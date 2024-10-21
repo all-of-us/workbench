@@ -25,7 +25,6 @@ import org.springframework.web.context.annotation.RequestScope;
 public class LeonardoConfig {
   public static final String USER_RUNTIMES_API = "userRuntimesApi";
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
-  public static final String LEGACY_USER_RUNTIMES_API = "legacyUserRuntimesApi";
 
   public static final String USER_DISKS_API = "userDisksApi";
   public static final String SERVICE_DISKS_API = "serviceDisksApi";
@@ -41,8 +40,6 @@ public class LeonardoConfig {
   // Identifiers for the new OAS3 APIs from Leonardo. These should be used for runtimes access.
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
   private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceApiClient";
-  private static final String LEGACY_USER_LEONARDO_CLIENT = "legacyLeonardoApiClient";
-  private static final String LEGACY_SERVICE_LEONARDO_CLIENT = "legacyLeonardoServiceApiClient";
 
   public static final String SERVICE_RESOURCE_API = "serviceResourceApi";
 
@@ -72,28 +69,6 @@ public class LeonardoConfig {
     } else {
       log.info("no Referer request header found, requests to the Leo proxy API may be rejected");
     }
-    return apiClient;
-  }
-
-  @Bean(name = LEGACY_SERVICE_LEONARDO_CLIENT)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.pmiops.workbench.legacy_leonardo_client.ApiClient legacyServiceApiClient(
-      LeonardoApiClientFactory factory) {
-    var apiClient = factory.newLegacyApiClient();
-    try {
-      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
-    } catch (IOException e) {
-      throw new ServerErrorException(e);
-    }
-    return apiClient;
-  }
-
-  @Bean(name = LEGACY_USER_LEONARDO_CLIENT)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.pmiops.workbench.legacy_leonardo_client.ApiClient legacyUserApiClient(
-      UserAuthentication userAuthentication, LeonardoApiClientFactory factory) {
-    var apiClient = factory.newLegacyApiClient();
-    apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
   }
 
@@ -175,11 +150,8 @@ public class LeonardoConfig {
 
   @Bean(name = SERVICE_RUNTIMES_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi serviceRuntimesApi(
-      @Qualifier(LEGACY_SERVICE_LEONARDO_CLIENT)
-          org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi api =
-        new org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi();
+  public RuntimesApi serviceRuntimesApi(@Qualifier(SERVICE_LEONARDO_CLIENT) ApiClient apiClient) {
+    RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
     return api;
   }

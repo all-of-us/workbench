@@ -40,7 +40,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -288,21 +287,23 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, ListRuntimeDeleteRequest req) {
     final String googleProject =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
-    List<LeonardoListRuntimeResponse> runtimesToDelete =
-        filterByRuntimesInList(
-                leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
-                req.getRuntimesToDelete())
-            .collect(Collectors.toList());
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        runtimesToDelete =
+            filterByRuntimesInList(
+                    leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
+                    req.getRuntimesToDelete())
+                .toList();
     runtimesToDelete.forEach(
         runtime ->
             leonardoNotebooksClient.deleteRuntimeAsService(
                 leonardoMapper.toGoogleProject(runtime.getCloudContext()),
                 runtime.getRuntimeName()));
-    List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
-        filterByRuntimesInList(
-                leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
-                req.getRuntimesToDelete())
-            .collect(Collectors.toList());
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        runtimesInProjectAffected =
+            filterByRuntimesInList(
+                    leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
+                    req.getRuntimesToDelete())
+                .collect(Collectors.toList());
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
     // names and thus could have >1 deleted runtimes with the same name in the project.
@@ -321,7 +322,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     leonardoRuntimeAuditor.fireDeleteRuntimesInProject(
         googleProject,
         runtimesToDelete.stream()
-            .map(LeonardoListRuntimeResponse::getRuntimeName)
+            .map(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+                    ::getRuntimeName)
             .collect(Collectors.toList()));
     return runtimesInProjectAffected.stream()
         .map(leonardoMapper::toApiListRuntimeResponse)
@@ -565,8 +568,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                 .userModel(userMapper.toApiUser(userRole, null)));
   }
 
-  private static Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
-      Stream<LeonardoListRuntimeResponse> runtimesToFilter, List<String> runtimeNames) {
+  private static Stream<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+      filterByRuntimesInList(
+          Stream<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+              runtimesToFilter,
+          List<String> runtimeNames) {
     // Null means keep all runtimes.
     return runtimesToFilter.filter(
         runtime -> runtimeNames == null || runtimeNames.contains(runtime.getRuntimeName()));

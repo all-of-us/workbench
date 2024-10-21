@@ -23,9 +23,12 @@ import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,12 +44,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -140,38 +137,37 @@ public class OfflineRuntimeControllerTest {
     userDao.deleteAll();
   }
 
-  private LeonardoGetRuntimeResponse runtimeWithAge(Duration age) {
+  private GetRuntimeResponse runtimeWithAge(Duration age) {
     return runtimeWithAgeAndIdle(age, Duration.ZERO);
   }
 
-  private LeonardoGetRuntimeResponse runtimeWithAgeAndIdle(Duration age, Duration idleTime) {
+  private GetRuntimeResponse runtimeWithAgeAndIdle(Duration age, Duration idleTime) {
     // There should only be one runtime per project, so increment an index for
     // each runtime created per test.
-    return new LeonardoGetRuntimeResponse()
+    return new GetRuntimeResponse()
         .runtimeName("all-of-us")
         .cloudContext(
-            new LeonardoCloudContext()
-                .cloudProvider(LeonardoCloudProvider.GCP)
+            new CloudContext()
+                .cloudProvider(CloudProvider.GCP)
                 .cloudResource(String.format("proj-%d", runtimeProjectIdIndex++)))
-        .status(LeonardoRuntimeStatus.RUNNING)
+        .status(ClusterStatus.RUNNING)
         .auditInfo(
-            new LeonardoAuditInfo()
+            new AuditInfo()
                 .createdDate(NOW.minus(age).toString())
                 .dateAccessed(NOW.minus(idleTime).toString()));
   }
 
-  private List<LeonardoListRuntimeResponse> toListRuntimeResponseList(
-      List<LeonardoGetRuntimeResponse> runtimes) {
+  private List<ListRuntimeResponse> toListRuntimeResponseList(List<GetRuntimeResponse> runtimes) {
     return runtimes.stream()
         .map(leonardoMapper::toListRuntimeResponse)
         .collect(Collectors.toList());
   }
 
-  private void stubRuntimes(List<LeonardoGetRuntimeResponse> runtimes) {
+  private void stubRuntimes(List<GetRuntimeResponse> runtimes) {
     when(mockLeonardoApiClient.listRuntimesAsService())
         .thenReturn(toListRuntimeResponseList(runtimes));
 
-    for (LeonardoGetRuntimeResponse runtime : runtimes) {
+    for (GetRuntimeResponse runtime : runtimes) {
       String googleProject = leonardoMapper.toGoogleProject(runtime.getCloudContext());
       String runtimeName = runtime.getRuntimeName();
 
@@ -279,8 +275,7 @@ public class OfflineRuntimeControllerTest {
   @Test
   public void testDeleteOldRuntimesOtherStatusFiltered() throws Exception {
     stubRuntimes(
-        List.of(
-            runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(LeonardoRuntimeStatus.DELETING)));
+        List.of(runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(ClusterStatus.DELETING)));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());

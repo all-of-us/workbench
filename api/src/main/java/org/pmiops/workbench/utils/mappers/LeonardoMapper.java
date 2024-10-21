@@ -28,8 +28,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
@@ -141,7 +139,9 @@ public interface LeonardoMapper {
   }
 
   @Mapping(target = "patchInProgress", ignore = true)
-  LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
+  @Mapping(target = "workspaceId", ignore = true)
+  org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse toListRuntimeResponse(
+      GetRuntimeResponse runtime);
 
   @Nullable
   @Named("legacy_cloudContextToGoogleProject")
@@ -168,9 +168,10 @@ public interface LeonardoMapper {
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
-      qualifiedByName = "legacy_cloudContextToGoogleProject")
+      qualifiedByName = "cloudContextToGoogleProject")
   ListRuntimeResponse toApiListRuntimeResponse(
-      LeonardoListRuntimeResponse leonardoListRuntimeResponse);
+      org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+          leonardoListRuntimeResponse);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")

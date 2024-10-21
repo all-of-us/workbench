@@ -7,8 +7,6 @@ import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDis
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.UserAppEnvironment;
@@ -27,10 +25,10 @@ public interface LeonardoApiClient {
   /**
    * lists all runtimes in the environment as the appengine SA, to be used only for admin operations
    */
-  List<LeonardoListRuntimeResponse> listRuntimesAsService();
+  List<ListRuntimeResponse> listRuntimesAsService();
 
   /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
-  List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
+  List<ListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
   List<ListRuntimeResponse> listRuntimesByProject(String googleProject, boolean includeDeleted);
 
@@ -52,7 +50,7 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** Retrieves a notebook runtime as the appengine SA, to be used only for admin operations */
-  LeonardoGetRuntimeResponse getRuntimeAsService(String googleProject, String runtimeName)
+  GetRuntimeResponse getRuntimeAsService(String googleProject, String runtimeName)
       throws WorkbenchException;
 
   /** Deletes a notebook runtime as the appengine SA, to be used only for admin operations */
