@@ -348,6 +348,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     tanagraDBWorkspace.setWorkspaceNamespace(TANAGRA_WORKSPACE_NAMESPACE);
     tanagraDBWorkspace.setFirecloudName(TANAGRA_WORKSPACE_NAME);
     tanagraDBWorkspace.setCdrVersion(tanagraDBCdrVersion);
+    tanagraDBWorkspace.setUsesTanagra(true);
     tanagraDBWorkspace = workspaceDao.save(tanagraDBWorkspace);
 
     dbConditionConceptSet =
