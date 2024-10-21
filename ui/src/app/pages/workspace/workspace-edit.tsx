@@ -387,8 +387,7 @@ export const WorkspaceEdit = fp.flow(
       if (this.isMode(WorkspaceEditMode.Create) || !props.workspace) {
         return DataAppsVersions.DataAppsV1;
       }
-      return getCdrVersion(props.workspace, props.cdrVersionTiersResponse)
-        .tanagraEnabled
+      return props.workspace.usesTanagra
         ? DataAppsVersions.DataAppsV2
         : DataAppsVersions.DataAppsV1;
     }
