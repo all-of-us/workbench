@@ -128,10 +128,7 @@ const UneditableField = (props: {
   label: string;
   value: string | JSX.Element;
 }) => (
-  <div
-    data-test-id={props.dataTestId}
-    style={{ paddingTop: '1em', flex: '0 1 auto' }}
-  >
+  <div data-test-id={props.dataTestId} style={{ flex: '0 1 auto' }}>
     <div style={styles.label}>{props.label}</div>
     <div style={styles.value}>{props.value}</div>
   </div>
@@ -292,18 +289,25 @@ const EditableFields = ({
                     label='Individual Expiration Bypass'
                   />
                 )}
-                <UneditableField
-                  dataTestId='initial-credits-used'
-                  label='Usage'
-                  value={formatInitialCreditsUSD(updatedProfile.freeTierUsage)}
-                />
-                <InitialCreditsDropdown
-                  currentLimit={updatedProfile.freeTierDollarQuota}
-                  previousLimit={oldProfile.freeTierDollarQuota}
-                  highlightOnChange
-                  onChange={(event) => onChangeInitialCreditsLimit(event.value)}
-                  label='Limit'
-                />
+                <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
+                  <UneditableField
+                    dataTestId='initial-credits-used'
+                    label='Usage'
+                    value={formatInitialCreditsUSD(
+                      updatedProfile.freeTierUsage
+                    )}
+                  />
+                  <InitialCreditsDropdown
+                    currentLimit={updatedProfile.freeTierDollarQuota}
+                    previousLimit={oldProfile.freeTierDollarQuota}
+                    highlightOnChange
+                    onChange={(event) =>
+                      onChangeInitialCreditsLimit(event.value)
+                    }
+                    label='Limit'
+                    dropdownStyle={{ width: '10rem', minWidth: 'auto' }}
+                  />
+                </FlexRow>
               </FlexColumn>
             </FlexColumn>
           </FlexRow>
