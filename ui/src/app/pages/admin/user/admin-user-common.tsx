@@ -55,12 +55,10 @@ export const commonStyles = reactStyles({
     color: colors.primary,
     fontSize: '14px',
     fontWeight: 'bold',
-    paddingLeft: '1em',
   },
   textInput: {
     width: '21rem',
     opacity: '100%',
-    marginLeft: '1em',
   },
   textInputContainer: {
     marginTop: '1.5rem',
@@ -68,7 +66,6 @@ export const commonStyles = reactStyles({
   dropdown: {
     minWidth: '70px',
     width: '21rem',
-    marginLeft: '1em',
   },
   fadeBox: {
     margin: 'auto',
@@ -410,6 +407,7 @@ interface InitialCreditsDropdownProps {
   previousLimit?: number;
   highlightOnChange?: boolean;
   onChange: Function;
+  label: string;
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
 }
@@ -421,12 +419,13 @@ export const InitialCreditsDropdown = ({
   onChange,
   labelStyle,
   dropdownStyle,
+  label,
 }: InitialCreditsDropdownProps) => {
   return (
     <DropdownWithLabel
       dataTestId='initial-credits-dropdown'
       className='initial-credits'
-      label='Initial credit limit'
+      label={label}
       options={getInitialCreditLimitOptions(previousLimit)}
       currentValue={currentLimit}
       previousValue={previousLimit}
@@ -610,18 +609,19 @@ interface InitialCreditBypassSwitchProps {
   currentlyBypassed: boolean | null;
   previouslyBypassed: boolean | null;
   onChange: (bypassed: boolean) => void;
+  label: string;
 }
 
 export const InitialCreditBypassSwitch = ({
   currentlyBypassed,
   previouslyBypassed,
   onChange,
+  label,
 }: InitialCreditBypassSwitchProps) => {
   return (
-    <FlexColumn style={{ paddingTop: '1.5rem', paddingLeft: '1rem' }}>
-      <label style={{ ...commonStyles.label, padding: 0 }}>
-        Initial Credit Expiration Bypass
-      </label>
+    <FlexColumn style={{ paddingTop: '1.5rem' }}>
+      <label style={{ ...commonStyles.label, padding: 0 }}>{label}</label>
+
       <CommonToggle
         name={
           currentlyBypassed ? 'Credits will not expire' : 'Credits will expire'

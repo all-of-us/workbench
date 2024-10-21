@@ -16,11 +16,12 @@ import {
   VerifiedInstitutionalAffiliation,
 } from 'generated/fetch';
 
+import { InstitutionExpirationBypassExplanation } from 'app/components/admin/admin-institution-expiration-bypass-explanation';
 import { CommonToggle } from 'app/components/admin/common-toggle';
 import { AlertDanger } from 'app/components/alert';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { FlexColumn, FlexRow } from 'app/components/flex';
+import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -86,7 +87,6 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '16px',
     fontWeight: 'bold',
-    paddingLeft: '0.85em',
   },
   tableHeader: {
     color: colors.primary,
@@ -101,7 +101,6 @@ const styles = reactStyles({
   value: {
     color: colors.primary,
     fontSize: '14px',
-    paddingLeft: '1em',
   },
   auditLink: {
     color: colors.accent,
@@ -109,15 +108,23 @@ const styles = reactStyles({
     fontWeight: 500,
   },
   uneditableFields: {
-    width: '650px',
     borderRadius: '9px',
     backgroundColor: colorWithWhiteness(colors.light, 0.23),
-    paddingTop: '1em',
-    marginRight: '20px',
+    padding: '1.5rem',
+    flex: 1,
   },
   editableFields: {
-    width: '601px',
     paddingTop: '1em',
+    flex: 1,
+  },
+  editRow: {
+    gap: '1rem',
+  },
+  initialCreditsPanel: {
+    border: '1px solid #cccccc',
+    borderRadius: '3px',
+    padding: '1rem',
+    marginTop: '1.5rem',
   },
 });
 
@@ -126,13 +133,13 @@ const UneditableField = (props: {
   label: string;
   value: string | JSX.Element;
 }) => (
-  <FlexColumn
+  <div
     data-test-id={props.dataTestId}
-    style={{ paddingTop: '1em', width: '300px' }}
+    style={{ paddingTop: '1em', flex: '0 1 auto' }}
   >
     <div style={styles.label}>{props.label}</div>
     <div style={styles.value}>{props.value}</div>
-  </FlexColumn>
+  </div>
 );
 
 const UneditableFields = (props: { profile: Profile }) => {
@@ -148,13 +155,16 @@ const UneditableFields = (props: { profile: Profile }) => {
     );
 
   return (
-    <FlexColumn style={styles.uneditableFields}>
-      <FlexRow>
+    <FlexRow>
+      <div style={styles.uneditableFields}>
         <div style={styles.subHeader}>Researcher information</div>
-        <div style={styles.uneditableFieldsSpacer} />
-      </FlexRow>
-      <FlexRow>
-        <FlexColumn>
+        <FlexRow
+          style={{
+            gap: '1.5rem',
+            justifyContent: 'space-between',
+            whiteSpace: 'nowrap',
+          }}
+        >
           <UneditableField
             dataTestId='name'
             label='Name'
@@ -170,16 +180,15 @@ const UneditableFields = (props: { profile: Profile }) => {
             label='Data access tiers'
             value={accessTiers}
           />
-        </FlexColumn>
-        <FlexColumn>
           <UneditableField
             dataTestId='initial-credits-used'
             label='Initial credits used'
             value={getInitialCreditsUsage(props.profile)}
           />
-        </FlexColumn>
-      </FlexRow>
-    </FlexColumn>
+        </FlexRow>
+      </div>
+      <FlexSpacer />
+    </FlexRow>
   );
 };
 
@@ -202,6 +211,13 @@ interface EditableFieldsProps {
   onChangeInstitutionOtherText: (otherText: string) => void;
   onChangeInitialCreditBypass: (bypass: boolean) => void;
 }
+
+const getInstitution = (
+  institutionShortName: string,
+  institutions: PublicInstitutionDetails[]
+) => {
+  return institutions.find((i) => i.shortName === institutionShortName);
+};
 
 const EditableFields = ({
   oldProfile,
@@ -232,11 +248,13 @@ const EditableFields = ({
     hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
     !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
 
+  console.log('Updated Profile: ', updatedProfile);
+
   return (
     <FlexColumn style={styles.editableFields}>
-      <FlexColumn>
-        <div style={styles.subHeader}>Edit information</div>
-        <FlexRow>
+      <div style={styles.subHeader}>Edit information</div>
+      <FlexRow>
+        <FlexRow style={{ flex: 0, flexWrap: 'wrap' }}>
           <FlexColumn>
             <ContactEmailTextInput
               contactEmail={updatedProfile.contactEmail}
@@ -250,7 +268,7 @@ const EditableFields = ({
               </div>
             )}
           </FlexColumn>
-          <FlexRow>
+          <FlexRow style={styles.editRow}>
             <InstitutionDropdown
               institutions={institutions}
               currentInstitutionShortName={
@@ -282,26 +300,6 @@ const EditableFields = ({
               </StyledRouterLink>
             )}
           </FlexRow>
-        </FlexRow>
-
-        <FlexRow>
-          <InitialCreditsDropdown
-            currentLimit={updatedProfile.freeTierDollarQuota}
-            previousLimit={oldProfile.freeTierDollarQuota}
-            highlightOnChange
-            onChange={(event) => onChangeInitialCreditsLimit(event.value)}
-          />
-          {enableInitialCreditsExpiration && (
-            <InitialCreditBypassSwitch
-              currentlyBypassed={
-                updatedProfile.initialCreditsExpirationBypassed
-              }
-              previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
-              onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
-            />
-          )}
-        </FlexRow>
-        <FlexRow>
           <InstitutionalRoleDropdown
             institutions={institutions}
             currentAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
@@ -322,7 +320,42 @@ const EditableFields = ({
             onChange={(value) => onChangeInstitutionOtherText(value)}
           />
         </FlexRow>
-      </FlexColumn>
+        <FlexRow style={{ flex: 0 }}>
+          <FlexRow style={styles.initialCreditsPanel}>
+            <FlexColumn>
+              <div style={styles.subHeader}>Initial credits</div>
+              <InstitutionExpirationBypassExplanation
+                bypassed={
+                  institution?.institutionalInitialCreditsExpirationBypassed ??
+                  false
+                }
+              />
+
+              <FlexColumn>
+                {enableInitialCreditsExpiration && (
+                  <InitialCreditBypassSwitch
+                    currentlyBypassed={
+                      updatedProfile.initialCreditsExpirationBypassed
+                    }
+                    previouslyBypassed={
+                      oldProfile.initialCreditsExpirationBypassed
+                    }
+                    onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
+                    label='Individual Expiration Bypass'
+                  />
+                )}
+                <InitialCreditsDropdown
+                  currentLimit={updatedProfile.freeTierDollarQuota}
+                  previousLimit={oldProfile.freeTierDollarQuota}
+                  highlightOnChange
+                  onChange={(event) => onChangeInitialCreditsLimit(event.value)}
+                  label='Limit'
+                />
+              </FlexColumn>
+            </FlexColumn>
+          </FlexRow>
+        </FlexRow>
+      </FlexRow>
     </FlexColumn>
   );
 };
@@ -494,6 +527,8 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const [profileLoadingError, setProfileLoadingError] = useState<string>(null);
   const [institutionsLoadingError, setInstitutionsLoadingError] =
     useState<string>(null);
+  const [institution, setInstitution] =
+    useState<PublicInstitutionDetails>(null);
 
   useEffect(() => {
     const onMount = async () => {
@@ -510,9 +545,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         );
       }
       try {
-        setInstitutions(await getPublicInstitutionDetails());
+        const publicInstitutionDetails = await getPublicInstitutionDetails();
+        setInstitutions(publicInstitutionDetails);
+        setInstitution(
+          getInstitution(
+            updatedProfile?.verifiedInstitutionalAffiliation
+              ?.institutionShortName,
+            publicInstitutionDetails
+          )
+        );
         setInstitutionsLoadingError(null);
       } catch (error) {
+        console.log('Error loading institutions: ', error);
         setInstitutionsLoadingError(
           'Could not get list of verified institutions - please try again later'
         );
@@ -522,6 +566,14 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     onMount();
   }, []);
 
+  useEffect(() => {
+    setInstitution(
+      getInstitution(
+        updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName,
+        institutions
+      )
+    );
+  }, [institutions, updatedProfile]);
   // clean up any currently-running or previously-run validation
   const clearEmailValidation = () => {
     if (emailValidationAborter) {
@@ -674,63 +726,64 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               AUDIT <CaretRight />
             </UserAuditLink>
           </FlexRow>
-          <FlexRow style={{ paddingTop: '1em' }}>
+          <FlexColumn style={{ paddingTop: '1em' }}>
             <UneditableFields profile={oldProfile} />
-            <EditableFields
-              oldProfile={oldProfile}
-              updatedProfile={updatedProfile}
-              institutions={institutions}
-              emailValidationStatus={emailValidationStatus}
-              onChangeEmail={(contactEmail: string) =>
-                updateContactEmail(contactEmail)
-              }
-              onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
-                updateProfile({ freeTierDollarQuota })
-              }
-              onChangeInstitution={(institutionShortName: string) =>
-                updateInstitution(institutionShortName)
-              }
-              onChangeInstitutionalRole={(
-                institutionalRoleEnum: InstitutionalRole
-              ) => updateInstitutionalRole(institutionalRoleEnum)}
-              onChangeInstitutionOtherText={(otherText: string) =>
-                updateInstitutionalRoleOtherText(otherText)
-              }
-              onChangeInitialCreditBypass={(bypass: boolean) =>
-                updateProfile({ initialCreditsExpirationBypassed: bypass })
-              }
-            />
-          </FlexRow>
-          <FlexRow>
-            <FlexColumn>
-              <FlexRow>
-                <div style={styles.tableHeader}>Access status</div>
-                <TooltipTrigger
-                  disabled={!isLoggedInUser(updatedProfile)}
-                  content={'Cannot change your own Access Status'}
-                >
-                  <div>
-                    <DisabledToggle
-                      currentlyDisabled={updatedProfile.disabled}
-                      previouslyDisabled={oldProfile.disabled}
-                      toggleDisabled={() =>
-                        updateProfile({ disabled: !updatedProfile.disabled })
-                      }
-                      profile={updatedProfile}
-                    />
-                  </div>
-                </TooltipTrigger>
-              </FlexRow>
-              <AccessModuleTable
+            <FlexRow style={{ flexWrap: 'wrap' }}>
+              <EditableFields
                 oldProfile={oldProfile}
                 updatedProfile={updatedProfile}
-                pendingBypassRequests={bypassChangeRequests}
-                bypassUpdate={(accessBypassRequest) =>
-                  updateModuleBypassStatus(accessBypassRequest)
+                institutions={institutions}
+                emailValidationStatus={emailValidationStatus}
+                onChangeEmail={(contactEmail: string) =>
+                  updateContactEmail(contactEmail)
+                }
+                onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
+                  updateProfile({ freeTierDollarQuota })
+                }
+                onChangeInstitution={(institutionShortName: string) =>
+                  updateInstitution(institutionShortName)
+                }
+                onChangeInstitutionalRole={(
+                  institutionalRoleEnum: InstitutionalRole
+                ) => updateInstitutionalRole(institutionalRoleEnum)}
+                onChangeInstitutionOtherText={(otherText: string) =>
+                  updateInstitutionalRoleOtherText(otherText)
+                }
+                onChangeInitialCreditBypass={(bypass: boolean) =>
+                  updateProfile({ initialCreditsExpirationBypassed: bypass })
                 }
               />
-            </FlexColumn>
-          </FlexRow>
+              <FlexColumn>
+                <FlexRow>
+                  <div style={styles.tableHeader}>Access status</div>
+                  <TooltipTrigger
+                    disabled={!isLoggedInUser(updatedProfile)}
+                    content={'Cannot change your own Access Status'}
+                  >
+                    <div>
+                      <DisabledToggle
+                        currentlyDisabled={updatedProfile.disabled}
+                        previouslyDisabled={oldProfile.disabled}
+                        toggleDisabled={() =>
+                          updateProfile({ disabled: !updatedProfile.disabled })
+                        }
+                        profile={updatedProfile}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                </FlexRow>
+                <AccessModuleTable
+                  oldProfile={oldProfile}
+                  updatedProfile={updatedProfile}
+                  pendingBypassRequests={bypassChangeRequests}
+                  bypassUpdate={(accessBypassRequest) =>
+                    updateModuleBypassStatus(accessBypassRequest)
+                  }
+                />
+              </FlexColumn>
+            </FlexRow>
+          </FlexColumn>
+          <FlexRow></FlexRow>
           <FlexRow style={{ paddingTop: '1em' }}>
             <ErrorsTooltip errors={errors}>
               <Button
