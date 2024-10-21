@@ -82,14 +82,6 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
-  public static WorkbenchException convertShibbolethException(
-      org.pmiops.workbench.shibboleth.ApiException e) {
-    if (isSocketTimeoutException(e.getCause())) {
-      throw new GatewayTimeoutException();
-    }
-    throw codeToException(e.getCode());
-  }
-
   public static WorkbenchException convertSamException(
       org.broadinstitute.dsde.workbench.client.sam.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
