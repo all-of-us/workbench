@@ -6871,9 +6871,6 @@ components:
           description: |
             Stackdriver API key for error reporting, scoped to a particular
             domain. If unset, Stackdriver error reporting should be disabled.
-        shibbolethUiBaseUrl:
-          type: string
-          description: The base URL to use for client-side Shibboleth redirects.
         enableComplianceTraining:
           type: boolean
           description: Whether the Compliance Training access module is enabled.
