@@ -8,6 +8,8 @@ import { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
+import { faLink } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   AccessBypassRequest,
@@ -21,6 +23,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { StyledRouterLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   ClrIcon,
@@ -45,6 +48,7 @@ import {
   isBypassed,
 } from 'app/utils/access-utils';
 import { formatDate } from 'app/utils/dates';
+import { getAdminUrl } from 'app/utils/institutions';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -444,6 +448,7 @@ interface InstitutionDropdownProps {
   onChange: Function;
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
+  showGoToInstitutionLink: boolean;
 }
 
 export const InstitutionDropdown = ({
@@ -454,16 +459,38 @@ export const InstitutionDropdown = ({
   onChange,
   labelStyle,
   dropdownStyle,
+  showGoToInstitutionLink,
 }: InstitutionDropdownProps) => {
   const options = fp.map(
     ({ displayName, shortName }) => ({ label: displayName, value: shortName }),
     institutions
   );
+
+  const label = (
+    <>
+      Verified institution
+      {showGoToInstitutionLink && (
+        <StyledRouterLink
+          style={{ paddingLeft: '0.5rem' }}
+          path={getAdminUrl(currentInstitution?.institutionShortName)}
+          target='_blank'
+        >
+          <TooltipTrigger
+            content={`Click here to go to the
+                '${currentInstitution?.institutionDisplayName}' Details Page`}
+          >
+            <FontAwesomeIcon icon={faLink} />
+          </TooltipTrigger>
+        </StyledRouterLink>
+      )}
+    </>
+  );
+
   return institutions ? (
     <DropdownWithLabel
       dataTestId='verifiedInstitution'
       className='institution'
-      label='Verified institution'
+      label={label}
       options={options}
       currentValue={currentInstitution?.institutionShortName}
       previousValue={previousInstitution?.institutionShortName}

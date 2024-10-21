@@ -242,24 +242,8 @@ const EditableFields = ({
             previousInstitution={oldProfile.verifiedInstitutionalAffiliation}
             highlightOnChange
             onChange={(event) => onChangeInstitution(event.value)}
+            showGoToInstitutionLink
           />
-          {showGoToInstitutionLink && (
-            <StyledRouterLink
-              style={{ paddingTop: '3.45rem', paddingLeft: '0.9rem' }}
-              path={getAdminUrl(
-                updatedProfile.verifiedInstitutionalAffiliation
-                  ?.institutionShortName
-              )}
-              target='_blank'
-            >
-              <TooltipTrigger
-                content={`Click here to go to the
-                '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
-              >
-                <FontAwesomeIcon icon={faLink} />
-              </TooltipTrigger>
-            </StyledRouterLink>
-          )}
         </FlexRow>
         {emailValidationStatus === EmailValidationStatus.INVALID && (
           <div data-test-id='email-invalid' style={{ paddingLeft: '1em' }}>
@@ -286,7 +270,6 @@ const EditableFields = ({
         <FlexRow>
           <FlexSpacer />
           <InstitutionalRoleOtherTextInput
-            containerStyle={{ marginRight: '1.65rem' }}
             affiliation={updatedProfile.verifiedInstitutionalAffiliation}
             previousOtherText={
               oldProfile.verifiedInstitutionalAffiliation
