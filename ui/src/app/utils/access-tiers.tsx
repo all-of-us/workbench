@@ -1,6 +1,7 @@
 import { Profile } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
+import { ControlledTierBadge, RegisteredTierBadge } from 'app/components/icons';
 
 export enum AccessTierShortNames {
   Registered = 'registered',
@@ -34,4 +35,11 @@ export const displayNameForTier = (shortName: string) =>
     shortName,
     [AccessTierShortNames.Registered, () => AccessTierDisplayNames.Registered],
     [AccessTierShortNames.Controlled, () => AccessTierDisplayNames.Controlled]
+  );
+
+export const badgeForTier = (shortName: string) =>
+  switchCase(
+    shortName,
+    [AccessTierShortNames.Registered, () => <RegisteredTierBadge />],
+    [AccessTierShortNames.Controlled, () => <ControlledTierBadge />]
   );

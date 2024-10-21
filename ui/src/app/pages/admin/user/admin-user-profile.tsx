@@ -26,7 +26,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
-import { displayNameForTier } from 'app/utils/access-tiers';
+import { badgeForTier, displayNameForTier } from 'app/utils/access-tiers';
 import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
@@ -166,6 +166,17 @@ const getInstitution = (
   return institutions.find((i) => i.shortName === institutionShortName);
 };
 
+const UserAccess = (props: { profile: Profile }) => {
+  const { accessTierShortNames } = props.profile;
+  return (
+    <FlexRow style={{ gap: '0.25rem' }}>
+      {accessTierShortNames.map((accessTierShortName) =>
+        badgeForTier(accessTierShortName)
+      )}
+    </FlexRow>
+  );
+};
+
 const EditableFields = ({
   oldProfile,
   updatedProfile,
@@ -209,15 +220,15 @@ const EditableFields = ({
   return (
     <FlexColumn style={styles.editableFields}>
       <FlexRow>
-        <div
-          style={{ ...styles.subHeader, marginRight: '1.5rem' }}
-        >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
-        <div>{updatedProfile.username}</div>
-        <UneditableField
-          dataTestId='data-access-tiers'
-          label='Data access tiers'
-          value={accessTiers}
-        />
+        <FlexColumn>
+          <div
+            style={{ ...styles.subHeader, marginRight: '1.5rem' }}
+          >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
+          <FlexRow style={{ gap: '0.5rem' }}>
+            <div>{updatedProfile.username}</div>
+            <UserAccess profile={oldProfile} />
+          </FlexRow>
+        </FlexColumn>
       </FlexRow>
       <FlexRow>
         <FlexRow style={{ flex: 0, flexWrap: 'wrap' }}>
