@@ -4,8 +4,6 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import validate from 'validate.js';
-import { faLink } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   AccessBypassRequest,
@@ -18,7 +16,7 @@ import {
 
 import { CommonToggle } from 'app/components/admin/common-toggle';
 import { AlertDanger } from 'app/components/alert';
-import { Button, StyledRouterLink } from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
@@ -40,7 +38,6 @@ import {
 } from 'app/utils/authorities';
 import {
   checkInstitutionalEmail,
-  getAdminUrl,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 import {
@@ -238,33 +235,12 @@ const EditableFields = ({
           />
           <InstitutionDropdown
             institutions={institutions}
-            currentInstitutionShortName={
-              updatedProfile.verifiedInstitutionalAffiliation
-                ?.institutionShortName
-            }
-            previousInstitutionShortName={
-              oldProfile.verifiedInstitutionalAffiliation?.institutionShortName
-            }
+            currentInstitution={updatedProfile.verifiedInstitutionalAffiliation}
+            previousInstitution={oldProfile.verifiedInstitutionalAffiliation}
             highlightOnChange
             onChange={(event) => onChangeInstitution(event.value)}
+            showGoToInstitutionLink={showGoToInstitutionLink}
           />
-          {showGoToInstitutionLink && (
-            <StyledRouterLink
-              style={{ paddingTop: '3.45rem', paddingLeft: '0.9rem' }}
-              path={getAdminUrl(
-                updatedProfile.verifiedInstitutionalAffiliation
-                  ?.institutionShortName
-              )}
-              target='_blank'
-            >
-              <TooltipTrigger
-                content={`Click here to go to the
-                '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
-              >
-                <FontAwesomeIcon icon={faLink} />
-              </TooltipTrigger>
-            </StyledRouterLink>
-          )}
         </FlexRow>
         {emailValidationStatus === EmailValidationStatus.INVALID && (
           <div data-test-id='email-invalid' style={{ paddingLeft: '1em' }}>
@@ -291,7 +267,6 @@ const EditableFields = ({
         <FlexRow>
           <FlexSpacer />
           <InstitutionalRoleOtherTextInput
-            containerStyle={{ marginRight: '1.65rem' }}
             affiliation={updatedProfile.verifiedInstitutionalAffiliation}
             previousOtherText={
               oldProfile.verifiedInstitutionalAffiliation
