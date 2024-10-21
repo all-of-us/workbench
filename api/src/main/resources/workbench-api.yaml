@@ -9693,6 +9693,7 @@ components:
       - displayName
       - organizationTypeEnum
       - shortName
+      - institutionalInitialCreditsExpirationBypassed
       type: object
       properties:
         shortName:
@@ -9710,6 +9711,10 @@ components:
         requestAccessUrl:
           type: string
           description: Optional url for institution's handling their own access requests
+        institutionalInitialCreditsExpirationBypassed:
+          type: boolean
+          description: Whether the initial credits expiration has been bypassed
+            for all members of this institution
       description: Represents an institution which has been approved to validate researchers
         who wish to use the system. Does not include the sensitive email patterns
         used to validate users.
