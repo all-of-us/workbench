@@ -41,7 +41,6 @@ import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
-  NIH_CALLBACK_PATH,
   RAS_CALLBACK_PATH,
 } from 'app/utils/access-utils';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
@@ -326,11 +325,6 @@ export const SignedInRoutes = () => {
       </AppRoute>
       <AppRoute exact path='/profile'>
         <ProfilePage routeData={{ title: 'Profile' }} />
-      </AppRoute>
-      <AppRoute exact path={NIH_CALLBACK_PATH}>
-        <DataAccessRequirementsPage
-          routeData={{ title: 'Data Access Requirements' }}
-        />
       </AppRoute>
       <AppRoute exact path={RAS_CALLBACK_PATH}>
         <DataAccessRequirementsPage
