@@ -354,7 +354,7 @@ export const DropdownWithLabel = ({
 }) => {
   const dropdownHighlightStyling = `body .${className} .p-inputtext { background-color: ${colors.highlight}; }`;
   return (
-    <FlexColumn data-test-id={dataTestId} style={{ marginTop: '1.5rem' }}>
+    <FlexColumn data-test-id={dataTestId}>
       {highlightOnChange && currentValue !== previousValue && (
         <style>{dropdownHighlightStyling}</style>
       )}
@@ -567,7 +567,7 @@ export const InstitutionalRoleOtherTextInput = ({
       highlightOnChange={highlightOnChange}
       labelStyle={{ ...commonStyles.label, ...labelStyle }}
       inputStyle={{ ...commonStyles.textInput, ...inputStyle }}
-      containerStyle={{ ...commonStyles.textInputContainer, ...containerStyle }}
+      containerStyle={containerStyle}
       onChange={(value) => onChange(value)}
     />
   ) : null;
