@@ -224,21 +224,19 @@ const EditableFields = ({
   return (
     <FlexColumn style={styles.editableFields}>
       <FlexRow>
-        <FlexColumn>
-          <div
-            style={{ ...styles.subHeader, marginRight: '1.5rem' }}
-          >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
-          <FlexRow style={{ gap: '0.5rem' }}>
-            <div>{updatedProfile.username}</div>
-            <UserAccess
-              accessTierShortNames={oldProfile.accessTierShortNames}
-            />
-          </FlexRow>
-        </FlexColumn>
-      </FlexRow>
-      <FlexRow>
         <FlexRow style={{ flex: 0, flexWrap: 'wrap' }}>
           <FlexColumn>
+            <FlexColumn>
+              <div
+                style={{ ...styles.subHeader, marginRight: '1.5rem' }}
+              >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
+              <FlexRow style={{ gap: '0.5rem' }}>
+                <div>{updatedProfile.username}</div>
+                <UserAccess
+                  accessTierShortNames={oldProfile.accessTierShortNames}
+                />
+              </FlexRow>
+            </FlexColumn>
             <ContactEmailTextInput
               contactEmail={updatedProfile.contactEmail}
               previousContactEmail={oldProfile.contactEmail}
