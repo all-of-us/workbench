@@ -89,7 +89,6 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '18px',
     fontWeight: 'bold',
-    paddingTop: '2em',
     lineHeight: '22px',
   },
   uneditableFieldsSpacer: {
@@ -121,7 +120,6 @@ const styles = reactStyles({
     border: '1px solid #cccccc',
     borderRadius: '3px',
     padding: '1rem',
-    marginTop: '1.5rem',
   },
 });
 
@@ -209,17 +207,6 @@ const EditableFields = ({
   const showGoToInstitutionLink =
     hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
     !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
-
-  console.log('Updated Profile: ', updatedProfile);
-
-  const accessTiers =
-    updatedProfile.accessTierShortNames?.length === 0 ? (
-      <span>
-        <i>No data access</i>
-      </span>
-    ) : (
-      updatedProfile.accessTierShortNames.map(displayNameForTier).join(', ')
-    );
 
   return (
     <FlexColumn style={styles.editableFields}>
@@ -457,7 +444,7 @@ const DisabledToggle = (props: {
       : {};
 
   return (
-    <div style={{ paddingTop: '2.5em', paddingLeft: '2em' }}>
+    <div style={{ paddingLeft: '2em' }}>
       <div style={highlightStyle}>
         <CommonToggle
           name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
