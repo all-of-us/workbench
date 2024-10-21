@@ -10,7 +10,6 @@ import {
   getAccessModuleStatusByName,
   isEligibleModule,
   redirectToControlledTraining,
-  redirectToNiH,
   redirectToRas,
   redirectToRegisteredTraining,
 } from 'app/utils/access-utils';
@@ -47,7 +46,6 @@ export const MaybeModule = ({
     [AccessModule.TWO_FACTOR_AUTH, () => () => setShowTwoFactorAuthModal(true)],
     [AccessModule.RAS_LINK_LOGIN_GOV, () => redirectToRas],
     [AccessModule.IDENTITY, () => redirectToRas],
-    [AccessModule.ERA_COMMONS, () => redirectToNiH],
     [AccessModule.COMPLIANCE_TRAINING, () => redirectToRegisteredTraining],
     [AccessModule.CT_COMPLIANCE_TRAINING, () => redirectToControlledTraining],
     [
