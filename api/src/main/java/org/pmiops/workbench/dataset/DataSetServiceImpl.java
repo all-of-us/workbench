@@ -975,10 +975,10 @@ public class DataSetServiceImpl implements DataSetService {
     DbCdrVersion dbCdrVersion = dbWorkspace.getCdrVersion();
 
     validateDataSetRequestResources(
-        dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest(), dbCdrVersion);
+        dbWorkspace.getWorkspaceId(), dbWorkspace.isUsesTanagra(), dataSetExportRequest.getDataSetRequest(), dbCdrVersion);
 
     Map<String, QueryJobConfiguration> queriesByDomain =
-        dbCdrVersion.getTanagraEnabled()
+            (dbCdrVersion.getTanagraEnabled() && dbWorkspace.isUsesTanagra())
             ? tanagraDomainToBigQueryConfig(dataSetExportRequest.getDataSetRequest(), dbWorkspace)
             : domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
@@ -995,14 +995,14 @@ public class DataSetServiceImpl implements DataSetService {
                             dbWorkspace.getCdrVersion().getName(),
                             qualifier,
                             dataSetExportRequest.getAnalysisLanguage(),
-                            generateFieldList(dbCdrVersion, Domain.fromValue(entry.getKey())))
+                            generateFieldList(dbCdrVersion, Domain.fromValue(entry.getKey()), dbWorkspace.isUsesTanagra()))
                             .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .toList();
   }
 
-  private FieldList generateFieldList(DbCdrVersion dbCdrVersion, Domain domain) {
-    return dbCdrVersion.getTanagraEnabled()
+  private FieldList generateFieldList(DbCdrVersion dbCdrVersion, Domain domain, boolean isUsesTanagra) {
+    return (dbCdrVersion.getTanagraEnabled() && isUsesTanagra)
         ? bigQueryService.getTableFieldsFromDomainForTanagra(TANAGRA_DOMAIN_MAP.getKey(domain))
         : bigQueryService.getTableFieldsFromDomain(domain);
   }
@@ -1434,8 +1434,8 @@ public class DataSetServiceImpl implements DataSetService {
 
   /** Validate that the requested resources are contained by the given workspace. */
   private void validateDataSetRequestResources(
-      long workspaceId, DataSetRequest request, DbCdrVersion dbCdrVersion) {
-    if (dbCdrVersion.getTanagraEnabled()) {
+          long workspaceId, boolean isUsingTanagra, DataSetRequest request, DbCdrVersion dbCdrVersion) {
+    if (dbCdrVersion.getTanagraEnabled() && isUsingTanagra) {
       if (!request.isTanagraAllParticipantsCohort()) {
         tanagraValidateCohortsInWorkspace(request.getTanagraCohortIds());
       }
