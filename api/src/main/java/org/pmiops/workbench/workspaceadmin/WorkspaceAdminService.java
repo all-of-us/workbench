@@ -6,12 +6,12 @@ import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;
+import org.pmiops.workbench.model.AdminRuntimeFields;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
-import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -29,7 +29,12 @@ public interface WorkspaceAdminService {
 
   WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace);
 
-  List<ListRuntimeResponse> listRuntimes(String workspaceNamespace);
+  List<AdminRuntimeFields> listRuntimes(String workspaceNamespace);
+
+  // use listRuntimes
+  @Deprecated(since = "October 2024", forRemoval = true)
+  List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedListRuntimes(
+      String workspaceNamespace);
 
   List<UserAppEnvironment> listUserApps(String workspaceNamespace);
 
@@ -44,7 +49,12 @@ public interface WorkspaceAdminService {
 
   List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles);
 
-  List<ListRuntimeResponse> deleteRuntimesInWorkspace(
+  List<AdminRuntimeFields> deleteRuntimesInWorkspace(
+      String workspaceNamespace, ListRuntimeDeleteRequest req);
+
+  // use deleteRuntimesInWorkspace
+  @Deprecated(since = "October 2024", forRemoval = true)
+  List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
       String workspaceNamespace, ListRuntimeDeleteRequest req);
 
   void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
