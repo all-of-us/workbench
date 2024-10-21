@@ -247,9 +247,9 @@ public class RasLinkServiceTest {
     assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
     verify(mockIdentityVerificationService)
-            .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.ID_ME);
+        .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.ID_ME);
     verify(mockIdentityVerificationService, never())
-            .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.LOGIN_GOV);
+        .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.LOGIN_GOV);
   }
 
   @Test
