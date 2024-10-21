@@ -16,8 +16,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -29,8 +29,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.legacy_leonardo_client.ApiException;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -117,13 +115,14 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     final Duration maxAge = Duration.ofDays(config.firecloud.notebookRuntimeMaxAgeDays);
     final Duration idleMaxAge = Duration.ofDays(config.firecloud.notebookRuntimeIdleMaxAgeDays);
 
-    final List<LeonardoListRuntimeResponse> listRuntimeResponses =
-        leonardoApiClient.listRuntimesAsService();
+    final List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponses = leonardoApiClient.listRuntimesAsService();
 
     int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
-    for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
+    for (org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+        listRuntimeResponse : listRuntimeResponses) {
       final String googleProject =
           leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
       final String runtimeId =
@@ -131,7 +130,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
 
       // Refetch the runtime to ensure freshness,
       // as this iteration may take some time.
-      final LeonardoGetRuntimeResponse runtime =
+      final GetRuntimeResponse runtime =
           leonardoApiClient.getRuntimeAsService(
               googleProject, listRuntimeResponse.getRuntimeName());
 
@@ -330,9 +329,12 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     final String diskName = diskResponse.getName();
 
     if (leonardoMapper.toApiListDisksResponse(diskResponse).isGceRuntime()) {
-      return leonardoApiClient.listRuntimesByProjectAsService(googleProject).stream()
-          .flatMap(runtime -> Stream.ofNullable(runtime.getDiskConfig()))
-          .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
+      return
+      //      leonardoApiClient.listRuntimesByProjectAsService(googleProject).stream()
+      //          .flatMap(runtime -> Stream.ofNullable(runtime.getDiskConfig()))
+      //          .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
+      // TODO VERY WRONG
+      true;
     } else {
       return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()
           .anyMatch(userAppEnvironment -> diskName.equals(userAppEnvironment.getDiskName()));

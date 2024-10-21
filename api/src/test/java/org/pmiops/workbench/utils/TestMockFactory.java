@@ -29,7 +29,9 @@ import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -44,10 +46,6 @@ import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disk;
@@ -172,14 +170,12 @@ public class TestMockFactory {
         .googleProject(DEFAULT_GOOGLE_PROJECT);
   }
 
-  public static LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
-    return new LeonardoListRuntimeResponse()
+  public static ListRuntimeResponse createLeonardoListRuntimesResponse() {
+    return new ListRuntimeResponse()
         .runtimeName("runtime")
         .cloudContext(
-            new LeonardoCloudContext()
-                .cloudProvider(LeonardoCloudProvider.GCP)
-                .cloudResource("google-project"))
-        .status(LeonardoRuntimeStatus.STOPPED);
+            new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource("google-project"))
+        .status(ClusterStatus.STOPPED);
   }
 
   public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {

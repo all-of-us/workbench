@@ -2,31 +2,35 @@ package org.pmiops.workbench.leonardo;
 
 import java.util.List;
 import java.util.Map;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**
- * Encapsulate Leonardo's Notebooks API interaction details and provide a simple/mockable interface
- * for internal use.
+ * Encapsulate Leonardo's API interaction details and provide a simple/mockable interface for
+ * internal use.
  */
 public interface LeonardoApiClient {
+
+  //
+  // Runtime endpoints (legacy client)
+  //
+
   /**
    * lists all runtimes in the environment as the appengine SA, to be used only for admin operations
    */
-  List<LeonardoListRuntimeResponse> listRuntimesAsService();
+  List<ListRuntimeResponse> listRuntimesAsService();
 
   /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
-  List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
+  List<ListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
-  List<LeonardoListRuntimeResponse> listRuntimesByProject(
-      String googleProject, boolean includeDeleted);
+  List<ListRuntimeResponse> listRuntimesByProject(String googleProject, boolean includeDeleted);
 
   /**
    * Creates a notebooks runtime owned by the current authenticated user.
@@ -46,7 +50,7 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** Retrieves a notebook runtime as the appengine SA, to be used only for admin operations */
-  LeonardoGetRuntimeResponse getRuntimeAsService(String googleProject, String runtimeName)
+  GetRuntimeResponse getRuntimeAsService(String googleProject, String runtimeName)
       throws WorkbenchException;
 
   /** Deletes a notebook runtime as the appengine SA, to be used only for admin operations */
@@ -59,8 +63,11 @@ public interface LeonardoApiClient {
   int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException;
 
   /** Gets information about a notebook runtime */
-  LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName)
-      throws WorkbenchException;
+  GetRuntimeResponse getRuntime(String googleProject, String runtimeName) throws WorkbenchException;
+
+  //
+  // Welder endpoints - "notebooks" client
+  //
 
   /** Send files over to notebook runtime */
   void localizeForRuntime(String googleProject, String runtimeName, Map<String, String> fileList)
@@ -78,6 +85,10 @@ public interface LeonardoApiClient {
   StorageLink createStorageLinkForApp(
       String googleProject, String appName, StorageLink storageLink);
 
+  //
+  // Disk endpoints
+  //
+
   /** Deletes a persistent disk */
   void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;
 
@@ -93,6 +104,16 @@ public interface LeonardoApiClient {
   List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject);
 
+  /** List all persistent disks */
+  List<ListPersistentDiskResponse> listDisksAsService();
+
+  /** List all persistent disks in google project */
+  List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
+
+  //
+  // Apps endpoints
+  //
+
   /**
    * Creates Leonardo app owned by the current authenticated user.
    *
@@ -101,6 +122,8 @@ public interface LeonardoApiClient {
    */
   void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
       throws WorkbenchException;
+
+  int deleteUserAppsAsService(String userEmail);
 
   /**
    * Lists all apps the user creates in the given workspace GCP project
@@ -121,18 +144,18 @@ public interface LeonardoApiClient {
   void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
       throws WorkbenchException;
 
+  //
+  // Status endpoints
+  //
+
   /**
    * @return true if Leonardo service is okay, false otherwise.
    */
   boolean getLeonardoStatus();
 
-  int deleteUserAppsAsService(String userEmail);
-
-  /** List all persistent disks */
-  List<ListPersistentDiskResponse> listDisksAsService();
-
-  /** List all persistent disks in google project */
-  List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
+  //
+  // Resources endpoints
+  //
 
   void deleteAllResources(String googleProject, boolean deleteDisk);
 }
