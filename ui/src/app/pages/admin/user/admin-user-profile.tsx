@@ -238,13 +238,8 @@ const EditableFields = ({
           />
           <InstitutionDropdown
             institutions={institutions}
-            currentInstitutionShortName={
-              updatedProfile.verifiedInstitutionalAffiliation
-                ?.institutionShortName
-            }
-            previousInstitutionShortName={
-              oldProfile.verifiedInstitutionalAffiliation?.institutionShortName
-            }
+            currentInstitution={updatedProfile.verifiedInstitutionalAffiliation}
+            previousInstitution={oldProfile.verifiedInstitutionalAffiliation}
             highlightOnChange
             onChange={(event) => onChangeInstitution(event.value)}
           />

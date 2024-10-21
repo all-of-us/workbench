@@ -438,8 +438,8 @@ export const InitialCreditsDropdown = ({
 
 interface InstitutionDropdownProps {
   institutions?: PublicInstitutionDetails[];
-  currentInstitutionShortName?: string;
-  previousInstitutionShortName?: string;
+  currentInstitution?: VerifiedInstitutionalAffiliation;
+  previousInstitution?: VerifiedInstitutionalAffiliation;
   highlightOnChange?: boolean;
   onChange: Function;
   labelStyle?: CSSProperties;
@@ -448,8 +448,8 @@ interface InstitutionDropdownProps {
 
 export const InstitutionDropdown = ({
   institutions,
-  currentInstitutionShortName,
-  previousInstitutionShortName,
+  currentInstitution,
+  previousInstitution,
   highlightOnChange,
   onChange,
   labelStyle,
@@ -465,8 +465,8 @@ export const InstitutionDropdown = ({
       className='institution'
       label='Verified institution'
       options={options}
-      currentValue={currentInstitutionShortName}
-      previousValue={previousInstitutionShortName}
+      currentValue={currentInstitution?.institutionShortName}
+      previousValue={previousInstitution?.institutionShortName}
       highlightOnChange={highlightOnChange}
       labelStyle={labelStyle}
       dropdownStyle={dropdownStyle}
