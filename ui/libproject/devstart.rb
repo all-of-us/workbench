@@ -105,12 +105,13 @@ def deploy_tanagra_ui(cmd_name, args)
 
   Dir.chdir('../tanagra-aou-utils/tanagra/ui') do
     common.status "Building Tanagra UI..."
+    common.run_inline("rm -rf node_modules")
     common.run_inline("npm ci")
     common.status "npm run codegen"
     common.run_inline("npm run codegen")
     ui_base_url = get_config(op.opts.project)["tanagra"]["baseUrl"]
-    common.status "PUBLIC_URL=/tanagra REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} npm run build --if-present"
-    common.run_inline("PUBLIC_URL=/tanagra REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} npm run build --if-present")
+    common.status "PUBLIC_URL=/tanagra REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} REACT_APP_ADDITIONAL_ROUTES=none npm run build --if-present"
+    common.run_inline("PUBLIC_URL=/tanagra REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} REACT_APP_ADDITIONAL_ROUTES=none npm run build --if-present")
 
     common.status "Copying build into appengine folder..."
     common.run_inline("mkdir -p ../../appengine && cp -av ./build ../../appengine/")

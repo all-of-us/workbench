@@ -82,7 +82,6 @@
     },
     {
       "cdrVersionId": 6,
-      "isDefault": true,
       "name": "Synthetic Dataset v4",
       "bigqueryProject": "fc-aou-cdr-synth-stable",
       "bigqueryDataset": "SR2022Q4R6",
@@ -98,7 +97,6 @@
     },
     {
       "cdrVersionId": 7,
-      "isDefault": true,
       "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-stable-ct",
       "bigqueryDataset": "SC2022Q4R6",
@@ -116,6 +114,45 @@
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled"
+    },
+    {
+      "cdrVersionId": 8,
+      "isDefault": true,
+      "name": "Synthetic Dataset v5",
+      "bigqueryProject": "fc-aou-cdr-synth-stable",
+      "bigqueryDataset": "SR2023Q3R2",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 4,
+      "numParticipants": 234525,
+      "cdrDbName": "sr_2022q4_20",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "accessTier": "registered",
+      "tanagraEnabled": true
+    },
+    {
+      "cdrVersionId": 9,
+      "isDefault": true,
+      "name": "Synthetic Dataset in the Controlled Tier v5",
+      "bigqueryProject": "fc-aou-cdr-stable-ct",
+      "bigqueryDataset": "SC2023Q3R2",
+      "wgsBigqueryDataset": "1kg_wgs_2022q1",
+      "wgsFilterSetName": "example",
+      "creationTime": "2021-04-20 00:00:00Z",
+      "releaseNumber": 5,
+      "numParticipants": 234525,
+      "cdrDbName": "sc_2022q4_19",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "storageBasePath": "v5",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
+      "accessTier": "controlled",
+      "tanagraEnabled": true
     }
   ]
 }

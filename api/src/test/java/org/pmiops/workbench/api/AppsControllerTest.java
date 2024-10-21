@@ -133,12 +133,6 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testGetAppSuccess() {
-    controller.getApp(WORKSPACE_NS, APP_NAME);
-    verify(mockLeonardoApiClient).getAppByNameByProjectId(GOOGLE_PROJECT_ID, APP_NAME);
-  }
-
-  @Test
   public void testListAppSuccess() {
     controller.listAppsInWorkspace(WORKSPACE_NS);
     verify(mockLeonardoApiClient).listAppsInProjectCreatedByCreator(GOOGLE_PROJECT_ID);

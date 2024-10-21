@@ -25,9 +25,19 @@ export const BasicInformation = ({
         <WorkspaceInfoField labelText='Active Status'>
           {activeStatus}
         </WorkspaceInfoField>
-        <WorkspaceInfoField labelText='Billing Status'>
-          {workspace.billingStatus}
+        <WorkspaceInfoField labelText='Billing Account Type'>
+          {isUsingFreeTierBillingAccount(workspace)
+            ? `Initial credits (${workspace.creator})`
+            : 'User provided'}
         </WorkspaceInfoField>
+        {isUsingFreeTierBillingAccount(workspace) && (
+          <WorkspaceInfoField labelText='Initial Credits Billing Status'>
+            {workspace.initialCredits?.exhausted
+              ? 'Exhausted'
+              : 'Not Exhausted'}
+            , {workspace.initialCredits?.expired ? 'Expired' : 'Not Expired'}
+          </WorkspaceInfoField>
+        )}
         <WorkspaceInfoField labelText='Workspace Name'>
           {workspace.name}
         </WorkspaceInfoField>
@@ -42,11 +52,6 @@ export const BasicInformation = ({
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Google Project Id'>
           {workspace.googleProject}
-        </WorkspaceInfoField>
-        <WorkspaceInfoField labelText='Billing Account Type'>
-          {isUsingFreeTierBillingAccount(workspace)
-            ? 'Initial credits'
-            : 'User provided'}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Creation Time'>
           {new Date(workspace.creationTime).toDateString()}

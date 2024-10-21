@@ -12,12 +12,12 @@ def db_port = System.getenv("DB_PORT") ?: "3307" // We launch Cloud SQL Proxy on
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
 
 dependencies {
-    liquibaseRuntime 'org.liquibase:liquibase-core:4.16.1'
-    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'
-    liquibaseRuntime 'info.picocli:picocli:4.6.1'
-    liquibaseRuntime 'com.mysql:mysql-connector-j:8.3.0'
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.29.2'
+    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:4.0.0'
+    liquibaseRuntime 'info.picocli:picocli:4.7.6'
+    liquibaseRuntime 'com.mysql:mysql-connector-j:9.0.0'
     liquibaseRuntime 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
-    liquibaseRuntime 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+    liquibaseRuntime 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
 }
 
 liquibase {

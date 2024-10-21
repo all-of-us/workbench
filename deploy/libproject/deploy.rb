@@ -34,6 +34,11 @@ def get_live_gae_version(project, validate_version=true)
   services = Set["api", "default"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   active_services = actives.map{|v| v["service"]}.to_set
+  
+  # This is a temporary fix until these services exist in all environments
+  active_services.delete("tanagra-ui")
+  active_services.delete("tanagra-api")
+  
   if actives.empty?
     common.warning "Found 0 active GAE services in project '#{project}'"
     return nil
@@ -44,6 +49,12 @@ def get_live_gae_version(project, validate_version=true)
   end
 
   versions = actives.map{|v| v["id"]}.to_set
+  
+  # Iterate over versions and delete any that start with "tanagra-"
+  versions.each do |version|
+    versions.delete(version) if version.start_with?("tanagra-")
+  end
+  
   if versions.length != 1
     common.warning "Found varying IDs across GAE services in project '#{project}': " +
                    "[#{versions.to_a.join(', ')}]"

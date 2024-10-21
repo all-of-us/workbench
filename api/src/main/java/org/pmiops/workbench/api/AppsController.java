@@ -67,14 +67,6 @@ public class AppsController implements AppsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<UserAppEnvironment> getApp(String workspaceNamespace, String appName) {
-    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-
-    return ResponseEntity.ok(
-        leonardoApiClient.getAppByNameByProjectId(dbWorkspace.getGoogleProject(), appName));
-  }
-
-  @Override
   public ResponseEntity<EmptyResponse> updateApp(
       String workspaceNamespace, String appName, UserAppEnvironment app) {
     leonardoApiHelper.enforceComputeSecuritySuspension(userProvider.get());

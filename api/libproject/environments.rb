@@ -26,7 +26,7 @@ ENVIRONMENTS = {
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
     :tanagra_underlay_files => "aou/SR2023Q3R2_local,aou/SC2023Q3R2_local",
-    :tanagra_tag => "0.0.635",
+    :tanagra_tag => "0.0.647",
     :accessTiers => {
       "registered" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-test",
@@ -54,7 +54,7 @@ ENVIRONMENTS = {
     :tanagra_auth_disable_checks => "false",
     :tanagra_auth_gcp_access_token => "true",
     :tanagra_underlay_files => "aou/SR2023Q3R2_test,aou/SC2023Q3R2_test",
-    :tanagra_tag => "0.0.635",
+    :tanagra_tag => "0.0.647",
     :accessTiers => {
       "registered" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-test",
@@ -77,7 +77,13 @@ ENVIRONMENTS = {
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
-    :tanagra_tag => "0.0.635",
+    # turn on authZ model
+    :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
+    :tanagra_auth_disable_checks => "false",
+    :tanagra_auth_gcp_access_token => "true",
+    :tanagra_underlay_files => "aou/SR2023Q3R2_staging,aou/SC2023Q3R2_staging",
+    :tanagra_tag => "0.0.647",
     :accessTiers => {
       "registered" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-staging",
@@ -98,7 +104,13 @@ ENVIRONMENTS = {
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
-    :tanagra_tag => "0.0.635",
+    # turn on authZ model
+    :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
+    :tanagra_auth_disable_checks => "false",
+    :tanagra_auth_gcp_access_token => "true",
+    :tanagra_underlay_files => "aou/SR2023Q3R2_stable,aou/SC2023Q3R2_stable",
+    :tanagra_tag => "0.0.647",
     :accessTiers => {
       "registered" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-stable",
@@ -119,7 +131,13 @@ ENVIRONMENTS = {
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com",
-    :tanagra_tag => "0.0.635",
+    # turn on authZ model
+    :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
+    :tanagra_auth_disable_checks => "false",
+    :tanagra_auth_gcp_access_token => "true",
+    :tanagra_underlay_files => "aou/R2022Q4R13_preprod,aou/C2022Q4R13_preprod",
+    :tanagra_tag => "0.0.647",
     :accessTiers => {
       "registered" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-preprod",
@@ -142,7 +160,13 @@ ENVIRONMENTS = {
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
-    :tanagra_tag => "0.0.635",
+    # turn on authZ model
+    :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
+    :tanagra_auth_disable_checks => "false",
+    :tanagra_auth_gcp_access_token => "true",
+    :tanagra_underlay_files => "aou/R2022Q4R13_prod,aou/C2022Q4R13_prod",
+    :tanagra_tag => "0.0.647",
     :accessTiers => {
       "registered" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-prod",
