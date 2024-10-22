@@ -139,6 +139,8 @@ export class InstitutionApiStub extends InstitutionApi {
               x,
               AccessTierShortNames.Registered
             ).membershipRequirement,
+            institutionalInitialCreditsExpirationBypassed:
+              x.bypassInitialCreditsExpiration,
           };
         }),
       });
