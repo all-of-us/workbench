@@ -135,6 +135,15 @@ const styles = reactStyles({
     cursor: 'pointer',
     marginLeft: '1rem',
   },
+  error: {
+    width: '80%',
+    marginTop: '0.5rem',
+    padding: '0.375rem',
+    background: colors.warning,
+    color: colors.white,
+    fontSize: '12px',
+    borderRadius: '5px',
+  },
 });
 
 const pageSize = 25;
@@ -183,6 +192,7 @@ export const VariantSearch = fp.flow(
     workspace: { namespace, terraName },
   }) => {
     const [first, setFirst] = useState(0);
+    const [apiError, setApiError] = useState(false);
     const [inputErrors, setInputErrors] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -243,6 +253,7 @@ export const VariantSearch = fp.flow(
         setFirst(firstPage || 0);
       } catch (error) {
         console.error(error);
+        setApiError(true);
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -251,6 +262,7 @@ export const VariantSearch = fp.flow(
 
     useEffect(() => {
       if (resetResults > 0) {
+        setApiError(false);
         setLoading(true);
         searchVariants(false);
       }
@@ -332,6 +344,7 @@ export const VariantSearch = fp.flow(
         if (newInputErrors.length > 0) {
           setInputErrors(newInputErrors);
         } else {
+          setApiError(false);
           setInputErrors([]);
           setLoading(true);
           setSearching(true);
@@ -356,6 +369,7 @@ export const VariantSearch = fp.flow(
     };
 
     const clearSearch = () => {
+      setApiError(false);
       setInputErrors([]);
       setSearching(false);
       setSearchTerms('');
@@ -551,6 +565,20 @@ export const VariantSearch = fp.flow(
             </TooltipTrigger>
           </div>
         </div>
+        {apiError && (
+          <div style={styles.error}>
+            <ClrIcon
+              style={{
+                margin: '0 0.75rem 0 0.375rem',
+              }}
+              className='is-solid'
+              shape='exclamation-triangle'
+              size='22'
+            />
+            Sorry, the request cannot be completed. Please try again or contact
+            Support in the left hand navigation.
+          </div>
+        )}
         {!loading && variantFilters && (
           <div style={{ display: 'flex', position: 'relative' }}>
             <Clickable
@@ -652,7 +680,8 @@ export const VariantSearch = fp.flow(
         {loading ? (
           <SpinnerOverlay />
         ) : (
-          searching && (
+          searching &&
+          !apiError && (
             <DataTable
               currentPageReportTemplate={
                 displayResults.length > 0
