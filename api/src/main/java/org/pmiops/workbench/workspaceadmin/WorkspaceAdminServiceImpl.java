@@ -282,7 +282,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedListRuntimes(
       String workspaceNamespace) {
-    final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
     return listRuntimes(workspaceNamespace).stream()
         .map(leonardoMapper::toDeprecatedListRuntimeResponse)
         .toList();
