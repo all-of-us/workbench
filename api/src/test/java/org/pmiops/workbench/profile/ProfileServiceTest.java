@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,8 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -100,7 +103,8 @@ public class ProfileServiceTest {
         .familyName("Doe")
         .professionalUrl("https://scholar.google.com/citations?user=asdf")
         .areaOfResearch("asdfasdfasdf")
-        .verifiedInstitutionalAffiliation(BROAD_AFFILIATION);
+        .verifiedInstitutionalAffiliation(BROAD_AFFILIATION)
+        .initialCreditsExpirationBypassed(false);
   }
 
   private static final Profile VALID_PROFILE = createValidProfile();
@@ -108,6 +112,7 @@ public class ProfileServiceTest {
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
+  @MockBean private InitialCreditsExpirationService mockInitialCreditsExpirationService;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
   @MockBean
@@ -548,6 +553,33 @@ public class ProfileServiceTest {
     assertThat(profileService.getProfile(targetUser).isDisabled()).isFalse();
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void updateProfile_bypassInitialCredits_user_asAdmin(
+      boolean enableInitialCreditsExpiration) {
+    providedWorkbenchConfig.featureFlags.enableInitialCreditsExpiration =
+        enableInitialCreditsExpiration;
+    // grant admin authority to loggedInUser
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
+    Profile previousProfile = createValidProfile().initialCreditsExpirationBypassed(false);
+    Profile updatedProfile = createValidProfile().initialCreditsExpirationBypassed(true);
+
+    DbUser targetUser = new DbUser();
+    targetUser.setUserId(10);
+    targetUser.setGivenName("John");
+    targetUser.setFamilyName("Doe");
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    profileService.updateProfile(
+        targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
+
+    verify(mockInitialCreditsExpirationService, times(enableInitialCreditsExpiration ? 1 : 0))
+        .setInitialCreditsExpirationBypassed(targetUser, true);
+  }
+
   @Test
   public void updateProfile_demo_survey_add_v2() {
     DemographicSurveyV2 v2Survey =
@@ -883,13 +915,13 @@ public class ProfileServiceTest {
     user1.setInstitutionName("University 1");
 
     final UserDao.DbAdminTableUser user2 = factory.createProjection(UserDao.DbAdminTableUser.class);
-    user2.setUserId(102l);
+    user2.setUserId(102L);
     user2.setContactEmail("fred@aou.biz");
     user2.setDisabled(true);
     user2.setInstitutionName("University 2");
 
     final UserDao.DbAdminTableUser user3 = factory.createProjection(UserDao.DbAdminTableUser.class);
-    user3.setUserId(103l);
+    user3.setUserId(103L);
     user3.setContactEmail("betty@aou.biz");
     user3.setDisabled(true);
     user3.setInstitutionName("University 3");

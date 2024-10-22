@@ -1,7 +1,6 @@
 package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,7 +19,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -46,6 +44,7 @@ import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.mail.MailService;
@@ -125,6 +124,7 @@ public class UserServiceAccessTest {
     FireCloudService.class,
     MailService.class,
     UserServiceAuditor.class,
+    InitialCreditsExpirationService.class
   })
   @TestConfiguration
   static class Configuration {
@@ -1061,7 +1061,7 @@ public class UserServiceAccessTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
     dbUser = completeRTAndCTRequirements(dbUser);
 
-    ctTierConfig.setEmailDomains(Arrays.asList("fakeDomain.com"));
+    ctTierConfig.setEmailDomains(List.of("fakeDomain.com"));
     updateInstitutionTier(ctTierConfig);
 
     dbUser = updateUserAccessTiers();
@@ -1074,7 +1074,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_updateInvalidEmailForCT() {
     test_updateUserWithRetries_emailValidForRTButNotValidForCT();
 
-    ctTierConfig.setEmailDomains(Arrays.asList("domain.com"));
+    ctTierConfig.setEmailDomains(List.of("domain.com"));
     updateInstitutionTier(ctTierConfig);
 
     dbUser = updateUserAccessTiers();

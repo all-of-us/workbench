@@ -33,6 +33,7 @@ public class PublicInstitutionDetailsMapperTest {
                 .displayName(dbInst.getDisplayName())
                 .shortName(dbInst.getShortName())
                 .organizationTypeEnum(dbInst.getOrganizationTypeEnum())
-                .registeredTierMembershipRequirement(InstitutionMembershipRequirement.DOMAINS));
+                .registeredTierMembershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                .institutionalInitialCreditsExpirationBypassed(false));
   }
 }
