@@ -9,7 +9,9 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
 public interface PublicInstitutionDetailsMapper {
-  @Mapping(target = "institutionalInitialCreditsExpirationBypassed", source = "dbObject.bypassInitialCreditsExpiration")
+  @Mapping(
+      target = "institutionalInitialCreditsExpirationBypassed",
+      source = "dbObject.bypassInitialCreditsExpiration")
   PublicInstitutionDetails dbToModel(
       DbInstitution dbObject, MembershipRequirement registeredTierMembershipRequirement);
 }
