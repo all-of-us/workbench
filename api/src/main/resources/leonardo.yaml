@@ -1654,15 +1654,20 @@ components:
       required:
         - id
         - runtimeName
+        - googleProject
         - cloudContext
         - serviceAccount
         - auditInfo
         - runtimeConfig
+        - proxyUrl
         - status
         - labels
+        - errors
         - autopauseThreshold
-        - defaultClientId
+        - runtimeImages
         - scopes
+        - customEnvironmentVariables
+        - patchInProgress
       properties:
         id:
           type: integer
@@ -1670,6 +1675,9 @@ components:
         runtimeName:
           type: string
           description: The user-supplied name for the runtime
+        googleProject:
+          type: string
+          description: Deprecated. The Google Project used to create the runtime
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         serviceAccount:
@@ -1680,8 +1688,7 @@ components:
         auditInfo:
           $ref: "#/components/schemas/AuditInfo"
         runtimeConfig:
-          type: object
-          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
+          $ref: "#/components/schemas/OneOfRuntimeConfigInResponse"
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime
@@ -1690,36 +1697,33 @@ components:
         labels:
           type: object
           description: The labels to be placed on the runtime. Of type Map[String,String]
+        userScriptUri:
+          type: string
+          description: >
+            Optional GCS or HTTP URI to a bash script the user wishes to run
+            inside their Docker container. This script runs exactly once when the runtime is first initialized. Logs from
+            this script can be found in the Leo staging bucket for the runtime. The script is run as root
+            and docker --privileged.
         jupyterUserScriptUri:
           type: string
-          description: >
-            Optional GCS object URI to a bash script the user wishes to run
-            inside their jupyter
-
-            docker. This script runs exactly once when the cluster is first initialized. Logs from
-
-            this script can be found in the Leo staging bucket for the cluster. Script is run as root
-
-            and docker --privileged.
-        jupyterStartUserScriptUri:
+          description: DEPRECATED on 05/2021. Please use userScriptUri instead. This field may be removed after 6 months of deprecation.
+          deprecated: true
+        startUserScriptUri:
           type: string
           description: >
-            Optional GCS object URI to a bash script the user wishes to run on
-            cluster start inside
+            Optional GCS or HTTP URI to a bash script the user wishes to run on runtime start inside
+            the Docker container. In contrast to userScriptUri, this always runs before starting
+            the Docker container, both on initial runtime creation and on runtime resume (sserScriptUri runs
+            once on runtime creation). This script may be used to launch background processes which
+            would not otherwise survive a runtime stop/start.
 
-            the jupyter docker. In contrast to jupyterUserScriptUri, this always runs before starting
-
-            Jupyter, both on initial cluster creation and on cluster resume (jupyterUserScriptUri runs
-
-            once on cluster creation). This script may be used to launch background processes which
-
-            would not otherwise survive a cluster stop/start.
-
-            The script is pulled once at cluster creation time; subsequent client changes to the user
-
-            script at this URI do not affect the cluster. Timestamped logs for this script can be
-
-            found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
+            The script is pulled once at runtime creation time; subsequent client changes to the user
+            script at this URI do not affect the runtime. Timestamped logs for this script can be
+            found in the Leo staging bucket for the cluster. The script is run as root and docker --privileged.
+        jupyterStartUserScriptUri:
+          type: string
+          description: DEPRECATED on 05/2021. Please use startUserScriptUri instead. This field may be removed after 6 months of deprecation.
+          deprecated: true
         errors:
           type: array
           description: The list of errors that were encountered on runtime create. Each
@@ -1751,12 +1755,15 @@ components:
           description: Optional environment variables to be set on the runtime.
         diskConfig:
           $ref: "#/components/schemas/DiskConfig"
+        patchInProgress:
+          type: boolean
+          description: Whether there is a patch in progress on the runtime. Is used to indicate updates that require status transitions.
     ListRuntimeResponse:
       description: ""
       required:
         - id
         - runtimeName
-        - cloudContext
+        - googleProject
         - serviceAccount
         - runtimeConfig
         - status
@@ -1765,16 +1772,21 @@ components:
         id:
           type: integer
           description: Internal Leonardo ID of the runtime
+        workspaceId:
+          type: string
+          description: Id of the workspace associated with this runtime
         runtimeName:
           type: string
           description: The user-supplied name for the runtime
+        auditInfo:
+          $ref: "#/components/schemas/AuditInfo"
+        googleProject:
+          type: string
+          description: Deprecated. The Google Project used to create the runtime
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         runtimeConfig:
-          type: object
-          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
-        auditInfo:
-          $ref: "#/components/schemas/AuditInfo"
+          $ref: "#/components/schemas/OneOfRuntimeConfigInResponse"
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime
@@ -1786,8 +1798,6 @@ components:
         patchInProgress:
           type: boolean
           description: Whether there is a patch in progress on the runtime. Is used to indicate updates that require status transitions.
-        diskConfig:
-          $ref: "#/components/schemas/DiskConfig"
     ListPersistentDiskResponse:
       description: ""
       required:
@@ -1917,110 +1927,6 @@ components:
         createdDate:
           type: string
           description: The date and time the instance was created, in ISO-8601 format
-    ClusterRequest:
-      description: ""
-      properties:
-        labels:
-          type: object
-          description: The labels to be placed on the cluster. Of type Map[String,String]
-        userJupyterExtensionConfig:
-          $ref: "#/components/schemas/UserJupyterExtensionConfig"
-        jupyterUserScriptUri:
-          type: string
-          description: >
-            Optional GCS object URI to a bash script the user wishes to run
-            inside their jupyter
-
-            docker. This script runs exactly once when the cluster is first initialized. Logs from
-
-            this script can be found in the Leo staging bucket for the cluster. Script is run as root
-
-            and docker --privileged.
-        jupyterStartUserScriptUri:
-          type: string
-          description: >
-            Optional GCS object URI to a bash script the user wishes to run on
-            cluster start inside
-
-            the jupyter docker. In contrast to jupyterUserScriptUri, this always runs before starting
-
-            Jupyter, both on initial cluster creation and on cluster resume (jupyterUserScriptUri runs
-
-            once on cluster creation). This script may be used to launch background processes which
-
-            would not otherwise survive a cluster stop/start.
-
-            The script is pulled once at cluster creation time; subsequent client changes to the user
-
-            script at this URI do not affect the cluster. Timestamped logs for this script can be
-
-            found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
-        machineConfig:
-          $ref: "#/components/schemas/MachineConfig"
-        stopAfterCreation:
-          description: >
-            If true, Leo will immediately stop the cluster once it's created,
-            with the end result being a
-
-            a cluster in Stopped state. Otherwise, the end result will be a cluster in Running state.
-
-            Defaults to false.
-          type: boolean
-          default: false
-        allowStop:
-          type: boolean
-          description: If true, leo will allow updates that require a stop for this
-            cluster. This flag should not be used at the time of cluster
-            creation, but should be specified in the payload for the patch
-            endpoint.
-          default: false
-        autopause:
-          type: boolean
-          description: Whether autopause feature is enabled for this specific cluster. If
-            unset, autopause will be enabled and a system default threshold will
-            be used.
-        autopauseThreshold:
-          type: integer
-          description: The number of minutes of idle time to elapse before the cluster is
-            autopaused. If autopause is set to false, this value is disregarded.
-            A value of 0 is equivalent to autopause being turned off. If
-            autopause is enabled and this is unset, a system default threshold
-            will be used.
-        defaultClientId:
-          type: string
-          description: The default Google Client ID.
-        toolDockerImage:
-          type: string
-          description: The tool docker image to install. May be Dockerhub or GCR. If not
-            set, a default Jupyter image will be installed.
-        welderRegistry:
-          type: string
-          enum: [GCR, DockerHub]
-          description: The container registry from which to pull the latest version of welder.
-        scopes:
-          type: array
-          items:
-            type: string
-          description: >
-            The scopes for the cluster. Defaults (userinfo.email,
-            userinfo.profile, bigquery, source.read_only) will be used if left
-            blank. Important: If you choose to specify custom scopes, the
-            defaults will be overwritten. Thus, if you need the defaults, you
-            will need to include the default scopes in your custom list of
-            scopes.
-          default:
-            - https://www.googleapis.com/auth/userinfo.email
-            - https://www.googleapis.com/auth/userinfo.profile
-            - https://www.googleapis.com/auth/bigquery
-            - https://www.googleapis.com/auth/source.read_only
-        enableWelder:
-          type: boolean
-          description: If set to true, sets up welder on the cluster. If unset, welder will
-            not be put on the cluster.
-          default: true
-        customClusterEnvironmentVariables:
-          type: object
-          description: Optional environment variables to be set on the cluster.
     CreateRuntimeRequest:
       description: "Creates a new runtime"
       type: object
@@ -2279,6 +2185,15 @@ components:
         cloudService:
           type: string
           enum: [GCE, DATAPROC]
+    OneOfRuntimeConfigInResponse:
+      oneOf:
+        - $ref: "#/components/schemas/GceWithPdConfigInResponse"
+        - $ref: "#/components/schemas/DataprocConfig"
+      discriminator:
+        propertyName: cloudService
+        mapping:
+          GCE: "#/components/schemas/GceWithPdConfigInResponse"
+          DATAPROC: "#/components/schemas/DataprocConfig"
     RuntimeImage:
       type: object
       properties:
@@ -2352,83 +2267,120 @@ components:
             Defaults to us-central1-a.
         gpuConfig:
           $ref: "#/components/schemas/GpuConfig"
-    MachineConfig:
+    GceWithPdConfigInResponse:
+      description: Configuration for Google Compute Engine instances.
+      allOf:
+        - $ref: '#/components/schemas/RuntimeConfig'
+        - type: object
+          required:
+            - machineType
+            - bootDiskSize
+            - zone
+          properties:
+            persistentDiskId:
+              type: integer
+            bootDiskSize:
+              type: integer
+              description: size for boot disk
+            machineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the master node. For example "n1-standard-16"
+
+                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
+                see https://cloud.google.com/compute/docs/machine-types
+            zone:
+              type: string
+              description: >
+                Optional, the deployment area of the GCE VM. For example, us-east1-a or europe-west2-c.
+                Defaults to us-central1-a.
+            gpuConfig:
+              $ref: "#/components/schemas/GpuConfig"
+    DataprocConfig:
       description: Configuration for a single Dataproc cluster.
-      required:
-        - cloudService
-      properties:
-        cloudService:
-          type: string
-          enum: [GCE, DATAPROC]
-        numberOfWorkers:
-          type: integer
-          description: >
-            Optional, number of workers in the cluster. Can be 0 (default), 2 or
-            more. Google Dataproc does not allow 1 worker.
-        masterMachineType:
-          type: string
-          description: >
-            Optional, the machine type determines the number of CPUs and memory
-            for the master node. For example "n1-standard-16"
+      allOf:
+        - $ref: '#/components/schemas/RuntimeConfig'
+        - type: object
+          required:
+            - numberOfWorkers
+            - masterMachineType
+          properties:
+            numberOfWorkers:
+              type: integer
+              description: >
+                Optional, number of workers in the cluster. Can be 0 (default), 2 or
+                more. Google Dataproc does not allow 1 worker.
+            masterMachineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the master node. For example "n1-standard-16"
 
-            or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
-            see https://cloud.google.com/compute/docs/machine-types
-        masterDiskSize:
-          type: integer
-          description: >
-            Optional, the size in gigabytes of the disk on the master node.
-            Minimum size is 50GB. If unspecified, default size is 100GB.
-        workerMachineType:
-          type: string
-          description: >
-            Optional, the machine type determines the number of CPUs and memory
-            for the worker nodes. For example "n1-standard-16"
+                see https://cloud.google.com/compute/docs/machine-types
+            masterDiskSize:
+              type: integer
+              description: >
+                Optional, the size in gigabytes of the disk on the master node.
+                Minimum size is 50GB. If unspecified, default size is 100GB.
+            workerMachineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the worker nodes. For example "n1-standard-16"
 
-            or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
-            see https://cloud.google.com/compute/docs/machine-types. Ignored if numberOfWorkers is 0.
-        workerDiskSize:
-          type: integer
-          description: >
-            Optional, the size in gigabytes of the disk on the master node.
-            Minimum size is 10GB. If unspecified, default size is 100GB.
+                see https://cloud.google.com/compute/docs/machine-types. Ignored if numberOfWorkers is 0.
+            workerDiskSize:
+              type: integer
+              description: >
+                Optional, the size in gigabytes of the disk on the worker nodes.
+                Minimum size is 10GB. If unspecified, default size is 100GB.
 
-            Ignored if numberOfWorkers is 0.
-        numberOfWorkerLocalSSDs:
-          type: integer
-          description: >
-            Optional, the number of local solid state disks for workers. If
-            unspecified, the default number is 0.
+                Ignored if numberOfWorkers is 0.
+            numberOfWorkerLocalSSDs:
+              type: integer
+              description: >
+                Optional, the number of local solid state disks for workers. If
+                unspecified, the default number is 0.
 
-            Ignored if numberOfWorkers is 0.
-        numberOfPreemptibleWorkers:
-          type: integer
-          description: >
-            Optional, the number of preemptible workers. If unspecified, the
-            default number is 0. Ignored if numberOfWorkers is 0.
+                Ignored if numberOfWorkers is 0.
+            numberOfPreemptibleWorkers:
+              type: integer
+              description: >
+                Optional, the number of preemptible workers. If unspecified, the
+                default number is 0. Ignored if numberOfWorkers is 0.
 
-            For more information, see https://cloud.google.com/compute/docs/instances/preemptible
-        properties:
-          description: >
-            Example {"spark:spark.executor.memory": "10g"}. See
-            https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/cluster-properties
-            for allowed property settings
-          type: object
-          additionalProperties:
-            type: string
-        componentGatewayEnabled:
-          type: boolean
-          description: >
-            Optional, specifies whether to enable Dataproc Component Gateway on the cluster.
-            This can be used for accessing Spark web UIs. See
-            https://cloud.google.com/dataproc/docs/concepts/accessing/dataproc-gateways for more details.
-            Defaults to false.
-        workerPrivateAccess:
-          type: boolean
-          description: >
-            Optional, specifies whether to prevent public Internet access from the Dataproc worker nodes,
-            if any. Does not affect the master node. Defaults to false.
+                For more information, see https://cloud.google.com/compute/docs/instances/preemptible
+            properties:
+              description: >
+                Example {"spark:spark.executor.memory": "10g"}. See
+                https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/cluster-properties
+                for allowed property settings
+              type: object
+              additionalProperties:
+                type: string
+            region:
+              type: string
+              description: >
+                Optional, the deployment region of the cluster. For example, us-east1 or europe-west2.
+                Defaults to us-central1.
+            componentGatewayEnabled:
+              type: boolean
+              description: >
+                Optional, specifies whether to enable Dataproc Component Gateway on the cluster.
+                This can be used for accessing Spark web UIs. See
+                https://cloud.google.com/dataproc/docs/concepts/accessing/dataproc-gateways for more details.
+                Defaults to false.
+            workerPrivateAccess:
+              type: boolean
+              description: >
+                Optional, specifies whether to prevent public Internet access from the Dataproc worker nodes,
+                if any. Does not affect the master node. Defaults to false.
     UserJupyterExtensionConfig:
       description: Specification of Jupyter Extensions to be installed on the cluster
       properties:

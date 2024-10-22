@@ -16,7 +16,6 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLa
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import jakarta.inject.Provider;
 import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
@@ -48,11 +47,11 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.legacy_leonardo_client.api.ResourcesApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.ServiceInfoApi;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
@@ -84,7 +83,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
   private static final Set<LeonardoRuntimeStatus> STOPPABLE_RUNTIME_STATUSES =
-      ImmutableSet.of(
+      Set.of(
           LeonardoRuntimeStatus.RUNNING,
           LeonardoRuntimeStatus.STARTING,
           LeonardoRuntimeStatus.UPDATING);
@@ -229,8 +228,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     } else if (runtime.getGceWithPdConfig() != null) {
       return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
     } else {
-      LeonardoMachineConfig machineConfig =
-          leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      LeonardoDataprocConfig machineConfig =
+          leonardoMapper.toLeonardoDataprocConfig(runtime.getDataprocConfig());
       if (workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
         machineConfig.setWorkerPrivateAccess(true);
       }

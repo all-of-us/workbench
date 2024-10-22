@@ -71,6 +71,7 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
@@ -78,10 +79,9 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeImage;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.LegacyLeonardoRetryHandler;
@@ -283,7 +283,7 @@ public class RuntimeControllerTest {
     dataprocConfigObj.put("masterMachineType", "n1-standard-4");
     dataprocConfigObj.put("masterDiskSize", 50.0);
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj, null);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj);
     dataprocConfig = tmpRuntime.getDataprocConfig();
 
     gceConfigObj = new LinkedTreeMap<>();
@@ -292,7 +292,7 @@ public class RuntimeControllerTest {
     gceConfigObj.put("diskSize", 100.0);
     gceConfigObj.put("machineType", "n1-standard-2");
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj, null);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj);
     gceConfig = tmpRuntime.getGceConfig();
 
     testLeoRuntime =
@@ -862,9 +862,9 @@ public class RuntimeControllerTest {
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
-    LeonardoMachineConfig createLeonardoMachineConfig =
+    LeonardoDataprocConfig createLeonardoDataprocConfig =
         gson.fromJson(
-            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoMachineConfig.class);
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoDataprocConfig.class);
 
     assertThat(
             gson.fromJson(
@@ -872,13 +872,13 @@ public class RuntimeControllerTest {
                     LeonardoRuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.DATAPROC);
-    assertThat(createLeonardoMachineConfig.getNumberOfWorkers()).isEqualTo(5);
-    assertThat(createLeonardoMachineConfig.getWorkerMachineType()).isEqualTo("worker");
-    assertThat(createLeonardoMachineConfig.getWorkerDiskSize()).isEqualTo(10);
-    assertThat(createLeonardoMachineConfig.getNumberOfWorkerLocalSSDs()).isEqualTo(1);
-    assertThat(createLeonardoMachineConfig.getNumberOfPreemptibleWorkers()).isEqualTo(3);
-    assertThat(createLeonardoMachineConfig.getMasterDiskSize()).isEqualTo(100);
-    assertThat(createLeonardoMachineConfig.getMasterMachineType()).isEqualTo("standard");
+    assertThat(createLeonardoDataprocConfig.getNumberOfWorkers()).isEqualTo(5);
+    assertThat(createLeonardoDataprocConfig.getWorkerMachineType()).isEqualTo("worker");
+    assertThat(createLeonardoDataprocConfig.getWorkerDiskSize()).isEqualTo(10);
+    assertThat(createLeonardoDataprocConfig.getNumberOfWorkerLocalSSDs()).isEqualTo(1);
+    assertThat(createLeonardoDataprocConfig.getNumberOfPreemptibleWorkers()).isEqualTo(3);
+    assertThat(createLeonardoDataprocConfig.getMasterDiskSize()).isEqualTo(100);
+    assertThat(createLeonardoDataprocConfig.getMasterMachineType()).isEqualTo("standard");
   }
 
   @Test

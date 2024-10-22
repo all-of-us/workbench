@@ -23,16 +23,19 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDataprocConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoOneOfRuntimeConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeImage;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
@@ -61,15 +64,14 @@ public interface LeonardoMapper {
           RuntimeConfigurationType.GENERALANALYSIS, "preset-general-analysis",
           RuntimeConfigurationType.HAILGENOMICANALYSIS, "preset-hail-genomic-analysis");
 
-  DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
+  DataprocConfig toDataprocConfig(LeonardoDataprocConfig leonardoDataprocConfig);
 
   @Mapping(target = "properties", ignore = true)
   @Mapping(target = "workerPrivateAccess", ignore = true)
+  @Mapping(target = "region", ignore = true)
   @Mapping(target = "cloudService", constant = "DATAPROC")
   @Mapping(target = "componentGatewayEnabled", constant = "true")
-  LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
-
-  GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
+  LeonardoDataprocConfig toLeonardoDataprocConfig(DataprocConfig dataprocConfig);
 
   @Mapping(target = "bootDiskSize", ignore = true)
   @Mapping(target = "cloudService", constant = "GCE")
@@ -85,11 +87,8 @@ public interface LeonardoMapper {
   @Mapping(target = "cloudService", constant = "DATAPROC")
   LeonardoUpdateDataprocConfig toUpdateDataprocConfig(DataprocConfig dataprocConfig);
 
-  @Mapping(target = "persistentDisk", source = "leonardoDiskConfig")
-  @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
-  @Mapping(target = "gpuConfig", source = "leonardoGceConfig.gpuConfig")
   GceWithPdConfig toGceWithPdConfig(
-      LeonardoGceConfig leonardoGceConfig, LeonardoDiskConfig leonardoDiskConfig);
+      LeonardoGceWithPdConfigInResponse leonardoConfig, PersistentDiskRequest persistentDisk);
 
   @Mapping(target = "labels", ignore = true)
   PersistentDiskRequest diskConfigToPersistentDiskRequest(LeonardoDiskConfig leonardoDiskConfig);
@@ -121,7 +120,7 @@ public interface LeonardoMapper {
         .ifPresentOrElse(disk::setAppType, () -> disk.gceRuntime(true));
   }
 
-  @Mapping(target = "patchInProgress", ignore = true)
+  @Mapping(target = "workspaceId", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
 
   @Nullable
@@ -192,19 +191,13 @@ public interface LeonardoMapper {
   @AfterMapping
   default void getRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    mapRuntimeConfig(
-        runtime,
-        leonardoGetRuntimeResponse.getRuntimeConfig(),
-        leonardoGetRuntimeResponse.getDiskConfig());
+    mapRuntimeConfig(runtime, leonardoGetRuntimeResponse.getRuntimeConfig());
   }
 
   @AfterMapping
   default void listRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
-    mapRuntimeConfig(
-        runtime,
-        leonardoListRuntimeResponse.getRuntimeConfig(),
-        leonardoListRuntimeResponse.getDiskConfig());
+    mapRuntimeConfig(runtime, leonardoListRuntimeResponse.getRuntimeConfig());
   }
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -264,42 +257,61 @@ public interface LeonardoMapper {
     }
   }
 
+  @Nullable
+  default CloudServiceEnum getCloudService(LeonardoOneOfRuntimeConfigInResponse runtimeConfigObj) {
+    if (runtimeConfigObj == null) {
+      return null;
+    }
+
+    Gson gson = new Gson();
+    LeonardoRuntimeConfig runtimeConfig =
+        gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoRuntimeConfig.class);
+
+    return runtimeConfig.getCloudService();
+  }
+
   default void mapRuntimeConfig(
-      Runtime runtime, Object runtimeConfigObj, @Nullable LeonardoDiskConfig diskConfig) {
+      Runtime runtime, LeonardoOneOfRuntimeConfigInResponse runtimeConfigObj) {
     if (runtimeConfigObj == null) {
       return;
     }
 
-    Gson gson = new Gson();
-    String runtimeConfigJson = gson.toJson(runtimeConfigObj);
-    LeonardoRuntimeConfig runtimeConfig =
-        gson.fromJson(runtimeConfigJson, LeonardoRuntimeConfig.class);
+    CloudServiceEnum cloudService = getCloudService(runtimeConfigObj);
+    if (cloudService == null) {
+      return;
+    }
 
-    if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
-      runtime.dataprocConfig(
-          toDataprocConfig(gson.fromJson(runtimeConfigJson, LeonardoMachineConfig.class)));
-    } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
-      // Unfortunately the discriminator does not allow us to distinguish plain GCE config
-      // from GceWithPd; use the diskConfig to help differentiate.
-      LeonardoGceConfig leonardoGceConfig =
-          gson.fromJson(runtimeConfigJson, LeonardoGceConfig.class);
-      if (diskConfig != null) {
-        runtime.gceWithPdConfig(toGceWithPdConfig(leonardoGceConfig, diskConfig));
-      } else {
-        runtime.gceConfig(toGceConfig(leonardoGceConfig));
-      }
-    } else {
-      throw new IllegalArgumentException(
-          "Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : "
-              + runtimeConfig.getCloudService());
+    switch (cloudService) {
+      case DATAPROC:
+        {
+          runtime.dataprocConfig(
+              toDataprocConfig(
+                  new Gson()
+                      .fromJson(
+                          new Gson().toJson(runtimeConfigObj), LeonardoDataprocConfig.class)));
+          break;
+        }
+      case GCE:
+        LeonardoGceWithPdConfigInResponse leonardoConfig =
+            new Gson()
+                .fromJson(
+                    new Gson().toJson(runtimeConfigObj), LeonardoGceWithPdConfigInResponse.class);
+
+        leonardoConfig.getPersistentDiskId();
+        PersistentDiskRequest disk = null;
+
+        runtime.gceWithPdConfig(toGceWithPdConfig(leonardoConfig, disk));
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid RuntimeConfig.cloudService : " + cloudService);
     }
   }
 
-  default RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus) {
-    if (leonardoRuntimeStatus == null) {
+  default RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus clusterStatus) {
+    if (clusterStatus == null) {
       return RuntimeStatus.UNKNOWN;
     }
-    return RuntimeStatus.fromValue(leonardoRuntimeStatus.toString());
+    return RuntimeStatus.fromValue(clusterStatus.toString());
   }
 
   default DiskStatus toApiDiskStatus(
