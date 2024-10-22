@@ -605,8 +605,8 @@ paths:
       - workspaceAdmin
       summary: Delete specified (or all if no specified list) runtimes in given workspace
         namespace.
-      description: An admin gated endpoint that deletes given runtimes in a given
-        workspaace.
+      description: DEPRECATED.  Use adminDeleteRuntimes.
+        WAS - An admin gated endpoint that deletes given runtimes in a given workspace.
       operationId: deleteRuntimesInWorkspace
       parameters:
       - name: workspaceNamespace
@@ -633,6 +633,47 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ListRuntimeResponse'
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: runtimesToDelete
+  /v1/admin/security/workspaces/{workspaceNamespace}/deleteRuntimes:
+    post:
+      tags:
+        - workspaceAdmin
+      summary: Delete specified (or all if no specified list) runtimes in given workspace
+        namespace.
+      description: An admin gated endpoint that deletes given runtimes in a given
+        workspace.
+      operationId: adminDeleteRuntimes
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The workspace's namespace.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: A list of names of runtimes to delete. To delete all runtimes,
+          use an empty object, without providing a list property at all (e.g., {})
+          An empty list will delete no runtimes.  SECURITY_ADMIN required.
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ListRuntimeDeleteRequest'
+        required: true
+      responses:
+        200:
+          description: Runtimes deleted
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRuntimeFields'
         500:
           description: Internal Error
           content:
@@ -2182,7 +2223,8 @@ paths:
     get:
       tags:
         - workspaceAdmin
-      description: Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
+      description: DEPRECATED.  Use adminListRuntimes.
+        WAS - Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
       operationId: adminListRuntimesInWorkspace
       parameters:
         - name: workspaceNamespace
@@ -2200,6 +2242,28 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ListRuntimeResponse'
+  /v1/admin/workspaces/{workspaceNamespace}/listRuntimes:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminListRuntimes
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of runtimes in this Workspace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRuntimeFields'
   /v1/admin/workspaces/{workspaceNamespace}/userApps:
     get:
       tags:
@@ -9016,7 +9080,35 @@ components:
           type: boolean
           description: Whether there is a patch in progress on the runtime. Is used
             to indicate updates that require status transitions.
-      description: This is a subset of options in a full runtimes response, copied
+      description: DEPRECATED in favor of AdminRuntimeResponse, to prevent name clashes.  
+        WAS - This is a subset of options in a full runtimes response, copied from leonardo.yaml.
+    AdminRuntimeFields:
+      required:
+        - runtimeName
+        - status
+        - createdDate
+        - labels
+        - dateAccessed
+      type: object
+      properties:
+        runtimeName:
+          type: string
+          description: The user-supplied name for the runtime
+        status:
+          $ref: '#/components/schemas/RuntimeStatus'
+        createdDate:
+          type: string
+          description: The date and time the runtime was created, in ISO-8601 format
+        labels:
+          type: object
+          properties: {}
+          description: The labels to be placed on the runtime. Of type Map[String,String]
+        dateAccessed:
+          type: string
+          description: |
+            The date and time the runtime was last accessed, in ISO-8601 format.
+            Date accessed is defined as the last time the runtime was created, modified, or accessed via the proxy.
+      description: This is a subset of options in a full list runtimes response, copied
         from leonardo.yaml.
     ListRuntimeDeleteRequest:
       type: object
