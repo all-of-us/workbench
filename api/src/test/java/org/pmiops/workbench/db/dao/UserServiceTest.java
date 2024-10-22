@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,8 +25,6 @@ import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -610,44 +607,6 @@ public class UserServiceTest {
 
     assertThat(userService.isServiceAccount(serviceAccountUser)).isTrue();
     assertThat(userService.isServiceAccount(nonServiceAccountUser)).isFalse();
-  }
-
-  @ParameterizedTest
-  @CsvSource({"false,false", "false,true", "true,false", "true,true"})
-  public void testSetInitialCreditsExpirationBypassed(
-      boolean initialBypassed, boolean expectedBypassed) {
-    providedDbUser.getUserInitialCreditsExpiration().setBypassed(initialBypassed);
-    userService.setInitialCreditsExpirationBypassed(providedDbUser, expectedBypassed);
-    assertThat(providedDbUser.getUserInitialCreditsExpiration().isBypassed())
-        .isEqualTo(expectedBypassed);
-  }
-
-  @Test
-  public void testCreateInitialCreditsExpiration() {
-    DbUser user = new DbUser();
-    user.setUsername("Test User");
-    user = userDao.save(user);
-    assertThat(user.getUserInitialCreditsExpiration()).isNull();
-
-    userService.createInitialCreditsExpiration(user);
-
-    DbUserInitialCreditsExpiration initialCreditsExpiration =
-        user.getUserInitialCreditsExpiration();
-    assertThat(initialCreditsExpiration).isNotNull();
-    assertThat(initialCreditsExpiration.getCreditStartTime()).isEqualTo(FakeClockConfiguration.NOW);
-
-    Timestamp expectedExpirationTime =
-        Timestamp.from(
-            FakeClockConfiguration.NOW
-                .toInstant()
-                .atZone(FakeClockConfiguration.CLOCK.getZone())
-                .plusDays(providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays)
-                .toInstant());
-    assertThat(initialCreditsExpiration.getExpirationTime()).isEqualTo(expectedExpirationTime);
-    assertThat(initialCreditsExpiration.getExtensionCount()).isEqualTo(0);
-    assertThat(initialCreditsExpiration.getNotificationStatus())
-        .isEqualTo(NotificationStatus.NO_NOTIFICATION_SENT);
-    assertThat(initialCreditsExpiration.isBypassed()).isFalse();
   }
 
   private void tick() {

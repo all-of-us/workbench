@@ -112,6 +112,7 @@ public class ProfileServiceTest {
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
+  @MockBean private InitialCreditsExpirationService mockInitialCreditsExpirationService;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
   @MockBean
@@ -575,7 +576,7 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
 
-    verify(mockUserService, times(enableInitialCreditsExpiration ? 1 : 0))
+    verify(mockInitialCreditsExpirationService, times(enableInitialCreditsExpiration ? 1 : 0))
         .setInitialCreditsExpirationBypassed(targetUser, true);
   }
 
