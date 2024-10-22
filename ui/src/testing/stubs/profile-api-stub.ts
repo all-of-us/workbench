@@ -71,6 +71,7 @@ export class ProfileStubVariables {
         accessTierShortName: AccessTierShortNames.Controlled,
       },
     ],
+    initialCreditsExpirationBypass: false,
   };
   static ADMIN_TABLE_USER_STUB = <AdminTableUser>{
     ...ProfileStubVariables.PROFILE_STUB,
