@@ -210,6 +210,11 @@ public class UserController implements UserApiDelegate {
     return ResponseEntity.ok().build();
   }
 
+  @Override
+  public ResponseEntity<Void> extendInitialCreditExpiration() {
+    return ResponseEntity.noContent().build();
+  }
+
   /**
    * @return the free tier billing account, if the user has free credits
    */
