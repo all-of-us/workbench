@@ -105,7 +105,6 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     userInitialCreditsExpiration.setBypassed(isBypassed);
   }
 
-
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
