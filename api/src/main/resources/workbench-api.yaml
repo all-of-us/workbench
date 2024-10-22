@@ -659,7 +659,7 @@ paths:
       requestBody:
         description: A list of names of runtimes to delete. To delete all runtimes,
           use an empty object, without providing a list property at all (e.g., {})
-          An empty list will delete no runtimes.
+          An empty list will delete no runtimes.  SECURITY_ADMIN required.
         content:
           '*/*':
             schema:
