@@ -46,6 +46,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
@@ -108,6 +109,7 @@ public class UserServiceTest {
   })
   @MockBean({
     MailService.class,
+      InitialCreditsExpirationService.class
   })
   @TestConfiguration
   static class Configuration {
