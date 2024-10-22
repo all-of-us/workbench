@@ -577,8 +577,8 @@ public class ProfileService {
     boolean enableInitialCreditsExpiration =
         configProvider.get().featureFlags.enableInitialCreditsExpiration;
     if (enableInitialCreditsExpiration) {
-      Optional.ofNullable(request.isInitialCreditsExpirationBypassed())
-          .ifPresent(updatedProfile::setInitialCreditsExpirationBypassed);
+      updatedProfile.setInitialCreditsExpirationBypassed(
+          request.isInitialCreditsExpirationBypassed());
     }
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
