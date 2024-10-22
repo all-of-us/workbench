@@ -15,7 +15,7 @@ import {
 } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
 import { useCustomRuntime } from './runtime-hooks';
 
