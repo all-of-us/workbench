@@ -7,9 +7,6 @@ import static org.mockito.Mockito.verify;
 import jakarta.inject.Provider;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -73,6 +70,5 @@ public class LeonardoRuntimeAuditorTest {
     assertThat(eventSent.actionType()).isEqualTo(ActionType.DELETE);
     assertThat(eventSent.targetPropertyMaybe()).isEqualTo(googleProject);
     assertThat(eventSent.newValueMaybe()).isEqualTo(runtimeName);
-
   }
 }
