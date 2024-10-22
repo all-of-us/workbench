@@ -438,7 +438,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject_DeleteSome() {
+  public void testDeleteRuntime_DeleteSome() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
@@ -453,7 +453,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() {
+  public void testDeleteRuntime_DeleteDoesNotAffectOtherProjects() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
