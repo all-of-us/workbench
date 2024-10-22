@@ -29,11 +29,11 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.legacy_leonardo_client.ApiException;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -334,9 +334,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     if (leonardoMapper.toApiListDisksResponse(diskResponse).isGceRuntime()) {
       return leonardoApiClient.listRuntimesByProjectAsService(googleProject).stream()
           .map(LeonardoListRuntimeResponse::getRuntimeConfig)
-          .filter(
-              runtimeConfig ->
-                  CloudServiceEnum.GCE.equals(leonardoMapper.getCloudService(runtimeConfig)))
+          .filter(runtimeConfig -> CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService()))
           .map(
               runtimeConfig ->
                   new Gson()

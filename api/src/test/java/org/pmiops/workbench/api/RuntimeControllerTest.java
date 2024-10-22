@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.Collections;
@@ -71,17 +70,19 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeImage;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.LegacyLeonardoRetryHandler;
@@ -242,10 +243,10 @@ public class RuntimeControllerTest {
   private DbWorkspace testWorkspace;
 
   private DataprocConfig dataprocConfig;
-  private LinkedTreeMap<String, Object> dataprocConfigObj;
+  private LeonardoRuntimeConfig dataprocConfigObj;
 
   private GceConfig gceConfig;
-  private LinkedTreeMap<String, Object> gceConfigObj;
+  private LeonardoRuntimeConfig gceConfigObj;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -277,20 +278,24 @@ public class RuntimeControllerTest {
 
     Runtime tmpRuntime = new Runtime();
 
-    dataprocConfigObj = new LinkedTreeMap<>();
-    dataprocConfigObj.put("cloudService", "DATAPROC");
-    dataprocConfigObj.put("numberOfWorkers", 0);
-    dataprocConfigObj.put("masterMachineType", "n1-standard-4");
-    dataprocConfigObj.put("masterDiskSize", 50.0);
+    dataprocConfigObj =
+        new LeonardoDataprocConfig()
+            .numberOfWorkers(0)
+            .masterMachineType("n1-standard-4")
+            .masterDiskSize(50)
+            // this needs to be last because it changes the return type
+            .cloudService(CloudServiceEnum.DATAPROC);
 
     leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj);
     dataprocConfig = tmpRuntime.getDataprocConfig();
 
-    gceConfigObj = new LinkedTreeMap<>();
-    gceConfigObj.put("cloudService", "GCE");
-    gceConfigObj.put("bootDiskSize", 10.0);
-    gceConfigObj.put("diskSize", 100.0);
-    gceConfigObj.put("machineType", "n1-standard-2");
+    gceConfigObj =
+        new LeonardoGceWithPdConfigInResponse()
+            .bootDiskSize(10)
+            .machineType("n1-standard-2")
+            // NO .diskSize(100.0)
+            // this needs to be last because it changes the return type
+            .cloudService(CloudServiceEnum.GCE);
 
     leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj);
     gceConfig = tmpRuntime.getGceConfig();
@@ -548,7 +553,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_fromListRuntimes_invalidRuntime() throws ApiException {
-    dataprocConfigObj.put("cloudService", "notACloudService");
+    dataprocConfigObj.cloudService(CloudServiceEnum.fromValue("notACloudService"));
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
@@ -585,21 +590,23 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_dataprocConfig() throws ApiException {
     String timestamp = "2020-09-13T19:19:57.347Z";
 
-    LinkedTreeMap<String, Object> dataProcConfigObj = new LinkedTreeMap<>();
-    dataProcConfigObj.put("cloudService", "DATAPROC");
-    dataProcConfigObj.put("masterDiskSize", 50.0);
-    dataProcConfigObj.put("masterMachineType", "n1-standard-4");
-    dataProcConfigObj.put("numberOfPreemptibleWorkers", 4);
-    dataProcConfigObj.put("numberOfWorkerLocalSSDs", 8);
-    dataProcConfigObj.put("numberOfWorkers", 3);
-    dataProcConfigObj.put("workerDiskSize", 30);
-    dataProcConfigObj.put("workerMachineType", "n1-standard-2");
+    LeonardoRuntimeConfig dataProcConfigObj =
+        new LeonardoDataprocConfig()
+            .masterDiskSize(50)
+            .masterMachineType("n1-standard-4")
+            .numberOfPreemptibleWorkers(4)
+            .numberOfWorkerLocalSSDs(8)
+            .numberOfWorkers(3)
+            .workerDiskSize(30)
+            .workerMachineType("n1-standard-2")
+            // this needs to be last because it changes the return type
+            .cloudService(CloudServiceEnum.DATAPROC);
 
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
-            ImmutableList.of(
+            Collections.singletonList(
                 new LeonardoListRuntimeResponse()
                     .runtimeConfig(dataProcConfigObj)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))

@@ -23,7 +23,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceConfig;
@@ -31,11 +30,10 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfig
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDataprocConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoOneOfRuntimeConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeImage;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
@@ -257,26 +255,12 @@ public interface LeonardoMapper {
     }
   }
 
-  @Nullable
-  default CloudServiceEnum getCloudService(LeonardoOneOfRuntimeConfigInResponse runtimeConfigObj) {
-    if (runtimeConfigObj == null) {
-      return null;
-    }
-
-    Gson gson = new Gson();
-    LeonardoRuntimeConfig runtimeConfig =
-        gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoRuntimeConfig.class);
-
-    return runtimeConfig.getCloudService();
-  }
-
-  default void mapRuntimeConfig(
-      Runtime runtime, LeonardoOneOfRuntimeConfigInResponse runtimeConfigObj) {
+  default void mapRuntimeConfig(Runtime runtime, LeonardoRuntimeConfig runtimeConfigObj) {
     if (runtimeConfigObj == null) {
       return;
     }
 
-    CloudServiceEnum cloudService = getCloudService(runtimeConfigObj);
+    CloudServiceEnum cloudService = runtimeConfigObj.getCloudService();
     if (cloudService == null) {
       return;
     }
@@ -298,7 +282,7 @@ public interface LeonardoMapper {
                     new Gson().toJson(runtimeConfigObj), LeonardoGceWithPdConfigInResponse.class);
 
         leonardoConfig.getPersistentDiskId();
-        PersistentDiskRequest disk = null;
+        PersistentDiskRequest disk = null; // NO
 
         runtime.gceWithPdConfig(toGceWithPdConfig(leonardoConfig, disk));
         break;

@@ -1688,7 +1688,7 @@ components:
         auditInfo:
           $ref: "#/components/schemas/AuditInfo"
         runtimeConfig:
-          $ref: "#/components/schemas/OneOfRuntimeConfigInResponse"
+          $ref: "#/components/schemas/RuntimeConfig"
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime
@@ -1786,7 +1786,7 @@ components:
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         runtimeConfig:
-          $ref: "#/components/schemas/OneOfRuntimeConfigInResponse"
+          $ref: "#/components/schemas/RuntimeConfig"
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime
@@ -2185,15 +2185,6 @@ components:
         cloudService:
           type: string
           enum: [GCE, DATAPROC]
-    OneOfRuntimeConfigInResponse:
-      oneOf:
-        - $ref: "#/components/schemas/GceWithPdConfigInResponse"
-        - $ref: "#/components/schemas/DataprocConfig"
-      discriminator:
-        propertyName: cloudService
-        mapping:
-          GCE: "#/components/schemas/GceWithPdConfigInResponse"
-          DATAPROC: "#/components/schemas/DataprocConfig"
     RuntimeImage:
       type: object
       properties:
