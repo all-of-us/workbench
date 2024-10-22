@@ -122,7 +122,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   public ResponseEntity<List<AdminRuntimeFields>> adminDeleteRuntimes(
       String workspaceNamespace, ListRuntimeDeleteRequest runtimesToDelete) {
     return ResponseEntity.ok(
-        workspaceAdminService.deleteRuntimesInWorkspace(workspaceNamespace, runtimesToDelete));
+        workspaceAdminService.deleteRuntimes(workspaceNamespace, runtimesToDelete));
   }
 
   @Override

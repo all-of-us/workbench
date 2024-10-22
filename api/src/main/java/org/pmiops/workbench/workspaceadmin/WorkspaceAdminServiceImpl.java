@@ -298,13 +298,13 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
       String workspaceNamespace, ListRuntimeDeleteRequest req) {
-    return deleteRuntimesInWorkspace(workspaceNamespace, req).stream()
+    return deleteRuntimes(workspaceNamespace, req).stream()
         .map(leonardoMapper::toDeprecatedListRuntimeResponse)
         .collect(Collectors.toList());
   }
 
   @Override
-  public List<AdminRuntimeFields> deleteRuntimesInWorkspace(
+  public List<AdminRuntimeFields> deleteRuntimes(
       String workspaceNamespace, ListRuntimeDeleteRequest req) {
     final String googleProject =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();

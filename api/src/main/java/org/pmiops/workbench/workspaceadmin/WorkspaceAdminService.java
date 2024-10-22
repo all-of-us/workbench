@@ -49,10 +49,9 @@ public interface WorkspaceAdminService {
 
   List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles);
 
-  List<AdminRuntimeFields> deleteRuntimesInWorkspace(
-      String workspaceNamespace, ListRuntimeDeleteRequest req);
+  List<AdminRuntimeFields> deleteRuntimes(String workspaceNamespace, ListRuntimeDeleteRequest req);
 
-  // use deleteRuntimesInWorkspace
+  // use deleteRuntimes
   @Deprecated(since = "October 2024", forRemoval = true)
   List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
       String workspaceNamespace, ListRuntimeDeleteRequest req);
