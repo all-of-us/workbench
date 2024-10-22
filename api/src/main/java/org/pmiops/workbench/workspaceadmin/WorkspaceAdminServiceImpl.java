@@ -2,7 +2,6 @@ package org.pmiops.workbench.workspaceadmin;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.protobuf.util.Timestamps;
 import jakarta.annotation.Nullable;
@@ -298,36 +297,39 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
       String workspaceNamespace, ListRuntimeDeleteRequest req) {
-    return deleteRuntimes(workspaceNamespace, req).stream()
+    // the UI only calls this with a single argument, so this is safe
+    String runtimeNameToDelete = req.getRuntimesToDelete().get(0);
+    return deleteRuntime(workspaceNamespace, runtimeNameToDelete).stream()
         .map(leonardoMapper::toDeprecatedListRuntimeResponse)
         .collect(Collectors.toList());
   }
 
   @Override
-  public List<AdminRuntimeFields> deleteRuntimes(
-      String workspaceNamespace, ListRuntimeDeleteRequest req) {
+  public List<AdminRuntimeFields> deleteRuntime(
+      String workspaceNamespace, String runtimeNameToDelete) {
     final String googleProject =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
     List<LeonardoListRuntimeResponse> runtimesToDelete =
-        filterByRuntimesInList(
+        filterByRuntimeName(
                 leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
-                req.getRuntimesToDelete())
-            .collect(Collectors.toList());
+                runtimeNameToDelete)
+            .toList();
     runtimesToDelete.forEach(
         runtime ->
             leonardoNotebooksClient.deleteRuntimeAsService(
                 leonardoMapper.toGoogleProject(runtime.getCloudContext()),
                 runtime.getRuntimeName()));
+
     List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
-        filterByRuntimesInList(
+        filterByRuntimeName(
                 leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
-                req.getRuntimesToDelete())
-            .collect(Collectors.toList());
+                runtimeNameToDelete)
+            .toList();
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
     // names and thus could have >1 deleted runtimes with the same name in the project.
     List<LeonardoRuntimeStatus> acceptableStates =
-        ImmutableList.of(LeonardoRuntimeStatus.DELETING, LeonardoRuntimeStatus.ERROR);
+        List.of(LeonardoRuntimeStatus.DELETING, LeonardoRuntimeStatus.ERROR);
     runtimesInProjectAffected.stream()
         .filter(runtime -> !acceptableStates.contains(runtime.getStatus()))
         .forEach(
@@ -338,11 +340,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                         "Runtime %s/%s is not in a deleting state",
                         leonardoMapper.toGoogleProject(runtimeInBadState.getCloudContext()),
                         runtimeInBadState.getRuntimeName())));
-    leonardoRuntimeAuditor.fireDeleteRuntimesInProject(
-        googleProject,
-        runtimesToDelete.stream()
-            .map(LeonardoListRuntimeResponse::getRuntimeName)
-            .collect(Collectors.toList()));
+    runtimesToDelete.stream()
+        .map(LeonardoListRuntimeResponse::getRuntimeName)
+        .forEach(
+            runtimeName -> leonardoRuntimeAuditor.fireDeleteRuntime(googleProject, runtimeName));
     return runtimesInProjectAffected.stream()
         .map(leonardoMapper::toAdminRuntimeFields)
         .collect(Collectors.toList());
@@ -585,10 +586,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                 .userModel(userMapper.toApiUser(userRole, null)));
   }
 
-  private static Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
-      Stream<LeonardoListRuntimeResponse> runtimesToFilter, List<String> runtimeNames) {
-    // Null means keep all runtimes.
-    return runtimesToFilter.filter(
-        runtime -> runtimeNames == null || runtimeNames.contains(runtime.getRuntimeName()));
+  private static Stream<LeonardoListRuntimeResponse> filterByRuntimeName(
+      Stream<LeonardoListRuntimeResponse> runtimesToFilter, String runtimeName) {
+    return runtimesToFilter.filter(runtime -> runtime.getRuntimeName().equals(runtimeName));
   }
 }
