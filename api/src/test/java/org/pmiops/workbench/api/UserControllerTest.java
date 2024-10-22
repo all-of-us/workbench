@@ -86,7 +86,7 @@ public class UserControllerTest {
     FreeTierBillingService.class,
     MailService.class,
     UserServiceAuditor.class,
-      InitialCreditsExpirationService.class
+    InitialCreditsExpirationService.class
   })
   static class Configuration {
 

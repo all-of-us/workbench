@@ -107,10 +107,7 @@ public class UserServiceTest {
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
   })
-  @MockBean({
-    MailService.class,
-      InitialCreditsExpirationService.class
-  })
+  @MockBean({MailService.class, InitialCreditsExpirationService.class})
   @TestConfiguration
   static class Configuration {
     @Bean

@@ -2,10 +2,12 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.FakeClockConfiguration.CLOCK;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -16,10 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
-import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
-import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -27,12 +26,12 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
 import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -54,6 +53,7 @@ public class InitialCreditsExpirationServiceTest {
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
   private static List<DbAccessModule> accessModules;
+
   @MockBean private InstitutionService mockInstitutionService;
 
   @Autowired private AccessModuleDao accessModuleDao;
@@ -62,18 +62,14 @@ public class InitialCreditsExpirationServiceTest {
   @Autowired private InitialCreditsExpirationService initialCreditsExpirationService;
 
   @Import({
-    FakeClockConfiguration.class,
-    FakeJpaDateTimeConfiguration.class,
-    UserServiceTestConfiguration.class,
-    AccessTierServiceImpl.class,
-    AccessModuleServiceImpl.class,
-    CommonMappers.class,
-    UserAccessModuleMapperImpl.class,
-    UserServiceAuditor.class,
-    UserService.class
+    InitialCreditsExpirationServiceImpl.class,
   })
   @MockBean({
     MailService.class,
+    UserService.class,
+    AccessTierServiceImpl.class,
+    UserServiceAuditor.class,
+    LeonardoApiClient.class,
   })
   @TestConfiguration
   static class Configuration {
@@ -98,6 +94,11 @@ public class InitialCreditsExpirationServiceTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public List<DbAccessModule> getDbAccessModules() {
       return accessModules;
+    }
+
+    @Bean
+    public Clock getClock() {
+      return CLOCK;
     }
   }
 
@@ -166,7 +167,7 @@ public class InitialCreditsExpirationServiceTest {
         Timestamp.from(
             FakeClockConfiguration.NOW
                 .toInstant()
-                .atZone(FakeClockConfiguration.CLOCK.getZone())
+                .atZone(CLOCK.getZone())
                 .plusDays(providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays)
                 .toInstant());
     assertThat(initialCreditsExpiration.getExpirationTime()).isEqualTo(expectedExpirationTime);
