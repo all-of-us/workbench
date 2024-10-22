@@ -87,7 +87,12 @@ public class ComplianceTrainingServiceTest {
     UserAccessModuleMapperImpl.class,
     ComplianceTrainingServiceImpl.class
   })
-  @MockBean({FireCloudService.class, InstitutionService.class, UserServiceAuditor.class, InitialCreditsExpirationService.class})
+  @MockBean({
+    FireCloudService.class,
+    InstitutionService.class,
+    UserServiceAuditor.class,
+    InitialCreditsExpirationService.class
+  })
   @TestConfiguration
   static class Configuration {
     @Bean
