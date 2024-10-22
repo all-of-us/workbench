@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
@@ -171,4 +172,8 @@ public interface UserService {
   void signOut(DbUser user);
 
   boolean isServiceAccount(DbUser user);
+
+  DbUserInitialCreditsExpiration createInitialCreditsExpiration(DbUser user);
+
+  void setInitialCreditsExpirationBypassed(DbUser user, boolean isBypassed);
 }
