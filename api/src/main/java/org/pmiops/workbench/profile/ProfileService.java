@@ -257,7 +257,7 @@ public class ProfileService {
         configProvider.get().featureFlags.enableInitialCreditsExpiration;
 
     if (enableInitialCreditsExpiration) {
-      userService.setInitialCreditsExpirationBypassed(
+      initialCreditsExpirationService.setInitialCreditsExpirationBypassed(
           user,
           Optional.ofNullable(updatedProfile.isInitialCreditsExpirationBypassed()).orElse(false));
     }
