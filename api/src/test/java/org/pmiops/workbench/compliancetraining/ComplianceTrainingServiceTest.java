@@ -35,6 +35,7 @@ import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.PresetData;
@@ -86,7 +87,7 @@ public class ComplianceTrainingServiceTest {
     UserAccessModuleMapperImpl.class,
     ComplianceTrainingServiceImpl.class
   })
-  @MockBean({FireCloudService.class, InstitutionService.class, UserServiceAuditor.class})
+  @MockBean({FireCloudService.class, InstitutionService.class, UserServiceAuditor.class, InitialCreditsExpirationService.class})
   @TestConfiguration
   static class Configuration {
     @Bean

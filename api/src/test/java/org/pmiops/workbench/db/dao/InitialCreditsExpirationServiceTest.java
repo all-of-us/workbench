@@ -20,6 +20,7 @@ import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbUser;
@@ -68,6 +69,8 @@ public class InitialCreditsExpirationServiceTest {
     AccessModuleServiceImpl.class,
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
+    UserServiceAuditor.class,
+    UserService.class
   })
   @MockBean({
     MailService.class,
