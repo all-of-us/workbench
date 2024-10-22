@@ -588,47 +588,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkbenchListBillingAccountsResponse'
-  /v1/admin/security/workspaces/{workspaceNamespace}/delete-runtimes:
-    post:
-      tags:
-      - workspaceAdmin
-      summary: Delete specified (or all if no specified list) runtimes in given workspace
-        namespace.
-      description: DEPRECATED.  Use adminDeleteRuntime.
-        WAS - An admin gated endpoint that deletes given runtimes in a given workspace.
-      operationId: deleteRuntimesInWorkspace
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The workspace's workspace namespace. the runtimes
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: A list of names of runtimes to delete. To delete all runtimes,
-          use an empty object, without providing a list property at all (e.g., {})
-          An empty list will delete no runtimes.
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ListRuntimeDeleteRequest'
-        required: true
-      responses:
-        200:
-          description: Runtimes deleted
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ListRuntimeResponse'
-        500:
-          description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: runtimesToDelete
   /v1/runtimes/{workspaceNamespace}:
     get:
       tags:
@@ -2167,29 +2126,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FileDetail'
-  /v1/admin/workspaces/{workspaceNamespace}/runtimes:
-    get:
-      tags:
-        - workspaceAdmin
-      description: DEPRECATED.  Use adminListRuntimes.
-        WAS - Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
-      operationId: adminListRuntimesInWorkspace
-      parameters:
-        - name: workspaceNamespace
-          in: path
-          description: The Workspace namespace
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: List of runtimes in this Workspace
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ListRuntimeResponse'
   /v1/admin/security/workspaces/{workspaceNamespace}/runtimes/{runtimeName}:
     delete:
       tags:

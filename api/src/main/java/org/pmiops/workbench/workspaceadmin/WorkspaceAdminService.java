@@ -31,11 +31,6 @@ public interface WorkspaceAdminService {
 
   List<AdminRuntimeFields> listRuntimes(String workspaceNamespace);
 
-  // use listRuntimes
-  @Deprecated(since = "October 2024", forRemoval = true)
-  List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedListRuntimes(
-      String workspaceNamespace);
-
   List<UserAppEnvironment> listUserApps(String workspaceNamespace);
 
   WorkspaceAuditLogQueryResponse getWorkspaceAuditLogEntries(
@@ -50,11 +45,6 @@ public interface WorkspaceAdminService {
   List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles);
 
   AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete);
-
-  // use deleteRuntimes
-  @Deprecated(since = "October 2024", forRemoval = true)
-  List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
-      String workspaceNamespace, ListRuntimeDeleteRequest req);
 
   void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
 

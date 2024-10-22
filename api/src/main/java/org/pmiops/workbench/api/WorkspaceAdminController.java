@@ -45,15 +45,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(workspaceAdminService.getWorkspaceAdminView(workspaceNamespace));
   }
 
-  // use adminListRuntimes
-  @Deprecated(since = "October 2024", forRemoval = true)
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<org.pmiops.workbench.model.ListRuntimeResponse>>
-      adminListRuntimesInWorkspace(String workspaceNamespace) {
-    return ResponseEntity.ok(workspaceAdminService.deprecatedListRuntimes(workspaceNamespace));
-  }
-
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<List<AdminRuntimeFields>> adminListRuntimes(String workspaceNamespace) {
@@ -104,17 +95,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       String workspaceNamespace, Boolean onlyAppFiles) {
     return ResponseEntity.ok(
         workspaceAdminService.listFiles(workspaceNamespace, Boolean.TRUE.equals(onlyAppFiles)));
-  }
-
-  // use adminDeleteRuntime
-  @Deprecated(since = "October 2024", forRemoval = true)
-  @Override
-  @AuthorityRequired(Authority.SECURITY_ADMIN)
-  public ResponseEntity<List<org.pmiops.workbench.model.ListRuntimeResponse>>
-      deleteRuntimesInWorkspace(
-          String workspaceNamespace, ListRuntimeDeleteRequest runtimesToDelete) {
-    return ResponseEntity.ok(
-        workspaceAdminService.deprecatedDeleteRuntimes(workspaceNamespace, runtimesToDelete));
   }
 
   @Override
