@@ -37,8 +37,6 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
-import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -740,33 +738,6 @@ public class UserServiceImpl implements UserService {
   @Override
   public void signOut(DbUser user) {
     directoryService.signOut(user.getUsername());
-  }
-
-  @Override
-  public DbUserInitialCreditsExpiration createInitialCreditsExpiration(DbUser user) {
-    long initialCreditsValidityPeriodDays =
-        configProvider.get().billing.initialCreditsValidityPeriodDays;
-    Timestamp now = clockNow();
-    Timestamp expirationTime =
-        new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(initialCreditsValidityPeriodDays));
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        new DbUserInitialCreditsExpiration()
-            .setCreditStartTime(now)
-            .setExpirationTime(expirationTime)
-            .setUser(user)
-            .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT);
-    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
-    return userInitialCreditsExpiration;
-  }
-
-  @Override
-  public void setInitialCreditsExpirationBypassed(DbUser user, boolean isBypassed) {
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        user.getUserInitialCreditsExpiration();
-    if (userInitialCreditsExpiration == null) {
-      userInitialCreditsExpiration = createInitialCreditsExpiration(user);
-    }
-    userInitialCreditsExpiration.setBypassed(isBypassed);
   }
 
   /**

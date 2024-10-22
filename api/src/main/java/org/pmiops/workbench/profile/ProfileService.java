@@ -21,7 +21,6 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -73,7 +72,6 @@ public class ProfileService {
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
   private final Provider<DbUser> userProvider;
-  private final Provider<WorkbenchConfig> configProvider;
   private final UserDao userDao;
   private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
@@ -95,7 +93,6 @@ public class ProfileService {
       ProfileAuditor profileAuditor,
       ProfileMapper profileMapper,
       Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> configProvider,
       UserDao userDao,
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
@@ -115,7 +112,6 @@ public class ProfileService {
     this.profileAuditor = profileAuditor;
     this.profileMapper = profileMapper;
     this.userProvider = userProvider;
-    this.configProvider = configProvider;
     this.userDao = userDao;
     this.userService = userService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
@@ -252,15 +248,6 @@ public class ProfileService {
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
     user.setAddress(addressMapper.addressToDbAddress(updatedProfile.getAddress()));
-
-    boolean enableInitialCreditsExpiration =
-        configProvider.get().featureFlags.enableInitialCreditsExpiration;
-
-    if (enableInitialCreditsExpiration) {
-      userService.setInitialCreditsExpirationBypassed(
-          user,
-          Optional.ofNullable(updatedProfile.isInitialCreditsExpirationBypassed()).orElse(false));
-    }
     // Address may be null for users who were created before address validation was in place. See
     // RW-5139.
     Optional.ofNullable(user.getAddress()).ifPresent(address -> address.setUser(user));
@@ -574,12 +561,6 @@ public class ProfileService {
         .map(AccountDisabledStatus::isDisabled)
         .ifPresent(updatedProfile::setDisabled);
 
-    boolean enableInitialCreditsExpiration =
-        configProvider.get().featureFlags.enableInitialCreditsExpiration;
-    if (enableInitialCreditsExpiration) {
-      Optional.ofNullable(request.isInitialCreditsExpirationBypassed())
-          .ifPresent(updatedProfile::setInitialCreditsExpirationBypassed);
-    }
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
     return getProfile(dbUser);
