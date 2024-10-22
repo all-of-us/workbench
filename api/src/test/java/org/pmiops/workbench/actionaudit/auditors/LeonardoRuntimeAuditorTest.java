@@ -4,12 +4,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.ImmutableList;
 import jakarta.inject.Provider;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +32,6 @@ public class LeonardoRuntimeAuditorTest {
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
   private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
   private static final String BILLING_PROJECT_ID = "all-of-us-yjty";
-  private static final List<String> RUNTIME_NAMES =
-      ImmutableList.of("all-of-us-1", "all-of-us-2", "all-of-us-3");
 
   private LeonardoRuntimeAuditor leonardoRuntimeauditor;
 
@@ -68,19 +64,19 @@ public class LeonardoRuntimeAuditorTest {
   }
 
   @Test
-  public void testFireDeleteRuntimesInProject() {
-    leonardoRuntimeauditor.fireDeleteRuntimesInProject(BILLING_PROJECT_ID, RUNTIME_NAMES);
+  public void testFireDeleteRuntime() {
+    String runtimeName = "my-runtime";
+    leonardoRuntimeauditor.fireDeleteRuntime(BILLING_PROJECT_ID, runtimeName);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(RUNTIME_NAMES.size());
+    assertThat(eventsSent).hasSize(1);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
     assertThat(firstEvent.map(ActionAuditEvent::actionType).orElse(null))
         .isEqualTo(ActionType.DELETE);
     assertThat(firstEvent.map(ActionAuditEvent::targetPropertyMaybe).orElse(null))
         .isEqualTo(BILLING_PROJECT_ID);
-    assertThat(firstEvent.map(ActionAuditEvent::newValueMaybe).orElse(null))
-        .isEqualTo(RUNTIME_NAMES.get(0));
+    assertThat(firstEvent.map(ActionAuditEvent::newValueMaybe).orElse(null)).isEqualTo(runtimeName);
     assertThat(
             eventsSent.stream()
                 .map(ActionAuditEvent::actionType)

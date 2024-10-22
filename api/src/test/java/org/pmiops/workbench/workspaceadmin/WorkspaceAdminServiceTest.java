@@ -74,7 +74,6 @@ import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
@@ -425,95 +424,47 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject() {
+  public void testDeleteRuntime() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
-    workspaceAdminService.deleteRuntimes(
-        WORKSPACE_NAMESPACE,
-        new ListRuntimeDeleteRequest()
-            .runtimesToDelete(ImmutableList.of(testLeoRuntime.getRuntimeName())));
+    workspaceAdminService.deleteRuntime(WORKSPACE_NAMESPACE, testLeoRuntime.getRuntimeName());
     verify(mockLeonardoNotebooksClient)
         .deleteRuntimeAsService(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
     verify(mockLeonardoRuntimeAuditor)
-        .fireDeleteRuntimesInProject(
-            GOOGLE_PROJECT_ID,
-            listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
-                .collect(Collectors.toList()));
+        .fireDeleteRuntime(GOOGLE_PROJECT_ID, testLeoListRuntimeResponse.getRuntimeName());
   }
 
   @Test
   public void testDeleteRuntimesInProject_DeleteSome() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
-    List<String> runtimesToDelete = ImmutableList.of(testLeoRuntime.getRuntimeName());
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
-    workspaceAdminService.deleteRuntimes(
-        WORKSPACE_NAMESPACE, new ListRuntimeDeleteRequest().runtimesToDelete(runtimesToDelete));
-    verify(mockLeonardoNotebooksClient, times(runtimesToDelete.size()))
+    workspaceAdminService.deleteRuntime(WORKSPACE_NAMESPACE, testLeoRuntime.getRuntimeName());
+
+    verify(mockLeonardoNotebooksClient, times(1))
         .deleteRuntimeAsService(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
     verify(mockLeonardoRuntimeAuditor, times(1))
-        .fireDeleteRuntimesInProject(GOOGLE_PROJECT_ID, runtimesToDelete);
+        .fireDeleteRuntime(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
   }
 
   @Test
   public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
-    List<String> runtimesToDelete =
-        ImmutableList.of(testLeoRuntimeDifferentProject.getRuntimeName());
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
-    workspaceAdminService.deleteRuntimes(
-        WORKSPACE_NAMESPACE, new ListRuntimeDeleteRequest().runtimesToDelete(runtimesToDelete));
+    workspaceAdminService.deleteRuntime(
+        WORKSPACE_NAMESPACE, testLeoRuntimeDifferentProject.getRuntimeName());
     verify(mockLeonardoNotebooksClient, times(0))
         .deleteRuntimeAsService(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
     verify(mockLeonardoRuntimeAuditor, times(0))
-        .fireDeleteRuntimesInProject(GOOGLE_PROJECT_ID, runtimesToDelete);
-  }
-
-  @Test
-  public void testDeleteRuntimesInProject_NoRuntimes() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
-    when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
-        .thenReturn(listRuntimeResponseList);
-
-    workspaceAdminService.deleteRuntimes(
-        WORKSPACE_NAMESPACE, new ListRuntimeDeleteRequest().runtimesToDelete(ImmutableList.of()));
-    verify(mockLeonardoNotebooksClient, never())
-        .deleteRuntimeAsService(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
-    verify(mockLeonardoRuntimeAuditor, never())
-        .fireDeleteRuntimesInProject(
-            GOOGLE_PROJECT_ID,
-            listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
-                .collect(Collectors.toList()));
-  }
-
-  @Test
-  public void testDeleteRuntimesInProject_NullRuntimesList() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
-    when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
-        .thenReturn(listRuntimeResponseList);
-
-    workspaceAdminService.deleteRuntimes(
-        WORKSPACE_NAMESPACE, new ListRuntimeDeleteRequest().runtimesToDelete(null));
-    verify(mockLeonardoNotebooksClient)
-        .deleteRuntimeAsService(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
-    verify(mockLeonardoRuntimeAuditor)
-        .fireDeleteRuntimesInProject(
-            GOOGLE_PROJECT_ID,
-            listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
-                .collect(Collectors.toList()));
+        .fireDeleteRuntime(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
   }
 
   @Test
