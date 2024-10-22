@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -77,6 +78,33 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         .orElse(false);
   }
 
+  @Override
+  public DbUserInitialCreditsExpiration createInitialCreditsExpiration(DbUser user) {
+    long initialCreditsValidityPeriodDays =
+        workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays;
+    Timestamp now = clockNow();
+    Timestamp expirationTime =
+        new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(initialCreditsValidityPeriodDays));
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(now)
+            .setExpirationTime(expirationTime)
+            .setUser(user)
+            .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT);
+    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
+    return userInitialCreditsExpiration;
+  }
+
+  @Override
+  public void setInitialCreditsExpirationBypassed(DbUser user, boolean isBypassed) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+    if (userInitialCreditsExpiration == null) {
+      userInitialCreditsExpiration = createInitialCreditsExpiration(user);
+    }
+    userInitialCreditsExpiration.setBypassed(isBypassed);
+  }
+
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
@@ -137,5 +165,9 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     } catch (WorkbenchException e) {
       logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
     }
+  }
+
+  private Timestamp clockNow() {
+    return new Timestamp(clock.instant().toEpochMilli());
   }
 }

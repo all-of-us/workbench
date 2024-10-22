@@ -1,9 +1,9 @@
 package org.pmiops.workbench.access;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
@@ -13,9 +13,7 @@ import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import jakarta.inject.Provider;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -27,15 +25,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 
@@ -52,11 +51,13 @@ public class AccessSyncServiceTest {
 
   @Mock InstitutionService institutionService;
 
+  @Mock UserService userService;
+
+  @Mock InitialCreditsExpirationService initialCreditsExpirationService;
+
   @Mock UserServiceAuditor userServiceAuditor;
 
   Instant now = Instant.parse("2000-01-01T00:00:00.00Z");
-
-  @Spy Clock clock = Clock.fixed(now, ZoneId.systemDefault());
 
   @InjectMocks private AccessSyncServiceImpl accessSyncService;
 
@@ -72,6 +73,7 @@ public class AccessSyncServiceTest {
         workbenchConfigProvider,
         accessModuleService,
         institutionService,
+        userService,
         userServiceAuditor);
     registeredTier = createRegisteredTier();
     when(accessTierService.getAllTiers()).thenReturn(List.of(registeredTier));
@@ -100,14 +102,6 @@ public class AccessSyncServiceTest {
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
   }
 
-  private void assertCreditExpirationEquality(
-      DbUserInitialCreditsExpiration expected, DbUserInitialCreditsExpiration actual) {
-    assertEquals(expected.getUser(), actual.getUser());
-    assertEquals(expected.getCreditStartTime(), actual.getCreditStartTime());
-    assertEquals(expected.getExpirationTime(), actual.getExpirationTime());
-    assertEquals(expected.getExtensionCount(), actual.getExtensionCount());
-  }
-
   @ParameterizedTest
   @CsvSource({"false", "true"})
   public void testUpdateUserAccessTiers_whenRTGranted(boolean enableInitialCreditsExpiration) {
@@ -117,27 +111,10 @@ public class AccessSyncServiceTest {
     List<DbAccessTier> oldAccessTiers = List.of();
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
 
-    DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
+    accessSyncService.updateUserAccessTiers(dbUser, agent);
 
-    DbUserInitialCreditsExpiration expected = new DbUserInitialCreditsExpiration();
-
-    expected.setUser(dbUser);
-
-    if (enableInitialCreditsExpiration) {
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      Timestamp expirationTime =
-          new Timestamp(
-              now.getTime()
-                  + TimeUnit.DAYS.toMillis(
-                      workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays));
-      expected.setCreditStartTime(now);
-      expected.setExpirationTime(expirationTime);
-      assertCreditExpirationEquality(expected, dbUser.getUserInitialCreditsExpiration());
-    } else {
-      assertNull(dbUser.getUserInitialCreditsExpiration());
-    }
-
-    assertEquals(updatedUser, dbUser);
+    verify(initialCreditsExpirationService, times(enableInitialCreditsExpiration ? 1 : 0))
+        .createInitialCreditsExpiration(dbUser);
   }
 
   @ParameterizedTest

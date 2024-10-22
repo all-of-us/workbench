@@ -36,6 +36,7 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
+import org.pmiops.workbench.model.AdminRuntimeFields;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
@@ -44,7 +45,6 @@ import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
-import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
@@ -146,12 +146,14 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(
-      target = "googleProject",
-      source = "cloudContext",
-      qualifiedByName = "legacy_cloudContextToGoogleProject")
-  ListRuntimeResponse toApiListRuntimeResponse(
-      LeonardoListRuntimeResponse leonardoListRuntimeResponse);
+  AdminRuntimeFields toAdminRuntimeFields(LeonardoListRuntimeResponse leonardoListRuntimeResponse);
+
+  // these were unused, so they have been removed in the newer AdminRuntimeFields
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "googleProject", ignore = true)
+  @Mapping(target = "patchInProgress", ignore = true)
+  org.pmiops.workbench.model.ListRuntimeResponse toDeprecatedListRuntimeResponse(
+      AdminRuntimeFields source);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")

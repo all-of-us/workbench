@@ -16,6 +16,7 @@ import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -37,12 +38,15 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
@@ -103,9 +107,7 @@ public class UserServiceTest {
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
   })
-  @MockBean({
-    MailService.class,
-  })
+  @MockBean({MailService.class, InitialCreditsExpirationService.class})
   @TestConfiguration
   static class Configuration {
     @Bean
@@ -134,15 +136,28 @@ public class UserServiceTest {
 
   @BeforeEach
   public void setUp() {
-    DbUser user = new DbUser();
-    user.setUsername(USERNAME);
-    user = userDao.save(user);
-    providedDbUser = user;
-
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion = 5; // arbitrary
     providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays = 17L; // arbitrary
+
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setBypassed(false)
+            .setCreditStartTime(Timestamp.from(START_INSTANT))
+            .setExpirationTime(
+                Timestamp.from(
+                    START_INSTANT.plus(
+                        providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays,
+                        ChronoUnit.DAYS)))
+            .setExtensionCount(0)
+            .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT);
+
+    DbUser user = new DbUser();
+    user.setUsername(USERNAME);
+    user.setUserInitialCreditsExpiration(initialCreditsExpiration);
+    user = userDao.save(user);
+    providedDbUser = user;
 
     // key UserService logic depends on the existence of the Registered Tier
     accessTierDao.save(createRegisteredTier());

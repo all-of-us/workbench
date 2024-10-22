@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { ListRuntimeResponse, RuntimeApi } from 'generated/fetch';
+import { RuntimeApi } from 'generated/fetch';
 
 import { render, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -15,7 +15,7 @@ import {
 } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
 import { useCustomRuntime } from './runtime-hooks';
 
@@ -109,21 +109,21 @@ describe('runtime-utils', () => {
 
 describe(getCreator.name, () => {
   test.each([
-    ['a runtime without a creator label', defaultRuntime(), undefined],
     [
-      'a runtime with a creator label',
-      { ...defaultRuntime(), labels: { creator: 'scientist@aou' } },
+      'a (labels) object with a creator label',
+      { creator: 'scientist@aou', other: 'n/a' },
       'scientist@aou',
     ],
-    ['a non-runtime object', {}, undefined],
+    [
+      'a (labels) object without a creator label',
+      { some: 123, other: 'n/a', fields: 'ok' },
+      undefined,
+    ],
     ['undefined', undefined, undefined],
     ['null', null, undefined],
   ])(
     'getCreator should have the expected result for %s',
-    (
-      desc: string,
-      runtimeResponse: ListRuntimeResponse,
-      expected: string | undefined
-    ) => expect(getCreator(runtimeResponse)).toEqual(expected)
+    (_desc: string, labels: object, expected: string | undefined) =>
+      expect(getCreator(labels)).toEqual(expected)
   );
 });

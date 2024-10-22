@@ -2,8 +2,8 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
+  AdminRuntimeFields,
   CloudStorageTraffic,
-  ListRuntimeResponse,
   UserAppEnvironment,
   WorkspaceActiveStatus,
   WorkspaceAdminView,
@@ -40,7 +40,7 @@ interface State {
   cloudStorageTraffic?: CloudStorageTraffic;
   loadingWorkspace?: boolean;
   dataLoadError?: Response;
-  runtimes?: ListRuntimeResponse[];
+  runtimes?: AdminRuntimeFields[];
   userApps?: UserAppEnvironment[];
 }
 
@@ -88,7 +88,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     // to the main admin view call
 
     workspaceAdminApi()
-      .adminListRuntimesInWorkspace(ns)
+      .adminListRuntimes(ns)
       .then((runtimes) => this.setState({ runtimes }))
       .catch(this.handleDataLoadError);
 

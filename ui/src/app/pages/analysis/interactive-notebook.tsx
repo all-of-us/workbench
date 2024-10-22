@@ -41,7 +41,7 @@ import { openAppOrConfigPanel } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import * as Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 
 import {
   ErrorMode,
