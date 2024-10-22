@@ -88,7 +88,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     // to the main admin view call
 
     workspaceAdminApi()
-      .adminListRuntimesInWorkspaceV2(ns)
+      .adminListRuntimes(ns)
       .then((runtimes) => this.setState({ runtimes }))
       .catch(this.handleDataLoadError);
 

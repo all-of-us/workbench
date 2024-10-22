@@ -75,7 +75,7 @@ export const CloudEnvironmentsTable = ({
   const deleteRuntime = () => {
     setConfirmDeleteRuntime(false);
     workspaceAdminApi()
-      .adminDeleteRuntimesInWorkspace(workspaceNamespace, {
+      .adminDeleteRuntimes(workspaceNamespace, {
         runtimesToDelete: [runtimeToDelete],
       })
       .then(() => {

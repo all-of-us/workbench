@@ -605,7 +605,7 @@ paths:
       - workspaceAdmin
       summary: Delete specified (or all if no specified list) runtimes in given workspace
         namespace.
-      description: DEPRECATED.  Use adminDeleteRuntimesInWorkspace. 
+      description: DEPRECATED.  Use adminDeleteRuntimes.
         WAS - An admin gated endpoint that deletes given runtimes in a given workspace.
       operationId: deleteRuntimesInWorkspace
       parameters:
@@ -648,7 +648,7 @@ paths:
         namespace.
       description: An admin gated endpoint that deletes given runtimes in a given
         workspace.
-      operationId: adminDeleteRuntimesInWorkspace
+      operationId: adminDeleteRuntimes
       parameters:
         - name: workspaceNamespace
           in: path
@@ -2223,7 +2223,7 @@ paths:
     get:
       tags:
         - workspaceAdmin
-      description: DEPRECATED.  Use adminListRuntimesInWorkspaceV2.
+      description: DEPRECATED.  Use adminListRuntimes.
         WAS - Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
       operationId: adminListRuntimesInWorkspace
       parameters:
@@ -2247,7 +2247,7 @@ paths:
       tags:
         - workspaceAdmin
       description: Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
-      operationId: adminListRuntimesInWorkspaceV2
+      operationId: adminListRuntimes
       parameters:
         - name: workspaceNamespace
           in: path

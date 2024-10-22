@@ -45,7 +45,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(workspaceAdminService.getWorkspaceAdminView(workspaceNamespace));
   }
 
-  // use adminListRuntimesInWorkspaceV2
+  // use adminListRuntimes
   @Deprecated(since = "October 2024", forRemoval = true)
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
@@ -56,8 +56,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<AdminRuntimeFields>> adminListRuntimesInWorkspaceV2(
-      String workspaceNamespace) {
+  public ResponseEntity<List<AdminRuntimeFields>> adminListRuntimes(String workspaceNamespace) {
     return ResponseEntity.ok(workspaceAdminService.listRuntimes(workspaceNamespace));
   }
 
@@ -107,7 +106,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
         workspaceAdminService.listFiles(workspaceNamespace, Boolean.TRUE.equals(onlyAppFiles)));
   }
 
-  // use adminDeleteRuntimesInWorkspace
+  // use adminDeleteRuntimes
   @Deprecated(since = "October 2024", forRemoval = true)
   @Override
   @AuthorityRequired(Authority.SECURITY_ADMIN)
@@ -120,7 +119,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Override
   @AuthorityRequired(Authority.SECURITY_ADMIN)
-  public ResponseEntity<List<AdminRuntimeFields>> adminDeleteRuntimesInWorkspace(
+  public ResponseEntity<List<AdminRuntimeFields>> adminDeleteRuntimes(
       String workspaceNamespace, ListRuntimeDeleteRequest runtimesToDelete) {
     return ResponseEntity.ok(
         workspaceAdminService.deleteRuntimesInWorkspace(workspaceNamespace, runtimesToDelete));
