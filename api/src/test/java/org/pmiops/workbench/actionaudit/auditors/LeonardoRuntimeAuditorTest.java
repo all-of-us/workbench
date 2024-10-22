@@ -31,11 +31,10 @@ public class LeonardoRuntimeAuditorTest {
   private static final long Y2K_EPOCH_MILLIS =
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
   private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
-  private static final String BILLING_PROJECT_ID = "all-of-us-yjty";
 
   private LeonardoRuntimeAuditor leonardoRuntimeauditor;
 
-  @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventCollectionCaptor;
+  @Captor private ArgumentCaptor<ActionAuditEvent> eventCollectionCaptor;
 
   @Mock private Provider<String> mockActionIdProvider;
   @Mock private ActionAuditService mockActionAuditService;
@@ -66,22 +65,14 @@ public class LeonardoRuntimeAuditorTest {
   @Test
   public void testFireDeleteRuntime() {
     String runtimeName = "my-runtime";
-    leonardoRuntimeauditor.fireDeleteRuntime(BILLING_PROJECT_ID, runtimeName);
+    String googleProject = "my-project";
+    leonardoRuntimeauditor.fireDeleteRuntime(googleProject, runtimeName);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
-    Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(1);
-    Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
-    assertThat(firstEvent.isPresent()).isTrue();
-    assertThat(firstEvent.map(ActionAuditEvent::actionType).orElse(null))
-        .isEqualTo(ActionType.DELETE);
-    assertThat(firstEvent.map(ActionAuditEvent::targetPropertyMaybe).orElse(null))
-        .isEqualTo(BILLING_PROJECT_ID);
-    assertThat(firstEvent.map(ActionAuditEvent::newValueMaybe).orElse(null)).isEqualTo(runtimeName);
-    assertThat(
-            eventsSent.stream()
-                .map(ActionAuditEvent::actionType)
-                .collect(Collectors.toSet())
-                .size())
-        .isEqualTo(1);
+    ActionAuditEvent eventSent = eventCollectionCaptor.getValue();
+    assertThat(eventSent).isNotNull();
+    assertThat(eventSent.actionType()).isEqualTo(ActionType.DELETE);
+    assertThat(eventSent.targetPropertyMaybe()).isEqualTo(googleProject);
+    assertThat(eventSent.newValueMaybe()).isEqualTo(runtimeName);
+
   }
 }

@@ -34,7 +34,7 @@ public class LeonardoRuntimeAuditorImpl implements LeonardoRuntimeAuditor {
   }
 
   @Override
-  public void fireDeleteRuntime(String projectId, String runtimeName) {
+  public void fireDeleteRuntime(String googleProjectId, String runtimeName) {
     String actionId = actionIdProvider.get();
     actionAuditService.send(
         ActionAuditEvent.builder()
@@ -46,7 +46,7 @@ public class LeonardoRuntimeAuditorImpl implements LeonardoRuntimeAuditor {
             .actionType(ActionType.DELETE)
             .newValueMaybe(runtimeName)
             .targetType(TargetType.NOTEBOOK_SERVER)
-            .targetPropertyMaybe(projectId)
+            .targetPropertyMaybe(googleProjectId)
             .build());
   }
 }
