@@ -295,27 +295,48 @@ export const VariantSearch = fp.flow(
       }
     };
 
+    const validateInputForVariantSearch = (searchTerm: string) => {
+      const newInputErrors = [];
+      if (searchTerm.length < searchTrigger) {
+        newInputErrors.push(
+          `Minimum criteria search length is ${searchTrigger} characters`
+        );
+      }
+      // No variant search terms should contain whitespace in the middle
+      if (searchTerm.includes(' ')) {
+        newInputErrors.push('The search term cannot contain whitespace');
+      }
+      // Only genomic region should contain ':' and should always start with 'chr'
+      if (
+        searchTerm.includes(':') &&
+        searchTerm.substring(0, 3).toLowerCase() !== 'chr'
+      ) {
+        console.log(searchTerm.substring(0, 2));
+        newInputErrors.push(
+          "The search term must begin with 'chr' when searching Genomic Region"
+        );
+      }
+      return newInputErrors;
+    };
+
     const handleInput = (event: any) => {
       const {
         key,
         target: { value },
       } = event;
       if (key === 'Enter') {
-        if (value.trim().length < searchTrigger) {
-          setInputErrors([
-            `Minimum criteria search length is ${searchTrigger} characters`,
-          ]);
+        const newInputErrors = [
+          ...validateInputForMySQL(value),
+          ...validateInputForVariantSearch(value.trim()),
+        ];
+        if (newInputErrors.length > 0) {
+          setInputErrors(newInputErrors);
         } else {
-          const newInputErrors = validateInputForMySQL(value, searchTrigger);
-          if (newInputErrors.length > 0) {
-            setInputErrors(newInputErrors);
-          } else {
-            setInputErrors([]);
-            setLoading(true);
-            setSearching(true);
-            clearFilters(false);
-            searchVariants(true);
-          }
+          setInputErrors([]);
+          setLoading(true);
+          setSearching(true);
+          clearFilters(false);
+          searchVariants(true);
         }
       }
     };
