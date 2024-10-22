@@ -293,7 +293,6 @@ public class RuntimeControllerTest {
         new LeonardoGceWithPdConfigInResponse()
             .bootDiskSize(10)
             .machineType("n1-standard-2")
-            // NO .diskSize(100.0)
             // this needs to be last because it changes the return type
             .cloudService(CloudServiceEnum.GCE);
 

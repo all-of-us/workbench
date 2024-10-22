@@ -85,6 +85,9 @@ public interface LeonardoMapper {
   @Mapping(target = "cloudService", constant = "DATAPROC")
   LeonardoUpdateDataprocConfig toUpdateDataprocConfig(DataprocConfig dataprocConfig);
 
+  @Mapping(target = "diskSize", ignore = true)
+  GceConfig toGceConfig(LeonardoGceWithPdConfigInResponse leonardoConfig);
+
   GceWithPdConfig toGceWithPdConfig(
       LeonardoGceWithPdConfigInResponse leonardoConfig, PersistentDiskRequest persistentDisk);
 
@@ -281,10 +284,10 @@ public interface LeonardoMapper {
                 .fromJson(
                     new Gson().toJson(runtimeConfigObj), LeonardoGceWithPdConfigInResponse.class);
 
-        leonardoConfig.getPersistentDiskId();
-        PersistentDiskRequest disk = null; // NO
-
-        runtime.gceWithPdConfig(toGceWithPdConfig(leonardoConfig, disk));
+        // we never actually had the disk at this point!  if we did, we would do something with this
+        //        leonardoConfig.getPersistentDiskId(); // but what do I do with this?
+        //        runtime.gceWithPdConfig(toGceWithPdConfig(leonardoConfig, disk));
+        runtime.gceConfig(toGceConfig(leonardoConfig));
         break;
       default:
         throw new IllegalArgumentException("Invalid RuntimeConfig.cloudService : " + cloudService);
