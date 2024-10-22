@@ -8543,6 +8543,8 @@ components:
         initialCreditsExpirationBypassed:
           type: boolean
           default: false
+          description: When set to true, the user will not be required to spend their
+            initial credits within the expiration period.
     AccessModuleStatus:
       required:
       - moduleName
