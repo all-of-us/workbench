@@ -319,7 +319,8 @@ public class RuntimeControllerTest {
             .toolDockerImage(TOOL_DOCKER_IMAGE)
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
             .dataprocConfig(dataprocConfig)
-            .createdDate(createdDate);
+            .createdDate(createdDate)
+            .errors(Collections.emptyList());
 
     testWorkspace =
         new DbWorkspace()
@@ -437,12 +438,22 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_errorNoMessages() throws ApiException {
+  public void testGetRuntime_error_nullMessages() throws ApiException {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(null));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
-        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
+        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR).errors(null));
+  }
+
+  @Test
+  public void testGetRuntime_error_emptyMessageList() throws ApiException {
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenReturn(
+            testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(Collections.emptyList()));
+
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
+        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR).errors(Collections.emptyList()));
   }
 
   @Test

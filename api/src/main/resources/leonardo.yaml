@@ -1654,15 +1654,20 @@ components:
       required:
         - id
         - runtimeName
+        - googleProject
         - cloudContext
         - serviceAccount
         - auditInfo
         - runtimeConfig
+        - proxyUrl
         - status
         - labels
+        - errors
         - autopauseThreshold
-        - defaultClientId
+        - runtimeImages
         - scopes
+        - customEnvironmentVariables
+        - patchInProgress
       properties:
         id:
           type: integer
@@ -1670,6 +1675,9 @@ components:
         runtimeName:
           type: string
           description: The user-supplied name for the runtime
+        googleProject:
+          type: string
+          description: Deprecated. The Google Project used to create the runtime
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         serviceAccount:
@@ -1681,7 +1689,8 @@ components:
           $ref: "#/components/schemas/AuditInfo"
         runtimeConfig:
           type: object
-          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
+          description: oneOf GceWithPdConfigInResponse, MachineConfig
+          # Leo's version -> $ref: "#/components/schemas/OneOfRuntimeConfigInResponse"
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime
@@ -1692,34 +1701,31 @@ components:
           description: The labels to be placed on the runtime. Of type Map[String,String]
         jupyterUserScriptUri:
           type: string
+          description: DEPRECATED on 05/2021. Please use userScriptUri instead. This field may be removed after 6 months of deprecation.
+          deprecated: true
+        userScriptUri:
+          type: string
           description: >
-            Optional GCS object URI to a bash script the user wishes to run
-            inside their jupyter
-
-            docker. This script runs exactly once when the cluster is first initialized. Logs from
-
-            this script can be found in the Leo staging bucket for the cluster. Script is run as root
-
+            Optional GCS or HTTP URI to a bash script the user wishes to run
+            inside their Docker container. This script runs exactly once when the runtime is first initialized. Logs from
+            this script can be found in the Leo staging bucket for the runtime. The script is run as root
             and docker --privileged.
         jupyterStartUserScriptUri:
           type: string
+          description: DEPRECATED on 05/2021. Please use startUserScriptUri instead. This field may be removed after 6 months of deprecation.
+          deprecated: true
+        startUserScriptUri:
+          type: string
           description: >
-            Optional GCS object URI to a bash script the user wishes to run on
-            cluster start inside
+            Optional GCS or HTTP URI to a bash script the user wishes to run on runtime start inside
+            the Docker container. In contrast to userScriptUri, this always runs before starting
+            the Docker container, both on initial runtime creation and on runtime resume (sserScriptUri runs
+            once on runtime creation). This script may be used to launch background processes which
+            would not otherwise survive a runtime stop/start.
 
-            the jupyter docker. In contrast to jupyterUserScriptUri, this always runs before starting
-
-            Jupyter, both on initial cluster creation and on cluster resume (jupyterUserScriptUri runs
-
-            once on cluster creation). This script may be used to launch background processes which
-
-            would not otherwise survive a cluster stop/start.
-
-            The script is pulled once at cluster creation time; subsequent client changes to the user
-
-            script at this URI do not affect the cluster. Timestamped logs for this script can be
-
-            found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
+            The script is pulled once at runtime creation time; subsequent client changes to the user
+            script at this URI do not affect the runtime. Timestamped logs for this script can be
+            found in the Leo staging bucket for the cluster. The script is run as root and docker --privileged.
         errors:
           type: array
           description: The list of errors that were encountered on runtime create. Each
@@ -1751,6 +1757,9 @@ components:
           description: Optional environment variables to be set on the runtime.
         diskConfig:
           $ref: "#/components/schemas/DiskConfig"
+        patchInProgress:
+          type: boolean
+          description: Whether there is a patch in progress on the runtime. Is used to indicate updates that require status transitions.
     ListRuntimeResponse:
       description: ""
       required:
