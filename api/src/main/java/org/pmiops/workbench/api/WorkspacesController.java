@@ -613,6 +613,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             firecloudName,
             accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
+    
     try {
       dbWorkspace =
           workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);

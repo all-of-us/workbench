@@ -265,31 +265,51 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // Save the workspace first to allocate an ID.
     to = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
-    Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
-    for (DbCohort fromCohort : from.getCohorts()) {
-      fromCohortIdToToCohortId.put(
-          fromCohort.getCohortId(),
-          cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
+
+    if (to.isUsesTanagra()) {
+      try {
+        createTanagraStudy(
+                to.getWorkspaceNamespace(), to.getName());
+      } catch (Exception e) {
+        log.log(
+                Level.SEVERE,
+                String.format(
+                        "Could not create a Tanagra study for workspace namespace: %s, name: %s",
+                        to.getWorkspaceNamespace(), to.getName()),
+                e);
+      }
     }
-    Map<Long, Long> fromConceptSetIdToToConceptSetId = new HashMap<>();
-    for (DbConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
-      fromConceptSetIdToToConceptSetId.put(
-          fromConceptSet.getConceptSetId(),
-          conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, to).getConceptSetId());
-    }
-    for (DbDataset dataSet : dataSetService.getDataSets(from)) {
-      dataSetService.cloneDataSetToWorkspace(
-          dataSet,
-          to,
-          fromCohortIdToToCohortId.entrySet().stream()
-              .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
-              .map(Entry::getValue)
-              .collect(Collectors.toSet()),
-          fromConceptSetIdToToConceptSetId.entrySet().stream()
-              .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
-              .map(Entry::getValue)
-              .collect(Collectors.toSet()),
-          new ArrayList<>(dataSet.getPrePackagedConceptSet()));
+    
+    if (to.isUsesTanagra()) {
+      //Clone tanagra artifacts
+      
+    } else {
+      Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
+      for (DbCohort fromCohort : from.getCohorts()) {
+        fromCohortIdToToCohortId.put(
+                fromCohort.getCohortId(),
+                cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
+      }
+      Map<Long, Long> fromConceptSetIdToToConceptSetId = new HashMap<>();
+      for (DbConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
+        fromConceptSetIdToToConceptSetId.put(
+                fromConceptSet.getConceptSetId(),
+                conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, to).getConceptSetId());
+      }
+      for (DbDataset dataSet : dataSetService.getDataSets(from)) {
+        dataSetService.cloneDataSetToWorkspace(
+                dataSet,
+                to,
+                fromCohortIdToToCohortId.entrySet().stream()
+                        .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
+                        .map(Entry::getValue)
+                        .collect(Collectors.toSet()),
+                fromConceptSetIdToToConceptSetId.entrySet().stream()
+                        .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
+                        .map(Entry::getValue)
+                        .collect(Collectors.toSet()),
+                new ArrayList<>(dataSet.getPrePackagedConceptSet()));
+      }
     }
     return to;
   }
