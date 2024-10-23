@@ -120,6 +120,7 @@ const styles = reactStyles({
     border: '1px solid #cccccc',
     borderRadius: '3px',
     padding: '1rem',
+    flex: '0 1 0',
   },
 });
 
@@ -176,6 +177,138 @@ const UserAccess = (props: { accessTierShortNames: string[] }) => {
   );
 };
 
+const FishFields = ({
+  oldProfile,
+  updatedProfile,
+  institutions,
+  emailValidationStatus,
+  onChangeEmail,
+  onChangeInitialCreditsLimit,
+  onChangeInstitution,
+  onChangeInstitutionalRole,
+  onChangeInstitutionOtherText,
+  onChangeInitialCreditBypass,
+  institution,
+  profile,
+}) => {
+  // Show the link to  redirect to institution detail page,
+  // if the LOGGED IN USER has Institution admin authority and
+  // institution name is populated
+  const showGoToInstitutionLink =
+    hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
+    !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
+  return (
+    <FlexColumn style={{ flex: 0 }}>
+      <FlexColumn>
+        <div
+          style={{ ...styles.subHeader, marginRight: '1.5rem' }}
+        >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
+        <FlexRow style={{ gap: '0.5rem' }}>
+          <div>{updatedProfile.username}</div>
+          <UserAccess accessTierShortNames={oldProfile.accessTierShortNames} />
+        </FlexRow>
+      </FlexColumn>
+      <ContactEmailTextInput
+        contactEmail={updatedProfile.contactEmail}
+        previousContactEmail={oldProfile.contactEmail}
+        highlightOnChange
+        onChange={(email) => onChangeEmail(email)}
+      />
+      {emailValidationStatus === EmailValidationStatus.INVALID && (
+        <div data-test-id='email-invalid' style={{ paddingLeft: '1em' }}>
+          {getEmailValidationErrorMessage(institution)}
+        </div>
+      )}
+      <InstitutionDropdown
+        institutions={institutions}
+        currentInstitution={updatedProfile.verifiedInstitutionalAffiliation}
+        previousInstitution={oldProfile.verifiedInstitutionalAffiliation}
+        highlightOnChange
+        onChange={(event) => onChangeInstitution(event.value)}
+        showGoToInstitutionLink={showGoToInstitutionLink}
+      />
+      <InstitutionalRoleDropdown
+        institutions={institutions}
+        currentAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
+        previousRole={
+          oldProfile.verifiedInstitutionalAffiliation?.institutionalRoleEnum
+        }
+        highlightOnChange
+        onChange={(event) => onChangeInstitutionalRole(event.value)}
+      />
+      <InstitutionalRoleOtherTextInput
+        affiliation={updatedProfile.verifiedInstitutionalAffiliation}
+        previousOtherText={
+          oldProfile.verifiedInstitutionalAffiliation
+            ?.institutionalRoleOtherText
+        }
+        highlightOnChange
+        onChange={(value) => onChangeInstitutionOtherText(value)}
+      />
+    </FlexColumn>
+  );
+};
+
+const InitialCreditsCard = ({
+  oldProfile,
+  updatedProfile,
+  institutions,
+  emailValidationStatus,
+  onChangeEmail,
+  onChangeInitialCreditsLimit,
+  onChangeInstitution,
+  onChangeInstitutionalRole,
+  onChangeInstitutionOtherText,
+  onChangeInitialCreditBypass,
+  institution,
+  profile,
+}) => {
+  const {
+    config: { enableInitialCreditsExpiration },
+  } = serverConfigStore.get();
+
+  return (
+    <FlexRow style={styles.initialCreditsPanel}>
+      <FlexColumn>
+        <div style={styles.subHeader}>Initial credits</div>
+        <InstitutionExpirationBypassExplanation
+          bypassed={
+            institution?.institutionalInitialCreditsExpirationBypassed ?? false
+          }
+        />
+
+        <FlexColumn>
+          {enableInitialCreditsExpiration && (
+            <InitialCreditBypassSwitch
+              currentlyBypassed={
+                updatedProfile.initialCreditsExpirationBypassed
+              }
+              previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
+              onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
+              label='Individual Expiration Bypass'
+            />
+          )}
+          <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
+            <UneditableField
+              dataTestId='initial-credits-used'
+              label='Usage'
+              value={formatInitialCreditsUSD(updatedProfile.freeTierUsage)}
+            />
+            <InitialCreditsDropdown
+              currentLimit={updatedProfile.freeTierDollarQuota}
+              previousLimit={oldProfile.freeTierDollarQuota}
+              highlightOnChange
+              onChange={(event) => onChangeInitialCreditsLimit(event.value)}
+              label='Limit'
+              dropdownStyle={{ width: '10rem', minWidth: 'auto' }}
+            />
+          </FlexRow>
+        </FlexColumn>
+      </FlexColumn>
+    </FlexRow>
+  );
+};
+
 const EditableFields = ({
   oldProfile,
   updatedProfile,
@@ -194,126 +327,42 @@ const EditableFields = ({
       updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
   );
   const { profile } = useStore(profileStore);
-  const {
-    config: { enableInitialCreditsExpiration },
-  } = serverConfigStore.get();
-
-  // Show the link to  redirect to institution detail page,
-  // if the LOGGED IN USER has Institution admin authority and
-  // institution name is populated
-  const showGoToInstitutionLink =
-    hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
-    !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
 
   return (
-    <FlexColumn style={styles.editableFields}>
-      <FlexRow>
-        <FlexRow style={{ flex: 0, flexWrap: 'wrap' }}>
-          <FlexColumn>
-            <FlexColumn>
-              <div
-                style={{ ...styles.subHeader, marginRight: '1.5rem' }}
-              >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
-              <FlexRow style={{ gap: '0.5rem' }}>
-                <div>{updatedProfile.username}</div>
-                <UserAccess
-                  accessTierShortNames={oldProfile.accessTierShortNames}
-                />
-              </FlexRow>
-            </FlexColumn>
-            <ContactEmailTextInput
-              contactEmail={updatedProfile.contactEmail}
-              previousContactEmail={oldProfile.contactEmail}
-              highlightOnChange
-              onChange={(email) => onChangeEmail(email)}
-            />
-            {emailValidationStatus === EmailValidationStatus.INVALID && (
-              <div data-test-id='email-invalid' style={{ paddingLeft: '1em' }}>
-                {getEmailValidationErrorMessage(institution)}
-              </div>
-            )}
-          </FlexColumn>
-          <FlexRow style={styles.editRow}>
-            <InstitutionDropdown
-              institutions={institutions}
-              currentInstitution={
-                updatedProfile.verifiedInstitutionalAffiliation
-              }
-              previousInstitution={oldProfile.verifiedInstitutionalAffiliation}
-              highlightOnChange
-              onChange={(event) => onChangeInstitution(event.value)}
-              showGoToInstitutionLink={showGoToInstitutionLink}
-            />
-          </FlexRow>
-          <InstitutionalRoleDropdown
-            institutions={institutions}
-            currentAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
-            previousRole={
-              oldProfile.verifiedInstitutionalAffiliation?.institutionalRoleEnum
-            }
-            highlightOnChange
-            onChange={(event) => onChangeInstitutionalRole(event.value)}
-          />
-          <InstitutionalRoleOtherTextInput
-            containerStyle={{ marginRight: '1.65rem' }}
-            affiliation={updatedProfile.verifiedInstitutionalAffiliation}
-            previousOtherText={
-              oldProfile.verifiedInstitutionalAffiliation
-                ?.institutionalRoleOtherText
-            }
-            highlightOnChange
-            onChange={(value) => onChangeInstitutionOtherText(value)}
-          />
-        </FlexRow>
-        <FlexRow style={{ flex: 0 }}>
-          <FlexRow style={styles.initialCreditsPanel}>
-            <FlexColumn>
-              <div style={styles.subHeader}>Initial credits</div>
-              <InstitutionExpirationBypassExplanation
-                bypassed={
-                  institution?.institutionalInitialCreditsExpirationBypassed ??
-                  false
-                }
-              />
-
-              <FlexColumn>
-                {enableInitialCreditsExpiration && (
-                  <InitialCreditBypassSwitch
-                    currentlyBypassed={
-                      updatedProfile.initialCreditsExpirationBypassed
-                    }
-                    previouslyBypassed={
-                      oldProfile.initialCreditsExpirationBypassed
-                    }
-                    onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
-                    label='Individual Expiration Bypass'
-                  />
-                )}
-                <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
-                  <UneditableField
-                    dataTestId='initial-credits-used'
-                    label='Usage'
-                    value={formatInitialCreditsUSD(
-                      updatedProfile.freeTierUsage
-                    )}
-                  />
-                  <InitialCreditsDropdown
-                    currentLimit={updatedProfile.freeTierDollarQuota}
-                    previousLimit={oldProfile.freeTierDollarQuota}
-                    highlightOnChange
-                    onChange={(event) =>
-                      onChangeInitialCreditsLimit(event.value)
-                    }
-                    label='Limit'
-                    dropdownStyle={{ width: '10rem', minWidth: 'auto' }}
-                  />
-                </FlexRow>
-              </FlexColumn>
-            </FlexColumn>
-          </FlexRow>
-        </FlexRow>
-      </FlexRow>
-    </FlexColumn>
+    <>
+      <FishFields
+        {...{
+          oldProfile,
+          updatedProfile,
+          institutions,
+          emailValidationStatus,
+          onChangeEmail,
+          onChangeInitialCreditsLimit,
+          onChangeInstitution,
+          onChangeInstitutionalRole,
+          onChangeInstitutionOtherText,
+          onChangeInitialCreditBypass,
+          institution,
+          profile,
+        }}
+      />
+      <InitialCreditsCard
+        {...{
+          oldProfile,
+          updatedProfile,
+          institutions,
+          emailValidationStatus,
+          onChangeEmail,
+          onChangeInitialCreditsLimit,
+          onChangeInstitution,
+          onChangeInstitutionalRole,
+          onChangeInstitutionOtherText,
+          onChangeInitialCreditBypass,
+          institution,
+          profile,
+        }}
+      />
+    </>
   );
 };
 
@@ -709,7 +758,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                   updateProfile({ initialCreditsExpirationBypassed: bypass })
                 }
               />
-              <FlexColumn>
+              <FlexColumn style={{ flex: 0 }}>
                 <FlexRow>
                   <div style={styles.tableHeader}>Access status</div>
                   <TooltipTrigger
