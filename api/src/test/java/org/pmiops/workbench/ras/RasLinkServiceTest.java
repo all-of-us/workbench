@@ -238,6 +238,23 @@ public class RasLinkServiceTest {
   }
 
   @Test
+  public void testLinkRasIdMeSuccess() throws Exception {
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_ID_ME);
+
+    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
+
+    DbUser expectedUser = userDao.findUserByUserId(userId);
+    assertThat(expectedUser.getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
+    assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
+    assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
+    verify(mockIdentityVerificationService)
+        .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.ID_ME);
+    verify(mockIdentityVerificationService, never())
+        .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.LOGIN_GOV);
+  }
+
+  @Test
   public void testLinkRasLoginGovSuccess() throws Exception {
     mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
     mockAccessTokenResponse(USER_INFO_JSON_LOGIN_GOV);
@@ -252,20 +269,6 @@ public class RasLinkServiceTest {
         .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.LOGIN_GOV);
     verify(mockIdentityVerificationService, never())
         .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.ID_ME);
-  }
-
-  @Test
-  public void testLinkRasSuccess_withEraCommons() throws Exception {
-    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
-    mockAccessTokenResponse(USER_INFO_JSON_LOGIN_GOV_WITH_ERA);
-    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
-
-    assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
-    assertThat(userDao.findUserByUserId(userId).getEraCommonsLinkedNihUsername())
-        .isEqualTo("eraUserId");
-    assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
-    assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
-    assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, NOW);
   }
 
   @Test

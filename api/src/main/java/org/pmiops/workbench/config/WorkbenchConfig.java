@@ -136,18 +136,6 @@ public class WorkbenchConfig {
     public Integer lenientTimeoutInSeconds;
     // The docker image that we use for our jupyter images
     public String jupyterDockerImage;
-    // Base URL for the Shibboleth API server, e.g.
-    // https://profile-dot-broad-shibboleth-prod.appspot.com
-    // See RW-4257 for more details on Terra's Shibboleth-specific API.
-    //
-    // Note that the Terra Shibboleth API server does not have a distinct App Engine service for
-    // dev environments. Instead, a /dev prefix should be added to this base URL.
-    public String shibbolethApiBaseUrl;
-    // Base URL for the Shibboleth UI service, e.g. https://broad-shibboleth-prod.appspot.com.
-    // This is the base URL that a browser client should be redirected to in order to complete
-    // an authentication round trip with eRA Commons.
-    public String shibbolethUiBaseUrl;
-
     // Project containing aggregated BigQuery log sinks for Terra workspace projects. This contains
     // information such as runtime VM server logs.
     public String workspaceLogsProject;

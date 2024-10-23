@@ -90,10 +90,6 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
-  public updateNihToken() {
-    return Promise.resolve(this.profile);
-  }
-
   public updateProfile(updatedProfile?: Profile) {
     this.profile = updatedProfile;
     return Promise.resolve(undefined);
