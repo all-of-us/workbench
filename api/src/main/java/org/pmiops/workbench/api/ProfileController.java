@@ -194,6 +194,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Boolean> getUserTermsOfServiceStatus() {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
+    log.info("Checking user ToS status for user " + loggedInUser.getUsername());
     return ResponseEntity.ok(userService.hasSignedLatestTermsOfServiceForBoth(loggedInUser));
   }
 
