@@ -435,8 +435,15 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean hasSignedLatestTermsOfServiceForBoth(@Nonnull DbUser dbUser) {
-    return hasSignedLatestAoUTermsOfService(dbUser)
-        && fireCloudService.hasUserAcceptedLatestTerraToS();
+    boolean hasSignedLatestAouTos = hasSignedLatestAoUTermsOfService(dbUser);
+    boolean hasSignedLatestTerraTos = fireCloudService.hasUserAcceptedLatestTerraToS();
+
+    log.log(
+        Level.INFO,
+        String.format(
+            "User %s has signed latest AoU TOS: %s, and latest Terra TOS: %s",
+            dbUser.getUsername(), hasSignedLatestAouTos, hasSignedLatestTerraTos));
+    return hasSignedLatestAouTos && hasSignedLatestTerraTos;
   }
 
   @Override
