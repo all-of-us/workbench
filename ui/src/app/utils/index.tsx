@@ -441,7 +441,7 @@ export const withAsyncErrorHandling = fp.curry(
 // Checks for unclosed "", trailing + or -, and breaking special characters.
 export function validateInputForMySQL(
   searchString: string,
-  searchTrigger: number
+  searchTrigger?: number
 ): Array<string> {
   const inputErrors = new Set<string>(); // use Set to prevent duplicate messages
   let unclosedQuotes = false;
@@ -500,7 +500,10 @@ export function validateInputForMySQL(
           }
           // length of every word without the special chars mut be >= searchTrigger
           // for hyphenated word there will be at least 2 letters, if hyphen is removed
-          if (word.replace(/[+*"'-]/g, '').length < searchTrigger) {
+          if (
+            searchTrigger &&
+            word.replace(/[+*"'-]/g, '').length < searchTrigger
+          ) {
             inputErrors.add(
               `Search term [${word}] length must be at least ${searchTrigger} characters without special characters`
             );
@@ -511,7 +514,10 @@ export function validateInputForMySQL(
             `Search term [${termsArray[0]}] with one word cannot start with a minus character '-'`
           );
         }
-      } else if (subString.replace(/[+*"'-]/g, '').length < searchTrigger) {
+      } else if (
+        searchTrigger &&
+        subString.replace(/[+*"'-]/g, '').length < searchTrigger
+      ) {
         // Still need to check the quoted string for length
         inputErrors.add(
           `Search term [${subString}] length must be at least ${searchTrigger} characters without special characters`
