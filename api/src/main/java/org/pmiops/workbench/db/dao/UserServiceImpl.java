@@ -426,10 +426,20 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser) {
-    return userTermsOfServiceDao
-        .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
-        .map(u -> u.getTosVersion() == configProvider.get().termsOfService.latestAouVersion)
-        .orElse(false);
+    int signedVersion =
+        userTermsOfServiceDao
+            .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
+            .map(DbUserTermsOfService::getTosVersion)
+            .orElse(-1);
+    int latestAouVersion = configProvider.get().termsOfService.latestAouVersion;
+    boolean compliant = signedVersion == latestAouVersion;
+
+    log.info(
+        String.format(
+            "RWB ToS status for user %s: signed %d, required %d, compliant %s",
+            dbUser.getUsername(), signedVersion, latestAouVersion, compliant ? "true" : "false"));
+
+    return compliant;
   }
 
   @Override
