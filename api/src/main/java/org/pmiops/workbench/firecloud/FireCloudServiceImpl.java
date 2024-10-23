@@ -638,7 +638,11 @@ public class FireCloudServiceImpl implements FireCloudService {
     // See
     // https://broadinstitute.slack.com/archives/C0DSD41QT/p1701111037789719?thread_ts=1701103991.553039&cid=C0DSD41QT
     // TODO link a Terra/Sam bug if they create one for this
-    return status.getPermitsSystemUsage() && status.getIsCurrentVersion();
+
+    log.info("Terra ToS status: " + status.toString());
+    boolean compliant = status.getPermitsSystemUsage() && status.getIsCurrentVersion();
+    log.info("Terra ToS compliance: " + (compliant ? "true" : "false"));
+    return compliant;
   }
 
   private UserTermsOfServiceDetails getUserTerraToSStatus() {
