@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -328,7 +329,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     return true;
   }
 
-  private boolean isDiskAttached(ListPersistentDiskResponse diskResponse, String googleProject)
+  @VisibleForTesting
+  public boolean isDiskAttached(ListPersistentDiskResponse diskResponse, String googleProject)
       throws ApiException {
     final String diskName = diskResponse.getName();
 
@@ -346,10 +348,10 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
                 return CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService());
               })
           .map(
-              runtimeConfig ->
+              resp ->
                   new Gson()
                       .fromJson(
-                          new Gson().toJson(runtimeConfig),
+                          new Gson().toJson(resp.getRuntimeConfig()),
                           LeonardoGceWithPdConfigInResponse.class))
           .anyMatch(
               gceWithPdConfig ->
