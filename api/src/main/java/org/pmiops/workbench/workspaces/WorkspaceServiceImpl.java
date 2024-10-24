@@ -266,7 +266,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     to = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
 
-    if (to.isUsesTanagra()) {
+    if (to.getCdrVersion().getTanagraEnabled() && to.isUsesTanagra()) {
       try {
         createTanagraStudy(
                 to.getWorkspaceNamespace(), to.getName());
@@ -280,7 +280,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
     }
     
-    if (to.isUsesTanagra()) {
+    if (to.getCdrVersion().getTanagraEnabled() && to.isUsesTanagra()) {
       //Clone tanagra artifacts
       
     } else {
