@@ -200,7 +200,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
 
-    if (cdrVersion.getTanagraEnabled() && createdWorkspace.isUsesTanagra()) {
+    if (dbWorkspace.isCDRAndWorkspaceTanagraEnabled()) {
       try {
         workspaceService.createTanagraStudy(
             createdWorkspace.getNamespace(), createdWorkspace.getName());
@@ -613,7 +613,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             firecloudName,
             accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
-    
+
     try {
       dbWorkspace =
           workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);

@@ -61,6 +61,8 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
+import org.pmiops.workbench.tanagra.model.Cohort;
+import org.pmiops.workbench.tanagra.model.CohortList;
 import org.pmiops.workbench.tanagra.model.Study;
 import org.pmiops.workbench.tanagra.model.StudyCreateInfo;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
@@ -266,49 +268,67 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     to = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
 
-    if (to.getCdrVersion().getTanagraEnabled() && to.isUsesTanagra()) {
+    if (to.isCDRAndWorkspaceTanagraEnabled()) {
       try {
-        createTanagraStudy(
-                to.getWorkspaceNamespace(), to.getName());
+        createTanagraStudy(to.getWorkspaceNamespace(), to.getName());
+      } catch (Exception e) {
+        log.log(
+            Level.SEVERE,
+            String.format(
+                "Could not create a Tanagra study for workspace namespace: %s, name: %s",
+                to.getWorkspaceNamespace(), to.getName()),
+            e);
+      }
+    }
+
+    if (to.isCDRAndWorkspaceTanagraEnabled()) {
+      // Clone tanagra cohorts
+      try {
+        boolean hasMoreResults = true;
+        Integer limit = 50;
+        Integer offset = 0;
+        while (hasMoreResults) {
+          List<Cohort> cohorts = listCohorts(to.getWorkspaceNamespace(), offset, limit).stream().toList();
+          if (cohorts.size() < limit) {
+            hasMoreResults = false;
+          } else {
+            offset += limit;
+          }
+        }
       } catch (Exception e) {
         log.log(
                 Level.SEVERE,
                 String.format(
-                        "Could not create a Tanagra study for workspace namespace: %s, name: %s",
+                        "Could not clone Tanagra cohorts for workspace namespace: %s, name: %s",
                         to.getWorkspaceNamespace(), to.getName()),
                 e);
       }
-    }
-    
-    if (to.getCdrVersion().getTanagraEnabled() && to.isUsesTanagra()) {
-      //Clone tanagra artifacts
-      
     } else {
       Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
       for (DbCohort fromCohort : from.getCohorts()) {
         fromCohortIdToToCohortId.put(
-                fromCohort.getCohortId(),
-                cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
+            fromCohort.getCohortId(),
+            cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
       }
       Map<Long, Long> fromConceptSetIdToToConceptSetId = new HashMap<>();
       for (DbConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
         fromConceptSetIdToToConceptSetId.put(
-                fromConceptSet.getConceptSetId(),
-                conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, to).getConceptSetId());
+            fromConceptSet.getConceptSetId(),
+            conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, to).getConceptSetId());
       }
       for (DbDataset dataSet : dataSetService.getDataSets(from)) {
         dataSetService.cloneDataSetToWorkspace(
-                dataSet,
-                to,
-                fromCohortIdToToCohortId.entrySet().stream()
-                        .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
-                        .map(Entry::getValue)
-                        .collect(Collectors.toSet()),
-                fromConceptSetIdToToConceptSetId.entrySet().stream()
-                        .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
-                        .map(Entry::getValue)
-                        .collect(Collectors.toSet()),
-                new ArrayList<>(dataSet.getPrePackagedConceptSet()));
+            dataSet,
+            to,
+            fromCohortIdToToCohortId.entrySet().stream()
+                .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
+                .map(Entry::getValue)
+                .collect(Collectors.toSet()),
+            fromConceptSetIdToToConceptSetId.entrySet().stream()
+                .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
+                .map(Entry::getValue)
+                .collect(Collectors.toSet()),
+            new ArrayList<>(dataSet.getPrePackagedConceptSet()));
       }
     }
     return to;
@@ -515,6 +535,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     StudyCreateInfo studyCreateInfo =
         new StudyCreateInfo().id(workspaceNamespace).displayName(workspaceName);
     return tanagraApiProvider.get().createStudy(studyCreateInfo);
+  }
+
+  @Override
+  public CohortList listCohorts(String workspaceNamespace, Integer offset, Integer limit)
+          throws ApiException {
+    return tanagraApiProvider.get().listCohorts(workspaceNamespace, offset, limit);
   }
 
   @Override

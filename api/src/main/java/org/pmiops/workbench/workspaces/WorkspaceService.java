@@ -9,6 +9,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.tanagra.ApiException;
+import org.pmiops.workbench.tanagra.model.CohortList;
 import org.pmiops.workbench.tanagra.model.Study;
 
 /*
@@ -72,6 +73,8 @@ public interface WorkspaceService {
    * AoU workspace.
    */
   Study createTanagraStudy(String workspaceNamespace, String workspaceName) throws ApiException;
+  
+  CohortList listCohorts(String workspaceNamespace, Integer offset, Integer limit) throws ApiException;
 
   void updateInitialCreditsExhaustion(DbUser user, boolean exhausted);
 

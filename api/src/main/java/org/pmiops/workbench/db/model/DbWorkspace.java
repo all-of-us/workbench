@@ -785,4 +785,9 @@ public class DbWorkspace {
     this.usesTanagra = usesTanagra;
     return this;
   }
+
+  @Transient
+  public boolean isCDRAndWorkspaceTanagraEnabled() {
+    return usesTanagra && cdrVersion.getTanagraEnabled();
+  }
 }
