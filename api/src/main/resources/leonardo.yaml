@@ -1688,8 +1688,7 @@ components:
         auditInfo:
           $ref: "#/components/schemas/AuditInfo"
         runtimeConfig:
-          type: object
-          description: oneOf GceWithPdConfigInResponse, MachineConfig
+          $ref: '#/components/schemas/RuntimeConfig'
           # Leo's version -> $ref: "#/components/schemas/OneOfRuntimeConfigInResponse"
         proxyUrl:
           type: string
@@ -1787,8 +1786,7 @@ components:
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         runtimeConfig:
-          type: object
-          description: oneOf GceWithPdConfigInResponse, MachineConfig
+          $ref: '#/components/schemas/RuntimeConfig'
           # Leo's version -> $ref: "#/components/schemas/OneOfRuntimeConfigInResponse"
         auditInfo:
           $ref: "#/components/schemas/AuditInfo"
