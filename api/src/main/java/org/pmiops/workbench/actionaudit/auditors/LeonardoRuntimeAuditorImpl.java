@@ -4,8 +4,6 @@ import static org.pmiops.workbench.actionaudit.ActionAuditSpringConfiguration.AC
 
 import jakarta.inject.Provider;
 import java.time.Clock;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -36,23 +34,19 @@ public class LeonardoRuntimeAuditorImpl implements LeonardoRuntimeAuditor {
   }
 
   @Override
-  public void fireDeleteRuntimesInProject(String projectId, List<String> runtimeNames) {
+  public void fireDeleteRuntime(String googleProjectId, String runtimeName) {
     String actionId = actionIdProvider.get();
     actionAuditService.send(
-        runtimeNames.stream()
-            .map(
-                runtimeName ->
-                    ActionAuditEvent.builder()
-                        .timestamp(clock.millis())
-                        .actionId(actionId)
-                        .agentType(AgentType.ADMINISTRATOR)
-                        .agentIdMaybe(userProvider.get().getUserId())
-                        .agentEmailMaybe(userProvider.get().getUsername())
-                        .actionType(ActionType.DELETE)
-                        .newValueMaybe(runtimeName)
-                        .targetType(TargetType.NOTEBOOK_SERVER)
-                        .targetPropertyMaybe(projectId)
-                        .build())
-            .collect(Collectors.toList()));
+        ActionAuditEvent.builder()
+            .timestamp(clock.millis())
+            .actionId(actionId)
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentIdMaybe(userProvider.get().getUserId())
+            .agentEmailMaybe(userProvider.get().getUsername())
+            .actionType(ActionType.DELETE)
+            .newValueMaybe(runtimeName)
+            .targetType(TargetType.NOTEBOOK_SERVER)
+            .targetPropertyMaybe(googleProjectId)
+            .build());
   }
 }
