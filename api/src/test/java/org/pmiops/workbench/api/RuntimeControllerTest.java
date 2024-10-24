@@ -598,7 +598,8 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_dataprocConfig() throws ApiException {
     String timestamp = "2020-09-13T19:19:57.347Z";
 
-    LeonardoMachineConfig dataprocRuntimeConfig = new LeonardoMachineConfig()
+    LeonardoMachineConfig dataprocRuntimeConfig =
+        new LeonardoMachineConfig()
             .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
             .masterDiskSize(50)
             .masterMachineType("n1-standard-4")

@@ -280,6 +280,7 @@ public interface LeonardoMapper {
     String runtimeConfigJson = gson.toJson(runtimeConfigObj);
     LeonardoRuntimeConfig runtimeConfig =
         gson.fromJson(runtimeConfigJson, LeonardoRuntimeConfig.class);
+
     if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
       runtime.dataprocConfig(
           toDataprocConfig(gson.fromJson(runtimeConfigJson, LeonardoMachineConfig.class)));
