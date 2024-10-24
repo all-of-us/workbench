@@ -1765,7 +1765,7 @@ components:
       required:
         - id
         - runtimeName
-        - cloudContext
+        - googleProject
         - serviceAccount
         - runtimeConfig
         - status
@@ -1774,14 +1774,22 @@ components:
         id:
           type: integer
           description: Internal Leonardo ID of the runtime
+        workspaceId:
+          type: string
+          description: Id of the workspace associated with this runtime
         runtimeName:
           type: string
           description: The user-supplied name for the runtime
+        googleProject:
+          type: string
+          description:
+            Deprecated. The Google Project used to create the runtime
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         runtimeConfig:
           type: object
-          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
+          description: oneOf GceWithPdConfigInResponse, MachineConfig
+          # Leo's version -> $ref: "#/components/schemas/OneOfRuntimeConfigInResponse"
         auditInfo:
           $ref: "#/components/schemas/AuditInfo"
         proxyUrl:
@@ -1795,8 +1803,6 @@ components:
         patchInProgress:
           type: boolean
           description: Whether there is a patch in progress on the runtime. Is used to indicate updates that require status transitions.
-        diskConfig:
-          $ref: "#/components/schemas/DiskConfig"
     ListPersistentDiskResponse:
       description: ""
       required:
@@ -2361,6 +2367,35 @@ components:
             Defaults to us-central1-a.
         gpuConfig:
           $ref: "#/components/schemas/GpuConfig"
+    GceWithPdConfigInResponse:
+      description: Configuration for Google Compute Engine instances.
+      allOf:
+        - $ref: '#/components/schemas/RuntimeConfig'
+        - type: object
+          required:
+            - machineType
+            - bootDiskSize
+            - zone
+          properties:
+            persistentDiskId:
+              type: integer
+            bootDiskSize:
+              type: integer
+              description: size for boot disk
+            machineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the master node. For example "n1-standard-16"
+                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+                see https://cloud.google.com/compute/docs/machine-types
+            zone:
+              type: string
+              description: >
+                Optional, the deployment area of the GCE VM. For example, us-east1-a or europe-west2-c.
+                Defaults to us-central1-a.
+            gpuConfig:
+              $ref: "#/components/schemas/GpuConfig"
     MachineConfig:
       description: Configuration for a single Dataproc cluster.
       required:
