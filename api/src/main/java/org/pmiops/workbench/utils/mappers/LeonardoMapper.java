@@ -271,15 +271,15 @@ public interface LeonardoMapper {
   }
 
   default void mapRuntimeConfig(
-      Runtime runtime,
-      LeonardoRuntimeConfig runtimeConfig,
-      @Nullable LeonardoDiskConfig diskConfig) {
-    if (runtimeConfig == null) {
+      Runtime runtime, Object runtimeConfigObj, @Nullable LeonardoDiskConfig diskConfig) {
+    if (runtimeConfigObj == null) {
       return;
     }
 
     Gson gson = new Gson();
-    String runtimeConfigJson = gson.toJson(runtimeConfig);
+    String runtimeConfigJson = gson.toJson(runtimeConfigObj);
+    LeonardoRuntimeConfig runtimeConfig =
+        gson.fromJson(runtimeConfigJson, LeonardoRuntimeConfig.class);
     if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
       runtime.dataprocConfig(
           toDataprocConfig(gson.fromJson(runtimeConfigJson, LeonardoMachineConfig.class)));

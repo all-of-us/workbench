@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.Collections;
@@ -241,15 +240,12 @@ public class RuntimeControllerTest {
   private LeonardoGetRuntimeResponse testLeoRuntime;
 
   private Runtime testRuntime;
-  private DbWorkspace testWorkspace;
 
   private DataprocConfig dataprocConfig;
   private LeonardoMachineConfig leoDataprocConfig;
-  private LeonardoRuntimeConfig leoDataprocRuntimeConfig;
 
   private GceConfig gceConfig;
   private LeonardoGceWithPdConfig leoGceConfig;
-  private LeonardoRuntimeConfig leoGceRuntimeConfig;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -281,8 +277,6 @@ public class RuntimeControllerTest {
 
     Runtime tmpRuntime = new Runtime();
 
-    Gson gson = new Gson();
-
     leoDataprocConfig =
         new LeonardoMachineConfig()
             .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
@@ -290,10 +284,7 @@ public class RuntimeControllerTest {
             .masterMachineType("n1-standard-4")
             .masterDiskSize(50);
 
-    leoDataprocRuntimeConfig =
-        gson.fromJson(gson.toJson(leoDataprocConfig), LeonardoRuntimeConfig.class);
-
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, leoDataprocRuntimeConfig, null);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, leoDataprocConfig, null);
     dataprocConfig = tmpRuntime.getDataprocConfig();
 
     leoGceConfig =
@@ -302,9 +293,7 @@ public class RuntimeControllerTest {
             .bootDiskSize(10)
             .machineType("n1-standard-2");
 
-    leoGceRuntimeConfig = gson.fromJson(gson.toJson(leoGceConfig), LeonardoRuntimeConfig.class);
-
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, leoGceRuntimeConfig, null);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, leoGceConfig, null);
     gceConfig = tmpRuntime.getGceConfig();
 
     testLeoRuntime =
@@ -317,7 +306,7 @@ public class RuntimeControllerTest {
             .status(LeonardoRuntimeStatus.DELETING)
             .runtimeImages(Collections.singletonList(RUNTIME_IMAGE))
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
-            .runtimeConfig(leoDataprocRuntimeConfig)
+            .runtimeConfig(leoDataprocConfig)
             .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
 
     testRuntime =
@@ -332,7 +321,7 @@ public class RuntimeControllerTest {
             .createdDate(createdDate)
             .errors(Collections.emptyList());
 
-    testWorkspace =
+    DbWorkspace testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
             .setGoogleProject(GOOGLE_PROJECT_ID)
@@ -571,15 +560,15 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_fromListRuntimes_invalidRuntime() throws ApiException {
-    leoDataprocRuntimeConfig.cloudService(
-        LeonardoRuntimeConfig.CloudServiceEnum.fromValue("notACloudService"));
+    leoDataprocConfig.cloudService(
+        LeonardoMachineConfig.CloudServiceEnum.fromValue("notACloudService"));
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
-                    .runtimeConfig(leoDataprocRuntimeConfig)
+                    .runtimeConfig(leoDataprocConfig)
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -595,7 +584,7 @@ public class RuntimeControllerTest {
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
-                    .runtimeConfig(leoGceRuntimeConfig)
+                    .runtimeConfig(leoGceConfig)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
@@ -609,15 +598,15 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_dataprocConfig() throws ApiException {
     String timestamp = "2020-09-13T19:19:57.347Z";
 
-    LinkedTreeMap<String, Object> dataProcConfigObj = new LinkedTreeMap<>();
-    dataProcConfigObj.put("cloudService", "DATAPROC");
-    dataProcConfigObj.put("masterDiskSize", 50.0);
-    dataProcConfigObj.put("masterMachineType", "n1-standard-4");
-    dataProcConfigObj.put("numberOfPreemptibleWorkers", 4);
-    dataProcConfigObj.put("numberOfWorkerLocalSSDs", 8);
-    dataProcConfigObj.put("numberOfWorkers", 3);
-    dataProcConfigObj.put("workerDiskSize", 30);
-    dataProcConfigObj.put("workerMachineType", "n1-standard-2");
+    LeonardoMachineConfig dataprocRuntimeConfig = new LeonardoMachineConfig()
+            .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
+            .masterDiskSize(50)
+            .masterMachineType("n1-standard-4")
+            .numberOfPreemptibleWorkers(4)
+            .numberOfWorkerLocalSSDs(8)
+            .numberOfWorkers(3)
+            .workerDiskSize(30)
+            .workerMachineType("n1-standard-2");
 
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
@@ -625,7 +614,7 @@ public class RuntimeControllerTest {
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
-                    .runtimeConfig(leoDataprocRuntimeConfig)
+                    .runtimeConfig(dataprocRuntimeConfig)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
@@ -793,7 +782,7 @@ public class RuntimeControllerTest {
   @Test
   public void testGetRuntime_gceConfig() throws ApiException {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime.runtimeConfig(leoGceRuntimeConfig));
+        .thenReturn(testLeoRuntime.runtimeConfig(leoGceConfig));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.dataprocConfig(null).gceConfig(gceConfig));
@@ -804,7 +793,7 @@ public class RuntimeControllerTest {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(
             testLeoRuntime
-                .runtimeConfig(leoGceRuntimeConfig)
+                .runtimeConfig(leoGceConfig)
                 .diskConfig(
                     new LeonardoDiskConfig()
                         .diskType(LeonardoDiskType.SSD)

@@ -32,6 +32,7 @@ import org.pmiops.workbench.legacy_leonardo_client.ApiException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -332,12 +333,18 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     final String diskName = diskResponse.getName();
 
     if (leonardoMapper.toApiListDisksResponse(diskResponse).isGceRuntime()) {
-
       return leonardoApiClient.listRuntimesByProjectAsService(googleProject).stream()
-          .map(LeonardoListRuntimeResponse::getRuntimeConfig)
           // this filter/map follows the discriminator logic in the source Leonardo Swagger
           // for OneOfRuntimeConfigInResponse
-          .filter(runtimeConfig -> CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService()))
+          .filter(
+              resp -> {
+                var runtimeConfig =
+                    new Gson()
+                        .fromJson(
+                            new Gson().toJson(resp.getRuntimeConfig()),
+                            LeonardoRuntimeConfig.class);
+                return CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService());
+              })
           .map(
               runtimeConfig ->
                   new Gson()
