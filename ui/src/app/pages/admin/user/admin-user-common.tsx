@@ -23,6 +23,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { CommonToggle } from 'app/components/admin/common-toggle';
 import { StyledRouterLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
@@ -58,12 +59,10 @@ export const commonStyles = reactStyles({
     color: colors.primary,
     fontSize: '14px',
     fontWeight: 'bold',
-    paddingLeft: '1em',
   },
   textInput: {
     width: '21rem',
     opacity: '100%',
-    marginLeft: '1em',
   },
   textInputContainer: {
     marginTop: '1.5rem',
@@ -71,7 +70,6 @@ export const commonStyles = reactStyles({
   dropdown: {
     minWidth: '70px',
     width: '21rem',
-    marginLeft: '1em',
   },
   fadeBox: {
     margin: 'auto',
@@ -274,7 +272,6 @@ export const TierBadgesMaybe = (props: {
       <div style={{ width: '30px' }}>
         {rtRequired && <RegisteredTierBadge />}
       </div>
-      <div style={{ width: '30px' }} />
       <div style={{ width: '30px' }}>
         {ctRequired && <ControlledTierBadge />}
       </div>
@@ -306,7 +303,7 @@ export const updateAccountProperties = async (
   updatedProfile: Profile,
   accessBypassRequests?: AccessBypassRequest[]
 ): Promise<Profile> => {
-  const { username } = updatedProfile;
+  const { username, initialCreditsExpirationBypassed } = updatedProfile;
 
   const updateDisabledMaybe: boolean = getUpdatedProfileValue(
     oldProfile,
@@ -335,6 +332,7 @@ export const updateAccountProperties = async (
     affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'verifiedInstitutionalAffiliation',
     ]),
+    initialCreditsExpirationBypassed,
   };
 
   return userAdminApi().updateAccountProperties(request);
@@ -355,7 +353,7 @@ export const DropdownWithLabel = ({
 }) => {
   const dropdownHighlightStyling = `body .${className} .p-inputtext { background-color: ${colors.highlight}; }`;
   return (
-    <FlexColumn data-test-id={dataTestId} style={{ marginTop: '1.5rem' }}>
+    <FlexColumn data-test-id={dataTestId}>
       {highlightOnChange && currentValue !== previousValue && (
         <style>{dropdownHighlightStyling}</style>
       )}
@@ -412,6 +410,7 @@ interface InitialCreditsDropdownProps {
   previousLimit?: number;
   highlightOnChange?: boolean;
   onChange: Function;
+  label: string;
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
 }
@@ -423,12 +422,13 @@ export const InitialCreditsDropdown = ({
   onChange,
   labelStyle,
   dropdownStyle,
+  label,
 }: InitialCreditsDropdownProps) => {
   return (
     <DropdownWithLabel
       dataTestId='initial-credits-dropdown'
       className='initial-credits'
-      label='Initial credit limit'
+      label={label}
       options={getInitialCreditLimitOptions(previousLimit)}
       currentValue={currentLimit}
       previousValue={previousLimit}
@@ -566,7 +566,7 @@ export const InstitutionalRoleOtherTextInput = ({
       highlightOnChange={highlightOnChange}
       labelStyle={{ ...commonStyles.label, ...labelStyle }}
       inputStyle={{ ...commonStyles.textInput, ...inputStyle }}
-      containerStyle={{ ...commonStyles.textInputContainer, ...containerStyle }}
+      containerStyle={containerStyle}
       onChange={(value) => onChange(value)}
     />
   ) : null;
@@ -628,6 +628,48 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
     >
       {children}
     </TooltipTrigger>
+  );
+};
+
+interface InitialCreditBypassSwitchProps {
+  currentlyBypassed: boolean | null;
+  previouslyBypassed: boolean | null;
+  onChange: (bypassed: boolean) => void;
+  label: string;
+  expirationEpochMillis: number;
+}
+
+export const InitialCreditBypassSwitch = ({
+  currentlyBypassed,
+  previouslyBypassed,
+  expirationEpochMillis,
+  onChange,
+  label,
+}: InitialCreditBypassSwitchProps) => {
+  const hasExpired = expirationEpochMillis <= Date.now();
+  const date = formatDate(expirationEpochMillis, '-');
+  return (
+    <FlexColumn style={{ paddingTop: '1.5rem' }}>
+      <label style={{ ...commonStyles.label, padding: 0 }}>{label}</label>
+
+      <CommonToggle
+        name={
+          currentlyBypassed
+            ? 'Credits will not expire'
+            : hasExpired
+            ? `Credits expired on ${date}`
+            : `Credits will expire on ${date}`
+        }
+        checked={currentlyBypassed}
+        onToggle={onChange}
+        style={{
+          flex: 1,
+          ...(currentlyBypassed !== previouslyBypassed && {
+            backgroundColor: colors.highlight,
+          }),
+        }}
+      />
+    </FlexColumn>
   );
 };
 
