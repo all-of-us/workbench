@@ -259,47 +259,50 @@ const InitialCreditsCard = ({
   } = serverConfigStore.get();
 
   return (
-    <FlexRow style={styles.initialCreditsPanel}>
-      <FlexColumn>
-        <div style={styles.subHeader}>Initial credits</div>
-        <InstitutionExpirationBypassExplanation
-          bypassed={
-            institution?.institutionalInitialCreditsExpirationBypassed ?? false
-          }
-        />
-
+    <FlexColumn style={{ flex: 0 }}>
+      <FlexRow style={styles.initialCreditsPanel}>
         <FlexColumn>
-          {enableInitialCreditsExpiration && (
-            <InitialCreditBypassSwitch
-              currentlyBypassed={
-                updatedProfile.initialCreditsExpirationBypassed
-              }
-              previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
-              expirationEpochMillis={
-                oldProfile.initialCreditsExpirationEpochMillis
-              }
-              onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
-              label='Individual Expiration Bypass'
-            />
-          )}
-          <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
-            <UneditableField
-              dataTestId='initial-credits-used'
-              label='Usage'
-              value={formatInitialCreditsUSD(updatedProfile.freeTierUsage)}
-            />
-            <InitialCreditsDropdown
-              currentLimit={updatedProfile.freeTierDollarQuota}
-              previousLimit={oldProfile.freeTierDollarQuota}
-              highlightOnChange
-              onChange={(event) => onChangeInitialCreditsLimit(event.value)}
-              label='Limit'
-              dropdownStyle={{ width: '10rem', minWidth: 'auto' }}
-            />
-          </FlexRow>
+          <div style={styles.subHeader}>Initial credits</div>
+          <InstitutionExpirationBypassExplanation
+            bypassed={
+              institution?.institutionalInitialCreditsExpirationBypassed ??
+              false
+            }
+          />
+
+          <FlexColumn>
+            {enableInitialCreditsExpiration && (
+              <InitialCreditBypassSwitch
+                currentlyBypassed={
+                  updatedProfile.initialCreditsExpirationBypassed
+                }
+                previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
+                expirationEpochMillis={
+                  oldProfile.initialCreditsExpirationEpochMillis
+                }
+                onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
+                label='Individual Expiration Bypass'
+              />
+            )}
+            <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
+              <UneditableField
+                dataTestId='initial-credits-used'
+                label='Usage'
+                value={formatInitialCreditsUSD(updatedProfile.freeTierUsage)}
+              />
+              <InitialCreditsDropdown
+                currentLimit={updatedProfile.freeTierDollarQuota}
+                previousLimit={oldProfile.freeTierDollarQuota}
+                highlightOnChange
+                onChange={(event) => onChangeInitialCreditsLimit(event.value)}
+                label='Limit'
+                dropdownStyle={{ width: '10rem', minWidth: 'auto' }}
+              />
+            </FlexRow>
+          </FlexColumn>
         </FlexColumn>
-      </FlexColumn>
-    </FlexRow>
+      </FlexRow>
+    </FlexColumn>
   );
 };
 
