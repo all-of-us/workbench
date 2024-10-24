@@ -26,7 +26,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
-import { badgeForTier, displayNameForTier } from 'app/utils/access-tiers';
+import { badgeForTier } from 'app/utils/access-tiers';
 import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
@@ -177,17 +177,15 @@ const UserAccess = (props: { accessTierShortNames: string[] }) => {
   );
 };
 
-const FishFields = ({
+const InstitutionalFields = ({
   oldProfile,
   updatedProfile,
   institutions,
   emailValidationStatus,
   onChangeEmail,
-  onChangeInitialCreditsLimit,
   onChangeInstitution,
   onChangeInstitutionalRole,
   onChangeInstitutionOtherText,
-  onChangeInitialCreditBypass,
   institution,
   profile,
 }) => {
@@ -252,16 +250,9 @@ const FishFields = ({
 const InitialCreditsCard = ({
   oldProfile,
   updatedProfile,
-  institutions,
-  emailValidationStatus,
-  onChangeEmail,
   onChangeInitialCreditsLimit,
-  onChangeInstitution,
-  onChangeInstitutionalRole,
-  onChangeInstitutionOtherText,
   onChangeInitialCreditBypass,
   institution,
-  profile,
 }) => {
   const {
     config: { enableInitialCreditsExpiration },
@@ -330,34 +321,16 @@ const EditableFields = ({
 
   return (
     <>
-      <FishFields
+      <InstitutionalFields
         {...{
           oldProfile,
           updatedProfile,
           institutions,
           emailValidationStatus,
           onChangeEmail,
-          onChangeInitialCreditsLimit,
           onChangeInstitution,
           onChangeInstitutionalRole,
           onChangeInstitutionOtherText,
-          onChangeInitialCreditBypass,
-          institution,
-          profile,
-        }}
-      />
-      <InitialCreditsCard
-        {...{
-          oldProfile,
-          updatedProfile,
-          institutions,
-          emailValidationStatus,
-          onChangeEmail,
-          onChangeInitialCreditsLimit,
-          onChangeInstitution,
-          onChangeInstitutionalRole,
-          onChangeInstitutionOtherText,
-          onChangeInitialCreditBypass,
           institution,
           profile,
         }}
@@ -733,17 +706,10 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             </UserAuditLink>
           </FlexRow>
           <FlexColumn style={{ paddingTop: '1em' }}>
-            <FlexRow style={{ flexWrap: 'wrap', gap: '1.5rem' }}>
-              <EditableFields
-                oldProfile={oldProfile}
-                updatedProfile={updatedProfile}
-                institutions={institutions}
-                emailValidationStatus={emailValidationStatus}
+            <FlexRow style={{ flexWrap: 'wrap', gap: '1rem' }}>
+              <InstitutionalFields
                 onChangeEmail={(contactEmail: string) =>
                   updateContactEmail(contactEmail)
-                }
-                onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
-                  updateProfile({ freeTierDollarQuota })
                 }
                 onChangeInstitution={(institutionShortName: string) =>
                   updateInstitution(institutionShortName)
@@ -754,9 +720,27 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                 onChangeInstitutionOtherText={(otherText: string) =>
                   updateInstitutionalRoleOtherText(otherText)
                 }
+                {...{
+                  oldProfile,
+                  updatedProfile,
+                  institutions,
+                  emailValidationStatus,
+                  institution,
+                  profile,
+                }}
+              />
+              <InitialCreditsCard
+                onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
+                  updateProfile({ freeTierDollarQuota })
+                }
                 onChangeInitialCreditBypass={(bypass: boolean) =>
                   updateProfile({ initialCreditsExpirationBypassed: bypass })
                 }
+                {...{
+                  oldProfile,
+                  updatedProfile,
+                  institution,
+                }}
               />
               <FlexColumn style={{ flex: 0 }}>
                 <FlexRow>
@@ -788,7 +772,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               </FlexColumn>
             </FlexRow>
           </FlexColumn>
-          <FlexRow></FlexRow>
           <FlexRow style={{ paddingTop: '1em' }}>
             <ErrorsTooltip errors={errors}>
               <Button
