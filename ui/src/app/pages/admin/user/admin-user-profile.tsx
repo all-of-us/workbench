@@ -275,6 +275,9 @@ const InitialCreditsCard = ({
                 updatedProfile.initialCreditsExpirationBypassed
               }
               previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
+              expirationEpochMillis={
+                oldProfile.initialCreditsExpirationEpochMillis
+              }
               onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
               label='Individual Expiration Bypass'
             />

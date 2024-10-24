@@ -636,21 +636,29 @@ interface InitialCreditBypassSwitchProps {
   previouslyBypassed: boolean | null;
   onChange: (bypassed: boolean) => void;
   label: string;
+  expirationEpochMillis: number;
 }
 
 export const InitialCreditBypassSwitch = ({
   currentlyBypassed,
   previouslyBypassed,
+  expirationEpochMillis,
   onChange,
   label,
 }: InitialCreditBypassSwitchProps) => {
+  const hasExpired = expirationEpochMillis <= Date.now();
+  const date = formatDate(expirationEpochMillis, '-');
   return (
     <FlexColumn style={{ paddingTop: '1.5rem' }}>
       <label style={{ ...commonStyles.label, padding: 0 }}>{label}</label>
 
       <CommonToggle
         name={
-          currentlyBypassed ? 'Credits will not expire' : 'Credits will expire'
+          currentlyBypassed
+            ? 'Credits will not expire'
+            : hasExpired
+            ? `Credits expired on ${date}`
+            : `Credits will expire on ${date}`
         }
         checked={currentlyBypassed}
         onToggle={onChange}
