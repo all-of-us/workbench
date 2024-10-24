@@ -272,7 +272,6 @@ export const TierBadgesMaybe = (props: {
       <div style={{ width: '30px' }}>
         {rtRequired && <RegisteredTierBadge />}
       </div>
-      <div style={{ width: '30px' }} />
       <div style={{ width: '30px' }}>
         {ctRequired && <ControlledTierBadge />}
       </div>
