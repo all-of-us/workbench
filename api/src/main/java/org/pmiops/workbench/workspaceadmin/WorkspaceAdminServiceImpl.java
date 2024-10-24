@@ -277,30 +277,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .toList();
   }
 
-  // use listRuntimes
-  @Deprecated(since = "October 2024", forRemoval = true)
-  @Override
-  public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedListRuntimes(
-      String workspaceNamespace) {
-    return listRuntimes(workspaceNamespace).stream()
-        .map(leonardoMapper::toDeprecatedListRuntimeResponse)
-        .toList();
-  }
-
   @Override
   public List<UserAppEnvironment> listUserApps(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
     return leonardoNotebooksClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
-  }
-
-  // use deleteRuntimesInWorkspace
-  @Deprecated(since = "October 2024", forRemoval = true)
-  @Override
-  public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
-      String workspaceNamespace, ListRuntimeDeleteRequest req) {
-    return deleteRuntimes(workspaceNamespace, req).stream()
-        .map(leonardoMapper::toDeprecatedListRuntimeResponse)
-        .collect(Collectors.toList());
   }
 
   @Override
