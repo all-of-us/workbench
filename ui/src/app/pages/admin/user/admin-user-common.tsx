@@ -350,6 +350,7 @@ export const DropdownWithLabel = ({
   dataTestId,
   labelStyle = {},
   dropdownStyle = {},
+  name,
 }) => {
   const dropdownHighlightStyling = `body .${className} .p-inputtext { background-color: ${colors.highlight}; }`;
   return (
@@ -359,6 +360,7 @@ export const DropdownWithLabel = ({
       )}
       <label style={{ ...commonStyles.label, ...labelStyle }}>{label}</label>
       <Dropdown
+        name={name}
         appendTo='self'
         className={className}
         style={{ ...commonStyles.dropdown, ...dropdownStyle }}
@@ -426,6 +428,7 @@ export const InitialCreditsDropdown = ({
 }: InitialCreditsDropdownProps) => {
   return (
     <DropdownWithLabel
+      name='initial-credits-dropdown'
       dataTestId='initial-credits-dropdown'
       className='initial-credits'
       label={label}
@@ -488,6 +491,7 @@ export const InstitutionDropdown = ({
 
   return institutions ? (
     <DropdownWithLabel
+      name='institution-dropdown'
       dataTestId='verifiedInstitution'
       className='institution'
       label={label}
@@ -523,6 +527,7 @@ export const InstitutionalRoleDropdown = ({
 }: InstitutionalRoleDropdownProps) => {
   return institutions && currentAffiliation ? (
     <DropdownWithLabel
+      name='institution-role-dropdown'
       dataTestId='institutionalRole'
       className='institutional-role'
       label='Institutional role'

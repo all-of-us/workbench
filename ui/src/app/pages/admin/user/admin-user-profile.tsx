@@ -85,12 +85,6 @@ const styles = reactStyles({
     fontSize: '16px',
     fontWeight: 'bold',
   },
-  tableHeader: {
-    color: colors.primary,
-    fontSize: '18px',
-    fontWeight: 'bold',
-    lineHeight: '22px',
-  },
   uneditableFieldsSpacer: {
     height: '24px',
   },
@@ -164,14 +158,16 @@ const getInstitution = (
 
 const UserAccess = (props: { accessTierShortNames: string[] }) => {
   const { accessTierShortNames } = props;
-  return accessTierShortNames?.length === 0 ? (
-    <span>
-      <i>No data access</i>
-    </span>
-  ) : (
-    <FlexRow style={{ gap: '0.25rem' }}>
-      {accessTierShortNames.map((accessTierShortName) =>
-        badgeForTier(accessTierShortName)
+  return (
+    <FlexRow data-test-id='data-access-tiers' style={{ gap: '0.25rem' }}>
+      {accessTierShortNames?.length === 0 ? (
+        <span>
+          <i>No data access</i>
+        </span>
+      ) : (
+        accessTierShortNames.map((accessTierShortName) =>
+          badgeForTier(accessTierShortName)
+        )
       )}
     </FlexRow>
   );
@@ -199,11 +195,14 @@ const InstitutionalFields = ({
     <FlexColumn style={{ flex: 0 }}>
       <FlexColumn>
         <div
+          data-test-id='name'
           style={{ ...styles.subHeader, marginRight: '1.5rem' }}
         >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
         <FlexRow style={{ gap: '0.5rem' }}>
-          <div>{updatedProfile.username}</div>
-          <UserAccess accessTierShortNames={oldProfile.accessTierShortNames} />
+          <div data-test-id='user-name'>{updatedProfile.username}</div>
+          <UserAccess
+            accessTierShortNames={oldProfile.accessTierShortNames.sort()}
+          />
         </FlexRow>
       </FlexColumn>
       <ContactEmailTextInput
@@ -257,6 +256,8 @@ const InitialCreditsCard = ({
   const {
     config: { enableInitialCreditsExpiration },
   } = serverConfigStore.get();
+
+  console.log('What do we have here?', enableInitialCreditsExpiration);
 
   return (
     <FlexColumn style={{ flex: 0 }}>
@@ -750,7 +751,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               />
               <FlexColumn style={{ flex: 0 }}>
                 <FlexRow>
-                  <div style={styles.tableHeader}>Access status</div>
+                  <div style={styles.subHeader}>Access status</div>
                   <TooltipTrigger
                     disabled={!isLoggedInUser(updatedProfile)}
                     content={'Cannot change your own Access Status'}

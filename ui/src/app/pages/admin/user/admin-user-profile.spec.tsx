@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router';
 
@@ -16,21 +18,19 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import {
-  AccessTierDisplayNames,
-  AccessTierShortNames,
-} from 'app/utils/access-tiers';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   AccessRenewalStatus,
   getAccessModuleConfig,
 } from 'app/utils/access-utils';
-import { nowPlusDays } from 'app/utils/dates';
+import { formatDate, nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  getDropdownSelection,
 } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 import {
@@ -125,7 +125,8 @@ describe('AdminUserProfile', () => {
 
       const freeTierUsage = 543.21;
       const freeTierDollarQuota = 678.99;
-      const expectedCreditsText = '$543.21 used of $678.99 limit';
+      const creditUsageText = '$543.21';
+      const creditLimitText = '$678.99';
       const initialCreditsExpirationEpochMillis = Date.now();
 
       serverConfigStore.set({
@@ -144,7 +145,7 @@ describe('AdminUserProfile', () => {
         initialCreditsExpirationEpochMillis,
       });
 
-      component();
+      const { container } = component();
       await waitUntilPageLoaded();
       expect(
         within(screen.getByTestId('name')).getByText(expectedFullName)
@@ -152,57 +153,24 @@ describe('AdminUserProfile', () => {
       expect(
         within(screen.getByTestId('user-name')).getByText(username)
       ).toBeInTheDocument();
+
+      expect(screen.getByText(creditUsageText)).toBeInTheDocument();
       expect(
-        within(screen.getByTestId('initial-credits-used')).getByText(
-          expectedCreditsText
-        )
-      ).toBeInTheDocument();
+        getDropdownSelection(container, 'initial-credits-dropdown')
+      ).toEqual(creditLimitText);
+
+      const expirationMessage = `Credits expired on ${formatDate(
+        initialCreditsExpirationEpochMillis,
+        '-'
+      )}`;
 
       if (enableInitialCreditsExpiration) {
-        expect(screen.getByText('Credits will expire')).toBeInTheDocument();
+        expect(screen.getByText(expirationMessage)).toBeInTheDocument();
       } else {
-        expect(
-          screen.queryByText('Credits will expire')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText(expirationMessage)).not.toBeInTheDocument();
       }
     }
   );
-
-  it("should display the user's name, username, initial credits usage, and initial credits expiration status", async () => {
-    const givenName = 'John Q';
-    const familyName = 'Public';
-    const expectedFullName = 'John Q Public';
-
-    const username = 'some-email@yahoo.com';
-
-    const freeTierUsage = 543.21;
-    const freeTierDollarQuota = 678.99;
-    const expectedCreditsText = '$543.21 used of $678.99 limit';
-    const initialCreditsExpirationEpochMillis = Date.now();
-
-    updateTargetProfile({
-      username,
-      givenName,
-      familyName,
-      freeTierUsage,
-      freeTierDollarQuota,
-      initialCreditsExpirationEpochMillis,
-    });
-
-    component();
-    await waitUntilPageLoaded();
-    expect(
-      within(screen.getByTestId('name')).getByText(expectedFullName)
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('user-name')).getByText(username)
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('initial-credits-used')).getByText(
-        expectedCreditsText
-      )
-    ).toBeInTheDocument();
-  });
 
   it.each([true, false])(
     'should display when a user is bypassed when enableInitialCreditsExpiration is %s',
@@ -236,19 +204,19 @@ describe('AdminUserProfile', () => {
     [
       'RT only',
       [AccessTierShortNames.Registered],
-      AccessTierDisplayNames.Registered,
+      ['registered-tier-badge.svg'],
     ],
     [
       'CT only',
       [AccessTierShortNames.Controlled],
-      AccessTierDisplayNames.Controlled,
+      ['controlled-tier-badge.svg'],
     ],
     [
       'RT and CT',
       [AccessTierShortNames.Registered, AccessTierShortNames.Controlled],
-      'Registered Tier, Controlled Tier',
+      ['registered-tier-badge.svg', 'controlled-tier-badge.svg'],
     ],
-    ['neither', [], 'No data access'],
+    ['neither', [], ['No data access']],
   ])(
     'should display access tiers if the user has membership in %s',
     async (_, accessTierShortNames, expectedText) => {
@@ -256,9 +224,12 @@ describe('AdminUserProfile', () => {
 
       component();
       await waitUntilPageLoaded();
-      expect(
-        within(screen.getByTestId('data-access-tiers')).getByText(expectedText)
-      ).toBeInTheDocument();
+      screen.logTestingPlaygroundURL();
+      expectedText.map((text) => {
+        expect(
+          within(screen.getByTestId('data-access-tiers')).getByText(text)
+        ).toBeInTheDocument();
+      });
     }
   );
 
