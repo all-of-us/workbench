@@ -75,20 +75,20 @@ def format_benchmark(bm)
   "%ds" % [bm.real]
 end
 
+DEADLINE_SEC = 75
 def start_local_db_service()
   common = Common.new
-  deadline_sec = 75
 
   bm = Benchmark.measure {
     common.run_inline %W{docker compose up -d db}
 
     root_pass = "root-notasecret"
 
-    common.status "waiting up to #{deadline_sec}s for mysql service to start..."
+    common.status "waiting up to #{DEADLINE_SEC}s for mysql service to start..."
     start = Time.now
     until (common.run "docker compose exec -T db mysql -p#{root_pass} --silent -e 'SELECT 1;'").success?
-      if Time.now - start >= deadline_sec
-        raise("mysql docker service did not become available after #{deadline_sec}s")
+      if Time.now - start >= DEADLINE_SEC
+        raise("mysql docker service did not become available after #{DEADLINE_SEC}s")
       end
       sleep 1
     end
