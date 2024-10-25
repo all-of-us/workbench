@@ -2,11 +2,9 @@ package org.pmiops.workbench.workspaceadmin;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.protobuf.util.Timestamps;
 import jakarta.annotation.Nullable;
-import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
@@ -18,12 +16,10 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
@@ -32,7 +28,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -40,7 +35,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -90,11 +85,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final FireCloudService fireCloudService;
   private final InitialCreditsExpirationService initialCreditsExpirationService;
   private final LeonardoMapper leonardoMapper;
-  private final LeonardoApiClient leonardoNotebooksClient;
+  private final LeonardoApiClient leonardoApiClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
   private final NotebooksService notebooksService;
-  private final Provider<DbUser> userProvider;
   private final UserMapper userMapper;
   private final UserService userService;
   private final WorkspaceDao workspaceDao;
@@ -116,12 +110,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       FireCloudService fireCloudService,
       InitialCreditsExpirationService initialCreditsExpirationService,
       LeonardoMapper leonardoMapper,
-      LeonardoApiClient leonardoNotebooksClient,
+      LeonardoApiClient leonardoApiClient,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       MailService mailService,
       NotebooksService notebooksService,
-      Provider<WorkbenchConfig> workspaceConfigProvider,
-      Provider<DbUser> userProvider,
       UserMapper userMapper,
       UserService userService,
       WorkspaceDao workspaceDao,
@@ -140,11 +132,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.fireCloudService = fireCloudService;
     this.initialCreditsExpirationService = initialCreditsExpirationService;
     this.leonardoMapper = leonardoMapper;
-    this.leonardoNotebooksClient = leonardoNotebooksClient;
+    this.leonardoApiClient = leonardoApiClient;
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.mailService = mailService;
     this.notebooksService = notebooksService;
-    this.userProvider = userProvider;
     this.userMapper = userMapper;
     this.userService = userService;
     this.workspaceDao = workspaceDao;
@@ -270,9 +261,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public List<AdminRuntimeFields> listRuntimes(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    return leonardoNotebooksClient
-        .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
-        .stream()
+    return leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject()).stream()
         .map(leonardoMapper::toAdminRuntimeFields)
         .toList();
   }
@@ -290,7 +279,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public List<UserAppEnvironment> listUserApps(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    return leonardoNotebooksClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
+    return leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
   }
 
   // use deleteRuntimesInWorkspace
@@ -298,54 +287,37 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
       String workspaceNamespace, ListRuntimeDeleteRequest req) {
-    return deleteRuntimes(workspaceNamespace, req).stream()
-        .map(leonardoMapper::toDeprecatedListRuntimeResponse)
-        .collect(Collectors.toList());
+    // the UI only calls this with a single argument, so this is safe
+    String runtimeNameToDelete = req.getRuntimesToDelete().get(0);
+    return List.of(
+        leonardoMapper.toDeprecatedListRuntimeResponse(
+            deleteRuntime(workspaceNamespace, runtimeNameToDelete)));
   }
 
   @Override
-  public List<AdminRuntimeFields> deleteRuntimes(
-      String workspaceNamespace, ListRuntimeDeleteRequest req) {
+  public AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete) {
     final String googleProject =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
-    List<LeonardoListRuntimeResponse> runtimesToDelete =
-        filterByRuntimesInList(
-                leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
-                req.getRuntimesToDelete())
-            .collect(Collectors.toList());
-    runtimesToDelete.forEach(
-        runtime ->
-            leonardoNotebooksClient.deleteRuntimeAsService(
-                leonardoMapper.toGoogleProject(runtime.getCloudContext()),
-                runtime.getRuntimeName()));
-    List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
-        filterByRuntimesInList(
-                leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
-                req.getRuntimesToDelete())
-            .collect(Collectors.toList());
+    leonardoApiClient.deleteRuntimeAsService(googleProject, runtimeNameToDelete);
+
+    // fetch again to confirm deletion
+    LeonardoGetRuntimeResponse refreshedRuntime =
+        leonardoApiClient.getRuntimeAsService(googleProject, runtimeNameToDelete);
+
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
     // names and thus could have >1 deleted runtimes with the same name in the project.
     List<LeonardoRuntimeStatus> acceptableStates =
-        ImmutableList.of(LeonardoRuntimeStatus.DELETING, LeonardoRuntimeStatus.ERROR);
-    runtimesInProjectAffected.stream()
-        .filter(runtime -> !acceptableStates.contains(runtime.getStatus()))
-        .forEach(
-            runtimeInBadState ->
-                log.log(
-                    Level.SEVERE,
-                    String.format(
-                        "Runtime %s/%s is not in a deleting state",
-                        leonardoMapper.toGoogleProject(runtimeInBadState.getCloudContext()),
-                        runtimeInBadState.getRuntimeName())));
-    leonardoRuntimeAuditor.fireDeleteRuntimesInProject(
-        googleProject,
-        runtimesToDelete.stream()
-            .map(LeonardoListRuntimeResponse::getRuntimeName)
-            .collect(Collectors.toList()));
-    return runtimesInProjectAffected.stream()
-        .map(leonardoMapper::toAdminRuntimeFields)
-        .collect(Collectors.toList());
+        List.of(LeonardoRuntimeStatus.DELETING, LeonardoRuntimeStatus.ERROR);
+    if (!acceptableStates.contains(refreshedRuntime.getStatus())) {
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Runtime %s/%s is not in a deleting state", googleProject, runtimeNameToDelete));
+    }
+
+    leonardoRuntimeAuditor.fireDeleteRuntime(googleProject, runtimeNameToDelete);
+    return leonardoMapper.toAdminRuntimeFields(refreshedRuntime);
   }
 
   private DbWorkspace getWorkspaceByNamespaceOrThrow(String workspaceNamespace) {
@@ -583,12 +555,5 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                 // conversion
                 .role(userRole.getRole())
                 .userModel(userMapper.toApiUser(userRole, null)));
-  }
-
-  private static Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
-      Stream<LeonardoListRuntimeResponse> runtimesToFilter, List<String> runtimeNames) {
-    // Null means keep all runtimes.
-    return runtimesToFilter.filter(
-        runtime -> runtimeNames == null || runtimeNames.contains(runtime.getRuntimeName()));
   }
 }

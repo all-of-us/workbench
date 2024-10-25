@@ -106,7 +106,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
         workspaceAdminService.listFiles(workspaceNamespace, Boolean.TRUE.equals(onlyAppFiles)));
   }
 
-  // use adminDeleteRuntimes
+  // use adminDeleteRuntime
   @Deprecated(since = "October 2024", forRemoval = true)
   @Override
   @AuthorityRequired(Authority.SECURITY_ADMIN)
@@ -119,10 +119,9 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Override
   @AuthorityRequired(Authority.SECURITY_ADMIN)
-  public ResponseEntity<List<AdminRuntimeFields>> adminDeleteRuntimes(
-      String workspaceNamespace, ListRuntimeDeleteRequest runtimesToDelete) {
-    return ResponseEntity.ok(
-        workspaceAdminService.deleteRuntimes(workspaceNamespace, runtimesToDelete));
+  public ResponseEntity<AdminRuntimeFields> adminDeleteRuntime(
+      String workspaceNamespace, String runtimeName) {
+    return ResponseEntity.ok(workspaceAdminService.deleteRuntime(workspaceNamespace, runtimeName));
   }
 
   @Override

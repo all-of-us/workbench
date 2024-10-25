@@ -49,7 +49,7 @@ public interface WorkspaceAdminService {
 
   List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles);
 
-  List<AdminRuntimeFields> deleteRuntimes(String workspaceNamespace, ListRuntimeDeleteRequest req);
+  AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete);
 
   // use deleteRuntimes
   @Deprecated(since = "October 2024", forRemoval = true)
