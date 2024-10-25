@@ -298,12 +298,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete) {
     final String googleProject =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
-    LeonardoGetRuntimeResponse runtimeToDelete =
-        leonardoApiClient.getRuntimeAsService(googleProject, runtimeNameToDelete);
-
-    leonardoApiClient.deleteRuntimeAsService(
-        leonardoMapper.toGoogleProject(runtimeToDelete.getCloudContext()),
-        runtimeToDelete.getRuntimeName());
+    leonardoApiClient.deleteRuntimeAsService(googleProject, runtimeNameToDelete);
 
     // fetch again to confirm deletion
     LeonardoGetRuntimeResponse refreshedRuntime =
@@ -318,13 +313,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       log.log(
           Level.SEVERE,
           String.format(
-              "Runtime %s/%s is not in a deleting state",
-              leonardoMapper.toGoogleProject(refreshedRuntime.getCloudContext()),
-              refreshedRuntime.getRuntimeName()));
+              "Runtime %s/%s is not in a deleting state", googleProject, runtimeNameToDelete));
     }
 
-    leonardoRuntimeAuditor.fireDeleteRuntime(googleProject, runtimeToDelete.getRuntimeName());
-    return leonardoMapper.toAdminRuntimeFields(runtimeToDelete);
+    leonardoRuntimeAuditor.fireDeleteRuntime(googleProject, runtimeNameToDelete);
+    return leonardoMapper.toAdminRuntimeFields(refreshedRuntime);
   }
 
   private DbWorkspace getWorkspaceByNamespaceOrThrow(String workspaceNamespace) {
