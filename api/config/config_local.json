@@ -28,6 +28,7 @@
       0.75
     ],
     "initialCreditsValidityPeriodDays": 120,
+    "initialCreditsExtensionPeriodDays": 365,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
     "freeTierCronUserBatchSize": 100,
     "minutesBeforeLastFreeTierJob": 60,
