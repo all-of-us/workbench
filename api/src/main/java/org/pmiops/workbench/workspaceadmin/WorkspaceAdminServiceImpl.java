@@ -35,7 +35,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -261,9 +261,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public List<AdminRuntimeFields> listRuntimes(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    return leonardoApiClient
-        .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
-        .stream()
+    return leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject()).stream()
         .map(leonardoMapper::toAdminRuntimeFields)
         .toList();
   }
@@ -300,16 +298,16 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete) {
     final String googleProject =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
-    LeonardoListRuntimeResponse runtimeToDelete =
-        listRuntimesAndFilter(runtimeNameToDelete, workspaceNamespace, googleProject);
+    LeonardoGetRuntimeResponse runtimeToDelete =
+        leonardoApiClient.getRuntimeAsService(googleProject, runtimeNameToDelete);
 
     leonardoApiClient.deleteRuntimeAsService(
         leonardoMapper.toGoogleProject(runtimeToDelete.getCloudContext()),
         runtimeToDelete.getRuntimeName());
 
     // fetch again to confirm deletion
-    LeonardoListRuntimeResponse refreshedRuntime =
-        listRuntimesAndFilter(runtimeNameToDelete, workspaceNamespace, googleProject);
+    LeonardoGetRuntimeResponse refreshedRuntime =
+        leonardoApiClient.getRuntimeAsService(googleProject, runtimeNameToDelete);
 
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
@@ -327,20 +325,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     leonardoRuntimeAuditor.fireDeleteRuntime(googleProject, runtimeToDelete.getRuntimeName());
     return leonardoMapper.toAdminRuntimeFields(runtimeToDelete);
-  }
-
-  private LeonardoListRuntimeResponse listRuntimesAndFilter(
-      String runtimeNameToDelete, String workspaceNamespace, String googleProject) {
-
-    return leonardoApiClient.listRuntimesByProjectAsService(googleProject).stream()
-        .filter(runtime -> runtime.getRuntimeName().equals(runtimeNameToDelete))
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new NotFoundException(
-                    String.format(
-                        "Runtime %s not found in workspace namespace %s / google project %s",
-                        runtimeNameToDelete, workspaceNamespace, googleProject)));
   }
 
   private DbWorkspace getWorkspaceByNamespaceOrThrow(String workspaceNamespace) {

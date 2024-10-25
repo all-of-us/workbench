@@ -146,6 +146,10 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  AdminRuntimeFields toAdminRuntimeFields(LeonardoGetRuntimeResponse leonardoGetRuntimeResponse);
+
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   AdminRuntimeFields toAdminRuntimeFields(LeonardoListRuntimeResponse leonardoListRuntimeResponse);
 
   // these were unused, so they have been removed in the newer AdminRuntimeFields
