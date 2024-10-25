@@ -2178,15 +2178,13 @@ paths:
     delete:
       tags:
         - workspaceAdmin
-      summary: Delete specified (or all if no specified list) runtimes in given workspace
-        namespace.
-      description: An admin gated endpoint that deletes given runtimes in a given
-        workspace.
+      summary: Delete the specified runtime in the given workspace namespace.
+      description: An admin gated endpoint that deletes the given runtime in a given workspace.
       operationId: adminDeleteRuntime
       parameters:
         - name: workspaceNamespace
           in: path
-          description: The workspace's namespace.
+          description: The namespace of the workspace.
           required: true
           schema:
             type: string
@@ -2198,13 +2196,17 @@ paths:
             type: string
       responses:
         200:
-          description: Runtimes deleted
+          description: Runtime deleted
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminRuntimeFields'
+                $ref: '#/components/schemas/AdminRuntimeFields'
+        404:
+          description: Runtime not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         500:
           description: Internal Error
           content:
