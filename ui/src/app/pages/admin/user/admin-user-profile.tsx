@@ -19,7 +19,7 @@ import { CommonToggle } from 'app/components/admin/common-toggle';
 import { AlertDanger } from 'app/components/alert';
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -56,7 +56,6 @@ import {
   displayModuleExpirationDate,
   displayModuleStatus,
   ErrorsTooltip,
-  getInitialCreditsUsage,
   getPublicInstitutionDetails,
   InitialCreditBypassSwitch,
   InitialCreditsDropdown,
@@ -134,19 +133,6 @@ enum EmailValidationStatus {
   VALID,
   INVALID,
   API_ERROR,
-}
-
-interface EditableFieldsProps {
-  oldProfile: Profile;
-  updatedProfile: Profile;
-  institutions?: PublicInstitutionDetails[];
-  emailValidationStatus: EmailValidationStatus;
-  onChangeEmail: (contactEmail: string) => void;
-  onChangeInitialCreditsLimit: (limit: number) => void;
-  onChangeInstitution: (institutionShortName: string) => void;
-  onChangeInstitutionalRole: (institutionalRoleEnum: InstitutionalRole) => void;
-  onChangeInstitutionOtherText: (otherText: string) => void;
-  onChangeInitialCreditBypass: (bypass: boolean) => void;
 }
 
 const getInstitution = (
@@ -257,8 +243,6 @@ const InitialCreditsCard = ({
     config: { enableInitialCreditsExpiration },
   } = serverConfigStore.get();
 
-  console.log('What do we have here?', enableInitialCreditsExpiration);
-
   return (
     <FlexColumn style={{ flex: 0 }}>
       <FlexRow style={styles.initialCreditsPanel}>
@@ -304,45 +288,6 @@ const InitialCreditsCard = ({
         </FlexColumn>
       </FlexRow>
     </FlexColumn>
-  );
-};
-
-const EditableFields = ({
-  oldProfile,
-  updatedProfile,
-  institutions,
-  emailValidationStatus,
-  onChangeEmail,
-  onChangeInitialCreditsLimit,
-  onChangeInstitution,
-  onChangeInstitutionalRole,
-  onChangeInstitutionOtherText,
-  onChangeInitialCreditBypass,
-}: EditableFieldsProps) => {
-  const institution: PublicInstitutionDetails = institutions.find(
-    (i) =>
-      i.shortName ===
-      updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
-  );
-  const { profile } = useStore(profileStore);
-
-  return (
-    <>
-      <InstitutionalFields
-        {...{
-          oldProfile,
-          updatedProfile,
-          institutions,
-          emailValidationStatus,
-          onChangeEmail,
-          onChangeInstitution,
-          onChangeInstitutionalRole,
-          onChangeInstitutionOtherText,
-          institution,
-          profile,
-        }}
-      />
-    </>
   );
 };
 
