@@ -541,9 +541,9 @@ dependencies {
       exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
     }
 
-    // updated 2 Oct 2024 to most recent develop
+    // updated 21 Oct 2024 to most recent develop
     // see https://github.com/DataBiosphere/leonardo/actions/workflows/publish_java_client.yml
-    implementation("org.broadinstitute.dsde.workbench:leonardo-client_2.13:1.3.6-3fbffee")
+    implementation("org.broadinstitute.dsde.workbench:leonardo-client_2.13:1.3.6-880147e")
 
     implementation group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '4.0.5'
 
