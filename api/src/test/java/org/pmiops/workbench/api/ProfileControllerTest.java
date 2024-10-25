@@ -66,7 +66,6 @@ import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
@@ -93,7 +92,6 @@ import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
-import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.Race;
@@ -108,7 +106,6 @@ import org.pmiops.workbench.profile.PageVisitMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.ras.RasLinkService;
-import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -139,7 +136,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private MailService mockMailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
-  @MockBean private ShibbolethService mockShibbolethService;
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
 
@@ -1077,44 +1073,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // don't send the user instructions email if the instructions have been deleted
     verifyNoMoreInteractions(mockMailService);
-  }
-
-  @Test
-  public void testUpdateNihToken() {
-    NihToken nihToken = new NihToken().jwt("test");
-    createAccountAndDbUserWithAffiliation();
-    profileController.updateNihToken(nihToken);
-    verify(mockShibbolethService).updateShibbolethToken(eq(nihToken.getJwt()));
-  }
-
-  @Test
-  public void testUpdateNihToken_serverError() {
-    assertThrows(
-        ServerErrorException.class,
-        () -> {
-          doThrow(new ServerErrorException())
-              .when(mockShibbolethService)
-              .updateShibbolethToken(any());
-          profileController.updateNihToken(new NihToken().jwt("test"));
-        });
-  }
-
-  @Test
-  public void testUpdateNihToken_badRequest_1() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          profileController.updateNihToken(null);
-        });
-  }
-
-  @Test
-  public void testUpdateNihToken_badRequest_noJwt() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          profileController.updateNihToken(new NihToken());
-        });
   }
 
   @Test

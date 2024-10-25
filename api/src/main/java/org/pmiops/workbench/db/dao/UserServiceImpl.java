@@ -426,17 +426,36 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser) {
-    return userTermsOfServiceDao
-        .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
-        .map(
-            u -> u.getTosVersion() >= configProvider.get().termsOfService.minimumAcceptedAouVersion)
-        .orElse(false);
+    int signedVersion =
+        userTermsOfServiceDao
+            .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
+            .map(DbUserTermsOfService::getTosVersion)
+            .orElse(-1);
+    int minimumAcceptedAouVersion = configProvider.get().termsOfService.minimumAcceptedAouVersion;
+    boolean compliant = signedVersion >= minimumAcceptedAouVersion;
+
+    log.info(
+        String.format(
+            "RWB ToS status for user %s: signed %d, required %d, compliant %s",
+            dbUser.getUsername(),
+            signedVersion,
+            minimumAcceptedAouVersion,
+            compliant ? "true" : "false"));
+
+    return compliant;
   }
 
   @Override
   public boolean hasSignedLatestTermsOfServiceForBoth(@Nonnull DbUser dbUser) {
-    return hasSignedLatestAoUTermsOfService(dbUser)
-        && fireCloudService.hasUserAcceptedLatestTerraToS();
+    boolean hasSignedLatestAouTos = hasSignedLatestAoUTermsOfService(dbUser);
+    boolean hasSignedLatestTerraTos = fireCloudService.hasUserAcceptedLatestTerraToS();
+
+    log.log(
+        Level.INFO,
+        String.format(
+            "User %s has signed latest AoU TOS: %s, and latest Terra TOS: %s",
+            dbUser.getUsername(), hasSignedLatestAouTos, hasSignedLatestTerraTos));
+    return hasSignedLatestAouTos && hasSignedLatestTerraTos;
   }
 
   @Override

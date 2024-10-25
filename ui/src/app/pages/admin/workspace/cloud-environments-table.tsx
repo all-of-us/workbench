@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { ListRuntimeResponse, UserAppEnvironment } from 'generated/fetch';
+import { AdminRuntimeFields, UserAppEnvironment } from 'generated/fetch';
 
 import {
   fromRuntimeStatus,
@@ -32,12 +32,12 @@ interface CloudEnvironmentRow {
   status: string;
 }
 
-const runtimeToRow = (runtime: ListRuntimeResponse): CloudEnvironmentRow => {
-  const { runtimeName, createdDate, dateAccessed, status } = runtime;
+const runtimeToRow = (runtime: AdminRuntimeFields): CloudEnvironmentRow => {
+  const { runtimeName, createdDate, dateAccessed, status, labels } = runtime;
   return {
     appType: UIAppType.JUPYTER,
     name: runtimeName,
-    creator: getCreator(runtime),
+    creator: getCreator(labels),
     createdTime: new Date(createdDate).toDateString(),
     lastAccessedTime: new Date(dateAccessed).toDateString(),
     status: fromRuntimeStatus(status),
@@ -60,7 +60,7 @@ const userAppToRow = (userApp: UserAppEnvironment): CloudEnvironmentRow => {
 interface Props {
   workspaceNamespace: string;
   onDelete: () => void;
-  runtimes?: ListRuntimeResponse[];
+  runtimes?: AdminRuntimeFields[];
   userApps?: UserAppEnvironment[];
 }
 export const CloudEnvironmentsTable = ({
@@ -75,9 +75,7 @@ export const CloudEnvironmentsTable = ({
   const deleteRuntime = () => {
     setConfirmDeleteRuntime(false);
     workspaceAdminApi()
-      .deleteRuntimesInWorkspace(workspaceNamespace, {
-        runtimesToDelete: [runtimeToDelete],
-      })
+      .adminDeleteRuntime(workspaceNamespace, runtimeToDelete)
       .then(() => {
         setRuntimeToDelete(null);
         onDelete();

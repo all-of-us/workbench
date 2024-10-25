@@ -26,7 +26,7 @@
       "cdrVersionId": 1,
       "name": "All of Us Registered Tier Dataset v3",
       "bigqueryProject": "fc-aou-cdr-preprod",
-      "bigqueryDataset": "R2019Q4R6",
+      "bigqueryDataset": "R2019Q4R7",
       "creationTime": "2019-10-21 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 224097,
@@ -200,7 +200,8 @@
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "tanagraEnabled": true
     },
     {
       "cdrVersionId": 13,
@@ -230,7 +231,8 @@
       "wgsLongReadsHailGRCh38": "longreads/hail.mt/GRCh38",
       "wgsLongReadsHailT2T": "longreads/hail.mt/T2T",
       "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
-      "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T"
+      "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T",
+      "tanagraEnabled": true
     },
     {
       "cdrVersionId": 14,

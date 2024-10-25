@@ -328,33 +328,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: createAccountRequest
-  /v1/update-nih-token:
-    post:
-      tags:
-      - profile
-      description: Updates a users NIH token
-      operationId: updateNihToken
-      requestBody:
-        description: the token retrieved from NIH
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NihToken'
-        required: false
-      responses:
-        200:
-          description: The user's updated profile.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Profile'
-        400:
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: token
   /v1/user/link-ras-account:
     post:
       tags:
@@ -621,8 +594,8 @@ paths:
       - workspaceAdmin
       summary: Delete specified (or all if no specified list) runtimes in given workspace
         namespace.
-      description: An admin gated endpoint that deletes given runtimes in a given
-        workspaace.
+      description: DEPRECATED.  Use adminDeleteRuntime.
+        WAS - An admin gated endpoint that deletes given runtimes in a given workspace.
       operationId: deleteRuntimesInWorkspace
       parameters:
       - name: workspaceNamespace
@@ -2198,7 +2171,8 @@ paths:
     get:
       tags:
         - workspaceAdmin
-      description: Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
+      description: DEPRECATED.  Use adminListRuntimes.
+        WAS - Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
       operationId: adminListRuntimesInWorkspace
       parameters:
         - name: workspaceNamespace
@@ -2216,6 +2190,68 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ListRuntimeResponse'
+  /v1/admin/security/workspaces/{workspaceNamespace}/runtimes/{runtimeName}:
+    delete:
+      tags:
+        - workspaceAdmin
+      summary: Delete the specified runtime in the given workspace namespace.
+      description: An admin gated endpoint that deletes the given runtime in a given workspace.
+      operationId: adminDeleteRuntime
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The namespace of the workspace.
+          required: true
+          schema:
+            type: string
+        - name: runtimeName
+          in: path
+          description: The name of the runtime to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Runtime deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRuntimeFields'
+        404:
+          description: Runtime not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: runtimesToDelete
+  /v1/admin/workspaces/{workspaceNamespace}/listRuntimes:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminListRuntimes
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of runtimes in this Workspace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRuntimeFields'
   /v1/admin/workspaces/{workspaceNamespace}/userApps:
     get:
       tags:
@@ -6914,9 +6950,6 @@ components:
           description: |
             Stackdriver API key for error reporting, scoped to a particular
             domain. If unset, Stackdriver error reporting should be disabled.
-        shibbolethUiBaseUrl:
-          type: string
-          description: The base URL to use for client-side Shibboleth redirects.
         enableComplianceTraining:
           type: boolean
           description: Whether the Compliance Training access module is enabled.
@@ -9037,7 +9070,35 @@ components:
           type: boolean
           description: Whether there is a patch in progress on the runtime. Is used
             to indicate updates that require status transitions.
-      description: This is a subset of options in a full runtimes response, copied
+      description: DEPRECATED in favor of AdminRuntimeResponse, to prevent name clashes.  
+        WAS - This is a subset of options in a full runtimes response, copied from leonardo.yaml.
+    AdminRuntimeFields:
+      required:
+        - runtimeName
+        - status
+        - createdDate
+        - labels
+        - dateAccessed
+      type: object
+      properties:
+        runtimeName:
+          type: string
+          description: The user-supplied name for the runtime
+        status:
+          $ref: '#/components/schemas/RuntimeStatus'
+        createdDate:
+          type: string
+          description: The date and time the runtime was created, in ISO-8601 format
+        labels:
+          type: object
+          properties: {}
+          description: The labels to be placed on the runtime. Of type Map[String,String]
+        dateAccessed:
+          type: string
+          description: |
+            The date and time the runtime was last accessed, in ISO-8601 format.
+            Date accessed is defined as the last time the runtime was created, modified, or accessed via the proxy.
+      description: This is a subset of options in a full list runtimes response, copied
         from leonardo.yaml.
     ListRuntimeDeleteRequest:
       type: object

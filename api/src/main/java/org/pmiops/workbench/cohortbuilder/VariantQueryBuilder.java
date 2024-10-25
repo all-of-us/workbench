@@ -518,17 +518,17 @@ public final class VariantQueryBuilder {
 
         String namedParameter =
             QueryParameterUtil.addQueryParameterValue(
-                params, QueryParameterValue.string(chr[0].toLowerCase()));
+                params, QueryParameterValue.string(chr[0].trim().toLowerCase()));
         replaceParams.put("@contig", namedParameter);
 
         namedParameter =
             QueryParameterUtil.addQueryParameterValue(
-                params, QueryParameterValue.int64(Integer.valueOf(position[0])));
+                params, QueryParameterValue.int64(Integer.valueOf(position[0].trim())));
         replaceParams.put("@start", namedParameter);
 
         namedParameter =
             QueryParameterUtil.addQueryParameterValue(
-                params, QueryParameterValue.int64(Integer.valueOf(position[1])));
+                params, QueryParameterValue.int64(Integer.valueOf(position[1].trim())));
         replaceParams.put("@end", namedParameter);
         generateFilterParams(filter, params, replaceParams);
         addLimitAndOffset(params, replaceParams, limit, offset);

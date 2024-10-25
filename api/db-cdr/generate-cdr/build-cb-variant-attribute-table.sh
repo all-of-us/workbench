@@ -75,7 +75,7 @@ then
   echo "Creating cb_variant_attribute_contig_position table."
   bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
   "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_variant_attribute_contig_position\` CLUSTER BY contig, position AS
-   SELECT vid, contig, position
+   SELECT vid, LOWER(contig), position
    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_variant_attribute\`"
 
   echo "Creating cb_variant_attribute_genes table."

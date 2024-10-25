@@ -9,7 +9,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
-import * as Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 
 interface Props {
   onCancel: Function;

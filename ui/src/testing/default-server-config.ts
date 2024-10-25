@@ -60,7 +60,6 @@ const defaultServerConfig: ConfigResponse = {
   projectId: 'all-of-us-rw-prod',
   firecloudURL: 'https://firecloud.org',
   publicApiKeyForErrorReports: 'notasecret',
-  shibbolethUiBaseUrl: 'https://broad-shibboleth-prod.appspot.com/',
   enableComplianceTraining: true,
   unsafeAllowSelfBypass: false,
   defaultFreeCreditsDollarLimit: 300,

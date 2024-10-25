@@ -22,7 +22,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "publicApiKeyForErrorReports",
       source = "config.server.publicApiKeyForErrorReports")
-  @Mapping(target = "shibbolethUiBaseUrl", source = "config.firecloud.shibbolethUiBaseUrl")
   @Mapping(
       target = "defaultFreeCreditsDollarLimit",
       source = "config.billing.defaultFreeCreditsDollarLimit")

@@ -3,7 +3,6 @@ import * as React from 'react';
 import {
   DiskType,
   ErrorCode,
-  ListRuntimeResponse,
   Runtime,
   RuntimeError,
   RuntimeStatus,
@@ -176,6 +175,6 @@ export const canUpdateRuntime = (status: RuntimeStatus) =>
     [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
   ).includes(status);
 
-export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
+export const getCreator = (labels?: object): string | undefined =>
   // eslint-disable-next-line @typescript-eslint/dot-notation
-  runtime?.labels?.['creator'];
+  labels?.['creator'];

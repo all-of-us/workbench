@@ -7,7 +7,6 @@ import org.pmiops.workbench.leonardo.LegacyLeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.rawls.RawlsRetryHandler;
-import org.pmiops.workbench.shibboleth.ShibbolethRetryHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,7 +24,6 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
   LeonardoRetryHandler.class,
   NotebooksRetryHandler.class,
   RawlsRetryHandler.class,
-  ShibbolethRetryHandler.class,
 })
 public class RetryConfig {
 
