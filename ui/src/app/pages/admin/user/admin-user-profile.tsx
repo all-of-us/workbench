@@ -24,7 +24,7 @@ import { CaretRight, ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import { badgeForTier } from 'app/utils/access-tiers';
 import {
