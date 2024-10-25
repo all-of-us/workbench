@@ -539,4 +539,9 @@ public class ProfileController implements ProfileApiDelegate {
     userService.confirmPublications();
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
+
+  @Override
+  public ResponseEntity<Void> extendInitialCreditExpiration() {
+    return ResponseEntity.noContent().build();
+  }
 }

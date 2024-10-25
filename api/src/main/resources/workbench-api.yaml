@@ -370,7 +370,7 @@ paths:
   /v1/extendInitialCreditExpiration:
     post:
       tags:
-      - user
+      - profile
       description: User requests extension of initial credit expiration period
       operationId: extendInitialCreditExpiration
       responses:
