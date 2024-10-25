@@ -38,13 +38,13 @@ class CloudSqlProxyContext < ServiceAccountContext
           }).chomp
       end
       begin
-        deadlineSec = 40
+        deadline_sec = 75
 
-        common.status "waiting up to #{deadlineSec}s for cloudsql proxy to start..."
+        common.status "waiting up to #{deadline_sec}s for cloudsql proxy to start..."
         start = Time.now
         until common.run(maybe_dockerize_mysql_cmd("mysqladmin ping --host 0.0.0.0 --port 3307 --silent")).success?
-          if Time.now - start >= deadlineSec
-            raise("mysql docker service did not become available after #{deadlineSec}s")
+          if Time.now - start >= deadline_sec
+            raise("mysql docker service did not become available after #{deadline_sec}s")
           end
           sleep 1
         end

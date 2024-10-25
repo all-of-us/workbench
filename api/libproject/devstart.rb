@@ -77,18 +77,18 @@ end
 
 def start_local_db_service()
   common = Common.new
-  deadlineSec = 40
+  deadline_sec = 75
 
   bm = Benchmark.measure {
     common.run_inline %W{docker compose up -d db}
 
     root_pass = "root-notasecret"
 
-    common.status "waiting up to #{deadlineSec}s for mysql service to start..."
+    common.status "waiting up to #{deadline_sec}s for mysql service to start..."
     start = Time.now
     until (common.run "docker compose exec -T db mysql -p#{root_pass} --silent -e 'SELECT 1;'").success?
-      if Time.now - start >= deadlineSec
-        raise("mysql docker service did not become available after #{deadlineSec}s")
+      if Time.now - start >= deadline_sec
+        raise("mysql docker service did not become available after #{deadline_sec}s")
       end
       sleep 1
     end
