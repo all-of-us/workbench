@@ -8,9 +8,10 @@ import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.tanagra.ApiException;
+import org.pmiops.workbench.tanagra.model.Cohort;
 import org.pmiops.workbench.tanagra.model.CohortList;
-import org.pmiops.workbench.tanagra.model.Study;
+import org.pmiops.workbench.tanagra.model.FeatureSet;
+import org.pmiops.workbench.tanagra.model.FeatureSetList;
 
 /*
  * WorkspaceService is primarily an interface for coordinating the three Workspace models.
@@ -72,9 +73,15 @@ public interface WorkspaceService {
    * This call will create a Study in the Tanagra application. A Tanagra Study is equivalent to a
    * AoU workspace.
    */
-  Study createTanagraStudy(String workspaceNamespace, String workspaceName) throws ApiException;
+  void createTanagraStudy(String workspaceNamespace, String workspaceName);
   
-  CohortList listCohorts(String workspaceNamespace, Integer offset, Integer limit) throws ApiException;
+  CohortList listTanagraCohorts(String workspaceNamespace, Integer offset, Integer limit);
+
+  FeatureSetList listTanagraFeatureSets(String workspaceNamespace, Integer offset, Integer limit);
+
+  void cloneTanagraCohort(Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace);
+
+  void cloneTanagraFeatureSet(FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace);
 
   void updateInitialCreditsExhaustion(DbUser user, boolean exhausted);
 

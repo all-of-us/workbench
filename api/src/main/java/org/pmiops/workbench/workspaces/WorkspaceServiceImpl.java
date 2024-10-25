@@ -59,11 +59,13 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
-import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.tanagra.model.Cohort;
+import org.pmiops.workbench.tanagra.model.CohortCloneInfo;
 import org.pmiops.workbench.tanagra.model.CohortList;
-import org.pmiops.workbench.tanagra.model.Study;
+import org.pmiops.workbench.tanagra.model.FeatureSet;
+import org.pmiops.workbench.tanagra.model.FeatureSetCloneInfo;
+import org.pmiops.workbench.tanagra.model.FeatureSetList;
 import org.pmiops.workbench.tanagra.model.StudyCreateInfo;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
@@ -269,40 +271,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
 
     if (to.isCDRAndWorkspaceTanagraEnabled()) {
-      try {
-        createTanagraStudy(to.getWorkspaceNamespace(), to.getName());
-      } catch (Exception e) {
-        log.log(
-            Level.SEVERE,
-            String.format(
-                "Could not create a Tanagra study for workspace namespace: %s, name: %s",
-                to.getWorkspaceNamespace(), to.getName()),
-            e);
-      }
+      createTanagraStudy(to.getWorkspaceNamespace(), to.getName());
     }
 
     if (to.isCDRAndWorkspaceTanagraEnabled()) {
       // Clone tanagra cohorts
-      try {
-        boolean hasMoreResults = true;
-        Integer limit = 50;
-        Integer offset = 0;
-        while (hasMoreResults) {
-          List<Cohort> cohorts = listCohorts(to.getWorkspaceNamespace(), offset, limit).stream().toList();
-          if (cohorts.size() < limit) {
-            hasMoreResults = false;
-          } else {
-            offset += limit;
-          }
-        }
-      } catch (Exception e) {
-        log.log(
-                Level.SEVERE,
-                String.format(
-                        "Could not clone Tanagra cohorts for workspace namespace: %s, name: %s",
-                        to.getWorkspaceNamespace(), to.getName()),
-                e);
-      }
+      cloneTanagraCohorts(from.getWorkspaceNamespace(), to.getWorkspaceNamespace());
+      // Cone tanagra feature sets
+      cloneTanagraFeatureSets(from.getWorkspaceNamespace(), to.getWorkspaceNamespace());
     } else {
       Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
       for (DbCohort fromCohort : from.getCohorts()) {
@@ -332,6 +308,36 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
     }
     return to;
+  }
+
+  private void cloneTanagraCohorts(String fromWorkspaceNamespace, String toWorkspaceNamespace) {
+    boolean hasMoreResults = true;
+    int offset = 0;
+    int limit = 50;
+    while(hasMoreResults) {
+      List<Cohort> cohorts = listTanagraCohorts(fromWorkspaceNamespace, offset, limit).stream().toList();
+      cohorts.forEach(cohort -> cloneTanagraCohort(cohort, fromWorkspaceNamespace, toWorkspaceNamespace));
+      if (cohorts.size() < limit) {
+        hasMoreResults = false;
+      } else {
+        offset += limit;
+      }
+    }
+  }
+  
+  private void cloneTanagraFeatureSets(String fromWorkspaceNamespace, String toWorkspaceNamespace) {
+    boolean hasMoreResults = true;
+    int offset = 0;
+    int limit = 50;
+    while(hasMoreResults) {
+      List<FeatureSet> featureSets = listTanagraFeatureSets(fromWorkspaceNamespace, offset, limit).stream().toList();
+      featureSets.forEach(fs -> cloneTanagraFeatureSet(fs, fromWorkspaceNamespace, toWorkspaceNamespace));
+      if (featureSets.size() < limit) {
+        hasMoreResults = false;
+      } else {
+        offset += limit;
+      }
+    }
   }
 
   @Override
@@ -530,17 +536,79 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Study createTanagraStudy(String workspaceNamespace, String workspaceName)
-      throws ApiException {
-    StudyCreateInfo studyCreateInfo =
-        new StudyCreateInfo().id(workspaceNamespace).displayName(workspaceName);
-    return tanagraApiProvider.get().createStudy(studyCreateInfo);
+  public void createTanagraStudy(String workspaceNamespace, String workspaceName) {
+    try {
+      StudyCreateInfo studyCreateInfo =
+              new StudyCreateInfo().id(workspaceNamespace).displayName(workspaceName);
+      tanagraApiProvider.get().createStudy(studyCreateInfo);
+    } catch (Exception e) {
+      log.log(
+              Level.SEVERE,
+              String.format(
+                      "Could not create a Tanagra study for workspace namespace: %s, name: %s",
+                      workspaceNamespace, workspaceName),
+              e);
+    }
   }
 
   @Override
-  public CohortList listCohorts(String workspaceNamespace, Integer offset, Integer limit)
-          throws ApiException {
-    return tanagraApiProvider.get().listCohorts(workspaceNamespace, offset, limit);
+  public CohortList listTanagraCohorts(String workspaceNamespace, Integer offset, Integer limit) {
+    try {
+      return tanagraApiProvider.get().listCohorts(workspaceNamespace, offset, limit);
+    } catch (Exception e) {
+      log.log(
+              Level.SEVERE,
+              String.format(
+                      "Could not list cohorts for workspace: %s",
+                      workspaceNamespace),
+              e);
+    }
+    return new CohortList();
+  }
+
+  @Override
+  public FeatureSetList listTanagraFeatureSets(String workspaceNamespace, Integer offset, Integer limit) {
+    try {
+      return tanagraApiProvider.get().listFeatureSets(workspaceNamespace, offset, limit);
+    } catch (Exception e) {
+      log.log(
+              Level.SEVERE,
+              String.format(
+                      "Could not list feature sets for workspace: %s",
+                      workspaceNamespace),
+              e);
+    }
+    return new FeatureSetList();
+  }
+
+  @Override
+  public void cloneTanagraCohort(Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace) {
+    CohortCloneInfo cohortCloneInfo = new CohortCloneInfo().destinationStudyId(toWorkspaceNamespace).displayName(cohort.getDisplayName()).description(cohort.getDescription());
+    try {
+      tanagraApiProvider.get().cloneCohort(cohortCloneInfo, fromWorkspaceNamespace, cohort.getId());
+    } catch (Exception e) {
+      log.log(
+              Level.SEVERE,
+              String.format(
+                      "Could not clone cohort for workspace: %s",
+                      toWorkspaceNamespace),
+              e);
+    }
+  }
+
+  @Override
+  public void cloneTanagraFeatureSet(FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace) {
+    FeatureSetCloneInfo cloneInfo = new FeatureSetCloneInfo().destinationStudyId(toWorkspaceNamespace).displayName(featureSet.getDisplayName()).description(featureSet.getDescription());
+    try {
+      tanagraApiProvider.get().cloneFeatureSet(cloneInfo, fromWorkspaceNamespace, featureSet.getId());
+    } catch (Exception e) {
+      log.log(
+              Level.SEVERE,
+              String.format(
+                      "Could not clone feature set for workspace: %s",
+                      toWorkspaceNamespace),
+              e);
+    }
   }
 
   @Override

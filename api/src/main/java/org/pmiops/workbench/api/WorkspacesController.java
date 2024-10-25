@@ -201,17 +201,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
 
     if (dbWorkspace.isCDRAndWorkspaceTanagraEnabled()) {
-      try {
-        workspaceService.createTanagraStudy(
+      workspaceService.createTanagraStudy(
             createdWorkspace.getNamespace(), createdWorkspace.getName());
-      } catch (Exception e) {
-        log.log(
-            Level.SEVERE,
-            String.format(
-                "Could not create a Tanagra study for workspace namespace: %s, name: %s",
-                createdWorkspace.getNamespace(), createdWorkspace.getName()),
-            e);
-      }
     }
     return ResponseEntity.ok(createdWorkspace);
   }
