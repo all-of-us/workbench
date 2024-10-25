@@ -694,7 +694,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                   institution,
                 }}
               />
-              <FlexColumn style={{ flex: 0 }}>
+              <FlexColumn style={{ flex: 1 }}>
                 <FlexRow>
                   <div style={styles.subHeader}>Access status</div>
                   <TooltipTrigger
