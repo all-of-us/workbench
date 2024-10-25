@@ -105,6 +105,21 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     userInitialCreditsExpiration.setBypassed(isBypassed);
   }
 
+  @Override
+  public void extendInitialCreditsExpiration(DbUser user) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+    if (userInitialCreditsExpiration == null) {
+      throw new WorkbenchException("User does not have initial credits expiration set");
+    }
+    userInitialCreditsExpiration.setExpirationTime(
+        new Timestamp(
+            userInitialCreditsExpiration.getCreditStartTime().getTime()
+                + TimeUnit.DAYS.toMillis(
+                    workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
+    userDao.save(user);
+  }
+
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
