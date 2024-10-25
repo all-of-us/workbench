@@ -6,6 +6,7 @@ require_relative "./mysql_docker"
 class CloudSqlProxyContext < ServiceAccountContext
 
   DOCKER_PROXY_NAME = 'rw_cloud_sql_proxy'
+  DEADLINE_SEC = 75
 
   def run()
     common = Common.new
@@ -38,13 +39,11 @@ class CloudSqlProxyContext < ServiceAccountContext
           }).chomp
       end
       begin
-        deadlineSec = 40
-
-        common.status "waiting up to #{deadlineSec}s for cloudsql proxy to start..."
+        common.status "waiting up to #{DEADLINE_SEC}s for cloudsql proxy to start..."
         start = Time.now
         until common.run(maybe_dockerize_mysql_cmd("mysqladmin ping --host 0.0.0.0 --port 3307 --silent")).success?
-          if Time.now - start >= deadlineSec
-            raise("mysql docker service did not become available after #{deadlineSec}s")
+          if Time.now - start >= DEADLINE_SEC
+            raise("mysql docker service did not become available after #{DEADLINE_SEC}s")
           end
           sleep 1
         end
