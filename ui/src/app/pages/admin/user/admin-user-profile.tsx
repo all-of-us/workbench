@@ -654,28 +654,76 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           </FlexRow>
           <FlexColumn style={{ paddingTop: '1em' }}>
             <FlexRow style={{ flexWrap: 'wrap', gap: '1rem' }}>
-              <InstitutionalFields
-                onChangeEmail={(contactEmail: string) =>
-                  updateContactEmail(contactEmail)
-                }
-                onChangeInstitution={(institutionShortName: string) =>
-                  updateInstitution(institutionShortName)
-                }
-                onChangeInstitutionalRole={(
-                  institutionalRoleEnum: InstitutionalRole
-                ) => updateInstitutionalRole(institutionalRoleEnum)}
-                onChangeInstitutionOtherText={(otherText: string) =>
-                  updateInstitutionalRoleOtherText(otherText)
-                }
-                {...{
-                  oldProfile,
-                  updatedProfile,
-                  institutions,
-                  emailValidationStatus,
-                  institution,
-                  profile,
-                }}
-              />
+              <FlexColumn>
+                <InstitutionalFields
+                  onChangeEmail={(contactEmail: string) =>
+                    updateContactEmail(contactEmail)
+                  }
+                  onChangeInstitution={(institutionShortName: string) =>
+                    updateInstitution(institutionShortName)
+                  }
+                  onChangeInstitutionalRole={(
+                    institutionalRoleEnum: InstitutionalRole
+                  ) => updateInstitutionalRole(institutionalRoleEnum)}
+                  onChangeInstitutionOtherText={(otherText: string) =>
+                    updateInstitutionalRoleOtherText(otherText)
+                  }
+                  {...{
+                    oldProfile,
+                    updatedProfile,
+                    institutions,
+                    emailValidationStatus,
+                    institution,
+                    profile,
+                  }}
+                />
+                <FlexRow style={{ paddingTop: '4em' }}>
+                  <ErrorsTooltip errors={errors}>
+                    <Button
+                      data-test-id='update-profile'
+                      type='primary'
+                      disabled={
+                        !!errors ||
+                        !profileNeedsUpdate(
+                          oldProfile,
+                          updatedProfile,
+                          bypassChangeRequests
+                        )
+                      }
+                      onClick={async () => {
+                        spinnerProps.showSpinner();
+                        const response = await updateAccountProperties(
+                          oldProfile,
+                          updatedProfile,
+                          bypassChangeRequests
+                        );
+                        setOldProfile(response);
+                        setUpdatedProfile(response);
+                        spinnerProps.hideSpinner();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </ErrorsTooltip>
+                  <Button
+                    type='secondary'
+                    disabled={
+                      !profileNeedsUpdate(
+                        oldProfile,
+                        updatedProfile,
+                        bypassChangeRequests
+                      )
+                    }
+                    onClick={() => {
+                      setBypassChangeRequests([]);
+                      setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
+                      setUpdatedProfile(oldProfile);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </FlexRow>
+              </FlexColumn>
               <InitialCreditsCard
                 onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
                   updateProfile({ freeTierDollarQuota })
@@ -719,52 +767,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               </FlexColumn>
             </FlexRow>
           </FlexColumn>
-          <FlexRow style={{ paddingTop: '1em' }}>
-            <ErrorsTooltip errors={errors}>
-              <Button
-                data-test-id='update-profile'
-                type='primary'
-                disabled={
-                  !!errors ||
-                  !profileNeedsUpdate(
-                    oldProfile,
-                    updatedProfile,
-                    bypassChangeRequests
-                  )
-                }
-                onClick={async () => {
-                  spinnerProps.showSpinner();
-                  const response = await updateAccountProperties(
-                    oldProfile,
-                    updatedProfile,
-                    bypassChangeRequests
-                  );
-                  setOldProfile(response);
-                  setUpdatedProfile(response);
-                  spinnerProps.hideSpinner();
-                }}
-              >
-                Save
-              </Button>
-            </ErrorsTooltip>
-            <Button
-              type='secondary'
-              disabled={
-                !profileNeedsUpdate(
-                  oldProfile,
-                  updatedProfile,
-                  bypassChangeRequests
-                )
-              }
-              onClick={() => {
-                setBypassChangeRequests([]);
-                setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
-                setUpdatedProfile(oldProfile);
-              }}
-            >
-              Cancel
-            </Button>
-          </FlexRow>
           <FlexRow>
             <h2>Egress event history</h2>
           </FlexRow>
