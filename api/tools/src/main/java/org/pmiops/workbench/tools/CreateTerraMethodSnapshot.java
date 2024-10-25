@@ -150,7 +150,8 @@ public class CreateTerraMethodSnapshot extends Tool {
               .entityType("Workflow")
               .snapshotComment(snapshotComment)
               .payload(sourceFileContents)
-              .documentation("Automatically created snapshot from Github").synopsis("Automatically created snapshot from Github");
+              .documentation("Automatically created snapshot from Github")
+              .synopsis("Automatically created snapshot from Github");
 
       FirecloudMethodResponse methodResponse;
       if (existingMethods.isEmpty()) {
