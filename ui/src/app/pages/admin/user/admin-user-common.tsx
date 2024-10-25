@@ -64,9 +64,6 @@ export const commonStyles = reactStyles({
     width: '21rem',
     opacity: '100%',
   },
-  textInputContainer: {
-    marginTop: '1.5rem',
-  },
   dropdown: {
     minWidth: '70px',
     width: '21rem',
@@ -401,7 +398,7 @@ export const ContactEmailTextInput = ({
       highlightOnChange={highlightOnChange}
       labelStyle={{ ...commonStyles.label, ...labelStyle }}
       inputStyle={{ ...commonStyles.textInput, ...inputStyle }}
-      containerStyle={{ ...commonStyles.textInputContainer, ...containerStyle }}
+      containerStyle={containerStyle}
       onChange={(value) => onChange(value)}
     />
   );

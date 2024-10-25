@@ -96,12 +96,6 @@ const styles = reactStyles({
     fontSize: '16px',
     fontWeight: 500,
   },
-  uneditableFields: {
-    borderRadius: '9px',
-    backgroundColor: colorWithWhiteness(colors.light, 0.23),
-    padding: '1.5rem',
-    flex: 1,
-  },
   editableFields: {
     paddingTop: '1em',
     flex: 1,
@@ -178,7 +172,7 @@ const InstitutionalFields = ({
     hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
     !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
   return (
-    <FlexColumn style={{ flex: 0 }}>
+    <FlexColumn style={{ flex: 0, gap: '1rem' }}>
       <FlexColumn>
         <div
           data-test-id='name'
