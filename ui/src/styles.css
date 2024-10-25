@@ -407,7 +407,7 @@ body .p-datatable .p-datatable-tbody > tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-body .p-datatable.condensedTable .p-datatable-tbody > tr > td {
+body .p-datatable.condensed-table .p-datatable-tbody > tr > td {
   padding: 0.5rem 0.40rem
 }
 

@@ -386,7 +386,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       breakpoint='0px'
       style={{ paddingTop: '1em' }}
       value={tableData}
-      className='condensedTable'
+      className='condensed-table'
     >
       <Column field='moduleName' header='Access module' />
       <Column field='moduleStatus' header='Status' />
