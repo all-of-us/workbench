@@ -16,4 +16,6 @@ public interface InitialCreditsExpirationService {
   DbUserInitialCreditsExpiration createInitialCreditsExpiration(DbUser user);
 
   void setInitialCreditsExpirationBypassed(DbUser user, boolean isBypassed);
+
+  void extendInitialCreditsExpiration(DbUser user);
 }

@@ -32,6 +32,7 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
@@ -85,6 +86,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
   private final RasLinkService rasLinkService;
   private final ComplianceTrainingService complianceTrainingService;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
 
   @Autowired
   ProfileController(
@@ -106,7 +108,8 @@ public class ProfileController implements ProfileApiDelegate {
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService,
-      ComplianceTrainingService complianceTrainingService) {
+      ComplianceTrainingService complianceTrainingService,
+      InitialCreditsExpirationService initialCreditsExpirationService) {
     this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -126,6 +129,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.rasLinkService = rasLinkService;
     this.complianceTrainingService = complianceTrainingService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -538,5 +542,11 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> confirmPublications() {
     userService.confirmPublications();
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> extendInitialCreditExpiration() {
+    initialCreditsExpirationService.extendInitialCreditsExpiration(userProvider.get());
+    return ResponseEntity.noContent().build();
   }
 }

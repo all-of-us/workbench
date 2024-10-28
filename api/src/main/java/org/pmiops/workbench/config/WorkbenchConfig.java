@@ -112,6 +112,9 @@ public class WorkbenchConfig {
 
     // The number of days that initial credits are valid for.
     public Long initialCreditsValidityPeriodDays;
+
+    // The number of days that initial credits can be extended for.
+    public Long initialCreditsExtensionPeriodDays;
   }
 
   public static class FireCloudConfig {

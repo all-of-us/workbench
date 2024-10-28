@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.CLOCK;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
@@ -13,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +27,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -108,6 +111,7 @@ public class InitialCreditsExpirationServiceTest {
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion = 5; // arbitrary
     providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays = 17L; // arbitrary
+    providedWorkbenchConfig.billing.initialCreditsExtensionPeriodDays = 78L; // arbitrary
 
     DbUserInitialCreditsExpiration initialCreditsExpiration =
         new DbUserInitialCreditsExpiration()
@@ -175,5 +179,49 @@ public class InitialCreditsExpirationServiceTest {
     assertThat(initialCreditsExpiration.getNotificationStatus())
         .isEqualTo(NotificationStatus.NO_NOTIFICATION_SENT);
     assertThat(initialCreditsExpiration.isBypassed()).isFalse();
+  }
+
+  @Test
+  public void testExtendInitialCreditsExpiration() {
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        providedDbUser.getUserInitialCreditsExpiration();
+    assertThat(initialCreditsExpiration).isNotNull();
+
+    initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser);
+    assertThat(initialCreditsExpiration.getExpirationTime())
+        .isEqualTo(
+            new Timestamp(
+                initialCreditsExpiration.getCreditStartTime().getTime()
+                    + TimeUnit.DAYS.toMillis(
+                        providedWorkbenchConfig.billing.initialCreditsExtensionPeriodDays)));
+  }
+
+  @Test
+  public void testExtendInitialCreditsExpiration_notInitiated() {
+
+    providedDbUser.setUserInitialCreditsExpiration(null);
+    userDao.save(providedDbUser);
+
+    WorkbenchException actualException =
+        assertThrows(
+            WorkbenchException.class,
+            () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
+    assertThat(actualException.getMessage())
+        .isEqualTo("User does not have initial credits expiration set.");
+  }
+
+  @Test
+  public void testExtendInitialCreditsExpiration_alreadyExtended() {
+
+    providedDbUser.getUserInitialCreditsExpiration().setExtensionCount(1);
+    userDao.save(providedDbUser);
+
+    WorkbenchException actualException =
+        assertThrows(
+            WorkbenchException.class,
+            () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
+    assertThat(actualException.getMessage())
+        .isEqualTo(
+            "User has already extended their initial credits expiration and cannot extend further.");
   }
 }

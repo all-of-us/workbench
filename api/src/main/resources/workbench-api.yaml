@@ -367,6 +367,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: rasLinkRequestBody
+  /v1/user/extendInitialCreditExpiration:
+    post:
+      tags:
+      - profile
+      description: User requests extension of initial credit expiration period
+      operationId: extendInitialCreditExpiration
+      responses:
+        204:
+          description: The user's initial credit expiration period has been extended.
+          content: {}
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/page-visits:
     post:
       tags:
