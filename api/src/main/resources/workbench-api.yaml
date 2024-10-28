@@ -367,7 +367,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: rasLinkRequestBody
-  /v1/extendInitialCreditExpiration:
+  /v1/user/extendInitialCreditExpiration:
     post:
       tags:
       - profile
