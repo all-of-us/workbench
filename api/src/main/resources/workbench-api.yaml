@@ -8968,46 +8968,6 @@ components:
           type: integer
           description: File size in bytes.
           format: int64
-    ListRuntimeResponse:
-      required:
-      - createdDate
-      - dateAccessed
-      - googleProject
-      - id
-      - labels
-      - runtimeName
-      - status
-      type: object
-      properties:
-        id:
-          type: integer
-          description: Internal Leonardo ID of the runtime
-        runtimeName:
-          type: string
-          description: The user-supplied name for the runtime
-        googleProject:
-          type: string
-          description: The Google Project used to create the runtime
-        status:
-          $ref: '#/components/schemas/RuntimeStatus'
-        createdDate:
-          type: string
-          description: The date and time the runtime was created, in ISO-8601 format
-        labels:
-          type: object
-          properties: {}
-          description: The labels to be placed on the runtime. Of type Map[String,String]
-        dateAccessed:
-          type: string
-          description: |
-            The date and time the runtime was last accessed, in ISO-8601 format.
-            Date accessed is defined as the last time the runtime was created, modified, or accessed via the proxy.
-        patchInProgress:
-          type: boolean
-          description: Whether there is a patch in progress on the runtime. Is used
-            to indicate updates that require status transitions.
-      description: DEPRECATED in favor of AdminRuntimeResponse, to prevent name clashes.  
-        WAS - This is a subset of options in a full runtimes response, copied from leonardo.yaml.
     AdminRuntimeFields:
       required:
         - runtimeName
