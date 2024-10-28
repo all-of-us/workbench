@@ -162,11 +162,11 @@ public class WorkbenchConfig {
 
   public static class WgsCohortExtractionConfig {
     public String serviceAccount;
+    // used by publish_cdr_wgs() in db-cdr devstart
     public String serviceAccountTerraProxyGroup;
     public String operationalTerraWorkspaceNamespace;
     public String operationalTerraWorkspaceName;
     public String operationalTerraWorkspaceBucket;
-    public String extractionPetServiceAccount;
     public String extractionMethodConfigurationNamespace;
     public String extractionMethodConfigurationName;
     // This is the Agora snapshot identifier, returned when running create-terra-method-snapshot.
