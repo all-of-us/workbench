@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.CLOCK;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
-import org.pmiops.workbench.exceptions.WorkbenchException;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -190,8 +191,9 @@ public class InitialCreditsExpirationServiceTest {
     assertThat(initialCreditsExpiration.getExpirationTime())
         .isEqualTo(
             new Timestamp(
-                initialCreditsExpiration.getCreditStartTime().getTime() +
-                TimeUnit.DAYS.toMillis(providedWorkbenchConfig.billing.initialCreditsExtensionPeriodDays)));
+                initialCreditsExpiration.getCreditStartTime().getTime()
+                    + TimeUnit.DAYS.toMillis(
+                        providedWorkbenchConfig.billing.initialCreditsExtensionPeriodDays)));
   }
 
   @Test
@@ -200,6 +202,8 @@ public class InitialCreditsExpirationServiceTest {
     providedDbUser.setUserInitialCreditsExpiration(null);
     userDao.save(providedDbUser);
 
-    assertThrows(WorkbenchException.class, () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
+    assertThrows(
+        WorkbenchException.class,
+        () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
   }
 }
