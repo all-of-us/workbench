@@ -27,7 +27,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
-import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -202,8 +202,21 @@ public class InitialCreditsExpirationServiceTest {
     providedDbUser.setUserInitialCreditsExpiration(null);
     userDao.save(providedDbUser);
 
-    assertThrows(
-        WorkbenchException.class,
+    BadRequestException actualException = assertThrows(
+        BadRequestException.class,
         () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
+    assertThat(actualException.getMessage()).isEqualTo("User does not have initial credits expiration set.");
+  }
+
+  @Test
+  public void testExtendInitialCreditsExpiration_alreadyExtended() {
+
+    providedDbUser.getUserInitialCreditsExpiration().setExtensionCount(1);
+    userDao.save(providedDbUser);
+
+    BadRequestException actualException = assertThrows(
+        BadRequestException.class,
+        () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
+    assertThat(actualException.getMessage()).isEqualTo("User has already extended their initial credits expiration and cannot extend further.");
   }
 }
