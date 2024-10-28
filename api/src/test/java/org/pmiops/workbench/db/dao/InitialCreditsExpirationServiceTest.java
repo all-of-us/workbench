@@ -202,10 +202,12 @@ public class InitialCreditsExpirationServiceTest {
     providedDbUser.setUserInitialCreditsExpiration(null);
     userDao.save(providedDbUser);
 
-    BadRequestException actualException = assertThrows(
-        BadRequestException.class,
-        () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
-    assertThat(actualException.getMessage()).isEqualTo("User does not have initial credits expiration set.");
+    BadRequestException actualException =
+        assertThrows(
+            BadRequestException.class,
+            () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
+    assertThat(actualException.getMessage())
+        .isEqualTo("User does not have initial credits expiration set.");
   }
 
   @Test
@@ -214,9 +216,12 @@ public class InitialCreditsExpirationServiceTest {
     providedDbUser.getUserInitialCreditsExpiration().setExtensionCount(1);
     userDao.save(providedDbUser);
 
-    BadRequestException actualException = assertThrows(
-        BadRequestException.class,
-        () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
-    assertThat(actualException.getMessage()).isEqualTo("User has already extended their initial credits expiration and cannot extend further.");
+    BadRequestException actualException =
+        assertThrows(
+            BadRequestException.class,
+            () -> initialCreditsExpirationService.extendInitialCreditsExpiration(providedDbUser));
+    assertThat(actualException.getMessage())
+        .isEqualTo(
+            "User has already extended their initial credits expiration and cannot extend further.");
   }
 }
