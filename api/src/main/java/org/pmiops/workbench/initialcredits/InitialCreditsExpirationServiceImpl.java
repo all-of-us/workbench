@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -110,13 +111,19 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     if (userInitialCreditsExpiration == null) {
-      throw new WorkbenchException("User does not have initial credits expiration set");
+      throw new BadRequestException("User does not have initial credits expiration set.");
+    }
+    if (userInitialCreditsExpiration.getExtensionCount() != 0) {
+      throw new BadRequestException(
+          "User has already extended their initial credits expiration and cannot extend further.");
     }
     userInitialCreditsExpiration.setExpirationTime(
         new Timestamp(
             userInitialCreditsExpiration.getCreditStartTime().getTime()
                 + TimeUnit.DAYS.toMillis(
                     workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
+    userInitialCreditsExpiration.setExtensionCount(
+        userInitialCreditsExpiration.getExtensionCount() + 1);
     userDao.save(user);
   }
 
