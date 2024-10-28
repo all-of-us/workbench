@@ -74,14 +74,16 @@ public interface WorkspaceService {
    * AoU workspace.
    */
   void createTanagraStudy(String workspaceNamespace, String workspaceName);
-  
+
   CohortList listTanagraCohorts(String workspaceNamespace, Integer offset, Integer limit);
 
   FeatureSetList listTanagraFeatureSets(String workspaceNamespace, Integer offset, Integer limit);
 
-  void cloneTanagraCohort(Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace);
+  void cloneTanagraCohort(
+      Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace);
 
-  void cloneTanagraFeatureSet(FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace);
+  void cloneTanagraFeatureSet(
+      FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace);
 
   void updateInitialCreditsExhaustion(DbUser user, boolean exhausted);
 

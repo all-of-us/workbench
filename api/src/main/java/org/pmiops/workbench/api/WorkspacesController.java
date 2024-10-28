@@ -202,7 +202,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     if (dbWorkspace.isCDRAndWorkspaceTanagraEnabled()) {
       workspaceService.createTanagraStudy(
-            createdWorkspace.getNamespace(), createdWorkspace.getName());
+          createdWorkspace.getNamespace(), createdWorkspace.getName());
     }
     return ResponseEntity.ok(createdWorkspace);
   }
@@ -590,6 +590,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 "Destination workspace Access Tier '%s' does not match source workspace Access Tier '%s'",
                 toCdrVersion.getAccessTier().getShortName(), accessTier.getShortName()));
       }
+    }
+
+    // Need to validate that we are cloning workspaces that both use Data Apps v1 or v2
+    // We don't support cloning artifacts across versions
+    if (fromWorkspace.isUsesTanagra() && !toWorkspace.isUsesTanagra()) {
+      throw new BadRequestException(
+          "Destination workspace uses Data Apps v1 which does not match source workspace Data Apps v2");
+    }
+    if (!fromWorkspace.isUsesTanagra() && toWorkspace.isUsesTanagra()) {
+      throw new BadRequestException(
+          "Destination workspace uses Data Apps v2 which does not match source workspace Data Apps v1");
     }
 
     DbUser user = userProvider.get();
