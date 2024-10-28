@@ -2018,13 +2018,25 @@ def create_terra_method_snapshot(cmd_name, *args)
   op.add_option(
     "--project [GOOGLE_PROJECT]",
     ->(opts, v) { opts.project = v},
-    "Google project to act on (e.g. all-of-us-workbench-test). Cannot be used with --all-projects"
+    "Google project to act on (e.g. all-of-us-workbench-test)."
+# if we re-enable all-projects, update to:
+#    "Google project to act on (e.g. all-of-us-workbench-test). Cannot be used with --all-projects"
   )
   op.opts.all_projects = false
-  op.add_option(
-    "--all-projects [all-projects]",
-    ->(opts, _) { opts.all_projects = true},
-    "Create snapshot in every AoU environment. Cannot be used with --project.")
+
+# disabled until we figure out how to make the GcloudContextV2 constructor
+# work with it (may not be worth it)
+#
+# this was a workaround which apparently doesn't work anymore
+  # Use GcloudContextV2 to validate gcloud auth but we need to drop the
+  # --project argument validation that's built into the constructor
+  #   GcloudContextV2.validate_gcloud_auth()
+  #   op.parse.validate
+#
+#   op.add_option(
+#     "--all-projects [all-projects]",
+#     ->(opts, _) { opts.all_projects = true},
+#     "Create snapshot in every AoU environment. Cannot be used with --project.")
 
   op.add_option(
     "--source-git-repo [source-git-repo]",
@@ -2048,16 +2060,18 @@ def create_terra_method_snapshot(cmd_name, *args)
     "Agora method name to create snapshot in. default: WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName
           Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace")
   op.add_validator ->(opts) {
-    if (!opts.project and !opts.all_projects)
-      common.error "A project must be set or --all-projects must be true"
+# if we re-enable all-projects, update to:
+#     if (!opts.project and !opts.all_projects)
+#       common.error "A project must be set or --all-projects must be true"
+    if (!opts.project)
+      common.error "A project must be set"
       raise ArgumentError
     end
   }
 
-  # Use GcloudContextV2 to validate gcloud auth but we need to drop the
-  # --project argument validation that's built into the constructor
-  GcloudContextV2.validate_gcloud_auth()
+  gcc = GcloudContextV2.new(op)
   op.parse.validate
+  gcc.validate()
 
   source_file_commit_hash = get_github_commit_hash(op.opts.source_git_repo, op.opts.source_git_ref)
 
@@ -2074,7 +2088,8 @@ def create_terra_method_snapshot(cmd_name, *args)
     ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
     flags.map! { |f| "'#{f}'" }
 
-    ServiceAccountContext.new(project).run do
+    ENV.update(read_db_vars(gcc))
+    ServiceAccountContext.new(gcc.project).run do
       common.run_inline %W{
        ./gradlew createTerraMethodSnapshot
        -PappArgs=[#{flags.join(',')}]}

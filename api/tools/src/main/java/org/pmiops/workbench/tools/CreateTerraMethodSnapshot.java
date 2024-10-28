@@ -26,8 +26,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodQuery;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodResponse;
 import org.pmiops.workbench.tools.factories.ToolsFirecloudApiClientFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -151,7 +149,9 @@ public class CreateTerraMethodSnapshot extends Tool {
               .name(methodName)
               .entityType("Workflow")
               .snapshotComment(snapshotComment)
-              .payload(sourceFileContents);
+              .payload(sourceFileContents)
+              .documentation("Automatically created snapshot from Github")
+              .synopsis("Automatically created snapshot from Github");
 
       FirecloudMethodResponse methodResponse;
       if (existingMethods.isEmpty()) {
@@ -250,9 +250,6 @@ public class CreateTerraMethodSnapshot extends Tool {
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(CreateTerraMethodSnapshot.class)
-        .web(WebApplicationType.NONE)
-        .run(args)
-        .close();
+    CommandLineToolConfig.runCommandLine(CreateTerraMethodSnapshot.class, args);
   }
 }
