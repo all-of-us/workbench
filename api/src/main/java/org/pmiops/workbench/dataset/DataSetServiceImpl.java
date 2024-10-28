@@ -536,10 +536,11 @@ public class DataSetServiceImpl implements DataSetService {
   @org.jetbrains.annotations.NotNull
   private String replaceProjectIdAndDataSet(EntityOutputPreview p, DbCdrVersion dbCdrVersion) {
     String regexToFixTicks = "`([^`]+)`\\.([^\\s]+)";
-    String query = p.getSourceSql();
+    String query =
+        Optional.ofNullable(p.getSourceSql()).isEmpty() ? p.getIndexSql() : p.getSourceSql();
     String cdrProject =
         query.contains(LOCAL_CDR_STRING) ? LOCAL_CDR_STRING : dbCdrVersion.getBigqueryProject();
-    return p.getSourceSql()
+    return query
         .replaceAll(regexToFixTicks, "`$1.$2`")
         .replace(cdrProject + "." + dbCdrVersion.getBigqueryDataset(), "${projectId}.${dataSetId}");
   }
