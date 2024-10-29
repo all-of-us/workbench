@@ -127,7 +127,7 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(cloudStorageCounts);
 
     LeonardoListRuntimeResponse leonardoListRuntimeResponse =
-        TestMockFactory.createLeonardoListRuntimesResponse();
+        TestMockFactory.createListRuntimeResponse();
     List<LeonardoListRuntimeResponse> runtimes = List.of(leonardoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(runtimes);
