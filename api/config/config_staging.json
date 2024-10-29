@@ -46,7 +46,6 @@
     "operationalTerraWorkspaceNamespace": "aouwgscohortextraction-staging",
     "operationalTerraWorkspaceName": "aouwgscohortextractionstaging",
     "operationalTerraWorkspaceBucket": "fc-c143d305-0ffd-4ca5-b585-9b222691da6c",
-    "extractionPetServiceAccount": "pet-112406122740824430926@aouwgscohortextraction-staging.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-staging",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
     "extractionMethodConfigurationVersion": 5,

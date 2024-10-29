@@ -162,11 +162,11 @@ public class WorkbenchConfig {
 
   public static class WgsCohortExtractionConfig {
     public String serviceAccount;
+    // used by publish_cdr_wgs() in db-cdr devstart
     public String serviceAccountTerraProxyGroup;
     public String operationalTerraWorkspaceNamespace;
     public String operationalTerraWorkspaceName;
     public String operationalTerraWorkspaceBucket;
-    public String extractionPetServiceAccount;
     public String extractionMethodConfigurationNamespace;
     public String extractionMethodConfigurationName;
     // This is the Agora snapshot identifier, returned when running create-terra-method-snapshot.
@@ -177,7 +177,6 @@ public class WorkbenchConfig {
     // backwards incompatible changes are introduced into the Workflow, e.g. new required inputs
     // are added.
     public Integer extractionMethodLogicalVersion;
-    @Deprecated public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
     public int minExtractionScatterTasks;
