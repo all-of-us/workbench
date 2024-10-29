@@ -48,7 +48,6 @@ import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserAppEnvironment;
@@ -266,32 +265,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .toList();
   }
 
-  // use listRuntimes
-  @Deprecated(since = "October 2024", forRemoval = true)
-  @Override
-  public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedListRuntimes(
-      String workspaceNamespace) {
-    return listRuntimes(workspaceNamespace).stream()
-        .map(leonardoMapper::toDeprecatedListRuntimeResponse)
-        .toList();
-  }
-
   @Override
   public List<UserAppEnvironment> listUserApps(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
     return leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
-  }
-
-  // use deleteRuntimesInWorkspace
-  @Deprecated(since = "October 2024", forRemoval = true)
-  @Override
-  public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
-      String workspaceNamespace, ListRuntimeDeleteRequest req) {
-    // the UI only calls this with a single argument, so this is safe
-    String runtimeNameToDelete = req.getRuntimesToDelete().get(0);
-    return List.of(
-        leonardoMapper.toDeprecatedListRuntimeResponse(
-            deleteRuntime(workspaceNamespace, runtimeNameToDelete)));
   }
 
   @Override
