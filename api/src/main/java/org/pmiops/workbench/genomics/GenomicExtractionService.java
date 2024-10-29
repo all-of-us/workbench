@@ -375,11 +375,11 @@ public class GenomicExtractionService {
                 + personIdsFile.getName()
                 + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
-        // Added in https://github.com/broadinstitute/gatk/pull/7698
-        .put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"")
+        // Added Oct 2024 for logical version 4
+        // replaces extraction_uuid and cohort_table_prefix which are now set to this value
+        .put(EXTRACT_WORKFLOW_NAME + ".call_set_identifier", "\"" + extractionUuid + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"")
-        .put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"")
         .put(
             EXTRACT_WORKFLOW_NAME + ".gvs_project",
             "\"" + workspace.getCdrVersion().getBigqueryProject() + "\"")
