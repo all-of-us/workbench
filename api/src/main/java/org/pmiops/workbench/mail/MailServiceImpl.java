@@ -80,8 +80,6 @@ public class MailServiceImpl implements MailService {
       "emails/initial_credits_dollar_threshold/content.html";
   private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE =
       "emails/initial_credits_exhaustion/content.html";
-  private static final String INITIAL_CREDITS_EXPIRED_RESOURCE =
-      "emails/initial_credits_expired/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
   private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
       "emails/new_user_satisfaction_survey/content.html";
@@ -222,24 +220,6 @@ public class MailServiceImpl implements MailService {
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         "Alert - Initial credit exhaustion in All of Us Researcher Workbench",
-        logMsg,
-        htmlMessage);
-  }
-
-  @Override
-  public void alertUserInitialCreditsExpired(final DbUser user) throws MessagingException {
-    final String logMsg =
-        String.format(
-            "Sending email because initial credits have expired for User %s", userForLogging(user));
-    log.info(logMsg);
-
-    final String htmlMessage =
-        buildHtml(INITIAL_CREDITS_EXPIRED_RESOURCE, initialCreditsExpirationSubstitutionMap(user));
-
-    sendWithRetries(
-        Collections.singletonList(user.getContactEmail()),
-        Collections.emptyList(),
-        "Alert - Initial credit expiration in All of Us Researcher Workbench",
         logMsg,
         htmlMessage);
   }

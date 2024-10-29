@@ -25,8 +25,6 @@ public interface MailService {
 
   void alertUserInitialCreditsExhausted(final DbUser user) throws MessagingException;
 
-  void alertUserInitialCreditsExpired(final DbUser user) throws MessagingException;
-
   void alertUserAccessTierWarningThreshold(
       final DbUser user, long daysRemaining, Instant expirationTime, String tierShortName)
       throws MessagingException;
