@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final LeonardoApiClient leonardoApiClient;
   private final InstitutionService institutionService;
+  private final MailService mailService;
 
   @Autowired
   public InitialCreditsExpirationServiceImpl(
@@ -41,13 +43,14 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       LeonardoApiClient leonardoApiClient,
-      InstitutionService institutionService) {
+      InstitutionService institutionService, MailService mailService) {
     this.userDao = userDao;
     this.clock = clock;
     this.workspaceDao = workspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.leonardoApiClient = leonardoApiClient;
     this.institutionService = institutionService;
+    this.mailService = mailService;
   }
 
   @Override
@@ -70,6 +73,21 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   public boolean haveCreditsExpired(DbUser user) {
     return getCreditsExpiration(user)
         .map(expirationTime -> !expirationTime.after(new Timestamp(clock.instant().toEpochMilli())))
+        .orElse(false);
+  }
+
+  // Returns true if the user's credits are expiring within the initialCreditsExpirationWarningDays.
+  private boolean areCreditsExpiringSoon(DbUser user) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    long initialCreditsExpirationWarningDays =
+        workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDays;
+    return getCreditsExpiration(user)
+        .map(
+            expirationTime ->
+                now.after(
+                    new Timestamp(
+                        expirationTime.getTime()
+                            - TimeUnit.DAYS.toMillis(initialCreditsExpirationWarningDays))))
         .orElse(false);
   }
 
@@ -124,30 +142,40 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     if (null != userInitialCreditsExpiration
-        && haveCreditsExpired(user)
         && null == userInitialCreditsExpiration.getExpirationCleanupTime()) {
-      logger.info(
-          "Initial credits expired for user {}. Expiration time: {}",
-          user.getUsername(),
-          userInitialCreditsExpiration.getExpirationTime());
+      if (haveCreditsExpired(user)) {
+        logger.info(
+            "Initial credits expired for user {}. Expiration time: {}",
+            user.getUsername(),
+            userInitialCreditsExpiration.getExpirationTime());
 
-      workspaceDao.findAllByCreator(user).stream()
-          .filter(
-              ws ->
-                  BillingUtils.isInitialCredits(
-                      ws.getBillingAccountName(), workbenchConfigProvider.get()))
-          .filter(DbWorkspace::isActive)
-          .filter(ws -> !ws.isInitialCreditsExpired())
-          .forEach(
-              ws -> {
-                ws.setInitialCreditsExpired(true);
-                ws.setBillingStatus(BillingStatus.INACTIVE);
-                workspaceDao.save(ws);
-                deleteAppsAndRuntimesInWorkspace(ws);
-              });
+        workspaceDao.findAllByCreator(user).stream()
+            .filter(
+                ws ->
+                    BillingUtils.isInitialCredits(
+                        ws.getBillingAccountName(), workbenchConfigProvider.get()))
+            .filter(DbWorkspace::isActive)
+            .filter(ws -> !ws.isInitialCreditsExpired())
+            .forEach(
+                ws -> {
+                  ws.setInitialCreditsExpired(true);
+                  ws.setBillingStatus(BillingStatus.INACTIVE);
+                  workspaceDao.save(ws);
+                  deleteAppsAndRuntimesInWorkspace(ws);
+                });
 
-      userInitialCreditsExpiration.setExpirationCleanupTime(Timestamp.from(Instant.now()));
-      userDao.save(user);
+        userInitialCreditsExpiration.setExpirationCleanupTime(Timestamp.from(Instant.now()));
+        userDao.save(user);
+      } else if (areCreditsExpiringSoon(user)
+          && null == userInitialCreditsExpiration.getApproachingExpirationNotificationTime()) {
+        logger.info(
+            "Initial credits expiring soon for user {}. Expiration time: {}",
+            user.getUsername(),
+            userInitialCreditsExpiration.getExpirationTime());
+        //Send email notification to user
+        userInitialCreditsExpiration.setApproachingExpirationNotificationTime(Timestamp.from(Instant.now()));
+        userDao.save(user);
+      }
     }
   }
 
