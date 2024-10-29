@@ -177,7 +177,6 @@ public class WorkbenchConfig {
     // backwards incompatible changes are introduced into the Workflow, e.g. new required inputs
     // are added.
     public Integer extractionMethodLogicalVersion;
-    @Deprecated public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
     public int minExtractionScatterTasks;
