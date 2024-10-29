@@ -80,6 +80,8 @@ public class MailServiceImpl implements MailService {
       "emails/initial_credits_dollar_threshold/content.html";
   private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE =
       "emails/initial_credits_exhaustion/content.html";
+  private static final String INITIAL_CREDITS_EXPIRING_RESOURCE =
+      "emails/initial_credits_expiring/content.html";
   private static final String INITIAL_CREDITS_EXPIRED_RESOURCE =
       "emails/initial_credits_expired/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
@@ -235,6 +237,26 @@ public class MailServiceImpl implements MailService {
 
     final String htmlMessage =
         buildHtml(INITIAL_CREDITS_EXPIRED_RESOURCE, initialCreditsExpirationSubstitutionMap(user));
+
+    sendWithRetries(
+        Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
+        "Alert - Initial credit expiration in All of Us Researcher Workbench",
+        logMsg,
+        htmlMessage);
+  }
+
+  @Override
+  public void alertUserInitialCreditsExpiring(DbUser user) throws MessagingException {
+    final String logMsg =
+        String.format(
+            "Sending email because initial credits are expiring soon for User %s",
+            userForLogging(user));
+    log.info(logMsg);
+
+    final String htmlMessage =
+        buildHtml(
+            INITIAL_CREDITS_EXPIRING_RESOURCE, initialCreditsExpiringSubstitutionMap(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -599,6 +621,18 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
+  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExpiringSubstitutionMap(
+      DbUser user) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .put(EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION, formatCondensedDateCentralTime(user.getUserInitialCreditsExpiration().getExpirationTime().toInstant()))
+        .build();
+  }
+
   private ImmutableMap<EmailSubstitutionField, String> accessTierSubstitutionMap(
       Instant expirationTime, DbUser user, String tierShortName) {
 
@@ -834,6 +868,14 @@ public class MailServiceImpl implements MailService {
 
   private String formatCurrency(double currentUsage) {
     return NumberFormat.getCurrencyInstance().format(currentUsage);
+  }
+
+  private String formatCondensedDateCentralTime(Instant date) {
+    // e.g. 04/05/2021
+    return DateTimeFormatter.ofPattern("MM/dd/yyyy")
+        .withLocale(Locale.US)
+        .withZone(ZoneId.of("America/Chicago"))
+        .format(date);
   }
 
   private String formatDateCentralTime(Instant date) {
