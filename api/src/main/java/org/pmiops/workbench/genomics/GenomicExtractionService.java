@@ -4,7 +4,6 @@ import com.google.cloud.storage.Blob;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.Ints;
 import jakarta.inject.Provider;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -66,6 +65,7 @@ public class GenomicExtractionService {
   // Theoretical maximum is 20K-30K, keep it lower during the initial alpha period.
   private static final int MAX_EXTRACTION_SAMPLE_COUNT = 5_000;
   // Scatter count maximum for extraction. Affects number of workers and numbers of shards.
+  // TODO: remove?
   private static final int MAX_EXTRACTION_SCATTER = 2_000;
 
   private final DataSetService dataSetService;
@@ -355,16 +355,18 @@ public class GenomicExtractionService {
                 cohortExtractionConfig.operationalTerraWorkspaceBucket,
                 extractionFolder + "/person_ids.txt",
                 String.join("\n", personIds).getBytes(StandardCharsets.UTF_8));
-
-    // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
-    // keeping overhead low and limiting footprint on shared extraction quota.
-    int minScatter =
-        Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
-    int scatter =
-        Ints.constrainToRange(
-            Math.round(personIds.size() * cohortExtractionConfig.extractionScatterTasksPerSample),
-            minScatter,
-            MAX_EXTRACTION_SCATTER);
+    //
+    //    // Initial heuristic for scatter count, optimizing to avoid large compute/output shards
+    // while
+    //    // keeping overhead low and limiting footprint on shared extraction quota.
+    //    int minScatter =
+    //        Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
+    //    int scatter =
+    //        Ints.constrainToRange(
+    //            Math.round(personIds.size() *
+    // cohortExtractionConfig.extractionScatterTasksPerSample),
+    //            minScatter,
+    //            MAX_EXTRACTION_SCATTER);
 
     return new ImmutableMap.Builder<String, String>()
         .put(
@@ -386,8 +388,10 @@ public class GenomicExtractionService {
         .put(
             EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
             "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
-        // This value will need to be dynamically adjusted through testing
-        .put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatter))
+        // Removed Oct 2024 for logical version 4
+        // an extract_scatter_count_override is available - not sure if we should set that
+        // .put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatter))
+
         // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
         // etc
         .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")

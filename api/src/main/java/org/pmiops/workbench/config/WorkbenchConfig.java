@@ -179,7 +179,9 @@ public class WorkbenchConfig {
     public Integer extractionMethodLogicalVersion;
     public String extractionDestinationDataset;
     // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
+    // TODO: remove?
     public int minExtractionScatterTasks;
+    // TODO: remove?
     public float extractionScatterTasksPerSample;
     public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
