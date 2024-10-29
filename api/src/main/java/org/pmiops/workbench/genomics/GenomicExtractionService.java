@@ -313,53 +313,21 @@ public class GenomicExtractionService {
         .orElse(ImmutableList.of("unknown cause"));
   }
 
-  public GenomicExtractionJob submitGenomicExtractionJob(DbWorkspace workspace, DbDataset dataSet)
-      throws ApiException {
-    WgsCohortExtractionConfig cohortExtractionConfig =
-        workbenchConfigProvider.get().wgsCohortExtraction;
+  private Map<String, String> getWorkflowInputs(
+      DbWorkspace workspace,
+      WgsCohortExtractionConfig cohortExtractionConfig,
+      String extractionUuid,
+      List<String> personIds,
+      String extractionFolder,
+      String outputDir) {
 
-    RawlsWorkspaceDetails fcUserWorkspace =
-        fireCloudService.getWorkspace(workspace).get().getWorkspace();
-
-    String extractionUuid = UUID.randomUUID().toString();
-    String extractionFolder = "genomic-extractions/" + extractionUuid;
-
-    List<String> personIds = dataSetService.getPersonIdsWithWholeGenome(dataSet);
-    if (personIds.isEmpty()) {
-      throw new FailedPreconditionException(
-          "provided cohort contains no participants with whole genome data");
+    String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
+    if (destinationParts.length != 2) {
+      log.severe(
+          "bad config value for destination BigQuery dataset: "
+              + cohortExtractionConfig.extractionDestinationDataset);
+      throw new ServerErrorException();
     }
-    if (personIds.size() > MAX_EXTRACTION_SAMPLE_COUNT) {
-      throw new FailedPreconditionException(
-          String.format(
-              "provided dataset contains %d individuals with whole genome data, the current limit "
-                  + "for extraction is %d",
-              personIds.size(), MAX_EXTRACTION_SAMPLE_COUNT));
-    }
-
-    Blob personIdsFile =
-        extractionServiceAccountCloudStorageClientProvider
-            .get()
-            .writeFile(
-                // It is critical that this file is written to a bucket that the user cannot write
-                // to because its contents will feed into a SQL query with the cohort
-                // extraction SA's permissions
-                cohortExtractionConfig.operationalTerraWorkspaceBucket,
-                extractionFolder + "/person_ids.txt",
-                String.join("\n", personIds).getBytes(StandardCharsets.UTF_8));
-
-    final String outputDir =
-        "gs://" + fcUserWorkspace.getBucketName() + "/" + extractionFolder + "/vcfs/";
-
-    // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
-    // keeping overhead low and limiting footprint on shared extraction quota.
-    int minScatter =
-        Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
-    int scatter =
-        Ints.constrainToRange(
-            Math.round(personIds.size() * cohortExtractionConfig.extractionScatterTasksPerSample),
-            minScatter,
-            MAX_EXTRACTION_SCATTER);
 
     Map<String, String> maybeInputs = new HashMap<>();
     int methodLogicalVersion =
@@ -377,13 +345,87 @@ public class GenomicExtractionService {
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".filter_set_name", "\"" + filterSetName + "\"");
     }
 
-    String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
-    if (destinationParts.length != 2) {
-      log.severe(
-          "bad config value for destination BigQuery dataset: "
-              + cohortExtractionConfig.extractionDestinationDataset);
-      throw new ServerErrorException();
+    Blob personIdsFile =
+        extractionServiceAccountCloudStorageClientProvider
+            .get()
+            .writeFile(
+                // It is critical that this file is written to a bucket that the user cannot write
+                // to because its contents will feed into a SQL query with the cohort
+                // extraction SA's permissions
+                cohortExtractionConfig.operationalTerraWorkspaceBucket,
+                extractionFolder + "/person_ids.txt",
+                String.join("\n", personIds).getBytes(StandardCharsets.UTF_8));
+
+    // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
+    // keeping overhead low and limiting footprint on shared extraction quota.
+    int minScatter =
+        Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
+    int scatter =
+        Ints.constrainToRange(
+            Math.round(personIds.size() * cohortExtractionConfig.extractionScatterTasksPerSample),
+            minScatter,
+            MAX_EXTRACTION_SCATTER);
+
+    return new ImmutableMap.Builder<String, String>()
+        .put(
+            EXTRACT_WORKFLOW_NAME + ".cohort_sample_names",
+            "\"gs://" // Cromwell string inputs require double quotes
+                + personIdsFile.getBucket()
+                + "/"
+                + personIdsFile.getName()
+                + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
+        // Added in https://github.com/broadinstitute/gatk/pull/7698
+        .put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"")
+        .put(
+            EXTRACT_WORKFLOW_NAME + ".gvs_project",
+            "\"" + workspace.getCdrVersion().getBigqueryProject() + "\"")
+        .put(
+            EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
+            "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
+        // This value will need to be dynamically adjusted through testing
+        .put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatter))
+        // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
+        // etc
+        .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
+        .put(
+            EXTRACT_WORKFLOW_NAME + ".gatk_override",
+            "\"" + cohortExtractionConfig.gatkJarUri + "\"")
+        .putAll(maybeInputs)
+        .build();
+  }
+
+  public GenomicExtractionJob submitGenomicExtractionJob(DbWorkspace workspace, DbDataset dataSet)
+      throws ApiException {
+
+    List<String> personIds = dataSetService.getPersonIdsWithWholeGenome(dataSet);
+    if (personIds.isEmpty()) {
+      throw new FailedPreconditionException(
+          "provided cohort contains no participants with whole genome data");
     }
+    if (personIds.size() > MAX_EXTRACTION_SAMPLE_COUNT) {
+      throw new FailedPreconditionException(
+          String.format(
+              "provided dataset contains %d individuals with whole genome data, the current limit "
+                  + "for extraction is %d",
+              personIds.size(), MAX_EXTRACTION_SAMPLE_COUNT));
+    }
+
+    WgsCohortExtractionConfig cohortExtractionConfig =
+        workbenchConfigProvider.get().wgsCohortExtraction;
+
+    RawlsWorkspaceDetails fcUserWorkspace =
+        fireCloudService.getWorkspace(workspace).get().getWorkspace();
+
+    String extractionUuid = UUID.randomUUID().toString();
+    String extractionFolder = "genomic-extractions/" + extractionUuid;
+
+    final String outputDir =
+        "gs://" + fcUserWorkspace.getBucketName() + "/" + extractionFolder + "/vcfs/";
 
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
@@ -391,48 +433,13 @@ public class GenomicExtractionService {
             .createWorkspaceMethodConfig(
                 new FirecloudMethodConfiguration()
                     .inputs(
-                        new ImmutableMap.Builder<String, String>()
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".cohort_sample_names",
-                                "\"gs://" // Cromwell string inputs require double quotes
-                                    + personIdsFile.getBucket()
-                                    + "/"
-                                    + personIdsFile.getName()
-                                    + "\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".query_project",
-                                "\"" + workspace.getGoogleProject() + "\"")
-                            // Added in https://github.com/broadinstitute/gatk/pull/7698
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix",
-                                "\"" + extractionUuid + "\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".destination_project_id",
-                                "\"" + destinationParts[0] + "\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".destination_dataset_name",
-                                "\"" + destinationParts[1] + "\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".extraction_uuid",
-                                "\"" + extractionUuid + "\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".gvs_project",
-                                "\"" + workspace.getCdrVersion().getBigqueryProject() + "\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
-                                "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
-                            // This value will need to be dynamically adjusted through testing
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatter))
-                            // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
-                            // etc
-                            .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
-                            .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".gatk_override",
-                                "\"" + cohortExtractionConfig.gatkJarUri + "\"")
-                            .putAll(maybeInputs)
-                            .build())
+                        getWorkflowInputs(
+                            workspace,
+                            cohortExtractionConfig,
+                            extractionUuid,
+                            personIds,
+                            extractionFolder,
+                            outputDir))
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)
                     .methodRepoMethod(createRepoMethodParameter(cohortExtractionConfig))
