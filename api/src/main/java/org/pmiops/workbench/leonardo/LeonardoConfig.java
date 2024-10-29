@@ -24,6 +24,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @org.springframework.context.annotation.Configuration
 public class LeonardoConfig {
+  public static final String LEGACY_USER_RUNTIMES_API = "legacyUserRuntimesApi";
   public static final String USER_RUNTIMES_API = "userRuntimesApi";
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
 
@@ -130,12 +131,22 @@ public class LeonardoConfig {
     return apiClient;
   }
 
-  @Bean(name = USER_RUNTIMES_API)
+  @Bean(name = LEGACY_USER_RUNTIMES_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public RuntimesApi runtimesApi(
+  public RuntimesApi legacyRuntimesApi(
       @Qualifier(LEGACY_USER_LEONARDO_CLIENT)
           org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
     RuntimesApi api = new RuntimesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = USER_RUNTIMES_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi runtimesApi(
+      @Qualifier(USER_LEONARDO_CLIENT) ApiClient apiClient) {
+    org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi api =
+        new org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi();
     api.setApiClient(apiClient);
     return api;
   }
