@@ -338,6 +338,9 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       return leonardoApiClient.listRuntimesByProjectAsService(googleProject).stream()
           // this filter/map follows the discriminator logic in the source Leonardo Swagger
           // for OneOfRuntimeConfigInResponse
+
+          // TODO: does all this go away for the new client?
+
           .filter(
               resp -> {
                 var runtimeConfig =

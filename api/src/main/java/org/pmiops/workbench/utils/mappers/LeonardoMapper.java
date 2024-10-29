@@ -273,6 +273,8 @@ public interface LeonardoMapper {
       return;
     }
 
+    // TODO: does all this go away for the new client?
+
     Gson gson = new Gson();
     String runtimeConfigJson = gson.toJson(runtimeConfigObj);
     LeonardoRuntimeConfig runtimeConfig =
