@@ -224,7 +224,6 @@ describe('AdminUserProfile', () => {
 
       component();
       await waitUntilPageLoaded();
-      screen.logTestingPlaygroundURL();
       expectedText.map((text) => {
         expect(
           within(screen.getByTestId('data-access-tiers')).getByText(text)

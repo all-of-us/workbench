@@ -244,8 +244,7 @@ const InitialCreditsCard = ({
           <div style={styles.subHeader}>Initial credits</div>
           <InstitutionExpirationBypassExplanation
             bypassed={
-              institution?.institutionalInitialCreditsExpirationBypassed ??
-              false
+              !!institution?.institutionalInitialCreditsExpirationBypassed
             }
           />
 
@@ -482,7 +481,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         );
         setInstitutionsLoadingError(null);
       } catch (error) {
-        console.log('Error loading institutions: ', error);
         setInstitutionsLoadingError(
           'Could not get list of verified institutions - please try again later'
         );
