@@ -111,17 +111,6 @@ const styles = reactStyles({
   },
 });
 
-const UneditableField = (props: {
-  dataTestId: string;
-  label: string;
-  value: string | JSX.Element;
-}) => (
-  <div data-test-id={props.dataTestId} style={{ flex: '0 1 auto' }}>
-    <div style={styles.label}>{props.label}</div>
-    <div style={styles.value}>{props.value}</div>
-  </div>
-);
-
 enum EmailValidationStatus {
   UNCHECKED,
   VALID,
@@ -263,11 +252,15 @@ const InitialCreditsCard = ({
               />
             )}
             <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
-              <UneditableField
-                dataTestId='initial-credits-used'
-                label='Usage'
-                value={formatInitialCreditsUSD(updatedProfile.freeTierUsage)}
-              />
+              <div
+                data-test-id='initial-credits-used'
+                style={{ flex: '0 1 auto' }}
+              >
+                <div style={styles.label}>Usage</div>
+                <div style={styles.value}>
+                  {formatInitialCreditsUSD(updatedProfile.freeTierUsage)}
+                </div>
+              </div>
               <InitialCreditsDropdown
                 currentLimit={updatedProfile.freeTierDollarQuota}
                 previousLimit={oldProfile.freeTierDollarQuota}
