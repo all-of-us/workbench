@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.Collections;
@@ -241,13 +240,12 @@ public class RuntimeControllerTest {
   private LeonardoGetRuntimeResponse testLeoRuntime;
 
   private Runtime testRuntime;
-  private DbWorkspace testWorkspace;
 
   private DataprocConfig dataprocConfig;
-  private LinkedTreeMap<String, Object> dataprocConfigObj;
+  private LeonardoMachineConfig leoDataprocConfig;
 
   private GceConfig gceConfig;
-  private LinkedTreeMap<String, Object> gceConfigObj;
+  private LeonardoGceWithPdConfig leoGceConfig;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -279,22 +277,23 @@ public class RuntimeControllerTest {
 
     Runtime tmpRuntime = new Runtime();
 
-    dataprocConfigObj = new LinkedTreeMap<>();
-    dataprocConfigObj.put("cloudService", "DATAPROC");
-    dataprocConfigObj.put("numberOfWorkers", 0);
-    dataprocConfigObj.put("masterMachineType", "n1-standard-4");
-    dataprocConfigObj.put("masterDiskSize", 50.0);
+    leoDataprocConfig =
+        new LeonardoMachineConfig()
+            .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
+            .numberOfWorkers(0)
+            .masterMachineType("n1-standard-4")
+            .masterDiskSize(50);
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj, null);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, leoDataprocConfig, null);
     dataprocConfig = tmpRuntime.getDataprocConfig();
 
-    gceConfigObj = new LinkedTreeMap<>();
-    gceConfigObj.put("cloudService", "GCE");
-    gceConfigObj.put("bootDiskSize", 10.0);
-    gceConfigObj.put("diskSize", 100.0);
-    gceConfigObj.put("machineType", "n1-standard-2");
+    leoGceConfig =
+        new LeonardoGceWithPdConfig()
+            .cloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE)
+            .bootDiskSize(10)
+            .machineType("n1-standard-2");
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj, null);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, leoGceConfig, null);
     gceConfig = tmpRuntime.getGceConfig();
 
     testLeoRuntime =
@@ -307,7 +306,7 @@ public class RuntimeControllerTest {
             .status(LeonardoRuntimeStatus.DELETING)
             .runtimeImages(Collections.singletonList(RUNTIME_IMAGE))
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
-            .runtimeConfig(dataprocConfigObj)
+            .runtimeConfig(leoDataprocConfig)
             .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
 
     testRuntime =
@@ -319,9 +318,10 @@ public class RuntimeControllerTest {
             .toolDockerImage(TOOL_DOCKER_IMAGE)
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
             .dataprocConfig(dataprocConfig)
-            .createdDate(createdDate);
+            .createdDate(createdDate)
+            .errors(Collections.emptyList());
 
-    testWorkspace =
+    DbWorkspace testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
             .setGoogleProject(GOOGLE_PROJECT_ID)
@@ -437,12 +437,22 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_errorNoMessages() throws ApiException {
+  public void testGetRuntime_error_nullMessages() throws ApiException {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(null));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
-        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
+        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR).errors(null));
+  }
+
+  @Test
+  public void testGetRuntime_error_emptyMessageList() throws ApiException {
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenReturn(
+            testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(Collections.emptyList()));
+
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
+        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR).errors(Collections.emptyList()));
   }
 
   @Test
@@ -550,14 +560,15 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_fromListRuntimes_invalidRuntime() throws ApiException {
-    dataprocConfigObj.put("cloudService", "notACloudService");
+    leoDataprocConfig.cloudService(
+        LeonardoMachineConfig.CloudServiceEnum.fromValue("notACloudService"));
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
-                    .runtimeConfig(dataprocConfigObj)
+                    .runtimeConfig(leoDataprocConfig)
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -573,7 +584,7 @@ public class RuntimeControllerTest {
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
-                    .runtimeConfig(gceConfigObj)
+                    .runtimeConfig(leoGceConfig)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
@@ -587,15 +598,16 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_dataprocConfig() throws ApiException {
     String timestamp = "2020-09-13T19:19:57.347Z";
 
-    LinkedTreeMap<String, Object> dataProcConfigObj = new LinkedTreeMap<>();
-    dataProcConfigObj.put("cloudService", "DATAPROC");
-    dataProcConfigObj.put("masterDiskSize", 50.0);
-    dataProcConfigObj.put("masterMachineType", "n1-standard-4");
-    dataProcConfigObj.put("numberOfPreemptibleWorkers", 4);
-    dataProcConfigObj.put("numberOfWorkerLocalSSDs", 8);
-    dataProcConfigObj.put("numberOfWorkers", 3);
-    dataProcConfigObj.put("workerDiskSize", 30);
-    dataProcConfigObj.put("workerMachineType", "n1-standard-2");
+    LeonardoMachineConfig dataprocRuntimeConfig =
+        new LeonardoMachineConfig()
+            .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
+            .masterDiskSize(50)
+            .masterMachineType("n1-standard-4")
+            .numberOfPreemptibleWorkers(4)
+            .numberOfWorkerLocalSSDs(8)
+            .numberOfWorkers(3)
+            .workerDiskSize(30)
+            .workerMachineType("n1-standard-2");
 
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
@@ -603,7 +615,7 @@ public class RuntimeControllerTest {
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
-                    .runtimeConfig(dataProcConfigObj)
+                    .runtimeConfig(dataprocRuntimeConfig)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
@@ -771,7 +783,7 @@ public class RuntimeControllerTest {
   @Test
   public void testGetRuntime_gceConfig() throws ApiException {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime.runtimeConfig(gceConfigObj));
+        .thenReturn(testLeoRuntime.runtimeConfig(leoGceConfig));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.dataprocConfig(null).gceConfig(gceConfig));
@@ -782,7 +794,7 @@ public class RuntimeControllerTest {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(
             testLeoRuntime
-                .runtimeConfig(gceConfigObj)
+                .runtimeConfig(leoGceConfig)
                 .diskConfig(
                     new LeonardoDiskConfig()
                         .diskType(LeonardoDiskType.SSD)
