@@ -235,8 +235,7 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        buildHtml(
-            INITIAL_CREDITS_EXPIRING_RESOURCE, initialCreditsExpiringSubstitutionMap(user));
+        buildHtml(INITIAL_CREDITS_EXPIRING_RESOURCE, initialCreditsExpiringSubstitutionMap(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -609,7 +608,10 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
-        .put(EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION, formatCondensedDateCentralTime(user.getUserInitialCreditsExpiration().getExpirationTime().toInstant()))
+        .put(
+            EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION,
+            formatCondensedDateCentralTime(
+                user.getUserInitialCreditsExpiration().getExpirationTime().toInstant()))
         .build();
   }
 

@@ -44,7 +44,8 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       LeonardoApiClient leonardoApiClient,
-      InstitutionService institutionService, MailService mailService) {
+      InstitutionService institutionService,
+      MailService mailService) {
     this.userDao = userDao;
     this.clock = clock;
     this.workspaceDao = workspaceDao;
@@ -175,7 +176,8 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
             userInitialCreditsExpiration.getExpirationTime());
         try {
           mailService.alertUserInitialCreditsExpiring(user);
-          userInitialCreditsExpiration.setApproachingExpirationNotificationTime(Timestamp.from(Instant.now()));
+          userInitialCreditsExpiration.setApproachingExpirationNotificationTime(
+              Timestamp.from(Instant.now()));
           userDao.save(user);
         } catch (MessagingException e) {
           logger.error(
