@@ -5,6 +5,7 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -85,14 +86,24 @@ public interface WorkspaceMapper {
 
     List<DbWorkspace> dbWorkspaces =
         workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
+    return toApiWorkspaceResponseList(dbWorkspaces, fcWorkspacesByUuid, expirationService);
+  }
+
+  // safely combines dbWorkspaces and fcWorkspacesByUuid, returning only workspaces which appear in both
+  default List<WorkspaceResponse> toApiWorkspaceResponseList(
+      List<DbWorkspace> dbWorkspaces,
+      Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid,
+      InitialCreditsExpirationService expirationService) {
     return dbWorkspaces.stream()
-        .map(
-            dbWorkspace -> {
-              var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
-              return toApiWorkspaceResponse(
-                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), expirationService),
-                  fcResponse.getAccessLevel());
-            })
+        .flatMap(
+            dbWorkspace ->
+                Stream.ofNullable(fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid()))
+                    .map(
+                        fcResponse ->
+                            toApiWorkspaceResponse(
+                                toApiWorkspace(
+                                    dbWorkspace, fcResponse.getWorkspace(), expirationService),
+                                fcResponse.getAccessLevel())))
         .toList();
   }
 
