@@ -22,13 +22,10 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
-import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -41,10 +38,10 @@ import org.springframework.context.annotation.Import;
 public class FeaturedWorkspaceTest {
 
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  // @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private InitialCreditsExpirationService mockInitialCreditsExpirationService;
-  @MockBean private WorkspaceMapper mockWorkspaceMapper;
+  // @MockBean private WorkspaceMapper mockWorkspaceMapper;
 
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
@@ -53,7 +50,9 @@ public class FeaturedWorkspaceTest {
   @TestConfiguration
   @Import({
     FakeClockConfiguration.class,
+    // FeaturedWorkspaceMapperImpl.class,
     FeaturedWorkspaceServiceImpl.class,
+    // WorkspaceMapperImpl.class,
   })
   @MockBean({
     AccessTierServiceImpl.class,
@@ -70,9 +69,9 @@ public class FeaturedWorkspaceTest {
   @BeforeEach
   public void setUp() {
     dbWorkspace = new DbWorkspace().setWorkspaceNamespace("ns").setName("name");
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
-            DbFeaturedCategory.TUTORIAL_WORKSPACES))
-        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+    //    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
+    //            DbFeaturedCategory.TUTORIAL_WORKSPACES))
+    //        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 
   @Test
@@ -107,26 +106,26 @@ public class FeaturedWorkspaceTest {
             mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName()))
         .thenReturn(rawlsWorkspaceResponse);
 
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
-            FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString())))
-        .thenReturn(dbFeaturedCategory);
+    //    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
+    //            FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString())))
+    //        .thenReturn(dbFeaturedCategory);
     when(mockFeaturedWorkspaceDao.findDbFeaturedWorkspacesByCategory(dbFeaturedCategory))
         .thenReturn(Collections.singletonList(dbFeaturedWorkspace));
-    Workspace mockWorkspace =
-        new Workspace()
-            .namespace(namespace)
-            .featuredCategory(FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString()));
-    when(mockWorkspaceMapper.toApiWorkspace(
-            mockDbWorkspace,
-            rawlsWorkspaceResponse.getWorkspace(),
-            mockInitialCreditsExpirationService))
-        .thenReturn(mockWorkspace);
-    when(mockWorkspaceMapper.toApiWorkspaceResponse(
-            mockWorkspace, rawlsWorkspaceResponse.getAccessLevel()))
-        .thenReturn(
-            new WorkspaceResponse()
-                .workspace(mockWorkspace)
-                .accessLevel(WorkspaceAccessLevel.OWNER));
+//    Workspace mockWorkspace =
+//        new Workspace()
+//            .namespace(namespace)
+//            .featuredCategory(FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString()));
+    //    when(mockWorkspaceMapper.toApiWorkspace(
+    //            mockDbWorkspace,
+    //            rawlsWorkspaceResponse.getWorkspace(),
+    //            mockInitialCreditsExpirationService))
+    //        .thenReturn(mockWorkspace);
+    //    when(mockWorkspaceMapper.toApiWorkspaceResponse(
+    //            mockWorkspace, rawlsWorkspaceResponse.getAccessLevel()))
+    //        .thenReturn(
+    //            new WorkspaceResponse()
+    //                .workspace(mockWorkspace)
+    //                .accessLevel(WorkspaceAccessLevel.OWNER));
   }
 
   @Test

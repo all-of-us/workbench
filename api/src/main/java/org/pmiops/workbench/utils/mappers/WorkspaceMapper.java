@@ -89,7 +89,8 @@ public interface WorkspaceMapper {
     return toApiWorkspaceResponseList(dbWorkspaces, fcWorkspacesByUuid, expirationService);
   }
 
-  // safely combines dbWorkspaces and fcWorkspacesByUuid, returning only workspaces which appear in both
+  // safely combines dbWorkspaces and fcWorkspacesByUuid,
+  // returning only workspaces which appear in both
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
       List<DbWorkspace> dbWorkspaces,
       Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid,
