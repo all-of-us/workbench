@@ -3,6 +3,7 @@ package org.pmiops.workbench.featuredworkspace;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,7 @@ import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -44,6 +45,7 @@ public class FeaturedWorkspaceTest {
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
   private DbWorkspace dbWorkspace;
+  private List<RawlsWorkspaceListResponse> rawlsWorkspaces;
 
   @TestConfiguration
   @Import({
@@ -70,6 +72,7 @@ public class FeaturedWorkspaceTest {
   @BeforeEach
   public void setUp() {
     dbWorkspace = new DbWorkspace().setWorkspaceNamespace("ns").setName("name");
+    rawlsWorkspaces = new ArrayList<>();
   }
 
   @Test
@@ -90,30 +93,34 @@ public class FeaturedWorkspaceTest {
         .hasValue(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 
-  void mockFeaturedWorkspaces(String namespace, DbFeaturedCategory dbFeaturedCategory) {
+  void mockFeaturedWorkspaces(
+      String namespace, DbFeaturedCategory dbFeaturedCategory, String firecloudUuid) {
     DbWorkspace mockDbWorkspace =
-        new DbWorkspace().setWorkspaceNamespace(namespace).setWorkspaceId(1);
+        new DbWorkspace()
+            .setWorkspaceNamespace(namespace)
+            .setWorkspaceId(1)
+            .setFirecloudUuid(firecloudUuid);
 
     DbFeaturedWorkspace dbFeaturedWorkspace =
         new DbFeaturedWorkspace().setWorkspace(mockDbWorkspace).setCategory(dbFeaturedCategory);
 
-    RawlsWorkspaceResponse rawlsWorkspaceResponse = new RawlsWorkspaceResponse();
-    rawlsWorkspaceResponse.workspace(new RawlsWorkspaceDetails().workspaceId("1"));
-    rawlsWorkspaceResponse.accessLevel(RawlsWorkspaceAccessLevel.OWNER);
-    when(mockFireCloudService.getWorkspace(
-            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName()))
-        .thenReturn(rawlsWorkspaceResponse);
-
     when(mockFeaturedWorkspaceDao.findDbFeaturedWorkspacesByCategory(dbFeaturedCategory))
         .thenReturn(Collections.singletonList(dbFeaturedWorkspace));
+
+    rawlsWorkspaces.add(
+        new RawlsWorkspaceListResponse()
+            .workspace(new RawlsWorkspaceDetails().workspaceId(firecloudUuid))
+            .accessLevel(RawlsWorkspaceAccessLevel.OWNER));
+
+    when(mockFireCloudService.getWorkspaces()).thenReturn(rawlsWorkspaces);
   }
 
   @Test
   public void testGetByFeaturedCategory() {
-    mockFeaturedWorkspaces("Tutorial_namespace", DbFeaturedCategory.TUTORIAL_WORKSPACES);
-    mockFeaturedWorkspaces("Phenotype_namespace", DbFeaturedCategory.PHENOTYPE_LIBRARY);
-    mockFeaturedWorkspaces("Demo_namespace", DbFeaturedCategory.DEMO_PROJECTS);
-    mockFeaturedWorkspaces("Community_namespace", DbFeaturedCategory.COMMUNITY);
+    mockFeaturedWorkspaces("Tutorial_namespace", DbFeaturedCategory.TUTORIAL_WORKSPACES, "one");
+    mockFeaturedWorkspaces("Phenotype_namespace", DbFeaturedCategory.PHENOTYPE_LIBRARY, "two");
+    mockFeaturedWorkspaces("Demo_namespace", DbFeaturedCategory.DEMO_PROJECTS, "three");
+    mockFeaturedWorkspaces("Community_namespace", DbFeaturedCategory.COMMUNITY, "four");
 
     List<WorkspaceResponse> workspaceResponsesList =
         featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
