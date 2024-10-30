@@ -1,6 +1,7 @@
 package org.pmiops.workbench.featuredworkspace;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -160,5 +161,23 @@ public class FeaturedWorkspaceTest {
         featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
     assertThat(workspaceResponsesList.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void testGetByFeaturedCategory_inaccessible() {
+    mockFeaturedWorkspaces("Tutorial_namespace", DbFeaturedCategory.TUTORIAL_WORKSPACES, "one");
+
+    // override the mock so that FC getWorkspace() does not return the workspace
+    // which simulates inaccessibility to my user
+
+    when(mockFireCloudService.getWorkspaces()).thenReturn(Collections.emptyList());
+
+    List<WorkspaceResponse> workspaceResponsesList =
+        assertDoesNotThrow(
+            () ->
+                featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+                    FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
+
+    assertThat(workspaceResponsesList).isEmpty();
   }
 }
