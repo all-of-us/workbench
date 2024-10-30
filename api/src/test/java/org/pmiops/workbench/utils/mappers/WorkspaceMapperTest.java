@@ -40,6 +40,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -205,12 +206,31 @@ public class WorkspaceMapperTest {
   }
 
   @Test
-  public void testConvertsFirecloudResponseToApiResponse() {
+  public void testConvertsFirecloudResponseToApiResponse_2_param_version() {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
             workspaceMapper.toApiWorkspace(
                 sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService),
             RawlsWorkspaceAccessLevel.PROJECT_OWNER);
+
+    assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
+
+    // Verify data came from the DB workspace.
+    assertThat(resp.getWorkspace().getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+
+    // Verify data came from the Firecloud workspace.
+    assertThat(resp.getWorkspace().getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
+  }
+
+  @Test
+  public void testConvertsFirecloudResponseToApiResponse_3_param_version() {
+    RawlsWorkspaceListResponse rawlsResponse =
+        new RawlsWorkspaceListResponse()
+            .workspace(sourceFirecloudWorkspace)
+            .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
+    final WorkspaceResponse resp =
+        workspaceMapper.toApiWorkspaceResponse(
+            sourceDbWorkspace, rawlsResponse, initialCreditsExpirationService);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
 

@@ -71,6 +71,15 @@ public interface WorkspaceMapper {
   WorkspaceResponse toApiWorkspaceResponse(
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
+  default WorkspaceResponse toApiWorkspaceResponse(
+      DbWorkspace dbWorkspace,
+      RawlsWorkspaceListResponse fcResponse,
+      InitialCreditsExpirationService expirationService) {
+    return toApiWorkspaceResponse(
+        toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), expirationService),
+        fcResponse.getAccessLevel());
+  }
+
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
       WorkspaceDao workspaceDao,
       List<RawlsWorkspaceListResponse> fcWorkspaces,
@@ -101,10 +110,7 @@ public interface WorkspaceMapper {
                 Stream.ofNullable(fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid()))
                     .map(
                         fcResponse ->
-                            toApiWorkspaceResponse(
-                                toApiWorkspace(
-                                    dbWorkspace, fcResponse.getWorkspace(), expirationService),
-                                fcResponse.getAccessLevel())))
+                            toApiWorkspaceResponse(dbWorkspace, fcResponse, expirationService)))
         .toList();
   }
 
