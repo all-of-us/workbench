@@ -23,12 +23,12 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,16 +92,18 @@ public class GenomicExtractionServiceTest {
   private static final String FC_SUBMISSION_ID = "123";
 
   @Autowired GenomicExtractionService genomicExtractionService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired MethodConfigurationsApi methodConfigurationsApi;
-  @Autowired SubmissionsApi submissionsApi;
-  @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
-  @Autowired UserDao userDao;
-  @Autowired DataSetDao dataSetDao;
-  @Autowired WorkspaceDao workspaceDao;
+
   @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired DataSetService mockDataSetService;
-  @Autowired JiraService mockJiraService;
+  @Autowired DataSetDao dataSetDao;
+  @Autowired UserDao userDao;
+  @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
+  @Autowired WorkspaceDao workspaceDao;
+
+  @MockBean DataSetService mockDataSetService;
+  @MockBean FireCloudService mockFireCloudService;
+  @MockBean JiraService mockJiraService;
+  @MockBean MethodConfigurationsApi mockMethodConfigurationsApi;
+  @MockBean SubmissionsApi mockSubmissionsApi;
 
   private DbWorkspace targetWorkspace;
 
@@ -117,13 +119,6 @@ public class GenomicExtractionServiceTest {
     GenomicExtractionMapperImpl.class,
     CommonMappers.class,
     WorkspaceAuthService.class
-  })
-  @MockBean({
-    DataSetService.class,
-    FireCloudService.class,
-    JiraService.class,
-    MethodConfigurationsApi.class,
-    SubmissionsApi.class
   })
   static class Configuration {
     @Bean
@@ -170,15 +165,19 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.extractionDestinationDataset = "extract-proj.extract-ds";
     workbenchConfig.wgsCohortExtraction.cdrv7.methodName = "methodName";
     workbenchConfig.wgsCohortExtraction.cdrv7.methodNamespace = "methodNamespace";
-    workbenchConfig.wgsCohortExtraction.cdrv7.methodRepoVersion = 1;
+    workbenchConfig.wgsCohortExtraction.cdrv7.methodRepoVersion = 10;
     workbenchConfig.wgsCohortExtraction.cdrv7.methodLogicalVersion = 3;
     workbenchConfig.wgsCohortExtraction.cdrv7.minExtractionScatterTasks = 100;
     workbenchConfig.wgsCohortExtraction.cdrv7.extractionScatterTasksPerSample = 4;
+    workbenchConfig.wgsCohortExtraction.cdrv8.methodName = "v8MethodName";
+    workbenchConfig.wgsCohortExtraction.cdrv8.methodNamespace = "v8MethodNamespace";
+    workbenchConfig.wgsCohortExtraction.cdrv8.methodRepoVersion = 1;
+    workbenchConfig.wgsCohortExtraction.cdrv8.methodLogicalVersion = 1;
 
     RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails().bucketName("user-bucket");
     RawlsWorkspaceResponse fcWorkspaceResponse =
         new RawlsWorkspaceResponse().workspace(fcWorkspace);
-    doReturn(Optional.of(fcWorkspaceResponse)).when(fireCloudService).getWorkspace(any());
+    doReturn(Optional.of(fcWorkspaceResponse)).when(mockFireCloudService).getWorkspace(any());
     currentUser = createUser("a@fake-research-aou.org");
 
     FirecloudMethodConfiguration firecloudMethodConfiguration = new FirecloudMethodConfiguration();
@@ -189,30 +188,33 @@ public class GenomicExtractionServiceTest {
         new FirecloudValidatedMethodConfiguration();
     validatedMethodConfiguration.setMethodConfiguration(firecloudMethodConfiguration);
     doReturn(validatedMethodConfiguration)
-        .when(methodConfigurationsApi)
+        .when(mockMethodConfigurationsApi)
         .createWorkspaceMethodConfig(any(), any(), any());
 
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setBigqueryProject("bigquery_project");
-    cdrVersion.setWgsBigqueryDataset("wgs_dataset");
-    cdrVersion = cdrVersionDao.save(cdrVersion);
+    DbCdrVersion cdrVersion =
+        cdrVersionDao.save(
+            new DbCdrVersion()
+                .setCdrVersionId(7)
+                .setBigqueryProject("bigquery_project")
+                .setWgsBigqueryDataset("wgs_dataset"));
 
-    DbWorkspace workspace = new DbWorkspace();
-    workspace.setWorkspaceNamespace("target-ws-namespace");
-    workspace.setFirecloudName("target-ws-fc-name");
-    workspace.setName("target-ws-name");
-    workspace.setWorkspaceId(2);
-    workspace.setCdrVersion(cdrVersion);
-    targetWorkspace = workspaceDao.save(workspace);
+    targetWorkspace =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceId(2)
+                .setWorkspaceNamespace("target-ws-namespace")
+                .setFirecloudName("target-ws-fc-name")
+                .setName("target-ws-name")
+                .setCdrVersion(cdrVersion));
 
     FirecloudSubmissionResponse submissionResponse = new FirecloudSubmissionResponse();
     submissionResponse.setSubmissionId(FC_SUBMISSION_ID);
     submissionResponse.setSubmissionDate(
         CommonMappers.offsetDateTimeUtc(new Timestamp(CLOCK.instant().toEpochMilli())));
-    doReturn(submissionResponse).when(submissionsApi).createSubmission(any(), any(), any());
+    doReturn(submissionResponse).when(mockSubmissionsApi).createSubmission(any(), any(), any());
 
     doReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.READER))
-        .when(fireCloudService)
+        .when(mockFireCloudService)
         .getWorkspace(anyString(), anyString());
 
     doReturn(new CreatedIssue().key("RW-123"))
@@ -224,7 +226,7 @@ public class GenomicExtractionServiceTest {
 
   public void mockGetFirecloudSubmission(FirecloudSubmission submission) throws ApiException {
     doReturn(submission)
-        .when(submissionsApi)
+        .when(mockSubmissionsApi)
         .getSubmission(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
@@ -284,7 +286,7 @@ public class GenomicExtractionServiceTest {
             .submissionDate(OffsetDateTime.now()));
 
     doReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.NO_ACCESS))
-        .when(fireCloudService)
+        .when(mockFireCloudService)
         .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
 
     assertThrows(
@@ -295,7 +297,7 @@ public class GenomicExtractionServiceTest {
         });
 
     doReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.READER))
-        .when(fireCloudService)
+        .when(mockFireCloudService)
         .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
     genomicExtractionService.getGenomicExtractionJobs(
         targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
@@ -417,7 +419,7 @@ public class GenomicExtractionServiceTest {
             .submissionDate(OffsetDateTime.now());
 
     doReturn(firecloudSubmission)
-        .when(submissionsApi)
+        .when(mockSubmissionsApi)
         .getSubmission(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
@@ -439,7 +441,7 @@ public class GenomicExtractionServiceTest {
                             .outputs(
                                 ImmutableMap.of(
                                     EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb", vcfSize)))))
-        .when(submissionsApi)
+        .when(mockSubmissionsApi)
         .getWorkflowOutputs(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
@@ -455,9 +457,18 @@ public class GenomicExtractionServiceTest {
 
   @Test
   public void submitExtractionJob() throws ApiException {
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
-        .thenReturn(ImmutableList.of("1", "2", "3"));
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1", "2", "3"));
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+
+    ArgumentCaptor<FirecloudMethodConfiguration> argument =
+        ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
+
+    verify(mockMethodConfigurationsApi)
+        .createWorkspaceMethodConfig(argument.capture(), any(), any());
+    assertThat(argument.getValue().getMethodConfigVersion())
+        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv7.methodRepoVersion);
+    assertThat(argument.getValue().getNamespace())
+        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv7.methodNamespace);
 
     verify(cloudStorageClient)
         .writeFile(
@@ -475,13 +486,14 @@ public class GenomicExtractionServiceTest {
 
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1"));
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
 
-    verify(methodConfigurationsApi).createWorkspaceMethodConfig(argument.capture(), any(), any());
+    verify(mockMethodConfigurationsApi)
+        .createWorkspaceMethodConfig(argument.capture(), any(), any());
     String actualOutputDir =
         argument.getValue().getInputs().get(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir");
 
@@ -492,22 +504,49 @@ public class GenomicExtractionServiceTest {
   @Test
   public void submitExtractionJob_many() throws ApiException {
     final List<String> largePersonIdList =
-        LongStream.range(1, 376).boxed().map(id -> id.toString()).collect(Collectors.toList());
+        LongStream.range(1, 376).boxed().map(Object::toString).toList();
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
 
-    verify(methodConfigurationsApi).createWorkspaceMethodConfig(argument.capture(), any(), any());
+    verify(mockMethodConfigurationsApi)
+        .createWorkspaceMethodConfig(argument.capture(), any(), any());
     String actualScatter =
         argument.getValue().getInputs().get(EXTRACT_WORKFLOW_NAME + ".scatter_count");
     assertThat(actualScatter).isEqualTo("1500");
   }
 
   @Test
-  public void submitExtractionJob_noWgsData() throws ApiException {
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
+  public void submitExtractionJob_v8() throws ApiException {
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1", "2", "3"));
+
+    DbCdrVersion cdrV8 =
+        cdrVersionDao.save(
+            new DbCdrVersion()
+                .setCdrVersionId(8)
+                .setBigqueryProject("bigquery_project")
+                .setWgsBigqueryDataset("wgs_dataset")
+                .setNeedsV8GenomicExtractionWorkflow(true));
+    targetWorkspace = workspaceDao.save(targetWorkspace.setCdrVersion(cdrV8));
+
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+
+    ArgumentCaptor<FirecloudMethodConfiguration> argument =
+        ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
+
+    verify(mockMethodConfigurationsApi)
+        .createWorkspaceMethodConfig(argument.capture(), any(), any());
+    assertThat(argument.getValue().getMethodConfigVersion())
+        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv8.methodRepoVersion);
+    assertThat(argument.getValue().getNamespace())
+        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv8.methodNamespace);
+  }
+
+  @Test
+  public void submitExtractionJob_noWgsData() {
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(Collections.emptyList());
 
     assertThrows(
         FailedPreconditionException.class,
@@ -515,9 +554,9 @@ public class GenomicExtractionServiceTest {
   }
 
   @Test
-  public void submitExtractionJob_tooManySamples() throws ApiException {
+  public void submitExtractionJob_tooManySamples() {
     final List<String> largePersonIdList =
-        LongStream.range(1, 6_000).boxed().map(id -> id.toString()).collect(Collectors.toList());
+        LongStream.range(1, 6_000).boxed().map(Object::toString).toList();
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
 
     assertThrows(
@@ -532,7 +571,7 @@ public class GenomicExtractionServiceTest {
             FirecloudSubmissionStatus.EVALUATING, FirecloudWorkflowStatus.RUNNING);
 
     doNothing()
-        .when(submissionsApi)
+        .when(mockSubmissionsApi)
         .abortSubmission(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
@@ -542,7 +581,7 @@ public class GenomicExtractionServiceTest {
         targetWorkspace,
         String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
 
-    verify(submissionsApi, times(1))
+    verify(mockSubmissionsApi, times(1))
         .abortSubmission(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,

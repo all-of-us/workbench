@@ -68,6 +68,7 @@ public class WorkbenchConfig {
     config.tanagra = new TanagraConfig();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.wgsCohortExtraction.cdrv7 = new WgsCohortExtractionConfig.CDRv7Config();
+    config.wgsCohortExtraction.cdrv8 = new WgsCohortExtractionConfig.CDRv8Config();
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
     config.e2eTestUsers = new E2ETestUserConfig();
