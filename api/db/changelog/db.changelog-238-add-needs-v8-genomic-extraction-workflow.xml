@@ -6,9 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="thibault" id="db.changelog-238-add-needs-v8-genomic-extraction-workflow">
     <addColumn tableName="cdr_version">
-      <column name="needs_v8_genomic_extraction_workflow" type="boolean" defaultValueBoolean="false">
-        <constraints nullable="false"/>
-      </column>
+      <column name="needs_v8_genomic_extraction_workflow" type="boolean" defaultValueBoolean="false"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>
