@@ -407,14 +407,15 @@ public class GenomicExtractionService {
               personIds.size(), MAX_EXTRACTION_SAMPLE_COUNT));
     }
 
+    // we use different workflows based on the CDR version:
+    // one version for v7 or earlier, and one for v8 or later
+    boolean v7OrEarlier = !workspace.getCdrVersion().getNeedsV8GenomicExtractionWorkflow();
+
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
-    // TODO choose version based on workspace.getCdrVersion()
-    boolean v7 = true;
-
     Optional<Integer> scatterCount = Optional.empty();
-    if (v7) {
+    if (v7OrEarlier) {
       int logicalVersion = cohortExtractionConfig.cdrv7.methodLogicalVersion;
       if (logicalVersion < EARLIEST_SUPPORTED_V7_METHOD_VERSION) {
         log.severe("unsupported GVS extract method version: " + logicalVersion);
@@ -434,7 +435,7 @@ public class GenomicExtractionService {
     }
 
     VersionedConfig versionedConfig =
-        v7 ? cohortExtractionConfig.cdrv7 : cohortExtractionConfig.cdrv8;
+        v7OrEarlier ? cohortExtractionConfig.cdrv7 : cohortExtractionConfig.cdrv8;
 
     RawlsWorkspaceDetails fcUserWorkspace =
         fireCloudService.getWorkspace(workspace).get().getWorkspace();
