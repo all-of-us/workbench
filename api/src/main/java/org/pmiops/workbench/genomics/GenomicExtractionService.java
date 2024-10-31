@@ -122,13 +122,12 @@ public class GenomicExtractionService {
     String namespace = String.valueOf(perCdrConfig.methodNamespace);
     String version = String.valueOf(perCdrConfig.methodRepoVersion);
 
-    return new ImmutableMap.Builder<String, String>()
-        .put("methodName", name)
-        .put("methodVersion", version)
-        .put("methodNamespace", namespace)
-        .put("methodUri", String.format("agora://%s/%s/%s", namespace, name, version))
-        .put("sourceRepo", "agora")
-        .build();
+    return Map.of(
+        "methodName", name,
+        "methodVersion", version,
+        "methodNamespace", namespace,
+        "methodUri", String.format("agora://%s/%s/%s", namespace, name, version),
+        "sourceRepo", "agora");
   }
 
   private boolean isTerminal(TerraJobStatus status) {
@@ -405,14 +404,14 @@ public class GenomicExtractionService {
 
     // we use different workflows based on the CDR version:
     // one version for v7 or earlier, and one for v8 or later
-    boolean v8OrLater =
+    boolean v8orLater =
         Boolean.TRUE.equals(workspace.getCdrVersion().getNeedsV8GenomicExtractionWorkflow());
 
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
     Optional<Integer> scatterCount = Optional.empty();
-    if (!v8OrLater) {
+    if (!v8orLater) {
       int logicalVersion = cohortExtractionConfig.cdrv7.methodLogicalVersion;
       if (logicalVersion < EARLIEST_SUPPORTED_V7_METHOD_VERSION) {
         log.severe("unsupported GVS extract method version: " + logicalVersion);
@@ -432,7 +431,7 @@ public class GenomicExtractionService {
     }
 
     VersionedConfig versionedConfig =
-        v8OrLater ? cohortExtractionConfig.cdrv8 : cohortExtractionConfig.cdrv7;
+        v8orLater ? cohortExtractionConfig.cdrv8 : cohortExtractionConfig.cdrv7;
 
     RawlsWorkspaceDetails fcUserWorkspace =
         fireCloudService.getWorkspace(workspace).get().getWorkspace();
