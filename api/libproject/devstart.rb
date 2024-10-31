@@ -2063,12 +2063,10 @@ def create_terra_method_snapshot(cmd_name, *args)
     "--method-name [method-name]",
     ->(opts, v) { opts.method_name = v},
     "Agora method name to create snapshot in.")
+
   op.add_validator ->(opts) {
-# if we re-enable all-projects, update to:
-#     if (!opts.project and !opts.all_projects)
-#       common.error "A project must be set or --all-projects must be true"
-    if (!opts.project)
-      common.error "A project must be set"
+    unless (opts.project and opts.source_git_repo and opts.source_git_path and opts.source_git_ref and opts.method_namespace and opts.method_name)
+      common.error "All arguments are required"
       raise ArgumentError
     end
   }
@@ -2102,7 +2100,7 @@ end
 
 Common.register_command({
   :invocation => "create-terra-method-snapshot",
-  :description => "Create Terra Method snapshot in single or all environments.",
+  :description => "Create Terra Method snapshot in a single environment.",
   :fn => ->(*args) { create_terra_method_snapshot("create-terra-method-snapshot", *args) }
 })
 
