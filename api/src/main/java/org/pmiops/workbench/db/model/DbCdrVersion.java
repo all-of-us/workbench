@@ -61,6 +61,8 @@ public class DbCdrVersion {
   private String wgsLongReadsJointVcfGRCh38;
   private String wgsLongReadsJointVcfT2T;
 
+  private Boolean needsV8GenomicExtractionWorkflow;
+
   @Id
   @Column(name = "cdr_version_id")
   public long getCdrVersionId() {
@@ -483,6 +485,15 @@ public class DbCdrVersion {
     this.wgsLongReadsJointVcfT2T = wgsLongReadsJointVcfT2T;
   }
 
+  @Column(name = "needs_v8_genomic_extraction_workflow")
+  public Boolean getNeedsV8GenomicExtractionWorkflow() {
+    return needsV8GenomicExtractionWorkflow;
+  }
+
+  public void setNeedsV8GenomicExtractionWorkflow(Boolean needsV8GenomicExtractionWorkflow) {
+    this.needsV8GenomicExtractionWorkflow = needsV8GenomicExtractionWorkflow;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -512,7 +523,22 @@ public class DbCdrVersion {
         microarrayVcfSingleSampleStoragePath,
         microarrayVcfManifestPath,
         microarrayIdatManifestPath,
-        wgsVdsPath);
+        wgsVdsPath,
+        wgsExomeMultiHailPath,
+        wgsExomeSplitHailPath,
+        wgsExomeVcfPath,
+        wgsAcafThresholdMultiHailPath,
+        wgsAcafThresholdSplitHailPath,
+        wgsAcafThresholdVcfPath,
+        wgsClinvarMultiHailPath,
+        wgsClinvarSplitHailPath,
+        wgsClinvarVcfPath,
+        wgsLongReadsManifestPath,
+        wgsLongReadsHailGRCh38,
+        wgsLongReadsHailT2T,
+        wgsLongReadsJointVcfGRCh38,
+        wgsLongReadsJointVcfT2T,
+        needsV8GenomicExtractionWorkflow);
   }
 
   @Override
@@ -551,6 +577,21 @@ public class DbCdrVersion {
             microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath)
         && Objects.equals(microarrayVcfManifestPath, that.microarrayVcfManifestPath)
         && Objects.equals(microarrayIdatManifestPath, that.microarrayIdatManifestPath)
-        && Objects.equals(wgsVdsPath, that.wgsVdsPath);
+        && Objects.equals(wgsVdsPath, that.wgsVdsPath)
+        && Objects.equals(wgsExomeMultiHailPath, that.wgsExomeMultiHailPath)
+        && Objects.equals(wgsExomeSplitHailPath, that.wgsExomeSplitHailPath)
+        && Objects.equals(wgsExomeVcfPath, that.wgsExomeVcfPath)
+        && Objects.equals(wgsAcafThresholdMultiHailPath, that.wgsAcafThresholdMultiHailPath)
+        && Objects.equals(wgsAcafThresholdSplitHailPath, that.wgsAcafThresholdSplitHailPath)
+        && Objects.equals(wgsAcafThresholdVcfPath, that.wgsAcafThresholdVcfPath)
+        && Objects.equals(wgsClinvarMultiHailPath, that.wgsClinvarMultiHailPath)
+        && Objects.equals(wgsClinvarSplitHailPath, that.wgsClinvarSplitHailPath)
+        && Objects.equals(wgsClinvarVcfPath, that.wgsClinvarVcfPath)
+        && Objects.equals(wgsLongReadsManifestPath, that.wgsLongReadsManifestPath)
+        && Objects.equals(wgsLongReadsHailGRCh38, that.wgsLongReadsHailGRCh38)
+        && Objects.equals(wgsLongReadsHailT2T, that.wgsLongReadsHailT2T)
+        && Objects.equals(wgsLongReadsJointVcfGRCh38, that.wgsLongReadsJointVcfGRCh38)
+        && Objects.equals(wgsLongReadsJointVcfT2T, that.wgsLongReadsJointVcfT2T)
+        && Objects.equals(needsV8GenomicExtractionWorkflow, that.needsV8GenomicExtractionWorkflow);
   }
 }

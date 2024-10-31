@@ -245,6 +245,7 @@
   <include file="changelog/db.changelog-235-replace-workspace-billing-status.xml"/>
   <include file="changelog/db.changelog-236-add-uses-tanagra.xml"/>
   <include file="changelog/db.changelog-237-add-default-user-initial-credits-expiration-bypassed.xml"/>
+  <include file="changelog/db.changelog-238-add-needs-v8-genomic-extraction-workflow.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
