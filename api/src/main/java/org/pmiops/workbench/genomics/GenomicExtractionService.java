@@ -118,14 +118,14 @@ public class GenomicExtractionService {
   }
 
   private Map<String, String> createRepoMethodParameter(VersionedConfig perCdrConfig) {
-    String name = String.valueOf(perCdrConfig.methodName);
     String namespace = String.valueOf(perCdrConfig.methodNamespace);
+    String name = String.valueOf(perCdrConfig.methodName);
     String version = String.valueOf(perCdrConfig.methodRepoVersion);
 
     return Map.of(
+        "methodNamespace", namespace,
         "methodName", name,
         "methodVersion", version,
-        "methodNamespace", namespace,
         "sourceRepo", "agora",
         "methodUri", String.format("agora://%s/%s/%s", namespace, name, version));
   }
