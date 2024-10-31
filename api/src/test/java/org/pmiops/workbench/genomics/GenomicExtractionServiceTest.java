@@ -158,25 +158,22 @@ public class GenomicExtractionServiceTest {
     doReturn("bucket").when(blob).getBucket();
     doReturn("filename").when(blob).getName();
     doReturn(blob).when(cloudStorageClient).writeFile(any(), any(), any());
-    workbenchConfig = new WorkbenchConfig();
-    workbenchConfig.server = new WorkbenchConfig.ServerConfig();
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.server.uiBaseUrl = "https://workbench.researchallofus.org";
     workbenchConfig.server.shortName = "test";
-    workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     workbenchConfig.firecloud.terraUiBaseUrl = "https://app.terra.bio";
-    workbenchConfig.wgsCohortExtraction = new WorkbenchConfig.WgsCohortExtractionConfig();
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceBucket = "terraBucket";
-    workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName = "methodName";
-    workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace = "methodNamespace";
-    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 3;
-    workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationVersion = 1;
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace =
         "operationalTerraWorkspaceNamespace";
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName =
         "operationalTerraWorkspaceName";
-    workbenchConfig.wgsCohortExtraction.minExtractionScatterTasks = 100;
-    workbenchConfig.wgsCohortExtraction.extractionScatterTasksPerSample = 4;
     workbenchConfig.wgsCohortExtraction.extractionDestinationDataset = "extract-proj.extract-ds";
+    workbenchConfig.wgsCohortExtraction.cdrv7.methodName = "methodName";
+    workbenchConfig.wgsCohortExtraction.cdrv7.methodNamespace = "methodNamespace";
+    workbenchConfig.wgsCohortExtraction.cdrv7.methodRepoVersion = 1;
+    workbenchConfig.wgsCohortExtraction.cdrv7.methodLogicalVersion = 3;
+    workbenchConfig.wgsCohortExtraction.cdrv7.minExtractionScatterTasks = 100;
+    workbenchConfig.wgsCohortExtraction.cdrv7.extractionScatterTasksPerSample = 4;
 
     RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails().bucketName("user-bucket");
     RawlsWorkspaceResponse fcWorkspaceResponse =

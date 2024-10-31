@@ -67,6 +67,7 @@ public class WorkbenchConfig {
     config.server = new ServerConfig();
     config.tanagra = new TanagraConfig();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
+    config.wgsCohortExtraction.cdrv7 = new WgsCohortExtractionConfig.CDRv7Config();
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
     config.e2eTestUsers = new E2ETestUserConfig();
@@ -167,22 +168,32 @@ public class WorkbenchConfig {
     public String operationalTerraWorkspaceNamespace;
     public String operationalTerraWorkspaceName;
     public String operationalTerraWorkspaceBucket;
-    public String extractionMethodConfigurationNamespace;
-    public String extractionMethodConfigurationName;
-    // This is the Agora snapshot identifier, returned when running create-terra-method-snapshot.
-    // This may be different across environments, as the method configurations are independently
-    // defined.
-    public Integer extractionMethodConfigurationVersion;
-    // This is a logical workflow version used by the RW server. This should be incremented when
-    // backwards incompatible changes are introduced into the Workflow, e.g. new required inputs
-    // are added.
-    public Integer extractionMethodLogicalVersion;
     public String extractionDestinationDataset;
-    // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
-    public int minExtractionScatterTasks;
-    public float extractionScatterTasksPerSample;
     public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
+
+    public abstract static class CommonCDRConfig {
+      // 'method' values refer to both the stored Method and the generated Method Configuration
+      public String methodNamespace;
+      public String methodName;
+      // This is the Agora snapshot identifier, returned when running create-terra-method-snapshot.
+      // This may be different across environments, as the method configurations are independently
+      // defined.
+      public int methodRepoVersion;
+      // This is a logical workflow version used by the RW server. This should be incremented when
+      // backwards incompatible changes are introduced into the Workflow, e.g. new required inputs
+      // are added.
+      public int methodLogicalVersion;
+    }
+
+    // for extraction workflows compatible with CDR v7 and earlier
+    public static class CDRv7Config extends CommonCDRConfig {
+      // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
+      public int minExtractionScatterTasks;
+      public float extractionScatterTasksPerSample;
+    }
+
+    public CDRv7Config cdrv7;
   }
 
   public static class CdrConfig {

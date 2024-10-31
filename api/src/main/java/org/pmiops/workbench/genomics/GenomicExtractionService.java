@@ -112,20 +112,20 @@ public class GenomicExtractionService {
   }
 
   private Map<String, String> createRepoMethodParameter(
-      WgsCohortExtractionConfig cohortExtractionConfig) {
+      WgsCohortExtractionConfig.CommonCDRConfig cohortExtractionConfig) {
+    String methodVersion = String.valueOf(cohortExtractionConfig.methodRepoVersion);
     return new ImmutableMap.Builder<String, String>()
-        .put("methodName", cohortExtractionConfig.extractionMethodConfigurationName)
-        .put(
-            "methodVersion", cohortExtractionConfig.extractionMethodConfigurationVersion.toString())
-        .put("methodNamespace", cohortExtractionConfig.extractionMethodConfigurationNamespace)
+        .put("methodName", cohortExtractionConfig.methodName)
+        .put("methodVersion", methodVersion)
+        .put("methodNamespace", cohortExtractionConfig.methodNamespace)
         .put(
             "methodUri",
             "agora://"
-                + cohortExtractionConfig.extractionMethodConfigurationNamespace
+                + cohortExtractionConfig.methodNamespace
                 + "/"
-                + cohortExtractionConfig.extractionMethodConfigurationName
+                + cohortExtractionConfig.methodName
                 + "/"
-                + cohortExtractionConfig.extractionMethodConfigurationVersion)
+                + methodVersion)
         .put("sourceRepo", "agora")
         .build();
   }
@@ -330,12 +330,15 @@ public class GenomicExtractionService {
     }
 
     Map<String, String> maybeInputs = new HashMap<>();
-    int methodLogicalVersion =
-        Optional.ofNullable(cohortExtractionConfig.extractionMethodLogicalVersion).orElse(0);
-    if (methodLogicalVersion < 3) {
-      log.severe("unsupported GVS extract method version: " + methodLogicalVersion);
-      throw new ServerErrorException();
-    }
+
+    // TODO keep this check or not?
+
+    //    int methodLogicalVersion =
+    //        Optional.ofNullable(cohortExtractionConfig.extractionMethodLogicalVersion).orElse(0);
+    //    if (methodLogicalVersion < 3) {
+    //      log.severe("unsupported GVS extract method version: " + methodLogicalVersion);
+    //      throw new ServerErrorException();
+    //    }
 
     String filterSetName = workspace.getCdrVersion().getWgsFilterSetName();
     if (!Strings.isNullOrEmpty(filterSetName)) {
@@ -356,13 +359,16 @@ public class GenomicExtractionService {
                 extractionFolder + "/person_ids.txt",
                 String.join("\n", personIds).getBytes(StandardCharsets.UTF_8));
 
+    // TODO only calc for v7
+
     // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
     // keeping overhead low and limiting footprint on shared extraction quota.
     int minScatter =
-        Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
+        Math.min(cohortExtractionConfig.cdrv7.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
     int scatter =
         Ints.constrainToRange(
-            Math.round(personIds.size() * cohortExtractionConfig.extractionScatterTasksPerSample),
+            Math.round(
+                personIds.size() * cohortExtractionConfig.cdrv7.extractionScatterTasksPerSample),
             minScatter,
             MAX_EXTRACTION_SCATTER);
 
@@ -418,6 +424,10 @@ public class GenomicExtractionService {
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
+    // TODO choose version
+    WgsCohortExtractionConfig.CommonCDRConfig cohortExtractionCdrConfig =
+        cohortExtractionConfig.cdrv7;
+
     RawlsWorkspaceDetails fcUserWorkspace =
         fireCloudService.getWorkspace(workspace).get().getWorkspace();
 
@@ -440,11 +450,10 @@ public class GenomicExtractionService {
                             personIds,
                             extractionFolder,
                             outputDir))
-                    .methodConfigVersion(
-                        cohortExtractionConfig.extractionMethodConfigurationVersion)
-                    .methodRepoMethod(createRepoMethodParameter(cohortExtractionConfig))
+                    .methodConfigVersion(cohortExtractionCdrConfig.methodRepoVersion)
+                    .methodRepoMethod(createRepoMethodParameter(cohortExtractionCdrConfig))
                     .name(extractionUuid)
-                    .namespace(cohortExtractionConfig.extractionMethodConfigurationNamespace)
+                    .namespace(cohortExtractionCdrConfig.methodNamespace)
                     .outputs(new HashMap<>()),
                 cohortExtractionConfig.operationalTerraWorkspaceNamespace,
                 cohortExtractionConfig.operationalTerraWorkspaceName)
@@ -483,7 +492,7 @@ public class GenomicExtractionService {
         .deleteWorkspaceMethodConfig(
             cohortExtractionConfig.operationalTerraWorkspaceNamespace,
             cohortExtractionConfig.operationalTerraWorkspaceName,
-            cohortExtractionConfig.extractionMethodConfigurationNamespace,
+            cohortExtractionCdrConfig.methodNamespace,
             methodConfig.getName());
 
     return genomicExtractionMapper.toApi(dbSubmission);
