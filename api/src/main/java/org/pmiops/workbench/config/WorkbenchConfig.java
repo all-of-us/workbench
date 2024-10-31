@@ -172,7 +172,7 @@ public class WorkbenchConfig {
     public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
 
-    public abstract static class CommonCDRConfig {
+    public abstract static class VersionedConfig {
       // 'method' values refer to both the stored Method and the generated Method Configuration
       public String methodNamespace;
       public String methodName;
@@ -187,13 +187,19 @@ public class WorkbenchConfig {
     }
 
     // for extraction workflows compatible with CDR v7 and earlier
-    public static class CDRv7Config extends CommonCDRConfig {
+    public static class CDRv7Config extends VersionedConfig {
       // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
       public int minExtractionScatterTasks;
       public float extractionScatterTasksPerSample;
     }
 
+    // for extraction workflows compatible with CDR v7 and earlier
+    public static class CDRv8Config extends VersionedConfig {
+      // TODO: do we have any specific config for v8?
+    }
+
     public CDRv7Config cdrv7;
+    public CDRv8Config cdrv8;
   }
 
   public static class CdrConfig {
