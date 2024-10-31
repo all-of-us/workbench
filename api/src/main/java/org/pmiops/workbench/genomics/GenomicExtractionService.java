@@ -426,14 +426,11 @@ public class GenomicExtractionService {
       int minScatter =
           Math.min(
               cohortExtractionConfig.cdrv7.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER_V7);
+      int desiredScatter =
+          Math.round(
+              personIds.size() * cohortExtractionConfig.cdrv7.extractionScatterTasksPerSample);
       scatterCount =
-          Optional.of(
-              Ints.constrainToRange(
-                  Math.round(
-                      personIds.size()
-                          * cohortExtractionConfig.cdrv7.extractionScatterTasksPerSample),
-                  minScatter,
-                  MAX_EXTRACTION_SCATTER_V7));
+          Optional.of(Ints.constrainToRange(desiredScatter, minScatter, MAX_EXTRACTION_SCATTER_V7));
     }
 
     VersionedConfig versionedConfig =
