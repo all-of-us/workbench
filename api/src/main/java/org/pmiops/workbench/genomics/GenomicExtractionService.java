@@ -126,8 +126,8 @@ public class GenomicExtractionService {
         "methodName", name,
         "methodVersion", version,
         "methodNamespace", namespace,
-        "methodUri", String.format("agora://%s/%s/%s", namespace, name, version),
-        "sourceRepo", "agora");
+        "sourceRepo", "agora",
+        "methodUri", String.format("agora://%s/%s/%s", namespace, name, version));
   }
 
   private boolean isTerminal(TerraJobStatus status) {
