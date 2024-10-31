@@ -1,31 +1,33 @@
 package org.pmiops.workbench.initialcredits;
 
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -49,19 +51,29 @@ public class InitialCreditsExpirationServiceTest {
 
   @SpyBean private WorkspaceDao spyWorkspaceDao;
 
-  @MockBean private MailService mailService;
-
   @MockBean private FakeClock fakeClock;
 
   @MockBean private LeonardoApiClient leonardoApiClient;
 
   @MockBean private InstitutionService institutionService;
 
+  private static final long validityPeriodDays = 17L; // arbitrary
+  private static final long extensionPeriodDays = 78L; // arbitrary
+  private static final long warningPeriodDays = 10L; // arbitrary
+
   private static final Timestamp NOW = Timestamp.from(FakeClockConfiguration.NOW.toInstant());
-  private static final Timestamp NOW_PLUS_ONE_DAY =
-      Timestamp.from(FakeClockConfiguration.NOW.toInstant().plusSeconds(24 * 60 * 60));
-  private static final Timestamp NOW_MINUS_ONE_DAY =
+  private static final Timestamp PAST_EXPIRATION =
       Timestamp.from(FakeClockConfiguration.NOW.toInstant().minusSeconds(24 * 60 * 60));
+  private static final Timestamp DURING_WARNING_PERIOD =
+      Timestamp.from(
+          FakeClockConfiguration.NOW
+              .toInstant()
+              .plusSeconds((warningPeriodDays - 1L) * 24 * 60 * 60));
+  private static final Timestamp BEFORE_WARNING_PERIOD =
+      Timestamp.from(
+          FakeClockConfiguration.NOW
+              .toInstant()
+              .plusSeconds((warningPeriodDays + 1L) * 24 * 60 * 60));
 
   private static WorkbenchConfig config;
 
@@ -79,7 +91,9 @@ public class InitialCreditsExpirationServiceTest {
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
-    config.billing.accountId = "billingAccountId";
+    config.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
+    config.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
+    config.billing.initialCreditsExpirationWarningDays = warningPeriodDays;
     when(fakeClock.instant()).thenReturn(FakeClockConfiguration.NOW.toInstant());
 
     workspace =
@@ -154,123 +168,82 @@ public class InitialCreditsExpirationServiceTest {
   }
 
   @Test
-  public void test_checkCreditsExpirationForUserIDs_noExpirationRecord() throws MessagingException {
+  public void test_checkCreditsExpirationForUserIDs_noExpirationRecord() {
     DbUser user = spyUserDao.save(new DbUser());
     when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
-    verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
     // Only run during setup
     verify(spyWorkspaceDao, times(1)).save(any());
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
+    assertNull(user.getUserInitialCreditsExpiration());
   }
 
-  @Test
-  public void test_checkCreditsExpirationForUserIDs_bypassed() throws MessagingException {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration().setBypassed(true).setExpirationTime(NOW)));
-    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
-
-    service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
-
-    verify(mailService, never()).alertUserInitialCreditsExpired(any());
-    verifyUserSaveOnlyDuringSetup();
-    // Only run during setup
-    verify(spyWorkspaceDao, times(1)).save(any());
-    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
-  }
-
-  @Test
-  public void test_checkCreditsExpirationForUserIDs_unexpired() throws MessagingException {
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("dataForUsersWithAnExpirationRecord")
+  public void test_checkCreditsExpirationForUserIDs_withExpirationRecord(
+      String testName,
+      Timestamp expirationTime,
+      boolean bypassed,
+      Timestamp expectedWarningNotificationTime,
+      Timestamp expectedCleanupTime) {
     DbUser user =
         spyUserDao.save(
             new DbUser()
                 .setUserInitialCreditsExpiration(
                     new DbUserInitialCreditsExpiration()
-                        .setBypassed(false)
-                        .setExpirationTime(NOW_PLUS_ONE_DAY)
-                        .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
+                        .setExpirationTime(expirationTime)
+                        .setBypassed(bypassed)));
     when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
-    verify(mailService, never()).alertUserInitialCreditsExpired(any());
-    verifyUserSaveOnlyDuringSetup();
-    // Only run during setup
-    verify(spyWorkspaceDao, times(1)).save(any());
-    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
+    assertEquals(
+        user.getUserInitialCreditsExpiration().getApproachingExpirationNotificationTime(),
+        expectedWarningNotificationTime);
+    assertEquals(
+        user.getUserInitialCreditsExpiration().getExpirationCleanupTime(), expectedCleanupTime);
   }
 
-  @Test
-  public void test_checkCreditsExpirationForUserIDs_expiredPreviouslySentNotification()
-      throws MessagingException {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setBypassed(false)
-                        .setExpirationTime(NOW_MINUS_ONE_DAY)
-                        .setNotificationStatus(NotificationStatus.EXPIRATION_NOTIFICATION_SENT)));
-    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
-
-    service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
-
-    verify(mailService, never()).alertUserInitialCreditsExpired(any());
-    verifyUserSaveOnlyDuringSetup();
-    // Only run during setup
-    verify(spyWorkspaceDao, times(1)).save(any());
-    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
-  }
-
-  @Test
-  public void test_checkCreditsExpirationForUserIDs_expiredUnsentNotification()
-      throws MessagingException {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setBypassed(false)
-                        .setExpirationTime(NOW_MINUS_ONE_DAY)
-                        .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
-    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
-
-    service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
-
-    verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
-    // Called once during setup and once during the test
-    verify(spyUserDao, times(2)).save(any());
-    // Once during test setup and once during test
-    verify(spyWorkspaceDao, times(2)).save(any());
-    verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
-  }
-
-  @Test
-  public void test_checkCreditsExpirationForUserIDs_expiredUnsentNotificationWithMailException()
-      throws MessagingException {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setBypassed(false)
-                        .setExpirationTime(NOW_MINUS_ONE_DAY)
-                        .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
-    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
-    doThrow(new MessagingException()).when(mailService).alertUserInitialCreditsExpired(any());
-
-    service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
-
-    verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
-    verifyUserSaveOnlyDuringSetup();
-    // Once during test setup and once during test
-    verify(spyWorkspaceDao, times(2)).save(any());
-    verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
+  static Stream<Arguments> dataForUsersWithAnExpirationRecord() {
+    return Stream.of(
+        Arguments.of(
+            "If a bypassed user is before their warning period, they will not receive a warning email or have their resources cleaned up.",
+            BEFORE_WARNING_PERIOD,
+            true,
+            null,
+            null),
+        Arguments.of(
+            "If a non-bypassed user is before their warning period, they will not receive a warning email or have their resources cleaned up.",
+            BEFORE_WARNING_PERIOD,
+            false,
+            null,
+            null),
+        Arguments.of(
+            "If a bypassed user is in their warning period, they will not receive a warning email or have their resources cleaned up.",
+            DURING_WARNING_PERIOD,
+            true,
+            null,
+            null),
+        Arguments.of(
+            "If a non-bypassed user is in their warning period, they will receive a warning email but not have their resources cleaned up.",
+            DURING_WARNING_PERIOD,
+            false,
+            NOW,
+            null),
+        Arguments.of(
+            "If a bypassed user has passed their expiration date, they will not receive a warning email or have their resources cleaned up.",
+            PAST_EXPIRATION,
+            true,
+            null,
+            null),
+        Arguments.of(
+            "If a non-bypassed user has passed their expiration date, they will not receive a warning email but will have their resources cleaned up.",
+            PAST_EXPIRATION,
+            false,
+            null,
+            NOW));
   }
 }
