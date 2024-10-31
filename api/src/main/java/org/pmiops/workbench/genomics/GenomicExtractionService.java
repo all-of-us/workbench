@@ -117,20 +117,16 @@ public class GenomicExtractionService {
     this.clock = clock;
   }
 
-  private Map<String, String> createRepoMethodParameter(VersionedConfig cohortExtractionConfig) {
-    String methodVersion = String.valueOf(cohortExtractionConfig.methodRepoVersion);
+  private Map<String, String> createRepoMethodParameter(VersionedConfig perCdrConfig) {
+    String name = String.valueOf(perCdrConfig.methodName);
+    String namespace = String.valueOf(perCdrConfig.methodNamespace);
+    String version = String.valueOf(perCdrConfig.methodRepoVersion);
+
     return new ImmutableMap.Builder<String, String>()
-        .put("methodName", cohortExtractionConfig.methodName)
-        .put("methodVersion", methodVersion)
-        .put("methodNamespace", cohortExtractionConfig.methodNamespace)
-        .put(
-            "methodUri",
-            "agora://"
-                + cohortExtractionConfig.methodNamespace
-                + "/"
-                + cohortExtractionConfig.methodName
-                + "/"
-                + methodVersion)
+        .put("methodName", name)
+        .put("methodVersion", version)
+        .put("methodNamespace", namespace)
+        .put("methodUri", String.format("agora://%s/%s/%s", namespace, name, version))
         .put("sourceRepo", "agora")
         .build();
   }

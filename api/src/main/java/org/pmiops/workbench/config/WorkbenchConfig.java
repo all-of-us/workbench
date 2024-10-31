@@ -194,9 +194,9 @@ public class WorkbenchConfig {
       public float extractionScatterTasksPerSample;
     }
 
-    // for extraction workflows compatible with CDR v7 and earlier
+    // for extraction workflows compatible with CDR v8 and later
     public static class CDRv8Config extends VersionedConfig {
-      // TODO: do we have any specific config for v8?
+      // TODO: do we need any specific config for v8?
     }
 
     public CDRv7Config cdrv7;
