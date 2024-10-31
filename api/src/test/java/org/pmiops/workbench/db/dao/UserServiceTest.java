@@ -39,7 +39,6 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -150,8 +149,7 @@ public class UserServiceTest {
                     START_INSTANT.plus(
                         providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays,
                         ChronoUnit.DAYS)))
-            .setExtensionCount(0)
-            .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT);
+            .setExtensionCount(0);
 
     DbUser user = new DbUser();
     user.setUsername(USERNAME);
