@@ -4,11 +4,14 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +31,7 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -56,6 +60,8 @@ public class InitialCreditsExpirationServiceTest {
   @MockBean private LeonardoApiClient leonardoApiClient;
 
   @MockBean private InstitutionService institutionService;
+
+  @MockBean private MailService mailService;
 
   private static final long validityPeriodDays = 17L; // arbitrary
   private static final long extensionPeriodDays = 78L; // arbitrary
@@ -89,7 +95,7 @@ public class InitialCreditsExpirationServiceTest {
   }
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws MessagingException {
     config = WorkbenchConfig.createEmptyConfig();
     config.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
     config.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
@@ -102,6 +108,7 @@ public class InitialCreditsExpirationServiceTest {
                 .setBillingAccountName(config.billing.initialCreditsBillingAccountName())
                 .setWorkspaceId(1L));
     when(spyWorkspaceDao.findAllByCreator(any())).thenReturn(Set.of(workspace));
+    doNothing().when(mailService).alertUserInitialCreditsExpiring(isA(DbUser.class));
   }
 
   private void verifyUserSaveOnlyDuringSetup() {
