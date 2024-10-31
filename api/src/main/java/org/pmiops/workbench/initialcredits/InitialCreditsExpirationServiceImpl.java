@@ -4,7 +4,6 @@ import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -74,22 +73,22 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   @Override
   public boolean haveCreditsExpired(DbUser user) {
     return getCreditsExpiration(user)
-        .map(expirationTime -> !expirationTime.after(new Timestamp(clock.instant().toEpochMilli())))
+        .map(expirationTime -> !expirationTime.after(clockNow()))
         .orElse(false);
   }
 
   // Returns true if the user's credits are expiring within the initialCreditsExpirationWarningDays.
   private boolean areCreditsExpiringSoon(DbUser user) {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     long initialCreditsExpirationWarningDays =
         workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDays;
     return getCreditsExpiration(user)
         .map(
             expirationTime ->
-                now.after(
-                    new Timestamp(
-                        expirationTime.getTime()
-                            - TimeUnit.DAYS.toMillis(initialCreditsExpirationWarningDays))))
+                clockNow()
+                    .after(
+                        new Timestamp(
+                            expirationTime.getTime()
+                                - TimeUnit.DAYS.toMillis(initialCreditsExpirationWarningDays))))
         .orElse(false);
   }
 
@@ -166,7 +165,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
                   deleteAppsAndRuntimesInWorkspace(ws);
                 });
 
-        userInitialCreditsExpiration.setExpirationCleanupTime(Timestamp.from(Instant.now()));
+        userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
         userDao.save(user);
       } else if (areCreditsExpiringSoon(user)
           && null == userInitialCreditsExpiration.getApproachingExpirationNotificationTime()) {
@@ -176,8 +175,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
             userInitialCreditsExpiration.getExpirationTime());
         try {
           mailService.alertUserInitialCreditsExpiring(user);
-          userInitialCreditsExpiration.setApproachingExpirationNotificationTime(
-              Timestamp.from(Instant.now()));
+          userInitialCreditsExpiration.setApproachingExpirationNotificationTime(clockNow());
           userDao.save(user);
         } catch (MessagingException e) {
           logger.error(
