@@ -70,9 +70,9 @@ public class GenomicExtractionService {
 
   // Scatter count maximum for extraction for CDR v7 and earlier.
   // Affects number of workers and numbers of shards.
-  private static final int MAX_EXTRACTION_SCATTER_V7 = 2_000;
+  private static final int LEGACY_MAX_EXTRACTION_SCATTER = 2_000;
 
-  private static final int EARLIEST_SUPPORTED_V7_METHOD_VERSION = 3;
+  private static final int EARLIEST_SUPPORTED_LEGACY_METHOD_VERSION = 3;
 
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
@@ -404,16 +404,16 @@ public class GenomicExtractionService {
 
     // we use different workflows based on the CDR version:
     // one version for v7 or earlier, and one for v8 or later
-    boolean v8orLater =
-        Boolean.TRUE.equals(workspace.getCdrVersion().getNeedsV8GenomicExtractionWorkflow());
+    boolean useLegacyWorkflow =
+        !Boolean.TRUE.equals(workspace.getCdrVersion().getNeedsV8GenomicExtractionWorkflow());
 
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
     Optional<Integer> scatterCount = Optional.empty();
-    if (!v8orLater) {
-      int logicalVersion = cohortExtractionConfig.cdrv7.methodLogicalVersion;
-      if (logicalVersion < EARLIEST_SUPPORTED_V7_METHOD_VERSION) {
+    if (useLegacyWorkflow) {
+      int logicalVersion = cohortExtractionConfig.legacyVersions.methodLogicalVersion;
+      if (logicalVersion < EARLIEST_SUPPORTED_LEGACY_METHOD_VERSION) {
         log.severe("unsupported GVS extract method version: " + logicalVersion);
         throw new ServerErrorException();
       }
@@ -422,16 +422,21 @@ public class GenomicExtractionService {
       // keeping overhead low and limiting footprint on shared extraction quota.
       int minScatter =
           Math.min(
-              cohortExtractionConfig.cdrv7.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER_V7);
+              cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
+              LEGACY_MAX_EXTRACTION_SCATTER);
       int desiredScatter =
           Math.round(
-              personIds.size() * cohortExtractionConfig.cdrv7.extractionScatterTasksPerSample);
+              personIds.size()
+                  * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
       scatterCount =
-          Optional.of(Ints.constrainToRange(desiredScatter, minScatter, MAX_EXTRACTION_SCATTER_V7));
+          Optional.of(
+              Ints.constrainToRange(desiredScatter, minScatter, LEGACY_MAX_EXTRACTION_SCATTER));
     }
 
     VersionedConfig versionedConfig =
-        v8orLater ? cohortExtractionConfig.cdrv8 : cohortExtractionConfig.cdrv7;
+        useLegacyWorkflow
+            ? cohortExtractionConfig.legacyVersions
+            : cohortExtractionConfig.cdrv8plus;
 
     RawlsWorkspaceDetails fcUserWorkspace =
         fireCloudService.getWorkspace(workspace).get().getWorkspace();

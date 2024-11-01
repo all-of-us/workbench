@@ -48,7 +48,7 @@
     "extractionDestinationDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_destination",
     "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true,
-    "cdrv7": {
+    "legacyVersions": {
       "methodNamespace": "aouwgscohortextraction-preprod",
       "methodName": "GvsExtractCohortFromSampleNames",
       "methodRepoVersion": 5,

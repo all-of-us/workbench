@@ -4,6 +4,8 @@ import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.CDRv8PlusConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.LegacyWorkflowConfig;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -67,8 +69,8 @@ public class WorkbenchConfig {
     config.server = new ServerConfig();
     config.tanagra = new TanagraConfig();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
-    config.wgsCohortExtraction.cdrv7 = new WgsCohortExtractionConfig.CDRv7Config();
-    config.wgsCohortExtraction.cdrv8 = new WgsCohortExtractionConfig.CDRv8Config();
+    config.wgsCohortExtraction.legacyVersions = new LegacyWorkflowConfig();
+    config.wgsCohortExtraction.cdrv8plus = new CDRv8PlusConfig();
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
     config.e2eTestUsers = new E2ETestUserConfig();
@@ -188,19 +190,19 @@ public class WorkbenchConfig {
     }
 
     // for extraction workflows compatible with CDR v7 and earlier
-    public static class CDRv7Config extends VersionedConfig {
+    public static class LegacyWorkflowConfig extends VersionedConfig {
       // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
       public int minExtractionScatterTasks;
       public float extractionScatterTasksPerSample;
     }
 
     // for extraction workflows compatible with CDR v8 and later
-    public static class CDRv8Config extends VersionedConfig {
+    public static class CDRv8PlusConfig extends VersionedConfig {
       // TODO: do we need any specific config for v8?
     }
 
-    public CDRv7Config cdrv7;
-    public CDRv8Config cdrv8;
+    public LegacyWorkflowConfig legacyVersions;
+    public CDRv8PlusConfig cdrv8plus;
   }
 
   public static class CdrConfig {

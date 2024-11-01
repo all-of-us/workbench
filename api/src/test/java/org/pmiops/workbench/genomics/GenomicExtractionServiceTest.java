@@ -163,16 +163,16 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName =
         "operationalTerraWorkspaceName";
     workbenchConfig.wgsCohortExtraction.extractionDestinationDataset = "extract-proj.extract-ds";
-    workbenchConfig.wgsCohortExtraction.cdrv7.methodName = "methodName";
-    workbenchConfig.wgsCohortExtraction.cdrv7.methodNamespace = "methodNamespace";
-    workbenchConfig.wgsCohortExtraction.cdrv7.methodRepoVersion = 10;
-    workbenchConfig.wgsCohortExtraction.cdrv7.methodLogicalVersion = 3;
-    workbenchConfig.wgsCohortExtraction.cdrv7.minExtractionScatterTasks = 100;
-    workbenchConfig.wgsCohortExtraction.cdrv7.extractionScatterTasksPerSample = 4;
-    workbenchConfig.wgsCohortExtraction.cdrv8.methodName = "v8MethodName";
-    workbenchConfig.wgsCohortExtraction.cdrv8.methodNamespace = "v8MethodNamespace";
-    workbenchConfig.wgsCohortExtraction.cdrv8.methodRepoVersion = 1;
-    workbenchConfig.wgsCohortExtraction.cdrv8.methodLogicalVersion = 1;
+    workbenchConfig.wgsCohortExtraction.legacyVersions.methodName = "methodName";
+    workbenchConfig.wgsCohortExtraction.legacyVersions.methodNamespace = "methodNamespace";
+    workbenchConfig.wgsCohortExtraction.legacyVersions.methodRepoVersion = 10;
+    workbenchConfig.wgsCohortExtraction.legacyVersions.methodLogicalVersion = 3;
+    workbenchConfig.wgsCohortExtraction.legacyVersions.minExtractionScatterTasks = 100;
+    workbenchConfig.wgsCohortExtraction.legacyVersions.extractionScatterTasksPerSample = 4;
+    workbenchConfig.wgsCohortExtraction.cdrv8plus.methodName = "v8MethodName";
+    workbenchConfig.wgsCohortExtraction.cdrv8plus.methodNamespace = "v8MethodNamespace";
+    workbenchConfig.wgsCohortExtraction.cdrv8plus.methodRepoVersion = 1;
+    workbenchConfig.wgsCohortExtraction.cdrv8plus.methodLogicalVersion = 1;
 
     RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails().bucketName("user-bucket");
     RawlsWorkspaceResponse fcWorkspaceResponse =
@@ -466,9 +466,9 @@ public class GenomicExtractionServiceTest {
     verify(mockMethodConfigurationsApi)
         .createWorkspaceMethodConfig(argument.capture(), any(), any());
     assertThat(argument.getValue().getMethodConfigVersion())
-        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv7.methodRepoVersion);
+        .isEqualTo(workbenchConfig.wgsCohortExtraction.legacyVersions.methodRepoVersion);
     assertThat(argument.getValue().getNamespace())
-        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv7.methodNamespace);
+        .isEqualTo(workbenchConfig.wgsCohortExtraction.legacyVersions.methodNamespace);
 
     verify(cloudStorageClient)
         .writeFile(
@@ -539,9 +539,9 @@ public class GenomicExtractionServiceTest {
     verify(mockMethodConfigurationsApi)
         .createWorkspaceMethodConfig(argument.capture(), any(), any());
     assertThat(argument.getValue().getMethodConfigVersion())
-        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv8.methodRepoVersion);
+        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv8plus.methodRepoVersion);
     assertThat(argument.getValue().getNamespace())
-        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv8.methodNamespace);
+        .isEqualTo(workbenchConfig.wgsCohortExtraction.cdrv8plus.methodNamespace);
   }
 
   @Test
