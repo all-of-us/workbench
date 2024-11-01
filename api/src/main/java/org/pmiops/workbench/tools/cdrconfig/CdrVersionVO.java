@@ -53,4 +53,6 @@ public class CdrVersionVO {
   public String wgsLongReadsHailT2T;
   public String wgsLongReadsJointVcfGRCh38;
   public String wgsLongReadsJointVcfT2T;
+
+  public Boolean needsV8GenomicExtractionWorkflow;
 }
