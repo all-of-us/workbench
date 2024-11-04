@@ -155,7 +155,8 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     }
   }
 
-  private void handleExpiredCredits(DbUser user, DbUserInitialCreditsExpiration userInitialCreditsExpiration){
+  private void handleExpiredCredits(
+      DbUser user, DbUserInitialCreditsExpiration userInitialCreditsExpiration) {
     logger.info(
         "Initial credits expired for user {}. Expiration time: {}",
         user.getUsername(),
@@ -180,7 +181,8 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     userDao.save(user);
   }
 
-  private void handleExpiringSoonCredits(DbUser user, DbUserInitialCreditsExpiration userInitialCreditsExpiration){
+  private void handleExpiringSoonCredits(
+      DbUser user, DbUserInitialCreditsExpiration userInitialCreditsExpiration) {
     logger.info(
         "Initial credits expiring soon for user {}. Expiration time: {}",
         user.getUsername(),

@@ -606,6 +606,54 @@ public class UserServiceTest {
     assertThat(userService.isServiceAccount(nonServiceAccountUser)).isFalse();
   }
 
+  @Test
+  public void testGetAllUsersWithActiveInitialCredits() {
+    var noCreditsUser =
+        PresetData.createDbUser()
+            .setUsername("nocredits@researchallofus.org")
+            .setUserInitialCreditsExpiration(null);
+    var notExpiredUser = PresetData.createDbUser().setUsername("notexpired@researchallofus.org");
+    var expiredButNotCleanedUser =
+        PresetData.createDbUser().setUsername("expiredbutnotcleaned@researchallofus.org");
+    var expiredAndCleanedUser =
+        PresetData.createDbUser().setUsername("expiredandcleaned@researchallofus.org");
+
+    DbUserInitialCreditsExpiration notExpired =
+        new DbUserInitialCreditsExpiration()
+            .setUser(notExpiredUser)
+            .setBypassed(false)
+            .setCreditStartTime(Timestamp.from(START_INSTANT))
+            .setExpirationTime(Timestamp.from(START_INSTANT.plus(1, ChronoUnit.DAYS)))
+            .setExpirationCleanupTime(null);
+    notExpiredUser.setUserInitialCreditsExpiration(notExpired);
+    userDao.save(notExpiredUser);
+
+    DbUserInitialCreditsExpiration expiredButNotCleaned =
+        new DbUserInitialCreditsExpiration()
+            .setUser(expiredButNotCleanedUser)
+            .setBypassed(false)
+            .setCreditStartTime(Timestamp.from(START_INSTANT))
+            .setExpirationTime(Timestamp.from(START_INSTANT.plus(1, ChronoUnit.DAYS)))
+            .setExpirationCleanupTime(null);
+    expiredButNotCleanedUser.setUserInitialCreditsExpiration(expiredButNotCleaned);
+    userDao.save(expiredButNotCleanedUser);
+
+    DbUserInitialCreditsExpiration expiredAndCleaned =
+        new DbUserInitialCreditsExpiration()
+            .setUser(expiredAndCleanedUser)
+            .setBypassed(false)
+            .setCreditStartTime(Timestamp.from(START_INSTANT))
+            .setExpirationTime(Timestamp.from(START_INSTANT.plus(1, ChronoUnit.DAYS)))
+            .setExpirationCleanupTime(Timestamp.from(START_INSTANT));
+    expiredAndCleanedUser.setUserInitialCreditsExpiration(expiredAndCleaned);
+    userDao.save(expiredAndCleanedUser);
+
+    List<DbUser> x = userService.getAllUsersWithActiveInitialCredits();
+    assertThat(x).containsAtLeast(notExpiredUser, expiredButNotCleanedUser);
+    assertThat(x).doesNotContain(noCreditsUser);
+    assertThat(x).doesNotContain(expiredAndCleanedUser);
+  }
+
   private void tick() {
     fakeClock.increment(CLOCK_INCREMENT_MILLIS);
   }
