@@ -648,3 +648,4 @@ then
       ) y
   WHERE x.person_id = y.person_id"
 fi
+
