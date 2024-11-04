@@ -99,7 +99,7 @@
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasIdMeLinking": false,
     "enableRasLoginGovLinking": false,
-    "currentDuccVersions": [5, 6],
+    "currentDuccVersions": [6],
     "renewal": {
       "expiryDays": 3650,
       "expiryDaysWarningThresholds": [1, 7, 15],
