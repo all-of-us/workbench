@@ -302,6 +302,7 @@ export const VariantSearchFilters = ({
                     formState.countMin ?? filters.countMin,
                     formState.countMax ?? filters.countMax,
                   ]}
+                  step={1}
                   connect
                 />
               </div>
@@ -388,6 +389,7 @@ export const VariantSearchFilters = ({
                     formState.numberMin ?? filters.numberMin,
                     formState.numberMax ?? filters.numberMax,
                   ]}
+                  step={1}
                   connect
                 />
               </div>

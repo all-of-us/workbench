@@ -1548,6 +1548,7 @@ public class DataSetServiceImpl implements DataSetService {
       case INT64:
       case FLOAT64:
       case NUMERIC:
+      case BIGNUMERIC:
         return parameter.getValue();
       case STRING:
       case TIMESTAMP:
