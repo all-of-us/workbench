@@ -36,8 +36,6 @@ public class AdminAuthorityTest {
   private static final Set<String> NONCONFORMING_ADMIN_METHODS =
       ImmutableSet.of(
           "postStatusAlert",
-          "publishWorkspace",
-          "unpublishWorkspace",
           "getInstitution",
           "getInstitutions",
           "createInstitution",
@@ -45,8 +43,7 @@ public class AdminAuthorityTest {
           "updateInstitution",
           "setInstitutionUserInstructions",
           "deleteInstitutionUserInstructions",
-          "createAuthDomain",
-          "updateUserDisabledStatus");
+          "createAuthDomain");
 
   /**
    * Conversely, methods which have an "/admin/" infix, but do not require an Authority. This should

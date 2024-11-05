@@ -200,18 +200,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
 
-    if (cdrVersion.getTanagraEnabled() && createdWorkspace.isUsesTanagra()) {
-      try {
-        workspaceService.createTanagraStudy(
-            createdWorkspace.getNamespace(), createdWorkspace.getName());
-      } catch (Exception e) {
-        log.log(
-            Level.SEVERE,
-            String.format(
-                "Could not create a Tanagra study for workspace namespace: %s, name: %s",
-                createdWorkspace.getNamespace(), createdWorkspace.getName()),
-            e);
-      }
+    if (dbWorkspace.isCDRAndWorkspaceTanagraEnabled()) {
+      workspaceService.createTanagraStudy(
+          createdWorkspace.getNamespace(), createdWorkspace.getName());
     }
     return ResponseEntity.ok(createdWorkspace);
   }
@@ -601,6 +592,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
+    // Need to validate that we are cloning workspaces that both use Data Apps v1 or v2
+    // We don't support cloning artifacts across versions
+    if (fromWorkspace.isUsesTanagra() && !toWorkspace.isUsesTanagra()) {
+      throw new BadRequestException(
+          "Destination workspace uses Data Apps v1 which does not match source workspace Data Apps v2");
+    }
+    if (!fromWorkspace.isUsesTanagra() && toWorkspace.isUsesTanagra()) {
+      throw new BadRequestException(
+          "Destination workspace uses Data Apps v2 which does not match source workspace Data Apps v1");
+    }
+
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
     String billingProject = createTerraBillingProject(accessTier);
@@ -613,6 +615,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             firecloudName,
             accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
+
     try {
       dbWorkspace =
           workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);

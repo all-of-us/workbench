@@ -1683,7 +1683,7 @@ export const WorkspaceEdit = fp.flow(
                           aria-label='data apps dropdown'
                           value={dataAppsVersion}
                           onChange={(e) => this.onDataAppsVersionChange(e)}
-                          disabled={this.isMode(WorkspaceEditMode.Edit)}
+                          disabled={!this.isMode(WorkspaceEditMode.Create)}
                         >
                           {this.dataAppsVersionOptions().map(
                             (version, index) => (

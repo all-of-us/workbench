@@ -19,7 +19,6 @@ public class DbCdrVersion {
   private Boolean isDefault;
   private String name;
   private DbAccessTier accessTier;
-  private short releaseNumber;
   private short archivalStatus;
   private String bigqueryProject;
   private String bigqueryDataset;
@@ -60,6 +59,8 @@ public class DbCdrVersion {
   private String wgsLongReadsHailT2T;
   private String wgsLongReadsJointVcfGRCh38;
   private String wgsLongReadsJointVcfT2T;
+
+  private Boolean needsV8GenomicExtractionWorkflow;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -129,16 +130,6 @@ public class DbCdrVersion {
 
   public DbCdrVersion setArchivalStatusEnum(ArchivalStatus archivalStatus) {
     setArchivalStatus(DbStorageEnums.archivalStatusToStorage(archivalStatus));
-    return this;
-  }
-
-  @Column(name = "release_number")
-  public short getReleaseNumber() {
-    return releaseNumber;
-  }
-
-  public DbCdrVersion setReleaseNumber(short releaseNumber) {
-    this.releaseNumber = releaseNumber;
     return this;
   }
 
@@ -388,8 +379,9 @@ public class DbCdrVersion {
     return wgsAcafThresholdMultiHailPath;
   }
 
-  public void setWgsAcafThresholdMultiHailPath(String wgsAcafThresholdMultiHailPath) {
+  public DbCdrVersion setWgsAcafThresholdMultiHailPath(String wgsAcafThresholdMultiHailPath) {
     this.wgsAcafThresholdMultiHailPath = wgsAcafThresholdMultiHailPath;
+    return this;
   }
 
   @Column(name = "wgs_acaf_threshold_split_hail_path")
@@ -397,8 +389,9 @@ public class DbCdrVersion {
     return wgsAcafThresholdSplitHailPath;
   }
 
-  public void setWgsAcafThresholdSplitHailPath(String wgsAcafThresholdSplitHailPath) {
+  public DbCdrVersion setWgsAcafThresholdSplitHailPath(String wgsAcafThresholdSplitHailPath) {
     this.wgsAcafThresholdSplitHailPath = wgsAcafThresholdSplitHailPath;
+    return this;
   }
 
   @Column(name = "wgs_acaf_threshold_vcf_path")
@@ -406,8 +399,9 @@ public class DbCdrVersion {
     return wgsAcafThresholdVcfPath;
   }
 
-  public void setWgsAcafThresholdVcfPath(String wgsAcafThresholdVcfPath) {
+  public DbCdrVersion setWgsAcafThresholdVcfPath(String wgsAcafThresholdVcfPath) {
     this.wgsAcafThresholdVcfPath = wgsAcafThresholdVcfPath;
+    return this;
   }
 
   @Column(name = "wgs_clinvar_multi_hail_path")
@@ -415,8 +409,9 @@ public class DbCdrVersion {
     return wgsClinvarMultiHailPath;
   }
 
-  public void setWgsClinvarMultiHailPath(String wgsClinvarMultiHailPath) {
+  public DbCdrVersion setWgsClinvarMultiHailPath(String wgsClinvarMultiHailPath) {
     this.wgsClinvarMultiHailPath = wgsClinvarMultiHailPath;
+    return this;
   }
 
   @Column(name = "wgs_clinvar_split_hail_path")
@@ -424,8 +419,9 @@ public class DbCdrVersion {
     return wgsClinvarSplitHailPath;
   }
 
-  public void setWgsClinvarSplitHailPath(String wgsClinvarSplitHailPath) {
+  public DbCdrVersion setWgsClinvarSplitHailPath(String wgsClinvarSplitHailPath) {
     this.wgsClinvarSplitHailPath = wgsClinvarSplitHailPath;
+    return this;
   }
 
   @Column(name = "wgs_clinvar_vcf_path")
@@ -433,8 +429,9 @@ public class DbCdrVersion {
     return wgsClinvarVcfPath;
   }
 
-  public void setWgsClinvarVcfPath(String wgsClinvarVcfPath) {
+  public DbCdrVersion setWgsClinvarVcfPath(String wgsClinvarVcfPath) {
     this.wgsClinvarVcfPath = wgsClinvarVcfPath;
+    return this;
   }
 
   @Column(name = "wgs_long_reads_manifest_path")
@@ -452,8 +449,9 @@ public class DbCdrVersion {
     return wgsLongReadsHailGRCh38;
   }
 
-  public void setWgsLongReadsHailGRCh38(String wgsLongReadsHailGRCh38) {
+  public DbCdrVersion setWgsLongReadsHailGRCh38(String wgsLongReadsHailGRCh38) {
     this.wgsLongReadsHailGRCh38 = wgsLongReadsHailGRCh38;
+    return this;
   }
 
   @Column(name = "wgs_longread_hail_t2t")
@@ -461,8 +459,9 @@ public class DbCdrVersion {
     return wgsLongReadsHailT2T;
   }
 
-  public void setWgsLongReadsHailT2T(String wgsLongReadsHailT2T) {
+  public DbCdrVersion setWgsLongReadsHailT2T(String wgsLongReadsHailT2T) {
     this.wgsLongReadsHailT2T = wgsLongReadsHailT2T;
+    return this;
   }
 
   @Column(name = "wgs_longread_joint_vcf_grch38")
@@ -470,8 +469,9 @@ public class DbCdrVersion {
     return wgsLongReadsJointVcfGRCh38;
   }
 
-  public void setWgsLongReadsJointVcfGRCh38(String wgsLongReadsJointVcfGRCh38) {
+  public DbCdrVersion setWgsLongReadsJointVcfGRCh38(String wgsLongReadsJointVcfGRCh38) {
     this.wgsLongReadsJointVcfGRCh38 = wgsLongReadsJointVcfGRCh38;
+    return this;
   }
 
   @Column(name = "wgs_longread_joint_vcf_t2t")
@@ -479,8 +479,20 @@ public class DbCdrVersion {
     return wgsLongReadsJointVcfT2T;
   }
 
-  public void setWgsLongReadsJointVcfT2T(String wgsLongReadsJointVcfT2T) {
+  public DbCdrVersion setWgsLongReadsJointVcfT2T(String wgsLongReadsJointVcfT2T) {
     this.wgsLongReadsJointVcfT2T = wgsLongReadsJointVcfT2T;
+    return this;
+  }
+
+  @Column(name = "needs_v8_genomic_extraction_workflow")
+  public Boolean getNeedsV8GenomicExtractionWorkflow() {
+    return needsV8GenomicExtractionWorkflow;
+  }
+
+  public DbCdrVersion setNeedsV8GenomicExtractionWorkflow(
+      Boolean needsV8GenomicExtractionWorkflow) {
+    this.needsV8GenomicExtractionWorkflow = needsV8GenomicExtractionWorkflow;
+    return this;
   }
 
   @Override
@@ -490,7 +502,6 @@ public class DbCdrVersion {
         isDefault,
         name,
         accessTier,
-        releaseNumber,
         archivalStatus,
         bigqueryProject,
         bigqueryDataset,
@@ -512,7 +523,22 @@ public class DbCdrVersion {
         microarrayVcfSingleSampleStoragePath,
         microarrayVcfManifestPath,
         microarrayIdatManifestPath,
-        wgsVdsPath);
+        wgsVdsPath,
+        wgsExomeMultiHailPath,
+        wgsExomeSplitHailPath,
+        wgsExomeVcfPath,
+        wgsAcafThresholdMultiHailPath,
+        wgsAcafThresholdSplitHailPath,
+        wgsAcafThresholdVcfPath,
+        wgsClinvarMultiHailPath,
+        wgsClinvarSplitHailPath,
+        wgsClinvarVcfPath,
+        wgsLongReadsManifestPath,
+        wgsLongReadsHailGRCh38,
+        wgsLongReadsHailT2T,
+        wgsLongReadsJointVcfGRCh38,
+        wgsLongReadsJointVcfT2T,
+        needsV8GenomicExtractionWorkflow);
   }
 
   @Override
@@ -525,7 +551,6 @@ public class DbCdrVersion {
     }
     DbCdrVersion that = (DbCdrVersion) o;
     return cdrVersionId == that.cdrVersionId
-        && releaseNumber == that.releaseNumber
         && archivalStatus == that.archivalStatus
         && numParticipants == that.numParticipants
         && Objects.equals(isDefault, that.isDefault)
@@ -551,6 +576,21 @@ public class DbCdrVersion {
             microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath)
         && Objects.equals(microarrayVcfManifestPath, that.microarrayVcfManifestPath)
         && Objects.equals(microarrayIdatManifestPath, that.microarrayIdatManifestPath)
-        && Objects.equals(wgsVdsPath, that.wgsVdsPath);
+        && Objects.equals(wgsVdsPath, that.wgsVdsPath)
+        && Objects.equals(wgsExomeMultiHailPath, that.wgsExomeMultiHailPath)
+        && Objects.equals(wgsExomeSplitHailPath, that.wgsExomeSplitHailPath)
+        && Objects.equals(wgsExomeVcfPath, that.wgsExomeVcfPath)
+        && Objects.equals(wgsAcafThresholdMultiHailPath, that.wgsAcafThresholdMultiHailPath)
+        && Objects.equals(wgsAcafThresholdSplitHailPath, that.wgsAcafThresholdSplitHailPath)
+        && Objects.equals(wgsAcafThresholdVcfPath, that.wgsAcafThresholdVcfPath)
+        && Objects.equals(wgsClinvarMultiHailPath, that.wgsClinvarMultiHailPath)
+        && Objects.equals(wgsClinvarSplitHailPath, that.wgsClinvarSplitHailPath)
+        && Objects.equals(wgsClinvarVcfPath, that.wgsClinvarVcfPath)
+        && Objects.equals(wgsLongReadsManifestPath, that.wgsLongReadsManifestPath)
+        && Objects.equals(wgsLongReadsHailGRCh38, that.wgsLongReadsHailGRCh38)
+        && Objects.equals(wgsLongReadsHailT2T, that.wgsLongReadsHailT2T)
+        && Objects.equals(wgsLongReadsJointVcfGRCh38, that.wgsLongReadsJointVcfGRCh38)
+        && Objects.equals(wgsLongReadsJointVcfT2T, that.wgsLongReadsJointVcfT2T)
+        && Objects.equals(needsV8GenomicExtractionWorkflow, that.needsV8GenomicExtractionWorkflow);
   }
 }

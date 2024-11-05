@@ -7,6 +7,7 @@ import { DataTable } from 'primereact/datatable';
 
 import {
   CdrVersionTiersResponse,
+  ResourceType,
   Workspace,
   WorkspaceResource,
 } from 'generated/fetch';
@@ -22,6 +23,14 @@ import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
 } from 'app/components/with-confirm-delete-modal';
+import {
+  WithErrorModalProps,
+  withErrorModalWrapper,
+} from 'app/components/with-error-modal-wrapper';
+import {
+  withSpinnerOverlay,
+  WithSpinnerOverlayProps,
+} from 'app/components/with-spinner-overlay';
 import { TanagraWorkspaceResource } from 'app/pages/data/tanagra-dev/data-component-tanagra';
 import {
   getCreatedBy,
@@ -102,7 +111,10 @@ interface TableData {
   workspace: Workspace;
 }
 
-interface Props extends WithConfirmDeleteModalProps {
+interface Props
+  extends WithConfirmDeleteModalProps,
+    WithErrorModalProps,
+    WithSpinnerOverlayProps {
   existingNameList: string[];
   workspaceResources: TanagraWorkspaceResource[];
   onUpdate: Function;
@@ -113,7 +125,9 @@ interface Props extends WithConfirmDeleteModalProps {
 
 export const TanagraResourceList = fp.flow(
   withCdrVersions(),
-  withConfirmDeleteModal()
+  withConfirmDeleteModal(),
+  withErrorModalWrapper(),
+  withSpinnerOverlay()
 )((props: Props) => {
   const [resourceToRename, setResourceToRename] =
     useState<TanagraWorkspaceResource>();
@@ -197,12 +211,66 @@ export const TanagraResourceList = fp.flow(
     }
   };
 
+  const duplicateResource = async (resource: TanagraWorkspaceResource) => {
+    props.showSpinner();
+    switch (getType(resource)) {
+      case ResourceType.COHORT:
+        await cohortsApi()
+          .cloneCohort({
+            studyId: resource.workspaceNamespace,
+            cohortId: resource.cohortTanagra.id,
+            cohortCloneInfo: {
+              displayName: `Duplicate of ${resource.cohortTanagra.displayName}`,
+              description: resource.cohortTanagra.description,
+            },
+          })
+          .then(() => props.onUpdate())
+          .catch((error) => {
+            console.error(error);
+            props.showErrorModal(
+              'Duplicating Cohort Error',
+              'Cohort could not be duplicated. Please try again.'
+            );
+          })
+          .finally(() => props.hideSpinner());
+        break;
+      case ResourceType.CONCEPT_SET:
+        await featureSetsApi()
+          .cloneFeatureSet({
+            studyId: resource.workspaceNamespace,
+            featureSetId: resource.featureSetTanagra.id,
+            featureSetCloneInfo: {
+              displayName: `Duplicate of ${resource.featureSetTanagra.displayName}`,
+              description: resource.featureSetTanagra.description,
+            },
+          })
+          .then(() => props.onUpdate())
+          .catch((error) => {
+            console.error(error);
+            props.showErrorModal(
+              'Duplicating Feature Set Error',
+              'Feature set could not be duplicated. Please try again.'
+            );
+          })
+          .finally(() => props.hideSpinner());
+        break;
+      default:
+        props.hideSpinner();
+    }
+  };
+
   const actions = (resource): ResourceAction[] => {
     return [
       {
         icon: 'note',
         displayName: 'Rename',
         onClick: () => setResourceToRename(resource),
+        disabled: !canWrite(resource),
+      },
+      {
+        icon: 'copy',
+        displayName: 'Duplicate',
+        onClick: () => duplicateResource(resource),
         disabled: !canWrite(resource),
       },
       {

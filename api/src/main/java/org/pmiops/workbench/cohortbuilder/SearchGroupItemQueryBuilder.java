@@ -74,6 +74,8 @@ public final class SearchGroupItemQueryBuilder {
       ImmutableMap.ofEntries(
           new AbstractMap.SimpleEntry<>(Domain.FITBIT, "has_fitbit"),
           new AbstractMap.SimpleEntry<>(
+              Domain.FITBIT_PLUS_DEVICE, "has_fitbit_plus_device_information"),
+          new AbstractMap.SimpleEntry<>(
               Domain.FITBIT_HEART_RATE_SUMMARY, "has_fitbit_heart_rate_summary"),
           new AbstractMap.SimpleEntry<>(
               Domain.FITBIT_HEART_RATE_LEVEL, "has_fitbit_heart_rate_level"),
@@ -82,6 +84,7 @@ public final class SearchGroupItemQueryBuilder {
           new AbstractMap.SimpleEntry<>(
               Domain.FITBIT_SLEEP_DAILY_SUMMARY, "has_fitbit_sleep_daily_summary"),
           new AbstractMap.SimpleEntry<>(Domain.FITBIT_SLEEP_LEVEL, "has_fitbit_sleep_level"),
+          new AbstractMap.SimpleEntry<>(Domain.FITBIT_DEVICE, "has_fitbit_device_information"),
           new AbstractMap.SimpleEntry<>(Domain.WHOLE_GENOME_VARIANT, "has_whole_genome_variant"),
           new AbstractMap.SimpleEntry<>(
               Domain.PHYSICAL_MEASUREMENT, "has_physical_measurement_data"),

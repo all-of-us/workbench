@@ -973,16 +973,13 @@ public class DataSetServiceImpl implements DataSetService {
     // workspace ID.
     dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
 
-    DbCdrVersion dbCdrVersion = dbWorkspace.getCdrVersion();
+    boolean isTanagraEnabled = dbWorkspace.isCDRAndWorkspaceTanagraEnabled();
 
     validateDataSetRequestResources(
-        dbWorkspace.getWorkspaceId(),
-        dbWorkspace.isUsesTanagra(),
-        dataSetExportRequest.getDataSetRequest(),
-        dbCdrVersion);
+        dbWorkspace.getWorkspaceId(), isTanagraEnabled, dataSetExportRequest.getDataSetRequest());
 
     Map<String, QueryJobConfiguration> queriesByDomain =
-        (dbCdrVersion.getTanagraEnabled() && dbWorkspace.isUsesTanagra())
+        (isTanagraEnabled)
             ? tanagraDomainToBigQueryConfig(dataSetExportRequest.getDataSetRequest(), dbWorkspace)
             : domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
@@ -999,18 +996,14 @@ public class DataSetServiceImpl implements DataSetService {
                             dbWorkspace.getCdrVersion().getName(),
                             qualifier,
                             dataSetExportRequest.getAnalysisLanguage(),
-                            generateFieldList(
-                                dbCdrVersion,
-                                Domain.fromValue(entry.getKey()),
-                                dbWorkspace.isUsesTanagra()))
+                            generateFieldList(Domain.fromValue(entry.getKey()), isTanagraEnabled))
                             .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .toList();
   }
 
-  private FieldList generateFieldList(
-      DbCdrVersion dbCdrVersion, Domain domain, boolean isUsesTanagra) {
-    return (dbCdrVersion.getTanagraEnabled() && isUsesTanagra)
+  private FieldList generateFieldList(Domain domain, boolean isTanagraEnabled) {
+    return (isTanagraEnabled)
         ? bigQueryService.getTableFieldsFromDomainForTanagra(TANAGRA_DOMAIN_MAP.getKey(domain))
         : bigQueryService.getTableFieldsFromDomain(domain);
   }
@@ -1442,8 +1435,8 @@ public class DataSetServiceImpl implements DataSetService {
 
   /** Validate that the requested resources are contained by the given workspace. */
   private void validateDataSetRequestResources(
-      long workspaceId, boolean isUsingTanagra, DataSetRequest request, DbCdrVersion dbCdrVersion) {
-    if (dbCdrVersion.getTanagraEnabled() && isUsingTanagra) {
+      long workspaceId, boolean isTanagraEnabled, DataSetRequest request) {
+    if (isTanagraEnabled) {
       if (!request.isTanagraAllParticipantsCohort()) {
         tanagraValidateCohortsInWorkspace(request.getTanagraCohortIds());
       }
@@ -1555,6 +1548,7 @@ public class DataSetServiceImpl implements DataSetService {
       case INT64:
       case FLOAT64:
       case NUMERIC:
+      case BIGNUMERIC:
         return parameter.getValue();
       case STRING:
       case TIMESTAMP:

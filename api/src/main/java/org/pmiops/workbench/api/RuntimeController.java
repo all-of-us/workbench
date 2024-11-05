@@ -147,7 +147,7 @@ public class RuntimeController implements RuntimeApiDelegate {
             .values()
             .contains(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
       try {
-        Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
+        Runtime runtime = leonardoMapper.toApiRuntimeWithoutDisk(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
           log.warning(
               "Runtimes returned from ListRuntimes should be DELETED but found "

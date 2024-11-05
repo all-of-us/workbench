@@ -12,7 +12,6 @@ public class CdrVersionVO {
   public Boolean isDefault;
   public String name;
   public String accessTier; // modified from DbAccessTier type in DbCdrVersion
-  public short releaseNumber;
   public short archivalStatus;
   public String bigqueryProject;
   public String bigqueryDataset;
@@ -53,4 +52,6 @@ public class CdrVersionVO {
   public String wgsLongReadsHailT2T;
   public String wgsLongReadsJointVcfGRCh38;
   public String wgsLongReadsJointVcfT2T;
+
+  public Boolean needsV8GenomicExtractionWorkflow;
 }

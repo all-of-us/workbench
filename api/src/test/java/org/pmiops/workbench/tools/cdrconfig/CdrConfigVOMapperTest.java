@@ -46,7 +46,6 @@ public class CdrConfigVOMapperTest {
     testVersionJson.isDefault = true;
     testVersionJson.name = "CDR Version 20";
     testVersionJson.accessTier = testTierJson.shortName;
-    testVersionJson.releaseNumber = 2;
     testVersionJson.archivalStatus = DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE);
     testVersionJson.bigqueryProject = "a big one";
     testVersionJson.bigqueryDataset = "also a big one";
@@ -156,7 +155,6 @@ public class CdrConfigVOMapperTest {
             .setCdrVersionId(testVersionJson.cdrVersionId)
             .setIsDefault(testVersionJson.isDefault)
             .setName(testVersionJson.name)
-            .setReleaseNumber(testVersionJson.releaseNumber)
             .setArchivalStatus(testVersionJson.archivalStatus)
             .setBigqueryProject(testVersionJson.bigqueryProject)
             .setBigqueryDataset(testVersionJson.bigqueryDataset)
