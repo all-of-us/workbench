@@ -20,6 +20,11 @@ query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMA
 where table_name=\"person\" AND column_name = \"self_reported_category_concept_id\""
 selfReportedCategoryCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
+echo "Checking if device tables exists in this dataset"
+query="select count(table_id) as count from \`$BQ_PROJECT.$BQ_DATASET.__TABLES__\`
+where table_name=\"device\""
+deviceTableExist=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
 ################################################
 # insert person data into cb_search_person
 ################################################
@@ -644,6 +649,67 @@ then
           LEFT JOIN
               (
                   SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.wear_study\`
+              ) ws on (p.person_id = ws.person_id)
+      ) y
+  WHERE x.person_id = y.person_id"
+fi
+
+if [[ $deviceTableExist > 0 ]];
+then
+  ################################################
+  # set has_fitbit_device_information
+  ################################################
+  echo "set has_fitbit_device_information flag in cb_search_person"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+  SET x.has_fitbit_device_information = y.has_fitbit_device_information
+  FROM
+      (
+          SELECT
+                p.person_id
+              , CASE
+                  WHEN ws.person_id is null THEN 0
+                  ELSE 1
+                END has_fitbit_device_information
+          FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+          LEFT JOIN
+              (
+                  SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.device\`
+              ) ws on (p.person_id = ws.person_id)
+      ) y
+  WHERE x.person_id = y.person_id"
+  
+  ################################################
+  # set has_fitbit_plus_device_information
+  ################################################
+  echo "set has_fitbit_plus_device_information flag in cb_search_person"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+  SET x.has_fitbit_plus_device_information = y.has_fitbit_plus_device_information
+  FROM
+      (
+          SELECT
+                p.person_id
+              , CASE
+                  WHEN ws.person_id is null THEN 0
+                  ELSE 1
+                END has_fitbit_plus_device_information
+          FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+          LEFT JOIN
+              (
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
+                  union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+                  union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
+                  union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+                  union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
+                  union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
+                  union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.device\`
               ) ws on (p.person_id = ws.person_id)
       ) y
   WHERE x.person_id = y.person_id"

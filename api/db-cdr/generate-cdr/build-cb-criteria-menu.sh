@@ -51,6 +51,11 @@ where table_name=\"person\" AND column_name = \"self_reported_category_concept_i
 selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 echo "self reported count: $selfReportedCategoryDataCount"
 
+echo "Checking if device tables exists in this dataset"
+query="select count(table_id) as count from \`$BQ_PROJECT.$BQ_DATASET.__TABLES__\`
+where table_name=\"device\""
+deviceTableExist=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
 ###############################
 # CREATE cb_criteria_menu TABLE
 ###############################
@@ -139,13 +144,21 @@ then
 
   SORT_ORDER=0
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT','FITBIT','Has Any Fitbit Data',0,$((++SORT_ORDER)))"
+  if [[ $deviceTableExist > 0 ]];
+  then
+    insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_PLUS_DEVICE','FITBIT_PLUS_DEVICE','Has Any Fitbit Data Plus Device',0,$((++SORT_ORDER)))"
+  fi
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_ACTIVITY','FITBIT_ACTIVITY','Fitbit Activity Summary',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_HEART_RATE_SUMMARY','FITBIT_HEART_RATE_SUMMARY','Fitbit Heart Rate Summary',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_HEART_RATE_LEVEL','FITBIT_HEART_RATE_LEVEL','Fitbit Heart Rate Minute Level',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_INTRADAY_STEPS','FITBIT_INTRADAY_STEPS','Fitbit Steps Intraday',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_SLEEP_DAILY_SUMMARY','FITBIT_SLEEP_DAILY_SUMMARY','Fitbit Sleep Daily Summary',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_SLEEP_LEVEL','FITBIT_SLEEP_LEVEL','Fitbit Sleep Level',0,$((++SORT_ORDER)))"
-  
+  if [[ $deviceTableExist > 0 ]];
+  then
+    insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_DEVICE','FITBIT_DEVICE','Fitbit Device',0,$((++SORT_ORDER)))"
+  fi
+    
   if [[ $wearConsentDataCount > 0 ]];
   then
     echo "Insert wear consent into cb_criteria_menu"
