@@ -220,6 +220,8 @@ public final class DbStorageEnums {
           .put(Domain.CONCEPT_QUICK_ADD, (short) 28)
           .put(Domain.SNP_INDEL_VARIANT, (short) 29)
           .put(Domain.WEAR_CONSENT, (short) 30)
+          .put(Domain.FITBIT_PLUS_DEVICE, (short) 31)
+          .put(Domain.FITBIT_DEVICE, (short) 32)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
