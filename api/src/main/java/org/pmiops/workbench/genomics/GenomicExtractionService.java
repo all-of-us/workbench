@@ -320,7 +320,7 @@ public class GenomicExtractionService {
       List<String> personIds,
       String extractionFolder,
       String outputDir,
-      Optional<Integer> scatterCount) {
+      boolean useLegacyWorkflow) {
 
     String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
     if (destinationParts.length != 2) {
@@ -340,9 +340,30 @@ public class GenomicExtractionService {
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".filter_set_name", "\"" + filterSetName + "\"");
     }
 
-    scatterCount.ifPresent(
-        count ->
-            maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(count)));
+    if (useLegacyWorkflow) {
+      // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
+      // keeping overhead low and limiting footprint on shared extraction quota.
+      int minScatter =
+          Math.min(
+              cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
+              LEGACY_MAX_EXTRACTION_SCATTER);
+      int desiredScatter =
+          Math.round(
+              personIds.size()
+                  * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
+      int scatterCount =
+          Ints.constrainToRange(desiredScatter, minScatter, LEGACY_MAX_EXTRACTION_SCATTER);
+
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
+
+      // Added in https://github.com/broadinstitute/gatk/pull/7698
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"");
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
+    } else {
+      // Added Nov 2024
+      // replaces extraction_uuid and cohort_table_prefix which are now set to this value
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".call_set_identifier", "\"" + extractionUuid + "\"");
+    }
 
     Blob personIdsFile =
         extractionServiceAccountCloudStorageClientProvider
@@ -364,11 +385,8 @@ public class GenomicExtractionService {
                 + personIdsFile.getName()
                 + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
-        // Added in https://github.com/broadinstitute/gatk/pull/7698
-        .put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"")
-        .put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"")
         .put(
             EXTRACT_WORKFLOW_NAME + ".gvs_project",
             "\"" + workspace.getCdrVersion().getBigqueryProject() + "\"")
@@ -410,27 +428,12 @@ public class GenomicExtractionService {
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
-    Optional<Integer> scatterCount = Optional.empty();
     if (useLegacyWorkflow) {
       int logicalVersion = cohortExtractionConfig.legacyVersions.methodLogicalVersion;
       if (logicalVersion < EARLIEST_SUPPORTED_LEGACY_METHOD_VERSION) {
         log.severe("unsupported GVS extract method version: " + logicalVersion);
         throw new ServerErrorException();
       }
-
-      // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
-      // keeping overhead low and limiting footprint on shared extraction quota.
-      int minScatter =
-          Math.min(
-              cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
-              LEGACY_MAX_EXTRACTION_SCATTER);
-      int desiredScatter =
-          Math.round(
-              personIds.size()
-                  * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
-      scatterCount =
-          Optional.of(
-              Ints.constrainToRange(desiredScatter, minScatter, LEGACY_MAX_EXTRACTION_SCATTER));
     }
 
     VersionedConfig versionedConfig =
@@ -460,7 +463,7 @@ public class GenomicExtractionService {
                             personIds,
                             extractionFolder,
                             outputDir,
-                            scatterCount))
+                            useLegacyWorkflow))
                     .methodConfigVersion(versionedConfig.methodRepoVersion)
                     .methodRepoMethod(createRepoMethodParameter(versionedConfig))
                     .name(extractionUuid)
