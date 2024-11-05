@@ -189,12 +189,12 @@ public class FeaturedWorkspaceTest {
     // override the mock so that FC getWorkspaces() returns the workspace with NO_ACCESS
     // which simulates that my user is not in the workspace's tier auth domain
 
-    var workspaceWithOutAccess =
+    var workspaceWithoutAccess =
         rawlsWorkspaces.stream()
             .map(ws -> ws.accessLevel(RawlsWorkspaceAccessLevel.NO_ACCESS))
             .toList();
 
-    when(mockFireCloudService.getWorkspaces()).thenReturn(workspaceWithOutAccess);
+    when(mockFireCloudService.getWorkspaces()).thenReturn(workspaceWithoutAccess);
 
     List<WorkspaceResponse> workspaceResponsesList =
         assertDoesNotThrow(
