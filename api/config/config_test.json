@@ -55,6 +55,12 @@
       "methodLogicalVersion": 3,
       "minExtractionScatterTasks": 20,
       "extractionScatterTasksPerSample": 4
+    },
+    "cdrv8plus": {
+      "methodNamespace": "aouwgscohortextraction-test",
+      "methodName": "dest_project_id_yonghao_test",
+      "methodRepoVersion": 2,
+      "methodLogicalVersion": 4
     }
   },
   "cdr": {
