@@ -167,7 +167,7 @@ public class FeaturedWorkspaceTest {
   public void testGetByFeaturedCategory_inaccessible() {
     mockFeaturedWorkspaces("Tutorial_namespace", DbFeaturedCategory.TUTORIAL_WORKSPACES, "one");
 
-    // override the mock so that FC getWorkspace() does not return the workspace
+    // override the mock so that FC getWorkspaces() does not return the workspace
     // which simulates inaccessibility to my user
 
     when(mockFireCloudService.getWorkspaces()).thenReturn(Collections.emptyList());
@@ -179,5 +179,30 @@ public class FeaturedWorkspaceTest {
                     FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
 
     assertThat(workspaceResponsesList).isEmpty();
+  }
+
+  @Test
+  public void testGetByFeaturedCategory_noaccess() {
+    String namespace = "Tutorial_namespace";
+    mockFeaturedWorkspaces(namespace, DbFeaturedCategory.TUTORIAL_WORKSPACES, "one");
+
+    // override the mock so that FC getWorkspaces() returns the workspace with NO_ACCESS
+    // which simulates that my user is not in the workspace's tier auth domain
+
+    var workspaceWithOutAccess =
+        rawlsWorkspaces.stream()
+            .map(ws -> ws.accessLevel(RawlsWorkspaceAccessLevel.NO_ACCESS))
+            .toList();
+
+    when(mockFireCloudService.getWorkspaces()).thenReturn(workspaceWithOutAccess);
+
+    List<WorkspaceResponse> workspaceResponsesList =
+        assertDoesNotThrow(
+            () ->
+                featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+                    FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
+
+    assertThat(workspaceResponsesList.size()).isEqualTo(1);
+    assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace()).isEqualTo(namespace);
   }
 }
