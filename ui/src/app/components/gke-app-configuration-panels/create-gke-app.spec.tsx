@@ -20,6 +20,7 @@ import {
   defaultAppRequest,
 } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { MILLIS_PER_DAY } from 'app/utils/dates';
 import { autodeleteOptions, findMachineByName } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
@@ -295,9 +296,14 @@ describe(CreateGkeApp.name, () => {
 
       it('should correctly calculate autodeleteRemainingDays', async () => {
         const now = new Date();
-        now.setDate(now.getDate() - 2); // Subtract 2 days
-        const dateAccessed = now;
-        const autodeleteThreshold = 7 * 24 * 60 + 1; // 7 days in minutes plus a small buffer
+        const twoDaysInMillis = 2 * MILLIS_PER_DAY;
+        const oneMinuteBufferInMillis = 70; // just over 60 seconds
+        // 2 days ago, minus a minute buffer
+        const elapsedTime = twoDaysInMillis - oneMinuteBufferInMillis;
+        const dateAccessed = new Date(now.valueOf() - elapsedTime);
+
+        const sevenDaysInMinutes = 7 * 24 * 60;
+        const autodeleteThreshold = sevenDaysInMinutes;
 
         await component(appType, {
           userApps: [
@@ -316,9 +322,14 @@ describe(CreateGkeApp.name, () => {
 
       it('should show correct message when autodeleteRemainingDays is 0', async () => {
         const now = new Date();
-        now.setDate(now.getDate() - 2); // Subtract 2 days
-        const dateAccessed = now;
-        const autodeleteThreshold = 2 * 24 * 60 + 1; // 2 days in minutes plus small buffer.
+        const twoDaysInMillis = 2 * MILLIS_PER_DAY;
+        const oneMinuteBufferInMillis = 70; // just over 60 seconds
+        // 2 days ago, minus a minute buffer
+        const elapsedTime = twoDaysInMillis - oneMinuteBufferInMillis;
+        const dateAccessed = new Date(now.valueOf() - elapsedTime);
+
+        const twoDaysInMinutes = 2 * 24 * 60;
+        const autodeleteThreshold = twoDaysInMinutes;
 
         await component(appType, {
           userApps: [

@@ -1,10 +1,13 @@
 package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -205,7 +209,7 @@ public class WorkspaceMapperTest {
   }
 
   @Test
-  public void testConvertsFirecloudResponseToApiResponse() {
+  public void testConvertsFirecloudResponseToApiResponse_2_param_version() {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
             workspaceMapper.toApiWorkspace(
@@ -219,6 +223,86 @@ public class WorkspaceMapperTest {
 
     // Verify data came from the Firecloud workspace.
     assertThat(resp.getWorkspace().getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
+  }
+
+  @Test
+  public void testConvertsFirecloudResponseToApiResponse_3_param_version() {
+    RawlsWorkspaceListResponse rawlsResponse =
+        new RawlsWorkspaceListResponse()
+            .workspace(sourceFirecloudWorkspace)
+            .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
+    final WorkspaceResponse resp =
+        workspaceMapper.toApiWorkspaceResponse(
+            sourceDbWorkspace, rawlsResponse, initialCreditsExpirationService);
+
+    assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
+
+    // Verify data came from the DB workspace.
+    assertThat(resp.getWorkspace().getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+
+    // Verify data came from the Firecloud workspace.
+    assertThat(resp.getWorkspace().getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
+  }
+
+  @Test
+  public void testConvertsFirecloudResponsesToApiResponseList_listVersion() {
+    RawlsWorkspaceListResponse rawlsResponse =
+        new RawlsWorkspaceListResponse()
+            .workspace(sourceFirecloudWorkspace)
+            .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
+
+    String fcUuid = sourceFirecloudWorkspace.getWorkspaceId();
+
+    final List<WorkspaceResponse> result =
+        workspaceMapper.toApiWorkspaceResponseList(
+            List.of(sourceDbWorkspace.setFirecloudUuid(fcUuid)),
+            Map.of(fcUuid, rawlsResponse),
+            initialCreditsExpirationService);
+
+    assertThat(result).hasSize(1);
+    final WorkspaceResponse wsResp = result.get(0);
+
+    // Verify data came from the DB workspace.
+    assertThat(wsResp.getWorkspace().getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+
+    // Verify data came from the Firecloud workspace.
+    assertThat(wsResp.getWorkspace().getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
+  }
+
+  @Test
+  public void testConvertsFirecloudResponsesToApiResponseList_listVersion_missing_aou() {
+    RawlsWorkspaceListResponse rawlsResponse =
+        new RawlsWorkspaceListResponse()
+            .workspace(sourceFirecloudWorkspace)
+            .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
+
+    String fcUuid = sourceFirecloudWorkspace.getWorkspaceId();
+
+    final List<WorkspaceResponse> result =
+        assertDoesNotThrow(
+            () ->
+                workspaceMapper.toApiWorkspaceResponseList(
+                    Collections.emptyList(),
+                    Map.of(fcUuid, rawlsResponse),
+                    initialCreditsExpirationService));
+
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void testConvertsFirecloudResponsesToApiResponseList_listVersion_missing_rawls() {
+
+    String fcUuid = sourceFirecloudWorkspace.getWorkspaceId();
+
+    final List<WorkspaceResponse> result =
+        assertDoesNotThrow(
+            () ->
+                workspaceMapper.toApiWorkspaceResponseList(
+                    List.of(sourceDbWorkspace.setFirecloudUuid(fcUuid)),
+                    Collections.emptyMap(),
+                    initialCreditsExpirationService));
+
+    assertThat(result).isEmpty();
   }
 
   private void assertResearchPurposeMatches(ResearchPurpose rp) {

@@ -19,7 +19,6 @@ public class DbCdrVersion {
   private Boolean isDefault;
   private String name;
   private DbAccessTier accessTier;
-  private short releaseNumber;
   private short archivalStatus;
   private String bigqueryProject;
   private String bigqueryDataset;
@@ -131,16 +130,6 @@ public class DbCdrVersion {
 
   public DbCdrVersion setArchivalStatusEnum(ArchivalStatus archivalStatus) {
     setArchivalStatus(DbStorageEnums.archivalStatusToStorage(archivalStatus));
-    return this;
-  }
-
-  @Column(name = "release_number")
-  public short getReleaseNumber() {
-    return releaseNumber;
-  }
-
-  public DbCdrVersion setReleaseNumber(short releaseNumber) {
-    this.releaseNumber = releaseNumber;
     return this;
   }
 
@@ -513,7 +502,6 @@ public class DbCdrVersion {
         isDefault,
         name,
         accessTier,
-        releaseNumber,
         archivalStatus,
         bigqueryProject,
         bigqueryDataset,
@@ -563,7 +551,6 @@ public class DbCdrVersion {
     }
     DbCdrVersion that = (DbCdrVersion) o;
     return cdrVersionId == that.cdrVersionId
-        && releaseNumber == that.releaseNumber
         && archivalStatus == that.archivalStatus
         && numParticipants == that.numParticipants
         && Objects.equals(isDefault, that.isDefault)
