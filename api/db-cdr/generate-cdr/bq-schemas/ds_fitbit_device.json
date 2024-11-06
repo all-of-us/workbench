@@ -1,0 +1,47 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "device_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "device_date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "battery",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "battery_level",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "device_version",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "device_type",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "last_sync_time",
+    "type": "DATETIME"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "src_id",
+    "type": "STRING"
+  }
+]

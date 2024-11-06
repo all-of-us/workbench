@@ -253,6 +253,11 @@ public class CdrVersionServiceTest {
   }
 
   @Test
+  public void testGetCdrVersionsHasFitbitDeviceData() {
+    testGetCdrVersionsHasDataType(CdrVersion::isHasFitbitDeviceData);
+  }
+
+  @Test
   public void testGetCdrVersionsHasSurveyConductData() {
     testGetCdrVersionsHasDataType(CdrVersion::isHasSurveyConductData);
   }
