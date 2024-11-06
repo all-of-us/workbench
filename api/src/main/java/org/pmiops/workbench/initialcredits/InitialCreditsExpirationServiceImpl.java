@@ -188,10 +188,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
       userInitialCreditsExpiration.setApproachingExpirationNotificationTime(clockNow());
       userDao.save(user);
     } catch (MessagingException e) {
-      logger.error(
-          String.format(
-              "Failed to send initial credits expiration warning notification for user %s",
-              user.getUserId()));
+      logger.error("Failed to send initial credits expiration warning notification for user {}", user.getUserId());
     }
   }
 
