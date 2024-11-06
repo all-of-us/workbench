@@ -142,10 +142,6 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
-    if (null == userInitialCreditsExpiration
-        || userInitialCreditsExpiration.getExpirationCleanupTime() != null) {
-      return;
-    }
 
     if (haveCreditsExpired(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
