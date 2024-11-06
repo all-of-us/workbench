@@ -384,7 +384,6 @@ public class GenomicExtractionService {
                 + "/"
                 + personIdsFile.getName()
                 + "\"")
-        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"")
         .put(
