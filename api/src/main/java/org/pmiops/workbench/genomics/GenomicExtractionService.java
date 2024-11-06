@@ -359,7 +359,8 @@ public class GenomicExtractionService {
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"");
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"");
     } else {
       // Added Nov 2024
       // replaces extraction_uuid and cohort_table_prefix which are now set to this value
