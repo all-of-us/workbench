@@ -147,12 +147,14 @@ export const VARIANT_DISPLAY = {
 
 export const BOOLEAN_CRITERIA_DOMAINS = [
   Domain.FITBIT.toString(),
+  Domain.FITBIT_PLUS_DEVICE.toString(),
   Domain.FITBIT_SLEEP_LEVEL.toString(),
   Domain.FITBIT_SLEEP_DAILY_SUMMARY.toString(),
   Domain.FITBIT_HEART_RATE_LEVEL.toString(),
   Domain.FITBIT_HEART_RATE_SUMMARY.toString(),
   Domain.FITBIT_ACTIVITY.toString(),
   Domain.FITBIT_INTRADAY_STEPS.toString(),
+  Domain.FITBIT_DEVICE.toString(),
   Domain.WHOLE_GENOME_VARIANT.toString(),
   Domain.LR_WHOLE_GENOME_VARIANT.toString(),
   Domain.ARRAY_DATA.toString(),
