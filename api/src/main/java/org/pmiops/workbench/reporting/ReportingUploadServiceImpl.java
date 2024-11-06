@@ -157,6 +157,16 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getFixedValues(captureTimestamp)));
   }
 
+  /** Batch uploads {@link ReportingLeonardoAppUsage}. */
+  @Override
+  public void uploadLeonardoAppUsagetBatch(List<ReportingLeonardoAppUsage> batch, long captureTimestamp) {
+    uploadBatchTable(
+        leonardoAppUsageInsertAllRequestBuilder.build(
+            getTableId(LeonardoAppUsageColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+  }
+
   /** Batch uploads {@link ReportingNewUserSatisfactionSurvey}. */
   @Override
   public void uploadNewUserSatisfactionSurveyBatch(

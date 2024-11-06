@@ -597,23 +597,28 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingLeonardoAppUsage> getLeonardoAppUsage() {
+  public List<ReportingLeonardoAppUsage> getLeonardoAppUsage(long limit, long offset) {
     if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
       // Skip querying data if not enabled, and just return empty list instead.
       return new ArrayList<>();
     }
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
-                "SELECT appId, appName, status, createdDate, destroyedDate, "
-                    + "startTime, stopTime, creator, customEnvironmentVariables "
-                    + "FROM `"
-                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
-                    + "` au "
-                    + "JOIN `"
-                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
-                    + "` a on a.id = au.appId where STARTS_WITH(appName, \""
-                    + USER_APP_NAME_PREFIX
-                    + "\")")
+                String.format(
+                    "SELECT appId, appName, status, createdDate, destroyedDate, "
+                        + "startTime, stopTime, creator, customEnvironmentVariables "
+                        + "FROM `"
+                        + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
+                        + "` au "
+                        + "JOIN `"
+                        + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
+                        + "` a on a.id = au.appId where STARTS_WITH(appName, \""
+                        + USER_APP_NAME_PREFIX
+                        + "LIMIT %d\n"
+                        + "OFFSET %d"
+                        + "\")",
+                    limit,
+                    offset))
             .build();
 
     List<ReportingLeonardoAppUsage> queryResults = new ArrayList<>();
