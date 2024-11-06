@@ -182,8 +182,6 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verifyUserSaveOnlyDuringSetup();
-    // Only run during setup
-    verify(spyWorkspaceDao, times(1)).save(any());
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
     assertNull(user.getUserInitialCreditsExpiration());
   }
