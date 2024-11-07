@@ -75,7 +75,7 @@ def format_benchmark(bm)
   "%ds" % [bm.real]
 end
 
-DEADLINE_SEC = 75
+DEADLINE_SEC = 120
 def start_local_db_service()
   common = Common.new
 
