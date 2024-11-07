@@ -47,7 +47,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
@@ -99,7 +98,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final FireCloudService fireCloudService;
   private final FirecloudMapper firecloudMapper;
   private final FreeTierBillingService freeTierBillingService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
   private final MailService mailService;
   private final Provider<DbUser> userProvider;
   private final Provider<TanagraApi> tanagraApiProvider;
@@ -126,7 +124,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       FireCloudService fireCloudService,
       FirecloudMapper firecloudMapper,
       FreeTierBillingService freeTierBillingService,
-      InitialCreditsExpirationService initialCreditsExpirationService,
       MailService mailService,
       Provider<DbUser> userProvider,
       Provider<TanagraApi> tanagraApiProvider,
@@ -150,7 +147,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.fireCloudService = fireCloudService;
     this.firecloudMapper = firecloudMapper;
     this.freeTierBillingService = freeTierBillingService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
     this.mailService = mailService;
     this.tanagraApiProvider = tanagraApiProvider;
     this.userDao = userDao;
@@ -168,7 +164,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public List<WorkspaceResponse> getWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
+            workspaceDao, fireCloudService.getWorkspaces(), freeTierBillingService)
         .stream()
         .filter(WorkspaceServiceImpl::filterToNonPublished)
         .toList();
@@ -184,7 +180,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
+            workspaceDao, fireCloudService.getWorkspaces(), freeTierBillingService)
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().getFeaturedCategory() != null)
         .toList();
@@ -225,7 +221,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     workspaceResponse.setAccessLevel(
         firecloudMapper.fcToApiWorkspaceAccessLevel(fcResponse.getAccessLevel()));
     Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, freeTierBillingService);
     workspaceResponse.setWorkspace(workspace);
 
     return workspaceResponse;
@@ -503,7 +499,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
     } catch (IOException | InterruptedException e) {
       throw new ServerErrorException(
-          String.format("Timed out while verifying billing account update."), e);
+          "Timed out while verifying billing account update.", e);
     }
 
     workspace.setBillingAccountName(newBillingAccountName);
@@ -516,7 +512,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           hasInitialCreditsRemaining ? BillingStatus.ACTIVE : BillingStatus.INACTIVE);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
       workspace.setInitialCreditsExpired(
-          initialCreditsExpirationService.haveCreditsExpired(creator));
+          freeTierBillingService.haveCreditsExpired(creator));
     } else {
       // At this point, we can assume that a user provided billing account is open since we
       // throw a BadRequestException if a closed one is provided

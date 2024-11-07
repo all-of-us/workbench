@@ -36,7 +36,6 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.AccountDisabledStatus;
@@ -65,7 +64,6 @@ public class ProfileService {
   private final Clock clock;
   private final DemographicSurveyMapper demographicSurveyMapper;
   private final FreeTierBillingService freeTierBillingService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
   private final Javers javers;
@@ -88,7 +86,6 @@ public class ProfileService {
       Clock clock,
       DemographicSurveyMapper demographicSurveyMapper,
       FreeTierBillingService freeTierBillingService,
-      InitialCreditsExpirationService initialCreditsExpirationService,
       InstitutionDao institutionDao,
       InstitutionService institutionService,
       Javers javers,
@@ -108,7 +105,6 @@ public class ProfileService {
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
     this.freeTierBillingService = freeTierBillingService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
     this.institutionDao = institutionDao;
     this.institutionService = institutionService;
     this.javers = javers;
@@ -156,7 +152,7 @@ public class ProfileService {
 
     return profileMapper.toModel(
         user,
-        initialCreditsExpirationService,
+        freeTierBillingService,
         verifiedInstitutionalAffiliation,
         latestTermsOfService,
         freeTierUsage,
@@ -257,7 +253,7 @@ public class ProfileService {
         configProvider.get().featureFlags.enableInitialCreditsExpiration;
 
     if (enableInitialCreditsExpiration) {
-      initialCreditsExpirationService.setInitialCreditsExpirationBypassed(
+      freeTierBillingService.setInitialCreditsExpirationBypassed(
           user,
           Optional.ofNullable(updatedProfile.isInitialCreditsExpirationBypassed()).orElse(false));
     }

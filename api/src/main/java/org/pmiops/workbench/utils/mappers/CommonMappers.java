@@ -11,9 +11,9 @@ import java.util.Optional;
 import org.mapstruct.Context;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.stereotype.Service;
 
@@ -123,7 +123,7 @@ public class CommonMappers {
   @Named("getInitialCreditsExpiration")
   @Nullable
   public Long getInitialCreditsExpiration(
-      DbUser source, @Context InitialCreditsExpirationService expirationService) {
-    return expirationService.getCreditsExpiration(source).map(this::timestamp).orElse(null);
+      DbUser source, @Context FreeTierBillingService freeTierBillingService) {
+    return freeTierBillingService.getCreditsExpiration(source).map(this::timestamp).orElse(null);
   }
 }

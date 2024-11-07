@@ -13,12 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -27,8 +24,6 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -78,7 +73,7 @@ public class WorkspaceMapperTest {
   private DbWorkspace sourceDbWorkspace;
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
-  @Autowired private InitialCreditsExpirationService initialCreditsExpirationService;
+  @Autowired private FreeTierBillingService freeTierBillingService;
   @Autowired private WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
@@ -178,7 +173,7 @@ public class WorkspaceMapperTest {
 
     final Workspace ws =
         workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService);
+            sourceDbWorkspace, sourceFirecloudWorkspace, freeTierBillingService);
     assertThat(ws.getTerraName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
@@ -204,7 +199,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setFeaturedCategory(DbFeaturedWorkspace.DbFeaturedCategory.COMMUNITY);
     final Workspace ws =
         workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService);
+            sourceDbWorkspace, sourceFirecloudWorkspace, freeTierBillingService);
     assertThat(ws.getFeaturedCategory()).isEqualTo(FeaturedWorkspaceCategory.COMMUNITY);
   }
 
@@ -213,7 +208,7 @@ public class WorkspaceMapperTest {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
             workspaceMapper.toApiWorkspace(
-                sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService),
+                sourceDbWorkspace, sourceFirecloudWorkspace, freeTierBillingService),
             RawlsWorkspaceAccessLevel.PROJECT_OWNER);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
@@ -233,7 +228,7 @@ public class WorkspaceMapperTest {
             .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
-            sourceDbWorkspace, rawlsResponse, initialCreditsExpirationService);
+            sourceDbWorkspace, rawlsResponse, freeTierBillingService);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
 
@@ -284,7 +279,7 @@ public class WorkspaceMapperTest {
                 workspaceMapper.toApiWorkspaceResponseList(
                     Collections.emptyList(),
                     Map.of(fcUuid, rawlsResponse),
-                    initialCreditsExpirationService));
+                    freeTierBillingService));
 
     assertThat(result).isEmpty();
   }

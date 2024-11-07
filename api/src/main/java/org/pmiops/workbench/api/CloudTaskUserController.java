@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
@@ -56,7 +56,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final UserService userService;
   private final AccessModuleService accessModuleService;
   private final FreeTierBillingBatchUpdateService freeTierBillingUpdateService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
+  private final FreeTierBillingService freeTierBillingService;
 
   CloudTaskUserController(
       UserDao userDao,
@@ -64,13 +64,13 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       UserService userService,
       AccessModuleService accessModuleService,
       FreeTierBillingBatchUpdateService freeTierBillingUpdateService,
-      InitialCreditsExpirationService initialCreditsExpirationService) {
+      FreeTierBillingService freeTierBillingService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.accessModuleService = accessModuleService;
     this.freeTierBillingUpdateService = freeTierBillingUpdateService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
+    this.freeTierBillingService = freeTierBillingService;
   }
 
   @Override
@@ -185,7 +185,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
-    initialCreditsExpirationService.checkCreditsExpirationForUserIDs(userIdsList);
+    freeTierBillingService.checkCreditsExpirationForUserIDs(userIdsList);
     return ResponseEntity.noContent().build();
   }
 

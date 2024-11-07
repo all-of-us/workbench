@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
@@ -22,7 +22,7 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FireCloudService fireCloudService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
+  private final FreeTierBillingService freeTierBillingService;
   private final WorkspaceMapper workspaceMapper;
 
   @Autowired
@@ -30,12 +30,12 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FireCloudService fireCloudService,
-      InitialCreditsExpirationService initialCreditsExpirationService,
+      FreeTierBillingService freeTierBillingService,
       WorkspaceMapper workspaceMapper) {
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.fireCloudService = fireCloudService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
+    this.freeTierBillingService = freeTierBillingService;
     this.workspaceMapper = workspaceMapper;
   }
 
@@ -68,6 +68,6 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
                     fcWorkspace -> fcWorkspace));
 
     return workspaceMapper.toApiWorkspaceResponseList(
-        dbWorkspaces, fcWorkspacesByUuid, initialCreditsExpirationService);
+        dbWorkspaces, fcWorkspacesByUuid, freeTierBillingService);
   }
 }

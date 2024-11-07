@@ -4,8 +4,10 @@ import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
+import jakarta.mail.MessagingException;
 import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -23,9 +26,14 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
@@ -45,7 +53,10 @@ public class FreeTierBillingService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
+  private final InstitutionService institutionService;
+  private final MailService mailService;
+  private final LeonardoApiClient leonardoApiClient;
+  private final Clock clock;
 
   private static final Logger logger = LoggerFactory.getLogger(FreeTierBillingService.class);
 
@@ -58,7 +69,8 @@ public class FreeTierBillingService {
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       WorkspaceFreeTierUsageService workspaceFreeTierUsageService,
-      InitialCreditsExpirationService initialCreditsExpirationService) {
+      InstitutionService institutionService, MailService mailService,
+      LeonardoApiClient leonardoApiClient, Clock clock) {
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -66,7 +78,10 @@ public class FreeTierBillingService {
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceFreeTierUsageService = workspaceFreeTierUsageService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
+    this.institutionService = institutionService;
+    this.mailService = mailService;
+    this.leonardoApiClient = leonardoApiClient;
+    this.clock = clock;
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -202,7 +217,7 @@ public class FreeTierBillingService {
   public boolean maybeSetDollarLimitOverride(DbUser user, double newDollarLimit) {
     final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
 
-    if (!initialCreditsExpirationService.haveCreditsExpired(user)
+    if (!haveCreditsExpired(user)
         && (previousLimitMaybe != null
             || CostComparisonUtils.costsDiffer(
                 newDollarLimit,
@@ -445,5 +460,136 @@ public class FreeTierBillingService {
                     Collectors.summingDouble(
                         v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0))));
     return dbCostByCreator;
+  }
+
+  public DbUserInitialCreditsExpiration createInitialCreditsExpiration(DbUser user) {
+    long initialCreditsValidityPeriodDays =
+        workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays;
+    Timestamp now = clockNow();
+    Timestamp expirationTime =
+        new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(initialCreditsValidityPeriodDays));
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(now)
+            .setExpirationTime(expirationTime)
+            .setUser(user)
+            .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT);
+    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
+    return userInitialCreditsExpiration;
+  }
+
+  public void setInitialCreditsExpirationBypassed(DbUser user, boolean isBypassed) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+    if (userInitialCreditsExpiration == null) {
+      userInitialCreditsExpiration = createInitialCreditsExpiration(user);
+    }
+    userInitialCreditsExpiration.setBypassed(isBypassed);
+  }
+
+  public Optional<Timestamp> getCreditsExpiration(DbUser user) {
+    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
+        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
+        .map(DbUserInitialCreditsExpiration::getExpirationTime);
+  }
+
+  public boolean haveCreditsExpired(DbUser user) {
+    return getCreditsExpiration(user)
+        .map(expirationTime -> !expirationTime.after(new Timestamp(clock.instant().toEpochMilli())))
+        .orElse(false);
+  }
+
+  public void extendInitialCreditsExpiration(DbUser user) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+    if (userInitialCreditsExpiration == null) {
+      throw new WorkbenchException("User does not have initial credits expiration set.");
+    }
+    if (userInitialCreditsExpiration.getExtensionCount() != 0) {
+      throw new WorkbenchException(
+          "User has already extended their initial credits expiration and cannot extend further.");
+    }
+    userInitialCreditsExpiration.setExpirationTime(
+        new Timestamp(
+            userInitialCreditsExpiration.getCreditStartTime().getTime()
+                + TimeUnit.DAYS.toMillis(
+                workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
+    userInitialCreditsExpiration.setExtensionCount(
+        userInitialCreditsExpiration.getExtensionCount() + 1);
+    userDao.save(user);
+  }
+
+  public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
+    if (userIdsList != null && !userIdsList.isEmpty()) {
+      Iterable<DbUser> users = userDao.findAllById(userIdsList);
+      users.forEach(this::checkExpiration);
+    }
+  }
+
+  private void checkExpiration(DbUser user) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+    if (null != userInitialCreditsExpiration
+        && haveCreditsExpired(user)
+        && userInitialCreditsExpiration
+        .getNotificationStatus()
+        .equals(NotificationStatus.NO_NOTIFICATION_SENT)) {
+      logger.info(
+          "Initial credits expired for user {}. Expiration time: {}",
+          user.getUsername(),
+          userInitialCreditsExpiration.getExpirationTime());
+      boolean hasExhaustedWorkspace =
+          workspaceDao.findAllByCreator(user).parallelStream()
+              .anyMatch(DbWorkspace::isInitialCreditsExhausted);
+
+      // Set initial credits expired for all workspaces regardless of whether
+      // they have exhausted their credits or not.
+      workspaceDao.findAllByCreator(user).stream()
+          .filter(
+              ws ->
+                  BillingUtils.isInitialCredits(
+                      ws.getBillingAccountName(), workbenchConfigProvider.get()))
+          .filter(DbWorkspace::isActive)
+          .filter(ws -> !ws.isInitialCreditsExpired())
+          .forEach(
+              ws -> {
+                ws.setInitialCreditsExpired(true);
+                ws.setBillingStatus(BillingStatus.INACTIVE);
+                workspaceDao.save(ws);
+                deleteAppsAndRuntimesInWorkspace(ws);
+              });
+      try {
+        // If the user has already been notified about exhausting their initial credits,
+        // we do not need to notify them about expiration as well.
+        if (!hasExhaustedWorkspace) {
+          mailService.alertUserInitialCreditsExpired(user);
+          userInitialCreditsExpiration.setNotificationStatus(
+              NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
+          userDao.save(user);
+        }
+
+      } catch (MessagingException e) {
+        logger.error(
+            String.format(
+                "Failed to send initial credits expiration notification for user %s",
+                user.getUserId()));
+      }
+    }
+  }
+
+  private Timestamp clockNow() {
+    return new Timestamp(clock.instant().toEpochMilli());
+  }
+
+  private void deleteAppsAndRuntimesInWorkspace(DbWorkspace workspace) {
+
+    String namespace = workspace.getWorkspaceNamespace();
+    try {
+      leonardoApiClient.deleteAllResources(workspace.getGoogleProject(), false);
+      logger.info("Deleted apps and runtimes for workspace {}", namespace);
+    } catch (WorkbenchException e) {
+      logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
+    }
   }
 }
