@@ -249,6 +249,7 @@
   <include file="changelog/db.changelog-239-rm-release-number.xml"/>
   <include file="changelog/db.changelog-240-cdr-version-hasFitbitDevice-field.xml"/>
   <include file="changelog/db.changelog-241-replace-user-initial-credits-expiration-status.xml"/>
+  <include file="changelog/db.changelog-242-remove-old-workspace-columns.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
