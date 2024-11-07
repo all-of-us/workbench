@@ -164,8 +164,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private DbCdrVersion cdrVersion;
   private DbWorkspace workspace;
 
-  @SpyBean
-  private CohortReviewController controller;
+  @SpyBean private CohortReviewController controller;
 
   @SpyBean private TestWorkbenchConfig testWorkbenchConfig;
 
