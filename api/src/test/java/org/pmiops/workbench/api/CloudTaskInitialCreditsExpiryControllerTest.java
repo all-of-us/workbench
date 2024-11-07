@@ -45,6 +45,7 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -73,7 +74,6 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
 
-  @Autowired CloudTaskInitialCreditsExpiryController cloudTaskInitialCreditsExpiryController;
   @Autowired MailService mailService;
 
   @Autowired UserDao userDao;
@@ -83,6 +83,8 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   @Autowired FreeTierBillingService freeTierBillingService;
 
   @Autowired WorkspaceService workspaceService;
+
+  @Autowired CloudTaskInitialCreditsExpiryController cloudTaskInitialCreditsExpiryController;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -106,7 +108,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     FirecloudMapper.class,
     FireCloudService.class,
     ImpersonatedWorkspaceService.class,
-    FreeTierBillingService.class,
+    InstitutionService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,
