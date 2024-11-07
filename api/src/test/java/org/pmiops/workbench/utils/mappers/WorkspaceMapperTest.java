@@ -14,8 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
+import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -85,7 +89,7 @@ public class WorkspaceMapperTest {
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
-    InitialCreditsExpirationServiceImpl.class,
+    FreeTierBillingService.class,
     WorkspaceMapperImpl.class,
   })
   @MockBean({
@@ -252,7 +256,7 @@ public class WorkspaceMapperTest {
         workspaceMapper.toApiWorkspaceResponseList(
             List.of(sourceDbWorkspace.setFirecloudUuid(fcUuid)),
             Map.of(fcUuid, rawlsResponse),
-            initialCreditsExpirationService);
+            freeTierBillingService);
 
     assertThat(result).hasSize(1);
     final WorkspaceResponse wsResp = result.get(0);
@@ -295,7 +299,7 @@ public class WorkspaceMapperTest {
                 workspaceMapper.toApiWorkspaceResponseList(
                     List.of(sourceDbWorkspace.setFirecloudUuid(fcUuid)),
                     Collections.emptyMap(),
-                    initialCreditsExpirationService));
+                    freeTierBillingService));
 
     assertThat(result).isEmpty();
   }

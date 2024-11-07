@@ -69,7 +69,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -210,7 +209,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean({
     AbsorbService.class,
     BigQueryService.class,
-    InitialCreditsExpirationService.class,
+    FreeTierBillingService.class,
     NewUserSatisfactionSurveyService.class,
     TaskQueueService.class,
   })

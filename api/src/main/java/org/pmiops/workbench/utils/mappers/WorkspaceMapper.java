@@ -110,7 +110,8 @@ public interface WorkspaceMapper {
                 Stream.ofNullable(fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid()))
                     .map(
                         fcResponse ->
-                            toApiWorkspaceResponse(dbWorkspace, fcResponse, freeTierBillingService)))
+                            toApiWorkspaceResponse(
+                                dbWorkspace, fcResponse, freeTierBillingService)))
         .toList();
   }
 

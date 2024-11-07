@@ -498,8 +498,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             "Provided billing account is closed. Please provide an open account.");
       }
     } catch (IOException | InterruptedException e) {
-      throw new ServerErrorException(
-          "Timed out while verifying billing account update.", e);
+      throw new ServerErrorException("Timed out while verifying billing account update.", e);
     }
 
     workspace.setBillingAccountName(newBillingAccountName);
@@ -511,8 +510,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       workspace.setBillingStatus(
           hasInitialCreditsRemaining ? BillingStatus.ACTIVE : BillingStatus.INACTIVE);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
-      workspace.setInitialCreditsExpired(
-          freeTierBillingService.haveCreditsExpired(creator));
+      workspace.setInitialCreditsExpired(freeTierBillingService.haveCreditsExpired(creator));
     } else {
       // At this point, we can assume that a user provided billing account is open since we
       // throw a BadRequestException if a closed one is provided

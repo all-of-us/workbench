@@ -53,7 +53,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.identityverification.IdentityVerificationService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Institution;
@@ -169,7 +168,7 @@ public class RasLinkServiceTest {
     HttpTransport.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsExpirationService.class
+    FreeTierBillingService.class
   })
   static class Configuration {
     @Bean

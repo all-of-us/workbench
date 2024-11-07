@@ -59,7 +59,6 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
@@ -112,7 +111,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConceptSetsControllerTest {
 
   public static final String UPDATED_DESC = "Updated Desc";
-  private static Criteria CRITERIA_CONDITION_1 =
+  private static final Criteria CRITERIA_CONDITION_1 =
       new Criteria()
           .conceptId(123L)
           .name("a concept")
@@ -252,7 +251,7 @@ public class ConceptSetsControllerTest {
     FirecloudMapperImpl.class,
     FreeTierBillingService.class,
     IamService.class,
-    InitialCreditsExpirationService.class,
+    FreeTierBillingService.class,
     MailService.class,
     NotebooksService.class,
     TaskQueueService.class,

@@ -101,7 +101,6 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.Cohort;
@@ -272,7 +271,7 @@ public class DataSetControllerTest {
     FeaturedWorkspaceMapper.class,
     FreeTierBillingService.class,
     IamService.class,
-    InitialCreditsExpirationService.class,
+    FreeTierBillingService.class,
     MailService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
@@ -1076,12 +1075,12 @@ public class DataSetControllerTest {
 
   @Test
   public void getDataDictionaryEntry() {
-    when(mockCdrVersionService.findByCdrVersionId(2l))
+    when(mockCdrVersionService.findByCdrVersionId(2L))
         .thenReturn(Optional.ofNullable(new DbCdrVersion()));
     when(mockDSDataDictionaryDao.findFirstByFieldNameAndDomain(anyString(), anyString()))
         .thenReturn(new DbDSDataDictionary());
 
-    dataSetController.getDataDictionaryEntry(2l, "PERSON", "MockValue");
+    dataSetController.getDataDictionaryEntry(2L, "PERSON", "MockValue");
     verify(mockDSDataDictionaryDao, times(1)).findFirstByFieldNameAndDomain("MockValue", "PERSON");
   }
 

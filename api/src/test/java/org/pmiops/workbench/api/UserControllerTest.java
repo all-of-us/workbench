@@ -36,7 +36,6 @@ import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingAccount;
 import org.pmiops.workbench.model.TierAccessStatus;
@@ -86,7 +85,7 @@ public class UserControllerTest {
     FreeTierBillingService.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsExpirationService.class
+    FreeTierBillingService.class
   })
   static class Configuration {
 

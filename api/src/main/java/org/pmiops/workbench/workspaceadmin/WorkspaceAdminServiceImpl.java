@@ -237,8 +237,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace();
 
     Workspace workspace =
-        workspaceMapper.toApiWorkspace(
-            dbWorkspace, firecloudWorkspace, freeTierBillingService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, freeTierBillingService);
 
     return new WorkspaceAdminView()
         .workspace(workspace)

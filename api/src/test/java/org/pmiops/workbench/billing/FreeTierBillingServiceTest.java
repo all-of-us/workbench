@@ -1,12 +1,17 @@
 package org.pmiops.workbench.billing;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.pmiops.workbench.billing.InitialCreditsExpiryTaskMatchers.*;
+import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.billing.InitialCreditsExpiryTaskMatchers.MapMatcher;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import com.google.cloud.PageImpl;
@@ -32,9 +37,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.billing.InitialCreditsExpiryTaskMatchers.UserListMatcher;
@@ -44,9 +52,12 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -55,6 +66,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -68,8 +80,29 @@ public class FreeTierBillingServiceTest {
 
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
+  private static final long validityPeriodDays = 17L; // arbitrary
+  private static final long extensionPeriodDays = 78L; // arbitrary
+  private static final long warningPeriodDays = 10L; // arbitrary
+
+  private static final Timestamp NOW = Timestamp.from(FakeClockConfiguration.NOW.toInstant());
+  private static final Timestamp PAST_EXPIRATION =
+      Timestamp.from(FakeClockConfiguration.NOW.toInstant().minusSeconds(24 * 60 * 60));
+  private static final Timestamp DURING_WARNING_PERIOD =
+      Timestamp.from(
+          FakeClockConfiguration.NOW
+              .toInstant()
+              .plusSeconds((warningPeriodDays - 1L) * 24 * 60 * 60));
+  private static final Timestamp BEFORE_WARNING_PERIOD =
+      Timestamp.from(
+          FakeClockConfiguration.NOW
+              .toInstant()
+              .plusSeconds((warningPeriodDays + 1L) * 24 * 60 * 60));
+
+  @SpyBean private UserDao spyUserDao;
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
-  @MockBean private InitialCreditsExpirationService initialCreditsExpirationService;
+  @MockBean private InstitutionService institutionService;
+  @MockBean private LeonardoApiClient leonardoApiClient;
+  @MockBean private MailService mailService;
 
   @Autowired BigQueryService bigQueryService;
   @Autowired FreeTierBillingService freeTierBillingService;
@@ -84,6 +117,8 @@ public class FreeTierBillingServiceTest {
 
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
+
+  private DbWorkspace workspace;
 
   @TestConfiguration
   @Import({FreeTierBillingService.class, WorkspaceFreeTierUsageService.class})
@@ -109,7 +144,14 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.freeTierCronUserBatchSize = 10;
     workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
-    workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2l;
+    workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2L;
+
+    workspace =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
+                .setWorkspaceId(1L));
+    // when(workspaceDao.findAllByCreator(any())).thenReturn(Set.of(workspace));
 
     // by default we have 0 spend
     // doReturn(mockBQTableSingleResult(0.0)).when(bigQueryService).executeQuery(any());
@@ -801,6 +843,115 @@ public class FreeTierBillingServiceTest {
 
     assertSingleWorkspaceTestDbState(user, workspace, 50);
     assertSingleWorkspaceTestDbState(user, anotherWorkspace, 100.1);
+  }
+
+  @Test
+  public void test_none() {
+    DbUser user = new DbUser();
+    assertThat(freeTierBillingService.getCreditsExpiration(user)).isEmpty();
+  }
+
+  @Test
+  public void test_userBypassed() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(true).setExpirationTime(NOW));
+    assertThat(freeTierBillingService.getCreditsExpiration(user)).isEmpty();
+  }
+
+  @Test
+  public void test_institutionBypassed() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setBypassed(false)
+                        .setExpirationTime(NOW)));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
+    assertThat(freeTierBillingService.getCreditsExpiration(user)).isEmpty();
+  }
+
+  @Test
+  public void test_nullTimestamp() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(false).setExpirationTime(null));
+    assertThat(freeTierBillingService.getCreditsExpiration(user)).isEmpty();
+  }
+
+  @Test
+  public void test_validTimestamp() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(false).setExpirationTime(NOW));
+    assertThat(freeTierBillingService.getCreditsExpiration(user)).hasValue(NOW);
+  }
+
+  @Test
+  public void test_checkCreditsExpirationForUserIDs_null() {
+    freeTierBillingService.checkCreditsExpirationForUserIDs(null);
+    verify(spyUserDao, never()).findAllById(any());
+  }
+
+  @Test
+  public void test_checkCreditsExpirationForUserIDs_emptyList() {
+    freeTierBillingService.checkCreditsExpirationForUserIDs(new ArrayList<>());
+    verify(spyUserDao, never()).findAllById(any());
+  }
+
+  @Test
+  public void test_checkCreditsExpirationForUserIDs_noExpirationRecord() {
+    DbUser user = spyUserDao.save(new DbUser());
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+
+    freeTierBillingService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
+    assertNull(user.getUserInitialCreditsExpiration());
+  }
+
+  static Stream<Arguments> dataForUsersWithAnExpirationRecord() {
+    return Stream.of(
+        Arguments.of(
+            "If a bypassed user is before their warning period, they will not receive a warning email or have their resources cleaned up.",
+            BEFORE_WARNING_PERIOD,
+            true,
+            null,
+            null),
+        Arguments.of(
+            "If a non-bypassed user is before their warning period, they will not receive a warning email or have their resources cleaned up.",
+            BEFORE_WARNING_PERIOD,
+            false,
+            null,
+            null),
+        Arguments.of(
+            "If a bypassed user is in their warning period, they will not receive a warning email or have their resources cleaned up.",
+            DURING_WARNING_PERIOD,
+            true,
+            null,
+            null),
+        Arguments.of(
+            "If a non-bypassed user is in their warning period, they will receive a warning email but not have their resources cleaned up.",
+            DURING_WARNING_PERIOD,
+            false,
+            NOW,
+            null),
+        Arguments.of(
+            "If a bypassed user has passed their expiration date, they will not receive a warning email or have their resources cleaned up.",
+            PAST_EXPIRATION,
+            true,
+            null,
+            null),
+        Arguments.of(
+            "If a non-bypassed user has passed their expiration date, they will not receive a warning email but will have their resources cleaned up.",
+            PAST_EXPIRATION,
+            false,
+            null,
+            NOW));
   }
 
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {

@@ -2,8 +2,10 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import com.google.common.collect.Maps;
@@ -14,7 +16,11 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +45,6 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -101,7 +106,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     FirecloudMapper.class,
     FireCloudService.class,
     ImpersonatedWorkspaceService.class,
-    InitialCreditsExpirationService.class,
+    FreeTierBillingService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,
@@ -133,7 +138,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.freeTierCronUserBatchSize = 10;
     workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
-    workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2l;
+    workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2L;
   }
 
   @AfterEach

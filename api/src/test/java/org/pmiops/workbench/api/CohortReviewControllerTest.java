@@ -100,7 +100,6 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -300,7 +299,7 @@ public class CohortReviewControllerTest {
     FireCloudService.class,
     FreeTierBillingService.class,
     IamService.class,
-    InitialCreditsExpirationService.class,
+    FreeTierBillingService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,

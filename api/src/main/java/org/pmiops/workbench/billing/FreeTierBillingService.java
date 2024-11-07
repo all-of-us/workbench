@@ -69,8 +69,10 @@ public class FreeTierBillingService {
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       WorkspaceFreeTierUsageService workspaceFreeTierUsageService,
-      InstitutionService institutionService, MailService mailService,
-      LeonardoApiClient leonardoApiClient, Clock clock) {
+      InstitutionService institutionService,
+      MailService mailService,
+      LeonardoApiClient leonardoApiClient,
+      Clock clock) {
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -514,7 +516,7 @@ public class FreeTierBillingService {
         new Timestamp(
             userInitialCreditsExpiration.getCreditStartTime().getTime()
                 + TimeUnit.DAYS.toMillis(
-                workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
+                    workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
     userInitialCreditsExpiration.setExtensionCount(
         userInitialCreditsExpiration.getExtensionCount() + 1);
     userDao.save(user);
@@ -533,8 +535,8 @@ public class FreeTierBillingService {
     if (null != userInitialCreditsExpiration
         && haveCreditsExpired(user)
         && userInitialCreditsExpiration
-        .getNotificationStatus()
-        .equals(NotificationStatus.NO_NOTIFICATION_SENT)) {
+            .getNotificationStatus()
+            .equals(NotificationStatus.NO_NOTIFICATION_SENT)) {
       logger.info(
           "Initial credits expired for user {}. Expiration time: {}",
           user.getUsername(),

@@ -69,7 +69,6 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Cohort;
@@ -213,7 +212,7 @@ public class CohortsControllerTest {
     FreeTierBillingService.class,
     LeonardoApiClient.class,
     IamService.class,
-    InitialCreditsExpirationService.class,
+    FreeTierBillingService.class,
     MailService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
