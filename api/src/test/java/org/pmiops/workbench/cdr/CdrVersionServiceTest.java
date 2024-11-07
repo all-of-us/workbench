@@ -120,6 +120,7 @@ public class CdrVersionServiceTest {
             false,
             false,
             false,
+            false,
             false);
     nonDefaultCdrVersion =
         makeCdrVersion(
@@ -128,6 +129,7 @@ public class CdrVersionServiceTest {
             "Old Registered CDR",
             registeredTier,
             null,
+            false,
             false,
             false,
             false,
@@ -147,6 +149,7 @@ public class CdrVersionServiceTest {
             false,
             false,
             false,
+            false,
             false);
     controlledNonDefaultCdrVersion =
         makeCdrVersion(
@@ -155,6 +158,7 @@ public class CdrVersionServiceTest {
             "Old Controlled CDR",
             controlledTier,
             null,
+            false,
             false,
             false,
             false,
@@ -318,7 +322,17 @@ public class CdrVersionServiceTest {
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
     makeCdrVersion(
-        5L, true, "Test CDR With Data Types", registeredTier, "wgs", true, true, true, true, true);
+        5L,
+        true,
+        "Test CDR With Data Types",
+        registeredTier,
+        "wgs",
+        true,
+        true,
+        true,
+        true,
+        true,
+        true);
     final List<CdrVersion> newVersions =
         parseTierVersions(cdrVersionService.getCdrVersionsByTier(), registeredTier.getShortName());
 
@@ -355,7 +369,8 @@ public class CdrVersionServiceTest {
       boolean hasCopeSurveyData,
       boolean hasFitbitSleepData,
       boolean hasSurevyConductData,
-      boolean tanagraEnabled) {
+      boolean tanagraEnabled,
+      boolean hasFitbitDeviceData) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
@@ -370,6 +385,7 @@ public class CdrVersionServiceTest {
     cdrVersion.setHasFitbitSleepData(hasFitbitSleepData);
     cdrVersion.setHasSurveyConductData(hasSurevyConductData);
     cdrVersion.setTanagraEnabled(tanagraEnabled);
+    cdrVersion.setHasFitbitDeviceData(hasFitbitDeviceData);
     return cdrVersionDao.save(cdrVersion);
   }
 
