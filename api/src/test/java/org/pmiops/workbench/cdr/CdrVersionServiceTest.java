@@ -120,6 +120,7 @@ public class CdrVersionServiceTest {
             false,
             false,
             false,
+            false,
             false);
     nonDefaultCdrVersion =
         makeCdrVersion(
@@ -128,6 +129,7 @@ public class CdrVersionServiceTest {
             "Old Registered CDR",
             registeredTier,
             null,
+            false,
             false,
             false,
             false,
@@ -147,6 +149,7 @@ public class CdrVersionServiceTest {
             false,
             false,
             false,
+            false,
             false);
     controlledNonDefaultCdrVersion =
         makeCdrVersion(
@@ -155,6 +158,7 @@ public class CdrVersionServiceTest {
             "Old Controlled CDR",
             controlledTier,
             null,
+            false,
             false,
             false,
             false,
@@ -244,32 +248,37 @@ public class CdrVersionServiceTest {
 
   @Test
   public void testGetCdrVersionsHasFitBit() {
-    testGetCdrVersionsHasDataType(CdrVersion::isHasFitbitData);
+    assertGetCdrVersionsHasDataType(CdrVersion::isHasFitbitData);
   }
 
   @Test
   public void testGetCdrVersionsHasFitbitSleepData() {
-    testGetCdrVersionsHasDataType(CdrVersion::isHasFitbitSleepData);
+    assertGetCdrVersionsHasDataType(CdrVersion::isHasFitbitSleepData);
+  }
+
+  @Test
+  public void testGetCdrVersionsHasFitbitDeviceData() {
+    assertGetCdrVersionsHasDataType(CdrVersion::isHasFitbitDeviceData);
   }
 
   @Test
   public void testGetCdrVersionsHasSurveyConductData() {
-    testGetCdrVersionsHasDataType(CdrVersion::isHasSurveyConductData);
+    assertGetCdrVersionsHasDataType(CdrVersion::isHasSurveyConductData);
   }
 
   @Test
   public void testGetCdrVersionsTanagraEnabled() {
-    testGetCdrVersionsHasDataType(CdrVersion::isTanagraEnabled);
+    assertGetCdrVersionsHasDataType(CdrVersion::isTanagraEnabled);
   }
 
   @Test
   public void testGetCdrVersionsHasCopeSurveyData() {
-    testGetCdrVersionsHasDataType(CdrVersion::isHasCopeSurveyData);
+    assertGetCdrVersionsHasDataType(CdrVersion::isHasCopeSurveyData);
   }
 
   @Test
   public void testGetCdrVersionsHasWgsData() {
-    testGetCdrVersionsHasDataType(CdrVersion::isHasWgsData);
+    assertGetCdrVersionsHasDataType(CdrVersion::isHasWgsData);
   }
 
   private void assertExpectedResponse(CdrVersionTiersResponse response) {
@@ -305,7 +314,7 @@ public class CdrVersionServiceTest {
         .isEqualTo(expectedDefault.getCreationTime());
   }
 
-  private void testGetCdrVersionsHasDataType(Predicate<CdrVersion> hasType) {
+  private void assertGetCdrVersionsHasDataType(Predicate<CdrVersion> hasType) {
     addMembershipForTest(registeredTier);
     final List<CdrVersion> cdrVersions =
         parseTierVersions(cdrVersionService.getCdrVersionsByTier(), registeredTier.getShortName());
@@ -313,7 +322,17 @@ public class CdrVersionServiceTest {
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
     makeCdrVersion(
-        5L, true, "Test CDR With Data Types", registeredTier, "wgs", true, true, true, true, true);
+        5L,
+        true,
+        "Test CDR With Data Types",
+        registeredTier,
+        "wgs",
+        true,
+        true,
+        true,
+        true,
+        true,
+        true);
     final List<CdrVersion> newVersions =
         parseTierVersions(cdrVersionService.getCdrVersionsByTier(), registeredTier.getShortName());
 
@@ -350,7 +369,8 @@ public class CdrVersionServiceTest {
       boolean hasCopeSurveyData,
       boolean hasFitbitSleepData,
       boolean hasSurevyConductData,
-      boolean tanagraEnabled) {
+      boolean tanagraEnabled,
+      boolean hasFitbitDeviceData) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
@@ -365,6 +385,7 @@ public class CdrVersionServiceTest {
     cdrVersion.setHasFitbitSleepData(hasFitbitSleepData);
     cdrVersion.setHasSurveyConductData(hasSurevyConductData);
     cdrVersion.setTanagraEnabled(tanagraEnabled);
+    cdrVersion.setHasFitbitDeviceData(hasFitbitDeviceData);
     return cdrVersionDao.save(cdrVersion);
   }
 

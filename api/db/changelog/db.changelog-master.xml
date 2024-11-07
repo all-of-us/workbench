@@ -247,6 +247,7 @@
   <include file="changelog/db.changelog-237-add-default-user-initial-credits-expiration-bypassed.xml"/>
   <include file="changelog/db.changelog-238-add-needs-v8-genomic-extraction-workflow.xml"/>
   <include file="changelog/db.changelog-239-rm-release-number.xml"/>
+  <include file="changelog/db.changelog-240-cdr-version-hasFitbitDevice-field.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

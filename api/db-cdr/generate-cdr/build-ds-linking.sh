@@ -353,3 +353,18 @@ VALUES
   ($((ID++)), 'LEVEL', 'sleep_level.level', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
   ($((ID++)), 'START_DATETIME', 'CAST(sleep_level.start_datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
   ($((ID++)), 'DURATION_IN_MIN', 'sleep_level.duration_in_min', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level')"
+  
+echo "ds_linking - inserting fitbit device data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'PERSON_ID', 'device.person_id', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'DEVICE_ID', 'device.device_id', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'DEVICE_DATE', 'device.device_date', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'BATTERY', 'device.battery', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'BATTERY_LEVEL', 'device.battery_level', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'DEVICE_VERSION', 'device.device_version', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'DEVICE_TYPE', 'device.device_type', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'LAST_SYNC_TIME', 'CAST(device.last_sync_time AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'SRC_ID', 'device.src_id', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device')"
