@@ -861,10 +861,12 @@ export const DatasetPage = fp.flow(
     const updatePrepackagedDomains = () => {
       PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
       prepackagedConceptSetToString = prepackagedAllSurveyConceptSetToString;
-      const { hasFitbitData, hasFitbitSleepData, hasFitbitDeviceData, hasWgsData } = getCdrVersion(
-        workspace,
-        cdrVersionTiersResponse
-      );
+      const {
+        hasFitbitData,
+        hasFitbitSleepData,
+        hasFitbitDeviceData,
+        hasWgsData,
+      } = getCdrVersion(workspace, cdrVersionTiersResponse);
       PREPACKAGED_DOMAINS = {
         ...PREPACKAGED_DOMAINS,
         ...PREPACKAGED_SURVEY_DOMAINS,
