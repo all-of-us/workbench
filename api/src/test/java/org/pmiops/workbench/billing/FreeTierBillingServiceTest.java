@@ -1,11 +1,14 @@
 package org.pmiops.workbench.billing;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,12 +39,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
@@ -80,6 +86,29 @@ public class FreeTierBillingServiceTest {
 
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
+  @SpyBean private UserDao spyUserDao;
+
+  @SpyBean private WorkspaceDao spyWorkspaceDao;
+
+  @MockBean private UserServiceAuditor mockUserServiceAuditor;
+  @MockBean private MailService mailService;
+  @MockBean private LeonardoApiClient leonardoApiClient;
+  @MockBean private InstitutionService institutionService;
+
+  @Autowired BigQueryService bigQueryService;
+  @Autowired FreeTierBillingService freeTierBillingService;
+  @Autowired UserDao userDao;
+  @Autowired WorkspaceDao workspaceDao;
+  @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+  @Autowired WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
+
+  @Autowired private TaskQueueService taskQueueService;
+
+  private static WorkbenchConfig workbenchConfig;
+
+  private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
+  private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
+
   private static final long validityPeriodDays = 17L; // arbitrary
   private static final long extensionPeriodDays = 78L; // arbitrary
   private static final long warningPeriodDays = 10L; // arbitrary
@@ -97,26 +126,6 @@ public class FreeTierBillingServiceTest {
           FakeClockConfiguration.NOW
               .toInstant()
               .plusSeconds((warningPeriodDays + 1L) * 24 * 60 * 60));
-
-  @SpyBean private UserDao spyUserDao;
-  @MockBean private UserServiceAuditor mockUserServiceAuditor;
-  @MockBean private InstitutionService institutionService;
-  @MockBean private LeonardoApiClient leonardoApiClient;
-  @MockBean private MailService mailService;
-
-  @Autowired BigQueryService bigQueryService;
-  @Autowired FreeTierBillingService freeTierBillingService;
-  @Autowired UserDao userDao;
-  @Autowired WorkspaceDao workspaceDao;
-  @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-  @Autowired WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
-
-  @Autowired private TaskQueueService taskQueueService;
-
-  private static WorkbenchConfig workbenchConfig;
-
-  private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
-  private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
 
   private DbWorkspace workspace;
 
@@ -137,24 +146,25 @@ public class FreeTierBillingServiceTest {
   }
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws MessagingException {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.freeTierCronUserBatchSize = 10;
+    workbenchConfig.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
+    workbenchConfig.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
+    workbenchConfig.billing.initialCreditsExpirationWarningDays = warningPeriodDays;
     workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2L;
 
     workspace =
-        workspaceDao.save(
+        spyWorkspaceDao.save(
             new DbWorkspace()
                 .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
                 .setWorkspaceId(1L));
-    // when(workspaceDao.findAllByCreator(any())).thenReturn(Set.of(workspace));
-
-    // by default we have 0 spend
-    // doReturn(mockBQTableSingleResult(0.0)).when(bigQueryService).executeQuery(any());
+    when(spyWorkspaceDao.findAllByCreator(any())).thenReturn(Set.of(workspace));
+    doNothing().when(mailService).alertUserInitialCreditsExpiring(isA(DbUser.class));
   }
 
   @AfterEach
@@ -165,7 +175,7 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_exceedsDollarThresholds() throws MessagingException {
+  public void checkFreeTierBillingUsage_exceedsDollarThresholds() {
     final double limit = 100.0;
     final double costUnderThreshold = 49.5;
 
@@ -218,7 +228,7 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_altDollarThresholds() throws MessagingException {
+  public void checkFreeTierBillingUsage_altDollarThresholds() {
 
     // set alert thresholds at 30% and 65% instead
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.3, .65));
@@ -297,7 +307,7 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_deletedWorkspaceNotIgnored() throws MessagingException {
+  public void checkFreeTierBillingUsage_deletedWorkspaceNotIgnored() {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
@@ -914,6 +924,32 @@ public class FreeTierBillingServiceTest {
     assertNull(user.getUserInitialCreditsExpiration());
   }
 
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("dataForUsersWithAnExpirationRecord")
+  public void test_checkCreditsExpirationForUserIDs_withExpirationRecord(
+      String testName,
+      Timestamp expirationTime,
+      boolean bypassed,
+      Timestamp expectedWarningNotificationTime,
+      Timestamp expectedCleanupTime) {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(expirationTime)
+                        .setBypassed(bypassed)));
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+
+    freeTierBillingService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    assertEquals(
+        user.getUserInitialCreditsExpiration().getApproachingExpirationNotificationTime(),
+        expectedWarningNotificationTime);
+    assertEquals(
+        user.getUserInitialCreditsExpiration().getExpirationCleanupTime(), expectedCleanupTime);
+  }
+
   static Stream<Arguments> dataForUsersWithAnExpirationRecord() {
     return Stream.of(
         Arguments.of(
@@ -970,14 +1006,6 @@ public class FreeTierBillingServiceTest {
             .collect(Collectors.toList());
 
     return new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
-  }
-
-  private TableResult mockBQTableSingleResult(final String project, final Double cost) {
-    return mockBQTableResult(ImmutableMap.of(project, cost));
-  }
-
-  private TableResult mockBQTableSingleResult(final Double cost) {
-    return mockBQTableSingleResult(SINGLE_WORKSPACE_TEST_PROJECT, cost);
   }
 
   private void assertSingleWorkspaceTestDbState(

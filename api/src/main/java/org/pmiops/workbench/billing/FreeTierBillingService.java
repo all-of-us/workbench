@@ -27,7 +27,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -49,14 +48,14 @@ public class FreeTierBillingService {
   private final TaskQueueService taskQueueService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
+  private final Clock clock;
   private final UserServiceAuditor userServiceAuditor;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
+  private final LeonardoApiClient leonardoApiClient;
   private final InstitutionService institutionService;
   private final MailService mailService;
-  private final LeonardoApiClient leonardoApiClient;
-  private final Clock clock;
 
   private static final Logger logger = LoggerFactory.getLogger(FreeTierBillingService.class);
 
@@ -65,25 +64,25 @@ public class FreeTierBillingService {
       TaskQueueService taskQueueService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
+      Clock clock,
       UserServiceAuditor userServiceAuditor,
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       WorkspaceFreeTierUsageService workspaceFreeTierUsageService,
-      InstitutionService institutionService,
-      MailService mailService,
       LeonardoApiClient leonardoApiClient,
-      Clock clock) {
+      InstitutionService institutionService,
+      MailService mailService) {
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.clock = clock;
     this.userServiceAuditor = userServiceAuditor;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceFreeTierUsageService = workspaceFreeTierUsageService;
+    this.leonardoApiClient = leonardoApiClient;
     this.institutionService = institutionService;
     this.mailService = mailService;
-    this.leonardoApiClient = leonardoApiClient;
-    this.clock = clock;
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -257,6 +256,155 @@ public class FreeTierBillingService {
             ? creatorFreeTierDollarLimit
             : creatorFreeTierDollarLimit - creatorCachedFreeTierUsage;
     return Math.max(creatorFreeCreditsRemaining, 0);
+  }
+
+  public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
+    if (userIdsList != null && !userIdsList.isEmpty()) {
+      Iterable<DbUser> users = userDao.findAllById(userIdsList);
+      users.forEach(this::checkExpiration);
+    }
+  }
+
+  public Optional<Timestamp> getCreditsExpiration(DbUser user) {
+    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
+        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
+        .map(DbUserInitialCreditsExpiration::getExpirationTime);
+  }
+
+  public boolean haveCreditsExpired(DbUser user) {
+    return getCreditsExpiration(user)
+        .map(expirationTime -> !expirationTime.after(clockNow()))
+        .orElse(false);
+  }
+
+  // Returns true if the user's credits are expiring within the initialCreditsExpirationWarningDays.
+  private boolean areCreditsExpiringSoon(DbUser user) {
+    long initialCreditsExpirationWarningDays =
+        workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDays;
+    return getCreditsExpiration(user)
+        .map(
+            expirationTime ->
+                clockNow()
+                    .after(
+                        new Timestamp(
+                            expirationTime.getTime()
+                                - TimeUnit.DAYS.toMillis(initialCreditsExpirationWarningDays))))
+        .orElse(false);
+  }
+
+  public DbUserInitialCreditsExpiration createInitialCreditsExpiration(DbUser user) {
+    long initialCreditsValidityPeriodDays =
+        workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays;
+    Timestamp now = clockNow();
+    Timestamp expirationTime =
+        new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(initialCreditsValidityPeriodDays));
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(now)
+            .setExpirationTime(expirationTime)
+            .setUser(user);
+    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
+    return userInitialCreditsExpiration;
+  }
+
+  public void setInitialCreditsExpirationBypassed(DbUser user, boolean isBypassed) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+    if (userInitialCreditsExpiration == null) {
+      userInitialCreditsExpiration = createInitialCreditsExpiration(user);
+    }
+    userInitialCreditsExpiration.setBypassed(isBypassed);
+  }
+
+  public void extendInitialCreditsExpiration(DbUser user) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+    if (userInitialCreditsExpiration == null) {
+      throw new WorkbenchException("User does not have initial credits expiration set.");
+    }
+    if (userInitialCreditsExpiration.getExtensionCount() != 0) {
+      throw new WorkbenchException(
+          "User has already extended their initial credits expiration and cannot extend further.");
+    }
+    userInitialCreditsExpiration.setExpirationTime(
+        new Timestamp(
+            userInitialCreditsExpiration.getCreditStartTime().getTime()
+                + TimeUnit.DAYS.toMillis(
+                    workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
+    userInitialCreditsExpiration.setExtensionCount(
+        userInitialCreditsExpiration.getExtensionCount() + 1);
+    userDao.save(user);
+  }
+
+  private void checkExpiration(DbUser user) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+
+    if (haveCreditsExpired(user)) {
+      handleExpiredCredits(user, userInitialCreditsExpiration);
+    } else if (areCreditsExpiringSoon(user)
+        && null == userInitialCreditsExpiration.getApproachingExpirationNotificationTime()) {
+      handleExpiringSoonCredits(user, userInitialCreditsExpiration);
+    }
+  }
+
+  private void handleExpiredCredits(
+      DbUser user, DbUserInitialCreditsExpiration userInitialCreditsExpiration) {
+    logger.info(
+        "Initial credits expired for user {}. Expiration time: {}",
+        user.getUsername(),
+        userInitialCreditsExpiration.getExpirationTime());
+
+    workspaceDao.findAllByCreator(user).stream()
+        .filter(
+            ws ->
+                BillingUtils.isInitialCredits(
+                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .filter(DbWorkspace::isActive)
+        .filter(ws -> !ws.isInitialCreditsExpired())
+        .forEach(
+            ws -> {
+              ws.setInitialCreditsExpired(true);
+              ws.setBillingStatus(BillingStatus.INACTIVE);
+              workspaceDao.save(ws);
+              deleteAppsAndRuntimesInWorkspace(ws);
+            });
+
+    userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
+    userDao.save(user);
+  }
+
+  private void handleExpiringSoonCredits(
+      DbUser user, DbUserInitialCreditsExpiration userInitialCreditsExpiration) {
+    logger.info(
+        "Initial credits expiring soon for user {}. Expiration time: {}",
+        user.getUsername(),
+        userInitialCreditsExpiration.getExpirationTime());
+    try {
+      mailService.alertUserInitialCreditsExpiring(user);
+      userInitialCreditsExpiration.setApproachingExpirationNotificationTime(clockNow());
+      userDao.save(user);
+    } catch (MessagingException e) {
+      logger.error(
+          "Failed to send initial credits expiration warning notification for user {}",
+          user.getUserId());
+    }
+  }
+
+  private void deleteAppsAndRuntimesInWorkspace(DbWorkspace workspace) {
+
+    String namespace = workspace.getWorkspaceNamespace();
+    try {
+      leonardoApiClient.deleteAllResources(workspace.getGoogleProject(), false);
+      logger.info("Deleted apps and runtimes for workspace {}", namespace);
+    } catch (WorkbenchException e) {
+      logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
+    }
+  }
+
+  private Timestamp clockNow() {
+    return new Timestamp(clock.instant().toEpochMilli());
   }
 
   @NotNull
@@ -462,136 +610,5 @@ public class FreeTierBillingService {
                     Collectors.summingDouble(
                         v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0))));
     return dbCostByCreator;
-  }
-
-  public DbUserInitialCreditsExpiration createInitialCreditsExpiration(DbUser user) {
-    long initialCreditsValidityPeriodDays =
-        workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays;
-    Timestamp now = clockNow();
-    Timestamp expirationTime =
-        new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(initialCreditsValidityPeriodDays));
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        new DbUserInitialCreditsExpiration()
-            .setCreditStartTime(now)
-            .setExpirationTime(expirationTime)
-            .setUser(user)
-            .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT);
-    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
-    return userInitialCreditsExpiration;
-  }
-
-  public void setInitialCreditsExpirationBypassed(DbUser user, boolean isBypassed) {
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        user.getUserInitialCreditsExpiration();
-    if (userInitialCreditsExpiration == null) {
-      userInitialCreditsExpiration = createInitialCreditsExpiration(user);
-    }
-    userInitialCreditsExpiration.setBypassed(isBypassed);
-  }
-
-  public Optional<Timestamp> getCreditsExpiration(DbUser user) {
-    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
-        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
-        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
-        .map(DbUserInitialCreditsExpiration::getExpirationTime);
-  }
-
-  public boolean haveCreditsExpired(DbUser user) {
-    return getCreditsExpiration(user)
-        .map(expirationTime -> !expirationTime.after(new Timestamp(clock.instant().toEpochMilli())))
-        .orElse(false);
-  }
-
-  public void extendInitialCreditsExpiration(DbUser user) {
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        user.getUserInitialCreditsExpiration();
-    if (userInitialCreditsExpiration == null) {
-      throw new WorkbenchException("User does not have initial credits expiration set.");
-    }
-    if (userInitialCreditsExpiration.getExtensionCount() != 0) {
-      throw new WorkbenchException(
-          "User has already extended their initial credits expiration and cannot extend further.");
-    }
-    userInitialCreditsExpiration.setExpirationTime(
-        new Timestamp(
-            userInitialCreditsExpiration.getCreditStartTime().getTime()
-                + TimeUnit.DAYS.toMillis(
-                    workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
-    userInitialCreditsExpiration.setExtensionCount(
-        userInitialCreditsExpiration.getExtensionCount() + 1);
-    userDao.save(user);
-  }
-
-  public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
-    if (userIdsList != null && !userIdsList.isEmpty()) {
-      Iterable<DbUser> users = userDao.findAllById(userIdsList);
-      users.forEach(this::checkExpiration);
-    }
-  }
-
-  private void checkExpiration(DbUser user) {
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        user.getUserInitialCreditsExpiration();
-    if (null != userInitialCreditsExpiration
-        && haveCreditsExpired(user)
-        && userInitialCreditsExpiration
-            .getNotificationStatus()
-            .equals(NotificationStatus.NO_NOTIFICATION_SENT)) {
-      logger.info(
-          "Initial credits expired for user {}. Expiration time: {}",
-          user.getUsername(),
-          userInitialCreditsExpiration.getExpirationTime());
-      boolean hasExhaustedWorkspace =
-          workspaceDao.findAllByCreator(user).parallelStream()
-              .anyMatch(DbWorkspace::isInitialCreditsExhausted);
-
-      // Set initial credits expired for all workspaces regardless of whether
-      // they have exhausted their credits or not.
-      workspaceDao.findAllByCreator(user).stream()
-          .filter(
-              ws ->
-                  BillingUtils.isInitialCredits(
-                      ws.getBillingAccountName(), workbenchConfigProvider.get()))
-          .filter(DbWorkspace::isActive)
-          .filter(ws -> !ws.isInitialCreditsExpired())
-          .forEach(
-              ws -> {
-                ws.setInitialCreditsExpired(true);
-                ws.setBillingStatus(BillingStatus.INACTIVE);
-                workspaceDao.save(ws);
-                deleteAppsAndRuntimesInWorkspace(ws);
-              });
-      try {
-        // If the user has already been notified about exhausting their initial credits,
-        // we do not need to notify them about expiration as well.
-        if (!hasExhaustedWorkspace) {
-          mailService.alertUserInitialCreditsExpired(user);
-          userInitialCreditsExpiration.setNotificationStatus(
-              NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
-          userDao.save(user);
-        }
-
-      } catch (MessagingException e) {
-        logger.error(
-            String.format(
-                "Failed to send initial credits expiration notification for user %s",
-                user.getUserId()));
-      }
-    }
-  }
-
-  private Timestamp clockNow() {
-    return new Timestamp(clock.instant().toEpochMilli());
-  }
-
-  private void deleteAppsAndRuntimesInWorkspace(DbWorkspace workspace) {
-
-    String namespace = workspace.getWorkspaceNamespace();
-    try {
-      leonardoApiClient.deleteAllResources(workspace.getGoogleProject(), false);
-      logger.info("Deleted apps and runtimes for workspace {}", namespace);
-    } catch (WorkbenchException e) {
-      logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
-    }
   }
 }
