@@ -40,7 +40,6 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -150,8 +149,7 @@ public class UserServiceTest {
                     START_INSTANT.plus(
                         providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays,
                         ChronoUnit.DAYS)))
-            .setExtensionCount(0)
-            .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT);
+            .setExtensionCount(0);
 
     DbUser user = new DbUser();
     user.setUsername(USERNAME);
@@ -606,6 +604,47 @@ public class UserServiceTest {
 
     assertThat(userService.isServiceAccount(serviceAccountUser)).isTrue();
     assertThat(userService.isServiceAccount(nonServiceAccountUser)).isFalse();
+  }
+
+  @Test
+  public void testGetAllUsersWithActiveInitialCredits() {
+    Timestamp today = Timestamp.from(START_INSTANT);
+    Timestamp yesterday = Timestamp.from(START_INSTANT.minus(1, ChronoUnit.DAYS));
+    Timestamp tomorrow = Timestamp.from(START_INSTANT.plus(1, ChronoUnit.DAYS));
+
+    DbUser noCreditsUser =
+        PresetData.createDbUser()
+            .setUsername("nocredits@researchallofus.org")
+            .setUserInitialCreditsExpiration(null);
+    DbUser notExpiredUser =
+        createUserWithSpecifiedInitialCreditsExpiration(
+            "notexpired@researchallofus.org", today, tomorrow, null);
+    DbUser expiredButNotCleanedUser =
+        createUserWithSpecifiedInitialCreditsExpiration(
+            "expiredbutnotcleaned@researchallofus.org", yesterday, today, null);
+    DbUser expiredAndCleanedUser =
+        createUserWithSpecifiedInitialCreditsExpiration(
+            "expiredandcleaned@researchallofus.org", yesterday, today, today);
+
+    List<DbUser> activeUsers = userService.getAllUsersWithActiveInitialCredits();
+    assertThat(activeUsers).containsAtLeast(notExpiredUser, expiredButNotCleanedUser);
+    assertThat(activeUsers).doesNotContain(noCreditsUser);
+    assertThat(activeUsers).doesNotContain(expiredAndCleanedUser);
+  }
+
+  private DbUser createUserWithSpecifiedInitialCreditsExpiration(
+      String username,
+      Timestamp creditStartTime,
+      Timestamp expirationTime,
+      Timestamp expirationCleanupTime) {
+    DbUser user = PresetData.createDbUser().setUsername(username);
+    user.setUserInitialCreditsExpiration(
+        new DbUserInitialCreditsExpiration()
+            .setUser(user)
+            .setCreditStartTime(creditStartTime)
+            .setExpirationTime(expirationTime)
+            .setExpirationCleanupTime(expirationCleanupTime));
+    return userDao.save(user);
   }
 
   private void tick() {

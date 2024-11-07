@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
+import java.util.stream.Collectors;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +44,10 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   }
 
   public ResponseEntity<Void> checkInitialCreditsExpiration() {
-    taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(userService.getAllUserIds());
+    taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(
+        userService.getAllUsersWithActiveInitialCredits().stream()
+            .map(DbUser::getUserId)
+            .collect(Collectors.toList()));
     return ResponseEntity.noContent().build();
   }
 }

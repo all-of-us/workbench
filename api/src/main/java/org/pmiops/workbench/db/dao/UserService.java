@@ -89,6 +89,8 @@ public interface UserService {
 
   List<DbUser> getAllUsersExcludingDisabled();
 
+  List<DbUser> getAllUsersWithActiveInitialCredits();
+
   /**
    * Find users whose name or username match the supplied search terms and who have the appropriate
    * access tier.

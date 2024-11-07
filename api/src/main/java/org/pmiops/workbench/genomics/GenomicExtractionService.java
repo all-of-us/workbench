@@ -359,8 +359,6 @@ public class GenomicExtractionService {
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"");
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"");
     } else {
       // Added Nov 2024
       // replaces extraction_uuid and cohort_table_prefix which are now set to this value
@@ -394,6 +392,7 @@ public class GenomicExtractionService {
         .put(
             EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
             "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
         // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
         // etc
         .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")

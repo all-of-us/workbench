@@ -29,6 +29,7 @@
     ],
     "initialCreditsValidityPeriodDays": 120,
     "initialCreditsExtensionPeriodDays": 365,
+    "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "freeTierCronUserBatchSize": 200,
     "minutesBeforeLastFreeTierJob": 60,

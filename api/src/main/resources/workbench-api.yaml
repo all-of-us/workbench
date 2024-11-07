@@ -6718,6 +6718,8 @@ components:
           type: string
         tanagraEnabled:
           type: boolean
+        hasFitbitDeviceData:
+          type: boolean
     DomainCard:
       required:
       - category
@@ -7892,6 +7894,7 @@ components:
       - FITBIT_INTRADAY_STEPS
       - FITBIT_SLEEP_DAILY_SUMMARY
       - FITBIT_SLEEP_LEVEL
+      - FITBIT_DEVICE
       - WHOLE_GENOME
       - BOTH
       - ZIP_CODE_SOCIOECONOMIC
@@ -13024,12 +13027,6 @@ components:
       - NEUTRAL
       - SATISFIED
       - VERY_SATISFIED
-    InitialCreditExpirationNotificationStatus:
-      type: string
-      description: Describes whether or not a user has been sent a notification about their initial credits expiring.
-      enum:
-      - NO_NOTIFICATION_SENT
-      - EXPIRATION_NOTIFICATION_SENT
     InitialCreditResponse:
       type: object
       properties:
