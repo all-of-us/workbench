@@ -142,6 +142,7 @@
       "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
+      "hasFitbitDeviceData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered",

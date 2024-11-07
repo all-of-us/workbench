@@ -30,6 +30,7 @@ public class DbCdrVersion {
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
   private Boolean hasFitbitSleepData;
+  private Boolean hasFitbitDeviceData;
   private Boolean hasSurveyConductData;
   private Boolean tanagraEnabled;
   private String storageBasePath;
@@ -230,6 +231,16 @@ public class DbCdrVersion {
 
   public DbCdrVersion setHasFitbitSleepData(Boolean hasFitbitSleepData) {
     this.hasFitbitSleepData = hasFitbitSleepData;
+    return this;
+  }
+
+  @Column(name = "has_fitbit_device_data")
+  public Boolean getHasFitbitDeviceData() {
+    return hasFitbitDeviceData == null ? false : hasFitbitDeviceData;
+  }
+
+  public DbCdrVersion setHasFitbitDeviceData(Boolean hasFitbitDeviceData) {
+    this.hasFitbitDeviceData = hasFitbitDeviceData;
     return this;
   }
 
@@ -513,6 +524,7 @@ public class DbCdrVersion {
         hasFitbitData,
         hasCopeSurveyData,
         hasFitbitSleepData,
+        hasFitbitDeviceData,
         hasSurveyConductData,
         tanagraEnabled,
         storageBasePath,
@@ -564,6 +576,7 @@ public class DbCdrVersion {
         && Objects.equals(wgsFilterSetName, that.wgsFilterSetName)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
         && Objects.equals(hasFitbitSleepData, that.hasFitbitSleepData)
+        && Objects.equals(hasFitbitDeviceData, that.hasFitbitDeviceData)
         && Objects.equals(hasSurveyConductData, that.hasSurveyConductData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
         && Objects.equals(tanagraEnabled, that.tanagraEnabled)

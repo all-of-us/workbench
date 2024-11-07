@@ -23,6 +23,7 @@ public class CdrVersionVO {
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;
   public Boolean hasFitbitSleepData;
+  public Boolean hasFitbitDeviceData;
   public Boolean hasSurveyConductData;
   public Boolean tanagraEnabled;
   public String storageBasePath;

@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="evrii" id="db.changelog-240-replace-user-initial-credits-expiration-status">
+  <changeSet author="evrii" id="db.changelog-241-replace-user-initial-credits-expiration-status">
     <dropColumn tableName="user_initial_credits_expiration" columnName="notification_status"/>
     <addColumn tableName="user_initial_credits_expiration">
       <column name="approaching_expiration_notification_time" type="datetime">

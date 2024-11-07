@@ -384,7 +384,6 @@ public class GenomicExtractionService {
                 + "/"
                 + personIdsFile.getName()
                 + "\"")
-        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"")
         .put(
@@ -393,6 +392,7 @@ public class GenomicExtractionService {
         .put(
             EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
             "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
         // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
         // etc
         .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")

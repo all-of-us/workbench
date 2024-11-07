@@ -6718,6 +6718,8 @@ components:
           type: string
         tanagraEnabled:
           type: boolean
+        hasFitbitDeviceData:
+          type: boolean
     DomainCard:
       required:
       - category
@@ -7892,6 +7894,7 @@ components:
       - FITBIT_INTRADAY_STEPS
       - FITBIT_SLEEP_DAILY_SUMMARY
       - FITBIT_SLEEP_LEVEL
+      - FITBIT_DEVICE
       - WHOLE_GENOME
       - BOTH
       - ZIP_CODE_SOCIOECONOMIC
