@@ -38,6 +38,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
@@ -485,12 +486,7 @@ public class InitialCreditsService {
             ws ->
                 BillingUtils.isInitialCredits(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .forEach(
-            ws -> {
-              ws.setInitialCreditsExhausted(false);
-              ws.setBillingStatus(BillingStatus.ACTIVE);
-              workspaceDao.save(ws);
-            });
+        .forEach(ws -> workspaceDao.save(ws.setInitialCreditsExhausted(false)));
   }
 
   /**

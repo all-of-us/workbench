@@ -509,12 +509,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           initialCreditsService.userHasRemainingFreeTierCredits(creator);
       workspace.setBillingStatus(
           hasInitialCreditsRemaining ? BillingStatus.ACTIVE : BillingStatus.INACTIVE);
+          freeTierBillingService.userHasRemainingFreeTierCredits(creator);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
       workspace.setInitialCreditsExpired(initialCreditsService.areUserCreditsExpired(creator));
     } else {
       // At this point, we can assume that a user provided billing account is open since we
       // throw a BadRequestException if a closed one is provided
       workspace.setBillingStatus(BillingStatus.ACTIVE);
+      workspace.setInitialCreditsExpired(
+          initialCreditsExpirationService.haveCreditsExpired(creator));
     }
   }
 
@@ -616,12 +619,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
     workspaceDao.findAllByCreator(user).stream()
         .filter(ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .forEach(
-            ws -> {
-              ws.setInitialCreditsExhausted(exhausted);
-              ws.setBillingStatus(exhausted ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
-              workspaceDao.save(ws);
-            });
+        .forEach(ws -> workspaceDao.save(ws.setInitialCreditsExhausted(exhausted)));
   }
 
   @Override
