@@ -45,7 +45,6 @@ import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -213,7 +212,8 @@ public class WorkspaceMapperTest {
             .setResearchOutcomeEnumSet(RESEARCH_OUTCOMES)
             .setDisseminateResearchEnumSet(Collections.emptySet())
             .setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER)
-            .setGoogleProject(GOOGLE_PROJECT);
+            .setGoogleProject(GOOGLE_PROJECT)
+            .setInitialCreditsExhausted(false);
 
     workbenchConfig = createEmptyConfig();
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
@@ -236,6 +236,8 @@ public class WorkspaceMapperTest {
     assertThat(ws.getCreatorUser().getFamilyName()).isEqualTo(CREATOR_FAMILY_NAME);
     assertThat(ws.getInitialCredits().getExpirationEpochMillis())
         .isEqualTo(INITIAL_CREDITS_EXPIRATION_TIMESTAMP.getTime());
+    assertThat(ws.getInitialCredits().isExhausted()).isFalse();
+    assertThat(ws.getInitialCredits().isExpired()).isFalse();
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
     assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
     assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);

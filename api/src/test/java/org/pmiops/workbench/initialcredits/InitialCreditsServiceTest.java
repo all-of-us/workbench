@@ -56,6 +56,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.ArgumentMatchers.UserListMatcher;
