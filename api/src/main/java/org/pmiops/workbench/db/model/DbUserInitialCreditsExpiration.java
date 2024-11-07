@@ -2,8 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,9 +18,10 @@ public class DbUserInitialCreditsExpiration {
   private DbUser user;
   private Timestamp creditStartTime;
   private Timestamp expirationTime;
+  private Timestamp approachingExpirationNotificationTime;
+  private Timestamp expirationCleanupTime;
   private boolean bypassed;
   private int extensionCount;
-  private NotificationStatus notificationStatus;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -87,20 +86,24 @@ public class DbUserInitialCreditsExpiration {
     return this;
   }
 
-  @Column(name = "notification_status")
-  @Enumerated(EnumType.STRING)
-  public NotificationStatus getNotificationStatus() {
-    return notificationStatus;
+  @Column(name = "approaching_expiration_notification_time")
+  public Timestamp getApproachingExpirationNotificationTime() {
+    return approachingExpirationNotificationTime;
   }
 
-  public DbUserInitialCreditsExpiration setNotificationStatus(
-      NotificationStatus notificationStatus) {
-    this.notificationStatus = notificationStatus;
+  public DbUserInitialCreditsExpiration setApproachingExpirationNotificationTime(
+      Timestamp approachingExpirationNotificationTime) {
+    this.approachingExpirationNotificationTime = approachingExpirationNotificationTime;
     return this;
   }
 
-  public enum NotificationStatus {
-    NO_NOTIFICATION_SENT,
-    EXPIRATION_NOTIFICATION_SENT
+  @Column(name = "expiration_cleanup_time")
+  public Timestamp getExpirationCleanupTime() {
+    return expirationCleanupTime;
+  }
+
+  public DbUserInitialCreditsExpiration setExpirationCleanupTime(Timestamp expirationCleanupTime) {
+    this.expirationCleanupTime = expirationCleanupTime;
+    return this;
   }
 }

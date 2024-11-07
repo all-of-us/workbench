@@ -119,6 +119,9 @@ public class WorkbenchConfig {
 
     // The number of days that initial credits can be extended for.
     public Long initialCreditsExtensionPeriodDays;
+
+    // The number of days before initial credits expire that a warning email should be sent.
+    public Long initialCreditsExpirationWarningDays;
   }
 
   public static class FireCloudConfig {
