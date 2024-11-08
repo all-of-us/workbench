@@ -3,7 +3,7 @@ package org.pmiops.workbench.workspaces;
 import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;
 import org.pmiops.workbench.firecloud.FireCloudService;

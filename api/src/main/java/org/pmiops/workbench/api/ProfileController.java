@@ -16,7 +16,7 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliancetraining.ComplianceTrainingService;
 import org.pmiops.workbench.config.WorkbenchConfig;

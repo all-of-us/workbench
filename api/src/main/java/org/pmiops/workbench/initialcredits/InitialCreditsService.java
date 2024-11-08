@@ -1,4 +1,4 @@
-package org.pmiops.workbench.billing;
+package org.pmiops.workbench.initialcredits;
 
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 

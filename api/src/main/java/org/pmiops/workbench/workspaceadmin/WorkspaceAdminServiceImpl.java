@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;

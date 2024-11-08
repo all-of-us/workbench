@@ -1,4 +1,4 @@
-package org.pmiops.workbench.billing;
+package org.pmiops.workbench.initialcredits;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;

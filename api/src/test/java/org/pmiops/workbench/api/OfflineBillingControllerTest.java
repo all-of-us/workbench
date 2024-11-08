@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.billing.InitialCreditsBatchUpdateService;
+import org.pmiops.workbench.initialcredits.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserService;

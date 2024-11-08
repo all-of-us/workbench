@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;

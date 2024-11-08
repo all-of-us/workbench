@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;

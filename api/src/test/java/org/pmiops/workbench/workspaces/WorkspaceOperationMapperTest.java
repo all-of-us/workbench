@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;

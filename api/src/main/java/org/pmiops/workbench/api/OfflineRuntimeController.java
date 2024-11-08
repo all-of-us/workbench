@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;

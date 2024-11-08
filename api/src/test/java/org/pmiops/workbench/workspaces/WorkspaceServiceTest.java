@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;

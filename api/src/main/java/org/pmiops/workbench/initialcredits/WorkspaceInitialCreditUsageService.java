@@ -1,4 +1,4 @@
-package org.pmiops.workbench.billing;
+package org.pmiops.workbench.initialcredits;
 
 import java.util.List;
 import java.util.Map;

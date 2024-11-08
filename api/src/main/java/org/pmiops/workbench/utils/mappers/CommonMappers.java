@@ -11,7 +11,7 @@ import java.util.Optional;
 import org.mapstruct.Context;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Domain;

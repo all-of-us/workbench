@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.billing.InitialCreditsBatchUpdateService;
+import org.pmiops.workbench.initialcredits.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserService;

@@ -67,7 +67,7 @@ import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;

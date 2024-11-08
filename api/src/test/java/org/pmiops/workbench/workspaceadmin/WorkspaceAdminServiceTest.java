@@ -35,7 +35,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
-import org.pmiops.workbench.billing.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
