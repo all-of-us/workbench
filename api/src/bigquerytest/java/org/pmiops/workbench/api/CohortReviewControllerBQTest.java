@@ -92,10 +92,10 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -164,27 +164,27 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private DbCdrVersion cdrVersion;
   private DbWorkspace workspace;
 
-  @SpyBean private CohortReviewController controller;
+  @Autowired private CohortReviewController controller;
 
-  @SpyBean private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
-  @SpyBean private CohortDao cohortDao;
+  @Autowired private CohortDao cohortDao;
 
-  @SpyBean private CohortReviewDao cohortReviewDao;
+  @Autowired private CohortReviewDao cohortReviewDao;
 
-  @SpyBean private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceDao workspaceDao;
 
-  @SpyBean private CdrVersionDao cdrVersionDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
 
-  @SpyBean private ParticipantCohortStatusDao participantCohortStatusDao;
+  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
 
-  @SpyBean private CohortBuilderService cohortBuilderService;
+  @Autowired private CohortBuilderService cohortBuilderService;
 
-  @SpyBean private FireCloudService mockFireCloudService;
+  @Autowired private FireCloudService mockFireCloudService;
 
-  @SpyBean private UserDao userDao;
+  @Autowired private UserDao userDao;
 
-  @SpyBean private AccessTierDao accessTierDao;
+  @Autowired private AccessTierDao accessTierDao;
 
   private DbCohortReview reviewWithoutEHRData;
   private DbCohortReview reviewWithEHRData;
