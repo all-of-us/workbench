@@ -1,15 +1,20 @@
 package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
@@ -18,14 +23,15 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -40,6 +46,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -74,7 +81,7 @@ public class WorkspaceMapperTest {
   private DbWorkspace sourceDbWorkspace;
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
-  @Autowired private InitialCreditsExpirationService initialCreditsExpirationService;
+  @Autowired private InitialCreditsService initialCreditsService;
   @Autowired private WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
@@ -86,7 +93,7 @@ public class WorkspaceMapperTest {
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
-    InitialCreditsExpirationServiceImpl.class,
+    InitialCreditsService.class,
     WorkspaceMapperImpl.class,
   })
   @MockBean({
@@ -96,7 +103,11 @@ public class WorkspaceMapperTest {
     CohortService.class,
     MailService.class,
     LeonardoApiClient.class,
-    InstitutionService.class
+    InstitutionService.class,
+    TaskQueueService.class,
+    UserServiceAuditor.class,
+    WorkspaceFreeTierUsageDao.class,
+    WorkspaceInitialCreditUsageService.class
   })
   static class Configuration {}
 
@@ -174,7 +185,7 @@ public class WorkspaceMapperTest {
 
     final Workspace ws =
         workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService);
+            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService);
     assertThat(ws.getTerraName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
@@ -200,16 +211,16 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setFeaturedCategory(DbFeaturedWorkspace.DbFeaturedCategory.COMMUNITY);
     final Workspace ws =
         workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService);
+            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService);
     assertThat(ws.getFeaturedCategory()).isEqualTo(FeaturedWorkspaceCategory.COMMUNITY);
   }
 
   @Test
-  public void testConvertsFirecloudResponseToApiResponse() {
+  public void testConvertsFirecloudResponseToApiResponse_2_param_version() {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
             workspaceMapper.toApiWorkspace(
-                sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService),
+                sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService),
             RawlsWorkspaceAccessLevel.PROJECT_OWNER);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
@@ -219,6 +230,84 @@ public class WorkspaceMapperTest {
 
     // Verify data came from the Firecloud workspace.
     assertThat(resp.getWorkspace().getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
+  }
+
+  @Test
+  public void testConvertsFirecloudResponseToApiResponse_3_param_version() {
+    RawlsWorkspaceListResponse rawlsResponse =
+        new RawlsWorkspaceListResponse()
+            .workspace(sourceFirecloudWorkspace)
+            .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
+    final WorkspaceResponse resp =
+        workspaceMapper.toApiWorkspaceResponse(
+            sourceDbWorkspace, rawlsResponse, initialCreditsService);
+
+    assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
+
+    // Verify data came from the DB workspace.
+    assertThat(resp.getWorkspace().getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+
+    // Verify data came from the Firecloud workspace.
+    assertThat(resp.getWorkspace().getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
+  }
+
+  @Test
+  public void testConvertsFirecloudResponsesToApiResponseList_listVersion() {
+    RawlsWorkspaceListResponse rawlsResponse =
+        new RawlsWorkspaceListResponse()
+            .workspace(sourceFirecloudWorkspace)
+            .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
+
+    String fcUuid = sourceFirecloudWorkspace.getWorkspaceId();
+
+    final List<WorkspaceResponse> result =
+        workspaceMapper.toApiWorkspaceResponseList(
+            List.of(sourceDbWorkspace.setFirecloudUuid(fcUuid)),
+            Map.of(fcUuid, rawlsResponse),
+            initialCreditsService);
+
+    assertThat(result).hasSize(1);
+    final WorkspaceResponse wsResp = result.get(0);
+
+    // Verify data came from the DB workspace.
+    assertThat(wsResp.getWorkspace().getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+
+    // Verify data came from the Firecloud workspace.
+    assertThat(wsResp.getWorkspace().getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
+  }
+
+  @Test
+  public void testConvertsFirecloudResponsesToApiResponseList_listVersion_missing_aou() {
+    RawlsWorkspaceListResponse rawlsResponse =
+        new RawlsWorkspaceListResponse()
+            .workspace(sourceFirecloudWorkspace)
+            .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
+
+    String fcUuid = sourceFirecloudWorkspace.getWorkspaceId();
+
+    final List<WorkspaceResponse> result =
+        assertDoesNotThrow(
+            () ->
+                workspaceMapper.toApiWorkspaceResponseList(
+                    Collections.emptyList(), Map.of(fcUuid, rawlsResponse), initialCreditsService));
+
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void testConvertsFirecloudResponsesToApiResponseList_listVersion_missing_rawls() {
+
+    String fcUuid = sourceFirecloudWorkspace.getWorkspaceId();
+
+    final List<WorkspaceResponse> result =
+        assertDoesNotThrow(
+            () ->
+                workspaceMapper.toApiWorkspaceResponseList(
+                    List.of(sourceDbWorkspace.setFirecloudUuid(fcUuid)),
+                    Collections.emptyMap(),
+                    initialCreditsService));
+
+    assertThat(result).isEmpty();
   }
 
   private void assertResearchPurposeMatches(ResearchPurpose rp) {

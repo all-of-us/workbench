@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -26,6 +25,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.BillingAccount;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
@@ -59,7 +59,7 @@ public class UserController implements UserApiDelegate {
 
   private final AccessTierService accessTierService;
   private final FireCloudService fireCloudService;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final UserService userService;
 
   @Autowired
@@ -69,14 +69,14 @@ public class UserController implements UserApiDelegate {
       Provider<WorkbenchConfig> configProvider,
       AccessTierService accessTierService,
       FireCloudService fireCloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       UserService userService) {
     this.cloudBillingProvider = cloudBillingProvider;
     this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.accessTierService = accessTierService;
     this.fireCloudService = fireCloudService;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.userService = userService;
   }
 
@@ -214,7 +214,7 @@ public class UserController implements UserApiDelegate {
    * @return the free tier billing account, if the user has free credits
    */
   private Stream<BillingAccount> maybeFreeTierBillingAccount() {
-    if (!freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
+    if (!initialCreditsService.userHasRemainingFreeTierCredits(userProvider.get())) {
       return Stream.empty();
     }
 

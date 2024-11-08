@@ -34,7 +34,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -48,7 +48,6 @@ import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserAppEnvironment;
@@ -83,7 +82,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FireCloudService fireCloudService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
+  private final InitialCreditsService initialCreditsService;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiClient leonardoApiClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
@@ -108,7 +107,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FireCloudService fireCloudService,
-      InitialCreditsExpirationService initialCreditsExpirationService,
+      InitialCreditsService initialCreditsService,
       LeonardoMapper leonardoMapper,
       LeonardoApiClient leonardoApiClient,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
@@ -130,7 +129,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.fireCloudService = fireCloudService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
+    this.initialCreditsService = initialCreditsService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoApiClient = leonardoApiClient;
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
@@ -238,8 +237,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace();
 
     Workspace workspace =
-        workspaceMapper.toApiWorkspace(
-            dbWorkspace, firecloudWorkspace, initialCreditsExpirationService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, initialCreditsService);
 
     return new WorkspaceAdminView()
         .workspace(workspace)
@@ -253,7 +251,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     return new WorkspaceAdminView()
         .workspace(
             workspaceMapper.toApiWorkspace(
-                dbWorkspace, new RawlsWorkspaceDetails(), initialCreditsExpirationService))
+                dbWorkspace, new RawlsWorkspaceDetails(), initialCreditsService))
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }
@@ -266,32 +264,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .toList();
   }
 
-  // use listRuntimes
-  @Deprecated(since = "October 2024", forRemoval = true)
-  @Override
-  public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedListRuntimes(
-      String workspaceNamespace) {
-    return listRuntimes(workspaceNamespace).stream()
-        .map(leonardoMapper::toDeprecatedListRuntimeResponse)
-        .toList();
-  }
-
   @Override
   public List<UserAppEnvironment> listUserApps(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
     return leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
-  }
-
-  // use deleteRuntimesInWorkspace
-  @Deprecated(since = "October 2024", forRemoval = true)
-  @Override
-  public List<org.pmiops.workbench.model.ListRuntimeResponse> deprecatedDeleteRuntimes(
-      String workspaceNamespace, ListRuntimeDeleteRequest req) {
-    // the UI only calls this with a single argument, so this is safe
-    String runtimeNameToDelete = req.getRuntimesToDelete().get(0);
-    return List.of(
-        leonardoMapper.toDeprecatedListRuntimeResponse(
-            deleteRuntime(workspaceNamespace, runtimeNameToDelete)));
   }
 
   @Override

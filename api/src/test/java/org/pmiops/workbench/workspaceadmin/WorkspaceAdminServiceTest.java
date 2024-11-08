@@ -57,7 +57,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
@@ -154,7 +154,7 @@ public class WorkspaceAdminServiceTest {
     DataSetDao.class,
     DataSetMapper.class,
     FirecloudMapper.class,
-    InitialCreditsExpirationService.class,
+    InitialCreditsService.class,
     LeonardoApiClient.class,
     UserMapper.class,
     UserService.class,
@@ -416,7 +416,7 @@ public class WorkspaceAdminServiceTest {
   public void testSetAdminLockedStateCallsAuditor() {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
     adminLockingRequest.setRequestReason("To test auditor");
-    adminLockingRequest.setRequestDateInMillis(12345677l);
+    adminLockingRequest.setRequestDateInMillis(12345677L);
     workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
     verify(mockAdminAuditor)
         .fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);

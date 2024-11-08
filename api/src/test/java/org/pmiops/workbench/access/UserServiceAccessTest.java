@@ -44,7 +44,7 @@ import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.mail.MailService;
@@ -124,7 +124,7 @@ public class UserServiceAccessTest {
     FireCloudService.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsExpirationService.class
+    InitialCreditsService.class
   })
   @TestConfiguration
   static class Configuration {

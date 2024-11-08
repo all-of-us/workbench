@@ -51,7 +51,6 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
@@ -100,7 +99,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -298,9 +297,9 @@ public class CohortReviewControllerTest {
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     IamService.class,
-    InitialCreditsExpirationService.class,
+    InitialCreditsService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,

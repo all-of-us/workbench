@@ -310,6 +310,15 @@ function do_fitbit() {
   FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
   FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`)
   where rank = 1"
+  
+  echo "ds_fitbit_device - inserting data"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_fitbit_device\`
+      (person_id, device_id, device_date, battery, battery_level, device_version, device_type, last_sync_time, src_id)
+  SELECT person_id, device_id, device_date, battery, battery_level, device_version, device_type, last_sync_time, src_id
+  FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
+  FROM \`$BQ_PROJECT.$BQ_DATASET.device\`)
+  where rank = 1"
 }
 
 function do_COPE_and_PFHH(){

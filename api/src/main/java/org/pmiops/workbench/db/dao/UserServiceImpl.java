@@ -509,6 +509,11 @@ public class UserServiceImpl implements UserService {
     return userDao.findUsersExcludingDisabled();
   }
 
+  @Override
+  public List<DbUser> getAllUsersWithActiveInitialCredits() {
+    return userDao.findUsersWithActiveInitialCredits();
+  }
+
   /**
    * Find users whose name or username match the supplied search terms and who have the appropriate
    * access tier.

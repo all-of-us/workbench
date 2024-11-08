@@ -1,10 +1,13 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -12,6 +15,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import jakarta.mail.MessagingException;
@@ -19,6 +24,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
@@ -30,7 +36,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -41,14 +46,19 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -85,7 +95,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private FreeTierBillingService mockFreeTierBillingService;
+  @MockBean private InitialCreditsService mockInitialCreditsService;
   @MockBean private LeonardoApiClient mockLeonardoApiClient;
   @MockBean private MailService mockMailService;
 
@@ -397,7 +407,7 @@ public class OfflineRuntimeControllerTest {
     stubDisks(List.of(idleDisk(Duration.ofDays(14L))));
 
     workspace.setBillingAccountName(config.billing.initialCreditsBillingAccountName());
-    when(mockFreeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace))
+    when(mockInitialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(workspace))
         .thenReturn(123.0);
 
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -405,5 +415,136 @@ public class OfflineRuntimeControllerTest {
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
             eq(List.of(user1)), eq(workspace), any(), anyBoolean(), eq(14), eq(123.0));
+  }
+
+  @Test
+  public void testIsDiskAttached_Gce_attached() throws Exception {
+    int diskId = 1;
+    ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
+    LeonardoGceWithPdConfigInResponse runtimeConfigResponse =
+        new LeonardoGceWithPdConfigInResponse().persistentDiskId(diskId);
+    // need to use a separate call because this returns a LeonardoRuntimeConfig object instead
+    runtimeConfigResponse.cloudService(CloudServiceEnum.GCE);
+
+    when(mockLeonardoApiClient.listRuntimesByProjectAsService(anyString()))
+        .thenReturn(
+            List.of(new LeonardoListRuntimeResponse().runtimeConfig(runtimeConfigResponse)));
+
+    assertTrue(controller.isDiskAttached(diskResponse, "test-project"));
+  }
+
+  @Test
+  public void testIsDiskAttached_Gce_multiple() throws Exception {
+    int diskId = 1;
+    int otherDiskId = 2;
+    ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
+
+    LeonardoGceWithPdConfigInResponse runtimeConfigResponse1 =
+        new LeonardoGceWithPdConfigInResponse().persistentDiskId(diskId);
+    // need to use a separate call because this returns a LeonardoRuntimeConfig object instead
+    runtimeConfigResponse1.cloudService(CloudServiceEnum.GCE);
+
+    LeonardoGceWithPdConfigInResponse runtimeConfigResponse2 =
+        new LeonardoGceWithPdConfigInResponse().persistentDiskId(otherDiskId);
+    // need to use a separate call because this returns a LeonardoRuntimeConfig object instead
+    runtimeConfigResponse2.cloudService(CloudServiceEnum.GCE);
+
+    when(mockLeonardoApiClient.listRuntimesByProjectAsService(anyString()))
+        .thenReturn(
+            List.of(
+                new LeonardoListRuntimeResponse().runtimeConfig(runtimeConfigResponse1),
+                new LeonardoListRuntimeResponse().runtimeConfig(runtimeConfigResponse2)));
+
+    assertTrue(controller.isDiskAttached(diskResponse, "test-project"));
+  }
+
+  @Test
+  public void testIsDiskAttached_Gce_mismatch() throws Exception {
+    int diskId = 1;
+    int otherDiskId = 2;
+    ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
+
+    LeonardoGceWithPdConfigInResponse runtimeConfigResponse2 =
+        new LeonardoGceWithPdConfigInResponse().persistentDiskId(otherDiskId);
+    // need to use a separate call because this returns a LeonardoRuntimeConfig object instead
+    runtimeConfigResponse2.cloudService(CloudServiceEnum.GCE);
+
+    when(mockLeonardoApiClient.listRuntimesByProjectAsService(anyString()))
+        .thenReturn(
+            List.of(new LeonardoListRuntimeResponse().runtimeConfig(runtimeConfigResponse2)));
+
+    assertFalse(controller.isDiskAttached(diskResponse, "test-project"));
+  }
+
+  @Test
+  public void testIsDiskAttached_Gce_no_runtimes() throws Exception {
+    int diskId = 1;
+    ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
+
+    when(mockLeonardoApiClient.listRuntimesByProjectAsService(anyString()))
+        .thenReturn(Collections.emptyList());
+
+    assertFalse(controller.isDiskAttached(diskResponse, "test-project"));
+  }
+
+  @Test
+  public void testIsDiskAttached_GKE_App_attached() throws Exception {
+    String diskName = "my-disk-name";
+    ListPersistentDiskResponse diskResponse =
+        new ListPersistentDiskResponse()
+            .name(diskName)
+            .labels(Map.of(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(AppType.RSTUDIO)));
+
+    when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
+        .thenReturn(List.of(new UserAppEnvironment().diskName(diskName)));
+
+    assertTrue(controller.isDiskAttached(diskResponse, "test-project"));
+  }
+
+  @Test
+  public void testIsDiskAttached_GKE_App_multiple() throws Exception {
+    String diskName = "my-disk-name";
+    String otherDiskName = "other-disk-name";
+    ListPersistentDiskResponse diskResponse =
+        new ListPersistentDiskResponse()
+            .name(diskName)
+            .labels(Map.of(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(AppType.RSTUDIO)));
+
+    when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
+        .thenReturn(
+            List.of(
+                new UserAppEnvironment().diskName(diskName),
+                new UserAppEnvironment().diskName(otherDiskName)));
+
+    assertTrue(controller.isDiskAttached(diskResponse, "test-project"));
+  }
+
+  @Test
+  public void testIsDiskAttached_GKE_App_mismatch() throws Exception {
+    String diskName = "my-disk-name";
+    String otherDiskName = "other-disk-name";
+    ListPersistentDiskResponse diskResponse =
+        new ListPersistentDiskResponse()
+            .name(diskName)
+            .labels(Map.of(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(AppType.RSTUDIO)));
+
+    when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
+        .thenReturn(List.of(new UserAppEnvironment().diskName(otherDiskName)));
+
+    assertFalse(controller.isDiskAttached(diskResponse, "test-project"));
+  }
+
+  @Test
+  public void testIsDiskAttached_GKE_App_no_apps() throws Exception {
+    String diskName = "my-disk-name";
+    ListPersistentDiskResponse diskResponse =
+        new ListPersistentDiskResponse()
+            .name(diskName)
+            .labels(Map.of(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(AppType.RSTUDIO)));
+
+    when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
+        .thenReturn(Collections.emptyList());
+
+    assertFalse(controller.isDiskAttached(diskResponse, "test-project"));
   }
 }

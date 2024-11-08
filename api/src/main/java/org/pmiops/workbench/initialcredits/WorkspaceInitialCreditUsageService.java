@@ -1,4 +1,4 @@
-package org.pmiops.workbench.billing;
+package org.pmiops.workbench.initialcredits;
 
 import java.util.List;
 import java.util.Map;
@@ -16,24 +16,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-/** A service to update the workspace free tier usage in the database. */
+/** A service to update the workspace initial credit usage in the database. */
 @Service
-public class WorkspaceFreeTierUsageService {
+public class WorkspaceInitialCreditUsageService {
 
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceDao workspaceDao;
   private static final Logger logger =
-      Logger.getLogger(WorkspaceFreeTierUsageService.class.getName());
+      Logger.getLogger(WorkspaceInitialCreditUsageService.class.getName());
 
   @Autowired
-  public WorkspaceFreeTierUsageService(
+  public WorkspaceInitialCreditUsageService(
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao, WorkspaceDao workspaceDao) {
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceDao = workspaceDao;
   }
 
   /**
-   * This method is called in batches from {@link FreeTierBillingService} to update the cost in the
+   * This method is called in batches from {@link InitialCreditsService} to update the cost in the
    * database. The method is transactional to make sure that we do incremental changes to the
    * database.
    *

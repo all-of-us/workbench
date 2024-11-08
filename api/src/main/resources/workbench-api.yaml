@@ -367,6 +367,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: rasLinkRequestBody
+  /v1/user/extendInitialCreditExpiration:
+    post:
+      tags:
+      - profile
+      description: User requests extension of initial credit expiration period
+      operationId: extendInitialCreditExpiration
+      responses:
+        204:
+          description: The user's initial credit expiration period has been extended.
+          content: {}
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/page-visits:
     post:
       tags:
@@ -572,47 +588,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkbenchListBillingAccountsResponse'
-  /v1/admin/security/workspaces/{workspaceNamespace}/delete-runtimes:
-    post:
-      tags:
-      - workspaceAdmin
-      summary: Delete specified (or all if no specified list) runtimes in given workspace
-        namespace.
-      description: DEPRECATED.  Use adminDeleteRuntime.
-        WAS - An admin gated endpoint that deletes given runtimes in a given workspace.
-      operationId: deleteRuntimesInWorkspace
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The workspace's workspace namespace. the runtimes
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: A list of names of runtimes to delete. To delete all runtimes,
-          use an empty object, without providing a list property at all (e.g., {})
-          An empty list will delete no runtimes.
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ListRuntimeDeleteRequest'
-        required: true
-      responses:
-        200:
-          description: Runtimes deleted
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ListRuntimeResponse'
-        500:
-          description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: runtimesToDelete
   /v1/runtimes/{workspaceNamespace}:
     get:
       tags:
@@ -2151,29 +2126,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FileDetail'
-  /v1/admin/workspaces/{workspaceNamespace}/runtimes:
-    get:
-      tags:
-        - workspaceAdmin
-      description: DEPRECATED.  Use adminListRuntimes.
-        WAS - Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
-      operationId: adminListRuntimesInWorkspace
-      parameters:
-        - name: workspaceNamespace
-          in: path
-          description: The Workspace namespace
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: List of runtimes in this Workspace
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ListRuntimeResponse'
   /v1/admin/security/workspaces/{workspaceNamespace}/runtimes/{runtimeName}:
     delete:
       tags:
@@ -6607,12 +6559,14 @@ components:
       - LAB
       - VITAL
       - FITBIT
+      - FITBIT_PLUS_DEVICE
       - FITBIT_HEART_RATE_SUMMARY
       - FITBIT_HEART_RATE_LEVEL
       - FITBIT_ACTIVITY
       - FITBIT_INTRADAY_STEPS
       - FITBIT_SLEEP_DAILY_SUMMARY
       - FITBIT_SLEEP_LEVEL
+      - FITBIT_DEVICE
       - PHYSICAL_MEASUREMENT_CSS
       - WHOLE_GENOME_VARIANT
       - LR_WHOLE_GENOME_VARIANT
@@ -6763,6 +6717,8 @@ components:
         bigqueryDataset:
           type: string
         tanagraEnabled:
+          type: boolean
+        hasFitbitDeviceData:
           type: boolean
     DomainCard:
       required:
@@ -7938,6 +7894,7 @@ components:
       - FITBIT_INTRADAY_STEPS
       - FITBIT_SLEEP_DAILY_SUMMARY
       - FITBIT_SLEEP_LEVEL
+      - FITBIT_DEVICE
       - WHOLE_GENOME
       - BOTH
       - ZIP_CODE_SOCIOECONOMIC
@@ -9016,46 +8973,6 @@ components:
           type: integer
           description: File size in bytes.
           format: int64
-    ListRuntimeResponse:
-      required:
-      - createdDate
-      - dateAccessed
-      - googleProject
-      - id
-      - labels
-      - runtimeName
-      - status
-      type: object
-      properties:
-        id:
-          type: integer
-          description: Internal Leonardo ID of the runtime
-        runtimeName:
-          type: string
-          description: The user-supplied name for the runtime
-        googleProject:
-          type: string
-          description: The Google Project used to create the runtime
-        status:
-          $ref: '#/components/schemas/RuntimeStatus'
-        createdDate:
-          type: string
-          description: The date and time the runtime was created, in ISO-8601 format
-        labels:
-          type: object
-          properties: {}
-          description: The labels to be placed on the runtime. Of type Map[String,String]
-        dateAccessed:
-          type: string
-          description: |
-            The date and time the runtime was last accessed, in ISO-8601 format.
-            Date accessed is defined as the last time the runtime was created, modified, or accessed via the proxy.
-        patchInProgress:
-          type: boolean
-          description: Whether there is a patch in progress on the runtime. Is used
-            to indicate updates that require status transitions.
-      description: DEPRECATED in favor of AdminRuntimeResponse, to prevent name clashes.  
-        WAS - This is a subset of options in a full runtimes response, copied from leonardo.yaml.
     AdminRuntimeFields:
       required:
         - runtimeName
@@ -13110,12 +13027,6 @@ components:
       - NEUTRAL
       - SATISFIED
       - VERY_SATISFIED
-    InitialCreditExpirationNotificationStatus:
-      type: string
-      description: Describes whether or not a user has been sent a notification about their initial credits expiring.
-      enum:
-      - NO_NOTIFICATION_SENT
-      - EXPIRATION_NOTIFICATION_SENT
     InitialCreditResponse:
       type: object
       properties:

@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
@@ -16,10 +18,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -28,9 +28,13 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.legacy_leonardo_client.ApiException;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfigInResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -63,7 +67,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private static final int IDLE_AFTER_HOURS = 3;
 
   private final FireCloudService fireCloudService;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final MailService mailService;
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<WorkbenchConfig> configProvider;
@@ -75,7 +79,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   @Autowired
   OfflineRuntimeController(
       FireCloudService firecloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       MailService mailService,
       LeonardoApiClient leonardoApiClient,
       Provider<WorkbenchConfig> configProvider,
@@ -84,7 +88,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       Clock clock,
       LeonardoMapper leonardoMapper) {
     this.fireCloudService = firecloudService;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
     this.leonardoApiClient = leonardoApiClient;
     this.workspaceDao = workspaceDao;
@@ -317,7 +321,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     if (BillingUtils.isInitialCredits(
         workspace.get().getBillingAccountName(), configProvider.get())) {
       initialCreditsRemaining =
-          freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
+          initialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
@@ -325,14 +329,33 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     return true;
   }
 
-  private boolean isDiskAttached(ListPersistentDiskResponse diskResponse, String googleProject)
+  @VisibleForTesting
+  public boolean isDiskAttached(ListPersistentDiskResponse diskResponse, String googleProject)
       throws ApiException {
     final String diskName = diskResponse.getName();
 
     if (leonardoMapper.toApiListDisksResponse(diskResponse).isGceRuntime()) {
       return leonardoApiClient.listRuntimesByProjectAsService(googleProject).stream()
-          .flatMap(runtime -> Stream.ofNullable(runtime.getDiskConfig()))
-          .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
+          // this filter/map follows the discriminator logic in the source Leonardo Swagger
+          // for OneOfRuntimeConfigInResponse
+          .filter(
+              resp -> {
+                var runtimeConfig =
+                    new Gson()
+                        .fromJson(
+                            new Gson().toJson(resp.getRuntimeConfig()),
+                            LeonardoRuntimeConfig.class);
+                return CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService());
+              })
+          .map(
+              resp ->
+                  new Gson()
+                      .fromJson(
+                          new Gson().toJson(resp.getRuntimeConfig()),
+                          LeonardoGceWithPdConfigInResponse.class))
+          .anyMatch(
+              gceWithPdConfig ->
+                  diskResponse.getId().equals(gceWithPdConfig.getPersistentDiskId()));
     } else {
       return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()
           .anyMatch(userAppEnvironment -> diskName.equals(userAppEnvironment.getDiskName()));

@@ -36,6 +36,112 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Study'
+        500:
+          $ref: "#/components/responses/ServerError"
+                
+  "/v2/studies/{studyId}/cohorts":
+    parameters:
+      - $ref: "#/components/parameters/StudyId"
+    get:
+      parameters:
+        - $ref: "#/components/parameters/Offset"
+        - $ref: "#/components/parameters/Limit"
+      summary: List all cohorts in a study
+      operationId: listCohorts
+      tags:
+        - Tanagra
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CohortList"
+        500:
+          $ref: "#/components/responses/ServerError"
+          
+  "/v2/studies/{studyId}/cohorts/{cohortId}/clone":
+    parameters:
+      - $ref: "#/components/parameters/StudyId"
+      - $ref: "#/components/parameters/CohortId"
+    post:
+      summary: Clone an existing cohort
+      operationId: cloneCohort
+      tags:
+        - Tanagra
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CohortCloneInfo"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cohort"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        403:
+          $ref: "#/components/responses/Unauthorized"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+          
+  "/v2/studies/{studyId}/featureSets":
+    parameters:
+      - $ref: "#/components/parameters/StudyId"
+    get:
+      parameters:
+        - $ref: "#/components/parameters/Offset"
+        - $ref: "#/components/parameters/Limit"
+      summary: List all feature sets in a study
+      operationId: listFeatureSets
+      tags:
+        - Tanagra
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureSetList"
+        500:
+          $ref: "#/components/responses/ServerError"
+          
+  "/v2/studies/{studyId}/featureSets/{featureSetId}/clone":
+    parameters:
+      - $ref: "#/components/parameters/StudyId"
+      - $ref: "#/components/parameters/FeatureSetId"
+    post:
+      summary: Clone an existing feature set
+      operationId: cloneFeatureSet
+      tags:
+        - Tanagra
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeatureSetCloneInfo"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureSet"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
                 
   /v2/underlays/{underlayName}/describeExport:
     post:
@@ -63,17 +169,332 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EntityOutputPreviewList"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
 
 ##########################################################################################
 ## COMPONENTS
 ##########################################################################################
 components:
+  parameters:
+    CohortId:
+      name: cohortId
+      in: path
+      description: ID of the cohort
+      required: true
+      schema:
+        type: string
+        
+    StudyId:
+      name: studyId
+      in: path
+      description: ID of the study
+      required: true
+      schema:
+        type: string
+        
+    FeatureSetId:
+      name: featureSetId
+      in: path
+      description: ID of the feature set
+      required: true
+      schema:
+        type: string
+        
+    Offset:
+      name: offset
+      in: query
+      description: The number of items to skip before starting to collect the result set.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+        
+    Limit:
+      name: limit
+      in: query
+      description: The maximum number of items to return. Defaults to 50.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 50
+        
   securitySchemes:
     oauth:
       type: apiKey
       in: header
       name: Authorization
+      
   schemas:
+    CohortList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Cohort"
+        
+    Cohort:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the cohort, immutable
+        revisionId:
+          type: string
+          description: ID of a frozen cohort revision, immutable
+        underlayName:
+          type: string
+          description: Name of the underlay, immutable
+        displayName:
+          type: string
+          description: Human readable name of the cohort
+        description:
+          type: string
+          description: Description of the cohort
+        criteriaGroupSections:
+          type: array
+          description: Criteria group sections that define the entity filter
+          items:
+            $ref: "#/components/schemas/CriteriaGroupSection"
+        created:
+          description: Timestamp of when the cohort was created
+          type: string
+          format: date-time
+        createdBy:
+          description: Email of user who created cohort
+          type: string
+        lastModified:
+          description: Timestamp of when the cohort was last modified
+          type: string
+          format: date-time
+        isDeleted:
+          type: boolean
+      required:
+        - id
+        - underlayName
+        - displayName
+        - criteriaGroups
+        - created
+        - createdBy
+        - lastModified
+
+    CohortCloneInfo:
+      type: object
+      properties:
+        destinationStudyId:
+          # Optional: by default it is cloned into the same study
+          type: string
+          description: Unique identifier for this study
+        displayName:
+          type: string
+          description: Human readable name of the cohort
+        description:
+          type: string
+          description: Description of the cohort
+
+    CriteriaGroupSection:
+      type: object
+      description: Section of criteria groups and boolean logic operators to combine them
+      properties:
+        id:
+          type: string
+          description: ID of the section, immutable
+        displayName:
+          type: string
+          description: Name of the section
+        criteriaGroups:
+          type: array
+          description: |
+            For a temporal section, this is the set of groups that define the first block.
+            For a non-temporal section, the set of groups are the union of this list and the secondBlockCriteriaGroups list.
+          items:
+            $ref: "#/components/schemas/CriteriaGroup"
+        firstBlockReducingOperator:
+          $ref: "#/components/schemas/ReducingOperator"
+        secondBlockCriteriaGroups:
+          type: array
+          description: |
+            For a temporal section, this is the set of groups that define the second block.
+            For a non-temporal section, the set of groups are the union of this list and the criteriaGroups list.
+          items:
+            $ref: "#/components/schemas/CriteriaGroup"
+        secondBlockReducingOperator:
+          $ref: "#/components/schemas/ReducingOperator"
+        operator:
+          type: string
+          description: Operator to use when combining the criteria groups in the section
+          enum: ["AND", "OR", "DURING_SAME_ENCOUNTER", "NUM_DAYS_BEFORE", "NUM_DAYS_AFTER", "WITHIN_NUM_DAYS"]
+        operatorValue:
+          type: integer
+          description: Value associated with the operator (e.g. num days)
+        excluded:
+          type: boolean
+          description: True to exclude the section, false to include it
+        disabled:
+          type: boolean
+          description: True to disable the section
+          default: false
+      required:
+        - id
+        - displayName
+        - criteriaGroups
+        - operator
+        - excluded
+
+    ReducingOperator:
+      description: |
+        Reducing operator for criteria groups blocks.
+        Only applies for a temporal section.
+      type: string
+      enum: ["ANY", "FIRST_MENTION_OF", "LAST_MENTION_OF"]
+
+    CriteriaGroup:
+      type: object
+      description: Group of related criteria (primary + modifiers)
+      properties:
+        id:
+          type: string
+          description: ID of the group, immutable
+        displayName:
+          type: string
+          description: Name of the group
+        criteria:
+          type: array
+          description: Set of criteria in the group
+          items:
+            $ref: "#/components/schemas/Criteria"
+        disabled:
+          type: boolean
+          description: True to disable the group
+          default: false
+      required:
+        - id
+        - displayName
+        - criteria
+
+    Criteria:
+      type: object
+      description: Single criteria for a cohort or feature set definition
+      properties:
+        id:
+          type: string
+          description: ID of the criteria, immutable
+        displayName:
+          type: string
+          description: Name of the criteria
+        pluginName:
+          type: string
+          description: Name of the plugin that generated this criteria
+        pluginVersion:
+          type: integer
+          description: Version of the plugin that generated this criteria
+        predefinedId:
+          type: string
+          description: Id of the predefined criteria in the config
+        selectorOrModifierName:
+          type: string
+          description: Name of the selector or modifier used by this config
+        selectionData:
+          type: string # JSON formatted, previously base64 Protobuf formatted
+          description: Serialized plugin-specific representation of the user's selection
+        uiConfig:
+          type: string # JSON formatted
+          description: Serialized plugin-specific UI configuration for the criteria
+        tags:
+          description: Unstructured key-value tags for the criteria
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+      required:
+        - id
+        - displayName
+        - pluginName
+        - selectionData
+        - uiConfig
+        - tags
+
+    FeatureSetList:
+      type: array
+      items:
+        $ref: "#/components/schemas/FeatureSet"
+
+    FeatureSetCloneInfo:
+      type: object
+      properties:
+        destinationStudyId:
+          # Optional: by default it is cloned into the same study
+          type: string
+          description: ID of the study, immutable
+        displayName:
+          type: string
+          description: Human readable name of the feature set
+        description:
+          type: string
+          description: Description of the feature set
+          
+    FeatureSet:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the feature set, immutable
+        underlayName:
+          type: string
+          description: Name of the underlay, immutable
+        displayName:
+          type: string
+          description: Human readable name of the feature set
+        description:
+          type: string
+          description: Description of the feature set
+        criteria:
+          type: array
+          description: Criteria that define the entity filter
+          items:
+            $ref: "#/components/schemas/Criteria"
+        entityOutputs:
+          type: array
+          description: Outputs per entity
+          items:
+            $ref: "#/components/schemas/EntityOutput"
+        created:
+          description: Timestamp of when the feature set was created
+          type: string
+          format: date-time
+        createdBy:
+          description: Email of user who created the feature set
+          type: string
+        lastModified:
+          description: Timestamp of when the feature set was last modified
+          type: string
+          format: date-time
+      required:
+        - id
+        - underlayName
+        - displayName
+        - criteria
+        - entityOutputs
+        - created
+        - createdBy
+        - lastModified
+
+    EntityOutput:
+      type: object
+      properties:
+        entity:
+          description: Entity name
+          type: string
+        excludeAttributes:
+          type: array
+          description: Names of attributes to exclude from output
+          items:
+            type: string
+      required:
+        - entity
+
     StudyCreateInfo:
       type: object
       properties:
@@ -83,13 +504,14 @@ components:
         displayName:
           type: string
           description: Human readable name of the study
+
     Study:
       type: object
       required: [ id, created, createdBy, lastModified ]
       properties:
         id:
-          description: ID of the study, immutable
           type: string
+          description: Unique identifier for this study
         displayName:
           type: string
           description: Human readable name of the study
@@ -102,6 +524,7 @@ components:
         lastModified:
           type: string
           format: date-time
+
     ExportPreviewRequest:
       type: object
       properties:
@@ -129,6 +552,7 @@ components:
         - study
         - cohorts
         - featureSets
+
     EntityOutputPreview:
       type: object
       properties:
@@ -166,6 +590,7 @@ components:
         - entity
         - includedAttributes
         - criteria
+
     EntityOutputPreviewList:
       type: object
       properties:
@@ -175,6 +600,48 @@ components:
             $ref: "#/components/schemas/EntityOutputPreview"
       required:
         - entityOutputs
+        
+    ErrorReport:
+      type: object
+      required: [message, statusCode, causes]
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+        causes:
+          type: array
+          items:
+            type: string
+          
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorReport"
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorReport"
+
+    NotFound:
+      description: Not found (or unauthorized)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorReport"
+            
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorReport"
 
 security:
   - oauth: []

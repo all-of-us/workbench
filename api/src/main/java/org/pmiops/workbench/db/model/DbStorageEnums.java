@@ -220,6 +220,8 @@ public final class DbStorageEnums {
           .put(Domain.CONCEPT_QUICK_ADD, (short) 28)
           .put(Domain.SNP_INDEL_VARIANT, (short) 29)
           .put(Domain.WEAR_CONSENT, (short) 30)
+          .put(Domain.FITBIT_PLUS_DEVICE, (short) 31)
+          .put(Domain.FITBIT_DEVICE, (short) 32)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -240,12 +242,14 @@ public final class DbStorageEnums {
           .put(Domain.LAB, "Labs")
           .put(Domain.VITAL, "Vitals")
           .put(Domain.FITBIT, "Fitbit")
+          .put(Domain.FITBIT_PLUS_DEVICE, "Fitbit plus Device")
           .put(Domain.FITBIT_HEART_RATE_SUMMARY, "Fitbit: Heart Rate - Zone Summary")
           .put(Domain.FITBIT_HEART_RATE_LEVEL, "Fitbit: Heart Rate - Minute-Level")
           .put(Domain.FITBIT_ACTIVITY, "Fitbit: Activity - Daily Summary")
           .put(Domain.FITBIT_INTRADAY_STEPS, "Fitbit: Intraday Steps - Minute-Level")
           .put(Domain.FITBIT_SLEEP_DAILY_SUMMARY, "Fitbit: Sleep - Daily Summary")
           .put(Domain.FITBIT_SLEEP_LEVEL, "Fitbit: Sleep - Minute-Level")
+          .put(Domain.FITBIT_DEVICE, "Fitbit: Device Information")
           .put(Domain.PHYSICAL_MEASUREMENT_CSS, "Physical Measurement CSS")
           .put(Domain.WHOLE_GENOME_VARIANT, "Whole Genome Variant")
           .put(Domain.LR_WHOLE_GENOME_VARIANT, "Long Read Whole Genome Variant")
@@ -349,6 +353,7 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.SURVEY_SDOH, (short) 18)
               .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, (short) 19)
               .put(PrePackagedConceptSetEnum.SURVEY_PFHH, (short) 20)
+              .put(PrePackagedConceptSetEnum.FITBIT_DEVICE, (short) 21)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {

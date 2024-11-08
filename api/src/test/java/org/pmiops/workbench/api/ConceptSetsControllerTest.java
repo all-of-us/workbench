@@ -24,7 +24,6 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
@@ -59,7 +58,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
@@ -112,7 +111,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConceptSetsControllerTest {
 
   public static final String UPDATED_DESC = "Updated Desc";
-  private static Criteria CRITERIA_CONDITION_1 =
+  private static final Criteria CRITERIA_CONDITION_1 =
       new Criteria()
           .conceptId(123L)
           .name("a concept")
@@ -250,9 +249,9 @@ public class ConceptSetsControllerTest {
     FeaturedWorkspaceMapper.class,
     FireCloudService.class,
     FirecloudMapperImpl.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     IamService.class,
-    InitialCreditsExpirationService.class,
+    InitialCreditsService.class,
     MailService.class,
     NotebooksService.class,
     TaskQueueService.class,

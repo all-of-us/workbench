@@ -67,7 +67,6 @@ import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -136,7 +135,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -312,7 +311,7 @@ public class WorkspacesControllerTest {
   @MockBean CohortBuilderService cohortBuilderService;
   @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
   @MockBean FireCloudService mockFireCloudService;
-  @MockBean FreeTierBillingService mockFreeTierBillingService;
+  @MockBean InitialCreditsService mockInitialCreditsService;
   @MockBean IamService mockIamService;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
@@ -388,7 +387,7 @@ public class WorkspacesControllerTest {
     ConceptBigQueryService.class,
     FireCloudService.class,
     GenomicExtractionService.class,
-    InitialCreditsExpirationService.class,
+    InitialCreditsService.class,
     LeonardoApiClient.class,
     LeonardoRuntimeAuditor.class,
     MailService.class,
@@ -547,7 +546,7 @@ public class WorkspacesControllerTest {
     Field count = Field.of("count", LegacySQLTypeName.INTEGER);
     Schema schema = Schema.of(count);
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
-    List<FieldValueList> tableRows = Arrays.asList(FieldValueList.of(Arrays.asList(countValue)));
+    List<FieldValueList> tableRows = List.of(FieldValueList.of(List.of(countValue)));
     TableResult result =
         new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
@@ -576,7 +575,7 @@ public class WorkspacesControllerTest {
     FieldValue sexAtBirthConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "5");
     FieldValue deceasedValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "false");
     List<FieldValueList> tableRows2 =
-        Arrays.asList(
+        List.of(
             FieldValueList.of(
                 Arrays.asList(
                     personIdValue,
@@ -593,9 +592,9 @@ public class WorkspacesControllerTest {
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null)).thenReturn(result, result2);
   }
 
-  private static String testWorkspaceNamespace = "namespace";
-  private static String testWorkspaceDisplayName = "Workspace Name";
-  private static String testWorkspaceTerraName = "workspacename";
+  private static final String testWorkspaceNamespace = "namespace";
+  private static final String testWorkspaceDisplayName = "Workspace Name";
+  private static final String testWorkspaceTerraName = "workspacename";
 
   private Workspace createWorkspace() {
     return TestMockFactory.createWorkspace(
@@ -1153,7 +1152,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     doReturn(false)
-        .when(mockFreeTierBillingService)
+        .when(mockInitialCreditsService)
         .userHasRemainingFreeTierCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
@@ -1181,7 +1180,7 @@ public class WorkspacesControllerTest {
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doReturn(true)
-        .when(mockFreeTierBillingService)
+        .when(mockInitialCreditsService)
         .userHasRemainingFreeTierCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
@@ -1576,7 +1575,7 @@ public class WorkspacesControllerTest {
                     .cohortId(c1.getId())
                     .annotationType(AnnotationType.ENUM)
                     .columnName("cad")
-                    .enumValues(Arrays.asList("value")))
+                    .enumValues(List.of("value")))
             .getBody();
     ParticipantCohortAnnotation pca1EnumResponse =
         cohortReviewController
@@ -1636,7 +1635,7 @@ public class WorkspacesControllerTest {
                     .cohortId(c2.getId())
                     .annotationType(AnnotationType.ENUM)
                     .columnName("cad")
-                    .enumValues(Arrays.asList("value")))
+                    .enumValues(List.of("value")))
             .getBody();
     ParticipantCohortAnnotation pca2EnumResponse =
         cohortReviewController
@@ -2016,7 +2015,7 @@ public class WorkspacesControllerTest {
         Collections.singletonList(originalConceptSet.getConceptSetId()));
     originalDataSet.setCohortIds(Collections.singletonList(originalCohort.getCohortId()));
     originalDataSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    originalDataSet.setPrePackagedConceptSetEnum(Arrays.asList(PrePackagedConceptSetEnum.NONE));
+    originalDataSet.setPrePackagedConceptSetEnum(List.of(PrePackagedConceptSetEnum.NONE));
     dataSetDao.save(originalDataSet);
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -2841,7 +2840,7 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(
         ws.getNamespace(), ws.getTerraName(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
-    when(mockFreeTierBillingService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
+    when(mockInitialCreditsService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
 
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
         workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName()).getBody();

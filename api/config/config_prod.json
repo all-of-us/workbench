@@ -28,6 +28,8 @@
       0.75
     ],
     "initialCreditsValidityPeriodDays": 120,
+    "initialCreditsExtensionPeriodDays": 365,
+    "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "freeTierCronUserBatchSize": 200,
     "minutesBeforeLastFreeTierJob": 60,
@@ -44,16 +46,17 @@
     "operationalTerraWorkspaceNamespace": "aouwgscohortextraction-prod",
     "operationalTerraWorkspaceName": "aouwgscohortextractionprod",
     "operationalTerraWorkspaceBucket": "fc-43443354-728d-4523-a31d-acdff4a271b8",
-    "extractionPetServiceAccount": "pet-114668949591113561197@aouwgscohortextraction-prod.iam.gserviceaccount.com",
-    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-prod",
-    "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 4,
-    "extractionMethodLogicalVersion": 3,
     "extractionDestinationDataset": "fc-aou-cdr-prod-ct.wgs_extraction_destination",
-    "minExtractionScatterTasks": 350,
-    "extractionScatterTasksPerSample": 4,
     "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
-    "enableJiraTicketingOnFailure": true
+    "enableJiraTicketingOnFailure": true,
+    "legacyVersions": {
+      "methodNamespace": "aouwgscohortextraction-prod",
+      "methodName": "GvsExtractCohortFromSampleNames",
+      "methodRepoVersion": 4,
+      "methodLogicalVersion": 3,
+      "minExtractionScatterTasks": 350,
+      "extractionScatterTasksPerSample": 4
+    }
   },
   "cdr": {
     "debugQueries": false
@@ -97,7 +100,7 @@
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasIdMeLinking": true,
     "enableRasLoginGovLinking": true,
-    "currentDuccVersions": [5, 6],
+    "currentDuccVersions": [6],
     "renewal": {
       "expiryDays": 365,
       "expiryDaysWarningThresholds": [1, 7, 15],

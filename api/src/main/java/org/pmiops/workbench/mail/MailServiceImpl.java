@@ -82,8 +82,6 @@ public class MailServiceImpl implements MailService {
       "emails/initial_credits_exhaustion/content.html";
   private static final String INITIAL_CREDITS_EXPIRING_RESOURCE =
       "emails/initial_credits_expiring/content.html";
-  private static final String INITIAL_CREDITS_EXPIRED_RESOURCE =
-      "emails/initial_credits_expired/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
   private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
       "emails/new_user_satisfaction_survey/content.html";
@@ -229,24 +227,6 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void alertUserInitialCreditsExpired(final DbUser user) throws MessagingException {
-    final String logMsg =
-        String.format(
-            "Sending email because initial credits have expired for User %s", userForLogging(user));
-    log.info(logMsg);
-
-    final String htmlMessage =
-        buildHtml(INITIAL_CREDITS_EXPIRED_RESOURCE, initialCreditsExpirationSubstitutionMap(user));
-
-    sendWithRetries(
-        Collections.singletonList(user.getContactEmail()),
-        Collections.emptyList(),
-        "Alert - Initial credit expiration in All of Us Researcher Workbench",
-        logMsg,
-        htmlMessage);
-  }
-
-  @Override
   public void alertUserInitialCreditsExpiring(DbUser user) throws MessagingException {
     final String logMsg =
         String.format(
@@ -255,8 +235,7 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        buildHtml(
-            INITIAL_CREDITS_EXPIRING_RESOURCE, initialCreditsExpiringSubstitutionMap(user));
+        buildHtml(INITIAL_CREDITS_EXPIRING_RESOURCE, initialCreditsExpiringSubstitutionMap(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -629,7 +608,10 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
-        .put(EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION, formatCondensedDateCentralTime(user.getUserInitialCreditsExpiration().getExpirationTime().toInstant()))
+        .put(
+            EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION,
+            formatCondensedDateCentralTime(
+                user.getUserInitialCreditsExpiration().getExpirationTime().toInstant()))
         .build();
   }
 

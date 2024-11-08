@@ -66,6 +66,11 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "has_fitbit_plus_device_information",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "has_fitbit_activity_summary",
     "type": "INTEGER"
   },
@@ -92,6 +97,11 @@
   {
     "mode": "NULLABLE",
     "name": "has_fitbit_sleep_level",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_device_information",
     "type": "INTEGER"
   },
   {

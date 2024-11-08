@@ -622,9 +622,7 @@ public class DbUser {
   public boolean equals(Object o) {
     if (this == o) return true;
 
-    if (!(o instanceof DbUser)) return false;
-
-    DbUser dbUser = (DbUser) o;
+    if (!(o instanceof DbUser dbUser)) return false;
 
     return new EqualsBuilder()
         .append(userId, dbUser.userId)

@@ -14,7 +14,7 @@ import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileAccessModules;
@@ -52,7 +52,7 @@ public interface ProfileMapper {
       defaultValue = "false")
   Profile toModel(
       DbUser dbUser,
-      @Context InitialCreditsExpirationService expirationService,
+      @Context InitialCreditsService initialCreditsService,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
       DbUserTermsOfService latestTermsOfService,
       Double freeTierUsage,

@@ -20,7 +20,7 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final AccessModuleService accessModuleService;
   private final InstitutionService institutionService;
   private final UserDao userDao;
-  private final InitialCreditsExpirationService initialCreditsExpirationServiceImpl;
+  private final InitialCreditsService initialCreditsService;
   private final UserServiceAuditor userServiceAuditor;
 
   @Autowired
@@ -46,14 +46,14 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       AccessModuleService accessModuleService,
       InstitutionService institutionService,
       UserDao userDao,
-      InitialCreditsExpirationService initialCreditsExpirationServiceImpl,
+      InitialCreditsService initialCreditsService,
       UserServiceAuditor userServiceAuditor) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
     this.accessModuleService = accessModuleService;
     this.institutionService = institutionService;
     this.userDao = userDao;
-    this.initialCreditsExpirationServiceImpl = initialCreditsExpirationServiceImpl;
+    this.initialCreditsService = initialCreditsService;
     this.userServiceAuditor = userServiceAuditor;
   }
 
@@ -97,7 +97,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       if (previousAccessTiers.isEmpty()
           && !newAccessTiers.isEmpty()
           && null == maybeCreditsExpiration) {
-        initialCreditsExpirationServiceImpl.createInitialCreditsExpiration(dbUser);
+        initialCreditsService.createInitialCreditsExpiration(dbUser);
       }
     }
   }

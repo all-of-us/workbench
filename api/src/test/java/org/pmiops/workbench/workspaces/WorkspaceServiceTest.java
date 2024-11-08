@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -64,7 +63,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -117,9 +116,9 @@ public class WorkspaceServiceTest {
     ConceptSetService.class,
     DataSetService.class,
     FeaturedWorkspaceMapper.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     IamService.class,
-    InitialCreditsExpirationService.class,
+    InitialCreditsService.class,
     ProfileMapper.class,
     UserDao.class,
     UserMapper.class,

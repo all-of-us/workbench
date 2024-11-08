@@ -34,7 +34,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 
@@ -53,7 +53,7 @@ public class AccessSyncServiceTest {
 
   @Mock UserService userService;
 
-  @Mock InitialCreditsExpirationService initialCreditsExpirationService;
+  @Mock InitialCreditsService initialCreditsService;
 
   @Mock UserServiceAuditor userServiceAuditor;
 
@@ -113,7 +113,7 @@ public class AccessSyncServiceTest {
 
     accessSyncService.updateUserAccessTiers(dbUser, agent);
 
-    verify(initialCreditsExpirationService, times(enableInitialCreditsExpiration ? 1 : 0))
+    verify(initialCreditsService, times(enableInitialCreditsExpiration ? 1 : 0))
         .createInitialCreditsExpiration(dbUser);
   }
 

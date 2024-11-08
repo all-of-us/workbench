@@ -5,6 +5,7 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -13,7 +14,7 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -61,7 +62,7 @@ public interface WorkspaceMapper {
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
-      @Context InitialCreditsExpirationService expirationService);
+      @Context InitialCreditsService initialCreditsService);
 
   @Mapping(
       target = "accessLevel",
@@ -70,10 +71,19 @@ public interface WorkspaceMapper {
   WorkspaceResponse toApiWorkspaceResponse(
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
+  default WorkspaceResponse toApiWorkspaceResponse(
+      DbWorkspace dbWorkspace,
+      RawlsWorkspaceListResponse fcResponse,
+      InitialCreditsService initialCreditsService) {
+    return toApiWorkspaceResponse(
+        toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), initialCreditsService),
+        fcResponse.getAccessLevel());
+  }
+
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
       WorkspaceDao workspaceDao,
       List<RawlsWorkspaceListResponse> fcWorkspaces,
-      InitialCreditsExpirationService expirationService) {
+      InitialCreditsService initialCreditsService) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
@@ -85,14 +95,22 @@ public interface WorkspaceMapper {
 
     List<DbWorkspace> dbWorkspaces =
         workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
+    return toApiWorkspaceResponseList(dbWorkspaces, fcWorkspacesByUuid, initialCreditsService);
+  }
+
+  // safely combines dbWorkspaces and fcWorkspacesByUuid,
+  // returning only workspaces which appear in both
+  default List<WorkspaceResponse> toApiWorkspaceResponseList(
+      List<DbWorkspace> dbWorkspaces,
+      Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid,
+      InitialCreditsService initialCreditsService) {
     return dbWorkspaces.stream()
-        .map(
-            dbWorkspace -> {
-              var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
-              return toApiWorkspaceResponse(
-                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), expirationService),
-                  fcResponse.getAccessLevel());
-            })
+        .flatMap(
+            dbWorkspace ->
+                Stream.ofNullable(fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid()))
+                    .map(
+                        fcResponse ->
+                            toApiWorkspaceResponse(dbWorkspace, fcResponse, initialCreditsService)))
         .toList();
   }
 
@@ -123,13 +141,13 @@ public interface WorkspaceMapper {
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(
-      DbWorkspace dbWorkspace, @Context InitialCreditsExpirationService expirationService);
+      DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
   RecentWorkspace toApiRecentWorkspace(
       DbWorkspace dbWorkspace,
       WorkspaceAccessLevel accessLevel,
-      @Context InitialCreditsExpirationService expirationService);
+      @Context InitialCreditsService initialCreditsService);
 
   /**
    * This method was written I think before we realized we could have multiple input arguments.

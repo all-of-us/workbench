@@ -676,6 +676,7 @@ const prepackagedAllSurveyConceptSetToString = {
   FITBIT_INTRADAY_STEPS: 'Fitbit Intra Day Steps',
   FITBIT_SLEEP_DAILY_SUMMARY: 'Fitbit Sleep Daily Summary',
   FITBIT_SLEEP_LEVEL: 'Fitbit Sleep Level',
+  FITBIT_DEVICE: 'Fitbit Device',
   WHOLE_GENOME: 'Short Read Whole Genome Sequencing Data',
   ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
 };
@@ -724,6 +725,10 @@ const PREPACKAGED_WITH_FITBIT_SLEEP_DOMAINS = {
   [PrePackagedConceptSetEnum.FITBIT_SLEEP_LEVEL]: Domain.FITBIT_SLEEP_LEVEL,
 };
 
+const PREPACKAGED_WITH_FITBIT_DEVICE_DOMAINS = {
+  [PrePackagedConceptSetEnum.FITBIT_DEVICE]: Domain.FITBIT_DEVICE,
+};
+
 const PREPACKAGED_WITH_WHOLE_GENOME = {
   [PrePackagedConceptSetEnum.WHOLE_GENOME]: Domain.WHOLE_GENOME_VARIANT,
 };
@@ -758,6 +763,7 @@ const reverseDomainEnum = {
   FITBIT_INTRADAY_STEPS: Domain.FITBIT_INTRADAY_STEPS,
   FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBIT_SLEEP_DAILY_SUMMARY,
   FITBIT_SLEEP_LEVEL: Domain.FITBIT_SLEEP_LEVEL,
+  FITBIT_DEVICE: Domain.FITBIT_DEVICE,
   PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICAL_MEASUREMENT_CSS,
   WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIP_CODE_SOCIOECONOMIC,
@@ -856,10 +862,12 @@ export const DatasetPage = fp.flow(
     const updatePrepackagedDomains = () => {
       PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
       prepackagedConceptSetToString = prepackagedAllSurveyConceptSetToString;
-      const { hasFitbitData, hasFitbitSleepData, hasWgsData } = getCdrVersion(
-        workspace,
-        cdrVersionTiersResponse
-      );
+      const {
+        hasFitbitData,
+        hasFitbitSleepData,
+        hasFitbitDeviceData,
+        hasWgsData,
+      } = getCdrVersion(workspace, cdrVersionTiersResponse);
       PREPACKAGED_DOMAINS = {
         ...PREPACKAGED_DOMAINS,
         ...PREPACKAGED_SURVEY_DOMAINS,
@@ -878,6 +886,12 @@ export const DatasetPage = fp.flow(
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_FITBIT_SLEEP_DOMAINS,
+        };
+      }
+      if (hasFitbitDeviceData) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_WITH_FITBIT_DEVICE_DOMAINS,
         };
       }
       // Only allow selection of genomics prepackaged concept sets if genomics

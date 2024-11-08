@@ -122,6 +122,8 @@ public interface LeonardoMapper {
   }
 
   @Mapping(target = "patchInProgress", ignore = true)
+  @Mapping(target = "workspaceId", ignore = true)
+  @Mapping(target = "googleProject", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
 
   @Nullable
@@ -151,13 +153,6 @@ public interface LeonardoMapper {
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   AdminRuntimeFields toAdminRuntimeFields(LeonardoListRuntimeResponse leonardoListRuntimeResponse);
-
-  // these were unused, so they have been removed in the newer AdminRuntimeFields
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "googleProject", ignore = true)
-  @Mapping(target = "patchInProgress", ignore = true)
-  org.pmiops.workbench.model.ListRuntimeResponse toDeprecatedListRuntimeResponse(
-      AdminRuntimeFields source);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
@@ -191,7 +186,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
-  Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
+  Runtime toApiRuntimeWithoutDisk(LeonardoListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(LeonardoClusterError err);
 
@@ -210,7 +205,9 @@ public interface LeonardoMapper {
     mapRuntimeConfig(
         runtime,
         leonardoListRuntimeResponse.getRuntimeConfig(),
-        leonardoListRuntimeResponse.getDiskConfig());
+        // listRuntime does not actually have a diskConfig field.  This is OK because we only
+        // call this from a context where we're not expecting one.
+        null);
   }
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")

@@ -38,7 +38,6 @@ import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
@@ -53,7 +52,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.identityverification.IdentityVerificationService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Institution;
@@ -165,11 +164,11 @@ public class RasLinkServiceTest {
     AccessTierService.class,
     DirectoryService.class,
     FireCloudService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     HttpTransport.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsExpirationService.class
+    InitialCreditsService.class
   })
   static class Configuration {
     @Bean

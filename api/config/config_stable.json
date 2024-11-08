@@ -28,6 +28,8 @@
       0.75
     ],
     "initialCreditsValidityPeriodDays": 120,
+    "initialCreditsExtensionPeriodDays": 365,
+    "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
     "freeTierCronUserBatchSize": 100,
     "minutesBeforeLastFreeTierJob": 60,
@@ -44,16 +46,17 @@
     "operationalTerraWorkspaceNamespace": "aouwgscohortextraction-stable",
     "operationalTerraWorkspaceName": "aouwgscohortextractionstable",
     "operationalTerraWorkspaceBucket": "fc-b7045821-7a05-497e-844d-8889625ed10e",
-    "extractionPetServiceAccount": "pet-116281557770103257351@aouwgscohortextraction-stable.iam.gserviceaccount.com",
-    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-stable",
-    "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 5,
-    "extractionMethodLogicalVersion": 3,
-    "extractionDestinationDataset": "fc-aou-cdr-stable-ct.wgs_extraction_destination",
-    "minExtractionScatterTasks": 20,
-    "extractionScatterTasksPerSample": 4,
+     "extractionDestinationDataset": "fc-aou-cdr-stable-ct.wgs_extraction_destination",
     "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
-    "enableJiraTicketingOnFailure": true
+    "enableJiraTicketingOnFailure": true,
+    "legacyVersions": {
+      "methodNamespace": "aouwgscohortextraction-stable",
+      "methodName": "GvsExtractCohortFromSampleNames",
+      "methodRepoVersion": 5,
+      "methodLogicalVersion": 3,
+      "minExtractionScatterTasks": 20,
+      "extractionScatterTasksPerSample": 4
+    }
   },
   "cdr": {
     "debugQueries": true
@@ -97,7 +100,7 @@
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasIdMeLinking": true,
     "enableRasLoginGovLinking": true,
-    "currentDuccVersions": [5, 6],
+    "currentDuccVersions": [6],
     "renewal": {
       "expiryDays": 365,
       "expiryDaysWarningThresholds": [1, 7, 15],
