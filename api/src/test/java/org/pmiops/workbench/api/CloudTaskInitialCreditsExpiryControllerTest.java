@@ -29,7 +29,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.InitialCreditsService;
-import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
+import org.pmiops.workbench.billing.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -114,7 +114,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     TaskQueueService.class,
     UserMapper.class,
     UserServiceAuditor.class,
-    WorkspaceFreeTierUsageService.class,
+    WorkspaceInitialCreditUsageService.class,
     WorkspaceMapper.class,
     WorkspaceAuthService.class,
     UserService.class

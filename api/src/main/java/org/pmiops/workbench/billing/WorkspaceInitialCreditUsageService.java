@@ -18,15 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** A service to update the workspace free tier usage in the database. */
 @Service
-public class WorkspaceFreeTierUsageService {
+public class WorkspaceInitialCreditUsageService {
 
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceDao workspaceDao;
   private static final Logger logger =
-      Logger.getLogger(WorkspaceFreeTierUsageService.class.getName());
+      Logger.getLogger(WorkspaceInitialCreditUsageService.class.getName());
 
   @Autowired
-  public WorkspaceFreeTierUsageService(
+  public WorkspaceInitialCreditUsageService(
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao, WorkspaceDao workspaceDao) {
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceDao = workspaceDao;

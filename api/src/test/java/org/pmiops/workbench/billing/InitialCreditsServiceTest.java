@@ -100,7 +100,7 @@ public class InitialCreditsServiceTest {
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-  @Autowired WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
+  @Autowired WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
 
   @Autowired private TaskQueueService taskQueueService;
 
@@ -130,7 +130,7 @@ public class InitialCreditsServiceTest {
   private DbWorkspace workspace;
 
   @TestConfiguration
-  @Import({InitialCreditsService.class, WorkspaceFreeTierUsageService.class})
+  @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
   @MockBean({BigQueryService.class, TaskQueueService.class})
   static class Configuration {
     @Bean

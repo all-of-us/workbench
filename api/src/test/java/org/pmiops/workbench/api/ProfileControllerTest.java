@@ -46,7 +46,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.InitialCreditsService;
-import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
+import org.pmiops.workbench.billing.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -205,7 +205,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     AccessTierServiceImpl.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
-    WorkspaceFreeTierUsageService.class,
+    WorkspaceInitialCreditUsageService.class,
   })
   @MockBean({
     AbsorbService.class,

@@ -15,7 +15,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.billing.InitialCreditsService;
-import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
+import org.pmiops.workbench.billing.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -107,7 +107,7 @@ public class WorkspaceMapperTest {
     TaskQueueService.class,
     UserServiceAuditor.class,
     WorkspaceFreeTierUsageDao.class,
-    WorkspaceFreeTierUsageService.class
+    WorkspaceInitialCreditUsageService.class
   })
   static class Configuration {}
 

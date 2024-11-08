@@ -52,7 +52,7 @@ public class InitialCreditsService {
   private final UserServiceAuditor userServiceAuditor;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-  private final WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
+  private final WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
   private final LeonardoApiClient leonardoApiClient;
   private final InstitutionService institutionService;
   private final MailService mailService;
@@ -68,7 +68,7 @@ public class InitialCreditsService {
       UserServiceAuditor userServiceAuditor,
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
-      WorkspaceFreeTierUsageService workspaceFreeTierUsageService,
+      WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService,
       LeonardoApiClient leonardoApiClient,
       InstitutionService institutionService,
       MailService mailService) {
@@ -79,7 +79,7 @@ public class InitialCreditsService {
     this.userServiceAuditor = userServiceAuditor;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
-    this.workspaceFreeTierUsageService = workspaceFreeTierUsageService;
+    this.workspaceInitialCreditUsageService = workspaceInitialCreditUsageService;
     this.leonardoApiClient = leonardoApiClient;
     this.institutionService = institutionService;
     this.mailService = mailService;
@@ -543,7 +543,7 @@ public class InitialCreditsService {
                     WorkspaceCostView::getWorkspaceId,
                     v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
 
-    workspaceFreeTierUsageService.updateWorkspaceFreeTierUsageInDB(
+    workspaceInitialCreditUsageService.updateWorkspaceFreeTierUsageInDB(
         dbCostByWorkspace, allCostsInBqByProject, workspaceByProject);
   }
 
