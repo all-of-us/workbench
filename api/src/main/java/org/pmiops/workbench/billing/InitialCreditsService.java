@@ -258,6 +258,12 @@ public class InitialCreditsService {
     return Math.max(creatorFreeCreditsRemaining, 0);
   }
 
+  /**
+   * For each of the users corresponding to the given user IDs, check if their
+   * initial credits have expired, or will handle soon, and handle accordingly.
+   *
+   * @param userIdsList
+   */
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && !userIdsList.isEmpty()) {
       Iterable<DbUser> users = userDao.findAllById(userIdsList);
@@ -265,6 +271,13 @@ public class InitialCreditsService {
     }
   }
 
+  /**
+   * For the given user, check when the user's initial credits will expire, if relevant.
+   * @param user - The user whose initial credits expiration time is being checked
+   * @return The expiration time of the user's initial credits,
+   * if they have a UserInitialCreditsExpiration record and
+   * they have not been bypassed personally or institutionally.
+   */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
     return Optional.ofNullable(user.getUserInitialCreditsExpiration())
         .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
@@ -272,6 +285,12 @@ public class InitialCreditsService {
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
   }
 
+  /**
+   * Check if the user's initial credits have expired.
+   * @param user - The user whose initial credits
+   *             expiration time is being checked.
+   * @return True if the user's initial credits have expired, false otherwise.
+   */
   public boolean haveCreditsExpired(DbUser user) {
     return getCreditsExpiration(user)
         .map(expirationTime -> !expirationTime.after(clockNow()))
