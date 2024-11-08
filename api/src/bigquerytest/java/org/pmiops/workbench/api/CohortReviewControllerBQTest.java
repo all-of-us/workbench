@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
@@ -59,6 +58,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
@@ -92,10 +92,10 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -164,27 +164,27 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private DbCdrVersion cdrVersion;
   private DbWorkspace workspace;
 
-  @Autowired private CohortReviewController controller;
+  @SpyBean private CohortReviewController controller;
 
-  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+  @SpyBean private TestWorkbenchConfig testWorkbenchConfig;
 
-  @Autowired private CohortDao cohortDao;
+  @SpyBean private CohortDao cohortDao;
 
-  @Autowired private CohortReviewDao cohortReviewDao;
+  @SpyBean private CohortReviewDao cohortReviewDao;
 
-  @Autowired private WorkspaceDao workspaceDao;
+  @SpyBean private WorkspaceDao workspaceDao;
 
-  @Autowired private CdrVersionDao cdrVersionDao;
+  @SpyBean private CdrVersionDao cdrVersionDao;
 
-  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
+  @SpyBean private ParticipantCohortStatusDao participantCohortStatusDao;
 
-  @Autowired private CohortBuilderService cohortBuilderService;
+  @SpyBean private CohortBuilderService cohortBuilderService;
 
-  @Autowired private FireCloudService mockFireCloudService;
+  @SpyBean private FireCloudService mockFireCloudService;
 
-  @Autowired private UserDao userDao;
+  @SpyBean private UserDao userDao;
 
-  @Autowired private AccessTierDao accessTierDao;
+  @SpyBean private AccessTierDao accessTierDao;
 
   private DbCohortReview reviewWithoutEHRData;
   private DbCohortReview reviewWithEHRData;

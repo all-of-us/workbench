@@ -1,4 +1,4 @@
-package org.pmiops.workbench.billing;
+package org.pmiops.workbench.initialcredits;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,7 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.billing.InitialCreditsExpiryTaskMatchers.MapMatcher;
+import static org.pmiops.workbench.initialcredits.InitialCreditsExpiryTaskMatchers.MapMatcher;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import com.google.cloud.PageImpl;
@@ -51,7 +51,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.billing.InitialCreditsExpiryTaskMatchers.UserListMatcher;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -61,6 +60,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpiryTaskMatchers.UserListMatcher;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -100,7 +100,7 @@ public class InitialCreditsServiceTest {
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-  @Autowired WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
+  @Autowired WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
 
   @Autowired private TaskQueueService taskQueueService;
 
@@ -130,7 +130,7 @@ public class InitialCreditsServiceTest {
   private DbWorkspace workspace;
 
   @TestConfiguration
-  @Import({InitialCreditsService.class, WorkspaceFreeTierUsageService.class})
+  @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
   @MockBean({BigQueryService.class, TaskQueueService.class})
   static class Configuration {
     @Bean

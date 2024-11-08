@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.billing.InitialCreditsService;
-import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -32,6 +30,8 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -107,7 +107,7 @@ public class WorkspaceMapperTest {
     TaskQueueService.class,
     UserServiceAuditor.class,
     WorkspaceFreeTierUsageDao.class,
-    WorkspaceFreeTierUsageService.class
+    WorkspaceInitialCreditUsageService.class
   })
   static class Configuration {}
 

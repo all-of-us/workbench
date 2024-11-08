@@ -10,14 +10,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
-import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
-import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
+import org.pmiops.workbench.initialcredits.InitialCreditsBatchUpdateService;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
@@ -55,7 +55,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
   private final AccessModuleService accessModuleService;
-  private final FreeTierBillingBatchUpdateService freeTierBillingUpdateService;
+  private final InitialCreditsBatchUpdateService freeTierBillingUpdateService;
   private final InitialCreditsService initialCreditsService;
 
   CloudTaskUserController(
@@ -63,7 +63,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       CloudResourceManagerService cloudResourceManagerService,
       UserService userService,
       AccessModuleService accessModuleService,
-      FreeTierBillingBatchUpdateService freeTierBillingUpdateService,
+      InitialCreditsBatchUpdateService freeTierBillingUpdateService,
       InitialCreditsService initialCreditsService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
