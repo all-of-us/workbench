@@ -161,6 +161,7 @@ public class DataSetServiceImpl implements DataSetService {
           Domain.FITBIT_INTRADAY_STEPS,
           Domain.FITBIT_SLEEP_DAILY_SUMMARY,
           Domain.FITBIT_SLEEP_LEVEL,
+          Domain.FITBIT_DEVICE,
           Domain.WHOLE_GENOME_VARIANT,
           Domain.ZIP_CODE_SOCIOECONOMIC);
 
