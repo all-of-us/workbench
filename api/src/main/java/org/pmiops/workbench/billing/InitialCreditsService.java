@@ -259,8 +259,8 @@ public class InitialCreditsService {
   }
 
   /**
-   * For each of the users corresponding to the given user IDs, check if their
-   * initial credits have expired, or will handle soon, and handle accordingly.
+   * For each of the users corresponding to the given user IDs, check if their initial credits have
+   * expired, or will handle soon, and handle accordingly.
    *
    * @param userIdsList - The list of user IDs to check for initial credits expiration
    */
@@ -273,10 +273,11 @@ public class InitialCreditsService {
 
   /**
    * For the given user, check when the user's initial credits will expire, if relevant.
+   *
    * @param user - The user whose initial credits expiration time is being checked
-   * @return The expiration time of the user's initial credits,
-   * if they have a UserInitialCreditsExpiration record and
-   * they have not been bypassed personally or institutionally.
+   * @return The expiration time of the user's initial credits, if they have a
+   *     UserInitialCreditsExpiration record and they have not been bypassed personally or
+   *     institutionally.
    */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
     return Optional.ofNullable(user.getUserInitialCreditsExpiration())
@@ -287,8 +288,8 @@ public class InitialCreditsService {
 
   /**
    * Check if the user's initial credits have expired.
-   * @param user - The user whose initial credits
-   *             expiration time is being checked.
+   *
+   * @param user - The user whose initial credits expiration time is being checked.
    * @return True if the user's initial credits have expired, false otherwise.
    */
   public boolean areUserCreditsExpired(DbUser user) {
