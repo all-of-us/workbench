@@ -51,7 +51,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
@@ -297,9 +297,9 @@ public class CohortReviewControllerTest {
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     IamService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,

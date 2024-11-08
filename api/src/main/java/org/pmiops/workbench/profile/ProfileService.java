@@ -20,7 +20,7 @@ import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -63,7 +63,7 @@ public class ProfileService {
   private final AddressMapper addressMapper;
   private final Clock clock;
   private final DemographicSurveyMapper demographicSurveyMapper;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
   private final Javers javers;
@@ -85,7 +85,7 @@ public class ProfileService {
       AddressMapper addressMapper,
       Clock clock,
       DemographicSurveyMapper demographicSurveyMapper,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       InstitutionDao institutionDao,
       InstitutionService institutionService,
       Javers javers,
@@ -104,7 +104,7 @@ public class ProfileService {
     this.addressMapper = addressMapper;
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.institutionDao = institutionDao;
     this.institutionService = institutionService;
     this.javers = javers;
@@ -126,9 +126,9 @@ public class ProfileService {
     final DbUser user =
         userService.findUserWithAuthoritiesAndPageVisits(userLite.getUserId()).orElse(userLite);
 
-    final @Nullable Double freeTierUsage = freeTierBillingService.getCachedFreeTierUsage(user);
+    final @Nullable Double freeTierUsage = initialCreditsService.getCachedFreeTierUsage(user);
     final @Nullable Double freeTierDollarQuota =
-        freeTierBillingService.getUserFreeTierDollarLimit(user);
+        initialCreditsService.getUserFreeTierDollarLimit(user);
     final @Nullable VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         verifiedInstitutionalAffiliationDao
             .findFirstByUser(user)
@@ -152,7 +152,7 @@ public class ProfileService {
 
     return profileMapper.toModel(
         user,
-        freeTierBillingService,
+        initialCreditsService,
         verifiedInstitutionalAffiliation,
         latestTermsOfService,
         freeTierUsage,
@@ -257,7 +257,7 @@ public class ProfileService {
             isNowBypassed -> {
               if (enableInitialCreditsExpiration
                   && previousProfile.isInitialCreditsExpirationBypassed() != isNowBypassed) {
-                freeTierBillingService.setInitialCreditsExpirationBypassed(user, isNowBypassed);
+                initialCreditsService.setInitialCreditsExpirationBypassed(user, isNowBypassed);
               }
             });
 
@@ -559,7 +559,7 @@ public class ProfileService {
 
     Optional.ofNullable(request.getFreeCreditsLimit())
         .ifPresent(
-            newLimit -> freeTierBillingService.maybeSetDollarLimitOverride(dbUser, newLimit));
+            newLimit -> initialCreditsService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
     request
         .getAccessBypassRequests()

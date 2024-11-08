@@ -35,7 +35,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
@@ -154,7 +154,7 @@ public class WorkspaceAdminServiceTest {
     DataSetDao.class,
     DataSetMapper.class,
     FirecloudMapper.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     LeonardoApiClient.class,
     UserMapper.class,
     UserService.class,

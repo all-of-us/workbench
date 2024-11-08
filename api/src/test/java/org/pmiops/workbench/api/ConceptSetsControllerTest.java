@@ -24,7 +24,7 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
@@ -249,9 +249,9 @@ public class ConceptSetsControllerTest {
     FeaturedWorkspaceMapper.class,
     FireCloudService.class,
     FirecloudMapperImpl.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     IamService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     MailService.class,
     NotebooksService.class,
     TaskQueueService.class,

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -116,9 +116,9 @@ public class WorkspaceServiceTest {
     ConceptSetService.class,
     DataSetService.class,
     FeaturedWorkspaceMapper.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     IamService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     ProfileMapper.class,
     UserDao.class,
     UserMapper.class,

@@ -55,7 +55,7 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
@@ -269,9 +269,9 @@ public class DataSetControllerTest {
     ConceptBigQueryService.class,
     DirectoryService.class,
     FeaturedWorkspaceMapper.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     IamService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     MailService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,

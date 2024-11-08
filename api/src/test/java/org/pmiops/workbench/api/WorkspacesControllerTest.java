@@ -67,7 +67,7 @@ import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -311,7 +311,8 @@ public class WorkspacesControllerTest {
   @MockBean CohortBuilderService cohortBuilderService;
   @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
   @MockBean FireCloudService mockFireCloudService;
-  @MockBean FreeTierBillingService mockFreeTierBillingService;
+  @MockBean
+  InitialCreditsService mockInitialCreditsService;
   @MockBean IamService mockIamService;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
@@ -387,7 +388,7 @@ public class WorkspacesControllerTest {
     ConceptBigQueryService.class,
     FireCloudService.class,
     GenomicExtractionService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     LeonardoApiClient.class,
     LeonardoRuntimeAuditor.class,
     MailService.class,
@@ -1152,7 +1153,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     doReturn(false)
-        .when(mockFreeTierBillingService)
+        .when(mockInitialCreditsService)
         .userHasRemainingFreeTierCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
@@ -1180,7 +1181,7 @@ public class WorkspacesControllerTest {
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doReturn(true)
-        .when(mockFreeTierBillingService)
+        .when(mockInitialCreditsService)
         .userHasRemainingFreeTierCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
@@ -2840,7 +2841,7 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(
         ws.getNamespace(), ws.getTerraName(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
-    when(mockFreeTierBillingService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
+    when(mockInitialCreditsService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
 
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
         workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName()).getBody();

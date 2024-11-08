@@ -20,7 +20,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -53,7 +53,7 @@ public class CloudTaskUserControllerTest {
 
   @Autowired private FreeTierBillingBatchUpdateService mockFreeTierBillingUpdateService;
 
-  @Autowired private FreeTierBillingService mockFreeTierBillingService;
+  @Autowired private InitialCreditsService mockInitialCreditsService;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
@@ -62,7 +62,7 @@ public class CloudTaskUserControllerTest {
     CloudResourceManagerService.class,
     FreeTierBillingBatchUpdateService.class,
     UserService.class,
-    FreeTierBillingService.class
+    InitialCreditsService.class
   })
   static class Configuration {}
 
@@ -140,6 +140,6 @@ public class CloudTaskUserControllerTest {
   public void testCheckCreditsExpirationForUserIDs() {
     List<Long> userIdList = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
     controller.checkCreditsExpirationForUserIDs(userIdList);
-    verify(mockFreeTierBillingService).checkCreditsExpirationForUserIDs(userIdList);
+    verify(mockInitialCreditsService).checkCreditsExpirationForUserIDs(userIdList);
   }
 }

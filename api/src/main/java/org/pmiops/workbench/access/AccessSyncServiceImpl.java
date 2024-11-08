@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -36,7 +36,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final AccessModuleService accessModuleService;
   private final InstitutionService institutionService;
   private final UserDao userDao;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final UserServiceAuditor userServiceAuditor;
 
   @Autowired
@@ -46,14 +46,14 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       AccessModuleService accessModuleService,
       InstitutionService institutionService,
       UserDao userDao,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       UserServiceAuditor userServiceAuditor) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
     this.accessModuleService = accessModuleService;
     this.institutionService = institutionService;
     this.userDao = userDao;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.userServiceAuditor = userServiceAuditor;
   }
 
@@ -97,7 +97,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       if (previousAccessTiers.isEmpty()
           && !newAccessTiers.isEmpty()
           && null == maybeCreditsExpiration) {
-        freeTierBillingService.createInitialCreditsExpiration(dbUser);
+        initialCreditsService.createInitialCreditsExpiration(dbUser);
       }
     }
   }

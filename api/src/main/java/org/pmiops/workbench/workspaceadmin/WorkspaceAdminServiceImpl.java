@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
@@ -82,7 +82,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FireCloudService fireCloudService;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiClient leonardoApiClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
@@ -107,7 +107,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FireCloudService fireCloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       LeonardoMapper leonardoMapper,
       LeonardoApiClient leonardoApiClient,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
@@ -129,7 +129,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.fireCloudService = fireCloudService;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoApiClient = leonardoApiClient;
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
@@ -237,7 +237,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace();
 
     Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, freeTierBillingService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, initialCreditsService);
 
     return new WorkspaceAdminView()
         .workspace(workspace)
@@ -251,7 +251,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     return new WorkspaceAdminView()
         .workspace(
             workspaceMapper.toApiWorkspace(
-                dbWorkspace, new RawlsWorkspaceDetails(), freeTierBillingService))
+                dbWorkspace, new RawlsWorkspaceDetails(), initialCreditsService))
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }

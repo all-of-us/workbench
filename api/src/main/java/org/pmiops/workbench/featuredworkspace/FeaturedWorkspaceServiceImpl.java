@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -22,7 +22,7 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FireCloudService fireCloudService;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final WorkspaceMapper workspaceMapper;
 
   @Autowired
@@ -30,12 +30,12 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FireCloudService fireCloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       WorkspaceMapper workspaceMapper) {
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.fireCloudService = fireCloudService;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.workspaceMapper = workspaceMapper;
   }
 
@@ -68,6 +68,6 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
                     fcWorkspace -> fcWorkspace));
 
     return workspaceMapper.toApiWorkspaceResponseList(
-        dbWorkspaces, fcWorkspacesByUuid, freeTierBillingService);
+        dbWorkspaces, fcWorkspacesByUuid, initialCreditsService);
   }
 }

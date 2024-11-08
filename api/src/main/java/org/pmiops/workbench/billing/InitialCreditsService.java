@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
 
 /** Methods relating to Free Tier credit usage and limits */
 @Service
-public class FreeTierBillingService {
+public class InitialCreditsService {
 
   private final TaskQueueService taskQueueService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -57,10 +57,10 @@ public class FreeTierBillingService {
   private final InstitutionService institutionService;
   private final MailService mailService;
 
-  private static final Logger logger = LoggerFactory.getLogger(FreeTierBillingService.class);
+  private static final Logger logger = LoggerFactory.getLogger(InitialCreditsService.class);
 
   @Autowired
-  public FreeTierBillingService(
+  public InitialCreditsService(
       TaskQueueService taskQueueService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,

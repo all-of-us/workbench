@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -42,7 +42,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   private final FireCloudService firecloudService;
   private final FirecloudMapper firecloudMapper;
   private final ImpersonatedFirecloudService impersonatedFirecloudService;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
@@ -54,7 +54,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       FireCloudService firecloudService,
       FirecloudMapper firecloudMapper,
       ImpersonatedFirecloudService impersonatedFirecloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       UserDao userDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
@@ -63,7 +63,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     this.firecloudMapper = firecloudMapper;
     this.firecloudService = firecloudService;
     this.impersonatedFirecloudService = impersonatedFirecloudService;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
@@ -82,7 +82,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
           .toApiWorkspaceResponseList(
               workspaceDao,
               impersonatedFirecloudService.getWorkspaces(dbUser),
-              freeTierBillingService)
+              initialCreditsService)
           .stream()
           .filter(response -> response.getAccessLevel() == WorkspaceAccessLevel.OWNER)
           .collect(Collectors.toList());

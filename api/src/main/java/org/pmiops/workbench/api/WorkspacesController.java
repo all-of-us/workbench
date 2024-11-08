@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -80,7 +80,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final IamService iamService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -100,7 +100,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CdrVersionDao cdrVersionDao,
       Clock clock,
       FireCloudService fireCloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       IamService iamService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -117,7 +117,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.iamService = iamService;
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
@@ -193,7 +193,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
     final Workspace createdWorkspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, freeTierBillingService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
 
     if (dbWorkspace.isCDRAndWorkspaceTanagraEnabled()) {
@@ -274,7 +274,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                             op,
                             workspaceDao,
                             fireCloudService,
-                            freeTierBillingService,
+                            initialCreditsService,
                             workspaceMapper)))
         .orElse(ResponseEntity.notFound().build());
   }
@@ -489,7 +489,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     final Workspace originalWorkspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, freeTierBillingService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
 
     int version = Etags.toVersion(workspace.getEtag());
     if (dbWorkspace.getVersion() != version) {
@@ -539,7 +539,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     final Workspace editedWorkspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, freeTierBillingService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
@@ -649,7 +649,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, user);
     final Workspace savedWorkspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace, freeTierBillingService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace, initialCreditsService);
 
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
@@ -682,7 +682,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     return ResponseEntity.ok(
         new WorkspaceBillingUsageResponse()
-            .cost(freeTierBillingService.getWorkspaceFreeTierBillingUsage(workspace)));
+            .cost(initialCreditsService.getWorkspaceFreeTierBillingUsage(workspace)));
   }
 
   @Override
@@ -836,7 +836,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                     workspaceMapper.toApiRecentWorkspace(
                         dbWorkspacesById.get(userRecentWorkspace.getWorkspaceId()),
                         workspaceAccessLevelsById.get(userRecentWorkspace.getWorkspaceId()),
-                        freeTierBillingService))
+                        initialCreditsService))
             .collect(Collectors.toList());
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
@@ -859,7 +859,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
         workspaceMapper.toApiRecentWorkspace(
-            dbWorkspace, workspaceAccessLevel, freeTierBillingService);
+            dbWorkspace, workspaceAccessLevel, initialCreditsService);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
@@ -897,7 +897,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     double freeCreditsRemaining =
-        freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
+        initialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
     return ResponseEntity.ok(
         new WorkspaceCreatorFreeCreditsRemainingResponse()
             .freeCreditsRemaining(freeCreditsRemaining));

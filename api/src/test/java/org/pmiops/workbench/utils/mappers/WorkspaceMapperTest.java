@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -81,7 +81,7 @@ public class WorkspaceMapperTest {
   private DbWorkspace sourceDbWorkspace;
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
-  @Autowired private FreeTierBillingService freeTierBillingService;
+  @Autowired private InitialCreditsService initialCreditsService;
   @Autowired private WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
@@ -93,7 +93,7 @@ public class WorkspaceMapperTest {
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     WorkspaceMapperImpl.class,
   })
   @MockBean({
@@ -185,7 +185,7 @@ public class WorkspaceMapperTest {
 
     final Workspace ws =
         workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, freeTierBillingService);
+            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService);
     assertThat(ws.getTerraName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
@@ -211,7 +211,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setFeaturedCategory(DbFeaturedWorkspace.DbFeaturedCategory.COMMUNITY);
     final Workspace ws =
         workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, freeTierBillingService);
+            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService);
     assertThat(ws.getFeaturedCategory()).isEqualTo(FeaturedWorkspaceCategory.COMMUNITY);
   }
 
@@ -220,7 +220,7 @@ public class WorkspaceMapperTest {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
             workspaceMapper.toApiWorkspace(
-                sourceDbWorkspace, sourceFirecloudWorkspace, freeTierBillingService),
+                sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService),
             RawlsWorkspaceAccessLevel.PROJECT_OWNER);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
@@ -240,7 +240,7 @@ public class WorkspaceMapperTest {
             .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
-            sourceDbWorkspace, rawlsResponse, freeTierBillingService);
+            sourceDbWorkspace, rawlsResponse, initialCreditsService);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
 
@@ -264,7 +264,7 @@ public class WorkspaceMapperTest {
         workspaceMapper.toApiWorkspaceResponseList(
             List.of(sourceDbWorkspace.setFirecloudUuid(fcUuid)),
             Map.of(fcUuid, rawlsResponse),
-            freeTierBillingService);
+            initialCreditsService);
 
     assertThat(result).hasSize(1);
     final WorkspaceResponse wsResp = result.get(0);
@@ -291,7 +291,7 @@ public class WorkspaceMapperTest {
                 workspaceMapper.toApiWorkspaceResponseList(
                     Collections.emptyList(),
                     Map.of(fcUuid, rawlsResponse),
-                    freeTierBillingService));
+                    initialCreditsService));
 
     assertThat(result).isEmpty();
   }
@@ -307,7 +307,7 @@ public class WorkspaceMapperTest {
                 workspaceMapper.toApiWorkspaceResponseList(
                     List.of(sourceDbWorkspace.setFirecloudUuid(fcUuid)),
                     Collections.emptyMap(),
-                    freeTierBillingService));
+                    initialCreditsService));
 
     assertThat(result).isEmpty();
   }

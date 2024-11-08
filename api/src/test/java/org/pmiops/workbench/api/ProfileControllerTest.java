@@ -45,7 +45,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
@@ -191,7 +191,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     CommonMappers.class,
     ComplianceTrainingServiceImpl.class,
     DemographicSurveyMapperImpl.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     InstitutionMapperImpl.class,
     InstitutionServiceImpl.class,
     PageVisitMapperImpl.class,

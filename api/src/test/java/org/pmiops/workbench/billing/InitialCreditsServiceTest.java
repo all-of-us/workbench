@@ -79,7 +79,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.transaction.TestTransaction;
 
 @DataJpaTest
-public class FreeTierBillingServiceTest {
+public class InitialCreditsServiceTest {
 
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
@@ -96,7 +96,8 @@ public class FreeTierBillingServiceTest {
   @MockBean private InstitutionService institutionService;
 
   @Autowired BigQueryService bigQueryService;
-  @Autowired FreeTierBillingService freeTierBillingService;
+  @Autowired
+  InitialCreditsService initialCreditsService;
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
@@ -130,7 +131,7 @@ public class FreeTierBillingServiceTest {
   private DbWorkspace workspace;
 
   @TestConfiguration
-  @Import({FreeTierBillingService.class, WorkspaceFreeTierUsageService.class})
+  @Import({InitialCreditsService.class, WorkspaceFreeTierUsageService.class})
   @MockBean({BigQueryService.class, TaskQueueService.class})
   static class Configuration {
     @Bean
@@ -189,13 +190,13 @@ public class FreeTierBillingServiceTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costUnderThreshold);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verifyNoInteractions(taskQueueService);
 
     // check that we alert for the 50% threshold
     double costOverThreshold = 50.5;
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -206,7 +207,7 @@ public class FreeTierBillingServiceTest {
     costOverThreshold = 75.3;
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -219,7 +220,7 @@ public class FreeTierBillingServiceTest {
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costToTriggerExpiration);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -248,12 +249,12 @@ public class FreeTierBillingServiceTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costUnderThreshold);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verifyNoInteractions(taskQueueService);
 
     // check that we detect the 30% threshold
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -263,7 +264,7 @@ public class FreeTierBillingServiceTest {
     costOverThreshold = 65.01;
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -275,7 +276,7 @@ public class FreeTierBillingServiceTest {
     final double costToTriggerExpiration = 100.01;
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costToTriggerExpiration);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -296,7 +297,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -320,7 +321,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -343,7 +344,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verifyNoInteractions(taskQueueService); // No tasks have been added to the queue
 
     assertSingleWorkspaceTestDbState(user, workspace, 49.99);
@@ -363,7 +364,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verifyNoInteractions(taskQueueService);
 
     assertSingleWorkspaceTestDbState(user, workspace, 49.99);
@@ -376,17 +377,17 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isTrue();
+    assertThat(initialCreditsService.maybeSetDollarLimitOverride(user, 200.0)).isTrue();
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
 
     DbUser currentUser = userDao.findUserByUserId(user.getUserId());
-    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(currentUser, 100.0)).isTrue();
+    assertThat(initialCreditsService.maybeSetDollarLimitOverride(currentUser, 100.0)).isTrue();
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), 200.0, 100.0);
     assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(currentUser), 100.0);
+        initialCreditsService.getUserFreeTierDollarLimit(currentUser), 100.0);
   }
 
   @Test
@@ -394,18 +395,18 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
-    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isFalse();
+    assertThat(initialCreditsService.maybeSetDollarLimitOverride(user, 100.0)).isFalse();
     verify(mockUserServiceAuditor, never())
         .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 100.0);
 
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
 
-    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isFalse();
+    assertThat(initialCreditsService.maybeSetDollarLimitOverride(user, 200.0)).isFalse();
     verify(mockUserServiceAuditor, never())
         .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
   }
 
   @Test
@@ -418,12 +419,12 @@ public class FreeTierBillingServiceTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    assertThat(freeTierBillingService.getCachedFreeTierUsage(user)).isNull();
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+    assertThat(initialCreditsService.getCachedFreeTierUsage(user)).isNull();
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 100.0);
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -431,15 +432,15 @@ public class FreeTierBillingServiceTest {
             argThat(new MapMatcher(Map.of(user.getUserId(), 150.0))));
 
     assertSingleWorkspaceTestDbState(user, workspace, 150.0);
-    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 150.0);
+    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user), 150.0);
 
-    freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, 150.0);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     assertSingleWorkspaceTestDbState(user, workspace, 150.0);
   }
 
@@ -457,25 +458,25 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    assertThat(freeTierBillingService.getCachedFreeTierUsage(user)).isNull();
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+    assertThat(initialCreditsService.getCachedFreeTierUsage(user)).isNull();
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 100.0);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
             argThat(new MapMatcher(Map.of(user.getUserId(), 0.0d))),
             argThat(new MapMatcher(Map.of(user.getUserId(), 300.0))));
     assertSingleWorkspaceTestDbState(user, workspace, 300.0);
-    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 300.0);
+    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user), 300.0);
 
-    freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, 300.0);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     assertSingleWorkspaceTestDbState(user, workspace, 300.0);
 
     verify(mockUserServiceAuditor)
@@ -502,7 +503,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -539,7 +540,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(
+    initialCreditsService.checkFreeTierBillingUsageForUsers(
         Sets.newHashSet(user1, user2), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
@@ -570,7 +571,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -587,7 +588,7 @@ public class FreeTierBillingServiceTest {
 
     // we do not alert again, but the cost field is updated in the DB
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService, times(1))
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -615,7 +616,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -642,12 +643,12 @@ public class FreeTierBillingServiceTest {
     final double initialFreeCreditsDollarLimit = 1.0;
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = initialFreeCreditsDollarLimit;
     assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user), initialFreeCreditsDollarLimit);
+        initialCreditsService.getUserFreeTierDollarLimit(user), initialFreeCreditsDollarLimit);
 
     final double fractionalFreeCreditsDollarLimit = 123.456;
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = fractionalFreeCreditsDollarLimit;
     assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user), fractionalFreeCreditsDollarLimit);
+        initialCreditsService.getUserFreeTierDollarLimit(user), fractionalFreeCreditsDollarLimit);
   }
 
   @Test
@@ -659,19 +660,19 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     final double limit1 = 100.0;
-    freeTierBillingService.maybeSetDollarLimitOverride(user, limit1);
+    initialCreditsService.maybeSetDollarLimitOverride(user, limit1);
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, limit1);
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), limit1);
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), limit1);
 
     final double limit2 = 200.0;
 
     user = userDao.findUserByUserId(user.getUserId());
 
-    freeTierBillingService.maybeSetDollarLimitOverride(user, limit2);
+    initialCreditsService.maybeSetDollarLimitOverride(user, limit2);
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), limit1, limit2);
-    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), limit2);
+    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), limit2);
   }
 
   @Test
@@ -691,13 +692,13 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     // we have not yet had a chance to cache this usage
-    assertThat(freeTierBillingService.getCachedFreeTierUsage(user1)).isNull();
-    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
+    assertThat(initialCreditsService.getCachedFreeTierUsage(user1)).isNull();
+    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isTrue();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1), allBQCosts);
 
-    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user1), 100.01);
-    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isFalse();
+    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user1), 100.01);
+    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isFalse();
 
     TestTransaction.start();
     createWorkspace(user1, "another project");
@@ -707,27 +708,27 @@ public class FreeTierBillingServiceTest {
         ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0, "another project", 200.0);
 
     // we have not yet cached the new workspace costs
-    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user1), 100.01);
+    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user1), 100.01);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1), costs);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1), costs);
     final double expectedTotalCachedFreeTierUsage = 1000.0 + 200.0;
     assertWithinBillingTolerance(
-        freeTierBillingService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
+        initialCreditsService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(
+    initialCreditsService.checkFreeTierBillingUsageForUsers(
         Sets.newHashSet(user1, user2), ImmutableMap.of("project 3", user2Costs));
 
     assertWithinBillingTolerance(
-        freeTierBillingService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
-    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user2), user2Costs);
-    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user2)).isFalse();
+        initialCreditsService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
+    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user2), user2Costs);
+    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user2)).isFalse();
   }
 
   @Test
   public void userHasRemainingFreeTierCredits_newUser() {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     final DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
-    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
+    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isTrue();
   }
 
   @Test
@@ -742,17 +743,17 @@ public class FreeTierBillingServiceTest {
     // 99.99 < 100.0
     Map<String, Double> allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 99.99);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1), allBQCosts);
-    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1), allBQCosts);
+    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isTrue();
 
     // 100.01 > 100.0
     allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1), allBQCosts);
-    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isFalse();
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1), allBQCosts);
+    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isFalse();
 
     // 100.01 < 200.0
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
-    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
+    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isTrue();
   }
 
   @Test
@@ -774,7 +775,7 @@ public class FreeTierBillingServiceTest {
 
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -805,11 +806,11 @@ public class FreeTierBillingServiceTest {
     workspaceDao.save(workspace);
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
 
     allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 100.1);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -834,7 +835,7 @@ public class FreeTierBillingServiceTest {
     workspaceDao.save(workspace);
     commitTransaction();
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
 
     TestTransaction.start();
     DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT + "4");
@@ -844,7 +845,7 @@ public class FreeTierBillingServiceTest {
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT + "4", 100.1);
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
         .pushInitialCreditsExpiryTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -858,7 +859,7 @@ public class FreeTierBillingServiceTest {
   @Test
   public void test_none() {
     DbUser user = new DbUser();
-    assertThat(freeTierBillingService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
   }
 
   @Test
@@ -867,7 +868,7 @@ public class FreeTierBillingServiceTest {
         new DbUser()
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(true).setExpirationTime(NOW));
-    assertThat(freeTierBillingService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
   }
 
   @Test
@@ -880,7 +881,7 @@ public class FreeTierBillingServiceTest {
                         .setBypassed(false)
                         .setExpirationTime(NOW)));
     when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
-    assertThat(freeTierBillingService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
   }
 
   @Test
@@ -889,7 +890,7 @@ public class FreeTierBillingServiceTest {
         new DbUser()
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(false).setExpirationTime(null));
-    assertThat(freeTierBillingService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
   }
 
   @Test
@@ -898,18 +899,18 @@ public class FreeTierBillingServiceTest {
         new DbUser()
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(false).setExpirationTime(NOW));
-    assertThat(freeTierBillingService.getCreditsExpiration(user)).hasValue(NOW);
+    assertThat(initialCreditsService.getCreditsExpiration(user)).hasValue(NOW);
   }
 
   @Test
   public void test_checkCreditsExpirationForUserIDs_null() {
-    freeTierBillingService.checkCreditsExpirationForUserIDs(null);
+    initialCreditsService.checkCreditsExpirationForUserIDs(null);
     verify(spyUserDao, never()).findAllById(any());
   }
 
   @Test
   public void test_checkCreditsExpirationForUserIDs_emptyList() {
-    freeTierBillingService.checkCreditsExpirationForUserIDs(new ArrayList<>());
+    initialCreditsService.checkCreditsExpirationForUserIDs(new ArrayList<>());
     verify(spyUserDao, never()).findAllById(any());
   }
 
@@ -918,7 +919,7 @@ public class FreeTierBillingServiceTest {
     DbUser user = spyUserDao.save(new DbUser());
     when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
-    freeTierBillingService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
     assertNull(user.getUserInitialCreditsExpiration());
@@ -941,7 +942,7 @@ public class FreeTierBillingServiceTest {
                         .setBypassed(bypassed)));
     when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
-    freeTierBillingService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     assertEquals(
         user.getUserInitialCreditsExpiration().getApproachingExpirationNotificationTime(),

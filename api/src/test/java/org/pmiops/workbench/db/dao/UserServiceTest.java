@@ -33,7 +33,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -106,7 +106,7 @@ public class UserServiceTest {
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
   })
-  @MockBean({MailService.class, FreeTierBillingService.class})
+  @MockBean({MailService.class, InitialCreditsService.class})
   @TestConfiguration
   static class Configuration {
     @Bean

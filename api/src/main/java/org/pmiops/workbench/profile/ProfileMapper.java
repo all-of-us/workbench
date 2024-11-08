@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -52,7 +52,7 @@ public interface ProfileMapper {
       defaultValue = "false")
   Profile toModel(
       DbUser dbUser,
-      @Context FreeTierBillingService freeTierBillingService,
+      @Context InitialCreditsService initialCreditsService,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
       DbUserTermsOfService latestTermsOfService,
       Double freeTierUsage,

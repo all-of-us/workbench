@@ -38,7 +38,7 @@ import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
@@ -164,11 +164,11 @@ public class RasLinkServiceTest {
     AccessTierService.class,
     DirectoryService.class,
     FireCloudService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     HttpTransport.class,
     MailService.class,
     UserServiceAuditor.class,
-    FreeTierBillingService.class
+    InitialCreditsService.class
   })
   static class Configuration {
     @Bean

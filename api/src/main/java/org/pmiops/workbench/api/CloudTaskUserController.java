@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -56,7 +56,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final UserService userService;
   private final AccessModuleService accessModuleService;
   private final FreeTierBillingBatchUpdateService freeTierBillingUpdateService;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
 
   CloudTaskUserController(
       UserDao userDao,
@@ -64,13 +64,13 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       UserService userService,
       AccessModuleService accessModuleService,
       FreeTierBillingBatchUpdateService freeTierBillingUpdateService,
-      FreeTierBillingService freeTierBillingService) {
+      InitialCreditsService initialCreditsService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.accessModuleService = accessModuleService;
     this.freeTierBillingUpdateService = freeTierBillingUpdateService;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
   }
 
   @Override
@@ -185,7 +185,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
-    freeTierBillingService.checkCreditsExpirationForUserIDs(userIdsList);
+    initialCreditsService.checkCreditsExpirationForUserIDs(userIdsList);
     return ResponseEntity.noContent().build();
   }
 

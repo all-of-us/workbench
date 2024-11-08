@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -80,7 +80,8 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
-  @Autowired FreeTierBillingService freeTierBillingService;
+  @Autowired
+  InitialCreditsService initialCreditsService;
 
   @Autowired WorkspaceService workspaceService;
 
@@ -95,7 +96,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   @Import({
     CloudTaskInitialCreditsExpiryController.class,
     WorkspaceServiceImpl.class,
-    FreeTierBillingService.class
+    InitialCreditsService.class
   })
   @MockBean({
     AccessTierService.class,
@@ -409,7 +410,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
 
-    freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
 
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
 
@@ -442,7 +443,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
 
-    freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(

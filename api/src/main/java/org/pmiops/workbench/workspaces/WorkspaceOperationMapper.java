@@ -3,7 +3,7 @@ package org.pmiops.workbench.workspaces;
 import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -22,7 +22,7 @@ public interface WorkspaceOperationMapper {
       DbWorkspaceOperation source,
       WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       WorkspaceMapper workspaceMapper) {
 
     WorkspaceOperation modelOperation = toModelWithoutWorkspace(source);
@@ -34,7 +34,7 @@ public interface WorkspaceOperationMapper {
                     workspaceId,
                     workspaceDao,
                     fireCloudService,
-                    freeTierBillingService,
+                    initialCreditsService,
                     workspaceMapper))
         .ifPresent(modelOperation::workspace);
 
@@ -57,7 +57,7 @@ public interface WorkspaceOperationMapper {
       long workspaceId,
       WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       WorkspaceMapper workspaceMapper) {
     return workspaceDao
         .findActiveByWorkspaceId(workspaceId)
@@ -71,6 +71,6 @@ public interface WorkspaceOperationMapper {
                             workspaceMapper.toApiWorkspace(
                                 dbWorkspace,
                                 fcWorkspaceResponse.getWorkspace(),
-                                freeTierBillingService)));
+                                initialCreditsService)));
   }
 }

@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;
@@ -40,7 +40,7 @@ public class WorkspaceOperationMapperTest {
   @Autowired private WorkspaceDao workspaceDao;
 
   @MockBean private FireCloudService mockFirecloudService;
-  @MockBean private FreeTierBillingService mockFreeTierBillingService;
+  @MockBean private InitialCreditsService mockInitialCreditsService;
 
   @TestConfiguration
   @Import({
@@ -110,7 +110,7 @@ public class WorkspaceOperationMapperTest {
                 dbOperation,
                 workspaceDao,
                 mockFirecloudService,
-                mockFreeTierBillingService,
+                mockInitialCreditsService,
                 workspaceMapper))
         .isEqualTo(expectedOperation);
   }
@@ -136,7 +136,7 @@ public class WorkspaceOperationMapperTest {
                 dbOperation,
                 workspaceDao,
                 mockFirecloudService,
-                mockFreeTierBillingService,
+                mockInitialCreditsService,
                 workspaceMapper))
         .isEqualTo(expectedOperation);
   }
@@ -163,7 +163,7 @@ public class WorkspaceOperationMapperTest {
                 dbOperation,
                 workspaceDao,
                 mockFirecloudService,
-                mockFreeTierBillingService,
+                mockInitialCreditsService,
                 workspaceMapper))
         .isEqualTo(expectedOperation);
   }
@@ -180,7 +180,7 @@ public class WorkspaceOperationMapperTest {
             dbWorkspace.getWorkspaceId(),
             workspaceDao,
             mockFirecloudService,
-            mockFreeTierBillingService,
+            mockInitialCreditsService,
             workspaceMapper);
 
     assertThat(maybeWorkspace).hasValue(expectedWorkspace);
@@ -193,7 +193,7 @@ public class WorkspaceOperationMapperTest {
                 -1L,
                 workspaceDao,
                 mockFirecloudService,
-                mockFreeTierBillingService,
+                mockInitialCreditsService,
                 workspaceMapper))
         .isEmpty();
   }
@@ -206,6 +206,6 @@ public class WorkspaceOperationMapperTest {
 
     when(mockFirecloudService.getWorkspace(namespace, fcName))
         .thenReturn(new RawlsWorkspaceResponse().workspace(fcWorkspace));
-    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, mockFreeTierBillingService);
+    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, mockInitialCreditsService);
   }
 }

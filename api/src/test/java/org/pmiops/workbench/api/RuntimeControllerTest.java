@@ -43,7 +43,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
@@ -191,7 +191,7 @@ public class RuntimeControllerTest {
     LeonardoApiClientFactory.class,
     MailService.class,
     UserServiceAuditor.class,
-    FreeTierBillingService.class
+    InitialCreditsService.class
   })
   static class Configuration {
 

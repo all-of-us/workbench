@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to call the {@link FreeTierBillingService} with batches of users. This ensures that
+ * Class to call the {@link InitialCreditsService} with batches of users. This ensures that
  * FreeTierBillingService will commit the transaction for a smaller batch of users instead of
  * processing all users in one transaction and eventually timing out. See RW-6280
  */
@@ -35,7 +35,7 @@ public class FreeTierBillingBatchUpdateService {
       Logger.getLogger(FreeTierBillingBatchUpdateService.class.getName());
 
   private final UserDao userDao;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private final BigQueryService bigQueryService;
@@ -53,13 +53,13 @@ public class FreeTierBillingBatchUpdateService {
   public FreeTierBillingBatchUpdateService(
       GoogleProjectPerCostDao googleProjectPerCostDao,
       UserDao userDao,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
       BigQueryService bigQueryService) {
     this.googleProjectPerCostDao = googleProjectPerCostDao;
     this.userDao = userDao;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.bigQueryService = bigQueryService;
     this.workspaceDao = workspaceDao;
@@ -90,7 +90,7 @@ public class FreeTierBillingBatchUpdateService {
             .map((userId) -> userDao.findUserByUserId(userId))
             .collect(Collectors.toSet());
 
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(dbUserSet, userWorkspaceBQCosts);
+    initialCreditsService.checkFreeTierBillingUsageForUsers(dbUserSet, userWorkspaceBQCosts);
   }
 
   /**
@@ -115,7 +115,7 @@ public class FreeTierBillingBatchUpdateService {
           String.format(
               "Processing users batch of size/total: %d/%d. Current iteration is: %d",
               usersPartition.size(), numberOfUsers, count++));
-      freeTierBillingService.checkFreeTierBillingUsageForUsers(
+      initialCreditsService.checkFreeTierBillingUsageForUsers(
           new HashSet<>(usersPartition), allBQCosts);
     }
 

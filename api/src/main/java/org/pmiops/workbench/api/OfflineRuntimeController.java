@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -67,7 +67,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private static final int IDLE_AFTER_HOURS = 3;
 
   private final FireCloudService fireCloudService;
-  private final FreeTierBillingService freeTierBillingService;
+  private final InitialCreditsService initialCreditsService;
   private final MailService mailService;
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<WorkbenchConfig> configProvider;
@@ -79,7 +79,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   @Autowired
   OfflineRuntimeController(
       FireCloudService firecloudService,
-      FreeTierBillingService freeTierBillingService,
+      InitialCreditsService initialCreditsService,
       MailService mailService,
       LeonardoApiClient leonardoApiClient,
       Provider<WorkbenchConfig> configProvider,
@@ -88,7 +88,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       Clock clock,
       LeonardoMapper leonardoMapper) {
     this.fireCloudService = firecloudService;
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
     this.leonardoApiClient = leonardoApiClient;
     this.workspaceDao = workspaceDao;
@@ -321,7 +321,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     if (BillingUtils.isInitialCredits(
         workspace.get().getBillingAccountName(), configProvider.get())) {
       initialCreditsRemaining =
-          freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
+          initialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
