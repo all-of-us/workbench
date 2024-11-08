@@ -218,7 +218,7 @@ public class InitialCreditsService {
   public boolean maybeSetDollarLimitOverride(DbUser user, double newDollarLimit) {
     final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
 
-    if (!haveCreditsExpired(user)
+    if (!areUserCreditsExpired(user)
         && (previousLimitMaybe != null
             || CostComparisonUtils.costsDiffer(
                 newDollarLimit,
@@ -258,6 +258,12 @@ public class InitialCreditsService {
     return Math.max(creatorFreeCreditsRemaining, 0);
   }
 
+  /**
+   * For each of the users corresponding to the given user IDs, check if their initial credits have
+   * expired, or will handle soon, and handle accordingly.
+   *
+   * @param userIdsList - The list of user IDs to check for initial credits expiration
+   */
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && !userIdsList.isEmpty()) {
       Iterable<DbUser> users = userDao.findAllById(userIdsList);
@@ -265,6 +271,14 @@ public class InitialCreditsService {
     }
   }
 
+  /**
+   * For the given user, check when the user's initial credits will expire, if relevant.
+   *
+   * @param user - The user whose initial credits expiration time is being checked
+   * @return The expiration time of the user's initial credits, if they have a
+   *     UserInitialCreditsExpiration record and they have not been bypassed personally or
+   *     institutionally.
+   */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
     return Optional.ofNullable(user.getUserInitialCreditsExpiration())
         .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
@@ -272,7 +286,13 @@ public class InitialCreditsService {
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
   }
 
-  public boolean haveCreditsExpired(DbUser user) {
+  /**
+   * Check if the user's initial credits have expired.
+   *
+   * @param user - The user whose initial credits expiration time is being checked.
+   * @return True if the user's initial credits have expired, false otherwise.
+   */
+  public boolean areUserCreditsExpired(DbUser user) {
     return getCreditsExpiration(user)
         .map(expirationTime -> !expirationTime.after(clockNow()))
         .orElse(false);
@@ -341,7 +361,7 @@ public class InitialCreditsService {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
 
-    if (haveCreditsExpired(user)) {
+    if (areUserCreditsExpired(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
         && null == userInitialCreditsExpiration.getApproachingExpirationNotificationTime()) {
