@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
@@ -59,7 +59,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
@@ -139,8 +138,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     DataSetService.class,
     FeaturedWorkspaceMapper.class,
     FireCloudService.class,
-    FreeTierBillingService.class,
-    InitialCreditsExpirationService.class,
+    InitialCreditsService.class,
     MailService.class,
     UserRecentResourceService.class,
     UserService.class,

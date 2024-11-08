@@ -27,7 +27,7 @@ import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -42,7 +42,6 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
@@ -112,7 +111,7 @@ public class ProfileServiceTest {
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
-  @MockBean private InitialCreditsExpirationService mockInitialCreditsExpirationService;
+  @MockBean private InitialCreditsService mockInitialCreditsService;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
   @MockBean
@@ -143,8 +142,8 @@ public class ProfileServiceTest {
   @MockBean({
     AccessModuleService.class,
     AccessTierService.class,
-    FreeTierBillingService.class,
-    InitialCreditsExpirationService.class,
+    InitialCreditsService.class,
+    InitialCreditsService.class,
     NewUserSatisfactionSurveyService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,
@@ -576,7 +575,7 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
 
-    verify(mockInitialCreditsExpirationService, times(enableInitialCreditsExpiration ? 1 : 0))
+    verify(mockInitialCreditsService, times(enableInitialCreditsExpiration ? 1 : 0))
         .setInitialCreditsExpirationBypassed(targetUser, true);
   }
 

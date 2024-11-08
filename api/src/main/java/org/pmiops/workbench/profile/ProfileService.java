@@ -20,7 +20,7 @@ import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -36,7 +36,6 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.AccountDisabledStatus;
@@ -64,8 +63,7 @@ public class ProfileService {
   private final AddressMapper addressMapper;
   private final Clock clock;
   private final DemographicSurveyMapper demographicSurveyMapper;
-  private final FreeTierBillingService freeTierBillingService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
+  private final InitialCreditsService initialCreditsService;
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
   private final Javers javers;
@@ -87,8 +85,7 @@ public class ProfileService {
       AddressMapper addressMapper,
       Clock clock,
       DemographicSurveyMapper demographicSurveyMapper,
-      FreeTierBillingService freeTierBillingService,
-      InitialCreditsExpirationService initialCreditsExpirationService,
+      InitialCreditsService initialCreditsService,
       InstitutionDao institutionDao,
       InstitutionService institutionService,
       Javers javers,
@@ -107,8 +104,7 @@ public class ProfileService {
     this.addressMapper = addressMapper;
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
-    this.freeTierBillingService = freeTierBillingService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
+    this.initialCreditsService = initialCreditsService;
     this.institutionDao = institutionDao;
     this.institutionService = institutionService;
     this.javers = javers;
@@ -130,9 +126,9 @@ public class ProfileService {
     final DbUser user =
         userService.findUserWithAuthoritiesAndPageVisits(userLite.getUserId()).orElse(userLite);
 
-    final @Nullable Double freeTierUsage = freeTierBillingService.getCachedFreeTierUsage(user);
+    final @Nullable Double freeTierUsage = initialCreditsService.getCachedFreeTierUsage(user);
     final @Nullable Double freeTierDollarQuota =
-        freeTierBillingService.getUserFreeTierDollarLimit(user);
+        initialCreditsService.getUserFreeTierDollarLimit(user);
     final @Nullable VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         verifiedInstitutionalAffiliationDao
             .findFirstByUser(user)
@@ -156,7 +152,7 @@ public class ProfileService {
 
     return profileMapper.toModel(
         user,
-        initialCreditsExpirationService,
+        initialCreditsService,
         verifiedInstitutionalAffiliation,
         latestTermsOfService,
         freeTierUsage,
@@ -256,11 +252,15 @@ public class ProfileService {
     boolean enableInitialCreditsExpiration =
         configProvider.get().featureFlags.enableInitialCreditsExpiration;
 
-    if (enableInitialCreditsExpiration) {
-      initialCreditsExpirationService.setInitialCreditsExpirationBypassed(
-          user,
-          Optional.ofNullable(updatedProfile.isInitialCreditsExpirationBypassed()).orElse(false));
-    }
+    Optional.ofNullable(updatedProfile.isInitialCreditsExpirationBypassed())
+        .ifPresent(
+            isNowBypassed -> {
+              if (enableInitialCreditsExpiration
+                  && previousProfile.isInitialCreditsExpirationBypassed() != isNowBypassed) {
+                initialCreditsService.setInitialCreditsExpirationBypassed(user, isNowBypassed);
+              }
+            });
+
     // Address may be null for users who were created before address validation was in place. See
     // RW-5139.
     Optional.ofNullable(user.getAddress()).ifPresent(address -> address.setUser(user));
@@ -558,8 +558,7 @@ public class ProfileService {
     final Profile originalProfile = getProfile(dbUser);
 
     Optional.ofNullable(request.getFreeCreditsLimit())
-        .ifPresent(
-            newLimit -> freeTierBillingService.maybeSetDollarLimitOverride(dbUser, newLimit));
+        .ifPresent(newLimit -> initialCreditsService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
     request
         .getAccessBypassRequests()

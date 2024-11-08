@@ -33,7 +33,7 @@ public class WorkspaceFreeTierUsageService {
   }
 
   /**
-   * This method is called in batches from {@link FreeTierBillingService} to update the cost in the
+   * This method is called in batches from {@link InitialCreditsService} to update the cost in the
    * database. The method is transactional to make sure that we do incremental changes to the
    * database.
    *

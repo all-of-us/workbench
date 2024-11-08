@@ -23,6 +23,7 @@ import org.pmiops.workbench.access.AccessSyncServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
@@ -35,7 +36,6 @@ import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.PresetData;
@@ -91,7 +91,7 @@ public class ComplianceTrainingServiceTest {
     FireCloudService.class,
     InstitutionService.class,
     UserServiceAuditor.class,
-    InitialCreditsExpirationService.class
+    InitialCreditsService.class
   })
   @TestConfiguration
   static class Configuration {

@@ -28,13 +28,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 
@@ -53,7 +53,7 @@ public class AccessSyncServiceTest {
 
   @Mock UserService userService;
 
-  @Mock InitialCreditsExpirationService initialCreditsExpirationService;
+  @Mock InitialCreditsService initialCreditsService;
 
   @Mock UserServiceAuditor userServiceAuditor;
 
@@ -113,7 +113,7 @@ public class AccessSyncServiceTest {
 
     accessSyncService.updateUserAccessTiers(dbUser, agent);
 
-    verify(initialCreditsExpirationService, times(enableInitialCreditsExpiration ? 1 : 0))
+    verify(initialCreditsService, times(enableInitialCreditsExpiration ? 1 : 0))
         .createInitialCreditsExpiration(dbUser);
   }
 

@@ -34,7 +34,7 @@ public class FreeTierBillingBatchUpdateServiceTest {
   @Autowired private GoogleProjectPerCostDao mockGoogleProjectPerCostDao;
   @Autowired private WorkspaceDao mockWorkspaceDao;
   @Autowired private FreeTierBillingBatchUpdateService freeTierBillingBatchUpdateService;
-  @Autowired private FreeTierBillingService mockFreeTierBillingService;
+  @Autowired private InitialCreditsService mockInitialCreditsService;
   @Autowired private UserDao mockUserDao;
 
   @TestConfiguration
@@ -45,7 +45,7 @@ public class FreeTierBillingBatchUpdateServiceTest {
     WorkspaceDao.class,
     WorkbenchConfig.class,
     BigQueryService.class,
-    FreeTierBillingService.class
+    InitialCreditsService.class
   })
   static class Configuration {}
 
@@ -69,7 +69,7 @@ public class FreeTierBillingBatchUpdateServiceTest {
         .getGoogleProjectForUserList(Arrays.asList(new Long[] {1l, 2l, 3l}));
     verify(mockGoogleProjectPerCostDao, times(1)).findAllByGoogleProjectId(googleProjectIdsSet);
 
-    verify(mockFreeTierBillingService)
+    verify(mockInitialCreditsService)
         .checkFreeTierBillingUsageForUsers(mockDbuserSet, getUserCostMap());
   }
 

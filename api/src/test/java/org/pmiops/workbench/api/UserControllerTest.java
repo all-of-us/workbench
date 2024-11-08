@@ -25,7 +25,7 @@ import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
@@ -36,7 +36,6 @@ import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingAccount;
 import org.pmiops.workbench.model.TierAccessStatus;
@@ -83,10 +82,10 @@ public class UserControllerTest {
   @MockBean({
     DirectoryService.class,
     FireCloudService.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsExpirationService.class
+    InitialCreditsService.class
   })
   static class Configuration {
 
@@ -117,7 +116,7 @@ public class UserControllerTest {
 
   @Autowired AccessTierDao accessTierDao;
   @Autowired FireCloudService fireCloudService;
-  @Autowired FreeTierBillingService mockFreeTierBillingService;
+  @Autowired InitialCreditsService mockInitialCreditsService;
   @Autowired UserAccessTierDao userAccessTierDao;
   @Autowired UserDao userDao;
 
@@ -389,7 +388,7 @@ public class UserControllerTest {
   public void listBillingAccounts_upgradeYES_freeYES_cloudYES() throws IOException {
     config.billing.accountId = INITIAL_CREDITS_ID;
 
-    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+    when(mockInitialCreditsService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
@@ -409,7 +408,7 @@ public class UserControllerTest {
   public void listBillingAccounts_upgradeYES_freeYES_cloudNO() throws IOException {
     config.billing.accountId = INITIAL_CREDITS_ID;
 
-    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+    when(mockInitialCreditsService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
@@ -428,7 +427,7 @@ public class UserControllerTest {
   public void listBillingAccounts_upgradeYES_freeNO_cloudYES() throws IOException {
     config.billing.accountId = INITIAL_CREDITS_ID;
 
-    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+    when(mockInitialCreditsService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
@@ -446,7 +445,7 @@ public class UserControllerTest {
   public void listBillingAccounts_upgradeYES_freeNO_cloudNO() throws IOException {
     config.billing.accountId = INITIAL_CREDITS_ID;
 
-    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+    when(mockInitialCreditsService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));

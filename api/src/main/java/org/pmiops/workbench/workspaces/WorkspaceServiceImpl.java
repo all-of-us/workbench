@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -47,7 +47,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
@@ -98,8 +97,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FireCloudService fireCloudService;
   private final FirecloudMapper firecloudMapper;
-  private final FreeTierBillingService freeTierBillingService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
+  private final InitialCreditsService initialCreditsService;
   private final MailService mailService;
   private final Provider<DbUser> userProvider;
   private final Provider<TanagraApi> tanagraApiProvider;
@@ -125,8 +123,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FireCloudService fireCloudService,
       FirecloudMapper firecloudMapper,
-      FreeTierBillingService freeTierBillingService,
-      InitialCreditsExpirationService initialCreditsExpirationService,
+      InitialCreditsService initialCreditsService,
       MailService mailService,
       Provider<DbUser> userProvider,
       Provider<TanagraApi> tanagraApiProvider,
@@ -149,8 +146,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.fireCloudService = fireCloudService;
     this.firecloudMapper = firecloudMapper;
-    this.freeTierBillingService = freeTierBillingService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
+    this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
     this.tanagraApiProvider = tanagraApiProvider;
     this.userDao = userDao;
@@ -168,7 +164,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public List<WorkspaceResponse> getWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
+            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsService)
         .stream()
         .filter(WorkspaceServiceImpl::filterToNonPublished)
         .toList();
@@ -184,7 +180,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
+            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsService)
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().getFeaturedCategory() != null)
         .toList();
@@ -225,7 +221,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     workspaceResponse.setAccessLevel(
         firecloudMapper.fcToApiWorkspaceAccessLevel(fcResponse.getAccessLevel()));
     Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
     workspaceResponse.setWorkspace(workspace);
 
     return workspaceResponse;
@@ -502,8 +498,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             "Provided billing account is closed. Please provide an open account.");
       }
     } catch (IOException | InterruptedException e) {
-      throw new ServerErrorException(
-          String.format("Timed out while verifying billing account update."), e);
+      throw new ServerErrorException("Timed out while verifying billing account update.", e);
     }
 
     workspace.setBillingAccountName(newBillingAccountName);
@@ -511,12 +506,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     if (isInitialCredits(newBillingAccountName, workbenchConfigProvider.get())) {
       DbUser creator = workspace.getCreator();
       boolean hasInitialCreditsRemaining =
-          freeTierBillingService.userHasRemainingFreeTierCredits(creator);
+          initialCreditsService.userHasRemainingFreeTierCredits(creator);
       workspace.setBillingStatus(
           hasInitialCreditsRemaining ? BillingStatus.ACTIVE : BillingStatus.INACTIVE);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
-      workspace.setInitialCreditsExpired(
-          initialCreditsExpirationService.haveCreditsExpired(creator));
+      workspace.setInitialCreditsExpired(initialCreditsService.areUserCreditsExpired(creator));
     } else {
       // At this point, we can assume that a user provided billing account is open since we
       // throw a BadRequestException if a closed one is provided

@@ -11,10 +11,10 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -62,7 +62,7 @@ public interface WorkspaceMapper {
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
-      @Context InitialCreditsExpirationService expirationService);
+      @Context InitialCreditsService initialCreditsService);
 
   @Mapping(
       target = "accessLevel",
@@ -74,16 +74,16 @@ public interface WorkspaceMapper {
   default WorkspaceResponse toApiWorkspaceResponse(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceListResponse fcResponse,
-      InitialCreditsExpirationService expirationService) {
+      InitialCreditsService initialCreditsService) {
     return toApiWorkspaceResponse(
-        toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), expirationService),
+        toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), initialCreditsService),
         fcResponse.getAccessLevel());
   }
 
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
       WorkspaceDao workspaceDao,
       List<RawlsWorkspaceListResponse> fcWorkspaces,
-      InitialCreditsExpirationService expirationService) {
+      InitialCreditsService initialCreditsService) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
@@ -95,7 +95,7 @@ public interface WorkspaceMapper {
 
     List<DbWorkspace> dbWorkspaces =
         workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
-    return toApiWorkspaceResponseList(dbWorkspaces, fcWorkspacesByUuid, expirationService);
+    return toApiWorkspaceResponseList(dbWorkspaces, fcWorkspacesByUuid, initialCreditsService);
   }
 
   // safely combines dbWorkspaces and fcWorkspacesByUuid,
@@ -103,14 +103,14 @@ public interface WorkspaceMapper {
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
       List<DbWorkspace> dbWorkspaces,
       Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid,
-      InitialCreditsExpirationService expirationService) {
+      InitialCreditsService initialCreditsService) {
     return dbWorkspaces.stream()
         .flatMap(
             dbWorkspace ->
                 Stream.ofNullable(fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid()))
                     .map(
                         fcResponse ->
-                            toApiWorkspaceResponse(dbWorkspace, fcResponse, expirationService)))
+                            toApiWorkspaceResponse(dbWorkspace, fcResponse, initialCreditsService)))
         .toList();
   }
 
@@ -141,13 +141,13 @@ public interface WorkspaceMapper {
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(
-      DbWorkspace dbWorkspace, @Context InitialCreditsExpirationService expirationService);
+      DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
   RecentWorkspace toApiRecentWorkspace(
       DbWorkspace dbWorkspace,
       WorkspaceAccessLevel accessLevel,
-      @Context InitialCreditsExpirationService expirationService);
+      @Context InitialCreditsService initialCreditsService);
 
   /**
    * This method was written I think before we realized we could have multiple input arguments.

@@ -2,8 +2,10 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import com.google.common.collect.Maps;
@@ -14,7 +16,11 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -39,7 +45,7 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -68,16 +74,17 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
 
-  @Autowired CloudTaskInitialCreditsExpiryController cloudTaskInitialCreditsExpiryController;
   @Autowired MailService mailService;
 
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
-  @Autowired FreeTierBillingService freeTierBillingService;
+  @Autowired InitialCreditsService initialCreditsService;
 
   @Autowired WorkspaceService workspaceService;
+
+  @Autowired CloudTaskInitialCreditsExpiryController cloudTaskInitialCreditsExpiryController;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -88,7 +95,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   @Import({
     CloudTaskInitialCreditsExpiryController.class,
     WorkspaceServiceImpl.class,
-    FreeTierBillingService.class
+    InitialCreditsService.class
   })
   @MockBean({
     AccessTierService.class,
@@ -101,7 +108,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     FirecloudMapper.class,
     FireCloudService.class,
     ImpersonatedWorkspaceService.class,
-    InitialCreditsExpirationService.class,
+    InstitutionService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,
@@ -133,7 +140,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.freeTierCronUserBatchSize = 10;
     workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
-    workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2l;
+    workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2L;
   }
 
   @AfterEach
@@ -402,7 +409,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
 
-    freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
 
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
 
@@ -435,7 +442,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
 
-    freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(

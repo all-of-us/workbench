@@ -16,6 +16,7 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliancetraining.ComplianceTrainingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -32,7 +33,6 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
@@ -86,7 +86,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
   private final RasLinkService rasLinkService;
   private final ComplianceTrainingService complianceTrainingService;
-  private final InitialCreditsExpirationService initialCreditsExpirationService;
+  private final InitialCreditsService initialCreditsService;
 
   @Autowired
   ProfileController(
@@ -109,7 +109,7 @@ public class ProfileController implements ProfileApiDelegate {
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService,
       ComplianceTrainingService complianceTrainingService,
-      InitialCreditsExpirationService initialCreditsExpirationService) {
+      InitialCreditsService initialCreditsService) {
     this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -129,7 +129,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.rasLinkService = rasLinkService;
     this.complianceTrainingService = complianceTrainingService;
-    this.initialCreditsExpirationService = initialCreditsExpirationService;
+    this.initialCreditsService = initialCreditsService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -546,7 +546,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> extendInitialCreditExpiration() {
-    initialCreditsExpirationService.extendInitialCreditsExpiration(userProvider.get());
+    initialCreditsService.extendInitialCreditsExpiration(userProvider.get());
     return ResponseEntity.noContent().build();
   }
 }

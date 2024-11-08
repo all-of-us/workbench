@@ -55,7 +55,7 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
@@ -101,7 +101,6 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.Cohort;
@@ -270,9 +269,9 @@ public class DataSetControllerTest {
     ConceptBigQueryService.class,
     DirectoryService.class,
     FeaturedWorkspaceMapper.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     IamService.class,
-    InitialCreditsExpirationService.class,
+    InitialCreditsService.class,
     MailService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
@@ -1076,12 +1075,12 @@ public class DataSetControllerTest {
 
   @Test
   public void getDataDictionaryEntry() {
-    when(mockCdrVersionService.findByCdrVersionId(2l))
+    when(mockCdrVersionService.findByCdrVersionId(2L))
         .thenReturn(Optional.ofNullable(new DbCdrVersion()));
     when(mockDSDataDictionaryDao.findFirstByFieldNameAndDomain(anyString(), anyString()))
         .thenReturn(new DbDSDataDictionary());
 
-    dataSetController.getDataDictionaryEntry(2l, "PERSON", "MockValue");
+    dataSetController.getDataDictionaryEntry(2L, "PERSON", "MockValue");
     verify(mockDSDataDictionaryDao, times(1)).findFirstByFieldNameAndDomain("MockValue", "PERSON");
   }
 

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -222,7 +222,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     CohortCloningService.class,
     CommonMappers.class,
     FireCloudServiceImpl.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     GenomicExtractionService.class,
     NotebooksServiceImpl.class,
     Provider.class,

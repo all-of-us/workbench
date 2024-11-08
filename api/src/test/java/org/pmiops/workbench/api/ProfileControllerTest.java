@@ -45,7 +45,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
-import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
@@ -69,11 +69,11 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
@@ -191,7 +191,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     CommonMappers.class,
     ComplianceTrainingServiceImpl.class,
     DemographicSurveyMapperImpl.class,
-    FreeTierBillingService.class,
+    InitialCreditsService.class,
     InstitutionMapperImpl.class,
     InstitutionServiceImpl.class,
     PageVisitMapperImpl.class,
@@ -210,9 +210,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean({
     AbsorbService.class,
     BigQueryService.class,
-    InitialCreditsExpirationService.class,
     NewUserSatisfactionSurveyService.class,
     TaskQueueService.class,
+    LeonardoApiClient.class
   })
   static class Configuration {
     @Bean
