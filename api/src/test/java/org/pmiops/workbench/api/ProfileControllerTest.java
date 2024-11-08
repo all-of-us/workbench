@@ -73,6 +73,7 @@ import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
@@ -209,9 +210,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean({
     AbsorbService.class,
     BigQueryService.class,
-    FreeTierBillingService.class,
     NewUserSatisfactionSurveyService.class,
     TaskQueueService.class,
+    LeonardoApiClient.class
   })
   static class Configuration {
     @Bean

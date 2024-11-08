@@ -252,11 +252,15 @@ public class ProfileService {
     boolean enableInitialCreditsExpiration =
         configProvider.get().featureFlags.enableInitialCreditsExpiration;
 
-    if (enableInitialCreditsExpiration) {
-      freeTierBillingService.setInitialCreditsExpirationBypassed(
-          user,
-          Optional.ofNullable(updatedProfile.isInitialCreditsExpirationBypassed()).orElse(false));
-    }
+    Optional.ofNullable(updatedProfile.isInitialCreditsExpirationBypassed())
+        .ifPresent(
+            isNowBypassed -> {
+              if (enableInitialCreditsExpiration
+                  && previousProfile.isInitialCreditsExpirationBypassed() != isNowBypassed) {
+                freeTierBillingService.setInitialCreditsExpirationBypassed(user, isNowBypassed);
+              }
+            });
+
     // Address may be null for users who were created before address validation was in place. See
     // RW-5139.
     Optional.ofNullable(user.getAddress()).ifPresent(address -> address.setUser(user));
