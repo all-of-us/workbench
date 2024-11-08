@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-/** A service to update the workspace free tier usage in the database. */
+/** A service to update the workspace initial credit usage in the database. */
 @Service
 public class WorkspaceInitialCreditUsageService {
 
