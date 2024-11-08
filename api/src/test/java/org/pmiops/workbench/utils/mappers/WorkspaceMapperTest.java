@@ -12,8 +12,11 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
@@ -22,6 +25,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
@@ -99,7 +103,11 @@ public class WorkspaceMapperTest {
     CohortService.class,
     MailService.class,
     LeonardoApiClient.class,
-    InstitutionService.class
+    InstitutionService.class,
+    TaskQueueService.class,
+    UserServiceAuditor.class,
+    WorkspaceFreeTierUsageDao.class,
+    WorkspaceFreeTierUsageService.class
   })
   static class Configuration {}
 
