@@ -111,7 +111,6 @@
     },
     {
       "cdrVersionId": 8,
-      "isDefault": true,
       "name": "Synthetic Dataset in the Controlled Tier v4",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "SC2023Q3R2",
@@ -147,6 +146,29 @@
       "hasSurveyConductData": true,
       "accessTier": "registered",
       "tanagraEnabled": true
+    },
+    {
+      "cdrVersionId": 10,
+      "isDefault": true,
+      "name": "Synthetic Dataset in the Controlled Tier v8 (Echo)",
+      "bigqueryProject": "fc-aou-cdr-synth-test-2",
+      "bigqueryDataset": "SC2023Q3R3",
+      "wgsBigqueryDataset": "echo_controls",
+      "wgsFilterSetName": "echo-controls",
+      "creationTime": "2024-11-04 19:58:48Z",
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "storageBasePath": "5",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "wgsCramManifestPath": "wgs/cram/manifest.csv",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
+      "accessTier": "controlled",
+      "tanagraEnabled": true,
+      "needsV8GenomicExtractionWorkflow": true
     }
   ]
 }
