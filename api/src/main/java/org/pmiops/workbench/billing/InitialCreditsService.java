@@ -218,7 +218,7 @@ public class InitialCreditsService {
   public boolean maybeSetDollarLimitOverride(DbUser user, double newDollarLimit) {
     final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
 
-    if (!haveCreditsExpired(user)
+    if (!areUserCreditsExpired(user)
         && (previousLimitMaybe != null
             || CostComparisonUtils.costsDiffer(
                 newDollarLimit,
@@ -291,7 +291,7 @@ public class InitialCreditsService {
    *             expiration time is being checked.
    * @return True if the user's initial credits have expired, false otherwise.
    */
-  public boolean haveCreditsExpired(DbUser user) {
+  public boolean areUserCreditsExpired(DbUser user) {
     return getCreditsExpiration(user)
         .map(expirationTime -> !expirationTime.after(clockNow()))
         .orElse(false);
@@ -360,7 +360,7 @@ public class InitialCreditsService {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
 
-    if (haveCreditsExpired(user)) {
+    if (areUserCreditsExpired(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
         && null == userInitialCreditsExpiration.getApproachingExpirationNotificationTime()) {
