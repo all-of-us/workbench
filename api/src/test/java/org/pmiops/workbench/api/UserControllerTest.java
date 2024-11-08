@@ -116,8 +116,7 @@ public class UserControllerTest {
 
   @Autowired AccessTierDao accessTierDao;
   @Autowired FireCloudService fireCloudService;
-  @Autowired
-  InitialCreditsService mockInitialCreditsService;
+  @Autowired InitialCreditsService mockInitialCreditsService;
   @Autowired UserAccessTierDao userAccessTierDao;
   @Autowired UserDao userDao;
 

@@ -96,8 +96,7 @@ public class InitialCreditsServiceTest {
   @MockBean private InstitutionService institutionService;
 
   @Autowired BigQueryService bigQueryService;
-  @Autowired
-  InitialCreditsService initialCreditsService;
+  @Autowired InitialCreditsService initialCreditsService;
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;

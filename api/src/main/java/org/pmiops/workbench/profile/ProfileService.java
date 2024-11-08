@@ -558,8 +558,7 @@ public class ProfileService {
     final Profile originalProfile = getProfile(dbUser);
 
     Optional.ofNullable(request.getFreeCreditsLimit())
-        .ifPresent(
-            newLimit -> initialCreditsService.maybeSetDollarLimitOverride(dbUser, newLimit));
+        .ifPresent(newLimit -> initialCreditsService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
     request
         .getAccessBypassRequests()

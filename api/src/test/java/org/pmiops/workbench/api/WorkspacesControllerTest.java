@@ -311,8 +311,7 @@ public class WorkspacesControllerTest {
   @MockBean CohortBuilderService cohortBuilderService;
   @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
   @MockBean FireCloudService mockFireCloudService;
-  @MockBean
-  InitialCreditsService mockInitialCreditsService;
+  @MockBean InitialCreditsService mockInitialCreditsService;
   @MockBean IamService mockIamService;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;

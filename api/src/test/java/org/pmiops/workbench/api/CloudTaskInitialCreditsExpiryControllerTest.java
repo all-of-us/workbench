@@ -80,8 +80,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
-  @Autowired
-  InitialCreditsService initialCreditsService;
+  @Autowired InitialCreditsService initialCreditsService;
 
   @Autowired WorkspaceService workspaceService;
 

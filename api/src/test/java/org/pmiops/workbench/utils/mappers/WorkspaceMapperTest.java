@@ -289,9 +289,7 @@ public class WorkspaceMapperTest {
         assertDoesNotThrow(
             () ->
                 workspaceMapper.toApiWorkspaceResponseList(
-                    Collections.emptyList(),
-                    Map.of(fcUuid, rawlsResponse),
-                    initialCreditsService));
+                    Collections.emptyList(), Map.of(fcUuid, rawlsResponse), initialCreditsService));
 
     assertThat(result).isEmpty();
   }

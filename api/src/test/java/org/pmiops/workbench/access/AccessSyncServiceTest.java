@@ -53,8 +53,7 @@ public class AccessSyncServiceTest {
 
   @Mock UserService userService;
 
-  @Mock
-  InitialCreditsService initialCreditsService;
+  @Mock InitialCreditsService initialCreditsService;
 
   @Mock UserServiceAuditor userServiceAuditor;
 
