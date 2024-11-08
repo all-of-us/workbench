@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
+import org.pmiops.workbench.billing.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 public class OfflineBillingControllerTest {
 
-  @Autowired private FreeTierBillingBatchUpdateService mockFreeTierBillingUpdateService;
+  @Autowired private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
   @Autowired private OfflineBillingController offlineBillingController;
   @Autowired private TaskQueueService mockTaskQueueService;
   @Autowired private UserService mockUserService;
@@ -31,7 +31,7 @@ public class OfflineBillingControllerTest {
   @TestConfiguration
   @Import({FakeClockConfiguration.class, OfflineBillingController.class})
   @MockBean({
-    FreeTierBillingBatchUpdateService.class,
+    InitialCreditsBatchUpdateService.class,
     TaskQueueService.class,
     UserService.class,
     GoogleProjectPerCostDao.class
@@ -51,12 +51,11 @@ public class OfflineBillingControllerTest {
     verify(mockGoogleProjectPerCostDao).batchInsertProjectPerCost(anyList());
 
     // Confirm that task as pushed with User Id List
-    verify(mockTaskQueueService)
-        .groupAndPushFreeTierBilling(Arrays.asList(new Long[] {1l, 2l, 3l}));
+    verify(mockTaskQueueService).groupAndPushFreeTierBilling(Arrays.asList(1L, 2L, 3L));
   }
 
   private void mockUserId() {
-    when(mockUserService.getAllUserIds()).thenReturn(Arrays.asList(new Long[] {1l, 2l, 3l}));
+    when(mockUserService.getAllUserIds()).thenReturn(Arrays.asList(1L, 2L, 3L));
   }
 
   private void mockFreeTierCostForGP() {

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
-import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
+import org.pmiops.workbench.billing.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.billing.InitialCreditsService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -51,7 +51,7 @@ public class CloudTaskUserControllerTest {
   @Autowired private AccessModuleService mockAccessModuleService;
   @Autowired private UserService mockUserService;
 
-  @Autowired private FreeTierBillingBatchUpdateService mockFreeTierBillingUpdateService;
+  @Autowired private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
 
   @Autowired private InitialCreditsService mockInitialCreditsService;
 
@@ -60,7 +60,7 @@ public class CloudTaskUserControllerTest {
   @MockBean({
     AccessModuleService.class,
     CloudResourceManagerService.class,
-    FreeTierBillingBatchUpdateService.class,
+    InitialCreditsBatchUpdateService.class,
     UserService.class,
     InitialCreditsService.class
   })

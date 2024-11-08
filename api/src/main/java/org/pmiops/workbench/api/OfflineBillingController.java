@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
+import org.pmiops.workbench.billing.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineBillingController implements OfflineBillingApiDelegate {
 
-  private final FreeTierBillingBatchUpdateService freeTierBillingService;
+  private final InitialCreditsBatchUpdateService freeTierBillingService;
   private final GoogleProjectPerCostDao googleProjectPerCostDao;
-  private TaskQueueService taskQueueService;
+  private final TaskQueueService taskQueueService;
 
   private final UserService userService;
 
   @Autowired
   OfflineBillingController(
-      FreeTierBillingBatchUpdateService freeTierBillingService,
+      InitialCreditsBatchUpdateService freeTierBillingService,
       GoogleProjectPerCostDao googleProjectPerCostDao,
       UserService userService,
       TaskQueueService taskQueueService) {

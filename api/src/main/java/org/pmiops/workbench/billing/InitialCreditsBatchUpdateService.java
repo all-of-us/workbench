@@ -29,10 +29,10 @@ import org.springframework.stereotype.Service;
  * processing all users in one transaction and eventually timing out. See RW-6280
  */
 @Service
-public class FreeTierBillingBatchUpdateService {
+public class InitialCreditsBatchUpdateService {
 
   private static final Logger logger =
-      Logger.getLogger(FreeTierBillingBatchUpdateService.class.getName());
+      Logger.getLogger(InitialCreditsBatchUpdateService.class.getName());
 
   private final UserDao userDao;
   private final InitialCreditsService initialCreditsService;
@@ -50,7 +50,7 @@ public class FreeTierBillingBatchUpdateService {
       Range.closed(MIN_USERS_BATCH, MAX_USERS_BATCH);
 
   @Autowired
-  public FreeTierBillingBatchUpdateService(
+  public InitialCreditsBatchUpdateService(
       GoogleProjectPerCostDao googleProjectPerCostDao,
       UserDao userDao,
       InitialCreditsService initialCreditsService,

@@ -29,16 +29,16 @@ import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class FreeTierBillingBatchUpdateServiceTest {
+public class InitialCreditsBatchUpdateServiceTest {
 
   @Autowired private GoogleProjectPerCostDao mockGoogleProjectPerCostDao;
   @Autowired private WorkspaceDao mockWorkspaceDao;
-  @Autowired private FreeTierBillingBatchUpdateService freeTierBillingBatchUpdateService;
+  @Autowired private InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   @Autowired private InitialCreditsService mockInitialCreditsService;
   @Autowired private UserDao mockUserDao;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, FreeTierBillingBatchUpdateService.class})
+  @Import({FakeClockConfiguration.class, InitialCreditsBatchUpdateService.class})
   @MockBean({
     GoogleProjectPerCostDao.class,
     UserDao.class,
@@ -62,11 +62,9 @@ public class FreeTierBillingBatchUpdateServiceTest {
 
   @Test
   public void testFreeTierBillingBatchUpdateService() {
-    freeTierBillingBatchUpdateService.checkAndAlertFreeTierBillingUsage(
-        Arrays.asList(new Long[] {1l, 2l, 3l}));
+    initialCreditsBatchUpdateService.checkAndAlertFreeTierBillingUsage(Arrays.asList(1L, 2L, 3L));
 
-    verify(mockWorkspaceDao, times(1))
-        .getGoogleProjectForUserList(Arrays.asList(new Long[] {1l, 2l, 3l}));
+    verify(mockWorkspaceDao, times(1)).getGoogleProjectForUserList(Arrays.asList(1L, 2L, 3L));
     verify(mockGoogleProjectPerCostDao, times(1)).findAllByGoogleProjectId(googleProjectIdsSet);
 
     verify(mockInitialCreditsService)
@@ -74,19 +72,19 @@ public class FreeTierBillingBatchUpdateServiceTest {
   }
 
   private void mockDbUser() {
-    DbUser dbUserForId1 = new DbUser().setUserId(1l);
-    DbUser dbUserForId2 = new DbUser().setUserId(2l);
-    DbUser dbUserForId3 = new DbUser().setUserId(3l);
-    when(mockUserDao.findUserByUserId(1l)).thenReturn(dbUserForId1);
-    when(mockUserDao.findUserByUserId(2l)).thenReturn(dbUserForId2);
-    when(mockUserDao.findUserByUserId(3l)).thenReturn(dbUserForId3);
+    DbUser dbUserForId1 = new DbUser().setUserId(1L);
+    DbUser dbUserForId2 = new DbUser().setUserId(2L);
+    DbUser dbUserForId3 = new DbUser().setUserId(3L);
+    when(mockUserDao.findUserByUserId(1L)).thenReturn(dbUserForId1);
+    when(mockUserDao.findUserByUserId(2L)).thenReturn(dbUserForId2);
+    when(mockUserDao.findUserByUserId(3L)).thenReturn(dbUserForId3);
     mockDbuserSet.add(dbUserForId1);
     mockDbuserSet.add(dbUserForId2);
     mockDbuserSet.add(dbUserForId3);
   }
 
   private void mockGoogleProjectsForUser() {
-    when(mockWorkspaceDao.getGoogleProjectForUserList(Arrays.asList(1l, 2l, 3l)))
+    when(mockWorkspaceDao.getGoogleProjectForUserList(Arrays.asList(1L, 2L, 3L)))
         .thenReturn(googleProjectIdsSet);
   }
 
