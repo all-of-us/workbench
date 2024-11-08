@@ -6,7 +6,7 @@ require_relative "./mysql_docker"
 class CloudSqlProxyContext < ServiceAccountContext
 
   DOCKER_PROXY_NAME = 'rw_cloud_sql_proxy'
-  DEADLINE_SEC = 75
+  DEADLINE_SEC = 120
 
   def run()
     common = Common.new

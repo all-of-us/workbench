@@ -59,9 +59,9 @@
     },
     "cdrv8plus": {
       "methodNamespace": "aouwgscohortextraction-test",
-      "methodName": "dest_project_id_yonghao_test",
+      "methodName": "echo-prototyping",
       "methodRepoVersion": 2,
-      "methodLogicalVersion": 4
+      "methodLogicalVersion": 1
     }
   },
   "cdr": {

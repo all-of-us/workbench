@@ -366,5 +366,5 @@ VALUES
   ($((ID++)), 'BATTERY_LEVEL', 'device.battery_level', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
   ($((ID++)), 'DEVICE_VERSION', 'device.device_version', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
   ($((ID++)), 'DEVICE_TYPE', 'device.device_type', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
-  ($((ID++)), 'LAST_SYNC_TIME', 'CAST(device.last_sync_time AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
+  ($((ID++)), 'LAST_SYNC_TIME', 'CAST(device.last_sync_time AS DATE) as last_sync_time', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
   ($((ID++)), 'SRC_ID', 'device.src_id', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device')"
