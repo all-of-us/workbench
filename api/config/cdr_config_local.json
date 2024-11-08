@@ -111,7 +111,6 @@
     },
     {
       "cdrVersionId": 8,
-      "isDefault": true,
       "name": "Synthetic Dataset in the Controlled Tier v4",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "SC2023Q3R2",
@@ -146,6 +145,28 @@
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered",
+      "tanagraEnabled": true
+    },
+    {
+      "cdrVersionId": 10,
+      "isDefault": true,
+      "name": "Synthetic Dataset in the Controlled Tier - Joeltest",
+      "bigqueryProject": "fc-aou-cdr-synth-test-2",
+      "bigqueryDataset": "SC2023Q3R2",
+      "wgsBigqueryDataset": "1kg_wgs_2022q1",
+      "wgsFilterSetName": "example",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "storageBasePath": "v7",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "wgsCramManifestPath": "wgs/cram/manifest.csv",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
+      "accessTier": "controlled",
       "tanagraEnabled": true
     }
   ]
