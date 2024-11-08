@@ -262,7 +262,7 @@ public class InitialCreditsService {
    * For each of the users corresponding to the given user IDs, check if their
    * initial credits have expired, or will handle soon, and handle accordingly.
    *
-   * @param userIdsList
+   * @param userIdsList - The list of user IDs to check for initial credits expiration
    */
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && !userIdsList.isEmpty()) {
