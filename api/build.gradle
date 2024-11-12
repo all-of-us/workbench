@@ -196,6 +196,8 @@ swaggerSources {
     ])
     tanagra swagger3JavaClient("tanagra.yaml", "tanagra")
 
+    wsmanager swagger3JavaClient("ws-manager.yaml", "wsmanager")
+
     // Workbench needs a special configuration style, as we generate Spring server
     // bindings in this case.
     workbench {
