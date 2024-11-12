@@ -35,6 +35,9 @@ it('should display initial credits for a user with an expiration record', async 
     screen.getByText(`initial credits epiration date:`)
   ).toBeInTheDocument();
   expect(screen.getByText(`Dec 3, 2023`)).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: /request credit extension/i })
+  ).toBeInTheDocument();
 });
 
 it('should display initial credits for a user without an expiration record', async () => {
@@ -45,5 +48,8 @@ it('should display initial credits for a user without an expiration record', asy
   expect(screen.getByText(`$100.00`)).toBeInTheDocument();
   expect(
     screen.queryByText(`initial credits epiration date:`)
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: /request credit extension/i })
   ).not.toBeInTheDocument();
 });
