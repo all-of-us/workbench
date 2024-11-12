@@ -175,10 +175,10 @@ public class WorkbenchConfig {
     public String operationalTerraWorkspaceName;
     public String operationalTerraWorkspaceBucket;
     public String extractionDestinationDataset;
-    public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
 
     public abstract static class VersionedConfig {
+      public String gatkJarUri;
       // 'method' values refer to both the stored Method and the generated Method Configuration
       public String methodNamespace;
       public String methodName;

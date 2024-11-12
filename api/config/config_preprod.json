@@ -47,9 +47,9 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionpreprod",
     "operationalTerraWorkspaceBucket": "fc-5d8e6afe-9429-44ae-a22a-67b09705d1b4",
     "extractionDestinationDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_destination",
-    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true,
     "legacyVersions": {
+      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-preprod",
       "methodName": "GvsExtractCohortFromSampleNames",
       "methodRepoVersion": 5,

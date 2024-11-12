@@ -320,7 +320,8 @@ public class GenomicExtractionService {
       List<String> personIds,
       String extractionFolder,
       String outputDir,
-      boolean useLegacyWorkflow) {
+      boolean useLegacyWorkflow,
+      String gatkJarUri) {
 
     String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
     if (destinationParts.length != 2) {
@@ -397,9 +398,7 @@ public class GenomicExtractionService {
         // etc
         .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
         .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
-        .put(
-            EXTRACT_WORKFLOW_NAME + ".gatk_override",
-            "\"" + cohortExtractionConfig.gatkJarUri + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".gatk_override", "\"" + gatkJarUri + "\"")
         .putAll(maybeInputs)
         .build();
   }
@@ -463,7 +462,8 @@ public class GenomicExtractionService {
                             personIds,
                             extractionFolder,
                             outputDir,
-                            useLegacyWorkflow))
+                            useLegacyWorkflow,
+                            versionedConfig.gatkJarUri))
                     .methodConfigVersion(versionedConfig.methodRepoVersion)
                     .methodRepoMethod(createRepoMethodParameter(versionedConfig))
                     .name(extractionUuid)
