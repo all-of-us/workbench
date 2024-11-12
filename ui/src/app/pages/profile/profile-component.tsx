@@ -556,6 +556,9 @@ export const ProfileComponent = fp.flow(
                     <InitialCreditsPanel
                       freeTierUsage={profile.freeTierUsage}
                       freeTierDollarQuota={profile.freeTierDollarQuota}
+                      expirationDate={
+                        profile.initialCreditsExpirationEpochMillis
+                      }
                     />
                   )}
                 </div>

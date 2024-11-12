@@ -3,32 +3,43 @@ import * as React from 'react';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { AoU } from 'app/components/text-wrappers';
 import { formatInitialCreditsUSD } from 'app/utils';
+import { displayDateWithoutHours } from 'app/utils/dates';
 
 import { styles } from './profile-styles';
 
 interface Props {
   freeTierUsage: number;
   freeTierDollarQuota: number;
+  expirationDate: number;
 }
-export const InitialCreditsPanel = (props: Props) => (
-  <FlexRow style={styles.initialCreditsBox}>
-    <FlexColumn style={{ marginLeft: '1.2rem' }}>
-      <div style={{ marginTop: '0.6rem' }}>
-        <AoU /> initial credits used:
-      </div>
-      <div>
-        Remaining <AoU /> initial credits:
-      </div>
-    </FlexColumn>
-    <FlexColumn style={{ alignItems: 'flex-end', marginLeft: '1.5rem' }}>
-      <div style={{ marginTop: '0.6rem', fontWeight: 600 }}>
-        {formatInitialCreditsUSD(props.freeTierUsage)}
-      </div>
-      <div style={{ fontWeight: 600 }}>
-        {formatInitialCreditsUSD(
-          props.freeTierDollarQuota - (props.freeTierUsage ?? 0)
+export const InitialCreditsPanel = (props: Props) => {
+  const { expirationDate, freeTierUsage, freeTierDollarQuota } = props;
+  return (
+    <FlexRow style={styles.initialCreditsBox}>
+      <FlexColumn>
+        <div>
+          <AoU /> initial credits used:
+        </div>
+        <div>
+          Remaining <AoU /> initial credits:
+        </div>
+        {expirationDate && (
+          <div>
+            <AoU /> initial credits epiration date:
+          </div>
         )}
-      </div>
-    </FlexColumn>
-  </FlexRow>
-);
+      </FlexColumn>
+      <FlexColumn style={{ flex: 1, alignItems: 'flex-end' }}>
+        <div style={{ fontWeight: 600 }}>
+          {formatInitialCreditsUSD(freeTierUsage)}
+        </div>
+        <div style={{ fontWeight: 600 }}>
+          {formatInitialCreditsUSD(freeTierDollarQuota - (freeTierUsage ?? 0))}
+        </div>
+        <div style={{ fontWeight: 600 }}>
+          {displayDateWithoutHours(expirationDate)}
+        </div>
+      </FlexColumn>
+    </FlexRow>
+  );
+};
