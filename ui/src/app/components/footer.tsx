@@ -177,13 +177,13 @@ const WorkbenchFooter = withUserProfile()(
                     Home
                   </FooterAnchorTag>
                   <FooterAnchorTag
-                    href='library'
+                    href='/library'
                     analyticsFn={tracker.FeaturedWorkspaces}
                   >
                     Featured Workspaces
                   </FooterAnchorTag>
                   <FooterAnchorTag
-                    href='workspaces'
+                    href='/workspaces'
                     analyticsFn={tracker.YourWorkspaces}
                   >
                     Your Workspaces
