@@ -1000,7 +1000,7 @@ public class InitialCreditsServiceTest {
         assertThrows(
             WorkbenchException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals("User does not have initial credits expiration set.", exception.getMessage());
+    assertEquals("User does not have initial credits expiration set, so they cannot extend their expiration date.", exception.getMessage());
   }
 
   @Test
@@ -1024,7 +1024,68 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void test_extendInitialCreditsExpiration_notYetExtended() {
+  public void test_extendInitialCreditsExpiration_institutionallyBypassed() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setExtensionTime(null)
+                        .setBypassed(false)));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
+
+    WorkbenchException exception =
+        assertThrows(
+            WorkbenchException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.",
+        exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_individuallyBypassed() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setExtensionTime(null)
+                        .setBypassed(true)));
+
+    WorkbenchException exception =
+        assertThrows(
+            WorkbenchException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.",
+        exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_notYetExtendedOutsideWindow() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(BEFORE_WARNING_PERIOD)
+                        .setExtensionTime(null)
+                        .setBypassed(false)));
+
+    WorkbenchException exception =
+        assertThrows(
+            WorkbenchException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User's initial credits are not close enough to their expiration date to be extended.",
+        exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_notYetExtendedWithinWindow() {
     DbUser user =
         spyUserDao.save(
             new DbUser()
