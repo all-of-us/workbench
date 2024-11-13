@@ -157,9 +157,6 @@ export const withAnalysisConfigDefaults = (
     dataprocConfig,
     zone,
   } = r;
-  console.log('withAnalysisConfigDefaults disk', existingPersistentDisk);
-  console.log('withAnalysisConfigDefaults type', r.computeType);
-  console.log('withAnalysisConfigDefaults diskConfig', r.diskConfig);
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
   // For computeType Standard: We are moving away from storage disk as Standard
@@ -174,7 +171,6 @@ export const withAnalysisConfigDefaults = (
       detachable = true;
       size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
       if (canUseExistingDisk(r.diskConfig, existingPersistentDisk)) {
-        console.log('canUseExistingDisk yes', existingPersistentDisk.name);
         existingDiskName = existingPersistentDisk.name;
       }
     }

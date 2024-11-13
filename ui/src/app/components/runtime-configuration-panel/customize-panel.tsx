@@ -214,8 +214,6 @@ export const CustomizePanel = ({
                 options={[ComputeType.Standard, ComputeType.Dataproc]}
                 value={analysisConfig.computeType || ComputeType.Standard}
                 onChange={({ value: computeType }) => {
-                  console.log('computeType', computeType);
-
                   // When the compute type changes, we need to normalize the config and potentially restore defaults.
 
                   // when switching from DataProc to Standard, associate any existing disk
