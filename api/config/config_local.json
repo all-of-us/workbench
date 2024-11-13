@@ -185,5 +185,10 @@
   },
   "banner": {
     "enableLoginIssueBanner": false
+  },
+  "vwb": {
+    "wsmBaseUrl": "https:\/\/terra-devel-wsm.api.verily.com",
+    "organizationId": "79775c0a-3bf7-436a-8ab8-eab316998115",
+    "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b"
   }
 }

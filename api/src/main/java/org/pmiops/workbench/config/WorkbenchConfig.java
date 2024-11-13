@@ -41,6 +41,7 @@ public class WorkbenchConfig {
   public TermsOfServiceConfig termsOfService;
   public ArtifactRegistryConfig artifactRegistry;
   public BannerConfig banner;
+  public VwbConfig vwb;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -76,6 +77,7 @@ public class WorkbenchConfig {
     config.e2eTestUsers = new E2ETestUserConfig();
     config.termsOfService = new TermsOfServiceConfig();
     config.artifactRegistry = new ArtifactRegistryConfig();
+    config.vwb = new VwbConfig();
     return config;
   }
 
@@ -465,5 +467,12 @@ public class WorkbenchConfig {
 
   public static class BannerConfig {
     public boolean enableLoginIssueBanner;
+  }
+
+  public static class VwbConfig {
+    public String wsmBaseUrl;
+    public String organizationId;
+    // This will only be used for preview release, later on, each user will have their own pod.
+    public String defaultPodId;
   }
 }
