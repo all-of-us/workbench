@@ -1005,7 +1005,7 @@ public class InitialCreditsServiceTest {
     DbUser user = spyUserDao.save(new DbUser().setUserInitialCreditsExpiration(
         new DbUserInitialCreditsExpiration()
             .setExpirationTime(DURING_WARNING_PERIOD)
-            .setExtensionDate(DURING_WARNING_PERIOD)
+            .setExtensionTime(DURING_WARNING_PERIOD)
             .setBypassed(false)));
 
     WorkbenchException exception = assertThrows(WorkbenchException.class, ()-> initialCreditsService.extendInitialCreditsExpiration(user));
@@ -1018,14 +1018,14 @@ public class InitialCreditsServiceTest {
         new DbUserInitialCreditsExpiration()
             .setCreditStartTime(BEFORE_WARNING_PERIOD)
             .setExpirationTime(DURING_WARNING_PERIOD)
-            .setExtensionDate(null)
+            .setExtensionTime(null)
             .setBypassed(false)));
 
     initialCreditsService.extendInitialCreditsExpiration(user);
     DbUserInitialCreditsExpiration actualExpirationRecord = user.getUserInitialCreditsExpiration();
     Timestamp expectedExtensionDate = Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
     assertEquals(actualExpirationRecord.getExpirationTime(),expectedExtensionDate);
-    assertEquals(actualExpirationRecord.getExtensionDate(),NOW);
+    assertEquals(actualExpirationRecord.getExtensionTime(),NOW);
   }
 
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {

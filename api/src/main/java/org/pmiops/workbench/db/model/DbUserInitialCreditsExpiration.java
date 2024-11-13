@@ -21,7 +21,7 @@ public class DbUserInitialCreditsExpiration {
   private Timestamp approachingExpirationNotificationTime;
   private Timestamp expirationCleanupTime;
   private boolean bypassed;
-  private Timestamp extensionDate;
+  private Timestamp extensionTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -76,13 +76,13 @@ public class DbUserInitialCreditsExpiration {
     return this;
   }
 
-  @Column(name = "extension_date")
-  public Timestamp getExtensionDate() {
-    return extensionDate;
+  @Column(name = "extension_time")
+  public Timestamp getExtensionTime() {
+    return extensionTime;
   }
 
-  public DbUserInitialCreditsExpiration setExtensionDate(Timestamp extensionDate) {
-    this.extensionDate = extensionDate;
+  public DbUserInitialCreditsExpiration setExtensionTime(Timestamp extensionDate) {
+    this.extensionTime = extensionDate;
     return this;
   }
 
