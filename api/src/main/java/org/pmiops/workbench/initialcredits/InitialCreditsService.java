@@ -343,7 +343,7 @@ public class InitialCreditsService {
     if (userInitialCreditsExpiration == null) {
       throw new WorkbenchException("User does not have initial credits expiration set.");
     }
-    if (userInitialCreditsExpiration.getExtensionCount() != 0) {
+    if (userInitialCreditsExpiration.getExtensionDate() != null) {
       throw new WorkbenchException(
           "User has already extended their initial credits expiration and cannot extend further.");
     }
@@ -352,8 +352,7 @@ public class InitialCreditsService {
             userInitialCreditsExpiration.getCreditStartTime().getTime()
                 + TimeUnit.DAYS.toMillis(
                     workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
-    userInitialCreditsExpiration.setExtensionCount(
-        userInitialCreditsExpiration.getExtensionCount() + 1);
+    userInitialCreditsExpiration.setExtensionDate(clockNow());
     userDao.save(user);
   }
 
