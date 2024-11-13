@@ -1,10 +1,12 @@
 import * as React from 'react';
 
-import { Button } from 'app/components/buttons';
+import { Button, StyledExternalLink } from 'app/components/buttons';
+import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { AoU } from 'app/components/text-wrappers';
 import { formatInitialCreditsUSD } from 'app/utils';
 import { displayDateWithoutHours } from 'app/utils/dates';
+import { supportUrls } from 'app/utils/zendesk';
 
 import { styles } from './profile-styles';
 
@@ -14,6 +16,8 @@ interface Props {
   expirationDate: number;
 }
 export const InitialCreditsPanel = (props: Props) => {
+  const [showExtendInitialCreditsModal, setShowExtendInitialCreditsModal] =
+    React.useState(false);
   const { expirationDate, freeTierUsage, freeTierDollarQuota } = props;
   return (
     <div style={styles.initialCreditsBox}>
@@ -52,24 +56,24 @@ export const InitialCreditsPanel = (props: Props) => {
           <Button
             type='primarySmall'
             style={{ marginTop: '1rem' }}
-            onClick={() => console.log('Out of hand')}
+            onClick={() => setShowExtendInitialCreditsModal(true)}
           >
             Request credit extension
           </Button>
+          {showExtendInitialCreditsModal && (
+            <ExtendInitialCreditsModal
+              onClose={() => setShowExtendInitialCreditsModal(false)}
+            />
+          )}
         </FlexRow>
       )}
       <FlexRow>
-        <Button
-          style={{
-            maxWidth: 'none',
-            padding: '0',
-            textTransform: 'none',
-          }}
-          type='link'
-          onClick={() => console.log('Come on love')}
+        <StyledExternalLink
+          href={supportUrls.initialCredits}
+          style={{ marginTop: '1rem' }}
         >
           Learn more about credits & setting up a billing account
-        </Button>
+        </StyledExternalLink>
       </FlexRow>
     </div>
   );
