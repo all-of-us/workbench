@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useState } from 'react';
 
+import { Profile } from 'generated/fetch';
+
 import { Button, StyledExternalLink } from 'app/components/buttons';
 import {
   Modal,
@@ -11,6 +13,7 @@ import {
 import { Spinner } from 'app/components/spinners';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { displayDateWithoutHours } from 'app/utils/dates';
 import { notificationStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 
@@ -34,24 +37,37 @@ export const ExtendInitialCreditsModal = ({ onClose }: Props) => {
   const [saving, setSaving] = useState(false); // saving refers to the loading request time
 
   const onRequestExtension = () => {
+    let updatedProfile: Profile;
     setSaving(true);
     profileApi()
       .extendInitialCreditExpiration()
-      .then(() => {
+      .then((profileResponse) => {
+        updatedProfile = profileResponse;
         notificationStore.set({
           title: 'Initial credits extended',
-          message: 'Initial credits will now expire on X',
+          message:
+            'Initial credits will now expire on ' +
+            displayDateWithoutHours(
+              profileResponse.initialCreditsExpirationEpochMillis
+            ),
         });
       })
       .catch((error: Response) => {
-        error.json().then((errorJson) =>
+        if (typeof error.json === 'function') {
+          error.json().then((errorJson) =>
+            notificationStore.set({
+              title: 'Error extending Initial credits',
+              message: errorJson?.message,
+            })
+          );
+        } else {
           notificationStore.set({
             title: 'Error extending Initial credits',
-            message: errorJson?.message,
-          })
-        );
+            message: error.toString(),
+          });
+        }
       })
-      .finally(() => onClose());
+      .finally(() => onClose(updatedProfile));
   };
 
   return (

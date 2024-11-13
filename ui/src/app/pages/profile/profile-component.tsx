@@ -552,12 +552,21 @@ export const ProfileComponent = fp.flow(
                 <div style={{ marginLeft: '1.5rem' }}>
                   <div style={styles.title}>Initial credits balance</div>
                   <hr style={{ ...styles.verticalLine }} />
-                  {profile && (
+                  {currentProfile && (
                     <InitialCreditsPanel
-                      freeTierUsage={profile.freeTierUsage}
-                      freeTierDollarQuota={profile.freeTierDollarQuota}
+                      freeTierUsage={currentProfile.freeTierUsage}
+                      freeTierDollarQuota={currentProfile.freeTierDollarQuota}
                       expirationDate={
-                        profile.initialCreditsExpirationEpochMillis
+                        currentProfile.initialCreditsExpirationEpochMillis
+                      }
+                      updateInitialCredits={(updatedExpiration: number) =>
+                        this.setState({
+                          currentProfile: {
+                            ...currentProfile,
+                            initialCreditsExpirationEpochMillis:
+                              updatedExpiration,
+                          },
+                        })
                       }
                     />
                   )}

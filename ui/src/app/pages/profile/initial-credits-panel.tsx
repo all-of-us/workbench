@@ -14,11 +14,17 @@ interface Props {
   freeTierUsage: number;
   freeTierDollarQuota: number;
   expirationDate: number;
+  updateInitialCredits: Function;
 }
 export const InitialCreditsPanel = (props: Props) => {
   const [showExtendInitialCreditsModal, setShowExtendInitialCreditsModal] =
     React.useState(false);
-  const { expirationDate, freeTierUsage, freeTierDollarQuota } = props;
+  const {
+    expirationDate,
+    freeTierUsage,
+    freeTierDollarQuota,
+    updateInitialCredits,
+  } = props;
   return (
     <div style={styles.initialCreditsBox}>
       <FlexRow>
@@ -62,7 +68,14 @@ export const InitialCreditsPanel = (props: Props) => {
           </Button>
           {showExtendInitialCreditsModal && (
             <ExtendInitialCreditsModal
-              onClose={() => setShowExtendInitialCreditsModal(false)}
+              onClose={(updatedProfile) => {
+                if (updatedProfile) {
+                  updateInitialCredits(
+                    updatedProfile.initialCreditsExpirationEpochMillis
+                  );
+                }
+                setShowExtendInitialCreditsModal(false);
+              }}
             />
           )}
         </FlexRow>
