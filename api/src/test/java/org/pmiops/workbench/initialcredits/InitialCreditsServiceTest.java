@@ -3,6 +3,7 @@ package org.pmiops.workbench.initialcredits;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -60,6 +61,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpiryTaskMatchers.UserListMatcher;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -988,6 +990,42 @@ public class InitialCreditsServiceTest {
             false,
             null,
             NOW));
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_noExpirationRecord() {
+    DbUser user = spyUserDao.save(new DbUser());
+
+    WorkbenchException exception = assertThrows(WorkbenchException.class, ()-> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals("User does not have initial credits expiration set.", exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_alreadyExtended() {
+    DbUser user = spyUserDao.save(new DbUser().setUserInitialCreditsExpiration(
+        new DbUserInitialCreditsExpiration()
+            .setExpirationTime(DURING_WARNING_PERIOD)
+            .setExtensionDate(DURING_WARNING_PERIOD)
+            .setBypassed(false)));
+
+    WorkbenchException exception = assertThrows(WorkbenchException.class, ()-> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals("User has already extended their initial credits expiration and cannot extend further.", exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_notYetExtended() {
+    DbUser user = spyUserDao.save(new DbUser().setUserInitialCreditsExpiration(
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(BEFORE_WARNING_PERIOD)
+            .setExpirationTime(DURING_WARNING_PERIOD)
+            .setExtensionDate(null)
+            .setBypassed(false)));
+
+    initialCreditsService.extendInitialCreditsExpiration(user);
+    DbUserInitialCreditsExpiration actualExpirationRecord = user.getUserInitialCreditsExpiration();
+    Timestamp expectedExtensionDate = Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
+    assertEquals(actualExpirationRecord.getExpirationTime(),expectedExtensionDate);
+    assertEquals(actualExpirationRecord.getExtensionDate(),NOW);
   }
 
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {
