@@ -152,7 +152,7 @@ public class AccessSyncServiceTest {
             .setCreditStartTime(new Timestamp(now.toEpochMilli()))
             .setExpirationTime(new Timestamp(now.toEpochMilli() + TimeUnit.DAYS.toMillis(57L)))
             .setBypassed(false)
-            .setExtensionDate(null);
+            .setExtensionTime(null);
     dbUser.setUserInitialCreditsExpiration(existingExpiration);
 
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);

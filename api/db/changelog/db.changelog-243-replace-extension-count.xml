@@ -7,7 +7,7 @@
   <changeSet author="evrii" id="db.changelog-243-replace-extension-count">
     <dropColumn tableName="user_initial_credits_expiration" columnName="extension_count"/>
     <addColumn tableName="user_initial_credits_expiration">
-      <column name="extension_date" type="datetime"/>
+      <column name="extension_time" type="datetime"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>
