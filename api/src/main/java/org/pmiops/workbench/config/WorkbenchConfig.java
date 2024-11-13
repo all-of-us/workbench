@@ -326,6 +326,9 @@ public class WorkbenchConfig {
     // If true, prevents users from taking compliance training, however
     // the training is still required if enableComplianceTraining is true.
     public boolean blockComplianceTraining;
+
+    // If true, users will be able to create workspace in VWB
+    public boolean enableVWBWorkspaceCreation;
   }
 
   public static class ActionAuditConfig {
