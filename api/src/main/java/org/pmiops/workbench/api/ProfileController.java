@@ -545,8 +545,8 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> extendInitialCreditExpiration() {
-    initialCreditsService.extendInitialCreditsExpiration(userProvider.get());
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<Profile> extendInitialCreditExpiration() {
+    DbUser dbUser = initialCreditsService.extendInitialCreditsExpiration(userProvider.get());
+    return ResponseEntity.ok(profileService.getProfile(dbUser));
   }
 }

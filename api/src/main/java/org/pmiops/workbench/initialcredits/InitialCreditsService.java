@@ -337,7 +337,7 @@ public class InitialCreditsService {
     userInitialCreditsExpiration.setBypassed(isBypassed);
   }
 
-  public void extendInitialCreditsExpiration(DbUser user) {
+  public DbUser extendInitialCreditsExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     if (userInitialCreditsExpiration == null) {
@@ -355,6 +355,7 @@ public class InitialCreditsService {
     userInitialCreditsExpiration.setExtensionCount(
         userInitialCreditsExpiration.getExtensionCount() + 1);
     userDao.save(user);
+    return user;
   }
 
   private void checkExpiration(DbUser user) {

@@ -374,9 +374,12 @@ paths:
       description: User requests extension of initial credit expiration period
       operationId: extendInitialCreditExpiration
       responses:
-        204:
-          description: The user's initial credit expiration period has been extended.
-          content: {}
+        200:
+          description: The user's initial credit expiration period has been extended. This response is the updated profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
         500:
           description: Internal Error
           content:
