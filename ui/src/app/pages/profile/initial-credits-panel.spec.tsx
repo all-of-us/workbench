@@ -13,10 +13,16 @@ const setup = (
   freeTierDollarQuota: number,
   expirationDate: number
 ) => {
+  const updateInitialCredits = jest.fn();
   return {
     container: render(
       <InitialCreditsPanel
-        {...{ freeTierUsage, freeTierDollarQuota, expirationDate }}
+        {...{
+          freeTierUsage,
+          freeTierDollarQuota,
+          expirationDate,
+          updateInitialCredits,
+        }}
       />
     ).container,
     user: userEvent.setup(),
