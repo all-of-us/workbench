@@ -336,6 +336,8 @@ export const useCustomRuntime = (
         );
 
         if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
+          console.log('Updating disk in place');
+          console.log('mostSevereDiff', mostSevereDiff);
           await updateRuntimeAndInitializeLeoRuntime();
         }
         if (mostSevereDiff === AnalysisDiffState.NEEDS_DELETE) {
@@ -358,6 +360,7 @@ export const useCustomRuntime = (
             runtime.status === RuntimeStatus.RUNNING ||
             runtime.status === RuntimeStatus.STOPPED
           ) {
+            console.log('Updating runtime');
             await updateRuntimeAndInitializeLeoRuntime();
           }
         }

@@ -112,13 +112,10 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
 export const canUseExistingDisk = (
   { detachableType, size }: Partial<DiskConfig>,
   existingDisk: Disk | null
-) => {
-  return (
-    !!existingDisk &&
-    (!detachableType || detachableType === existingDisk.diskType) &&
-    size >= existingDisk.size
-  );
-};
+) =>
+  !!existingDisk &&
+  (!detachableType || detachableType === existingDisk.diskType) &&
+  size >= existingDisk.size;
 
 export const maybeWithExistingDiskName = (
   c: Omit<DiskConfig, 'existingDiskName'>,
@@ -160,6 +157,9 @@ export const withAnalysisConfigDefaults = (
     dataprocConfig,
     zone,
   } = r;
+  console.log('withAnalysisConfigDefaults disk', existingPersistentDisk);
+  console.log('withAnalysisConfigDefaults type', r.computeType);
+  console.log('withAnalysisConfigDefaults diskConfig', r.diskConfig);
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
   // For computeType Standard: We are moving away from storage disk as Standard
@@ -167,19 +167,16 @@ export const withAnalysisConfigDefaults = (
   // Eventually we will be removing this option altogether
   if (computeType === ComputeType.Standard) {
     zone ??= serverConfigStore.get().config.defaultGceVmZone;
+    detachableType ??= existingPersistentDisk?.diskType ?? DiskType.STANDARD;
+    detachable = true;
     if (existingPersistentDisk) {
       zone = existingPersistentDisk.zone;
       detachable = true;
       size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
-      detachableType =
-        detachableType ?? existingPersistentDisk?.diskType ?? DiskType.STANDARD;
       if (canUseExistingDisk(r.diskConfig, existingPersistentDisk)) {
+        console.log('canUseExistingDisk yes', existingPersistentDisk.name);
         existingDiskName = existingPersistentDisk.name;
       }
-    } else {
-      // No existing disk.
-      detachableType = DiskType.STANDARD;
-      detachable = true;
     }
   } else if (computeType === ComputeType.Dataproc) {
     detachable = false;
