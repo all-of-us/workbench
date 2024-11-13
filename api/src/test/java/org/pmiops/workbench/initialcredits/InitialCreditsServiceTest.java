@@ -996,36 +996,51 @@ public class InitialCreditsServiceTest {
   public void test_extendInitialCreditsExpiration_noExpirationRecord() {
     DbUser user = spyUserDao.save(new DbUser());
 
-    WorkbenchException exception = assertThrows(WorkbenchException.class, ()-> initialCreditsService.extendInitialCreditsExpiration(user));
+    WorkbenchException exception =
+        assertThrows(
+            WorkbenchException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
     assertEquals("User does not have initial credits expiration set.", exception.getMessage());
   }
 
   @Test
   public void test_extendInitialCreditsExpiration_alreadyExtended() {
-    DbUser user = spyUserDao.save(new DbUser().setUserInitialCreditsExpiration(
-        new DbUserInitialCreditsExpiration()
-            .setExpirationTime(DURING_WARNING_PERIOD)
-            .setExtensionTime(DURING_WARNING_PERIOD)
-            .setBypassed(false)));
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setExtensionTime(DURING_WARNING_PERIOD)
+                        .setBypassed(false)));
 
-    WorkbenchException exception = assertThrows(WorkbenchException.class, ()-> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals("User has already extended their initial credits expiration and cannot extend further.", exception.getMessage());
+    WorkbenchException exception =
+        assertThrows(
+            WorkbenchException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User has already extended their initial credits expiration and cannot extend further.",
+        exception.getMessage());
   }
 
   @Test
   public void test_extendInitialCreditsExpiration_notYetExtended() {
-    DbUser user = spyUserDao.save(new DbUser().setUserInitialCreditsExpiration(
-        new DbUserInitialCreditsExpiration()
-            .setCreditStartTime(BEFORE_WARNING_PERIOD)
-            .setExpirationTime(DURING_WARNING_PERIOD)
-            .setExtensionTime(null)
-            .setBypassed(false)));
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setCreditStartTime(BEFORE_WARNING_PERIOD)
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setExtensionTime(null)
+                        .setBypassed(false)));
 
     initialCreditsService.extendInitialCreditsExpiration(user);
     DbUserInitialCreditsExpiration actualExpirationRecord = user.getUserInitialCreditsExpiration();
-    Timestamp expectedExtensionDate = Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
-    assertEquals(actualExpirationRecord.getExpirationTime(),expectedExtensionDate);
-    assertEquals(actualExpirationRecord.getExtensionTime(),NOW);
+    Timestamp expectedExtensionDate =
+        Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
+    assertEquals(actualExpirationRecord.getExpirationTime(), expectedExtensionDate);
+    assertEquals(actualExpirationRecord.getExtensionTime(), NOW);
   }
 
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {
