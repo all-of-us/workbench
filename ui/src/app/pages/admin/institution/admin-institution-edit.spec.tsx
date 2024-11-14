@@ -578,10 +578,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should allow updating bypassInitialCreditsExpiration from false to true', async () => {
-    component();
+    component(BROAD.shortName);
     await waitForNoSpinner();
 
-    // VERILY inst starts with bypassInitialCreditsExpiration = false
+    // BROAD inst starts with bypassInitialCreditsExpiration = false
 
     const bypassToggle = screen.getByRole('switch', {
       name: 'Initial Credits Expiration Bypass',
@@ -597,10 +597,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should allow updating bypassInitialCreditsExpiration from true to false', async () => {
-    component(BROAD.shortName);
+    component(VERILY.shortName);
     await waitForNoSpinner();
 
-    // BROAD inst starts with bypassInitialCreditsExpiration = true
+    // VERILY inst starts with bypassInitialCreditsExpiration = true
 
     const bypassToggle = screen.getByRole('switch', {
       name: 'Initial Credits Expiration Bypass',
