@@ -14,7 +14,7 @@ import { Spinner } from 'app/components/spinners';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { displayDateWithoutHours } from 'app/utils/dates';
-import { notificationStore } from 'app/utils/stores';
+import { notificationStore, serverConfigStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 
 import { AoU } from './text-wrappers';
@@ -25,8 +25,9 @@ interface Props {
 
 const ExtensionDescription = () => (
   <div>
-    Initial credits provided by the <AoU /> Research Program expire after X
-    days. You are eligible to request an extension.
+    Initial credits provided by the <AoU /> Research Program expire after{' '}
+    {serverConfigStore.get().config.initialCreditsValidityPeriodDays} days. You
+    are eligible to request an extension.
     <StyledExternalLink href={supportUrls.initialCredits}>
       Learn more about credits & setting up a billing account
     </StyledExternalLink>
