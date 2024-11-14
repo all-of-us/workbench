@@ -341,15 +341,18 @@ public class InitialCreditsService {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     if (userInitialCreditsExpiration == null) {
-      throw new WorkbenchException("User does not have initial credits expiration set, so they cannot extend their expiration date.");
+      throw new WorkbenchException(
+          "User does not have initial credits expiration set, so they cannot extend their expiration date.");
     }
 
-    if(institutionService.shouldBypassForCreditsExpiration(user)) {
-      throw new WorkbenchException("User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.");
+    if (institutionService.shouldBypassForCreditsExpiration(user)) {
+      throw new WorkbenchException(
+          "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.");
     }
 
-    if(userInitialCreditsExpiration.isBypassed()) {
-      throw new WorkbenchException("User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.");
+    if (userInitialCreditsExpiration.isBypassed()) {
+      throw new WorkbenchException(
+          "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.");
     }
 
     if (userInitialCreditsExpiration.getExtensionTime() != null) {
