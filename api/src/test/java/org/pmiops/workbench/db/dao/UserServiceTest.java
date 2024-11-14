@@ -149,7 +149,7 @@ public class UserServiceTest {
                     START_INSTANT.plus(
                         providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays,
                         ChronoUnit.DAYS)))
-            .setExtensionCount(0);
+            .setExtensionTime(null);
 
     DbUser user = new DbUser();
     user.setUsername(USERNAME);
