@@ -239,7 +239,8 @@ const InitialCreditsCard = ({
               }
             />
           )}
-          {!institution?.institutionalInitialCreditsExpirationBypassed &&
+          {enableInitialCreditsExpiration &&
+            !institution?.institutionalInitialCreditsExpirationBypassed &&
             oldProfile.initialCreditsExtensionEpochMillis && (
               <p style={{ color: colors.primary, fontWeight: 500 }}>
                 User requested an extension on{' '}
