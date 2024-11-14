@@ -225,7 +225,7 @@ export const CustomizePanel = ({
                           // when switching from DataProc to Standard, set to the size of any existing disk
                           size:
                             (computeType === ComputeType.Standard &&
-                              gcePersistentDisk?.size) ??
+                              gcePersistentDisk?.size) ||
                             analysisConfig.diskConfig.size,
                         },
                       },
