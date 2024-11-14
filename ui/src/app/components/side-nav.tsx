@@ -337,7 +337,7 @@ export const SideNav = (props: SideNavProps) => {
         icon='star'
         content='Featured Workspaces'
         onToggleSideNav={() => onToggleSideNav()}
-        href={'/library'}
+        href='/library'
         active={libraryActive()}
         disabled={!hasRegisteredTierAccess(profile)}
       />
@@ -407,7 +407,7 @@ export const SideNav = (props: SideNavProps) => {
           <SideNavItem
             content='Workspaces'
             onToggleSideNav={() => onToggleSideNav()}
-            href='admin/workspaces'
+            href='/admin/workspaces'
             active={workspaceAdminActive()}
           />
         )}

@@ -47,15 +47,22 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionpreprod",
     "operationalTerraWorkspaceBucket": "fc-5d8e6afe-9429-44ae-a22a-67b09705d1b4",
     "extractionDestinationDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_destination",
-    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true,
     "legacyVersions": {
+      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-preprod",
       "methodName": "GvsExtractCohortFromSampleNames",
       "methodRepoVersion": 5,
       "methodLogicalVersion": 3,
       "minExtractionScatterTasks": 350,
       "extractionScatterTasksPerSample": 4
+    },
+    "cdrv8plus": {
+      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-after_master_merge-177-gbd0a99c-SNAPSHOT-local.jar",
+      "methodNamespace": "aouwgscohortextraction-preprod",
+      "methodName": "GvsExtractCohortFromSampleNamesV8",
+      "methodRepoVersion": 1,
+      "methodLogicalVersion": 1
     }
   },
   "cdr": {
@@ -119,7 +126,8 @@
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": false,
-    "blockComplianceTraining": false
+    "blockComplianceTraining": false,
+    "enableVWBWorkspaceCreation": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",

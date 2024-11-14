@@ -48,9 +48,9 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionstaging",
     "operationalTerraWorkspaceBucket": "fc-c143d305-0ffd-4ca5-b585-9b222691da6c",
     "extractionDestinationDataset": "fc-aou-cdr-staging-ct.wgs_extraction_destination",
-    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true,
     "legacyVersions": {
+      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-staging",
       "methodName": "GvsExtractCohortFromSampleNames",
       "methodRepoVersion": 5,
@@ -120,7 +120,8 @@
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
-    "blockComplianceTraining": false
+    "blockComplianceTraining": false,
+    "enableVWBWorkspaceCreation": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
