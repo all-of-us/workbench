@@ -37,6 +37,7 @@ import {
   hasAuthorityForAction,
   renderIfAuthorized,
 } from 'app/utils/authorities';
+import { formatDate } from 'app/utils/dates';
 import {
   checkInstitutionalEmail,
   getEmailValidationErrorMessage,
@@ -236,7 +237,12 @@ const InitialCreditsCard = ({
               !!institution?.institutionalInitialCreditsExpirationBypassed
             }
           />
-
+          {oldProfile.initialCreditsExtensionEpochMillis && (
+            <p style={{ color: colors.primary, fontWeight: 500 }}>
+              User requested an extension on{' '}
+              {formatDate(oldProfile.initialCreditsExtensionEpochMillis, '-')}
+            </p>
+          )}
           <FlexColumn>
             {enableInitialCreditsExpiration && (
               <InitialCreditBypassSwitch
