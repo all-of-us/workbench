@@ -34,7 +34,7 @@ const ExtensionDescription = ({ expirationDate }) => {
       Initial credits provided by the <AoU /> Research Program expire after{' '}
       {initialCreditsValidityPeriodDays} days. You are eligible to request an
       extension within {initialCreditsExpirationWarningDays} days of your
-      current expiration date ({displayDateWithoutHours(expirationDate)}).
+      current expiration date on {displayDateWithoutHours(expirationDate)}.
       <StyledExternalLink
         href={supportUrls.initialCredits}
         style={{ marginTop: '1rem' }}
