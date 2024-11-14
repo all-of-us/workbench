@@ -232,6 +232,7 @@
       "cdrDbName": "r_2024q3_6",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
+      "hasFitbitDeviceData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered"
@@ -249,6 +250,7 @@
       "cdrDbName": "c_2024q3_6",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
+      "hasFitbitDeviceData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "controlled",
