@@ -6983,6 +6983,15 @@ components:
           type: boolean
           default: false
           description: If true, allow for user's initial credits to expire.
+        initialCreditsValidityPeriodDays:
+          type: integer
+          description: The number of days that a user's initial credits are valid for.
+        initialCreditsExtensionPeriodDays:
+          type: integer
+          description: The number of days that a user's initial credits can be extended for.
+        initialCreditsExpirationWarningDays:
+          type: integer
+          description: The number of days before a user's initial credits expire that they will receive a warning.
         blockComplianceTraining:
           type: boolean
           description: Whether users are prevented from accessing the Compliance Training
