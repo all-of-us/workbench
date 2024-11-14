@@ -56,6 +56,13 @@
       "methodLogicalVersion": 3,
       "minExtractionScatterTasks": 350,
       "extractionScatterTasksPerSample": 4
+    },
+    "cdrv8plus": {
+      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-after_master_merge-177-gbd0a99c-SNAPSHOT-local.jar",
+      "methodNamespace": "aouwgscohortextraction-preprod",
+      "methodName": "echo-prototyping",
+      "methodRepoVersion": 2,
+      "methodLogicalVersion": 1
     }
   },
   "cdr": {
