@@ -377,8 +377,8 @@ paths:
         204:
           description: The user's initial credit expiration period has been extended.
           content: {}
-        500:
-          description: Internal Error
+        400:
+          description: Bad request
           content:
             application/json:
               schema:
