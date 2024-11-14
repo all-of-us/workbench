@@ -8514,6 +8514,10 @@ components:
           type: integer
           description: Timestamp indicating when the user's initial credits will expire, if applicable
           format: int64
+        initialCreditsExtensionEpochMillis:
+          type: integer
+          description: Timestamp indicating when the user requested their initial credits expiration to be extended, if applicable
+          format: int64
         initialCreditsExpirationBypassed:
           type: boolean
           default: false
