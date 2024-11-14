@@ -151,7 +151,7 @@ describe(useCustomRuntime.name, () => {
     });
   });
 
-  it('should allow Dataproc -> PD transition', async () => {
+  it('should allow Dataproc -> GCE transition', async () => {
     currentRuntime = defaultDataProcRuntime();
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,

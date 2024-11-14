@@ -151,15 +151,18 @@ describe(CustomizePanel.name, () => {
     });
   });
 
-  it('allows changing the ComputeType from Dataproc to Standard', async () => {
+  it('allows changing the ComputeType from Dataproc to Standard when no PD exists', async () => {
     const analysisConfig = {
       ...defaultAnalysisConfig,
       computeType: ComputeType.Dataproc,
     };
     const user = userEvent.setup();
+    const gcePersistentDisk = undefined;
+
     const { container } = await component({
       analysisConfig,
       allowDataproc: true,
+      gcePersistentDisk,
     });
 
     const standardOption = await getDropdownOption(
@@ -173,7 +176,49 @@ describe(CustomizePanel.name, () => {
       expect(setAnalysisConfig).toHaveBeenCalledWith(
         withAnalysisConfigDefaults(
           { ...analysisConfig, computeType: ComputeType.Standard },
-          stubDisk()
+          gcePersistentDisk
+        )
+      );
+    });
+  });
+
+  it('allows changing the ComputeType from Dataproc to Standard when a PD exists', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Dataproc,
+    };
+    const user = userEvent.setup();
+
+    const name = 'existing-disk-name';
+    const size = 234;
+    const gcePersistentDisk = { ...stubDisk(), name, size };
+
+    const { container } = await component({
+      analysisConfig,
+      allowDataproc: true,
+      gcePersistentDisk,
+    });
+
+    const standardOption = await getDropdownOption(
+      container,
+      'runtime-compute',
+      ComputeType.Standard,
+      2
+    );
+    user.click(standardOption);
+    await waitFor(() => {
+      expect(setAnalysisConfig).toHaveBeenCalledWith(
+        withAnalysisConfigDefaults(
+          {
+            ...analysisConfig,
+            computeType: ComputeType.Standard,
+            diskConfig: {
+              ...analysisConfig.diskConfig,
+              size: gcePersistentDisk.size,
+              existingDiskName: gcePersistentDisk.name,
+            },
+          },
+          gcePersistentDisk
         )
       );
     });
