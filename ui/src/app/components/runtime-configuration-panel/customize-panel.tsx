@@ -213,25 +213,26 @@ export const CustomizePanel = ({
                 style={{ width: '15rem' }}
                 options={[ComputeType.Standard, ComputeType.Dataproc]}
                 value={analysisConfig.computeType || ComputeType.Standard}
-                onChange={({ value: computeType }) => {
+                onChange={({ value: computeType }) =>
                   // When the compute type changes, we need to normalize the config and potentially restore defaults.
-
-                  // when switching from DataProc to Standard, associate any existing disk
-                  const diskConfig = {
-                    ...analysisConfig.diskConfig,
-                    size:
-                      computeType === ComputeType.Standard && gcePersistentDisk
-                        ? gcePersistentDisk.size
-                        : analysisConfig.diskConfig.size,
-                  };
-
                   setAnalysisConfig(
                     withAnalysisConfigDefaults(
-                      { ...analysisConfig, computeType, diskConfig },
+                      {
+                        ...analysisConfig,
+                        computeType,
+                        diskConfig: {
+                          ...analysisConfig.diskConfig,
+                          // when switching from DataProc to Standard, set to the size of any existing disk
+                          size:
+                            (computeType === ComputeType.Standard &&
+                              gcePersistentDisk?.size) ??
+                            analysisConfig.diskConfig.size,
+                        },
+                      },
                       gcePersistentDisk
                     )
-                  );
-                }}
+                  )
+                }
               />
               {analysisConfig.computeType === ComputeType.Dataproc && (
                 <TooltipTrigger
