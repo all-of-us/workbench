@@ -119,7 +119,8 @@
     "enableGKEAppMachineTypeChoice": false,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": false,
-    "blockComplianceTraining": false
+    "blockComplianceTraining": false,
+    "enableVWBWorkspaceCreation": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",

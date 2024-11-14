@@ -132,5 +132,13 @@ public class ExceptionUtils {
     }
   }
 
+  public static WorkbenchException convertWsmException(
+      org.pmiops.workbench.wsmanager.ApiException e) {
+    if (isSocketTimeoutException(e.getCause())) {
+      throw new GatewayTimeoutException();
+    }
+    throw codeToException(e.getCode());
+  }
+
   private ExceptionUtils() {}
 }
