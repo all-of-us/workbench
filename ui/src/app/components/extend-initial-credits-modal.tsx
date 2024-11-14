@@ -23,16 +23,23 @@ interface Props {
   onClose: Function;
 }
 
-const ExtensionDescription = () => (
-  <div>
-    Initial credits provided by the <AoU /> Research Program expire after{' '}
-    {serverConfigStore.get().config.initialCreditsValidityPeriodDays} days. You
-    are eligible to request an extension.
-    <StyledExternalLink href={supportUrls.initialCredits}>
-      Learn more about credits & setting up a billing account
-    </StyledExternalLink>
-  </div>
-);
+const ExtensionDescription = () => {
+  const {
+    initialCreditsValidityPeriodDays,
+    initialCreditsExpirationWarningDays,
+  } = serverConfigStore.get().config;
+  return (
+    <div>
+      Initial credits provided by the <AoU /> Research Program expire after{' '}
+      {initialCreditsValidityPeriodDays} days. You are eligible to request an
+      extension within {initialCreditsExpirationWarningDays} days of your
+      current expiration date on.
+      <StyledExternalLink href={supportUrls.initialCredits}>
+        Learn more about credits & setting up a billing account
+      </StyledExternalLink>
+    </div>
+  );
+};
 
 export const ExtendInitialCreditsModal = ({ onClose }: Props) => {
   const [saving, setSaving] = useState(false); // saving refers to the loading request time
