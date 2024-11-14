@@ -25,6 +25,7 @@ export const InitialCreditsPanel = (props: Props) => {
     freeTierDollarQuota,
     updateInitialCredits,
   } = props;
+  console.log('expirationDate: ', expirationDate);
   return (
     <div style={styles.initialCreditsBox}>
       <FlexRow>
@@ -76,6 +77,7 @@ export const InitialCreditsPanel = (props: Props) => {
                 }
                 setShowExtendInitialCreditsModal(false);
               }}
+              expirationDate={expirationDate}
             />
           )}
         </FlexRow>

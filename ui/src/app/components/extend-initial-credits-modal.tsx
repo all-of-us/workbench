@@ -21,9 +21,10 @@ import { AoU } from './text-wrappers';
 
 interface Props {
   onClose: Function;
+  expirationDate: number;
 }
 
-const ExtensionDescription = () => {
+const ExtensionDescription = ({ expirationDate }) => {
   const {
     initialCreditsValidityPeriodDays,
     initialCreditsExpirationWarningDays,
@@ -33,15 +34,21 @@ const ExtensionDescription = () => {
       Initial credits provided by the <AoU /> Research Program expire after{' '}
       {initialCreditsValidityPeriodDays} days. You are eligible to request an
       extension within {initialCreditsExpirationWarningDays} days of your
-      current expiration date on.
-      <StyledExternalLink href={supportUrls.initialCredits}>
+      current expiration date ({displayDateWithoutHours(expirationDate)}).
+      <StyledExternalLink
+        href={supportUrls.initialCredits}
+        style={{ marginTop: '1rem' }}
+      >
         Learn more about credits & setting up a billing account
       </StyledExternalLink>
     </div>
   );
 };
 
-export const ExtendInitialCreditsModal = ({ onClose }: Props) => {
+export const ExtendInitialCreditsModal = ({
+  onClose,
+  expirationDate,
+}: Props) => {
   const [saving, setSaving] = useState(false); // saving refers to the loading request time
 
   const onRequestExtension = () => {
@@ -82,7 +89,7 @@ export const ExtendInitialCreditsModal = ({ onClose }: Props) => {
     <Modal>
       <ModalTitle>Request Credit Expiration Date Extension</ModalTitle>
       <ModalBody style={{ marginTop: '0.3rem' }}>
-        <ExtensionDescription />
+        <ExtensionDescription expirationDate={expirationDate} />
       </ModalBody>
       <ModalFooter>
         <Button
