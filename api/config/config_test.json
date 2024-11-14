@@ -196,7 +196,7 @@
     ]
   },
   "termsOfService": {
-    "minimumAcceptedAouVersion": 1
+    "minimumAcceptedAouVersion": 2
   },
   "tanagra": {
     "baseUrl": "https:\/\/test.fake-research-aou.org"
