@@ -340,6 +340,7 @@ public class InitialCreditsService {
   public void extendInitialCreditsExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
+    //This handles the case existing users that have not yet been migrated but also those who have not yet completed RT training.
     if (userInitialCreditsExpiration == null) {
       throw new WorkbenchException(
           "User does not have initial credits expiration set, so they cannot extend their expiration date.");
