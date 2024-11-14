@@ -1000,7 +1000,9 @@ public class InitialCreditsServiceTest {
         assertThrows(
             WorkbenchException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals("User does not have initial credits expiration set, so they cannot extend their expiration date.", exception.getMessage());
+    assertEquals(
+        "User does not have initial credits expiration set, so they cannot extend their expiration date.",
+        exception.getMessage());
   }
 
   @Test
