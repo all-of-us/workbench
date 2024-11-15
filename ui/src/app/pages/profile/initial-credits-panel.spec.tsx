@@ -5,6 +5,7 @@ import * as React from 'react';
 import { screen } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { serverConfigStore } from 'app/utils/stores';
 
 import { InitialCreditsPanel } from './initial-credits-panel';
 
@@ -52,6 +53,30 @@ it('should display initial credits for a user with an expiration record', async 
   expect(
     screen.getByRole('button', { name: /request credit extension/i })
   ).toBeInTheDocument();
+});
+
+it('should show extension modal when extension button is clicked', async () => {
+  const freeTierUsage = 100.0;
+  const freeTierDollarQuota = 234;
+  const expirationDate = new Date('2023-12-03T20:00:00Z').getTime();
+  const eligibleForExtension = true;
+  serverConfigStore.set({
+    config: {
+      gsuiteDomain: 'fake-research-aou.org',
+      initialCreditsValidityPeriodDays: 100,
+      initialCreditsExpirationWarningDays: 5,
+    },
+  });
+  const { user } = setup(
+    freeTierUsage,
+    freeTierDollarQuota,
+    expirationDate,
+    eligibleForExtension
+  );
+  await user.click(
+    screen.getByRole('button', { name: /request credit extension/i })
+  );
+  screen.getByText(/request credit expiration date extension/i);
 });
 
 it('should not show extension button if the user is not eligible', async () => {
