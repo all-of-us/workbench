@@ -159,7 +159,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   /** Batch uploads {@link ReportingLeonardoAppUsage}. */
   @Override
-  public void uploadLeonardoAppUsagetBatch(List<ReportingLeonardoAppUsage> batch, long captureTimestamp) {
+  public void uploadLeonardoAppUsagetBatch(
+      List<ReportingLeonardoAppUsage> batch, long captureTimestamp) {
     uploadBatchTable(
         leonardoAppUsageInsertAllRequestBuilder.build(
             getTableId(LeonardoAppUsageColumnValueExtractor.TABLE_NAME),
