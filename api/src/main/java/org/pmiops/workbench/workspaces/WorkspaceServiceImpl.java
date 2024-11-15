@@ -71,6 +71,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +82,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>This needs to implement an interface to support Transactional
  */
 @Service
+@Primary
 public class WorkspaceServiceImpl implements WorkspaceService {
 
   protected static final int RECENT_WORKSPACE_COUNT = 4;
