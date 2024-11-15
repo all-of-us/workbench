@@ -112,13 +112,10 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
 export const canUseExistingDisk = (
   { detachableType, size }: Partial<DiskConfig>,
   existingDisk: Disk | null
-) => {
-  return (
-    !!existingDisk &&
-    (!detachableType || detachableType === existingDisk.diskType) &&
-    size >= existingDisk.size
-  );
-};
+) =>
+  !!existingDisk &&
+  (!detachableType || detachableType === existingDisk.diskType) &&
+  size >= existingDisk.size;
 
 export const maybeWithExistingDiskName = (
   c: Omit<DiskConfig, 'existingDiskName'>,
@@ -167,19 +164,14 @@ export const withAnalysisConfigDefaults = (
   // Eventually we will be removing this option altogether
   if (computeType === ComputeType.Standard) {
     zone ??= serverConfigStore.get().config.defaultGceVmZone;
+    detachable = true;
+    detachableType ??= existingPersistentDisk?.diskType ?? DiskType.STANDARD;
     if (existingPersistentDisk) {
       zone = existingPersistentDisk.zone;
-      detachable = true;
-      size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
-      detachableType =
-        detachableType ?? existingPersistentDisk?.diskType ?? DiskType.STANDARD;
+      size ??= existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
       if (canUseExistingDisk(r.diskConfig, existingPersistentDisk)) {
         existingDiskName = existingPersistentDisk.name;
       }
-    } else {
-      // No existing disk.
-      detachableType = DiskType.STANDARD;
-      detachable = true;
     }
   } else if (computeType === ComputeType.Dataproc) {
     detachable = false;

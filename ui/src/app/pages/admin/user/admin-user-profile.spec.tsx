@@ -200,6 +200,63 @@ describe('AdminUserProfile', () => {
     }
   );
 
+  it('should not display individual expiration info when institutionalInitialCreditsExpirationBypassed is true', async () => {
+    const institution = VERILY; // institution with bypassed expiration
+
+    updateTargetProfile({
+      verifiedInstitutionalAffiliation: {
+        ...TARGET_USER_PROFILE.verifiedInstitutionalAffiliation,
+        institutionShortName: institution.shortName,
+        institutionDisplayName: institution.displayName,
+      },
+    });
+
+    component();
+
+    // Ensures that the profile has the correct institution affiliation before proceeding.
+    await screen.findAllByText(institution.displayName);
+
+    screen.getByText(
+      /researchers affiliated with this institution are not subject to the expiration of their initial credits/i
+    );
+
+    expect(
+      screen.queryByText(/user requested an extension on/i)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/individual expiration bypass/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should display individual expiration info when institutionalInitialCreditsExpirationBypassed is false', async () => {
+    const institution = BROAD; // institution with unbypassed expiration
+
+    updateTargetProfile({
+      verifiedInstitutionalAffiliation: {
+        ...TARGET_USER_PROFILE.verifiedInstitutionalAffiliation,
+        institutionShortName: institution.shortName,
+        institutionDisplayName: institution.displayName,
+      },
+      initialCreditsExtensionEpochMillis: nowPlusDays(-10),
+    });
+
+    component();
+
+    // Ensures that the profile has the correct institution affiliation before proceeding.
+    await screen.findAllByText(institution.displayName);
+
+    screen.getByText(
+      /researchers affiliated with this institution are subject to the expiration of their initial credits/i
+    );
+
+    expect(
+      screen.getByText(/user requested an extension on/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/individual expiration bypass/i)
+    ).toBeInTheDocument();
+  });
+
   test.each([
     [
       'RT only',

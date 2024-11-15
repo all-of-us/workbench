@@ -377,6 +377,12 @@ paths:
         204:
           description: The user's initial credit expiration period has been extended.
           content: {}
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         500:
           description: Internal Error
           content:
@@ -8513,6 +8519,10 @@ components:
         initialCreditsExpirationEpochMillis:
           type: integer
           description: Timestamp indicating when the user's initial credits will expire, if applicable
+          format: int64
+        initialCreditsExtensionEpochMillis:
+          type: integer
+          description: Timestamp indicating when the user requested their initial credits expiration to be extended, if applicable
           format: int64
         initialCreditsExpirationBypassed:
           type: boolean
