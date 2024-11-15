@@ -24,7 +24,7 @@ public interface ReportingUploadService {
 
   void uploadCohortBatch(List<ReportingCohort> batch, long captureTimestamp);
 
-  void uploadLeonardoAppUsagetBatch(List<ReportingLeonardoAppUsage> batch, long captureTimestamp);
+  void uploadLeonardoAppUsageBatch(List<ReportingLeonardoAppUsage> batch, long captureTimestamp);
 
   void uploadNewUserSatisfactionSurveyBatch(
       List<ReportingNewUserSatisfactionSurvey> batch, long captureTimestamp);

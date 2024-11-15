@@ -602,23 +602,24 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
       // Skip querying data if not enabled, and just return empty list instead.
       return new ArrayList<>();
     }
+    var queryString = String.format(
+            "SELECT appId, appName, status, createdDate, destroyedDate, "
+                    + "startTime, stopTime, creator, customEnvironmentVariables "
+                    + "FROM `"
+                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
+                    + "` au "
+                    + "JOIN `"
+                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
+                    + "` a on a.id = au.appId where STARTS_WITH(appName, \""
+                    + USER_APP_NAME_PREFIX
+                    + "\") "
+                    + "LIMIT %d\n"
+                    + "OFFSET %d",
+            limit,
+            offset);
+
     final QueryJobConfiguration queryConfig =
-        QueryJobConfiguration.newBuilder(
-                String.format(
-                    "SELECT appId, appName, status, createdDate, destroyedDate, "
-                        + "startTime, stopTime, creator, customEnvironmentVariables "
-                        + "FROM `"
-                        + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
-                        + "` au "
-                        + "JOIN `"
-                        + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
-                        + "` a on a.id = au.appId where STARTS_WITH(appName, \""
-                        + USER_APP_NAME_PREFIX
-                        + "LIMIT %d\n"
-                        + "OFFSET %d"
-                        + "\")",
-                    limit,
-                    offset))
+        QueryJobConfiguration.newBuilder(queryString)
             .build();
 
     List<ReportingLeonardoAppUsage> queryResults = new ArrayList<>();

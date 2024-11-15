@@ -74,7 +74,7 @@ public class ReportingServiceImpl implements ReportingService {
         .forEach(b -> reportingUploadService.uploadCohortBatch(b, captureTimestamp));
     reportingQueryService
         .getBatchedLeonardoAppUsageStream()
-        .forEach(b -> reportingUploadService.uploadLeonardoAppUsagetBatch(b, captureTimestamp));
+        .forEach(b -> reportingUploadService.uploadLeonardoAppUsageBatch(b, captureTimestamp));
     reportingQueryService
         .getBatchedNewUserSatisfactionSurveyStream()
         .forEach(
