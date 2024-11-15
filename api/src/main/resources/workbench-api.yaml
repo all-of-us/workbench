@@ -8535,6 +8535,11 @@ components:
           default: false
           description: When set to true, the user will not be required to spend their
             initial credits within the expiration period.
+        eligibleForInitialCreditsExtension:
+          type: boolean
+          default: false
+          description: When set to true, the user is eligible to request an extension
+            of their initial credits expiration period.
     AccessModuleStatus:
       required:
       - moduleName

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.profile;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 import jakarta.annotation.Nullable;
 import java.time.Instant;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.AdminTableUser;
@@ -53,6 +56,9 @@ public interface ProfileMapper {
       source = "dbUser.userInitialCreditsExpiration.bypassed",
       target = "initialCreditsExpirationBypassed",
       defaultValue = "false")
+  @Mapping(
+      target = "eligibleForInitialCreditsExtension",
+      expression = "java(checkInitialCreditsExtensionEligibility(dbUser))")
   Profile toModel(
       DbUser dbUser,
       @Context InitialCreditsService initialCreditsService,
@@ -77,5 +83,17 @@ public interface ProfileMapper {
       return Arrays.stream(commaSeparatedAccessTierShortNames.split(","))
           .collect(Collectors.toList());
     }
+  }
+
+  default boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        dbUser.getUserInitialCreditsExpiration();
+    Instant now = Instant.now();
+
+    return initialCreditsExpiration != null
+        && initialCreditsExpiration.getExtensionTime() == null
+        && initialCreditsExpiration.getCreditStartTime() != null
+        && !now.isBefore(initialCreditsExpiration.getExpirationTime().toInstant().minus(14, DAYS))
+        && !now.isAfter(initialCreditsExpiration.getCreditStartTime().toInstant().plus(365, DAYS));
   }
 }
