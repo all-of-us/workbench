@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -19,6 +20,7 @@ import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -61,6 +63,7 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -138,6 +141,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private ProfileAuditor mockProfileAuditor;
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
+  @MockBean private Provider<DbUser> mockUserProvider;
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
@@ -1642,6 +1646,30 @@ public class ProfileControllerTest extends BaseControllerTest {
     result.setAuthorities(Lists.newArrayList(dbUser.getAuthoritiesEnum()));
 
     return result;
+  }
+
+  @Test
+  public void testExtendInitialCreditExpiration() {
+    createAccountAndDbUserWithAffiliation();
+    Timestamp creditStartTime = Timestamp.from(TIMESTAMP.toInstant().minus(3, DAYS));
+    Timestamp initialCreditExpirationTime = Timestamp.from(TIMESTAMP.toInstant().minus(1, DAYS));
+    dbUser.setUserInitialCreditsExpiration(
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(creditStartTime)
+            .setExpirationTime(initialCreditExpirationTime));
+    when(mockUserProvider.get()).thenReturn(dbUser);
+
+    Profile profile = profileController.extendInitialCreditExpiration().getBody();
+
+    assert profile != null;
+    assertThat(profile.getUserId()).isEqualTo(dbUser.getUserId());
+    DbUserInitialCreditsExpiration extendedUserInitialCreditsExpiration =
+        dbUser.getUserInitialCreditsExpiration();
+    assertThat(extendedUserInitialCreditsExpiration.getExpirationTime().toInstant())
+        .isEqualTo(
+            creditStartTime
+                .toInstant()
+                .plus(config.billing.initialCreditsExtensionPeriodDays, DAYS));
   }
 
   private Profile createAccountAndDbUserWithAffiliation(
