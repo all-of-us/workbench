@@ -13,6 +13,7 @@ import { styles } from './profile-styles';
 interface Props {
   freeTierUsage: number;
   freeTierDollarQuota: number;
+  eligibleForExtension: boolean;
   expirationDate: number;
   updateInitialCredits: Function;
 }
@@ -20,12 +21,13 @@ export const InitialCreditsPanel = (props: Props) => {
   const [showExtendInitialCreditsModal, setShowExtendInitialCreditsModal] =
     React.useState(false);
   const {
+    eligibleForExtension,
     expirationDate,
     freeTierUsage,
     freeTierDollarQuota,
     updateInitialCredits,
   } = props;
-  console.log('expirationDate: ', expirationDate);
+
   return (
     <div style={styles.initialCreditsBox}>
       <FlexRow>
@@ -38,7 +40,7 @@ export const InitialCreditsPanel = (props: Props) => {
           </div>
           {expirationDate && (
             <div>
-              <AoU /> initial credits epiration date:
+              <AoU /> initial credits expiration date:
             </div>
           )}
         </FlexColumn>
@@ -58,7 +60,7 @@ export const InitialCreditsPanel = (props: Props) => {
           )}
         </FlexColumn>
       </FlexRow>
-      {expirationDate && (
+      {eligibleForExtension && (
         <FlexRow>
           <Button
             type='primarySmall'
@@ -72,7 +74,8 @@ export const InitialCreditsPanel = (props: Props) => {
               onClose={(updatedProfile) => {
                 if (updatedProfile) {
                   updateInitialCredits(
-                    updatedProfile.initialCreditsExpirationEpochMillis
+                    updatedProfile.initialCreditsExpirationEpochMillis,
+                    updatedProfile.eligibleForInitialCreditsExtension
                   );
                 }
                 setShowExtendInitialCreditsModal(false);

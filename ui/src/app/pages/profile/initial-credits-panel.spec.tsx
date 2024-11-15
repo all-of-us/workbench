@@ -14,6 +14,7 @@ const setup = (
   expirationDate: number
 ) => {
   const updateInitialCredits = jest.fn();
+  const eligibleForExtension = true;
   return {
     container: render(
       <InitialCreditsPanel
@@ -22,6 +23,7 @@ const setup = (
           freeTierDollarQuota,
           expirationDate,
           updateInitialCredits,
+          eligibleForExtension,
         }}
       />
     ).container,

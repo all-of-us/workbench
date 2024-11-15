@@ -559,12 +559,20 @@ export const ProfileComponent = fp.flow(
                       expirationDate={
                         currentProfile.initialCreditsExpirationEpochMillis
                       }
-                      updateInitialCredits={(updatedExpiration: number) =>
+                      eligibleForExtension={
+                        currentProfile.eligibleForInitialCreditsExtension
+                      }
+                      updateInitialCredits={(
+                        updatedExpiration: number,
+                        updatedExtensionEligibility: boolean
+                      ) =>
                         this.setState({
                           currentProfile: {
                             ...currentProfile,
                             initialCreditsExpirationEpochMillis:
                               updatedExpiration,
+                            eligibleForInitialCreditsExtension:
+                              updatedExtensionEligibility,
                           },
                         })
                       }
