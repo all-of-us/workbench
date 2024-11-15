@@ -12,7 +12,7 @@ import {
 } from 'app/components/modals';
 import { Spinner } from 'app/components/spinners';
 import { profileApi } from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { notificationStore, serverConfigStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
