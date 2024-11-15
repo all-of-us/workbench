@@ -13,7 +13,7 @@ import {
 import { Spinner } from 'app/components/spinners';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { displayDateWithoutHours } from 'app/utils/dates';
+import { displayDateWithoutHours, minusDays } from 'app/utils/dates';
 import { notificationStore, serverConfigStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 
@@ -33,8 +33,12 @@ const ExtensionDescription = ({ expirationDate }) => {
     <div>
       Initial credits provided by the <AoU /> Research Program expire after{' '}
       {initialCreditsValidityPeriodDays} days. You are eligible to request an
-      extension within {initialCreditsExpirationWarningDays} days of your
-      current expiration date on {displayDateWithoutHours(expirationDate)}.
+      extension after{' '}
+      {displayDateWithoutHours(
+        minusDays(expirationDate, initialCreditsExpirationWarningDays)
+      )}{' '}
+      which is {initialCreditsExpirationWarningDays} days before your current
+      expiration date {displayDateWithoutHours(expirationDate)}.
       <StyledExternalLink
         href={supportUrls.initialCredits}
         style={{ marginTop: '1rem' }}
