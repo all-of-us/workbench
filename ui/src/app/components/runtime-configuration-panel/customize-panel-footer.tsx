@@ -50,7 +50,7 @@ export const CustomizePanelFooter = ({
     (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
       gcePersistentDisk.diskType !== analysisConfig.diskConfig.detachableType);
 
-  return unattachedPdExists ? (
+  return unattachedPdExists && !runtimeExists ? (
     <FlexRow
       style={{
         justifyContent: 'space-between',
