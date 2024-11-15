@@ -29,6 +29,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -340,27 +341,29 @@ public class InitialCreditsService {
   public DbUser extendInitialCreditsExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
+    // This handles the case existing users that have not yet been migrated but also those who have
+    // not yet completed RT training.
     if (userInitialCreditsExpiration == null) {
-      throw new WorkbenchException(
+      throw new BadRequestException(
           "User does not have initial credits expiration set, so they cannot extend their expiration date.");
     }
 
     if (institutionService.shouldBypassForCreditsExpiration(user)) {
-      throw new WorkbenchException(
+      throw new BadRequestException(
           "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.");
     }
 
     if (userInitialCreditsExpiration.isBypassed()) {
-      throw new WorkbenchException(
+      throw new BadRequestException(
           "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.");
     }
 
     if (userInitialCreditsExpiration.getExtensionTime() != null) {
-      throw new WorkbenchException(
+      throw new BadRequestException(
           "User has already extended their initial credits expiration and cannot extend further.");
     }
     if (!areCreditsExpiringSoon(user)) {
-      throw new WorkbenchException(
+      throw new BadRequestException(
           "User's initial credits are not close enough to their expiration date to be extended.");
     }
     userInitialCreditsExpiration.setExpirationTime(

@@ -633,7 +633,7 @@ describe(getErrorsAndWarnings.name, () => {
   });
 });
 
-describe(RuntimeConfigurationPanel.name, () => {
+describe('RuntimeConfigurationPanel', () => {
   let runtimeApiStub: RuntimeApiStub;
   let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;

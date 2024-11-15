@@ -1015,8 +1015,12 @@ describe(canUseExistingDisk.name, () => {
   });
 
   it('returns false when existingDisk is undefined', () => {
+    const existingDisk = undefined;
     expect(
-      canUseExistingDisk({ detachableType: DiskType.SSD, size: 5 }, undefined)
+      canUseExistingDisk(
+        { detachableType: DiskType.SSD, size: 5 },
+        existingDisk
+      )
     ).toBeFalsy();
   });
 });

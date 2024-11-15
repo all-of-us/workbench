@@ -61,7 +61,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
-import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpiryTaskMatchers.UserListMatcher;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -996,9 +996,9 @@ public class InitialCreditsServiceTest {
   public void test_extendInitialCreditsExpiration_noExpirationRecord() {
     DbUser user = spyUserDao.save(new DbUser());
 
-    WorkbenchException exception =
+    BadRequestException exception =
         assertThrows(
-            WorkbenchException.class,
+            BadRequestException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
     assertEquals(
         "User does not have initial credits expiration set, so they cannot extend their expiration date.",
@@ -1016,9 +1016,9 @@ public class InitialCreditsServiceTest {
                         .setExtensionTime(DURING_WARNING_PERIOD)
                         .setBypassed(false)));
 
-    WorkbenchException exception =
+    BadRequestException exception =
         assertThrows(
-            WorkbenchException.class,
+            BadRequestException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
     assertEquals(
         "User has already extended their initial credits expiration and cannot extend further.",
@@ -1037,9 +1037,9 @@ public class InitialCreditsServiceTest {
                         .setBypassed(false)));
     when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
 
-    WorkbenchException exception =
+    BadRequestException exception =
         assertThrows(
-            WorkbenchException.class,
+            BadRequestException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
     assertEquals(
         "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.",
@@ -1057,9 +1057,9 @@ public class InitialCreditsServiceTest {
                         .setExtensionTime(null)
                         .setBypassed(true)));
 
-    WorkbenchException exception =
+    BadRequestException exception =
         assertThrows(
-            WorkbenchException.class,
+            BadRequestException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
     assertEquals(
         "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.",
@@ -1077,9 +1077,9 @@ public class InitialCreditsServiceTest {
                         .setExtensionTime(null)
                         .setBypassed(false)));
 
-    WorkbenchException exception =
+    BadRequestException exception =
         assertThrows(
-            WorkbenchException.class,
+            BadRequestException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
     assertEquals(
         "User's initial credits are not close enough to their expiration date to be extended.",
