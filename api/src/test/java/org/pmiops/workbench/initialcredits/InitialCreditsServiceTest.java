@@ -1098,8 +1098,11 @@ public class InitialCreditsServiceTest {
                         .setExtensionTime(null)
                         .setBypassed(false)));
 
-    initialCreditsService.extendInitialCreditsExpiration(user);
-    DbUserInitialCreditsExpiration actualExpirationRecord = user.getUserInitialCreditsExpiration();
+    DbUserInitialCreditsExpiration actualExpirationRecord =
+        initialCreditsService
+            .extendInitialCreditsExpiration(user)
+            .getUserInitialCreditsExpiration();
+
     Timestamp expectedExtensionDate =
         Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
     assertEquals(actualExpirationRecord.getExpirationTime(), expectedExtensionDate);
