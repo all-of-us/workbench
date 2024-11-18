@@ -103,7 +103,9 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             Map.entry(
                 LeonardoAppUsageColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getAppUsageRowCount(
-                  workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId)), //get source row count
+                    workbenchConfigProvider.get()
+                        .reporting
+                        .terraWarehouseLeoAppUsageTableId)), // get source row count
             Map.entry(
                 NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
