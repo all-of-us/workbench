@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { Profile } from '../../../generated/fetch';
 import { Button, StyledExternalLink } from 'app/components/buttons';
 import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -71,7 +72,7 @@ export const InitialCreditsPanel = (props: Props) => {
           </Button>
           {showExtendInitialCreditsModal && (
             <ExtendInitialCreditsModal
-              onClose={(updatedProfile) => {
+              onClose={(updatedProfile: Profile) => {
                 if (updatedProfile) {
                   updateInitialCredits(
                     updatedProfile.initialCreditsExpirationEpochMillis,
