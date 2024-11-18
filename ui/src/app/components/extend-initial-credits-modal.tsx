@@ -24,16 +24,18 @@ const ExtensionDescription = ({ expirationDate }) => {
     initialCreditsValidityPeriodDays,
     initialCreditsExpirationWarningDays,
   } = serverConfigStore.get().config;
+
+  const eligibilityDate = displayDateWithoutHours(
+    minusDays(expirationDate, initialCreditsExpirationWarningDays)
+  );
+
   return (
     <div>
       Initial credits provided by the <AoU /> Research Program expire after{' '}
       {initialCreditsValidityPeriodDays} days. You are eligible to request an
-      extension after{' '}
-      {displayDateWithoutHours(
-        minusDays(expirationDate, initialCreditsExpirationWarningDays)
-      )}{' '}
-      which is {initialCreditsExpirationWarningDays} days before your current
-      expiration date {displayDateWithoutHours(expirationDate)}.
+      extension after {eligibilityDate} which is{' '}
+      {initialCreditsExpirationWarningDays} days before your current expiration
+      date {displayDateWithoutHours(expirationDate)}.
       <StyledExternalLink
         href={supportUrls.initialCredits}
         style={{ marginTop: '1rem' }}
