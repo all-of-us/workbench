@@ -19,15 +19,8 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { AoU } from './text-wrappers';
 
-const ExtensionDescription = ({ expirationDate }) => {
-  const {
-    initialCreditsValidityPeriodDays,
-    initialCreditsExpirationWarningDays,
-  } = serverConfigStore.get().config;
-
-  const eligibilityDate = displayDateWithoutHours(
-    minusDays(expirationDate, initialCreditsExpirationWarningDays)
-  );
+const ExtensionDescription = () => {
+  const { initialCreditsValidityPeriodDays } = serverConfigStore.get().config;
 
   return (
     <div>
@@ -93,7 +86,7 @@ export const ExtendInitialCreditsModal = ({
     <Modal>
       <ModalTitle>Request Credit Expiration Date Extension</ModalTitle>
       <ModalBody style={{ marginTop: '0.3rem' }}>
-        <ExtensionDescription expirationDate={expirationDate} />
+        <ExtensionDescription />
       </ModalBody>
       <ModalFooter>
         <Button
