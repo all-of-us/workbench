@@ -53,8 +53,7 @@ export const InvalidBillingBanner = fp.flow(
   const { profile } = profileState;
   const isCreator =
     workspace && profile && profile.username === workspace.creator;
-  const eligibleForExtension =
-    workspace && !workspace.initialCredits.extensionEpochMillis;
+  const isEligibleForExtension = workspace && !workspace.extensionEpochMillis;
   const isExpired =
     workspace && workspace.initialCredits.expirationEpochMillis < Date.now();
   const isExpiringSoon =
@@ -62,9 +61,33 @@ export const InvalidBillingBanner = fp.flow(
     !isExpired &&
     plusDays(workspace.initialCredits.expirationEpochMillis, 5) < Date.now();
   let message;
-  if (isCreator) {
-    if (eligibleForExtension) {
-      if (isExpired) {
+  let title;
+  if (isExpiringSoon && isEligibleForExtension) {
+    title = 'Workspace credits are expiring soon';
+    if (isCreator) {
+      // Banner 1 in spec
+      message = (
+        <div>
+          Your initial credits are expiring soon. You can request an extension
+          here. For more information, read the <InitialCreditsArticleLink />{' '}
+          article on the User Support Hub.
+        </div>
+      );
+    } else {
+      // Banner 2 in spec
+      message = (
+        <div>
+          This workspace creator’s initial credits are expiring soon. This
+          workspace was created by FIRST NAME LAST NAME. For more information,
+          read the <InitialCreditsArticleLink /> article on the User Support
+          Hub.
+        </div>
+      );
+    }
+  } else if (isExpired) {
+    if (isEligibleForExtension) {
+      title = 'Workspace credits have expired';
+      if (isCreator) {
         // Banner 3 in spec (changed to trigger modal from here instead of on Profile page)
         message = (
           <div>
@@ -73,34 +96,7 @@ export const InvalidBillingBanner = fp.flow(
             article on the User Support Hub.
           </div>
         );
-      } else if (isExpiringSoon) {
-        // Banner 1 in spec (changed to trigger modal from here instead of on Profile page)
-        message = (
-          <div>
-            Your initial credits are expiring soon. You can request an extension
-            here. For more information, read the <InitialCreditsArticleLink />{' '}
-            article on the User Support Hub.
-          </div>
-        );
-      }
-    } else {
-      if (isExpired) {
-        // Banner 5 in spec (use this also for exhausted)
-        message = (
-          <div>
-            Your initial credits have run out. To use the workspace, a valid
-            billing account needs to be provided. To learn more about
-            establishing a billing account, read the{' '}
-            <BillingAccountArticleLink /> article on the User Support Hub.
-          </div>
-        );
-      } else if (isExpiringSoon) {
-        // Not accounted for in spec
-      }
-    }
-  } else {
-    if (eligibleForExtension) {
-      if (isExpired) {
+      } else {
         // Banner 4 in spec
         message = (
           <div>
@@ -110,19 +106,20 @@ export const InvalidBillingBanner = fp.flow(
             Hub.
           </div>
         );
-      } else if (isExpiringSoon) {
-        // Banner 2 in spec
-        message = (
-          <div>
-            This workspace creator’s initial credits are expiring soon. This
-            workspace was created by FIRST NAME LAST NAME. For more information,
-            read the <InitialCreditsArticleLink /> article on the User Support
-            Hub.
-          </div>
-        );
       }
     } else {
-      if (isExpired) {
+      title = 'This workspace is out of initial credits';
+      if (isCreator) {
+        // Banner 5 in spec
+        message = (
+          <div>
+            Your initial credits have run out. To use the workspace, a valid
+            billing account needs to be provided. To learn more about
+            establishing a billing account, read the{' '}
+            <BillingAccountArticleLink /> article on the User Support Hub.
+          </div>
+        );
+      } else {
         // Banner 6 in spec
         message = (
           <div>
@@ -133,12 +130,9 @@ export const InvalidBillingBanner = fp.flow(
             <BillingAccountArticleLink /> article on the User Support Hub.
           </div>
         );
-      } else if (isExpiringSoon) {
-        // Not accounted for in spec
       }
     }
   }
-
   const footer = isCreator && (
     <Button
       style={{ height: '38px', width: '70%', fontWeight: 400 }}
@@ -157,6 +151,7 @@ export const InvalidBillingBanner = fp.flow(
       Edit Workspace
     </Button>
   );
+
   return (
     <ToastBanner
       {...{ message, footer, onClose }}
