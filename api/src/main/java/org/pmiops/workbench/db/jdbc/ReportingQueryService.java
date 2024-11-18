@@ -146,6 +146,8 @@ public interface ReportingQueryService {
 
   int getTableRowCount(String tableName);
 
+  int getAppUsageRowCount(String tableName);
+
   int getWorkspaceCount();
 
   List<ReportingLeonardoAppUsage> getLeonardoAppUsage(long limit, long offset);

@@ -589,6 +589,23 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
+  public int getAppUsageRowCount(String tableName) {
+    var queryString = "SELECT count(*) "
+                    + "FROM `"
+                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
+                    + "` au "
+                    + "JOIN `"
+                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
+                    + "` a on a.id = au.appId where STARTS_WITH(appName, \""
+                    + USER_APP_NAME_PREFIX
+                    + "\")";
+
+    final QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(queryString).build();
+    var res = bigQueryService.executeQuery(queryConfig);
+    return res.getValues().iterator().next().get(0).getNumericValue().intValue();
+  }
+
+  @Override
   public int getWorkspaceCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM workspace WHERE active_status = "
