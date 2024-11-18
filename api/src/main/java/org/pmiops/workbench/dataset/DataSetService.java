@@ -17,6 +17,7 @@ import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.ResourceType;
+import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 
 public interface DataSetService {
 
@@ -61,6 +62,9 @@ public interface DataSetService {
   DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain);
 
   List<String> getPersonIdsWithWholeGenome(DbDataset dataSet);
+
+  List<String> getTanagraPersonIdsWithWholeGenome(
+      DbWorkspace workspace, TanagraGenomicDataRequest tanagraGenomicDataRequest);
 
   List<DomainWithDomainValues> getValueListFromDomain(Long conceptSetId, String domain);
 

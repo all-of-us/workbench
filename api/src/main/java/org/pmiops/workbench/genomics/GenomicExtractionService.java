@@ -50,6 +50,7 @@ import org.pmiops.workbench.jira.JiraService.IssueType;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.model.GenomicExtractionJob;
+import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -403,10 +404,17 @@ public class GenomicExtractionService {
         .build();
   }
 
-  public GenomicExtractionJob submitGenomicExtractionJob(DbWorkspace workspace, DbDataset dataSet)
+  public GenomicExtractionJob submitGenomicExtractionJob(
+      DbWorkspace workspace, DbDataset dataSet, TanagraGenomicDataRequest tanagraGenomicDataRequest)
       throws ApiException {
 
-    List<String> personIds = dataSetService.getPersonIdsWithWholeGenome(dataSet);
+    boolean isTanagraEnabled = workspace.isCDRAndWorkspaceTanagraEnabled();
+
+    List<String> personIds =
+        isTanagraEnabled
+            ? dataSetService.getTanagraPersonIdsWithWholeGenome(
+                workspace, tanagraGenomicDataRequest)
+            : dataSetService.getPersonIdsWithWholeGenome(dataSet);
     if (personIds.isEmpty()) {
       throw new FailedPreconditionException(
           "provided cohort contains no participants with whole genome data");

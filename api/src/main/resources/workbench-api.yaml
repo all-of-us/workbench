@@ -3898,6 +3898,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenomicExtractionJob'
+  /v1/workspaces/{workspaceNamespace}/{terraName}/datasets/extractTanagraGenomicData:
+    post:
+      tags:
+      - dataSet
+      description: Initiates a Terra Cromwell job to extract genomes of the given
+        Tanagra-enabled dataset. Requires WRITER access on the workspace. Workspace
+        CDR must also have an associated WGS dataset
+      operationId: extractTanagraGenomicData
+      parameters:
+      - name: workspaceNamespace
+        in: path
+        description: The Workspace namespace
+        required: true
+        schema:
+          type: string
+      - name: terraName
+        in: path
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TanagraGenomicDataRequest'
+        required: true
+      responses:
+        200:
+          description: The Terra Job for the extraction workflow
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenomicExtractionJob'
   /v1/workspaces/{workspaceNamespace}/{terraName}/genomicExtractionJobs/{jobId}/abort:
     post:
       tags:
@@ -7942,6 +7977,25 @@ components:
           - NONE
           - PLINK
           - HAIL
+    TanagraGenomicDataRequest:
+      required:
+      - cohortIds
+      - featureSetIds
+      type: object
+      properties:
+        cohortIds:
+          type: array
+          description: The ids of all cohorts in the data set
+          items:
+            type: string
+        featureSetIds:
+          type: array
+          description: The ids of all feature sets in the data set
+          items:
+            type: string
+        allParticipants:
+          type: boolean
+          default: false
     MarkDataSetRequest:
       type: object
       properties:

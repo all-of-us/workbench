@@ -36,13 +36,16 @@ const TimeAgoWithVerboseTooltip = (epoch) => {
 };
 
 interface Props {
-  dataSet: DataSet;
+  dataSet?: DataSet;
   workspaceNamespace: string;
   workspaceTerraName: string;
   closeFunction: Function;
   title?: string;
   cancelText?: string;
   confirmText?: string;
+  tanagraCohortIds?: string[];
+  tanagraFeatureSetIds?: string[];
+  tanagraAllParticipantsCohort?: boolean;
 }
 
 export const GenomicExtractionModal = ({
@@ -53,6 +56,9 @@ export const GenomicExtractionModal = ({
   title,
   cancelText,
   confirmText,
+  tanagraCohortIds,
+  tanagraFeatureSetIds,
+  tanagraAllParticipantsCohort,
 }: Props) => {
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<{ status: number; message: string }>(null);
@@ -173,11 +179,21 @@ export const GenomicExtractionModal = ({
           onClick={async () => {
             setLaunching(true);
             try {
-              const job = await dataSetApi().extractGenomicData(
-                workspaceNamespace,
-                workspaceTerraName,
-                dataSet.id
-              );
+              const job = !!dataSet
+                ? await dataSetApi().extractGenomicData(
+                    workspaceNamespace,
+                    workspaceTerraName,
+                    dataSet.id
+                  )
+                : await dataSetApi().extractTanagraGenomicData(
+                    workspaceNamespace,
+                    workspaceTerraName,
+                    {
+                      cohortIds: tanagraCohortIds ?? [],
+                      featureSetIds: tanagraFeatureSetIds ?? [],
+                      allParticipants: tanagraAllParticipantsCohort,
+                    }
+                  );
               mutate(fp.concat(jobs, job));
               closeFunction();
             } catch (e) {

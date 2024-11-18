@@ -97,4 +97,8 @@ public class CohortQueryBuilder extends QueryBuilder {
         .setUseLegacySql(false)
         .build();
   }
+
+  public QueryJobConfiguration buildPersonIdQuery(String personIdQuery) {
+    return QueryJobConfiguration.newBuilder(personIdQuery).setUseLegacySql(false).build();
+  }
 }

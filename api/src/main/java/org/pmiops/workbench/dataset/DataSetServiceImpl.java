@@ -89,6 +89,7 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.tanagra.model.EntityOutputPreview;
@@ -1391,6 +1392,47 @@ public class DataSetServiceImpl implements DataSetService {
 
     final QueryJobConfiguration participantIdQuery =
         cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
+
+    return Streams.stream(
+            bigQueryService
+                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
+                .getValues())
+        .map(personId -> personId.get(0).getValue().toString())
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<String> getTanagraPersonIdsWithWholeGenome(
+      DbWorkspace workspace, TanagraGenomicDataRequest tanagraGenomicDataRequest) {
+    List<ParticipantCriteria> participantCriteriaList;
+    final QueryJobConfiguration participantIdQuery;
+    if (Boolean.TRUE.equals(tanagraGenomicDataRequest.isAllParticipants())) {
+      // Select all participants with WGS data.
+      participantCriteriaList =
+          ImmutableList.of(
+              new ParticipantCriteria(
+                  new CohortDefinition().addIncludesItem(createHasWgsSearchGroup())));
+      participantIdQuery =
+          cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
+    } else {
+      try {
+        DataSetRequest dataSetRequest =
+            new DataSetRequest()
+                .tanagraCohortIds(tanagraGenomicDataRequest.getCohortIds())
+                .tanagraFeatureSetIds(tanagraGenomicDataRequest.getFeatureSetIds());
+        ExportPreviewRequest exportPreviewRequest =
+            createExportPreviewRequest(dataSetRequest, workspace);
+        String underlayName = "aou" + workspace.getCdrVersion().getBigqueryDataset();
+        String cohortsQuery =
+            tanagraApiProvider
+                .get()
+                .describeExport(exportPreviewRequest, underlayName)
+                .getEntityIdSql();
+        participantIdQuery = cohortQueryBuilder.buildPersonIdQuery(cohortsQuery);
+      } catch (ApiException e) {
+        throw new BadRequestException("Bad Request: " + e.getMessage());
+      }
+    }
 
     return Streams.stream(
             bigQueryService

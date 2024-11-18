@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { environment } from 'environments/environment';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
+import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
 import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { getAccessToken } from 'app/utils/authentication';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -14,6 +15,13 @@ import {
   useNavigation,
 } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
+
+enum ModalState {
+  None,
+  Create,
+  Export,
+  Extract,
+}
 
 export const TanagraContainer = fp.flow(
   withCdrVersions(),
@@ -26,6 +34,7 @@ export const TanagraContainer = fp.flow(
     cdrVersionId,
     cdrVersionTiersResponse
   );
+  const [modalState, setModalState] = useState(ModalState.None);
   const [exportIds, setExportIds] = useState<ExportResources>();
   const tanagraUrl = `${
     serverConfigStore.get().config.tanagraBaseUrl
@@ -39,7 +48,13 @@ export const TanagraContainer = fp.flow(
   });
 
   useExportListener((exportResourceIds) => {
+    console.log(exportResourceIds);
     setExportIds(exportResourceIds);
+    setModalState(
+      exportResourceIds.predefinedCriteria.includes('_short_read_wgs')
+        ? ModalState.Extract
+        : ModalState.Export
+    );
   });
 
   return (
@@ -57,13 +72,25 @@ export const TanagraContainer = fp.flow(
         }}
         src={tanagraUrl}
       />
-      {!!exportIds && (
+      {modalState === ModalState.Export && (
         <ExportDatasetModal
           {...{ workspace }}
           closeFunction={() => setExportIds(undefined)}
           tanagraCohortIds={exportIds.cohortIds}
           tanagraFeatureSetIds={exportIds.featureSetIds}
           tanagraAllParticipantsCohort={exportIds.allParticipantsCohort}
+        />
+      )}
+      {modalState === ModalState.Extract && (
+        <GenomicExtractionModal
+          workspaceNamespace={namespace}
+          workspaceTerraName={terraName}
+          title={
+            'Would you like to extract genomic variant data as VCF files?'
+          }
+          cancelText={'Skip'}
+          confirmText={'Extract & Continue'}
+          closeFunction={() => setModalState(ModalState.Export)}
         />
       )}
     </div>
