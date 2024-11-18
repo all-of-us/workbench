@@ -383,12 +383,21 @@ public class InitialCreditsService {
     DbUserInitialCreditsExpiration initialCreditsExpiration =
         dbUser.getUserInitialCreditsExpiration();
     Instant now = Instant.now();
+    WorkbenchConfig.BillingConfig billingConfig = workbenchConfigProvider.get().billing;
 
     return initialCreditsExpiration != null
         && initialCreditsExpiration.getExtensionTime() == null
         && initialCreditsExpiration.getCreditStartTime() != null
-        && !now.isBefore(initialCreditsExpiration.getExpirationTime().toInstant().minus(14, DAYS))
-        && !now.isAfter(initialCreditsExpiration.getCreditStartTime().toInstant().plus(365, DAYS));
+        && !now.isBefore(
+            initialCreditsExpiration
+                .getExpirationTime()
+                .toInstant()
+                .minus(billingConfig.initialCreditsExpirationWarningDays, DAYS))
+        && !now.isAfter(
+            initialCreditsExpiration
+                .getCreditStartTime()
+                .toInstant()
+                .plus(billingConfig.initialCreditsExtensionPeriodDays, DAYS));
   }
 
   private void checkExpiration(DbUser user) {
