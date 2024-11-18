@@ -13047,6 +13047,9 @@ components:
         expirationEpochMillis:
           type: integer
           format: int64
+        extensionEpochMillis:
+          type: integer
+          format: int64
   parameters:
     userId:
       name: userId
