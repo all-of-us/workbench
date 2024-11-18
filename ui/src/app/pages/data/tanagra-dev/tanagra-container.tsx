@@ -91,6 +91,9 @@ export const TanagraContainer = fp.flow(
           cancelText={'Skip'}
           confirmText={'Extract & Continue'}
           closeFunction={() => setModalState(ModalState.Export)}
+          tanagraCohortIds={exportIds.cohortIds}
+          tanagraFeatureSetIds={exportIds.featureSetIds}
+          tanagraAllParticipantsCohort={exportIds.allParticipantsCohort}
         />
       )}
     </div>

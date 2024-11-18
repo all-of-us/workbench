@@ -7981,6 +7981,7 @@ components:
       required:
       - cohortIds
       - featureSetIds
+      - exportName
       type: object
       properties:
         cohortIds:
@@ -7993,6 +7994,9 @@ components:
           description: The ids of all feature sets in the data set
           items:
             type: string
+        exportName:
+          type: string
+          description: Name to use as the datasetName for the extraction job
         allParticipants:
           type: boolean
           default: false

@@ -70,7 +70,8 @@ export const GenomicExtractionModal = ({
   );
   const mostRecentExtract: GenomicExtractionJob = fp.flow(
     fp.filter(
-      (extract: GenomicExtractionJob) => extract.datasetName === dataSet.name
+      (extract: GenomicExtractionJob) =>
+        extract.datasetName === (dataSet?.name ?? 'Tanagra export')
     ),
     // This, incidentally to the implementation of orderBy, puts falsey values at the front...
     // ... which is actually what we want, but it's kind of bad to rely on implementation detail
@@ -191,6 +192,7 @@ export const GenomicExtractionModal = ({
                     {
                       cohortIds: tanagraCohortIds ?? [],
                       featureSetIds: tanagraFeatureSetIds ?? [],
+                      exportName: 'Tanagra export',
                       allParticipants: tanagraAllParticipantsCohort,
                     }
                   );

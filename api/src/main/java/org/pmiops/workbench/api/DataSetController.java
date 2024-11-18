@@ -503,9 +503,11 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     try {
+      // Empty dataset with only a name set since the extraction jobs needs a datasetName
+      DbDataset emptyDataset = new DbDataset().setName(tanagraGenomicDataRequest.getExportName());
       return ResponseEntity.ok(
           genomicExtractionService.submitGenomicExtractionJob(
-              workspace, null, tanagraGenomicDataRequest));
+              workspace, emptyDataset, tanagraGenomicDataRequest));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       // Our usage of Terra is an internal implementation detail to the client. Any error returned
       // from Firecloud is either a bug within our Cromwell integration or a backend failure.
