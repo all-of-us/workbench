@@ -157,6 +157,17 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getFixedValues(captureTimestamp)));
   }
 
+  /** Batch uploads {@link ReportingLeonardoAppUsage}. */
+  @Override
+  public void uploadLeonardoAppUsageBatch(
+      List<ReportingLeonardoAppUsage> batch, long captureTimestamp) {
+    uploadBatchTable(
+        leonardoAppUsageInsertAllRequestBuilder.build(
+            getTableId(LeonardoAppUsageColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+  }
+
   /** Batch uploads {@link ReportingNewUserSatisfactionSurvey}. */
   @Override
   public void uploadNewUserSatisfactionSurveyBatch(
@@ -291,12 +302,6 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
         workspaceFreeTierUsageRequestBuilder.buildBatchedRequests(
             getTableId(WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME),
             reportingSnapshot.getWorkspaceFreeTierUsage(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        leonardoAppUsageInsertAllRequestBuilder.buildBatchedRequests(
-            getTableId(LeonardoAppUsageColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getLeonardoAppUsage(),
             fixedValues,
             batchSize));
 

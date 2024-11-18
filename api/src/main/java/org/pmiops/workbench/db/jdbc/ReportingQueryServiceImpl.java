@@ -589,6 +589,24 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
+  public int getAppUsageRowCount(String tableName) {
+    var queryString =
+        "SELECT count(*) "
+            + "FROM `"
+            + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
+            + "` au "
+            + "JOIN `"
+            + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
+            + "` a on a.id = au.appId where STARTS_WITH(appName, \""
+            + USER_APP_NAME_PREFIX
+            + "\")";
+
+    final QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(queryString).build();
+    var res = bigQueryService.executeQuery(queryConfig);
+    return res.getValues().iterator().next().get(0).getNumericValue().intValue();
+  }
+
+  @Override
   public int getWorkspaceCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM workspace WHERE active_status = "
@@ -597,24 +615,29 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingLeonardoAppUsage> getLeonardoAppUsage() {
+  public List<ReportingLeonardoAppUsage> getLeonardoAppUsage(long limit, long offset) {
     if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
       // Skip querying data if not enabled, and just return empty list instead.
       return new ArrayList<>();
     }
-    final QueryJobConfiguration queryConfig =
-        QueryJobConfiguration.newBuilder(
-                "SELECT appId, appName, status, createdDate, destroyedDate, "
-                    + "startTime, stopTime, creator, customEnvironmentVariables "
-                    + "FROM `"
-                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
-                    + "` au "
-                    + "JOIN `"
-                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
-                    + "` a on a.id = au.appId where STARTS_WITH(appName, \""
-                    + USER_APP_NAME_PREFIX
-                    + "\")")
-            .build();
+    var queryString =
+        String.format(
+            "SELECT appId, appName, status, createdDate, destroyedDate, "
+                + "startTime, stopTime, creator, customEnvironmentVariables "
+                + "FROM `"
+                + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
+                + "` au "
+                + "JOIN `"
+                + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
+                + "` a on a.id = au.appId where STARTS_WITH(appName, \""
+                + USER_APP_NAME_PREFIX
+                + "\") "
+                + "LIMIT %d\n"
+                + "OFFSET %d",
+            limit,
+            offset);
+
+    final QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(queryString).build();
 
     List<ReportingLeonardoAppUsage> queryResults = new ArrayList<>();
     for (FieldValueList row : bigQueryService.executeQuery(queryConfig).getValues()) {

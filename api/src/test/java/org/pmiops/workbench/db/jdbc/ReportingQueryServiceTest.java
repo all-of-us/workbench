@@ -761,7 +761,7 @@ public class ReportingQueryServiceTest {
     TableResult tableResult =
         new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
     when(bigQueryService.executeQuery(any(QueryJobConfiguration.class))).thenReturn(tableResult);
-    assertThat(reportingQueryService.getLeonardoAppUsage())
+    assertThat(reportingQueryService.getLeonardoAppUsage(10, 0))
         .containsExactly(
             new ReportingLeonardoAppUsage()
                 .appId(123l)
