@@ -19,11 +19,6 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { AoU } from './text-wrappers';
 
-interface Props {
-  onClose: Function;
-  expirationDate: number;
-}
-
 const ExtensionDescription = ({ expirationDate }) => {
   const {
     initialCreditsValidityPeriodDays,
@@ -49,10 +44,15 @@ const ExtensionDescription = ({ expirationDate }) => {
   );
 };
 
+interface ExtendInitialCreditsModalProps {
+  onClose: Function;
+  expirationDate: number;
+}
+
 export const ExtendInitialCreditsModal = ({
   onClose,
   expirationDate,
-}: Props) => {
+}: ExtendInitialCreditsModalProps) => {
   const [saving, setSaving] = useState(false); // saving refers to the loading request time
 
   const onRequestExtension = () => {
