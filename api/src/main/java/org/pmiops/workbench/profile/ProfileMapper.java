@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -58,7 +59,8 @@ public interface ProfileMapper {
       defaultValue = "false")
   @Mapping(
       target = "eligibleForInitialCreditsExtension",
-      expression = "java(checkInitialCreditsExtensionEligibility(dbUser))")
+      source = "dbUser",
+      qualifiedByName = "checkInitialCreditsExtensionEligibility")
   Profile toModel(
       DbUser dbUser,
       @Context InitialCreditsService initialCreditsService,
@@ -85,6 +87,7 @@ public interface ProfileMapper {
     }
   }
 
+  @Named("checkInitialCreditsExtensionEligibility")
   default boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
     DbUserInitialCreditsExpiration initialCreditsExpiration =
         dbUser.getUserInitialCreditsExpiration();
