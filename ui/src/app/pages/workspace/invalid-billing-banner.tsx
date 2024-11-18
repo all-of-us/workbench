@@ -9,6 +9,7 @@ import { ToastBanner, ToastType } from 'app/components/toast-banner';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { plusDays } from 'app/utils/dates';
 import { NavigationProps } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
@@ -53,15 +54,19 @@ export const InvalidBillingBanner = fp.flow(
   const { profile } = profileState;
   const isCreator =
     workspace && profile && profile.username === workspace.creator;
-  const isEligibleForExtension = workspace && !workspace.extensionEpochMillis;
+  const isEligibleForExtension =
+    workspace && !workspace.initialCredits.extensionEpochMillis;
   const isExpired =
     workspace && workspace.initialCredits.expirationEpochMillis < Date.now();
   const isExpiringSoon =
     workspace &&
     !isExpired &&
-    plusDays(workspace.initialCredits.expirationEpochMillis, 5) < Date.now();
-  let message;
-  let title;
+    plusDays(
+      workspace.initialCredits.expirationEpochMillis,
+      -serverConfigStore.get().config.initialCreditsExpirationWarningDays
+    ) < Date.now();
+  let message: JSX.Element;
+  let title: string;
   if (isExpiringSoon && isEligibleForExtension) {
     title = 'Workspace credits are expiring soon';
     if (isCreator) {
