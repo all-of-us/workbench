@@ -1,5 +1,6 @@
 package org.pmiops.workbench.initialcredits;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 
 import jakarta.annotation.Nullable;
@@ -9,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.mapstruct.Named;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -373,6 +376,19 @@ public class InitialCreditsService {
                     workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
     userInitialCreditsExpiration.setExtensionTime(clockNow());
     return userDao.save(user);
+  }
+
+  @Named("checkInitialCreditsExtensionEligibility")
+  public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        dbUser.getUserInitialCreditsExpiration();
+    Instant now = Instant.now();
+
+    return initialCreditsExpiration != null
+        && initialCreditsExpiration.getExtensionTime() == null
+        && initialCreditsExpiration.getCreditStartTime() != null
+        && !now.isBefore(initialCreditsExpiration.getExpirationTime().toInstant().minus(14, DAYS))
+        && !now.isAfter(initialCreditsExpiration.getCreditStartTime().toInstant().plus(365, DAYS));
   }
 
   private void checkExpiration(DbUser user) {
