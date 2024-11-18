@@ -372,8 +372,7 @@ public class InitialCreditsService {
                 + TimeUnit.DAYS.toMillis(
                     workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
     userInitialCreditsExpiration.setExtensionTime(clockNow());
-    userDao.save(user);
-    return user;
+    return userDao.save(user);
   }
 
   private void checkExpiration(DbUser user) {
