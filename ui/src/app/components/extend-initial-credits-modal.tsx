@@ -84,7 +84,7 @@ export const ExtendInitialCreditsModal = ({
         } else {
           notificationStore.set({
             title: 'Error extending Initial credits',
-            message: error.toString(),
+            message: JSON.stringify(error),
           });
         }
       })
