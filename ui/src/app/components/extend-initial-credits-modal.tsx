@@ -55,11 +55,11 @@ export const ExtendInitialCreditsModal = ({
   onClose,
   expirationDate,
 }: ExtendInitialCreditsModalProps) => {
-  const [saving, setSaving] = useState(false); // saving refers to the loading request time
+  const [extending, setExtending] = useState(false);
 
   const onRequestExtension = () => {
     let updatedProfile: Profile;
-    setSaving(true);
+    setExtending(true);
     profileApi()
       .extendInitialCreditExpiration()
       .then((profileResponse) => {
@@ -102,12 +102,18 @@ export const ExtendInitialCreditsModal = ({
           style={{ color: colors.primary }}
           type='link'
           onClick={() => onClose()}
-          disabled={saving}
+          disabled={extending}
         >
           Cancel
         </Button>
-        <Button type='primary' onClick={onRequestExtension} disabled={saving}>
-          {saving && <Spinner style={{ marginRight: '0.375rem' }} size={18} />}
+        <Button
+          type='primary'
+          onClick={onRequestExtension}
+          disabled={extending}
+        >
+          {extending && (
+            <Spinner style={{ marginRight: '0.375rem' }} size={18} />
+          )}
           Request Extension
         </Button>
       </ModalFooter>
