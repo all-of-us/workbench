@@ -388,12 +388,12 @@ public class InitialCreditsService {
     return initialCreditsExpiration != null
         && initialCreditsExpiration.getExtensionTime() == null
         && initialCreditsExpiration.getCreditStartTime() != null
-        && !now.isBefore(
+        && now.isAfter(
             initialCreditsExpiration
                 .getExpirationTime()
                 .toInstant()
                 .minus(billingConfig.initialCreditsExpirationWarningDays, DAYS))
-        && !now.isAfter(
+        && now.isBefore(
             initialCreditsExpiration
                 .getCreditStartTime()
                 .toInstant()
