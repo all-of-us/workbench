@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, matchPath } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
@@ -317,7 +317,7 @@ export const Breadcrumb = fp.flow(
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
   const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
-    React.useState(false);
+    useState(false);
   const [workspace, setWorkspace] = React.useState<WorkspaceData | undefined>(
     undefined
   );
