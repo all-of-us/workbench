@@ -431,7 +431,7 @@ export const Breadcrumb = fp.flow(
   };
 
   return (
-    <React.Fragment>
+    <>
       {showInvalidBillingBanner && (
         <InvalidBillingBanner
           onClose={() => setShowInvalidBillingBanner(false)}
@@ -469,6 +469,6 @@ export const Breadcrumb = fp.flow(
           </div>
         )}
       </div>
-    </React.Fragment>
+    </>
   );
 });
