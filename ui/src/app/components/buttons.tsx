@@ -115,6 +115,19 @@ const buttonVariants = {
     },
     hover: { backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha) },
   },
+  primarySmall: {
+    style: {
+      ...styles.baseNew,
+      borderRadius: '0.23rem',
+      height: '30px',
+      backgroundColor: colors.primary,
+      color: colors.white,
+    },
+    disabledStyle: {
+      backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha),
+    },
+    hover: { backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha) },
+  },
   secondary: {
     style: {
       ...styles.baseNew,

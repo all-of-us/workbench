@@ -54,6 +54,15 @@ public interface WorkbenchConfigMapper {
       target = "enableInitialCreditsExpiration",
       source = "config.featureFlags.enableInitialCreditsExpiration")
   @Mapping(
+      target = "initialCreditsValidityPeriodDays",
+      source = "config.billing.initialCreditsValidityPeriodDays")
+  @Mapping(
+      target = "initialCreditsExtensionPeriodDays",
+      source = "config.billing.initialCreditsExtensionPeriodDays")
+  @Mapping(
+      target = "initialCreditsExpirationWarningDays",
+      source = "config.billing.initialCreditsExpirationWarningDays")
+  @Mapping(
       target = "blockComplianceTraining",
       source = "config.featureFlags.blockComplianceTraining")
   @Mapping(target = "isDownForMaintenance", source = "config.server.isDownForMaintenance")
