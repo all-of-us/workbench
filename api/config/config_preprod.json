@@ -15,7 +15,7 @@
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.13",
     "workspaceLogsProject": "fc-aou-logs-preprod",
     "workspaceBucketLocation": "us-central1",
-    "gceVmZones": ["us-central1-a"],
+    "gceVmZones": ["us-central1-a","us-central1-b","us-central1-c", "us-central1-f"],
     "defaultGceVmZone": "us-central1-a"
   },
   "billing": {
