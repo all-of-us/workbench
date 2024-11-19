@@ -82,7 +82,6 @@ export const InitialCreditsPanel = (props: Props) => {
                 }
                 setShowExtendInitialCreditsModal(false);
               }}
-              expirationDate={expirationDate}
             />
           )}
         </FlexRow>

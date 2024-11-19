@@ -13,7 +13,7 @@ import {
 import { Spinner } from 'app/components/spinners';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { displayDateWithoutHours, minusDays } from 'app/utils/dates';
+import { displayDateWithoutHours } from 'app/utils/dates';
 import { notificationStore, serverConfigStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 
@@ -39,12 +39,10 @@ const ExtensionDescription = () => {
 
 interface ExtendInitialCreditsModalProps {
   onClose: Function;
-  expirationDate: number;
 }
 
 export const ExtendInitialCreditsModal = ({
   onClose,
-  expirationDate,
 }: ExtendInitialCreditsModalProps) => {
   const [extending, setExtending] = useState(false);
 
