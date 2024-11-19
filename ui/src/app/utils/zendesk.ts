@@ -22,6 +22,7 @@ interface ZendeskUrls {
   cromwellInformation: string;
   sasHowToRun: string;
   sasExplore: string;
+  initialCredits: string;
 }
 
 const zendeskConfigs = {
@@ -59,6 +60,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
   const category = (id) => `${baseUrl}/categories/${id}`;
   const commonUrls = {
     helpCenter: baseUrl,
+    initialCredits: article('28920849686036'),
     rStudioHowToRun: article('22078658566804'),
     rStudioHowToDataset: article('360039585831'),
     cromwellInformation: article('14428263737620'),

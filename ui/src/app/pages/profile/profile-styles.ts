@@ -71,11 +71,11 @@ export const styles = reactStyles({
   },
   initialCreditsBox: {
     borderRadius: '0.6rem',
-    height: '4.5rem',
     marginTop: '1.05rem',
     marginBottom: '2.55rem',
     color: colors.primary,
     backgroundColor: colorWithWhiteness(colors.disabled, 0.7),
+    padding: '1rem',
   },
   updateSurveyButton: {
     textTransform: 'none',

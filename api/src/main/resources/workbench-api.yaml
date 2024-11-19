@@ -374,9 +374,12 @@ paths:
       description: User requests extension of initial credit expiration period
       operationId: extendInitialCreditExpiration
       responses:
-        204:
+        200:
           description: The user's initial credit expiration period has been extended.
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
         400:
           description: Bad request
           content:
@@ -6986,6 +6989,15 @@ components:
           type: boolean
           default: false
           description: If true, allow for user's initial credits to expire.
+        initialCreditsValidityPeriodDays:
+          type: integer
+          description: The number of days that a user's initial credits are valid for.
+        initialCreditsExtensionPeriodDays:
+          type: integer
+          description: The number of days that a user's initial credits can be extended for.
+        initialCreditsExpirationWarningDays:
+          type: integer
+          description: The number of days before a user's initial credits expire that they will receive a warning.
         blockComplianceTraining:
           type: boolean
           description: Whether users are prevented from accessing the Compliance Training
@@ -8529,6 +8541,11 @@ components:
           default: false
           description: When set to true, the user will not be required to spend their
             initial credits within the expiration period.
+        eligibleForInitialCreditsExtension:
+          type: boolean
+          default: false
+          description: When set to true, the user is eligible to request an extension
+            of their initial credits expiration period.
     AccessModuleStatus:
       required:
       - moduleName
