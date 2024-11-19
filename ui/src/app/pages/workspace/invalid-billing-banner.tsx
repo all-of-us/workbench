@@ -4,6 +4,7 @@ import * as fp from 'lodash';
 import { Profile } from 'generated/fetch';
 
 import { Button, LinkButton } from 'app/components/buttons';
+import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits-modal';
 import { AoU } from 'app/components/text-wrappers';
 import { ToastBanner, ToastType } from 'app/components/toast-banner';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
@@ -23,26 +24,32 @@ interface Props extends NavigationProps {
 }
 
 const InitialCreditsArticleLink = () => (
-  <>
-    "
-    <LinkButton
-      onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}
-    >
-      Using <AoU /> Initial Credits
-    </LinkButton>
-    "
-  </>
+  <LinkButton
+    onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}
+  >
+    Using <AoU /> Initial Credits
+  </LinkButton>
 );
 
 const BillingAccountArticleLink = () => (
+  <LinkButton
+    onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}
+  >
+    Paying for Your Research
+  </LinkButton>
+);
+
+interface ExtensionRequestLinkProps {
+  onClick: Function;
+}
+
+const ExtensionRequestLink = ({ onClick }: ExtensionRequestLinkProps) => (
   <>
-    "
-    <LinkButton
-      onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}
-    >
-      Paying for Your Research
+    You can request an extension{' '}
+    <LinkButton {...{ onClick }} style={{ display: 'inline' }}>
+      here
     </LinkButton>
-    "
+    .
   </>
 );
 
@@ -51,7 +58,10 @@ export const InvalidBillingBanner = fp.flow(
   withUserProfile(),
   withNavigation
 )(({ onClose, navigate, workspace, profileState }: Props) => {
-  const { profile } = profileState;
+  const [profile, setProfile] = React.useState<Profile | undefined>(
+    profileState?.profile
+  );
+  const [showExtensionModal, setShowExtensionModal] = React.useState(false);
   const isCreator =
     workspace && profile && profile.username === workspace.creator;
   const isEligibleForExtension = profile.eligibleForInitialCreditsExtension;
@@ -72,9 +82,10 @@ export const InvalidBillingBanner = fp.flow(
       // Banner 1 in spec
       message = (
         <div>
-          Your initial credits are expiring soon. You can request an extension
-          here. For more information, read the <InitialCreditsArticleLink />{' '}
-          article on the User Support Hub.
+          Your initial credits are expiring soon.{' '}
+          <ExtensionRequestLink onClick={() => setShowExtensionModal(true)} />{' '}
+          For more information, read the <InitialCreditsArticleLink /> article
+          on the User Support Hub.
         </div>
       );
     } else {
@@ -95,9 +106,10 @@ export const InvalidBillingBanner = fp.flow(
         // Banner 3 in spec (changed to trigger modal from here instead of on Profile page)
         message = (
           <div>
-            Your initial credits have expired. You can request an extension
-            here. For more information, read the <InitialCreditsArticleLink />{' '}
-            article on the User Support Hub.
+            Your initial credits have expired.{' '}
+            <ExtensionRequestLink onClick={() => setShowExtensionModal(true)} />{' '}
+            For more information, read the <InitialCreditsArticleLink /> article
+            on the User Support Hub.
           </div>
         );
       } else {
@@ -157,10 +169,20 @@ export const InvalidBillingBanner = fp.flow(
   );
 
   return (
-    <ToastBanner
-      {...{ message, title, footer, onClose }}
-      toastType={ToastType.WARNING}
-      zIndex={500}
-    />
+    <>
+      <ToastBanner
+        {...{ message, title, footer, onClose }}
+        toastType={ToastType.WARNING}
+        zIndex={500}
+      />
+      {showExtensionModal && (
+        <ExtendInitialCreditsModal
+          onClose={(updatedProfile: Profile) => {
+            setShowExtensionModal(false);
+            setProfile(updatedProfile);
+          }}
+        />
+      )}
+    </>
   );
 });
