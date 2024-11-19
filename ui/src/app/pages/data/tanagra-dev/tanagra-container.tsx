@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
+import { DataSet, Domain } from 'generated/fetch';
+
 import { environment } from 'environments/environment';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
+import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { getAccessToken } from 'app/utils/authentication';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -36,6 +39,7 @@ export const TanagraContainer = fp.flow(
   );
   const [modalState, setModalState] = useState(ModalState.None);
   const [exportIds, setExportIds] = useState<ExportResources>();
+  const [exportDataset, setExportDataset] = useState<DataSet>();
   const tanagraUrl = `${
     serverConfigStore.get().config.tanagraBaseUrl
   }/tanagra/ui#/tanagra/underlays/aou${bigqueryDataset}/studies/${namespace}/${splat}${
@@ -47,14 +51,36 @@ export const TanagraContainer = fp.flow(
     navigate(['workspaces', namespace, terraName, 'data']);
   });
 
-  useExportListener((exportResourceIds) => {
-    console.log(exportResourceIds);
+  useExportListener(async (exportResourceIds) => {
     setExportIds(exportResourceIds);
-    setModalState(
-      exportResourceIds.predefinedCriteria.includes('_short_read_wgs')
-        ? ModalState.Extract
-        : ModalState.Export
-    );
+    if (exportResourceIds.predefinedCriteria.includes('_short_read_wgs')) {
+      try {
+        const newDataset = await dataSetApi().createDataSet(
+          workspace.namespace,
+          workspace.terraName,
+          {
+            name: `Tanagra export test ${Date.now()}`,
+            domainValuePairs: [
+              {
+                domain: Domain.WHOLE_GENOME_VARIANT,
+                value: 'VCF Files',
+              },
+            ],
+            conceptSetIds: [],
+            cohortIds: [],
+            prePackagedConceptSet: [],
+          }
+        );
+        if (newDataset) {
+          setExportDataset(newDataset);
+          setModalState(ModalState.Extract);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      setModalState(ModalState.Export);
+    }
   });
 
   return (
@@ -72,7 +98,7 @@ export const TanagraContainer = fp.flow(
         }}
         src={tanagraUrl}
       />
-      {modalState === ModalState.Export && (
+      {!!exportIds && modalState === ModalState.Export && (
         <ExportDatasetModal
           {...{ workspace }}
           closeFunction={() => setExportIds(undefined)}
@@ -81,19 +107,19 @@ export const TanagraContainer = fp.flow(
           tanagraAllParticipantsCohort={exportIds.allParticipantsCohort}
         />
       )}
-      {modalState === ModalState.Extract && (
+      {!!exportIds && modalState === ModalState.Extract && (
         <GenomicExtractionModal
+          dataSet={exportDataset}
           workspaceNamespace={namespace}
           workspaceTerraName={terraName}
-          title={
-            'Would you like to extract genomic variant data as VCF files?'
-          }
+          title={'Would you like to extract genomic variant data as VCF files?'}
           cancelText={'Skip'}
           confirmText={'Extract & Continue'}
           closeFunction={() => setModalState(ModalState.Export)}
           tanagraCohortIds={exportIds.cohortIds}
           tanagraFeatureSetIds={exportIds.featureSetIds}
           tanagraAllParticipantsCohort={exportIds.allParticipantsCohort}
+          tanagraEnabled
         />
       )}
     </div>

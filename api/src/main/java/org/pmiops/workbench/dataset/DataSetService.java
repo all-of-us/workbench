@@ -23,9 +23,9 @@ public interface DataSetService {
 
   DbDataset mustGetDbDataset(long workspaceId, long dataSetId);
 
-  DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId);
+  DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId, boolean isTanagraEnabled);
 
-  DataSet saveDataSet(DbDataset dataset);
+  DataSet saveDataSet(DbDataset dataset, boolean isTanagraEnabled);
 
   DataSet updateDataSet(long workspaceId, long dataSetId, DataSetRequest dataSetRequest);
 

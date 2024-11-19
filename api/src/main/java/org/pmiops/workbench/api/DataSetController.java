@@ -112,15 +112,18 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> createDataSet(
       String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
-    validateDataSetCreateRequest(dataSetRequest);
-    final long workspaceId =
-        workspaceAuthService
-            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-                workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER)
-            .getWorkspaceId();
-    dataSetRequest.setWorkspaceId(workspaceId);
+    DbWorkspace workspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
+    if (!workspace.isUsesTanagra()) {
+      validateDataSetCreateRequest(dataSetRequest);
+    }
+    dataSetRequest.setWorkspaceId(workspace.getWorkspaceId());
     return ResponseEntity.ok(
-        dataSetService.saveDataSet(dataSetRequest, userProvider.get().getUserId()));
+        dataSetService.saveDataSet(
+            dataSetRequest,
+            userProvider.get().getUserId(),
+            workspace.isCDRAndWorkspaceTanagraEnabled()));
   }
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
@@ -504,10 +507,12 @@ public class DataSetController implements DataSetApiDelegate {
 
     try {
       // Empty dataset with only a name set since the extraction jobs needs a datasetName
-      DbDataset emptyDataset = new DbDataset().setName(tanagraGenomicDataRequest.getExportName());
+      DbDataset dataSet =
+          dataSetService.mustGetDbDataset(
+              workspace.getWorkspaceId(), tanagraGenomicDataRequest.getDatasetId());
       return ResponseEntity.ok(
           genomicExtractionService.submitGenomicExtractionJob(
-              workspace, emptyDataset, tanagraGenomicDataRequest));
+              workspace, dataSet, tanagraGenomicDataRequest));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       // Our usage of Terra is an internal implementation detail to the client. Any error returned
       // from Firecloud is either a bug within our Cromwell integration or a backend failure.

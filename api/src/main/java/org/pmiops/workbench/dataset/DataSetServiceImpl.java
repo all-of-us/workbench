@@ -321,19 +321,20 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId) {
+  public DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId, boolean isTanagraEnabled) {
     DbDataset dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     dbDataset.setCreatorId(userId);
-    return saveDataSet(dbDataset);
+    return saveDataSet(dbDataset, isTanagraEnabled);
   }
 
-  @Override
-  public DataSet saveDataSet(DbDataset dataset) {
+  public DataSet saveDataSet(DbDataset dataset, boolean isTanagraEnabled) {
     try {
       dataset.setLastModifiedBy(userProvider.get().getUsername());
       dataset = dataSetDao.save(dataset);
-      userRecentResourceService.updateDataSetEntry(
-          dataset.getWorkspaceId(), dataset.getCreatorId(), dataset.getDataSetId());
+      if (!isTanagraEnabled) {
+        userRecentResourceService.updateDataSetEntry(
+            dataset.getWorkspaceId(), dataset.getCreatorId(), dataset.getDataSetId());
+      }
       return dataSetMapper.dbModelToClient(dataset);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
@@ -359,7 +360,7 @@ public class DataSetServiceImpl implements DataSetService {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
 
-    return saveDataSet(dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock));
+    return saveDataSet(dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock), false);
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here
