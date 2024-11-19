@@ -30,6 +30,7 @@ import {
   maybeDaysRemaining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
+import { displayDateWithoutHours } from 'app/utils/dates';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { ReactComponent as additional } from 'assets/icons/DAR/additional.svg';
@@ -82,7 +83,6 @@ export const styles = reactStyles({
     gridArea: 'explanation',
   },
   completed: {
-    height: '87px',
     padding: '1em',
     marginLeft: '3%',
     marginRight: '3%',
@@ -98,7 +98,6 @@ export const styles = reactStyles({
     fontSize: '14px',
   },
   controlledRenewal: {
-    height: '87px',
     padding: '1em',
     marginLeft: '3%',
     marginRight: '3%',
@@ -114,7 +113,6 @@ export const styles = reactStyles({
     fontSize: '14px',
   },
   selfBypass: {
-    height: '87px',
     padding: '1em',
     marginLeft: '3%',
     marginRight: '3%',
@@ -515,8 +513,10 @@ const ControlledTierRenewalBanner = () => (
     </HashLinkButton>
   </FlexRow>
 );
-
-const CompletionBanner = () => (
+interface CompletionBannerProps {
+  profile: Profile;
+}
+const CompletionBanner = ({ profile }: CompletionBannerProps) => (
   <FlexRow data-test-id='dar-completed' style={styles.completed}>
     <FlexColumn>
       <div style={styles.completedHeader}>
@@ -524,6 +524,11 @@ const CompletionBanner = () => (
       </div>
       <div style={styles.completedText}>
         Researcher Workbench data access is complete.
+      </div>
+      <div style={styles.completedText}>
+        Your credits expire on{' '}
+        {displayDateWithoutHours(profile.initialCreditsExpirationEpochMillis)}{' '}
+        now that you have data access. Learn more here USH link
       </div>
     </FlexColumn>
     <GetStartedButton style={{ marginLeft: 'auto' }} />
@@ -706,7 +711,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
         {ctNeedsRenewal && <ControlledTierRenewalBanner />}
-        {showCompletionBanner && <CompletionBanner />}
+        {showCompletionBanner && <CompletionBanner {...{ profile }} />}
         {unsafeAllowSelfBypass && activeModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
