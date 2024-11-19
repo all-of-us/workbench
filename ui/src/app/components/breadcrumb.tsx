@@ -318,7 +318,7 @@ export const Breadcrumb = fp.flow(
 )((props: Props) => {
   const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
     useState(false);
-  const [workspace, setWorkspace] = React.useState<WorkspaceData | undefined>(
+  const [workspace, setWorkspace] = useState<WorkspaceData | undefined>(
     undefined
   );
 
