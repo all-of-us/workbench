@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { Button, HashLinkButton } from 'app/components/buttons';
+import { Button, HashLinkButton, LinkButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
@@ -33,6 +33,7 @@ import {
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
+import { supportUrls } from 'app/utils/zendesk';
 import { ReactComponent as additional } from 'assets/icons/DAR/additional.svg';
 import { ReactComponent as electronic } from 'assets/icons/DAR/electronic.svg';
 import { ReactComponent as genomic } from 'assets/icons/DAR/genomic.svg';
@@ -528,7 +529,14 @@ const CompletionBanner = ({ profile }: CompletionBannerProps) => (
       <div style={styles.completedText}>
         Your credits expire on{' '}
         {displayDateWithoutHours(profile.initialCreditsExpirationEpochMillis)}{' '}
-        now that you have data access. Learn more here USH link
+        now that you have data access. Learn more{' '}
+        <LinkButton
+          style={{ display: 'inline' }}
+          onClick={() => window.open(supportUrls.initialCredits, '_blank')}
+        >
+          here
+        </LinkButton>
+        .
       </div>
     </FlexColumn>
     <GetStartedButton style={{ marginLeft: 'auto' }} />
