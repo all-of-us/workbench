@@ -4,7 +4,10 @@ import { RuntimeStatus } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { toAnalysisConfig } from 'app/utils/analysis-config';
-import { machineRunningCost, machineStorageCost } from 'app/utils/machines';
+import {
+  machineRunningCostPerHour,
+  machineStorageCostPerHour,
+} from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 import { isVisible } from 'app/utils/runtime-utils';
 import { runtimeDiskStore, runtimeStore, useStore } from 'app/utils/stores';
@@ -18,8 +21,18 @@ export const RuntimeCost = () => {
   }
 
   const analysisConfig = toAnalysisConfig(runtime, gcePersistentDisk);
-  const runningCost = formatUsd(machineRunningCost(analysisConfig));
-  const storageCost = formatUsd(machineStorageCost(analysisConfig));
+  const runningCost = formatUsd(
+    machineRunningCostPerHour({
+      ...analysisConfig,
+      persistentDisk: gcePersistentDisk,
+    })
+  );
+  const storageCost = formatUsd(
+    machineStorageCostPerHour({
+      dataprocConfig: runtime.dataprocConfig,
+      persistentDisk: gcePersistentDisk,
+    })
+  );
 
   // display running cost or stopped (storage) cost
   // Error and Deleted statuses are not included because they're not "visible" [isVisible() = false]

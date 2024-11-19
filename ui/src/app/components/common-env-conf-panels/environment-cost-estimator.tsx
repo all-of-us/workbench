@@ -1,18 +1,19 @@
 import { CSSProperties } from 'react';
 
-import { cond } from '@terra-ui-packages/core-utils';
+import { PersistentDiskRequest } from 'generated/fetch';
+
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import {
-  detachableDiskPricePerMonth,
-  diskConfigPricePerMonth,
-  machineRunningCost,
   machineRunningCostBreakdown,
-  machineStorageCost,
+  machineRunningCostPerHour,
   machineStorageCostBreakdown,
+  machineStorageCostPerHour,
+  persistentDiskPricePerMonth,
+  RunningCost,
 } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 
@@ -54,15 +55,48 @@ export const EnvironmentCostEstimator = ({
   costTextColor = colors.accent,
   style,
 }: Props) => {
-  const { detachedDisk, diskConfig } = analysisConfig;
+  // temp derive from analysisConfig
+  const {
+    computeType,
+    gpuConfig,
+    machine,
+    numNodes,
+    dataprocConfig,
+    diskConfig,
+    detachedDisk,
+  } = analysisConfig;
+
+  // temp derive from analysisConfig
+  // detachable means: is the diskConfig a PD?
+  // - yes when there's an active GceWithPd
+  // detachedDisk is only present when the diskConfig is NOT a PD
+  const persistentDisk: PersistentDiskRequest = diskConfig.detachable
+    ? {
+        name: diskConfig.existingDiskName,
+        size: diskConfig.size,
+        diskType: diskConfig.detachableType,
+      }
+    : detachedDisk;
+
+  const runningCostParams: RunningCost = {
+    dataprocConfig,
+    persistentDisk,
+    computeType,
+    gpuConfig,
+    machine,
+    numNodes,
+  };
   const runningCost =
-    machineRunningCost(analysisConfig) +
+    machineRunningCostPerHour(runningCostParams) +
     (isGKEApp ? GKE_APP_HOURLY_USD_COST_PER_WORKSPACE : 0);
-  const runningCostBreakdown = machineRunningCostBreakdown(analysisConfig);
+  const runningCostBreakdown = machineRunningCostBreakdown(runningCostParams);
   const pausedCost =
-    machineStorageCost(analysisConfig) +
+    machineStorageCostPerHour({ dataprocConfig, persistentDisk }) +
     (isGKEApp ? GKE_APP_HOURLY_USD_COST_PER_WORKSPACE : 0);
-  const pausedCostBreakdown = machineStorageCostBreakdown(analysisConfig);
+  const pausedCostBreakdown = machineStorageCostBreakdown({
+    dataprocConfig,
+    persistentDisk,
+  });
 
   if (isGKEApp) {
     const gkeBaseCost = `${formatUsd(
@@ -76,11 +110,9 @@ export const EnvironmentCostEstimator = ({
     ...styles.cost,
     color: costTextColor,
   };
-  const pdCost = cond(
-    [diskConfig.detachable, () => diskConfigPricePerMonth(diskConfig)],
-    [!!detachedDisk, () => detachableDiskPricePerMonth(detachedDisk)],
-    () => 0
-  );
+  const pdCost = persistentDisk
+    ? persistentDiskPricePerMonth(persistentDisk)
+    : 0;
   return (
     <FlexRow {...{ style }}>
       <FlexColumn style={styles.costSection}>

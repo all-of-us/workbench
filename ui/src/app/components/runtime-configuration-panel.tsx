@@ -32,7 +32,7 @@ import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
-  machineRunningCost,
+  machineRunningCostPerHour,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import {
@@ -197,7 +197,23 @@ export const getErrorsAndWarnings = ({
   };
 
   const runningCostErrors = validate(
-    { currentRunningCost: machineRunningCost(analysisConfig) },
+    {
+      currentRunningCost: machineRunningCostPerHour({
+        ...analysisConfig,
+
+        // temp derive from analysisConfig
+        // detachable means: is the diskConfig a PD?
+        // - yes when there's an active GceWithPd
+        // detachedDisk is only present when the diskConfig is NOT a PD
+        persistentDisk: analysisConfig.diskConfig.detachable
+          ? {
+              name: analysisConfig.diskConfig.existingDiskName,
+              size: analysisConfig.diskConfig.size,
+              diskType: analysisConfig.diskConfig.detachableType,
+            }
+          : analysisConfig.detachedDisk,
+      }),
+    },
     {
       currentRunningCost: runningCostValidatorWithMessage(),
     }
@@ -363,10 +379,9 @@ export const RuntimeConfigurationPanel = fp.flow(
         (analysisConfig.computeType === ComputeType.Dataproc &&
           !analysisConfig.diskConfig.detachable));
 
-    let runtimeCannotBeCreatedExplanation;
-    if (workspace.billingStatus !== BillingStatus.ACTIVE) {
-      runtimeCannotBeCreatedExplanation = BILLING_ACCOUNT_DISABLED_TOOLTIP;
-    }
+    const runtimeCannotBeCreatedExplanation =
+      workspace.billingStatus !== BillingStatus.ACTIVE &&
+      BILLING_ACCOUNT_DISABLED_TOOLTIP;
 
     const runtimeCanBeUpdated =
       runtimeCanBeCreated &&
