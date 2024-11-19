@@ -1,5 +1,4 @@
 import {
-  DataprocConfig,
   Disk,
   DiskType,
   GpuConfig,
@@ -731,19 +730,11 @@ describe(withAnalysisConfigDefaults.name, () => {
         existingDiskName: null,
       };
 
-      // yes it removes 3 fields.  why?
-      const expectedDataprocConfig: DataprocConfig = {
-        ...inputConfig.dataprocConfig,
-        masterMachineType: undefined,
-        masterDiskSize: undefined,
-        numberOfWorkerLocalSSDs: undefined,
-      };
-
       const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
 
       expect(outConfig.computeType).toEqual(ComputeType.Dataproc);
       expect(outConfig.diskConfig).toEqual(expectedDiskConfig);
-      expect(outConfig.dataprocConfig).toEqual(expectedDataprocConfig);
+      expect(outConfig.dataprocConfig).toEqual(inputConfig.dataprocConfig);
       expect(outConfig.gpuConfig).toBeNull();
       expect(outConfig.detachedDisk).toEqual(inputDisk);
 
@@ -757,13 +748,7 @@ describe(withAnalysisConfigDefaults.name, () => {
       );
     });
 
-    const replaceableFields = [
-      'numberOfWorkers',
-      'workerMachineType',
-      'workerDiskSize',
-      'numberOfPreemptibleWorkers',
-    ];
-    it('replaces the replaceableFields with their defaults when dataprocConfig is missing', () => {
+    it('sets dataprocConfig to the preset default when it is missing', () => {
       const inputConfig = {
         ...defaultAnalysisConfig,
         computeType: ComputeType.Dataproc,
@@ -771,33 +756,10 @@ describe(withAnalysisConfigDefaults.name, () => {
       };
 
       const outConfig = withAnalysisConfigDefaults(inputConfig, undefined);
-
-      replaceableFields.forEach((field: string) =>
-        expect(outConfig.dataprocConfig[field]).toEqual(
-          runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig[field]
-        )
+      expect(outConfig.dataprocConfig).toEqual(
+        runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
       );
     });
-
-    test.each(replaceableFields)(
-      "it replaces %s with the default when it's missing",
-      (field: string) => {
-        const inputConfig = {
-          ...defaultAnalysisConfig,
-          computeType: ComputeType.Dataproc,
-          dataprocConfig: {
-            ...defaultAnalysisConfig.dataprocConfig,
-            [field]: undefined,
-          },
-        };
-
-        const outConfig = withAnalysisConfigDefaults(inputConfig, undefined);
-
-        expect(outConfig.dataprocConfig[field]).toEqual(
-          runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig[field]
-        );
-      }
-    );
 
     // same as Standard VM
     it("should replace a missing diskConfig size with the persistent disk's when it exists", () => {

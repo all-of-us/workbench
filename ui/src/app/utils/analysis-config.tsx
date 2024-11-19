@@ -157,9 +157,15 @@ export const withAnalysisConfigDefaults = (
     dataprocConfig = {
       numberOfWorkers:
         dataprocConfig?.numberOfWorkers ?? defaults.numberOfWorkers,
+      masterMachineType:
+        dataprocConfig?.masterMachineType ?? defaults.masterMachineType,
+      masterDiskSize: dataprocConfig?.masterDiskSize ?? defaults.masterDiskSize,
       workerMachineType:
         dataprocConfig?.workerMachineType ?? defaults.workerMachineType,
       workerDiskSize: dataprocConfig?.workerDiskSize ?? defaults.workerDiskSize,
+      numberOfWorkerLocalSSDs:
+        dataprocConfig?.numberOfWorkerLocalSSDs ??
+        defaults.numberOfWorkerLocalSSDs,
       numberOfPreemptibleWorkers:
         dataprocConfig?.numberOfPreemptibleWorkers ??
         defaults.numberOfPreemptibleWorkers,
