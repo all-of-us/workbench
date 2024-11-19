@@ -54,8 +54,7 @@ export const InvalidBillingBanner = fp.flow(
   const { profile } = profileState;
   const isCreator =
     workspace && profile && profile.username === workspace.creator;
-  const isEligibleForExtension =
-    workspace && !workspace.initialCredits.extensionEpochMillis;
+  const isEligibleForExtension = profile.eligibleForInitialCreditsExtension;
   const isExpired =
     workspace && workspace.initialCredits.expirationEpochMillis < Date.now();
   const isExpiringSoon =
@@ -159,8 +158,7 @@ export const InvalidBillingBanner = fp.flow(
 
   return (
     <ToastBanner
-      {...{ message, footer, onClose }}
-      title='This workspace has run out of initial credits'
+      {...{ message, title, footer, onClose }}
       toastType={ToastType.WARNING}
       zIndex={500}
     />
