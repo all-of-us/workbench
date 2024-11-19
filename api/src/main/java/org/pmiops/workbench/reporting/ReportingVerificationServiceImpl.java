@@ -167,11 +167,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                     getUploadResult(
                         snapshot,
                         DatasetConceptSetColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getDatasetConceptSets),
-                    getUploadResult(
-                        snapshot,
-                        LeonardoAppUsageColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getLeonardoAppUsage)));
+                        ReportingSnapshot::getDatasetConceptSets)));
     verifyStopwatch.stop();
     logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
     return result;
