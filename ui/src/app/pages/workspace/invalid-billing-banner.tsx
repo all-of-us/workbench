@@ -53,6 +53,80 @@ const ExtensionRequestLink = ({ onClick }: ExtensionRequestLinkProps) => (
   </>
 );
 
+const whoseCredits = (isCreator: boolean) => {
+  return isCreator ? 'Your' : 'This workspace creator’s';
+};
+
+const workspaceCreatorInformation = (isCreator: boolean) => {
+  return isCreator ? '' : 'This workspace was created by First Name Last Name.';
+};
+
+const whatHappened = (
+  isExhausted: boolean,
+  isExpired: boolean,
+  isExpiringSoon: boolean,
+  isEligibleForExtension: boolean,
+  isCreator: boolean
+) => {
+  const whose = whoseCredits(isCreator);
+  let whatIsHappening: string;
+  if (isExhausted || (isExpired && !isEligibleForExtension)) {
+    whatIsHappening = 'have run out.';
+  } else if (isExpired && isEligibleForExtension) {
+    whatIsHappening = 'have expired.';
+  } else if (isExpiringSoon && isEligibleForExtension) {
+    whatIsHappening = 'are expiring soon.';
+  }
+  return (
+    <>
+      {whose} initial credits {whatIsHappening}
+    </>
+  );
+};
+
+const whatToDo = (
+  isExhausted: boolean,
+  isExpired: boolean,
+  isExpiringSoon: boolean,
+  isEligibleForExtension: boolean,
+  onClick: Function
+) => {
+  if (isExhausted || (isExpired && !isEligibleForExtension)) {
+    return (
+      <>
+        To use the workspace, a valid billing account needs to be provided. To
+        learn more about establishing a billing account, read the{' '}
+        <BillingAccountArticleLink /> article on the User Support Hub.
+      </>
+    );
+  } else {
+    return (
+      <>
+        {isEligibleForExtension && (isExpired || isExpiringSoon) && (
+          <ExtensionRequestLink {...{ onClick }} />
+        )}{' '}
+        For more information, read the <InitialCreditsArticleLink /> article on
+        the User Support Hub.
+      </>
+    );
+  }
+};
+
+const titleText = (
+  isExhausted: boolean,
+  isExpired: boolean,
+  isExpiringSoon: boolean,
+  isEligibleForExtension: boolean
+) => {
+  if (isExhausted || (isExpired && !isEligibleForExtension)) {
+    return 'This workspace is out of initial credits';
+  } else if (isExpired && isEligibleForExtension) {
+    return 'Workspace credits have expired';
+  } else if (isExpiringSoon && isEligibleForExtension) {
+    return 'Workspace credits are expiring soon';
+  }
+};
+
 export const InvalidBillingBanner = fp.flow(
   withCurrentWorkspace(),
   withUserProfile(),
@@ -74,81 +148,37 @@ export const InvalidBillingBanner = fp.flow(
       workspace.initialCredits.expirationEpochMillis,
       -serverConfigStore.get().config.initialCreditsExpirationWarningDays
     ) < Date.now();
-  let message: JSX.Element;
-  let title: string;
-  if (isExpiringSoon && isEligibleForExtension) {
-    title = 'Workspace credits are expiring soon';
-    if (isCreator) {
-      // Banner 1 in spec
-      message = (
-        <div>
-          Your initial credits are expiring soon.{' '}
-          <ExtensionRequestLink onClick={() => setShowExtensionModal(true)} />{' '}
-          For more information, read the <InitialCreditsArticleLink /> article
-          on the User Support Hub.
-        </div>
-      );
-    } else {
-      // Banner 2 in spec
-      message = (
-        <div>
-          This workspace creator’s initial credits are expiring soon. This
-          workspace was created by FIRST NAME LAST NAME. For more information,
-          read the <InitialCreditsArticleLink /> article on the User Support
-          Hub.
-        </div>
-      );
-    }
-  } else if (isExpired) {
-    if (isEligibleForExtension) {
-      title = 'Workspace credits have expired';
-      if (isCreator) {
-        // Banner 3 in spec (changed to trigger modal from here instead of on Profile page)
-        message = (
-          <div>
-            Your initial credits have expired.{' '}
-            <ExtensionRequestLink onClick={() => setShowExtensionModal(true)} />{' '}
-            For more information, read the <InitialCreditsArticleLink /> article
-            on the User Support Hub.
-          </div>
-        );
-      } else {
-        // Banner 4 in spec
-        message = (
-          <div>
-            This workspace creator’s initial credits have expired. This
-            workspace was created by FIRST NAME LAST NAME. For more information,
-            read the <InitialCreditsArticleLink /> article on the User Support
-            Hub.
-          </div>
-        );
-      }
-    } else {
-      title = 'This workspace is out of initial credits';
-      if (isCreator) {
-        // Banner 5 in spec
-        message = (
-          <div>
-            Your initial credits have run out. To use the workspace, a valid
-            billing account needs to be provided. To learn more about
-            establishing a billing account, read the{' '}
-            <BillingAccountArticleLink /> article on the User Support Hub.
-          </div>
-        );
-      } else {
-        // Banner 6 in spec
-        message = (
-          <div>
-            This workspace creator’s initial credits have run out. This
-            workspace was created by FIRST NAME LAST NAME. To use the workspace,
-            a valid billing account needs to be provided. To learn more about
-            establishing a billing account, read the{' '}
-            <BillingAccountArticleLink /> article on the User Support Hub.
-          </div>
-        );
-      }
-    }
-  }
+  const isExhausted = workspace && workspace.initialCredits.exhausted;
+  const title = titleText(
+    isExhausted,
+    isExpired,
+    isExpiringSoon,
+    isEligibleForExtension
+  );
+
+  const workspaceCreatorInformationIfApplicable =
+    workspaceCreatorInformation(isCreator);
+  const whatHappenedMessage = whatHappened(
+    isExhausted,
+    isExpired,
+    isExpiringSoon,
+    isEligibleForExtension,
+    isCreator
+  );
+  const whatToDoMessage = whatToDo(
+    isExhausted,
+    isExpired,
+    isExpiringSoon,
+    isEligibleForExtension,
+    () => setShowExtensionModal(true)
+  );
+
+  const message = (
+    <>
+      {whatHappenedMessage} {workspaceCreatorInformationIfApplicable}
+      {whatToDoMessage}
+    </>
+  );
   const footer = isCreator && (
     <Button
       style={{ height: '38px', width: '70%', fontWeight: 400 }}
