@@ -309,10 +309,6 @@ interface Props {
   routeData: RouteDataStore;
 }
 
-interface State {
-  showInvalidBillingBanner: boolean;
-}
-
 export const Breadcrumb = fp.flow(
   withCurrentWorkspace(),
   withCurrentCohort(),
@@ -335,13 +331,16 @@ export const Breadcrumb = fp.flow(
       setShowInvalidBillingBanner(true);
     } else if (workspace && !props.workspace) {
       setShowInvalidBillingBanner(false);
-    } else if (workspace && props.workspace && workspace != props.workspace) {
+    } else if (workspace && props.workspace && workspace !== props.workspace) {
       // Workspace was reloaded
       if (workspace.billingStatus !== props.workspace.billingStatus) {
         setShowInvalidBillingBanner(
           props.workspace.billingStatus === BillingStatus.INACTIVE
         );
       }
+    }
+    if (props.workspace !== workspace) {
+      setWorkspace(props.workspace);
     }
   }, [props]);
 
