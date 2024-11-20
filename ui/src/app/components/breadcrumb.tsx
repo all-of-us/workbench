@@ -321,12 +321,12 @@ export const Breadcrumb = fp.flow(
 
   useEffect(() => {
     const newShowInvalidBillingBanner =
-      props.workspace?.billingStatus === BillingStatus.INACTIVE;
+      props?.workspace?.billingStatus === BillingStatus.INACTIVE;
 
     if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
       setShowInvalidBillingBanner(newShowInvalidBillingBanner);
     }
-  }, [props.workspace, showInvalidBillingBanner]);
+  }, [props?.workspace]);
 
   const trail = (): Array<BreadcrumbData> => {
     const workspaceMatch = matchPath<MatchParams>(location.pathname, {
