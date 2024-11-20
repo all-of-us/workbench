@@ -199,11 +199,13 @@ export const InvalidBillingBanner = fp.flow(
 
   return (
     <>
-      <ToastBanner
-        {...{ message, title, footer, onClose }}
-        toastType={ToastType.WARNING}
-        zIndex={500}
-      />
+      {((isExpiringSoon && isEligibleForExtension) || isExpired) && (
+        <ToastBanner
+          {...{ message, title, footer, onClose }}
+          toastType={ToastType.WARNING}
+          zIndex={500}
+        />
+      )}
       {showExtensionModal && (
         <ExtendInitialCreditsModal
           onClose={(updatedProfile: Profile) => {
