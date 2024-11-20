@@ -516,32 +516,52 @@ const ControlledTierRenewalBanner = () => (
 );
 interface CompletionBannerProps {
   profile: Profile;
+  initialCreditsValidityPeriodDays: number;
+  initialCreditsExtensionPeriodDays: number;
 }
-const CompletionBanner = ({ profile }: CompletionBannerProps) => (
-  <FlexRow data-test-id='dar-completed' style={styles.completed}>
-    <FlexColumn>
-      <div style={styles.completedHeader}>
-        Thank you for completing all the necessary steps
-      </div>
-      <div style={styles.completedText}>
-        Researcher Workbench data access is complete.
-      </div>
-      <div style={styles.completedText}>
-        Your credits expire on{' '}
-        {displayDateWithoutHours(profile.initialCreditsExpirationEpochMillis)}{' '}
-        now that you have data access. Learn more{' '}
-        <LinkButton
-          style={{ display: 'inline' }}
-          onClick={() => window.open(supportUrls.initialCredits, '_blank')}
-        >
-          here
-        </LinkButton>
-        .
-      </div>
-    </FlexColumn>
-    <GetStartedButton style={{ marginLeft: 'auto' }} />
-  </FlexRow>
-);
+const CompletionBanner = ({
+  profile,
+  initialCreditsValidityPeriodDays,
+  initialCreditsExtensionPeriodDays,
+}: CompletionBannerProps) => {
+  let creditExpirationExplanation: string;
+
+  if (profile.initialCreditsExtensionEpochMillis) {
+    creditExpirationExplanation = `Initially users are given ${initialCreditsValidityPeriodDays} days from when they first gain data access, but since you requested an extension you will have ${initialCreditsExtensionPeriodDays} days.`;
+  } else {
+    creditExpirationExplanation = `This is ${initialCreditsValidityPeriodDays} days from when you first gained data access.`;
+  }
+
+  return (
+    <FlexRow data-test-id='dar-completed' style={styles.completed}>
+      <FlexColumn>
+        <div style={styles.completedHeader}>
+          Thank you for completing all the necessary steps
+        </div>
+        <div style={styles.completedText}>
+          Researcher Workbench data access is complete.
+        </div>
+        <div style={styles.completedText}>
+          Your credits expire on{' '}
+          {displayDateWithoutHours(profile.initialCreditsExpirationEpochMillis)}
+          .
+        </div>
+        <div style={styles.completedText}>{creditExpirationExplanation}</div>
+        <div style={styles.completedText}>
+          Learn more{' '}
+          <LinkButton
+            style={{ display: 'inline' }}
+            onClick={() => window.open(supportUrls.initialCredits, '_blank')}
+          >
+            here
+          </LinkButton>
+          .
+        </div>
+      </FlexColumn>
+      <GetStartedButton style={{ marginLeft: 'auto' }} />
+    </FlexRow>
+  );
+};
 
 // TODO is there a better way?
 const Additional = additional;
@@ -589,7 +609,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // Local Variables
     const { profile, reload } = useStore(profileStore);
     const {
-      config: { unsafeAllowSelfBypass },
+      config: {
+        unsafeAllowSelfBypass,
+        initialCreditsValidityPeriodDays,
+        initialCreditsExtensionPeriodDays,
+      },
     } = useStore(serverConfigStore);
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -719,7 +743,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
         {ctNeedsRenewal && <ControlledTierRenewalBanner />}
-        {showCompletionBanner && <CompletionBanner {...{ profile }} />}
+        {showCompletionBanner && (
+          <CompletionBanner
+            {...{
+              profile,
+              initialCreditsValidityPeriodDays,
+              initialCreditsExtensionPeriodDays,
+            }}
+          />
+        )}
         {unsafeAllowSelfBypass && activeModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
