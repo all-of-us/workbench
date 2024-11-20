@@ -375,6 +375,9 @@ public class InitialCreditsService {
                 + TimeUnit.DAYS.toMillis(
                     workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
     userInitialCreditsExpiration.setExtensionTime(clockNow());
+
+    updateExpirationOfWorkspacesOwnedByUser(user, false);
+
     return userDao.save(user);
   }
 
@@ -419,20 +422,7 @@ public class InitialCreditsService {
         user.getUsername(),
         userInitialCreditsExpiration.getExpirationTime());
 
-    workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            ws ->
-                BillingUtils.isInitialCredits(
-                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .filter(DbWorkspace::isActive)
-        .filter(ws -> !ws.isInitialCreditsExpired())
-        .forEach(
-            ws -> {
-              ws.setInitialCreditsExpired(true);
-              ws.setBillingStatus(BillingStatus.INACTIVE);
-              workspaceDao.save(ws);
-              deleteAppsAndRuntimesInWorkspace(ws);
-            });
+    updateExpirationOfWorkspacesOwnedByUser(user, true);
 
     userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
     userDao.save(user);
@@ -673,5 +663,24 @@ public class InitialCreditsService {
                     Collectors.summingDouble(
                         v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0))));
     return dbCostByCreator;
+  }
+
+  private void updateExpirationOfWorkspacesOwnedByUser(DbUser user, boolean isExpired) {
+    workspaceDao.findAllByCreator(user).stream()
+        .filter(
+            ws ->
+                BillingUtils.isInitialCredits(
+                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .filter(DbWorkspace::isActive)
+        .filter(ws -> ws.isInitialCreditsExpired() != isExpired)
+        .forEach(
+            ws -> {
+              ws.setInitialCreditsExpired(isExpired);
+              ws.setBillingStatus(isExpired ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
+              workspaceDao.save(ws);
+              if (isExpired) {
+                deleteAppsAndRuntimesInWorkspace(ws);
+              }
+            });
   }
 }
