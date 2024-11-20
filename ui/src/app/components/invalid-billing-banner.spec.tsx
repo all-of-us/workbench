@@ -77,15 +77,18 @@ describe('InvalidBillingBanner', () => {
     expiringSoon: boolean,
     ownedByMe: boolean
   ) => {
+    // Set expiration date to be in the past if expired, in the future if not.
+    // If expiring soon, set it to be within the warning threshold, and just outside otherwise.
+    // Expired and expiringSoon are mutually exclusive.
+    const daysUntilExpiration = expired
+      ? -1
+      : warningThresholdDays + (expiringSoon ? -1 : 1);
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       initialCredits: {
         exhausted,
         expired,
-        expirationEpochMillis: plusDays(
-          Date.now(),
-          warningThresholdDays + (expiringSoon ? -1 : 1)
-        ),
+        expirationEpochMillis: plusDays(Date.now(), daysUntilExpiration),
       },
       creator: ownedByMe ? me : someOneElse,
     });
@@ -127,6 +130,33 @@ describe('InvalidBillingBanner', () => {
       'This workspace creator’s initial credits are expiring soon. This workspace was ' +
         'created by First Name Last Name.You can request an extension here. For more information, ' +
         'read the Using All of Us Initial Credits article on the User Support Hub.'
+    );
+  });
+
+  it('should show expired banner with option to extend to eligible user who created the workspace', async () => {
+    setupWorkspace(false, true, false, true);
+    setProfileExtensionEligibility(true);
+
+    component();
+
+    await screen.findByText('Workspace credits have expired');
+    expect(getBannerText()).toMatch(
+      'Your initial credits have expired. You can request an extension here. For more ' +
+        'information, read the Using All of Us Initial Credits article on the User Support Hub.'
+    );
+  });
+
+  it('should show expired banner to user who did not create the workspace but the owner is eligible for extension', async () => {
+    setupWorkspace(false, true, false, false);
+    setProfileExtensionEligibility(true);
+
+    component();
+
+    await screen.findByText('Workspace credits have expired');
+    expect(getBannerText()).toMatch(
+      'This workspace creator’s initial credits have expired. This workspace was created by ' +
+        'First Name Last Name.You can request an extension here. For more information, read the ' +
+        'Using All of Us Initial Credits article on the User Support Hub.'
     );
   });
 
