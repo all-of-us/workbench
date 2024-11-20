@@ -146,7 +146,7 @@ describe('InvalidBillingBanner', () => {
     );
   });
 
-  it('should show expired banner to user who did not create the workspace but the owner is eligible for extension', async () => {
+  it('should show expired banner to user who did not create the workspace and the owner is eligible for extension', async () => {
     setupWorkspace(false, true, false, false);
     setProfileExtensionEligibility(true);
 
@@ -160,11 +160,34 @@ describe('InvalidBillingBanner', () => {
     );
   });
 
-  // it('should display the Content and Signature pages in SIGNED mode if the user is up to date', async () => {
-  //   const { queryByTestId } = component(DuccSignatureState.SIGNED);
-  //   expect(queryByTestId('ducc-content-page')).toBeInTheDocument();
-  //   expect(queryByTestId('ducc-signature-page')).toBeInTheDocument();
-  // });
+  it('should show expired banner with no option to extend to ineligible user who created the workspace', async () => {
+    setupWorkspace(false, true, false, true);
+    setProfileExtensionEligibility(false);
+
+    component();
+
+    await screen.findByText('This workspace is out of initial credits');
+    expect(getBannerText()).toMatch(
+      'Your initial credits have run out. To use the workspace, a valid billing account needs ' +
+        'to be provided. To learn more about establishing a billing account, read the Paying for Your ' +
+        'Research article on the User Support Hub.'
+    );
+  });
+
+  it('should show expired banner to user who did not create the workspace and the owner is not eligible for extension', async () => {
+    setupWorkspace(false, true, false, false);
+    setProfileExtensionEligibility(false);
+
+    component();
+
+    await screen.findByText('This workspace is out of initial credits');
+    expect(getBannerText()).toMatch(
+      'This workspace creator’s initial credits have run out. This workspace was created by ' +
+        'First Name Last Name.To use the workspace, a valid billing account needs to be provided. ' +
+        'To learn more about establishing a billing account, read the Paying for Your Research article ' +
+        'on the User Support Hub.'
+    );
+  });
 
   /* All banners have "initial credits" in the text. Banner text can have one or more links in it.
    * React Testing Library has a hard time finding text that is split across multiple elements
@@ -173,5 +196,6 @@ describe('InvalidBillingBanner', () => {
    * include the plain text and the text found in the links.
    */
 
-  const getBannerText = () => screen.getByText(/initial credits/).textContent;
+  const getBannerText = () =>
+    screen.getAllByText(/initial credits/).pop().textContent;
 });
