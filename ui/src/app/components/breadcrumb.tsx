@@ -318,31 +318,15 @@ export const Breadcrumb = fp.flow(
 )((props: Props) => {
   const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
     useState(false);
-  const [workspace, setWorkspace] = useState<WorkspaceData | undefined>(
-    undefined
-  );
 
   useEffect(() => {
-    if (
-      !workspace &&
-      props.workspace &&
-      props.workspace.billingStatus === BillingStatus.INACTIVE
-    ) {
-      setShowInvalidBillingBanner(true);
-    } else if (workspace && !props.workspace) {
-      setShowInvalidBillingBanner(false);
-    } else if (workspace && props.workspace && workspace !== props.workspace) {
-      // Workspace was reloaded
-      if (workspace.billingStatus !== props.workspace.billingStatus) {
-        setShowInvalidBillingBanner(
-          props.workspace.billingStatus === BillingStatus.INACTIVE
-        );
-      }
+    const newShowInvalidBillingBanner =
+      props.workspace?.billingStatus === BillingStatus.INACTIVE;
+
+    if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
+      setShowInvalidBillingBanner(newShowInvalidBillingBanner);
     }
-    if (props.workspace !== workspace) {
-      setWorkspace(props.workspace);
-    }
-  }, [props]);
+  }, [props.workspace, showInvalidBillingBanner]);
 
   const trail = (): Array<BreadcrumbData> => {
     const workspaceMatch = matchPath<MatchParams>(location.pathname, {
