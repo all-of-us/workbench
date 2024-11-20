@@ -136,11 +136,10 @@ export const InvalidBillingBanner = fp.flow(
     profileState?.profile
   );
   const [showExtensionModal, setShowExtensionModal] = React.useState(false);
-  const isCreator =
-    workspace && profile && profile.username === workspace.creator;
-  const isEligibleForExtension = profile.eligibleForInitialCreditsExtension;
+  const isCreator = profile?.username === workspace?.creator;
+  const isEligibleForExtension = profile?.eligibleForInitialCreditsExtension;
   const isExpired =
-    workspace && workspace.initialCredits.expirationEpochMillis < Date.now();
+    workspace?.initialCredits.expirationEpochMillis < Date.now();
   const isExpiringSoon =
     workspace &&
     !isExpired &&
@@ -148,7 +147,7 @@ export const InvalidBillingBanner = fp.flow(
       workspace.initialCredits.expirationEpochMillis,
       -serverConfigStore.get().config.initialCreditsExpirationWarningDays
     ) < Date.now();
-  const isExhausted = workspace && workspace.initialCredits.exhausted;
+  const isExhausted = workspace?.initialCredits.exhausted;
   const title = titleText(
     isExhausted,
     isExpired,
