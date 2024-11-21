@@ -6492,7 +6492,7 @@ paths:
       tags:
         - vwbEgressAdmin
       description: Registers an egress event detected by VWB Egress System with the Workbench.
-      operationId: logEgressEvent
+      operationId: createVwbEgressEvent
       requestBody:
         description: Egress event request
         content:
