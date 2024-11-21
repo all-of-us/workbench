@@ -321,8 +321,7 @@ public class GenomicExtractionService {
       List<String> personIds,
       String extractionFolder,
       String outputDir,
-      boolean useLegacyWorkflow,
-      String gatkJarUri) {
+      boolean useLegacyWorkflow) {
 
     String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
     if (destinationParts.length != 2) {
@@ -361,6 +360,9 @@ public class GenomicExtractionService {
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"");
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".gatk_override",
+          "\"" + cohortExtractionConfig.legacyVersions.gatkJarUri + "\"");
     } else {
       // Added Nov 2024
       // replaces extraction_uuid and cohort_table_prefix which are now set to this value
@@ -399,7 +401,6 @@ public class GenomicExtractionService {
         // etc
         .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
         .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
-        .put(EXTRACT_WORKFLOW_NAME + ".gatk_override", "\"" + gatkJarUri + "\"")
         .putAll(maybeInputs)
         .build();
   }
@@ -470,8 +471,7 @@ public class GenomicExtractionService {
                             personIds,
                             extractionFolder,
                             outputDir,
-                            useLegacyWorkflow,
-                            versionedConfig.gatkJarUri))
+                            useLegacyWorkflow))
                     .methodConfigVersion(versionedConfig.methodRepoVersion)
                     .methodRepoMethod(createRepoMethodParameter(versionedConfig))
                     .name(extractionUuid)
