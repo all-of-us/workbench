@@ -669,7 +669,7 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getCdrVersionId()).isEqualTo(cdrVersionId);
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
-    assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
+    assertThat(retrievedWorkspace.getCreator().getUserName()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(retrievedWorkspace.getName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getDisplayName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getTerraName()).isEqualTo(testWorkspaceTerraName);
@@ -2102,7 +2102,7 @@ public class WorkspacesControllerTest {
     assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
     assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
     assertThat(clonedConceptSet.getCriteriums()).isEqualTo(originalConceptSet.getCriteriums());
-    assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreator());
+    assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreator().getUserName());
     assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
     assertThat(clonedConceptSet.getLastModifiedTime())
         .isEqualTo(clonedWorkspace.getLastModifiedTime());
@@ -2180,7 +2180,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-    assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
+    assertThat(workspace2.getCreator().getUserName()).isEqualTo(cloner.getUsername());
   }
 
   @Test
@@ -2397,7 +2397,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-    assertThat(clonedWorkspace.getCreator()).isEqualTo(cloner.getUsername());
+    assertThat(clonedWorkspace.getCreator().getUserName()).isEqualTo(cloner.getUsername());
 
     verify(fireCloudService)
         .updateWorkspaceACL(
