@@ -60,8 +60,7 @@
     "cdrv8plus": {
       "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-after_master_merge-177-gbd0a99c-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-test",
-      "methodName": "echo-prototyping",
-      "methodRepoVersion": 3,
+      "methodRepoVersion": 9,
       "methodLogicalVersion": 1
     }
   },
