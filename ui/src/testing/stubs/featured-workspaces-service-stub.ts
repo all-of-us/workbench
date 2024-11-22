@@ -18,7 +18,7 @@ export class FeaturedWorkspacesApiStub extends FeaturedWorkspaceApi {
           return {
             workspace: {
               ...workspace,
-              creator: 'spec@fakeresearch.com',
+              creator: { userName: 'spec@fakeresearch.com' },
               featuredCategory: category as FeaturedWorkspaceCategory,
             },
             accessLevel: WorkspaceAccessLevel.OWNER,
