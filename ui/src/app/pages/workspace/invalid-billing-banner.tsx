@@ -57,8 +57,11 @@ const whoseCredits = (isCreator: boolean) => {
   return isCreator ? 'Your' : 'This workspace creator’s';
 };
 
-const workspaceCreatorInformation = (isCreator: boolean) => {
-  return isCreator ? '' : 'This workspace was created by First Name Last Name.';
+const workspaceCreatorInformation = (
+  isCreator: boolean,
+  creatorUsername: string
+) => {
+  return isCreator ? '' : `This workspace was created by ${creatorUsername}.`;
 };
 
 const whatHappened = (
@@ -155,8 +158,10 @@ export const InvalidBillingBanner = fp.flow(
     isEligibleForExtension
   );
 
-  const workspaceCreatorInformationIfApplicable =
-    workspaceCreatorInformation(isCreator);
+  const workspaceCreatorInformationIfApplicable = workspaceCreatorInformation(
+    isCreator,
+    workspace?.creator
+  );
   const whatHappenedMessage = whatHappened(
     isExhausted,
     isExpired,
