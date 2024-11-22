@@ -61,7 +61,7 @@ const workspaceCreatorInformation = (
   isCreator: boolean,
   creatorUsername: string
 ) => {
-  return isCreator ? '' : `This workspace was created by ${creatorUsername}.`;
+  return isCreator ? '' : `This workspace was created by ${creatorUsername}. `;
 };
 
 const whatHappened = (
