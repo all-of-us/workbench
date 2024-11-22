@@ -48,7 +48,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "displayName", source = "dbWorkspace.name")
   @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "creator.email", source = "dbWorkspace.creator.contactEmail")
   @Mapping(target = "creator.userName", source = "dbWorkspace.creator.username")
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
@@ -123,7 +122,6 @@ public interface WorkspaceMapper {
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
-  @Mapping(target = "creator.email", source = "creator.contactEmail")
   @Mapping(target = "creator.userName", source = "creator.username")
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
