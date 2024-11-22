@@ -201,6 +201,7 @@ public class DataSetServiceImpl implements DataSetService {
               .put("visitOccurrence", Domain.VISIT)
               .put("deviceOccurrence", Domain.DEVICE)
               .put("surveyOccurrence", Domain.SURVEY)
+              .put("zipcodeSocioeconomic", Domain.ZIP_CODE_SOCIOECONOMIC)
               .build());
 
   /*
@@ -1480,7 +1481,7 @@ public class DataSetServiceImpl implements DataSetService {
   /** Validate that the requested resources are contained by the given workspace. */
   private void validateDataSetRequestResources(
       long workspaceId, boolean isTanagraEnabled, DataSetRequest request) {
-    if (isTanagraEnabled) {
+    if (isTanagraEnabled && request.getDataSetId() == null) {
       if (!request.isTanagraAllParticipantsCohort()) {
         tanagraValidateCohortsInWorkspace(request.getTanagraCohortIds());
       }

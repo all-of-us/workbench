@@ -79,6 +79,7 @@ export const TanagraContainer = fp.flow(
         console.error(error);
       }
     } else {
+      setExportDataset(null);
       setModalState(ModalState.Export);
     }
   });
@@ -101,10 +102,14 @@ export const TanagraContainer = fp.flow(
       {!!exportIds && modalState === ModalState.Export && (
         <ExportDatasetModal
           {...{ workspace }}
+          dataset={exportDataset}
           closeFunction={() => setExportIds(undefined)}
           tanagraCohortIds={exportIds.cohortIds}
           tanagraFeatureSetIds={exportIds.featureSetIds}
           tanagraAllParticipantsCohort={exportIds.allParticipantsCohort}
+          tanagraHasWGS={exportIds?.predefinedCriteria?.includes(
+            '_short_read_wgs'
+          )}
         />
       )}
       {!!exportIds && modalState === ModalState.Extract && (
