@@ -36,13 +36,17 @@ const TimeAgoWithVerboseTooltip = (epoch) => {
 };
 
 interface Props {
-  dataSet: DataSet;
+  dataSet?: DataSet;
   workspaceNamespace: string;
   workspaceTerraName: string;
   closeFunction: Function;
   title?: string;
   cancelText?: string;
   confirmText?: string;
+  tanagraCohortIds?: string[];
+  tanagraFeatureSetIds?: string[];
+  tanagraAllParticipantsCohort?: boolean;
+  tanagraEnabled?: boolean;
 }
 
 export const GenomicExtractionModal = ({
@@ -53,6 +57,10 @@ export const GenomicExtractionModal = ({
   title,
   cancelText,
   confirmText,
+  tanagraCohortIds,
+  tanagraFeatureSetIds,
+  tanagraAllParticipantsCohort,
+  tanagraEnabled,
 }: Props) => {
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<{ status: number; message: string }>(null);
@@ -64,7 +72,8 @@ export const GenomicExtractionModal = ({
   );
   const mostRecentExtract: GenomicExtractionJob = fp.flow(
     fp.filter(
-      (extract: GenomicExtractionJob) => extract.datasetName === dataSet.name
+      (extract: GenomicExtractionJob) =>
+        extract.datasetName === (dataSet?.name ?? 'Tanagra export')
     ),
     // This, incidentally to the implementation of orderBy, puts falsey values at the front...
     // ... which is actually what we want, but it's kind of bad to rely on implementation detail
@@ -83,6 +92,37 @@ export const GenomicExtractionModal = ({
     mostRecentExtract && mostRecentExtract.status === TerraJobStatus.SUCCEEDED;
   const failedExtract =
     mostRecentExtract && mostRecentExtract.status === TerraJobStatus.FAILED;
+
+  const onExtractClick = async () => {
+    setLaunching(true);
+    try {
+      const job = tanagraEnabled
+        ? await dataSetApi().extractTanagraGenomicData(
+            workspaceNamespace,
+            workspaceTerraName,
+            {
+              cohortIds: tanagraCohortIds ?? [],
+              featureSetIds: tanagraFeatureSetIds ?? [],
+              datasetId: dataSet?.id,
+              allParticipants: tanagraAllParticipantsCohort,
+            }
+          )
+        : await dataSetApi().extractGenomicData(
+            workspaceNamespace,
+            workspaceTerraName,
+            dataSet.id
+          );
+      mutate(fp.concat(jobs, job));
+      closeFunction();
+    } catch (e) {
+      const errJson = (await e.json().catch(() => {})) || {};
+      setError({
+        status: e.status,
+        message: errJson.message || 'unknown error',
+      });
+    }
+    setLaunching(false);
+  };
 
   return (
     <Modal loading={loading}>
@@ -170,25 +210,7 @@ export const GenomicExtractionModal = ({
           data-test-id='extract-button'
           disabled={loading || isClientError}
           style={{ marginLeft: '0.75rem' }}
-          onClick={async () => {
-            setLaunching(true);
-            try {
-              const job = await dataSetApi().extractGenomicData(
-                workspaceNamespace,
-                workspaceTerraName,
-                dataSet.id
-              );
-              mutate(fp.concat(jobs, job));
-              closeFunction();
-            } catch (e) {
-              const errJson = (await e.json().catch(() => {})) || {};
-              setError({
-                status: e.status,
-                message: errJson.message || 'unknown error',
-              });
-            }
-            setLaunching(false);
-          }}
+          onClick={onExtractClick}
         >
           {confirmText || 'Extract'}
         </Button>
