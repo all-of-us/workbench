@@ -478,8 +478,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
     if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
+      log.info(
+          String.format(
+              "Billing account for workspace %s is already set to %s",
+              workspace.getWorkspaceNamespace(), newBillingAccountName));
       return;
     }
+
+    log.info(
+        String.format(
+            "Updating billing account name for workspace: %s. Old billing account: %s, New billing account: %s",
+            workspace.getWorkspaceNamespace(),
+            workspace.getBillingAccountName(),
+            newBillingAccountName));
 
     if (isInitialCredits(newBillingAccountName, workbenchConfigProvider.get())) {
       fireCloudService.updateBillingAccountAsService(
@@ -495,13 +506,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               workspace.getGoogleProject(), newBillingAccountName);
       if (!projectBillingInfo.getBillingEnabled()) {
         throw new FailedPreconditionException(
-            "Provided billing account is closed. Please provide an open account.");
+            String.format(
+                "Provided billing account %s is closed. Please provide an open account.",
+                newBillingAccountName));
       }
     } catch (IOException | InterruptedException e) {
       throw new ServerErrorException("Timed out while verifying billing account update.", e);
     }
 
     workspace.setBillingAccountName(newBillingAccountName);
+
+    log.info(
+        String.format(
+            "Billing account name of workspace %s set to %s.",
+            workspace.getWorkspaceNamespace(), newBillingAccountName));
 
     if (isInitialCredits(newBillingAccountName, workbenchConfigProvider.get())) {
       DbUser creator = workspace.getCreator();
@@ -511,10 +529,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           hasInitialCreditsRemaining ? BillingStatus.ACTIVE : BillingStatus.INACTIVE);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
       workspace.setInitialCreditsExpired(initialCreditsService.areUserCreditsExpired(creator));
+      log.info(
+          String.format(
+              "Initial credits status of workspace %s was updated.",
+              workspace.getWorkspaceNamespace()));
     } else {
       // At this point, we can assume that a user provided billing account is open since we
       // throw a BadRequestException if a closed one is provided
       workspace.setBillingStatus(BillingStatus.ACTIVE);
+      log.info(
+          String.format(
+              "Billing status of workspace %s set to ACTIVE.", workspace.getWorkspaceNamespace()));
     }
   }
 
