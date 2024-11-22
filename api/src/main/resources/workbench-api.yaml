@@ -7224,7 +7224,7 @@ components:
         cdrVersionId:
           type: string
         creator:
-          type: string
+          $ref: '#/components/schemas/User'
         billingAccountName:
           type: string
         googleBucketName:
