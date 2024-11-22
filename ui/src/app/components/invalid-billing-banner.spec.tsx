@@ -5,7 +5,6 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { ProfileApi } from 'generated/fetch';
 
-import { currentWorkspaceStore } from '../utils/navigation';
 import { screen } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 import { DuccSignatureState } from 'app/components/data-user-code-of-conduct';
@@ -15,6 +14,7 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { plusDays } from 'app/utils/dates';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
