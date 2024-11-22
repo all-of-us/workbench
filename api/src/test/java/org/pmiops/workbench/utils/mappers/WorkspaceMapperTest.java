@@ -191,7 +191,7 @@ public class WorkspaceMapperTest {
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
     assertThat(ws.getNamespace()).isEqualTo(FIRECLOUD_NAMESPACE);
     assertThat(ws.getCdrVersionId()).isEqualTo(Long.toString(CDR_VERSION_ID));
-    assertThat(ws.getCreator()).isEqualTo(CREATOR_EMAIL);
+    assertThat(ws.getCreator().getUserName()).isEqualTo(CREATOR_EMAIL);
     assertThat(ws.getInitialCredits().getExpirationEpochMillis())
         .isEqualTo(INITIAL_CREDITS_EXPIRATION_TIMESTAMP.getTime());
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
