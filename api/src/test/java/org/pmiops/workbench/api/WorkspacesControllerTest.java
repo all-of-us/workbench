@@ -618,7 +618,8 @@ public class WorkspacesControllerTest {
   private Workspace createWorkspaceAndGrantAccess(WorkspaceAccessLevel accessLevel) {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-    stubGetWorkspace(ws.getNamespace(), ws.getTerraName(), ws.getCreator().getUserName(), accessLevel);
+    stubGetWorkspace(
+        ws.getNamespace(), ws.getTerraName(), ws.getCreator().getUserName(), accessLevel);
     return ws;
   }
 
@@ -1248,7 +1249,10 @@ public class WorkspacesControllerTest {
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
           stubGetWorkspace(
-              ws.getNamespace(), ws.getTerraName(), ws.getCreator().getUserName(), WorkspaceAccessLevel.READER);
+              ws.getNamespace(),
+              ws.getTerraName(),
+              ws.getCreator().getUserName(),
+              WorkspaceAccessLevel.READER);
           workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         });
   }
@@ -1264,7 +1268,10 @@ public class WorkspacesControllerTest {
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
           stubGetWorkspace(
-              ws.getNamespace(), ws.getTerraName(), ws.getCreator().getUserName(), WorkspaceAccessLevel.WRITER);
+              ws.getNamespace(),
+              ws.getTerraName(),
+              ws.getCreator().getUserName(),
+              WorkspaceAccessLevel.WRITER);
           workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         });
   }
@@ -2839,7 +2846,10 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(
-        ws.getNamespace(), ws.getTerraName(), ws.getCreator().getUserName(), WorkspaceAccessLevel.OWNER);
+        ws.getNamespace(),
+        ws.getTerraName(),
+        ws.getCreator().getUserName(),
+        WorkspaceAccessLevel.OWNER);
     when(mockInitialCreditsService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
 
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
@@ -2855,7 +2865,10 @@ public class WorkspacesControllerTest {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
           stubGetWorkspace(
-              ws.getNamespace(), ws.getTerraName(), ws.getCreator().getUserName(), WorkspaceAccessLevel.READER);
+              ws.getNamespace(),
+              ws.getTerraName(),
+              ws.getCreator().getUserName(),
+              WorkspaceAccessLevel.READER);
           workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName());
         });
   }
@@ -2865,7 +2878,10 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(
-        ws.getNamespace(), ws.getTerraName(), ws.getCreator().getUserName(), WorkspaceAccessLevel.OWNER);
+        ws.getNamespace(),
+        ws.getTerraName(),
+        ws.getCreator().getUserName(),
+        WorkspaceAccessLevel.OWNER);
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
         workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(0.0d);

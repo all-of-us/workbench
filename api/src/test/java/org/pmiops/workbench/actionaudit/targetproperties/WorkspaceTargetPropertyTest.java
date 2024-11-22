@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.User;
+import org.pmiops.workbench.model.Workspace;
 
 public class WorkspaceTargetPropertyTest {
   private Workspace workspace1;
@@ -45,7 +45,6 @@ public class WorkspaceTargetPropertyTest {
     long now = System.currentTimeMillis();
     User creator = new User();
     creator.setEmail("user@fake-research-aou.org");
-
 
     workspace1 =
         new Workspace()
