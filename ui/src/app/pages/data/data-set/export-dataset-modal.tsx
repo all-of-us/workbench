@@ -120,7 +120,7 @@ export const ExportDatasetModal = ({
       fp.includes(
         PrePackagedConceptSetEnum.WHOLE_GENOME,
         dataset?.prePackagedConceptSet
-      ) || tanagraHasWGS
+      ) || !!tanagraHasWGS
     );
   };
 
