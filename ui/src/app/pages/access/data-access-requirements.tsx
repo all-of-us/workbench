@@ -524,17 +524,9 @@ const CompletionBanner = ({
   initialCreditsValidityPeriodDays,
   initialCreditsExtensionPeriodDays,
 }: CompletionBannerProps) => {
-  let creditExpirationExplanation: string;
-
-  if (profile.initialCreditsExtensionEpochMillis) {
-    creditExpirationExplanation = `Initially users are given ${initialCreditsValidityPeriodDays} days from when they first gain data access, but since you requested an extension you will have ${initialCreditsExtensionPeriodDays} days.`;
-  } else {
-    creditExpirationExplanation = `This is ${initialCreditsValidityPeriodDays} days from when you first gained data access.`;
-  }
-
   return (
     <FlexRow data-test-id='dar-completed' style={styles.completed}>
-      <FlexColumn>
+      <FlexColumn style={{ flex: 0.5 }}>
         <div style={styles.completedHeader}>
           Thank you for completing all the necessary steps
         </div>
@@ -546,7 +538,13 @@ const CompletionBanner = ({
           {displayDateWithoutHours(profile.initialCreditsExpirationEpochMillis)}
           .
         </div>
-        <div style={styles.completedText}>{creditExpirationExplanation}</div>
+        <div style={styles.completedText}>
+          (You have {initialCreditsValidityPeriodDays} days to use credit after
+          gaining data access. You may request extension when it gets closer to
+          credit expiration date, which will extend your credit expiration date
+          to a total of {initialCreditsExtensionPeriodDays} days from the day
+          you gained data access.)
+        </div>
         <div style={styles.completedText}>
           Learn more{' '}
           <LinkButton
