@@ -540,10 +540,10 @@ const CompletionBanner = ({
         </div>
         <div style={styles.completedText}>
           (You have {initialCreditsValidityPeriodDays} days to use credit after
-          gaining data access. You may request extension when it gets closer to
-          credit expiration date, which will extend your credit expiration date
-          to a total of {initialCreditsExtensionPeriodDays} days from the day
-          you gained data access.)
+          gaining data access. You may request an extension when it gets closer
+          to your credit expiration date, which will extend your credit
+          expiration date to a total of {initialCreditsExtensionPeriodDays} days
+          from the day you gained data access.)
         </div>
         <div style={styles.completedText}>
           Learn more{' '}
