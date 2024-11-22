@@ -61,6 +61,7 @@ import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SexAtBirthV2;
 import org.pmiops.workbench.model.SexualOrientationV2;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.YesNoPreferNot;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
@@ -119,6 +120,12 @@ public class TestMockFactory {
     List<ResearchOutcomeEnum> ResearchOutcomeEnumsList = new ArrayList<>();
     ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
+    User creator = new User();
+    creator.setEmail("jay@contact.org");
+    creator.setUserName("jay@unit-test-research-aou.org");
+    creator.setGivenName("Jay");
+    creator.setFamilyName("Tester");
+
     return new Workspace()
         .etag("\"1\"")
         .name(workspaceDisplayName)
@@ -131,7 +138,7 @@ public class TestMockFactory {
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .googleProject(DEFAULT_GOOGLE_PROJECT)
         .creationTime(1588097211621L)
-        .creator("jay@unit-test-research-aou.org")
+        .creator(creator)
         .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())
         .lastModifiedTime(1588097211621L)
         .googleProject(DEFAULT_GOOGLE_PROJECT)
