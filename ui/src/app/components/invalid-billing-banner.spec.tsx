@@ -3,22 +3,18 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { Profile, ProfileApi } from 'generated/fetch';
+import { ProfileApi } from 'generated/fetch';
 
-import { workspaceDataStub } from '../../testing/stubs/workspaces';
-import { InvalidBillingBanner } from '../pages/workspace/invalid-billing-banner';
-import { plusDays } from '../utils/dates';
 import { currentWorkspaceStore } from '../utils/navigation';
 import { screen } from '@testing-library/dom';
 import { render } from '@testing-library/react';
-import {
-  DataUserCodeOfConduct,
-  DuccSignatureState,
-} from 'app/components/data-user-code-of-conduct';
+import { DuccSignatureState } from 'app/components/data-user-code-of-conduct';
+import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { plusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -26,6 +22,7 @@ import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 describe('InvalidBillingBanner', () => {
   const load = jest.fn();
@@ -93,6 +90,16 @@ describe('InvalidBillingBanner', () => {
       creator: ownedByMe ? me : someOneElse,
     });
   };
+
+  /* All banners have "initial credits" in the text. Banner text can have one or more links in it.
+   * React Testing Library has a hard time finding text that is split across multiple elements
+   * (like text and links), so we can't use getByText to find the banner text. Instead, this
+   * function will return the textContent of the element that contains the banner text. This will
+   * include the plain text and the text found in the links.
+   */
+
+  const getBannerText = () =>
+    screen.getAllByText(/initial credits/).pop().textContent;
 
   const setProfileExtensionEligibility = (isEligible: boolean) => {
     profileStore.set({
@@ -188,14 +195,4 @@ describe('InvalidBillingBanner', () => {
         'on the User Support Hub.'
     );
   });
-
-  /* All banners have "initial credits" in the text. Banner text can have one or more links in it.
-   * React Testing Library has a hard time finding text that is split across multiple elements
-   * (like text and links), so we can't use getByText to find the banner text. Instead, this
-   * function will return the textContent of the element that contains the banner text. This will
-   * include the plain text and the text found in the links.
-   */
-
-  const getBannerText = () =>
-    screen.getAllByText(/initial credits/).pop().textContent;
 });
