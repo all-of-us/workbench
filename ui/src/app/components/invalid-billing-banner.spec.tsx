@@ -30,7 +30,7 @@ describe('InvalidBillingBanner', () => {
   const updateCache = jest.fn();
   const warningThresholdDays = 5; // arbitrary
   const me = ProfileStubVariables.PROFILE_STUB.username;
-  const someOneElse = 'not-owner@fake-research-aou.org';
+  const someOneElse = 'someOneElse@fake-research-aou.org';
 
   const component = (
     signatureState: DuccSignatureState = DuccSignatureState.UNSIGNED
@@ -135,7 +135,7 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('Workspace credits are expiring soon');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits are expiring soon. This workspace was ' +
-        'created by First Name Last Name.You can request an extension here. For more information, ' +
+        'created by someOneElse@fake-research-aou.org. You can request an extension here. For more information, ' +
         'read the Using All of Us Initial Credits article on the User Support Hub.'
     );
   });
@@ -162,7 +162,7 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('Workspace credits have expired');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits have expired. This workspace was created by ' +
-        'First Name Last Name.You can request an extension here. For more information, read the ' +
+        'someOneElse@fake-research-aou.org. You can request an extension here. For more information, read the ' +
         'Using All of Us Initial Credits article on the User Support Hub.'
     );
   });
@@ -190,7 +190,7 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits have run out. This workspace was created by ' +
-        'First Name Last Name.To use the workspace, a valid billing account needs to be provided. ' +
+        'someOneElse@fake-research-aou.org. To use the workspace, a valid billing account needs to be provided. ' +
         'To learn more about establishing a billing account, read the Paying for Your Research article ' +
         'on the User Support Hub.'
     );
