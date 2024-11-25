@@ -98,7 +98,8 @@ public class CohortQueryBuilder extends QueryBuilder {
         .build();
   }
 
-  public QueryJobConfiguration buildWGSPersonIdQuery(String personIdQuery) {
+  // This method supports VCF extractions for Tanagra exports
+  public QueryJobConfiguration buildTanagraWGSPersonIdQuery(String personIdQuery) {
     return QueryJobConfiguration.newBuilder(
             personIdQuery
                 + " AND id IN (SELECT id FROM `${projectId}.${dataSetId}.T_ENT_person` WHERE has_whole_genome_variant = true)")

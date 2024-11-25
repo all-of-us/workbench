@@ -1430,7 +1430,7 @@ public class DataSetServiceImpl implements DataSetService {
                 .get()
                 .describeExport(exportPreviewRequest, underlayName)
                 .getEntityIdSql();
-        participantIdQuery = cohortQueryBuilder.buildWGSPersonIdQuery(cohortsQuery);
+        participantIdQuery = cohortQueryBuilder.buildTanagraWGSPersonIdQuery(cohortsQuery);
       } catch (ApiException e) {
         throw new BadRequestException("Bad Request: " + e.getMessage());
       }
