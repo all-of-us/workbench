@@ -428,6 +428,7 @@ public class InitialCreditsService {
         .filter(ws -> !ws.isInitialCreditsExpired())
         .forEach(
             ws -> {
+              logger.info("Setting workspace {} to inactive", ws.getWorkspaceNamespace());
               ws.setInitialCreditsExpired(true);
               ws.setBillingStatus(BillingStatus.INACTIVE);
               workspaceDao.save(ws);

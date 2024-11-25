@@ -643,6 +643,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .filter(ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .forEach(
             ws -> {
+              log.info(
+                  String.format(
+                      "Setting initial credits exhaustion status for workspace %s to %s",
+                      ws.getWorkspaceNamespace(),
+                      exhausted ? BillingStatus.INACTIVE : BillingStatus.ACTIVE));
               ws.setInitialCreditsExhausted(exhausted);
               ws.setBillingStatus(exhausted ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
               workspaceDao.save(ws);
