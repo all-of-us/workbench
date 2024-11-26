@@ -180,7 +180,6 @@ public class WorkbenchConfig {
     public boolean enableJiraTicketingOnFailure;
 
     public abstract static class VersionedConfig {
-      public String gatkJarUri;
       // 'method' values refer to both the stored Method and the generated Method Configuration
       public String methodNamespace;
       public String methodName;
@@ -196,6 +195,7 @@ public class WorkbenchConfig {
 
     // for extraction workflows compatible with CDR v7 and earlier
     public static class LegacyWorkflowConfig extends VersionedConfig {
+      public String gatkJarUri;
       // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
       public int minExtractionScatterTasks;
       public float extractionScatterTasksPerSample;
