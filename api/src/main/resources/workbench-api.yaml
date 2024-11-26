@@ -2326,6 +2326,7 @@ paths:
           description: The egress event was successfully handled.
           content: {}
       x-codegen-request-body-name: request
+
   /v1/admin/users/{userId}/egressBypassWindow:
     get:
       tags:
@@ -6521,6 +6522,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
+  /v2/admin/vwb/egressEvent:
+    post:
+      tags:
+        - vwbEgressAdmin
+      description: Registers an egress event detected by VWB Egress System with the Workbench.
+      operationId: createVwbEgressEvent
+      requestBody:
+        description: Egress event request
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/VwbEgressEventRequest'
+        required: false
+      responses:
+        204:
+          description: The egress event was successfully handled.
+          content: { }
+      x-codegen-request-body-name: request
 components:
   schemas:
     ArchivalStatus:
@@ -13122,6 +13141,46 @@ components:
         expirationEpochMillis:
           type: integer
           format: int64
+    VwbEgressEventRequest:
+      type: object
+      properties:
+        incidentCount:
+          type: integer
+          format: int64
+          description: current incident count for the user in the workspace
+        workspaceId:
+          type: string
+          description: UUID of a VWB workspace
+        egress_mib:
+          type: number
+          description: The total amount of egress detected during the window, in mebibytes
+            (MiB). This total subsumes the per-machine type egress values provided
+            here. The egress threshold is triggered against this value.
+          format: double
+        egress_mib_threshold:
+          type: number
+          description: The threshold value for which this egress triggered an alert,
+            in mebibytes (MiB).
+          format: double
+        gcp_project_id:
+          type: string
+          description: The Google Cloud project name associated with the workspace,
+            e.g. aou-rw-6b66533d. Always present.
+        vm_name:
+          type: string
+          description: The GCE VM that triggered egress alert.
+        time_window_duration:
+          type: integer
+          description: The duration of the time window during which the high-egress
+            event occurred, in seconds.
+          format: int64
+        time_window_start:
+          type: integer
+          description: Beginning of the time window, in milliseconds since Epoch.
+          format: int64
+        userEmail:
+          type: string
+          description: The user that causes egress alert
   parameters:
     userId:
       name: userId

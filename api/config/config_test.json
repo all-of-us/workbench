@@ -126,7 +126,8 @@
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
     "blockComplianceTraining": false,
-    "enableVWBWorkspaceCreation": false
+    "enableVWBWorkspaceCreation": false,
+    "enableVWBEgressMonitor": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -209,6 +210,7 @@
   "vwb": {
     "wsmBaseUrl": "https:\/\/terra-devel-wsm.api.verily.com",
     "organizationId": "79775c0a-3bf7-436a-8ab8-eab316998115",
-    "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b"
+    "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b",
+    "exfilManagerServiceAccount": "workbench-exfil-manager@prj-d-1v-ucd.iam.gserviceaccount.com"
   }
 }

@@ -329,6 +329,8 @@ public class WorkbenchConfig {
 
     // If true, users will be able to create workspace in VWB
     public boolean enableVWBWorkspaceCreation;
+    // If true, AoU API will start accepting egress notification coming from VWB Service
+    public boolean enableVWBEgressMonitor;
   }
 
   public static class ActionAuditConfig {
@@ -477,5 +479,8 @@ public class WorkbenchConfig {
     public String organizationId;
     // This will only be used for preview release, later on, each user will have their own pod.
     public String defaultPodId;
+    // The service account that will be calling AoU API to notify egress alerts. It will be used in
+    // later authZ check.
+    public String exfilManagerServiceAccount;
   }
 }

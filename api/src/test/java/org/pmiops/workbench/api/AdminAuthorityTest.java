@@ -55,6 +55,9 @@ public class AdminAuthorityTest {
       ImmutableSet.of(
           // logEgressEvent requires an API key secret; it's a webhook which cannot use authority
           "logEgressEvent",
+          // createVwbEgressEvent only allow VWB service account to call it. We will handle authZ
+          // seperatly
+          "createVwbEgressEvent",
           // Not technically an admin endpoint, but only enabled in lower environments
           "unsafeSelfBypassAccessRequirements");
 
