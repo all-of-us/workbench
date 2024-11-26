@@ -42,9 +42,9 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
       FirecloudMapper.class,
     })
 public interface WorkspaceResourceMapper {
+  @Mapping(target = "workspaceBillingStatus", ignore = true)
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
-  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   WorkspaceFields fromWorkspace(DbWorkspace dbWorkspace);
