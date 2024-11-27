@@ -96,6 +96,7 @@ public class WsmClient {
       throws InterruptedException, ApiException {
     int retries = 0;
     State state = State.CREATING;
+    // Wait for 2 minutes for the workspace creation before giving up
     do {
       WorkspaceDescription workspaceDescription =
           workspaceServiceApi.get().getWorkspace(workspaceId, null);

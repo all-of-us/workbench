@@ -67,6 +67,7 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
+import org.pmiops.workbench.wsm.WsmClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -95,25 +96,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
 
+  private final WsmClient wsmClient;
+
   @Autowired
   public WorkspacesController(
-      CdrVersionDao cdrVersionDao,
-      Clock clock,
-      FireCloudService fireCloudService,
-      InitialCreditsService initialCreditsService,
-      IamService iamService,
-      Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      TaskQueueService taskQueueService,
-      UserDao userDao,
-      WorkspaceAuditor workspaceAuditor,
-      WorkspaceAuthService workspaceAuthService,
-      WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper,
-      WorkspaceOperationDao workspaceOperationDao,
-      WorkspaceOperationMapper workspaceOperationMapper,
-      WorkspaceResourcesService workspaceResourcesService,
-      WorkspaceService workspaceService) {
+          CdrVersionDao cdrVersionDao,
+          Clock clock,
+          FireCloudService fireCloudService,
+          InitialCreditsService initialCreditsService,
+          IamService iamService,
+          Provider<DbUser> userProvider,
+          Provider<WorkbenchConfig> workbenchConfigProvider,
+          TaskQueueService taskQueueService,
+          UserDao userDao,
+          WorkspaceAuditor workspaceAuditor,
+          WorkspaceAuthService workspaceAuthService,
+          WorkspaceDao workspaceDao,
+          WorkspaceMapper workspaceMapper,
+          WorkspaceOperationDao workspaceOperationDao,
+          WorkspaceOperationMapper workspaceOperationMapper,
+          WorkspaceResourcesService workspaceResourcesService,
+          WorkspaceService workspaceService, WsmClient wsmClient) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -131,6 +134,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceOperationMapper = workspaceOperationMapper;
     this.workspaceResourcesService = workspaceResourcesService;
     this.workspaceService = workspaceService;
+    this.wsmClient = wsmClient;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -275,7 +279,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                             workspaceDao,
                             fireCloudService,
                             initialCreditsService,
-                            workspaceMapper)))
+                            workspaceMapper, wsmClient)))
         .orElse(ResponseEntity.notFound().build());
   }
 
