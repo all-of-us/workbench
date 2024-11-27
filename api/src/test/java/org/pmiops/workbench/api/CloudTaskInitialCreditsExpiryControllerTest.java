@@ -48,7 +48,6 @@ import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -569,10 +568,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     // Simulate the user attaching their own billing account to the previously free tier workspace.
     workspace = workspaceDao.findDbWorkspaceByWorkspaceId(workspace.getWorkspaceId());
-    workspaceDao.save(
-        workspace
-            .setBillingAccountName(fullBillingAccountName("byo-account"))
-            .setBillingStatus(BillingStatus.ACTIVE));
+    workspaceDao.save(workspace.setBillingAccountName(fullBillingAccountName("byo-account")));
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
@@ -594,7 +590,6 @@ class CloudTaskInitialCreditsExpiryControllerTest {
             .setWorkspaceNamespace("some other namespace")
             .setGoogleProject("other project")
             .setBillingAccountName("some other account")
-            .setBillingStatus(BillingStatus.ACTIVE)
             .setInitialCreditsExhausted(false);
     workspaceDao.save(userAccountWorkspace);
 

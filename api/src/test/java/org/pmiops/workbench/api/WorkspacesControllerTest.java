@@ -140,7 +140,6 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
@@ -1173,12 +1172,6 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    DbWorkspace dbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            workspace.getNamespace(),
-            workspace.getTerraName(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doReturn(true)
         .when(mockInitialCreditsService)
         .userHasRemainingFreeTierCredits(
