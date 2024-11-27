@@ -27,11 +27,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
-import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.*;
 
 @Entity
 @SecondaryTable(
@@ -95,6 +91,8 @@ public class DbWorkspace {
 
   private DbFeaturedCategory featuredCategory;
   private boolean usesTanagra;
+
+  private Workspace.LabEnum lab;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -789,5 +787,15 @@ public class DbWorkspace {
   @Transient
   public boolean isCDRAndWorkspaceTanagraEnabled() {
     return usesTanagra && cdrVersion.getTanagraEnabled();
+  }
+
+  @Column(name = "lab")
+  @Enumerated(EnumType.STRING)
+  public Workspace.LabEnum getLab() {
+    return lab;
+  }
+
+  public void setLab(Workspace.LabEnum lab) {
+    this.lab = lab;
   }
 }
