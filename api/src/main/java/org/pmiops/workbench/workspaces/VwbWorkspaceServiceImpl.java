@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.*;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -23,6 +22,8 @@ import org.pmiops.workbench.tanagra.model.FeatureSetList;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.ApiException;
+import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescriptionList;
 import org.slf4j.Logger;
@@ -98,12 +99,12 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
-    return null;
+    throw new UnsupportedOperationException("Not implemented in VWB");
   }
 
   @Override
   public String getPublishedWorkspacesGroupEmail() {
-    return null;
+    throw new UnsupportedOperationException("Not implemented in VWB");
   }
 
   @Override
@@ -175,51 +176,33 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
     return null;
   }
 
-  //    @Override
-  //    public RawlsWorkspaceDetails createWorkspace(Workspace workspace, DbCdrVersion cdrVersion) {
-  //        String workspaceToClone = cdrVersion.getVwbTemplateID();
-  //        WorkspaceDescription workspaceDescription =
-  //                wsmClient.cloneWorkspaceAsService(workspaceToClone, workspace);
-  //        // Need to wait until workspace has been created
-  //        // before sharing it with the user
-  //        String workspaceId = workspaceDescription.getId().toString();
-  //        try {
-  //            wsmClient.waitForWorkspaceCreation(workspaceId);
-  //        } catch (InterruptedException | ApiException e) {
-  //            // How do we recover here?
-  //            throw new WorkbenchException(e);
-  //        }
-  //        wsmClient.shareWorkspaceAsService(workspaceId, workspace.getCreator(), IamRole.OWNER);
-  //        return workspaceMapper.toWorkspaceDetails(workspaceDescription);
-  //    }
-  //
-  //    @Override
-  //    public RawlsWorkspaceDetails cloneWorkspace(
-  //            String fromWorkspaceNamespace,
-  //            String fromWorkspaceId,
-  //            Workspace toWorkspace,
-  //            DbAccessTier accessTier) {
-  //        return null;
-  //    }
-
-  private boolean filterToNonPublished(WorkspaceResponse response) {
-    return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
-        || response.getAccessLevel() == WorkspaceAccessLevel.WRITER
-        || response.getWorkspace().getFeaturedCategory() == null;
+  @Override
+  public RawlsWorkspaceDetails createWorkspace(Workspace workspace, DbCdrVersion cdrVersion) {
+    String workspaceToClone = cdrVersion.getVwbTemplateId();
+    WorkspaceDescription workspaceDescription =
+        wsmClient.cloneWorkspaceAsService(workspaceToClone, workspace);
+    // Need to wait until workspace has been created
+    // before sharing it with the user
+    String workspaceId = workspaceDescription.getId().toString();
+    try {
+      wsmClient.waitForWorkspaceCreation(workspaceId);
+    } catch (InterruptedException | ApiException e) {
+      // If the workspace is still in creating state, how do we recover here since we can't delete
+      // it.
+      // We may need a cron job to check orphaned workspaces and delete them
+      throw new WorkbenchException(e);
+    }
+    wsmClient.shareWorkspaceAsService(workspaceId, workspace.getCreator(), IamRole.OWNER);
+    return workspaceMapper.toWorkspaceDetails(workspaceDescription);
   }
 
-  private List<RawlsWorkspaceListResponse> workspaceResponseListFromWorkspaceDescriptionList(
-      WorkspaceDescriptionList workspaceDescriptionList) {
-    List<RawlsWorkspaceListResponse> responseList = new ArrayList<>();
-    workspaceDescriptionList
-        .getWorkspaces()
-        .forEach(
-            w -> {
-              responseList.add(
-                  new RawlsWorkspaceListResponse()
-                      .accessLevel(firecloudMapper.fromIamRole(w.getHighestRole()))
-                      .workspace(workspaceMapper.toWorkspaceDetails(w)));
-            });
-    return responseList;
+  @Override
+  public RawlsWorkspaceDetails cloneWorkspace(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      Workspace toWorkspace,
+      DbCdrVersion cdrVersion) {
+    return null;
   }
+
 }
