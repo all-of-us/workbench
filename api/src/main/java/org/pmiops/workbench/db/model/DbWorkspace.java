@@ -95,7 +95,6 @@ public class DbWorkspace {
 
   private Boolean isVwbWorkspace;
 
-
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
@@ -800,6 +799,4 @@ public class DbWorkspace {
   public boolean isCDRAndWorkspaceTanagraEnabled() {
     return usesTanagra && cdrVersion.getTanagraEnabled();
   }
-
-
 }
