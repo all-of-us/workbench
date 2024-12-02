@@ -73,7 +73,8 @@ public class WorkspaceMapperTest {
   private static final String WORKSPACE_AOU_NAME = "studyallthethings";
   private static final String WORKSPACE_FIRECLOUD_NAME = "aaaa-bbbb-cccc-dddd";
   private static final String BILLING_ACCOUNT_NAME = "billing-account";
-  private static final String INITIAL_CREDITS_BILLING_ACCOUNT_NAME = "initial-credits-billing-account";
+  private static final String INITIAL_CREDITS_BILLING_ACCOUNT_NAME =
+      "initial-credits-billing-account";
   private static final String GOOGLE_PROJECT = "google_project";
 
   private static final Timestamp DB_CREATION_TIMESTAMP =
@@ -333,7 +334,12 @@ public class WorkspaceMapperTest {
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("dataForWorkspaceBilling")
-  public void testToApiWorkspaceBillingStatus(String testName, String billingAccount, boolean exhausted, boolean expired, BillingStatus expectedStatus) {
+  public void testToApiWorkspaceBillingStatus(
+      String testName,
+      String billingAccount,
+      boolean exhausted,
+      boolean expired,
+      BillingStatus expectedStatus) {
     workbenchConfig.billing.accountId = INITIAL_CREDITS_BILLING_ACCOUNT_NAME;
     sourceDbWorkspace.setInitialCreditsExhausted(exhausted);
     sourceDbWorkspace.setInitialCreditsExpired(expired);
@@ -393,8 +399,7 @@ public class WorkspaceMapperTest {
             BILLING_ACCOUNT_NAME,
             true,
             true,
-            BillingStatus.ACTIVE)
-        );
+            BillingStatus.ACTIVE));
   }
 
   private void assertResearchPurposeMatches(ResearchPurpose rp) {
