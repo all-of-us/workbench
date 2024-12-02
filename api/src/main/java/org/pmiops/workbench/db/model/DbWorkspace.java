@@ -22,6 +22,7 @@ import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -92,7 +93,8 @@ public class DbWorkspace {
   private DbFeaturedCategory featuredCategory;
   private boolean usesTanagra;
 
-  private Workspace.LabEnum lab;
+  private Boolean isVwbWorkspace;
+
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -717,6 +719,16 @@ public class DbWorkspace {
         .toHashCode();
   }
 
+  @Column(name = "is_vwb_workspace")
+  public boolean isVwbWorkspace() {
+    return Optional.ofNullable(isVwbWorkspace).orElse(false);
+  }
+
+  public DbWorkspace setVwbWorkspace(Boolean vwbWorkspace) {
+    isVwbWorkspace = vwbWorkspace;
+    return this;
+  }
+
   /**
    * Preserve the database migration field 'billing_migration_status' for historical purposes, to
    * indicate the status of some older workspaces. All workspaces created going forward have status
@@ -789,13 +801,5 @@ public class DbWorkspace {
     return usesTanagra && cdrVersion.getTanagraEnabled();
   }
 
-  @Column(name = "lab")
-  @Enumerated(EnumType.STRING)
-  public Workspace.LabEnum getLab() {
-    return lab;
-  }
 
-  public void setLab(Workspace.LabEnum lab) {
-    this.lab = lab;
-  }
 }

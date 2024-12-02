@@ -4,11 +4,9 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet author="tarekahmed" id="db.changelog-244-add-lab-column-to-workspace">
+    <changeSet author="tarekahmed" id="db.changelog-244-add-is-vwb-workspace-column">
         <addColumn tableName="workspace">
-            <column name="lab" type="ENUM('AOU', 'VWB')">
-                <constraints nullable="true"/>
-            </column>
+            <column name="is_vwb_workspace" type="boolean" />
         </addColumn>
     </changeSet>
 </databaseChangeLog>

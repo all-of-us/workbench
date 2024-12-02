@@ -7321,12 +7321,10 @@ components:
           type: boolean
           description: Whether a workspace uses Tanagra
           default: false
-        lab:
-          type: string
-          description: the lab that owns the workspace (aou or vwb)
-          enum:
-            - AOU
-            - VWB
+        vwbWorkspace:
+          type: boolean
+          description: whether this workspace is a VWB workspace
+          default: false
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
