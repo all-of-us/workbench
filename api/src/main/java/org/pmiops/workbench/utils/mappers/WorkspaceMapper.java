@@ -59,6 +59,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
+  @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
