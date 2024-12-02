@@ -140,6 +140,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(
       DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService);
