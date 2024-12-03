@@ -1,5 +1,4 @@
 import {
-  DataprocConfig,
   Disk,
   DiskType,
   GpuConfig,

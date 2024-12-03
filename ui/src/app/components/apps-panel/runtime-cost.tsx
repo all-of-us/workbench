@@ -3,8 +3,9 @@ import * as React from 'react';
 import { RuntimeStatus } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { toAnalysisConfig } from 'app/utils/analysis-config';
 import {
+  ComputeType,
+  findMachineByName,
   machineRunningCostPerHour,
   machineStorageCostPerHour,
 } from 'app/utils/machines';
@@ -20,13 +21,25 @@ export const RuntimeCost = () => {
     return null;
   }
 
-  const analysisConfig = toAnalysisConfig(runtime, gcePersistentDisk);
+  const machineType =
+    runtime.gceConfig?.machineType ??
+    runtime.gceWithPdConfig?.machineType ??
+    runtime.dataprocConfig.masterMachineType;
+
   const runningCost = formatUsd(
     machineRunningCostPerHour({
-      ...analysisConfig,
+      dataprocConfig: runtime.dataprocConfig,
       persistentDisk: gcePersistentDisk,
+      computeType: runtime.dataprocConfig
+        ? ComputeType.Dataproc
+        : ComputeType.Standard,
+      machine: findMachineByName(machineType),
+      gpuConfig:
+        // not available for dataproc
+        runtime.gceConfig?.gpuConfig ?? runtime.gceWithPdConfig?.gpuConfig,
     })
   );
+
   const storageCost = formatUsd(
     machineStorageCostPerHour({
       dataprocConfig: runtime.dataprocConfig,

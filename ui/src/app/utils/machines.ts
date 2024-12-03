@@ -519,10 +519,9 @@ export interface RunningCost extends StorageCost {
   computeType: ComputeType;
   machine: Machine;
   gpuConfig: GpuConfig;
-  numNodes?: number;
 }
 export const machineRunningCostPerHour = (props: RunningCost) => {
-  const { computeType, machine, gpuConfig, numNodes, dataprocConfig } = props;
+  const { computeType, machine, gpuConfig, dataprocConfig } = props;
   const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
     dataprocConfig ?? {};
 
@@ -548,7 +547,7 @@ export const machineRunningCostPerHour = (props: RunningCost) => {
       : 0;
   return fp.sum([
     dataprocPrice,
-    machine.price * (numNodes ?? 1),
+    machine.price,
     gpu ? gpu.price : 0,
     machineStorageCostPerHour(props),
   ]);

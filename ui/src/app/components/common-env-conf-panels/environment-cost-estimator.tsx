@@ -1,7 +1,5 @@
 import { CSSProperties } from 'react';
 
-import { PersistentDiskRequest } from 'generated/fetch';
-
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
@@ -56,8 +54,7 @@ export const EnvironmentCostEstimator = ({
   costTextColor = colors.accent,
   style,
 }: Props) => {
-  const { computeType, gpuConfig, machine, numNodes, dataprocConfig } =
-    analysisConfig;
+  const { computeType, gpuConfig, machine, dataprocConfig } = analysisConfig;
 
   // temp derive from analysisConfig
   const persistentDisk = derivePdFromAnalysisConfig(analysisConfig);
@@ -68,7 +65,6 @@ export const EnvironmentCostEstimator = ({
     computeType,
     gpuConfig,
     machine,
-    numNodes,
   };
   const runningCost =
     machineRunningCostPerHour(runningCostParams) +
