@@ -172,7 +172,7 @@ public class TestMockFactory {
         .googleProject(DEFAULT_GOOGLE_PROJECT);
   }
 
-  public static LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
+  public static LeonardoListRuntimeResponse createListRuntimeResponse() {
     return new LeonardoListRuntimeResponse()
         .runtimeName("runtime")
         .cloudContext(
