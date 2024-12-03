@@ -19,13 +19,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import jakarta.persistence.EntityManager;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
@@ -106,13 +104,12 @@ public class ReportingVerificationServiceTest {
         .executeQuery(any(QueryJobConfiguration.class));
 
     logCapturingStream = new ByteArrayOutputStream();
-    Handler[] handlers = LOGGER.getParent().getHandlers();
     customLogHandler = new StreamHandler(logCapturingStream, new SimpleFormatter());
     LOGGER.addHandler(customLogHandler);
   }
 
   @Test
-  public void testVerifyBatch_verified() throws Exception {
+  public void testVerifyBatch_verified() {
     createTableEntries(ACTUAL_COUNT);
     assertThat(
             reportingVerificationService.verifyBatchesAndLog(
@@ -137,7 +134,7 @@ public class ReportingVerificationServiceTest {
   }
 
   @Test
-  public void testVerifyBatch_fail() throws Exception {
+  public void testVerifyBatch_fail() {
     createTableEntries(ACTUAL_COUNT * 2);
     assertThat(
             reportingVerificationService.verifyBatchesAndLog(
@@ -177,7 +174,7 @@ public class ReportingVerificationServiceTest {
   }
 
   /** Gets the captured log. */
-  private static String getTestCapturedLog() throws IOException {
+  private static String getTestCapturedLog() {
     customLogHandler.flush();
     return logCapturingStream.toString();
   }

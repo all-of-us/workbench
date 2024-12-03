@@ -600,6 +600,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   @Override
   public int getAppUsageRowCount(String tableName) {
+    if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
+      return 0;
+    }
+
     var queryString =
         "SELECT count(*) "
             + "FROM `"
