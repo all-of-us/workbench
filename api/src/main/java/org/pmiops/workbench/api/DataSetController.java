@@ -58,6 +58,7 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.ResourceTypeRequest;
+import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapper;
@@ -111,15 +112,18 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> createDataSet(
       String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
-    validateDataSetCreateRequest(dataSetRequest);
-    final long workspaceId =
-        workspaceAuthService
-            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-                workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER)
-            .getWorkspaceId();
-    dataSetRequest.setWorkspaceId(workspaceId);
+    DbWorkspace workspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
+    if (!workspace.isUsesTanagra()) {
+      validateDataSetCreateRequest(dataSetRequest);
+    }
+    dataSetRequest.setWorkspaceId(workspace.getWorkspaceId());
     return ResponseEntity.ok(
-        dataSetService.saveDataSet(dataSetRequest, userProvider.get().getUserId()));
+        dataSetService.saveDataSet(
+            dataSetRequest,
+            userProvider.get().getUserId(),
+            workspace.isCDRAndWorkspaceTanagraEnabled()));
   }
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
@@ -481,7 +485,34 @@ public class DataSetController implements DataSetApiDelegate {
     DbDataset dataSet = dataSetService.mustGetDbDataset(workspace.getWorkspaceId(), dataSetId);
     try {
       return ResponseEntity.ok(
-          genomicExtractionService.submitGenomicExtractionJob(workspace, dataSet));
+          genomicExtractionService.submitGenomicExtractionJob(workspace, dataSet, null));
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      // Our usage of Terra is an internal implementation detail to the client. Any error returned
+      // from Firecloud is either a bug within our Cromwell integration or a backend failure.
+      throw new ServerErrorException(e);
+    }
+  }
+
+  @Override
+  public ResponseEntity<GenomicExtractionJob> extractTanagraGenomicData(
+      String workspaceNamespace,
+      String workspaceTerraName,
+      TanagraGenomicDataRequest tanagraGenomicDataRequest) {
+    DbWorkspace workspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
+    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
+      throw new BadRequestException("Workspace CDR does not have access to WGS data");
+    }
+
+    try {
+      // Empty dataset with only a name set since the extraction jobs needs a datasetName
+      DbDataset dataSet =
+          dataSetService.mustGetDbDataset(
+              workspace.getWorkspaceId(), tanagraGenomicDataRequest.getDatasetId());
+      return ResponseEntity.ok(
+          genomicExtractionService.submitGenomicExtractionJob(
+              workspace, dataSet, tanagraGenomicDataRequest));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       // Our usage of Terra is an internal implementation detail to the client. Any error returned
       // from Firecloud is either a bug within our Cromwell integration or a backend failure.

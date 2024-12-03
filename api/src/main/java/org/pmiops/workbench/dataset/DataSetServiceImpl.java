@@ -89,6 +89,7 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.tanagra.model.EntityOutputPreview;
@@ -200,6 +201,7 @@ public class DataSetServiceImpl implements DataSetService {
               .put("visitOccurrence", Domain.VISIT)
               .put("deviceOccurrence", Domain.DEVICE)
               .put("surveyOccurrence", Domain.SURVEY)
+              .put("zipcodeSocioeconomic", Domain.ZIP_CODE_SOCIOECONOMIC)
               .build());
 
   /*
@@ -320,19 +322,20 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId) {
+  public DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId, boolean isTanagraEnabled) {
     DbDataset dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     dbDataset.setCreatorId(userId);
-    return saveDataSet(dbDataset);
+    return saveDataSet(dbDataset, isTanagraEnabled);
   }
 
-  @Override
-  public DataSet saveDataSet(DbDataset dataset) {
+  public DataSet saveDataSet(DbDataset dataset, boolean isTanagraEnabled) {
     try {
       dataset.setLastModifiedBy(userProvider.get().getUsername());
       dataset = dataSetDao.save(dataset);
-      userRecentResourceService.updateDataSetEntry(
-          dataset.getWorkspaceId(), dataset.getCreatorId(), dataset.getDataSetId());
+      if (!isTanagraEnabled) {
+        userRecentResourceService.updateDataSetEntry(
+            dataset.getWorkspaceId(), dataset.getCreatorId(), dataset.getDataSetId());
+      }
       return dataSetMapper.dbModelToClient(dataset);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
@@ -358,7 +361,7 @@ public class DataSetServiceImpl implements DataSetService {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
 
-    return saveDataSet(dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock));
+    return saveDataSet(dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock), false);
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here
@@ -1401,6 +1404,47 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
+  public List<String> getTanagraPersonIdsWithWholeGenome(
+      DbWorkspace workspace, TanagraGenomicDataRequest tanagraGenomicDataRequest) {
+    List<ParticipantCriteria> participantCriteriaList;
+    final QueryJobConfiguration participantIdQuery;
+    if (Boolean.TRUE.equals(tanagraGenomicDataRequest.isAllParticipants())) {
+      // Select all participants with WGS data.
+      participantCriteriaList =
+          ImmutableList.of(
+              new ParticipantCriteria(
+                  new CohortDefinition().addIncludesItem(createHasWgsSearchGroup())));
+      participantIdQuery =
+          cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
+    } else {
+      try {
+        DataSetRequest dataSetRequest =
+            new DataSetRequest()
+                .tanagraCohortIds(tanagraGenomicDataRequest.getCohortIds())
+                .tanagraFeatureSetIds(tanagraGenomicDataRequest.getFeatureSetIds());
+        ExportPreviewRequest exportPreviewRequest =
+            createExportPreviewRequest(dataSetRequest, workspace);
+        String underlayName = "aou" + workspace.getCdrVersion().getBigqueryDataset();
+        String cohortsQuery =
+            tanagraApiProvider
+                .get()
+                .describeExport(exportPreviewRequest, underlayName)
+                .getEntityIdSql();
+        participantIdQuery = cohortQueryBuilder.buildTanagraWGSPersonIdQuery(cohortsQuery);
+      } catch (ApiException e) {
+        throw new BadRequestException("Bad Request: " + e.getMessage());
+      }
+    }
+
+    return Streams.stream(
+            bigQueryService
+                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
+                .getValues())
+        .map(personId -> personId.get(0).getValue().toString())
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<DomainWithDomainValues> getValueListFromDomain(
       Long conceptSetId, String domainValue) {
     Domain domain =
@@ -1437,7 +1481,7 @@ public class DataSetServiceImpl implements DataSetService {
   /** Validate that the requested resources are contained by the given workspace. */
   private void validateDataSetRequestResources(
       long workspaceId, boolean isTanagraEnabled, DataSetRequest request) {
-    if (isTanagraEnabled) {
+    if (isTanagraEnabled && request.getDataSetId() == null) {
       if (!request.isTanagraAllParticipantsCohort()) {
         tanagraValidateCohortsInWorkspace(request.getTanagraCohortIds());
       }

@@ -172,6 +172,7 @@ export function useExitActionListener(callback: () => void) {
 
 export interface ExportResources {
   allParticipantsCohort: boolean;
+  predefinedCriteria: string[];
   cohortIds: string[];
   featureSetIds: string[];
 }
@@ -184,12 +185,14 @@ export function useExportListener(
     (event: {
       resources: {
         allParticipantsCohort: boolean;
+        predefinedCriteria: string[];
         cohorts: string[];
         featureSets: string[];
       };
     }) =>
       callback({
         allParticipantsCohort: event.resources.allParticipantsCohort,
+        predefinedCriteria: event.resources.predefinedCriteria,
         cohortIds: event.resources.cohorts,
         featureSetIds: event.resources.featureSets,
       })

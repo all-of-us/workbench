@@ -121,7 +121,8 @@
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
     "blockComplianceTraining": false,
-    "enableVWBWorkspaceCreation": false
+    "enableVWBWorkspaceCreation": false,
+    "enableVWBEgressMonitor": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

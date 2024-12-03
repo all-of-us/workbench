@@ -118,12 +118,9 @@ public class CreateTerraMethodSnapshot extends Tool {
       String sourceFileContents =
           resolveRelativeImports(
               getGithubFileContents(sourceGitRepo, sourceGitPath, sourceGitRef),
-              "https://raw.githubusercontent.com/"
-                  + sourceGitRepo
-                  + "/"
-                  + sourceGitRef
-                  + "/"
-                  + sourceGitPathFolder);
+              String.format(
+                  "https://raw.githubusercontent.com/%s/%s/%s",
+                  sourceGitRepo, sourceGitRef, sourceGitPathFolder));
 
       List<FirecloudMethodResponse> existingMethods =
           firecloudApiClientFactory
@@ -135,14 +132,9 @@ public class CreateTerraMethodSnapshot extends Tool {
       formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 
       String snapshotComment =
-          "Sourced from Github (repo, ref, path) ("
-              + sourceGitRepo
-              + ", "
-              + sourceGitRef
-              + ", "
-              + sourceGitPath
-              + ") on "
-              + formatter.format(new Date());
+          String.format(
+              "Sourced from Github (repo, ref, path) (%s, %s, %s) on %s",
+              sourceGitRepo, sourceGitRef, sourceGitPath, formatter.format(new Date()));
       FirecloudMethodQuery newMethodQuery =
           new FirecloudMethodQuery()
               .namespace(methodNamespace)
@@ -207,6 +199,9 @@ public class CreateTerraMethodSnapshot extends Tool {
               + methodResponse.getName()
               + "/"
               + methodResponse.getSnapshotId()
+              + "\n"
+              + "Using source repo commit "
+              + sourceGitRef
               + "\n\n"
               + "New snapshot inputs: \n"
               + methodIO.getInputs().stream()
@@ -227,13 +222,9 @@ public class CreateTerraMethodSnapshot extends Tool {
     Request request =
         new Request.Builder()
             .url(
-                "https://api.github.com"
-                    + "/repos/"
-                    + sourceGitRepo
-                    + "/contents/"
-                    + sourceGitPath
-                    + "?ref="
-                    + sourceGitRef)
+                String.format(
+                    "https://api.github.com/repos/%s/contents/%s?ref=%s",
+                    sourceGitRepo, sourceGitPath, sourceGitRef))
             .addHeader("Accept", "application/vnd.github.v3.raw")
             .build();
 

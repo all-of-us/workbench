@@ -25,6 +25,7 @@ WGS_TABLE_PREFIXES = [
   "pet_", # v1 schema only
   "ref_ranges_", #v2 schema only
   "sample_info",
+  "sample_chromosome_ploidy",
   "vet_"
 ]
 WGS_TABLE_FILTER = prefixes_to_grep_filter(WGS_TABLE_PREFIXES)

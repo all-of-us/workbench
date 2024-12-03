@@ -120,7 +120,8 @@
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": false,
     "blockComplianceTraining": false,
-    "enableVWBWorkspaceCreation": false
+    "enableVWBWorkspaceCreation": false,
+    "enableVWBEgressMonitor": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",

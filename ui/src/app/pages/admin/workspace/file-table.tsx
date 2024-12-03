@@ -47,6 +47,7 @@ export const FileTable = (props: Props) => {
     location: string;
     rawName: string;
     nameCell: JSX.Element;
+    lastModified: string;
     size: string;
   }
 
@@ -69,6 +70,7 @@ export const FileTable = (props: Props) => {
               {...{ file, storageBucketPath, workspaceNamespace, accessReason }}
             />
           ),
+          lastModified: new Date(file.lastModifiedTime).toDateString(),
           size: formatMB(file.sizeInBytes),
         };
       })
@@ -135,6 +137,7 @@ export const FileTable = (props: Props) => {
           >
             <Column field='location' header='Location' />
             <Column field='nameCell' header='Filename' />
+            <Column field='lastModified' header='Last Modified' />
             <Column
               field='size'
               header='File size (MB)'
