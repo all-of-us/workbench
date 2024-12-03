@@ -541,8 +541,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
             + "WHERE active_status = ? \n"
             + "ORDER BY w.workspace_id\n"
-            + "LIMIT %d\n"
-            + "OFFSET %d";
+            + "LIMIT ? \n"
+            + "OFFSET ?";
     return jdbcTemplate.query(
         sql,
         new Object[] {
