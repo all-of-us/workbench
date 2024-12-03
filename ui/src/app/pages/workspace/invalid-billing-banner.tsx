@@ -24,9 +24,7 @@ interface Props extends NavigationProps {
 }
 
 const InitialCreditsArticleLink = () => (
-  <LinkButton
-    onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}
-  >
+  <LinkButton onClick={() => window.open(supportUrls.initialCredits, '_blank')}>
     Using <AoU /> Initial Credits
   </LinkButton>
 );
