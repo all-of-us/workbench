@@ -638,6 +638,14 @@ public class DbWorkspace {
     return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
   }
 
+  @Deprecated(since = "September 2024", forRemoval = true)
+  @Column(name = "billing_status")
+  public BillingStatus getBillingStatus() {
+    return (initialCreditsExhausted || initialCreditsExpired
+        ? BillingStatus.INACTIVE
+        : BillingStatus.ACTIVE);
+  }
+
   public DbWorkspace setBillingStatus(BillingStatus billingStatus) {
     this.billingStatus = DbStorageEnums.billingStatusToStorage(billingStatus);
     return this;
