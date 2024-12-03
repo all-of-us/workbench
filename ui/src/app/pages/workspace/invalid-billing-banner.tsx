@@ -15,12 +15,6 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
 
-enum BannerTypeEnum {
-  EXHAUSTED,
-  EXPIRED_CANNOT_EXTEND,
-  EXPIRED_CAN_EXTEND,
-}
-
 interface Props extends NavigationProps {
   workspace: WorkspaceData;
   profileState: {
