@@ -114,7 +114,11 @@ describe('InvalidBillingBanner', () => {
   };
 
   it('should show expiring soon banner to user who created the workspace', async () => {
-    setupWorkspace(false, false, true, true);
+    const exhausted = false;
+    const expired = false;
+    const expiringSoon = true;
+    const ownedByMe = true;
+    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
     setProfileExtensionEligibility(true);
 
     component();
@@ -127,7 +131,11 @@ describe('InvalidBillingBanner', () => {
   });
 
   it('should show expiring soon banner to user who did not create the workspace', async () => {
-    setupWorkspace(false, false, true, false);
+    const exhausted = false;
+    const expired = false;
+    const expiringSoon = true;
+    const ownedByMe = false;
+    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
     setProfileExtensionEligibility(true);
 
     component();
@@ -141,7 +149,11 @@ describe('InvalidBillingBanner', () => {
   });
 
   it('should show expired banner with option to extend to eligible user who created the workspace', async () => {
-    setupWorkspace(false, true, false, true);
+    const exhausted = false;
+    const expired = true;
+    const expiringSoon = false;
+    const ownedByMe = true;
+    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
     setProfileExtensionEligibility(true);
 
     component();
@@ -154,7 +166,11 @@ describe('InvalidBillingBanner', () => {
   });
 
   it('should show expired banner to user who did not create the workspace and the owner is eligible for extension', async () => {
-    setupWorkspace(false, true, false, false);
+    const exhausted = false;
+    const expired = true;
+    const expiringSoon = false;
+    const ownedByMe = false;
+    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
     setProfileExtensionEligibility(true);
 
     component();
@@ -168,7 +184,11 @@ describe('InvalidBillingBanner', () => {
   });
 
   it('should show expired banner with no option to extend to ineligible user who created the workspace', async () => {
-    setupWorkspace(false, true, false, true);
+    const exhausted = false;
+    const expired = true;
+    const expiringSoon = false;
+    const ownedByMe = true;
+    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
     setProfileExtensionEligibility(false);
 
     component();
@@ -182,7 +202,11 @@ describe('InvalidBillingBanner', () => {
   });
 
   it('should show expired banner to user who did not create the workspace and the owner is not eligible for extension', async () => {
-    setupWorkspace(false, true, false, false);
+    const exhausted = false;
+    const expired = true;
+    const expiringSoon = false;
+    const ownedByMe = false;
+    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
     setProfileExtensionEligibility(false);
 
     component();
