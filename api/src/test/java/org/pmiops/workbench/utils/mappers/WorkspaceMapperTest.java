@@ -2,6 +2,8 @@ package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
+import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -9,8 +11,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.Etags;
@@ -20,6 +26,7 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -48,9 +55,12 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
@@ -63,6 +73,8 @@ public class WorkspaceMapperTest {
   private static final String WORKSPACE_AOU_NAME = "studyallthethings";
   private static final String WORKSPACE_FIRECLOUD_NAME = "aaaa-bbbb-cccc-dddd";
   private static final String BILLING_ACCOUNT_NAME = "billing-account";
+  private static final String INITIAL_CREDITS_BILLING_ACCOUNT_NAME =
+      "initial-credits-billing-account";
   private static final String GOOGLE_PROJECT = "google_project";
 
   private static final Timestamp DB_CREATION_TIMESTAMP =
@@ -80,6 +92,8 @@ public class WorkspaceMapperTest {
 
   private DbWorkspace sourceDbWorkspace;
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
+
+  private static WorkbenchConfig workbenchConfig;
 
   @Autowired private InitialCreditsService initialCreditsService;
   @Autowired private WorkspaceMapper workspaceMapper;
@@ -109,7 +123,14 @@ public class WorkspaceMapperTest {
     WorkspaceFreeTierUsageDao.class,
     WorkspaceInitialCreditUsageService.class
   })
-  static class Configuration {}
+  static class Configuration {
+
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig workbenchConfig() {
+      return workbenchConfig;
+    }
+  }
 
   @BeforeEach
   public void setUp() {
@@ -171,13 +192,14 @@ public class WorkspaceMapperTest {
             .setReviewRequested(false)
             .setApproved(true)
             .setTimeRequested(DB_CREATION_TIMESTAMP)
-            .setBillingStatus(BillingStatus.ACTIVE)
             .setBillingAccountName(BILLING_ACCOUNT_NAME)
             .setSpecificPopulationsEnum(SPECIFIC_POPULATIONS)
             .setResearchOutcomeEnumSet(RESEARCH_OUTCOMES)
             .setDisseminateResearchEnumSet(Collections.emptySet())
             .setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER)
             .setGoogleProject(GOOGLE_PROJECT);
+
+    workbenchConfig = createEmptyConfig();
   }
 
   @Test
@@ -308,6 +330,76 @@ public class WorkspaceMapperTest {
                     initialCreditsService));
 
     assertThat(result).isEmpty();
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("dataForWorkspaceBilling")
+  public void testToApiWorkspaceBillingStatus(
+      String testName,
+      String billingAccount,
+      boolean exhausted,
+      boolean expired,
+      BillingStatus expectedStatus) {
+    workbenchConfig.billing.accountId = INITIAL_CREDITS_BILLING_ACCOUNT_NAME;
+    sourceDbWorkspace.setInitialCreditsExhausted(exhausted);
+    sourceDbWorkspace.setInitialCreditsExpired(expired);
+    sourceDbWorkspace.setBillingAccountName(fullBillingAccountName(billingAccount));
+    Workspace x =
+        workspaceMapper.toApiWorkspace(
+            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService);
+    assertThat(x.getBillingStatus()).isEqualTo(expectedStatus);
+  }
+
+  static Stream<Arguments> dataForWorkspaceBilling() {
+    return Stream.of(
+        Arguments.of(
+            "If the workspace is using initial credits and the credits are neither exhausted or expired, the billing status is active.",
+            INITIAL_CREDITS_BILLING_ACCOUNT_NAME,
+            false,
+            false,
+            BillingStatus.ACTIVE),
+        Arguments.of(
+            "If the workspace is using initial credits and the credits are exhausted, the billing status is inactive.",
+            INITIAL_CREDITS_BILLING_ACCOUNT_NAME,
+            true,
+            false,
+            BillingStatus.INACTIVE),
+        Arguments.of(
+            "If the workspace is using initial credits and the credits are expired, the billing status is inactive.",
+            INITIAL_CREDITS_BILLING_ACCOUNT_NAME,
+            false,
+            true,
+            BillingStatus.INACTIVE),
+        Arguments.of(
+            "If the workspace is using initial credits and the credits are both exhausted and expired, the billing status is inactive.",
+            INITIAL_CREDITS_BILLING_ACCOUNT_NAME,
+            true,
+            true,
+            BillingStatus.INACTIVE),
+        Arguments.of(
+            "If the workspace is not using initial credits and the credits are neither exhausted or expired, the billing status is active.",
+            BILLING_ACCOUNT_NAME,
+            false,
+            false,
+            BillingStatus.ACTIVE),
+        Arguments.of(
+            "If the workspace is not using initial credits and the credits are exhausted, the billing status is active.",
+            BILLING_ACCOUNT_NAME,
+            true,
+            false,
+            BillingStatus.ACTIVE),
+        Arguments.of(
+            "If the workspace is not using initial credits and the credits are expired, the billing status is active.",
+            BILLING_ACCOUNT_NAME,
+            false,
+            true,
+            BillingStatus.ACTIVE),
+        Arguments.of(
+            "If the workspace is not using initial credits and the credits are both exhausted and expired, the billing status is active.",
+            BILLING_ACCOUNT_NAME,
+            true,
+            true,
+            BillingStatus.ACTIVE));
   }
 
   private void assertResearchPurposeMatches(ResearchPurpose rp) {

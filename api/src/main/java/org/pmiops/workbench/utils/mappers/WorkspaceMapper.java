@@ -60,6 +60,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
   @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
+  @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
@@ -141,6 +142,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
+  @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(
       DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService);

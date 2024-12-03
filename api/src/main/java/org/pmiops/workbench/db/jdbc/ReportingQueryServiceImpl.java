@@ -28,9 +28,11 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -494,55 +496,63 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   @Override
   public List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset) {
+    String sql =
+        "SELECT \n"
+            + "  a.short_name AS access_tier_short_name,\n"
+            + "  billing_account_name,\n"
+            + "  CASE \n"
+            + "    WHEN (w.billing_account_name = ? AND (w.initial_credits_exhausted = 1 OR w.initial_credits_expired = 1)) THEN ? \n"
+            + "    ELSE ? \n"
+            + "  END AS billing_status,\n"
+            + "  w.cdr_version_id AS cdr_version_id,\n"
+            + "  w.creation_time AS creation_time,\n"
+            + "  creator_id,\n"
+            + "  disseminate_research_other,\n"
+            + "  fw.category AS featured_workspace_category,\n"
+            + "  last_modified_time,\n"
+            + "  w.name AS name,\n"
+            + "  rp_additional_notes,\n"
+            + "  rp_ancestry,\n"
+            + "  rp_anticipated_findings,\n"
+            + "  rp_approved,\n"
+            + "  rp_commercial_purpose,\n"
+            + "  rp_control_set,\n"
+            + "  rp_disease_focused_research,\n"
+            + "  rp_disease_of_focus,\n"
+            + "  rp_drug_development,\n"
+            + "  rp_educational,\n"
+            + "  rp_ethics,\n"
+            + "  rp_intended_study,\n"
+            + "  rp_methods_development,\n"
+            + "  rp_other_population_details,\n"
+            + "  rp_other_purpose,\n"
+            + "  rp_other_purpose_details,\n"
+            + "  rp_population_health,\n"
+            + "  rp_reason_for_all_of_us,\n"
+            + "  rp_review_requested,\n"
+            + "  rp_scientific_approach,\n"
+            + "  rp_social_behavioral,\n"
+            + "  rp_time_requested,\n"
+            + "  w.workspace_id,\n"
+            + "  workspace_namespace\n"
+            + "FROM workspace w\n"
+            + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
+            + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+            + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
+            + "WHERE active_status = ? \n"
+            + "ORDER BY w.workspace_id\n"
+            + "LIMIT ? \n"
+            + "OFFSET ?";
     return jdbcTemplate.query(
-        String.format(
-            "SELECT \n"
-                + "  a.short_name AS access_tier_short_name,\n"
-                + "  billing_account_name,\n"
-                + "  billing_status,\n"
-                + "  w.cdr_version_id AS cdr_version_id,\n"
-                + "  w.creation_time AS creation_time,\n"
-                + "  creator_id,\n"
-                + "  disseminate_research_other,\n"
-                + "  fw.category AS featured_workspace_category,\n"
-                + "  last_modified_time,\n"
-                + "  w.name AS name,\n"
-                + "  rp_additional_notes,\n"
-                + "  rp_ancestry,\n"
-                + "  rp_anticipated_findings,\n"
-                + "  rp_approved,\n"
-                + "  rp_commercial_purpose,\n"
-                + "  rp_control_set,\n"
-                + "  rp_disease_focused_research,\n"
-                + "  rp_disease_of_focus,\n"
-                + "  rp_drug_development,\n"
-                + "  rp_educational,\n"
-                + "  rp_ethics,\n"
-                + "  rp_intended_study,\n"
-                + "  rp_methods_development,\n"
-                + "  rp_other_population_details,\n"
-                + "  rp_other_purpose,\n"
-                + "  rp_other_purpose_details,\n"
-                + "  rp_population_health,\n"
-                + "  rp_reason_for_all_of_us,\n"
-                + "  rp_review_requested,\n"
-                + "  rp_scientific_approach,\n"
-                + "  rp_social_behavioral,\n"
-                + "  rp_time_requested,\n"
-                + "  w.workspace_id,\n"
-                + "  workspace_namespace\n"
-                + "FROM workspace w\n"
-                + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
-                + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
-                + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
-                + "WHERE active_status = "
-                + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
-                + "\n"
-                + "ORDER BY w.workspace_id\n"
-                + "LIMIT %d\n"
-                + "OFFSET %d",
-            limit,
-            offset),
+        sql,
+        new Object[] {
+          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
+          DbStorageEnums.billingStatusToStorage(BillingStatus.INACTIVE),
+          DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE),
+          workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
+          limit,
+          offset
+        },
         (rs, unused) ->
             new ReportingWorkspace()
                 .accessTierShortName(rs.getString("access_tier_short_name"))
