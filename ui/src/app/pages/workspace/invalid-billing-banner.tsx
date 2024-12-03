@@ -8,7 +8,7 @@ import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits
 import { AoU } from 'app/components/text-wrappers';
 import { ToastBanner, ToastType } from 'app/components/toast-banner';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
-import { minusDays, plusDays } from 'app/utils/dates';
+import { minusDays } from 'app/utils/dates';
 import { NavigationProps } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
