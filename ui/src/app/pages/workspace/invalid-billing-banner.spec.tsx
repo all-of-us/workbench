@@ -7,12 +7,8 @@ import { ProfileApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render } from '@testing-library/react';
-import { DuccSignatureState } from 'app/components/data-user-code-of-conduct';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
-import {
-  profileApi,
-  registerApiClient,
-} from 'app/services/swagger-fetch-clients';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { plusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
