@@ -15,6 +15,12 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
 
+enum BannerTypeEnum {
+  EXHAUSTED,
+  EXPIRED_CANNOT_EXTEND,
+  EXPIRED_CAN_EXTEND,
+}
+
 interface Props extends NavigationProps {
   workspace: WorkspaceData;
   profileState: {
@@ -78,6 +84,8 @@ const whatHappened = (
   } else if (isExpiringSoon && isEligibleForExtension) {
     whatIsHappening = 'are expiring soon.';
   }
+  // The case when isExpiringSoon && !isEligibleForExtension
+  // never happens because the banner is not shown in that case.
   return (
     <>
       {whose} initial credits {whatIsHappening}
