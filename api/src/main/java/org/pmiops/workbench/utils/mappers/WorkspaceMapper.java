@@ -56,7 +56,7 @@ public interface WorkspaceMapper {
   @Mapping(
       target = "initialCredits.extensionEpochMillis",
       source = "dbWorkspace.creator",
-      qualifiedByName = "getInitialCreditsExpiration")
+      qualifiedByName = "getInitialCreditsExtension")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
