@@ -8,6 +8,7 @@ import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import {
+  derivePdFromAnalysisConfig,
   machineRunningCostBreakdown,
   machineRunningCostPerHour,
   machineStorageCostBreakdown,
@@ -55,28 +56,11 @@ export const EnvironmentCostEstimator = ({
   costTextColor = colors.accent,
   style,
 }: Props) => {
-  // temp derive from analysisConfig
-  const {
-    computeType,
-    gpuConfig,
-    machine,
-    numNodes,
-    dataprocConfig,
-    diskConfig,
-    detachedDisk,
-  } = analysisConfig;
+  const { computeType, gpuConfig, machine, numNodes, dataprocConfig } =
+    analysisConfig;
 
   // temp derive from analysisConfig
-  // detachable means: is the diskConfig a PD?
-  // - yes when there's an active GceWithPd
-  // detachedDisk is only present when the diskConfig is NOT a PD
-  const persistentDisk: PersistentDiskRequest = diskConfig.detachable
-    ? {
-        name: diskConfig.existingDiskName,
-        size: diskConfig.size,
-        diskType: diskConfig.detachableType,
-      }
-    : detachedDisk;
+  const persistentDisk = derivePdFromAnalysisConfig(analysisConfig);
 
   const runningCostParams: RunningCost = {
     dataprocConfig,

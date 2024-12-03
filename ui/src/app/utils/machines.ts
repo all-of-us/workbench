@@ -10,6 +10,7 @@ import {
 
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 
+import { AnalysisConfig } from './analysis-config';
 import { formatUsd } from './numbers';
 import { DiskConfig } from './runtime-utils';
 
@@ -429,6 +430,22 @@ const persistentDiskPricePerHour = (disk: PersistentDiskRequest) => {
 
 const dataprocDiskPricePerHour = (size: number) => {
   return diskPricePerMonth({ size }) / approxHoursPerMonth;
+};
+
+// temp until we can stop using AnalysisConfig in locations which need to calculate storage/running costs
+export const derivePdFromAnalysisConfig = (
+  analysisConfig: AnalysisConfig
+): PersistentDiskRequest => {
+  // detachable means: is the diskConfig a PD?
+  // - yes when there's an active GceWithPd
+  // detachedDisk is only present when the diskConfig is NOT a PD
+  return analysisConfig.diskConfig.detachable
+    ? {
+        name: analysisConfig.diskConfig.existingDiskName,
+        size: analysisConfig.diskConfig.size,
+        diskType: analysisConfig.diskConfig.detachableType,
+      }
+    : analysisConfig.detachedDisk;
 };
 
 interface StorageCost {

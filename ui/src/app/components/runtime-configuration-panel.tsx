@@ -32,6 +32,7 @@ import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
+  derivePdFromAnalysisConfig,
   machineRunningCostPerHour,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
@@ -200,18 +201,8 @@ export const getErrorsAndWarnings = ({
     {
       currentRunningCost: machineRunningCostPerHour({
         ...analysisConfig,
-
         // temp derive from analysisConfig
-        // detachable means: is the diskConfig a PD?
-        // - yes when there's an active GceWithPd
-        // detachedDisk is only present when the diskConfig is NOT a PD
-        persistentDisk: analysisConfig.diskConfig.detachable
-          ? {
-              name: analysisConfig.diskConfig.existingDiskName,
-              size: analysisConfig.diskConfig.size,
-              diskType: analysisConfig.diskConfig.detachableType,
-            }
-          : analysisConfig.detachedDisk,
+        persistentDisk: derivePdFromAnalysisConfig(analysisConfig),
       }),
     },
     {
