@@ -24,7 +24,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -230,8 +229,7 @@ public class CloudTaskInitialCreditsExpiryController
   }
 
   private Set<DbUser> getFreeTierActiveWorkspaceCreatorsIn(Set<DbUser> users) {
-    return workspaceDao.findCreatorsByBillingStatusAndBillingAccountNameIn(
-        BillingStatus.ACTIVE,
+    return workspaceDao.findCreatorsByActiveInitialCredits(
         List.of(workbenchConfig.get().billing.initialCreditsBillingAccountName()),
         users);
   }
