@@ -22,16 +22,13 @@ import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
-import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.*;
 
 @Entity
 @SecondaryTable(
@@ -95,6 +92,8 @@ public class DbWorkspace {
 
   private DbFeaturedCategory featuredCategory;
   private boolean usesTanagra;
+
+  private Boolean isVwbWorkspace;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -715,6 +714,16 @@ public class DbWorkspace {
         .append(billingAccountName)
         .append(googleProject)
         .toHashCode();
+  }
+
+  @Column(name = "is_vwb_workspace")
+  public boolean isVwbWorkspace() {
+    return Optional.ofNullable(isVwbWorkspace).orElse(false);
+  }
+
+  public DbWorkspace setVwbWorkspace(Boolean vwbWorkspace) {
+    isVwbWorkspace = vwbWorkspace;
+    return this;
   }
 
   /**

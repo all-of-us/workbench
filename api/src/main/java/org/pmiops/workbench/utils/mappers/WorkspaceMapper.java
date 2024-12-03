@@ -59,6 +59,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
+  @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
   @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
@@ -140,6 +141,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
   @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(
@@ -204,6 +206,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "initialCreditsExpired", ignore = true)
   @Mapping(target = "initialCreditsExhausted", ignore = true)
   @Mapping(target = "usesTanagra", ignore = true)
+  @Mapping(target = "vwbWorkspace", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
