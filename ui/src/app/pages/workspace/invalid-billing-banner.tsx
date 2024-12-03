@@ -202,7 +202,9 @@ export const InvalidBillingBanner = fp.flow(
 
   return (
     <>
-      {((isExpiringSoon && isEligibleForExtension) || isExpired) && (
+      {((isExpiringSoon && isEligibleForExtension) ||
+        isExpired ||
+        isExhausted) && (
         <ToastBanner
           {...{ message, title, footer, onClose }}
           toastType={ToastType.WARNING}
