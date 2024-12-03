@@ -7183,6 +7183,7 @@ components:
       enum:
       - pd-standard
       - pd-ssd
+      - pd-balanced
     Disk:
       required:
       - blockSize

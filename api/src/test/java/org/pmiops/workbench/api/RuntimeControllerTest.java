@@ -797,7 +797,7 @@ public class RuntimeControllerTest {
                 .runtimeConfig(leoGceConfig)
                 .diskConfig(
                     new LeonardoDiskConfig()
-                        .diskType(LeonardoDiskType.SSD)
+                        .diskType(LeonardoDiskType.BALANCED)
                         .name("pd")
                         .blockSize(100)
                         .size(200)));
@@ -805,7 +805,7 @@ public class RuntimeControllerTest {
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
     assertThat(runtime.getGceWithPdConfig().getPersistentDisk())
-        .isEqualTo(new PersistentDiskRequest().diskType(DiskType.SSD).name("pd").size(200));
+        .isEqualTo(new PersistentDiskRequest().diskType(DiskType.BALANCED).name("pd").size(200));
   }
 
   @Test
@@ -1187,7 +1187,7 @@ public class RuntimeControllerTest {
                     .machineType("standard")
                     .persistentDisk(
                         new PersistentDiskRequest()
-                            .diskType(DiskType.SSD)
+                            .diskType(DiskType.STANDARD)
                             .name(getPdName())
                             .size(500))
                     .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))
