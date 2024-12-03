@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { MemoryRouter, Route } from 'react-router';
+import { MemoryRouter } from 'react-router';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 
 import {
   EgressEvent,
@@ -26,9 +27,11 @@ describe('AdminEgressAudit', () => {
       <MemoryRouter
         initialEntries={[`/admin/egress-events/${event.egressEventId}`]}
       >
-        <Route exact path='/admin/egress-events/:eventId'>
-          <AdminEgressAudit hideSpinner={() => {}} showSpinner={() => {}} />
-        </Route>
+        <CompatRouter>
+          <CompatRoute exact path='/admin/egress-events/:eventId'>
+            <AdminEgressAudit hideSpinner={() => {}} showSpinner={() => {}} />
+          </CompatRoute>
+        </CompatRouter>
       </MemoryRouter>
     );
   };
