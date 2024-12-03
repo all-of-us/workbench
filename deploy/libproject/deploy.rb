@@ -120,9 +120,9 @@ def setup_and_enter_docker(cmd_name, opts)
   key_file = Tempfile.new(["#{opts.account}-key", ".json"], colima_path)
   ServiceAccountContext.new(
     opts.project, opts.account, key_file.path).run do
-    common.run_inline %W{docker compose build deploy}
+    common.run_inline %W{docker-compose build deploy}
     common.run_inline %W{
-      docker compose run --rm
+      docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
       -v #{key_file.path}:#{DOCKER_KEY_FILE_PATH}
       deploy deploy/project.rb #{cmd_name}
@@ -391,7 +391,7 @@ Common.register_command({
 
 def docker_clean()
   common = Common.new
-  common.run_inline %W{docker compose down --volumes}
+  common.run_inline %W{docker-compose down --volumes}
 end
 
 Common.register_command({
