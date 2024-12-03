@@ -32,27 +32,15 @@ describe('InvalidBillingBanner', () => {
   const me = ProfileStubVariables.PROFILE_STUB.username;
   const someOneElse = 'someOneElse@fake-research-aou.org';
 
-  const component = (
-    signatureState: DuccSignatureState = DuccSignatureState.UNSIGNED
-  ) =>
+  const component = () =>
     render(
       <MemoryRouter>
-        <InvalidBillingBanner
-          {...{ signatureState }}
-          hideSpinner={() => {}}
-          showSpinner={() => {}}
-        />
+        <InvalidBillingBanner />
       </MemoryRouter>
     );
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
-
-    // Do I need this?
-    reload.mockImplementation(async () => {
-      const newProfile = await profileApi().getMe();
-      profileStore.set({ profile: newProfile, load, reload, updateCache });
-    });
 
     profileStore.set({
       profile: ProfileStubVariables.PROFILE_STUB,
