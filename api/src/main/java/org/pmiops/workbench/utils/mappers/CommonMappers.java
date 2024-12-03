@@ -126,6 +126,7 @@ public class CommonMappers {
       DbUser source, @Context InitialCreditsService initialCreditsService) {
     return initialCreditsService.getCreditsExpiration(source).map(this::timestamp).orElse(null);
   }
+
   @Named("getInitialCreditsExpiration")
   @Nullable
   public Long getInitialCreditsExtension(
