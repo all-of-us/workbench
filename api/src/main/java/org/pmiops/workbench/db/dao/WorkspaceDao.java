@@ -11,7 +11,6 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -114,10 +113,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   @Query(
       "SELECT w.creator FROM DbWorkspace w "
-          + "WHERE w.billingStatus = (:status) AND w.billingAccountName in (:billingAccountNames) AND w.creator in (:creators)")
-  Set<DbUser> findCreatorsByBillingStatusAndBillingAccountNameIn(
-      @Param("status") BillingStatus status,
-      @Param("billingAccountNames") List<String> billingAccountNames,
+          + "WHERE w.billingAccountName in (:initialCreditAccountNames) AND w.creator in (:creators) AND w.initialCreditsExhausted = false AND w.initialCreditsExpired = false")
+  Set<DbUser> findCreatorsByActiveInitialCredits(
+      @Param("initialCreditAccountNames") List<String> initialCreditAccountNames,
       @Param("creators") Set<DbUser> creators);
 
   interface WorkspaceCostView {

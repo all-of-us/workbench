@@ -684,9 +684,7 @@ public class DbWorkspace {
   public boolean equals(Object o) {
     if (this == o) return true;
 
-    if (!(o instanceof DbWorkspace)) return false;
-
-    DbWorkspace workspace = (DbWorkspace) o;
+    if (!(o instanceof DbWorkspace workspace)) return false;
 
     return new EqualsBuilder()
         .append(billingMigrationStatus, workspace.billingMigrationStatus)

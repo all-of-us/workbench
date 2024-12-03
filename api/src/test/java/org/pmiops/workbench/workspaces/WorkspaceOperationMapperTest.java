@@ -3,11 +3,14 @@ package org.pmiops.workbench.workspaces;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
+import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;
@@ -27,13 +30,18 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
 public class WorkspaceOperationMapperTest {
+  private static WorkbenchConfig workbenchConfig;
+
   @Autowired private WorkspaceOperationMapper workspaceOperationMapper;
 
   @Autowired private WorkspaceMapper workspaceMapper;
@@ -51,11 +59,19 @@ public class WorkspaceOperationMapperTest {
     WorkspaceMapperImpl.class,
     WorkspaceOperationMapperImpl.class,
   })
-  @MockBean({
-    FirecloudApiClientFactory.class,
-    FirecloudRetryHandler.class,
-  })
-  static class Configuration {}
+  @MockBean({FirecloudApiClientFactory.class, FirecloudRetryHandler.class})
+  static class Configuration {
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig workbenchConfig() {
+      return workbenchConfig;
+    }
+  }
+
+  @BeforeEach
+  public void setUp() {
+    workbenchConfig = createEmptyConfig();
+  }
 
   @Test
   public void test_toModelWithoutWorkspace() {
