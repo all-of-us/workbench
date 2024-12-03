@@ -230,8 +230,7 @@ public class CloudTaskInitialCreditsExpiryController
 
   private Set<DbUser> getFreeTierActiveWorkspaceCreatorsIn(Set<DbUser> users) {
     return workspaceDao.findCreatorsByActiveInitialCredits(
-        List.of(workbenchConfig.get().billing.initialCreditsBillingAccountName()),
-        users);
+        List.of(workbenchConfig.get().billing.initialCreditsBillingAccountName()), users);
   }
 
   private void deleteAppsAndRuntimesInFreeTierWorkspaces(DbUser user) {
