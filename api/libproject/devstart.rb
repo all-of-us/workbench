@@ -3168,7 +3168,7 @@ def send_email(cmd_name, *args)
   op.add_typed_option(
     '--disable',
     String,
-    ->(opts, v) { opts.disable = true },
+    ->(opts, _) { opts.disable = true },
     'If specified, sends the DISABLE_USER egress email.  Defaults to the SUSPEND_COMPUTE egress email.')
   op.opts.disable = false
 
