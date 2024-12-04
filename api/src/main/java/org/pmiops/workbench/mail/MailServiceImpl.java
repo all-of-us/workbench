@@ -380,7 +380,7 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendEgressRemediationEmail(
-      DbUser dbUser, EgressRemediationAction action, String gkeServiceName)
+      DbUser dbUser, EgressRemediationAction action, @Nullable String gkeServiceName)
       throws MessagingException {
     String remediation = EGRESS_REMEDIATION_ACTION_MAP.get(action);
     String environmentType =
