@@ -15,6 +15,7 @@ import {
 import { cond } from '@terra-ui-packages/core-utils';
 import {
   Button,
+  LinkButton,
   StyledExternalLink,
   StyledRouterLink,
 } from 'app/components/buttons';
@@ -268,6 +269,17 @@ export const WorkspaceAbout = fp.flow(
       }
     }
 
+    get workspaceInitialCreditsExpirationTime(): string {
+      if (this.state?.workspace?.initialCredits) {
+        const asDate = new Date(
+          this.state.workspace.initialCredits.expirationEpochMillis
+        );
+        return asDate.toDateString();
+      } else {
+        return 'Loading...';
+      }
+    }
+
     get workspaceGcpBillingSpendUrl(): string {
       return this.state.workspace
         ? 'https://console.cloud.google.com/billing/' +
@@ -455,18 +467,31 @@ export const WorkspaceAbout = fp.flow(
               {workspace &&
                 WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
                 isUsingFreeTierBillingAccount(workspace) && (
-                  <div style={{ ...styles.infoBox, height: '3.75rem' }}>
-                    <div style={styles.infoBoxHeader}>
-                      Workspace Initial Credit Usage
+                  <>
+                    <div style={{ ...styles.infoBox, height: '3.75rem' }}>
+                      <div style={styles.infoBoxHeader}>
+                        Workspace Initial Credit Usage
+                      </div>
+                      <div style={{ fontSize: '0.75rem' }}>
+                        {this.state.workspaceInitialCreditsUsage !==
+                        undefined ? (
+                          '$' +
+                          this.state.workspaceInitialCreditsUsage.toFixed(2)
+                        ) : (
+                          <Spinner style={{ height: 16, width: 16 }} />
+                        )}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.75rem' }}>
-                      {this.state.workspaceInitialCreditsUsage !== undefined ? (
-                        '$' + this.state.workspaceInitialCreditsUsage.toFixed(2)
-                      ) : (
-                        <Spinner style={{ height: 16, width: 16 }} />
-                      )}
+                    <div style={{ ...styles.infoBox }}>
+                      <div style={styles.infoBoxHeader}>
+                        Workspace Initial Credit Expiration
+                      </div>
+                      <div style={{ fontSize: '0.75rem' }}>
+                        {this.workspaceInitialCreditsExpirationTime}
+                      </div>
+                      <LinkButton>Request Extension</LinkButton>
                     </div>
-                  </div>
+                  </>
                 )}
             </div>
             <div>
