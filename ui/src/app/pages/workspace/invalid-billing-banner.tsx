@@ -243,14 +243,14 @@ export const InvalidBillingBanner = fp.flow(
       {whatToDoMessage}
     </>
   );
-  const footer = isCreator && (
+  const footer = isCreator ? (
     <Button
       style={{ height: '38px', width: '70%', fontWeight: 400 }}
       onClick={() => onEditWorkspace(navigate, onClose, workspace)}
     >
       Edit Workspace
     </Button>
-  );
+  ) : undefined;
 
   return (
     <>
