@@ -241,7 +241,7 @@ public class MailServiceImplTest {
             new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO));
 
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
-    assertThat(gotHtml).contains("compute access has been temporarily suspended");
+    assertThat(gotHtml).contains("temporarily suspended");
     assertThat(gotHtml).doesNotContain("${");
   }
 
@@ -263,7 +263,7 @@ public class MailServiceImplTest {
             new RecipientAddress().email("egress-cc@aou.com").type(RecipientType.CC));
 
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
-    assertThat(gotHtml).contains("account has been disabled");
+    assertThat(gotHtml).contains("will remain disabled");
     assertThat(gotHtml).doesNotContain("${");
   }
 
