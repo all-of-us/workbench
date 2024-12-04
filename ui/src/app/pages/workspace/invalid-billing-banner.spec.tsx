@@ -109,8 +109,10 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits are expiring soon');
     expect(getBannerText()).toMatch(
-      'Your initial credits are expiring soon. You can request an extension here. For more ' +
-        'information, read the Using All of Us Initial Credits article on the User Support Hub.'
+      'Your initial credits are expiring soon. You can setup your billing account by visiting the ' +
+        'Edit Workspace page. If necessary, you can request an extension to your initial credit ' +
+        'expiration date here. For more information, read the Using All of Us Initial Credits article on ' +
+        'the User Support Hub.'
     );
   });
 
@@ -127,8 +129,10 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('Workspace credits are expiring soon');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits are expiring soon. This workspace was ' +
-        'created by someOneElse@fake-research-aou.org. You can request an extension here. For more information, ' +
-        'read the Using All of Us Initial Credits article on the User Support Hub.'
+        'created by someOneElse@fake-research-aou.org. You can setup your billing account by ' +
+        'visiting the Edit Workspace page. If necessary, you can request an extension to your initial ' +
+        'credit expiration date here. For more information, read the Using All of Us Initial Credits ' +
+        'article on the User Support Hub.'
     );
   });
 
@@ -144,8 +148,10 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits have expired');
     expect(getBannerText()).toMatch(
-      'Your initial credits have expired. You can request an extension here. For more ' +
-        'information, read the Using All of Us Initial Credits article on the User Support Hub.'
+      'Your initial credits have expired. You can setup your billing account by visiting the ' +
+        'Edit Workspace page. If necessary, you can request an extension to your initial credit ' +
+        'expiration date here. For more information, read the Using All of Us Initial Credits article on ' +
+        'the User Support Hub.'
     );
   });
 
@@ -161,9 +167,11 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits have expired');
     expect(getBannerText()).toMatch(
-      'This workspace creator’s initial credits have expired. This workspace was created by ' +
-        'someOneElse@fake-research-aou.org. You can request an extension here. For more information, read the ' +
-        'Using All of Us Initial Credits article on the User Support Hub.'
+      'This workspace creator’s initial credits have expired. This workspace was created ' +
+        'by someOneElse@fake-research-aou.org. You can setup your billing account by visiting the ' +
+        'Edit Workspace page. If necessary, you can request an extension to your initial credit ' +
+        'expiration date here. For more information, read the Using All of Us Initial Credits article on ' +
+        'the User Support Hub.'
     );
   });
 

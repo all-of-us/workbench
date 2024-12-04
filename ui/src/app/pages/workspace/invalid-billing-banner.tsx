@@ -15,16 +15,11 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
 
-interface Props extends NavigationProps {
-  workspace: WorkspaceData;
-  profileState: {
-    profile: Profile;
-  };
-  onClose: Function;
-}
-
 const InitialCreditsArticleLink = () => (
-  <LinkButton onClick={() => window.open(supportUrls.initialCredits, '_blank')}>
+  <LinkButton
+    style={{ display: 'inline' }}
+    onClick={() => window.open(supportUrls.initialCredits, '_blank')}
+  >
     Using <AoU /> Initial Credits
   </LinkButton>
 );
@@ -32,19 +27,49 @@ const InitialCreditsArticleLink = () => (
 const BillingAccountArticleLink = () => (
   <LinkButton
     onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}
+    style={{ display: 'inline' }}
   >
     Paying for Your Research
   </LinkButton>
 );
 
-interface ExtensionRequestLinkProps {
-  onClick: Function;
+interface BillingUpdateOptionsProps {
+  onRequestExtension: Function;
+  navigate: Function;
+  onClose: Function;
+  workspace: WorkspaceData;
 }
 
-const ExtensionRequestLink = ({ onClick }: ExtensionRequestLinkProps) => (
+const onEditWorkspace = (
+  navigate: Function,
+  onClose: Function,
+  workspace: WorkspaceData
+) => {
+  onClose();
+  navigate(['workspaces', workspace.namespace, workspace.terraName, 'edit'], {
+    queryParams: {
+      highlightBilling: true,
+    },
+  });
+};
+
+const BillingUpdateOptions = ({
+  onRequestExtension,
+  navigate,
+  onClose,
+  workspace,
+}: BillingUpdateOptionsProps) => (
   <>
-    You can request an extension{' '}
-    <LinkButton {...{ onClick }} style={{ display: 'inline' }}>
+    You can setup your billing account by visiting the{' '}
+    <LinkButton
+      onClick={() => onEditWorkspace(navigate, onClose, workspace)}
+      style={{ display: 'inline' }}
+    >
+      Edit Workspace
+    </LinkButton>{' '}
+    page. If necessary, you can request an extension to your initial credit
+    expiration date{' '}
+    <LinkButton onClick={onRequestExtension} style={{ display: 'inline' }}>
       here
     </LinkButton>
     .
@@ -87,13 +112,26 @@ const whatHappened = (
   );
 };
 
-const whatToDo = (
-  isExhausted: boolean,
-  isExpired: boolean,
-  isExpiringSoon: boolean,
-  isEligibleForExtension: boolean,
-  onClick: Function
-) => {
+interface WhatToDoProps {
+  isExhausted: boolean;
+  isExpired: boolean;
+  isExpiringSoon: boolean;
+  isEligibleForExtension: boolean;
+  onRequestExtension: Function;
+  navigate: Function;
+  onClose: Function;
+  workspace: WorkspaceData;
+}
+const whatToDo = ({
+  isExhausted,
+  isExpired,
+  isExpiringSoon,
+  isEligibleForExtension,
+  onRequestExtension,
+  navigate,
+  onClose,
+  workspace,
+}: WhatToDoProps) => {
   if (isExhausted || (isExpired && !isEligibleForExtension)) {
     return (
       <>
@@ -106,7 +144,9 @@ const whatToDo = (
     return (
       <>
         {isEligibleForExtension && (isExpired || isExpiringSoon) && (
-          <ExtensionRequestLink {...{ onClick }} />
+          <BillingUpdateOptions
+            {...{ onRequestExtension, navigate, onClose, workspace }}
+          />
         )}{' '}
         For more information, read the <InitialCreditsArticleLink /> article on
         the User Support Hub.
@@ -129,6 +169,14 @@ const titleText = (
     return 'Workspace credits are expiring soon';
   }
 };
+
+interface Props extends NavigationProps {
+  workspace: WorkspaceData;
+  profileState: {
+    profile: Profile;
+  };
+  onClose: Function;
+}
 
 export const InvalidBillingBanner = fp.flow(
   withCurrentWorkspace(),
@@ -169,13 +217,18 @@ export const InvalidBillingBanner = fp.flow(
     isEligibleForExtension,
     isCreator
   );
-  const whatToDoMessage = whatToDo(
-    isExhausted,
-    isExpired,
-    isExpiringSoon,
-    isEligibleForExtension,
-    () => setShowExtensionModal(true)
-  );
+  const whatToDoMessage = whatToDo({
+    ...{
+      isExhausted,
+      isExpired,
+      isExpiringSoon,
+      isEligibleForExtension,
+      navigate,
+      onClose,
+      workspace,
+    },
+    onRequestExtension: () => setShowExtensionModal(true),
+  });
 
   const message = (
     <>
@@ -186,17 +239,7 @@ export const InvalidBillingBanner = fp.flow(
   const footer = isCreator && (
     <Button
       style={{ height: '38px', width: '70%', fontWeight: 400 }}
-      onClick={() => {
-        onClose();
-        navigate(
-          ['workspaces', workspace.namespace, workspace.terraName, 'edit'],
-          {
-            queryParams: {
-              highlightBilling: true,
-            },
-          }
-        );
-      }}
+      onClick={() => onEditWorkspace(navigate, onClose, workspace)}
     >
       Edit Workspace
     </Button>
