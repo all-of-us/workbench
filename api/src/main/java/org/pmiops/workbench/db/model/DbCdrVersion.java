@@ -63,7 +63,7 @@ public class DbCdrVersion {
 
   private Boolean needsV8GenomicExtractionWorkflow;
 
-  private String vwbTemplateID;
+  private String vwbTemplateId;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -509,12 +509,12 @@ public class DbCdrVersion {
   }
 
   @Column(name = "vwb_template_id")
-  public String getVwbTemplateID() {
-    return vwbTemplateID;
+  public String getVwbTemplateId() {
+    return vwbTemplateId;
   }
 
-  public DbCdrVersion setVwbTemplateID(String vwbTemplateID) {
-    this.vwbTemplateID = vwbTemplateID;
+  public DbCdrVersion setVwbTemplateId(String vwbTemplateId) {
+    this.vwbTemplateId = vwbTemplateId;
     return this;
   }
 
@@ -563,7 +563,7 @@ public class DbCdrVersion {
         wgsLongReadsJointVcfGRCh38,
         wgsLongReadsJointVcfT2T,
         needsV8GenomicExtractionWorkflow,
-        vwbTemplateID);
+        vwbTemplateId);
   }
 
   @Override
@@ -618,6 +618,6 @@ public class DbCdrVersion {
         && Objects.equals(wgsLongReadsJointVcfGRCh38, that.wgsLongReadsJointVcfGRCh38)
         && Objects.equals(wgsLongReadsJointVcfT2T, that.wgsLongReadsJointVcfT2T)
         && Objects.equals(needsV8GenomicExtractionWorkflow, that.needsV8GenomicExtractionWorkflow)
-        && Objects.equals(vwbTemplateID, that.vwbTemplateID);
+        && Objects.equals(vwbTemplateId, that.vwbTemplateId);
   }
 }
