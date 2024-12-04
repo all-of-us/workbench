@@ -3141,6 +3141,7 @@ Common.register_command({
     :fn => ->(*args) {list_disks(LIST_DISKS_CMD, *args)}
 })
 
+VALID_EMAIL_OPTION = 'egress'
 def send_email(cmd_name, *args)
   common = Common.new
 
@@ -3152,6 +3153,13 @@ def send_email(cmd_name, *args)
     ->(opts, v) { opts.project = v },
     'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
   op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+    '--email [which email to send]',
+    String,
+    ->(opts, v) { opts.email = v },
+    "Currently, 'egress' is the only valid option.")
+  op.opts.email = VALID_EMAIL_OPTION
 
   op.add_typed_option(
     '--username [user name]',
@@ -3172,7 +3180,7 @@ def send_email(cmd_name, *args)
     'If specified, sends the DISABLE_USER egress email.  Defaults to the SUSPEND_COMPUTE egress email.')
   op.opts.disable = false
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.username and opts.contact }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.username and opts.contact and opts.email == VALID_EMAIL_OPTION }
 
   op.parse.validate
 
@@ -3180,6 +3188,7 @@ def send_email(cmd_name, *args)
     ["--username", op.opts.username],
     ["--contact", op.opts.contact],
     ["--disable", op.opts.disable],
+    ["--email", op.opts.email],
  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }

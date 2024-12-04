@@ -27,6 +27,8 @@ import org.springframework.context.annotation.Import;
   --disable
 */
 public class SendEmail extends Tool {
+  private static final Option whichEmailOpt =
+      Option.builder().longOpt("email").desc("Which email to send").required().hasArg().build();
 
   private static final Option usernameOpt =
       Option.builder().longOpt("username").desc("User name").required().hasArg().build();
@@ -44,12 +46,17 @@ public class SendEmail extends Tool {
           .build();
 
   private static final Options options =
-      new Options().addOption(usernameOpt).addOption(userContactOpt).addOption(disableOpt);
+      new Options()
+          .addOption(whichEmailOpt)
+          .addOption(usernameOpt)
+          .addOption(userContactOpt)
+          .addOption(disableOpt);
 
   @Bean
   public CommandLineRunner run(MailService mailService) {
     return args -> {
       CommandLine opts = new DefaultParser().parse(options, args);
+      String whichEmail = opts.getOptionValue(whichEmailOpt.getLongOpt());
       String username = opts.getOptionValue(usernameOpt.getLongOpt());
       String contactEmail = opts.getOptionValue(userContactOpt.getLongOpt());
       EgressRemediationAction action =
@@ -58,7 +65,11 @@ public class SendEmail extends Tool {
               : EgressRemediationAction.SUSPEND_COMPUTE;
 
       DbUser user = new DbUser().setUsername(username).setContactEmail(contactEmail);
-      mailService.sendEgressRemediationEmail(user, action, "Jupyter");
+
+      // TODO: add other options
+      if (whichEmail.equals("egress")) {
+        mailService.sendEgressRemediationEmail(user, action, "Jupyter");
+      }
     };
   }
 
