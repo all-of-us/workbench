@@ -3172,13 +3172,6 @@ def send_email(cmd_name, *args)
     'If specified, sends the DISABLE_USER egress email.  Defaults to the SUSPEND_COMPUTE egress email.')
   op.opts.disable = false
 
-  op.add_typed_option(
-    '--lengths',
-    String,
-    ->(opts, v) { opts.lengths = true },
-    'If specified, sends the file lengths egress email.  Defaults to the standard egress email.')
-  op.opts.lengths = false
-
   op.add_validator ->(opts) { raise ArgumentError unless opts.username and opts.contact }
 
   op.parse.validate
@@ -3187,7 +3180,6 @@ def send_email(cmd_name, *args)
     ["--username", op.opts.username],
     ["--contact", op.opts.contact],
     ["--disable", op.opts.disable],
-    ["--lengths", op.opts.lengths],
  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }
@@ -3208,8 +3200,7 @@ SEND_EMAIL_CMD = "send-email"
 #   ./project.rb send-email \
 #   --username joel@fake-research-aou.org \
 #   --contact thibault@broadinstitute.org \
-#   --disable \
-#   --lengths
+#   --disable
 Common.register_command({
     :invocation => SEND_EMAIL_CMD,
     :description => "Sends a system email.  Currently limited to egress emails.",

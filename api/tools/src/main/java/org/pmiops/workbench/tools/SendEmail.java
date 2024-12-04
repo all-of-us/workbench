@@ -24,8 +24,7 @@ import org.springframework.context.annotation.Import;
   ./project.rb send-email \
   --username joel@fake-research-aou.org \
   --contact thibault@broadinstitute.org \
-  --disable \
-  --lengths
+  --disable
 */
 public class SendEmail extends Tool {
 
@@ -44,21 +43,8 @@ public class SendEmail extends Tool {
           .hasArg()
           .build();
 
-  private static final Option fileLengthsOpt =
-      Option.builder()
-          .longOpt("lengths")
-          .desc(
-              "If true, sends the file lengths egress email.  If false, sends the standard egress email.")
-          .required()
-          .hasArg()
-          .build();
-
   private static final Options options =
-      new Options()
-          .addOption(usernameOpt)
-          .addOption(userContactOpt)
-          .addOption(disableOpt)
-          .addOption(fileLengthsOpt);
+      new Options().addOption(usernameOpt).addOption(userContactOpt).addOption(disableOpt);
 
   @Bean
   public CommandLineRunner run(MailService mailService) {
@@ -70,14 +56,9 @@ public class SendEmail extends Tool {
           Boolean.parseBoolean(opts.getOptionValue(disableOpt.getLongOpt()))
               ? EgressRemediationAction.DISABLE_USER
               : EgressRemediationAction.SUSPEND_COMPUTE;
-      boolean fileLengths = Boolean.parseBoolean(opts.getOptionValue(fileLengthsOpt.getLongOpt()));
 
       DbUser user = new DbUser().setUsername(username).setContactEmail(contactEmail);
-      if (fileLengths) {
-        mailService.sendFileLengthsEgressRemediationEmail(user, action);
-      } else {
-        mailService.sendEgressRemediationEmail(user, action, "Jupyter");
-      }
+      mailService.sendEgressRemediationEmail(user, action, "Jupyter");
     };
   }
 
