@@ -66,6 +66,7 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.pmiops.workbench.wsm.WsmClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,27 +97,31 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
 
+  private final WorkspaceServiceFactory workspaceServiceFactory;
+
   private final WsmClient wsmClient;
 
   @Autowired
   public WorkspacesController(
-          CdrVersionDao cdrVersionDao,
-          Clock clock,
-          FireCloudService fireCloudService,
-          InitialCreditsService initialCreditsService,
-          IamService iamService,
-          Provider<DbUser> userProvider,
-          Provider<WorkbenchConfig> workbenchConfigProvider,
-          TaskQueueService taskQueueService,
-          UserDao userDao,
-          WorkspaceAuditor workspaceAuditor,
-          WorkspaceAuthService workspaceAuthService,
-          WorkspaceDao workspaceDao,
-          WorkspaceMapper workspaceMapper,
-          WorkspaceOperationDao workspaceOperationDao,
-          WorkspaceOperationMapper workspaceOperationMapper,
-          WorkspaceResourcesService workspaceResourcesService,
-          WorkspaceService workspaceService, WsmClient wsmClient) {
+      CdrVersionDao cdrVersionDao,
+      Clock clock,
+      FireCloudService fireCloudService,
+      InitialCreditsService initialCreditsService,
+      IamService iamService,
+      Provider<DbUser> userProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      TaskQueueService taskQueueService,
+      UserDao userDao,
+      WorkspaceAuditor workspaceAuditor,
+      WorkspaceAuthService workspaceAuthService,
+      WorkspaceDao workspaceDao,
+      WorkspaceMapper workspaceMapper,
+      WorkspaceOperationDao workspaceOperationDao,
+      WorkspaceOperationMapper workspaceOperationMapper,
+      WorkspaceResourcesService workspaceResourcesService,
+      WorkspaceService workspaceService,
+      WorkspaceServiceFactory workspaceServiceFactory,
+      WsmClient wsmClient) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -134,6 +139,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceOperationMapper = workspaceOperationMapper;
     this.workspaceResourcesService = workspaceResourcesService;
     this.workspaceService = workspaceService;
+    this.workspaceServiceFactory = workspaceServiceFactory;
     this.wsmClient = wsmClient;
   }
 
@@ -166,17 +172,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
     validateWorkspaceApiModel(workspace);
 
+    WorkspaceService workspaceService =
+        workspaceServiceFactory.getWorkspaceService(workspace.isVwbWorkspace());
+
     DbCdrVersion cdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
-    DbAccessTier accessTier = cdrVersion.getAccessTier();
     DbUser user = userProvider.get();
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
-    String billingProject = createTerraBillingProject(accessTier);
-    String firecloudName = FireCloudService.toFirecloudName(workspace.getName());
+    workspace.setCreator(user.getUsername());
+    RawlsWorkspaceDetails fcWorkspace = workspaceService.createWorkspace(workspace, cdrVersion);
 
-    RawlsWorkspaceDetails fcWorkspace =
-        fireCloudService.createWorkspace(
-            billingProject, firecloudName, accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);
@@ -279,7 +284,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                             workspaceDao,
                             fireCloudService,
                             initialCreditsService,
-                            workspaceMapper, wsmClient)))
+                            workspaceMapper,
+                            wsmClient)))
         .orElse(ResponseEntity.notFound().build());
   }
 

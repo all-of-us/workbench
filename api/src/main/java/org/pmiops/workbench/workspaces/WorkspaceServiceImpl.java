@@ -644,24 +644,28 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     String billingProject = createTerraBillingProject(accessTier);
     String firecloudName = FireCloudService.toFirecloudName(workspace.getName());
     RawlsWorkspaceDetails fcWorkspace =
-            fireCloudService.createWorkspace(
-                    billingProject, firecloudName, accessTier.getAuthDomainName());
+        fireCloudService.createWorkspace(
+            billingProject, firecloudName, accessTier.getAuthDomainName());
     return fcWorkspace;
   }
 
   @Override
-  public RawlsWorkspaceDetails cloneWorkspace(String fromWorkspaceNamespace, String fromWorkspaceId, Workspace toWorkspace, DbCdrVersion cdrVersion) {
+  public RawlsWorkspaceDetails cloneWorkspace(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      Workspace toWorkspace,
+      DbCdrVersion cdrVersion) {
     // Note: please keep any initialization logic here in sync with createWorkspace().
     DbAccessTier accessTier = cdrVersion.getAccessTier();
     String billingProject = createTerraBillingProject(accessTier);
     String firecloudName = FireCloudService.toFirecloudName(toWorkspace.getName());
     RawlsWorkspaceDetails toFcWorkspace =
-            fireCloudService.cloneWorkspace(
-                    fromWorkspaceNamespace,
-                    fromWorkspaceId,
-                    billingProject,
-                    firecloudName,
-                    accessTier.getAuthDomainName());
+        fireCloudService.cloneWorkspace(
+            fromWorkspaceNamespace,
+            fromWorkspaceId,
+            billingProject,
+            firecloudName,
+            accessTier.getAuthDomainName());
     return toFcWorkspace;
   }
 
@@ -677,6 +681,4 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
     return billingProject;
   }
-
-
 }

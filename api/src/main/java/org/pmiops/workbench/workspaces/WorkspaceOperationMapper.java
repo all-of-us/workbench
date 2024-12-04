@@ -26,7 +26,8 @@ public interface WorkspaceOperationMapper {
       WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
-      WorkspaceMapper workspaceMapper, WsmClient wsmClient) {
+      WorkspaceMapper workspaceMapper,
+      WsmClient wsmClient) {
 
     WorkspaceOperation modelOperation = toModelWithoutWorkspace(source);
     // set the operation's workspace, if possible
@@ -38,7 +39,8 @@ public interface WorkspaceOperationMapper {
                     workspaceDao,
                     fireCloudService,
                     initialCreditsService,
-                    workspaceMapper, wsmClient))
+                    workspaceMapper,
+                    wsmClient))
         .ifPresent(modelOperation::workspace);
 
     return modelOperation;
@@ -67,25 +69,26 @@ public interface WorkspaceOperationMapper {
         .findActiveByWorkspaceId(workspaceId)
         .flatMap(
             dbWorkspace ->
-                    getWorkspaceDetails(dbWorkspace, workspaceMapper, fireCloudService, wsmClient)
+                getWorkspaceDetails(dbWorkspace, workspaceMapper, fireCloudService, wsmClient)
                     .map(
                         rawlsWorkspaceDetails ->
                             workspaceMapper.toApiWorkspace(
-                                dbWorkspace,
-                                    rawlsWorkspaceDetails,
-                                initialCreditsService)));
+                                dbWorkspace, rawlsWorkspaceDetails, initialCreditsService)));
   }
 
-
-  default Optional<RawlsWorkspaceDetails> getWorkspaceDetails(DbWorkspace dbWorkspace, WorkspaceMapper workspaceMapper, FireCloudService fireCloudService, WsmClient wsmClient) {
-    if (dbWorkspace.getLab() == Workspace.LabEnum.VWB) {
+  default Optional<RawlsWorkspaceDetails> getWorkspaceDetails(
+      DbWorkspace dbWorkspace,
+      WorkspaceMapper workspaceMapper,
+      FireCloudService fireCloudService,
+      WsmClient wsmClient) {
+    if (dbWorkspace.isVwbWorkspace()) {
       return Optional.ofNullable(
-                      wsmClient.getWorkspaceAsService(dbWorkspace.getWorkspaceNamespace()))
-              .map(workspaceDescription -> workspaceMapper.toWorkspaceDetails(workspaceDescription));
+              wsmClient.getWorkspaceAsService(dbWorkspace.getWorkspaceNamespace()))
+          .map(workspaceDescription -> workspaceMapper.toWorkspaceDetails(workspaceDescription));
     }
     return Optional.ofNullable(
-                    fireCloudService.getWorkspace(
-                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
-            .map(fcWorkspaceResponse -> fcWorkspaceResponse.getWorkspace());
+            fireCloudService.getWorkspace(
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
+        .map(fcWorkspaceResponse -> fcWorkspaceResponse.getWorkspace());
   }
 }

@@ -1,6 +1,5 @@
 package org.pmiops.workbench.workspaces;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +10,8 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.tanagra.model.Cohort;
 import org.pmiops.workbench.tanagra.model.CohortList;
 import org.pmiops.workbench.tanagra.model.FeatureSet;
@@ -25,7 +22,6 @@ import org.pmiops.workbench.wsm.WsmClient;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
-import org.pmiops.workbench.wsmanager.model.WorkspaceDescriptionList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -111,7 +107,9 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   public void deleteWorkspace(DbWorkspace dbWorkspace) {}
 
   @Override
-  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {}
+  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    logger.warn("updateWorkspaceBillingAccount not implemented in VWB");
+  }
 
   @Override
   public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
@@ -144,7 +142,9 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void createTanagraStudy(String workspaceNamespace, String workspaceName) {}
+  public void createTanagraStudy(String workspaceNamespace, String workspaceName) {
+    logger.warn("createTanagraStudy not implemented in VWB");
+  }
 
   @Override
   public CohortList listTanagraCohorts(String workspaceNamespace, Integer offset, Integer limit) {
@@ -204,5 +204,4 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
       DbCdrVersion cdrVersion) {
     return null;
   }
-
 }
