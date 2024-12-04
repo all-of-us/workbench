@@ -167,7 +167,7 @@ describe('InvalidBillingBanner', () => {
     );
   });
 
-  it('should show expired banner with no option to extend to ineligible user who created the workspace', async () => {
+  it('should show expired banner with no option to extend to expired user who created the workspace', async () => {
     const exhausted = false;
     const expired = true;
     const expiringSoon = false;
@@ -185,9 +185,46 @@ describe('InvalidBillingBanner', () => {
     );
   });
 
-  it('should show expired banner to user who did not create the workspace and the owner is not eligible for extension', async () => {
+  it('should show expired banner to user who did not create the workspace and the owner has expired credits and not eligible for extension', async () => {
     const exhausted = false;
     const expired = true;
+    const expiringSoon = false;
+    const ownedByMe = false;
+    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    setProfileExtensionEligibility(false);
+
+    component();
+
+    await screen.findByText('This workspace is out of initial credits');
+    expect(getBannerText()).toMatch(
+      'This workspace creator’s initial credits have run out. This workspace was created by ' +
+        'someOneElse@fake-research-aou.org. To use the workspace, a valid billing account needs to be provided. ' +
+        'To learn more about establishing a billing account, read the Paying for Your Research article ' +
+        'on the User Support Hub.'
+    );
+  });
+
+  it('should show expired banner with no option to extend to exhausted user who created the workspace', async () => {
+    const exhausted = true;
+    const expired = false;
+    const expiringSoon = false;
+    const ownedByMe = true;
+    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    setProfileExtensionEligibility(false);
+
+    component();
+
+    await screen.findByText('This workspace is out of initial credits');
+    expect(getBannerText()).toMatch(
+      'Your initial credits have run out. To use the workspace, a valid billing account needs ' +
+        'to be provided. To learn more about establishing a billing account, read the Paying for Your ' +
+        'Research article on the User Support Hub.'
+    );
+  });
+
+  it('should show expired banner to user who did not create the workspace and the owner has exhausted credits and not eligible for extension', async () => {
+    const exhausted = true;
+    const expired = false;
     const expiringSoon = false;
     const ownedByMe = false;
     setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
