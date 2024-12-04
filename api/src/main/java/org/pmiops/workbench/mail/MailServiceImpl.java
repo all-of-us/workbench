@@ -380,10 +380,11 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendEgressRemediationEmail(
-      DbUser dbUser, EgressRemediationAction action, String serviceName) throws MessagingException {
+      DbUser dbUser, EgressRemediationAction action, String gkeServiceName)
+      throws MessagingException {
     String remediation = EGRESS_REMEDIATION_ACTION_MAP.get(action);
     String environmentType =
-        appServiceNameToAppType(Strings.nullToEmpty(serviceName))
+        appServiceNameToAppType(Strings.nullToEmpty(gkeServiceName))
             .map(LeonardoAppUtils::appDisplayName)
             .orElse("Jupyter");
 

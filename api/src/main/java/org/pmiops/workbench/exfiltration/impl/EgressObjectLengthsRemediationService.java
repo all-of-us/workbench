@@ -58,8 +58,9 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
   protected void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
     disableUser(user);
-    String serviceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
-    mailService.sendEgressRemediationEmail(user, action, serviceName);
+    // null for Jupyter
+    String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    mailService.sendEgressRemediationEmail(user, action, gkeServiceName);
   }
 
   @Override
