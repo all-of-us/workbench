@@ -196,8 +196,9 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'Your initial credits have run out. To use the workspace, a valid billing account needs ' +
-        'to be provided. To learn more about establishing a billing account, read the Paying for Your ' +
-        'Research article on the User Support Hub.'
+        'to be provided. You can setup your billing account by visiting the Edit Workspace page. To ' +
+        'learn more about establishing a billing account, read the Paying for Your Research article on ' +
+        'the User Support Hub.'
     );
     expectEditWorkpaceButtonExists();
   });
@@ -235,8 +236,9 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'Your initial credits have run out. To use the workspace, a valid billing account needs ' +
-        'to be provided. To learn more about establishing a billing account, read the Paying for Your ' +
-        'Research article on the User Support Hub.'
+        'to be provided. You can setup your billing account by visiting the Edit Workspace page. To ' +
+        'learn more about establishing a billing account, read the Paying for Your Research article on ' +
+        'the User Support Hub.'
     );
     expectEditWorkpaceButtonExists();
   });

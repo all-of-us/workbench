@@ -53,8 +53,7 @@ const onEditWorkspace = (
   });
 };
 
-const BillingUpdateOptions = ({
-  onRequestExtension,
+const EditWorkspaceLink = ({
   navigate,
   onClose,
   workspace,
@@ -67,8 +66,16 @@ const BillingUpdateOptions = ({
     >
       Edit Workspace
     </LinkButton>{' '}
-    page. If necessary, you can request an extension to your initial credit
-    expiration date{' '}
+    page.
+  </>
+);
+
+const RequestExtensionLink = ({
+  onRequestExtension,
+}: BillingUpdateOptionsProps) => (
+  <>
+    If necessary, you can request an extension to your initial credit expiration
+    date{' '}
     <LinkButton onClick={onRequestExtension} style={{ display: 'inline' }}>
       here
     </LinkButton>
@@ -137,8 +144,15 @@ const whatToDo = ({
   if (isExhausted || (isExpired && !isEligibleForExtension)) {
     return (
       <>
-        To use the workspace, a valid billing account needs to be provided. To
-        learn more about establishing a billing account, read the{' '}
+        To use the workspace, a valid billing account needs to be provided.{' '}
+        {isCreator && (
+          <>
+            <EditWorkspaceLink
+              {...{ onRequestExtension, navigate, onClose, workspace }}
+            />{' '}
+          </>
+        )}
+        To learn more about establishing a billing account, read the{' '}
         <BillingAccountArticleLink /> article on the User Support Hub.
       </>
     );
@@ -149,7 +163,10 @@ const whatToDo = ({
           isEligibleForExtension &&
           (isExpired || isExpiringSoon) && (
             <>
-              <BillingUpdateOptions
+              <EditWorkspaceLink
+                {...{ onRequestExtension, navigate, onClose, workspace }}
+              />{' '}
+              <RequestExtensionLink
                 {...{ onRequestExtension, navigate, onClose, workspace }}
               />{' '}
             </>
