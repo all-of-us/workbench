@@ -113,6 +113,7 @@ const whatHappened = (
 };
 
 interface WhatToDoProps {
+  isCreator: boolean;
   isExhausted: boolean;
   isExpired: boolean;
   isExpiringSoon: boolean;
@@ -123,6 +124,7 @@ interface WhatToDoProps {
   workspace: WorkspaceData;
 }
 const whatToDo = ({
+  isCreator,
   isExhausted,
   isExpired,
   isExpiringSoon,
@@ -143,11 +145,15 @@ const whatToDo = ({
   } else {
     return (
       <>
-        {isEligibleForExtension && (isExpired || isExpiringSoon) && (
-          <BillingUpdateOptions
-            {...{ onRequestExtension, navigate, onClose, workspace }}
-          />
-        )}{' '}
+        {isCreator &&
+          isEligibleForExtension &&
+          (isExpired || isExpiringSoon) && (
+            <>
+              <BillingUpdateOptions
+                {...{ onRequestExtension, navigate, onClose, workspace }}
+              />{' '}
+            </>
+          )}
         For more information, read the <InitialCreditsArticleLink /> article on
         the User Support Hub.
       </>
@@ -219,6 +225,7 @@ export const InvalidBillingBanner = fp.flow(
   );
   const whatToDoMessage = whatToDo({
     ...{
+      isCreator,
       isExhausted,
       isExpired,
       isExpiringSoon,
