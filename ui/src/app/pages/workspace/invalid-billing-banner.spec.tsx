@@ -185,7 +185,7 @@ describe('InvalidBillingBanner', () => {
     );
   });
 
-  it('should show expired banner to user who did not create the workspace and the owner has expired credits and not eligible for extension', async () => {
+  it('should show expired banner to non-creator when creator is expired with no option to extend', async () => {
     const exhausted = false;
     const expired = true;
     const expiringSoon = false;
@@ -222,7 +222,7 @@ describe('InvalidBillingBanner', () => {
     );
   });
 
-  it('should show expired banner to user who did not create the workspace and the owner has exhausted credits and not eligible for extension', async () => {
+  it('should show expired banner to non-creator when creator is exhausted with no option to extend', async () => {
     const exhausted = true;
     const expired = false;
     const expiringSoon = false;
