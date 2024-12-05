@@ -35,10 +35,10 @@ describe('InvalidBillingBanner', () => {
       </MemoryRouter>
     );
 
-  const expectEditWorkpaceButtonExists = () =>
+  const expectEditWorkspaceButtonExists = () =>
     screen.getAllByRole('button', { name: /edit workspace/i });
 
-  const expectEditWorkpaceButtonDoesNotExist = () =>
+  const expectEditWorkspaceButtonDoesNotExist = () =>
     expect(
       screen.queryByRole('button', { name: /edit workspace/i })
     ).not.toBeInTheDocument();
@@ -122,7 +122,7 @@ describe('InvalidBillingBanner', () => {
         'expiration date here. For more information, read the Using All of Us Initial Credits article on ' +
         'the User Support Hub.'
     );
-    expectEditWorkpaceButtonExists();
+    expectEditWorkspaceButtonExists();
   });
 
   it('should show expiring soon banner to user who did not create the workspace', async () => {
@@ -141,7 +141,7 @@ describe('InvalidBillingBanner', () => {
         'created by someOneElse@fake-research-aou.org. For more information, read the Using All of ' +
         'Us Initial Credits article on the User Support Hub.'
     );
-    expectEditWorkpaceButtonDoesNotExist();
+    expectEditWorkspaceButtonDoesNotExist();
   });
 
   it('should show expired banner with option to extend to eligible user who created the workspace', async () => {
@@ -161,7 +161,7 @@ describe('InvalidBillingBanner', () => {
         'expiration date here. For more information, read the Using All of Us Initial Credits article on ' +
         'the User Support Hub.'
     );
-    expectEditWorkpaceButtonExists();
+    expectEditWorkspaceButtonExists();
   });
 
   it('should show expired banner to user who did not create the workspace and the owner is eligible for extension', async () => {
@@ -180,7 +180,7 @@ describe('InvalidBillingBanner', () => {
         'by someOneElse@fake-research-aou.org. For more information, read the Using All of Us Initial ' +
         'Credits article on the User Support Hub.'
     );
-    expectEditWorkpaceButtonDoesNotExist();
+    expectEditWorkspaceButtonDoesNotExist();
   });
 
   it('should show expired banner with no option to extend to expired user who created the workspace', async () => {
@@ -200,7 +200,7 @@ describe('InvalidBillingBanner', () => {
         'learn more about establishing a billing account, read the Paying for Your Research article on ' +
         'the User Support Hub.'
     );
-    expectEditWorkpaceButtonExists();
+    expectEditWorkspaceButtonExists();
   });
 
   it('should show expired banner to non-creator when creator is expired with no option to extend', async () => {
@@ -220,7 +220,7 @@ describe('InvalidBillingBanner', () => {
         'To learn more about establishing a billing account, read the Paying for Your Research article ' +
         'on the User Support Hub.'
     );
-    expectEditWorkpaceButtonDoesNotExist();
+    expectEditWorkspaceButtonDoesNotExist();
   });
 
   it('should show expired banner with no option to extend to exhausted user who created the workspace', async () => {
@@ -240,7 +240,7 @@ describe('InvalidBillingBanner', () => {
         'learn more about establishing a billing account, read the Paying for Your Research article on ' +
         'the User Support Hub.'
     );
-    expectEditWorkpaceButtonExists();
+    expectEditWorkspaceButtonExists();
   });
 
   it('should show expired banner to non-creator when creator is exhausted with no option to extend', async () => {
@@ -260,6 +260,6 @@ describe('InvalidBillingBanner', () => {
         'To learn more about establishing a billing account, read the Paying for Your Research article ' +
         'on the User Support Hub.'
     );
-    expectEditWorkpaceButtonDoesNotExist();
+    expectEditWorkspaceButtonDoesNotExist();
   });
 });
