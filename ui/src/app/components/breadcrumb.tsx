@@ -13,6 +13,7 @@ import {
 import { cond } from '@terra-ui-packages/core-utils';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
+import { OldInvalidBillingBanner } from 'app/pages/workspace/old-invalid-billing-banner';
 import {
   analysisTabName,
   analysisTabPath,
@@ -31,6 +32,7 @@ import {
   MatchParams,
   RouteDataStore,
   routeDataStore,
+  serverConfigStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -316,6 +318,23 @@ export const Breadcrumb = fp.flow(
   withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
+  const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
+    useState(false);
+
+  const enableInitialCreditsExpiration =
+    serverConfigStore.get().config.enableInitialCreditsExpiration;
+
+  // TODO: This is only needed for OldInvalidBillingBanner.
+  // Remove once initial credit expiration is live
+  useEffect(() => {
+    const newShowInvalidBillingBanner =
+      props?.workspace?.billingStatus === BillingStatus.INACTIVE;
+
+    if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
+      setShowInvalidBillingBanner(newShowInvalidBillingBanner);
+    }
+  }, [props?.workspace]);
+
   const trail = (): Array<BreadcrumbData> => {
     const workspaceMatch = matchPath<MatchParams>(location.pathname, {
       path: '/workspaces/:ns/:terraName',
@@ -403,8 +422,12 @@ export const Breadcrumb = fp.flow(
 
   return (
     <>
-      <InvalidBillingBanner />
-
+      {enableInitialCreditsExpiration && <InvalidBillingBanner />}
+      {showInvalidBillingBanner && !enableInitialCreditsExpiration && (
+        <OldInvalidBillingBanner
+          onClose={() => setShowInvalidBillingBanner(false)}
+        />
+      )}
       <div
         style={{
           marginLeft: '4.875rem',
