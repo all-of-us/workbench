@@ -10,6 +10,7 @@ cron-emulator-err.log
 /api/?/
 /api/db/?/
 /api/db-cdr/csv
+/api/db-cdr/generate-cdr/test-data/datasets
 /api/.docker-sync/
 /api/.java-version
 /api/.project/common/
