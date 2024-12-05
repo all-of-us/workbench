@@ -316,18 +316,6 @@ export const Breadcrumb = fp.flow(
   withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
-  const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
-    useState(false);
-
-  useEffect(() => {
-    const newShowInvalidBillingBanner =
-      props?.workspace?.billingStatus === BillingStatus.INACTIVE;
-
-    if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
-      setShowInvalidBillingBanner(newShowInvalidBillingBanner);
-    }
-  }, [props?.workspace]);
-
   const trail = (): Array<BreadcrumbData> => {
     const workspaceMatch = matchPath<MatchParams>(location.pathname, {
       path: '/workspaces/:ns/:terraName',
@@ -415,11 +403,7 @@ export const Breadcrumb = fp.flow(
 
   return (
     <>
-      {showInvalidBillingBanner && (
-        <InvalidBillingBanner
-          onClose={() => setShowInvalidBillingBanner(false)}
-        />
-      )}
+      <InvalidBillingBanner />
 
       <div
         style={{
