@@ -7,10 +7,11 @@ import { Button, LinkButton } from 'app/components/buttons';
 import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits-modal';
 import { AoU } from 'app/components/text-wrappers';
 import { ToastBanner, ToastType } from 'app/components/toast-banner';
+import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { minusDays } from 'app/utils/dates';
-import { NavigationProps } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
+import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
@@ -197,6 +198,7 @@ interface Props extends NavigationProps {
   workspace: WorkspaceData;
   profileState: {
     profile: Profile;
+    reload: Function;
   };
   onClose: Function;
 }
@@ -206,9 +208,7 @@ export const InvalidBillingBanner = fp.flow(
   withUserProfile(),
   withNavigation
 )(({ onClose, navigate, workspace, profileState }: Props) => {
-  const [profile, setProfile] = React.useState<Profile | undefined>(
-    profileState?.profile
-  );
+  const profile = profileState.profile;
   const [showExtensionModal, setShowExtensionModal] = React.useState(false);
   const isCreator = profile?.username === workspace?.creator;
   const isEligibleForExtension = profile?.eligibleForInitialCreditsExtension;
@@ -271,20 +271,31 @@ export const InvalidBillingBanner = fp.flow(
 
   return (
     <>
-      {((isExpiringSoon && isEligibleForExtension) ||
-        isExpired ||
-        isExhausted) && (
-        <ToastBanner
-          {...{ message, title, footer, onClose }}
-          toastType={ToastType.WARNING}
-          zIndex={500}
-        />
-      )}
+      {!showExtensionModal &&
+        ((isExpiringSoon && isEligibleForExtension) ||
+          isExpired ||
+          isExhausted) && (
+          <ToastBanner
+            {...{ message, title, footer, onClose }}
+            toastType={ToastType.WARNING}
+            zIndex={500}
+          />
+        )}
       {showExtensionModal && (
         <ExtendInitialCreditsModal
           onClose={(updatedProfile: Profile) => {
-            setShowExtensionModal(false);
-            setProfile(updatedProfile);
+            if (updatedProfile) {
+              profileStore.get().updateCache(updatedProfile);
+              workspacesApi()
+                .getWorkspace(workspace.namespace, workspace.terraName)
+                .then((updatedWorkspace) => {
+                  currentWorkspaceStore.next({
+                    ...updatedWorkspace.workspace,
+                    accessLevel: updatedWorkspace.accessLevel,
+                  });
+                })
+                .finally(() => setShowExtensionModal(false));
+            }
           }}
         />
       )}
