@@ -237,11 +237,6 @@ export const InvalidBillingBanner = fp.flow(
     isEligibleForExtension
   );
 
-  const workspaceCreatorInformationIfApplicable = workspaceCreatorInformation(
-    isCreator,
-    workspace?.creator
-  );
-
   const message = (
     <>
       <WhatHappened
@@ -253,7 +248,7 @@ export const InvalidBillingBanner = fp.flow(
           isCreator,
         }}
       />{' '}
-      {workspaceCreatorInformationIfApplicable}
+      {workspaceCreatorInformation(isCreator, workspace?.creator)}
       <WhatToDo
         {...{
           isCreator,
