@@ -95,13 +95,20 @@ const workspaceCreatorInformation = (
   return isCreator ? '' : `This workspace was created by ${creatorUsername}. `;
 };
 
-const whatHappened = (
-  isExhausted: boolean,
-  isExpired: boolean,
-  isExpiringSoon: boolean,
-  isEligibleForExtension: boolean,
-  isCreator: boolean
-) => {
+interface WhatHappenedProps {
+  isExhausted: boolean;
+  isExpired: boolean;
+  isExpiringSoon: boolean;
+  isEligibleForExtension: boolean;
+  isCreator: boolean;
+}
+const WhatHappened = ({
+  isExhausted,
+  isExpired,
+  isExpiringSoon,
+  isEligibleForExtension,
+  isCreator,
+}: WhatHappenedProps) => {
   const whose = whoseCredits(isCreator);
   let whatIsHappening: string;
   if (isExhausted || (isExpired && !isEligibleForExtension)) {
@@ -233,13 +240,6 @@ export const InvalidBillingBanner = fp.flow(
     isCreator,
     workspace?.creator
   );
-  const whatHappenedMessage = whatHappened(
-    isExhausted,
-    isExpired,
-    isExpiringSoon,
-    isEligibleForExtension,
-    isCreator
-  );
   const whatToDoMessage = whatToDo({
     ...{
       isCreator,
@@ -256,7 +256,16 @@ export const InvalidBillingBanner = fp.flow(
 
   const message = (
     <>
-      {whatHappenedMessage} {workspaceCreatorInformationIfApplicable}
+      <WhatHappened
+        {...{
+          isExhausted,
+          isExpired,
+          isExpiringSoon,
+          isEligibleForExtension,
+          isCreator,
+        }}
+      />{' '}
+      {workspaceCreatorInformationIfApplicable}
       {whatToDoMessage}
     </>
   );
