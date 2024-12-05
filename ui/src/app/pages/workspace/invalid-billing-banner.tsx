@@ -138,7 +138,8 @@ interface WhatToDoProps {
   onClose: Function;
   workspace: WorkspaceData;
 }
-const whatToDo = ({
+
+const WhatToDo = ({
   isCreator,
   isExhausted,
   isExpired,
@@ -240,19 +241,6 @@ export const InvalidBillingBanner = fp.flow(
     isCreator,
     workspace?.creator
   );
-  const whatToDoMessage = whatToDo({
-    ...{
-      isCreator,
-      isExhausted,
-      isExpired,
-      isExpiringSoon,
-      isEligibleForExtension,
-      navigate,
-      onClose,
-      workspace,
-    },
-    onRequestExtension: () => setShowExtensionModal(true),
-  });
 
   const message = (
     <>
@@ -266,7 +254,19 @@ export const InvalidBillingBanner = fp.flow(
         }}
       />{' '}
       {workspaceCreatorInformationIfApplicable}
-      {whatToDoMessage}
+      <WhatToDo
+        {...{
+          isCreator,
+          isExhausted,
+          isExpired,
+          isExpiringSoon,
+          isEligibleForExtension,
+          navigate,
+          onClose,
+          workspace,
+        }}
+        onRequestExtension={() => setShowExtensionModal(true)}
+      />
     </>
   );
   const footer = isCreator ? (
