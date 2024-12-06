@@ -29,6 +29,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.VwbEgressEventRequest;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -107,6 +108,38 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     }
 
     fireEvent(agentId, agentEmail, dbWorkspace, event);
+  }
+
+  @Override
+  public void fireVwbEgressEvent(VwbEgressEventRequest event, DbUser user) {
+    String actionId = actionIdProvider.get();
+    Builder baseEventBuilder =
+        ActionAuditEvent.builder()
+            .timestamp(clock.millis())
+            .actionId(actionId)
+            .actionType(ActionType.DETECT_HIGH_EGRESS_EVENT)
+            .agentType(AgentType.USER)
+            .agentIdMaybe(user.getUserId())
+            .agentEmailMaybe(user.getUsername())
+            .targetType(TargetType.WORKSPACE);
+    var events = new ArrayList<ActionAuditEvent>();
+    // File 3 events: Workspace, VM, GCP projects. Can add more if needed in the future
+    events.add(
+        baseEventBuilder
+            .targetPropertyMaybe("vwbWorkspaceId")
+            .newValueMaybe(event.getWorkspaceId())
+            .build());
+    events.add(
+        baseEventBuilder
+            .targetPropertyMaybe("gcpProjectId")
+            .newValueMaybe(event.getGcpProjectId())
+            .build());
+    events.add(
+        baseEventBuilder
+            .targetPropertyMaybe("vmName")
+            .newValueMaybe(event.getVmName())
+            .build());
+    actionAuditService.send(events);
   }
 
   @Override

@@ -42,6 +42,10 @@ public class DbEgressEvent {
 
   private String bucketAuditEvent;
 
+  private String vwbWorkspaceId;
+  private String vwbVmName;
+  private boolean isVwb;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "egress_event_id", nullable = false)
@@ -149,6 +153,35 @@ public class DbEgressEvent {
     return this;
   }
 
+  @Column(name = "vwb_workspace_id")
+  public String getVwbWorkspaceId() {
+    return vwbWorkspaceId;
+  }
+
+  public DbEgressEvent setVwbWorkspaceId(String vwbWorkspaceId) {
+    this.vwbWorkspaceId = vwbWorkspaceId;
+    return this;
+  }
+
+  @Column(name = "vwb_vm_name")
+  public String getVwbVmName() {
+    return vwbVmName;
+  }
+
+  public DbEgressEvent setVwbVmName(String vwbVmName) {
+    this.vwbVmName = vwbVmName;
+    return this;
+  }
+
+  @Column(name = "is_vwb")
+  public boolean getIsVwb() {
+    return isVwb;
+  }
+  public DbEgressEvent setIsVwb(boolean isVwb) {
+    this.isVwb = isVwb;
+    return this;
+  }
+
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -165,7 +198,10 @@ public class DbEgressEvent {
         && Objects.equals(creationTime, that.creationTime)
         && Objects.equals(lastModifiedTime, that.lastModifiedTime)
         && status == that.status
-        && Objects.equals(sumologicEvent, that.sumologicEvent);
+        && Objects.equals(sumologicEvent, that.sumologicEvent)
+        && Objects.equals(vwbWorkspaceId, that.vwbWorkspaceId)
+        && Objects.equals(vwbVmName, that.vwbVmName)
+        && Objects.equals(isVwb, that.isVwb);
   }
 
   @Override
@@ -179,6 +215,9 @@ public class DbEgressEvent {
         creationTime,
         lastModifiedTime,
         status,
-        sumologicEvent);
+        sumologicEvent,
+        vwbWorkspaceId,
+        vwbVmName,
+        isVwb);
   }
 }

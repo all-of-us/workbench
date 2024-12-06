@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.VwbEgressEventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -102,6 +103,30 @@ public class EgressEventServiceImpl implements EgressEventService {
     Optional<DbEgressEvent> maybeEvent =
         this.maybePersistEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
     maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
+  }
+
+  @Override
+  public void handleVwbEvent(VwbEgressEventRequest egressEvent) {
+    Optional<DbUser> egressUser = userService.getByUsername(egressEvent.getUserEmail());
+    if (egressUser.isEmpty()) {
+      logger.severe(
+          String.format(
+              "An egress event happened for workspace: %s, but we're unable to find a user %s.",
+              egressEvent.getWorkspaceId(), egressEvent.getUserEmail()));
+    }
+    this.egressEventAuditor.fireVwbEgressEvent(egressEvent, egressUser.get());
+    egressEventDao.save(
+        new DbEgressEvent()
+            .setUser(egressUser.orElse(null))
+            .setWorkspace(egressEvent.getWorkspaceId())
+            .setEgressMegabytes(
+                Optional.ofNullable(egressEvent.getEgressMib())
+                    // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
+                    .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
+                    .orElse(null))
+            .setEgressWindowSeconds(
+                Optional.ofNullable(egressEvent.getTimeWindowDuration()).orElse(null))
+            .setStatus(DbEgressEventStatus.PENDING));
   }
 
   @NotNull
