@@ -12,6 +12,7 @@ import {
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { nowPlusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   cdrVersionStore,
@@ -296,6 +297,62 @@ describe('WorkspaceAbout', () => {
     await user.click(screen.getByText('Publish'));
     expect(
       screen.getByText('Publish As a Community Workspace')
+    ).toBeInTheDocument();
+  });
+
+  it('should see initial credit expiration date', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      billingAccountName: 'billingAccounts/free',
+      initialCredits: {
+        exhausted: false,
+        expired: false,
+        expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
+      },
+    });
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        freeTierBillingAccountId: 'free',
+      },
+    });
+    component();
+    screen.logTestingPlaygroundURL();
+    expect(
+      screen.getByText(/workspace initial credit expiration/i)
+    ).toBeInTheDocument();
+    screen.getByText(/tue mar 17 1998/i);
+  });
+
+  it('should see extension button', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      creator: profile.username,
+      billingAccountName: 'billingAccounts/free',
+      initialCredits: {
+        exhausted: false,
+        expired: true,
+        expirationEpochMillis: nowPlusDays(-1),
+      },
+    });
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        freeTierBillingAccountId: 'free',
+      },
+    });
+    profileStore.set({
+      ...profileStore.get(),
+      profile: {
+        ...profile,
+        eligibleForInitialCreditsExtension: true,
+      },
+    });
+    component();
+    expect(
+      screen.getByRole('button', {
+        name: /request extension/i,
+      })
     ).toBeInTheDocument();
   });
 });
