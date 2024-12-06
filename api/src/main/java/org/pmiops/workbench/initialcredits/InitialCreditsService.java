@@ -280,7 +280,7 @@ public class InitialCreditsService {
    *
    * @param user - The user whose initial credits expiration time is being checked
    * @return The expiration time of the user's initial credits, if they have a
-   *     UserInitialCreditsExpiration record and they have not been bypassed personally or
+   *     UserInitialCreditsExpiration record, and they have not been bypassed personally or
    *     institutionally.
    */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
@@ -288,6 +288,21 @@ public class InitialCreditsService {
         .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
         .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
+  }
+
+  /**
+   * For the given user, check when the user's initial credits were extended, if relevant.
+   *
+   * @param user - The user whose initial credits extension time is being checked
+   * @return The extension time of the user's initial credits, if they have a
+   *     UserInitialCreditsExpiration record, and they have not been bypassed personally or
+   *     institutionally.
+   */
+  public Optional<Timestamp> getCreditsExtension(DbUser user) {
+    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
+        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
+        .map(DbUserInitialCreditsExpiration::getExtensionTime);
   }
 
   /**
