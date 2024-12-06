@@ -19,6 +19,7 @@ import {
   StyledExternalLink,
   StyledRouterLink,
 } from 'app/components/buttons';
+import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -30,10 +31,16 @@ import { ResearchPurpose } from 'app/pages/workspace/research-purpose';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCdrVersions, withUserProfile } from 'app/utils';
+import {
+  reactStyles,
+  withCdrVersions,
+  withCurrentWorkspace,
+  withUserProfile,
+} from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { profileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
@@ -42,14 +49,15 @@ import { supportUrls } from 'app/utils/zendesk';
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };
   cdrVersionTiersResponse: CdrVersionTiersResponse;
+  workspace: WorkspaceData;
 }
 
 interface WorkspaceState {
   sharing: boolean;
-  workspace: WorkspaceData;
   workspaceInitialCreditsUsage: number;
   workspaceUserRoles: UserRole[];
   showPublishConsentModal: boolean;
+  showExtensionModal: boolean;
 }
 
 const styles = reactStyles({
@@ -180,28 +188,28 @@ const WorkspaceInfoTooltipText = () => {
 
 export const WorkspaceAbout = fp.flow(
   withUserProfile(),
-  withCdrVersions()
+  withCdrVersions(),
+  withCurrentWorkspace()
 )(
   class extends React.Component<WorkspaceProps, WorkspaceState> {
     constructor(props) {
       super(props);
       this.state = {
         sharing: false,
-        workspace: undefined,
         workspaceInitialCreditsUsage: undefined,
         workspaceUserRoles: [],
         showPublishConsentModal: false,
+        showExtensionModal: false,
       };
     }
 
     componentDidMount() {
       this.props.hideSpinner();
       this.setVisits();
-      const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
-      if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-        this.loadInitialCreditsUsage(workspace);
+      if (WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel)) {
+        this.loadInitialCreditsUsage(this.props.workspace);
       }
-      this.loadUserRoles(workspace);
+      this.loadUserRoles(this.props.workspace);
     }
 
     loadInitialCreditsUsage(workspace: WorkspaceData) {
@@ -226,17 +234,6 @@ export const WorkspaceAbout = fp.flow(
       }
     }
 
-    reloadWorkspace(workspace: WorkspaceData): WorkspaceData {
-      this.setState({ workspace });
-      return workspace;
-    }
-
-    // update the component state AND the store with the new workspace object
-    updateWorkspaceState(workspace: WorkspaceData): void {
-      currentWorkspaceStore.next(workspace);
-      this.setState({ workspace });
-    }
-
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
       fetchWithErrorModal(() =>
@@ -252,8 +249,8 @@ export const WorkspaceAbout = fp.flow(
     }
 
     get workspaceCreationTime(): string {
-      if (this.state.workspace) {
-        const asDate = new Date(this.state.workspace.creationTime);
+      if (this.props.workspace) {
+        const asDate = new Date(this.props.workspace.creationTime);
         return asDate.toDateString();
       } else {
         return 'Loading...';
@@ -261,8 +258,8 @@ export const WorkspaceAbout = fp.flow(
     }
 
     get workspaceLastModifiedTime(): string {
-      if (this.state.workspace) {
-        const asDate = new Date(this.state.workspace.lastModifiedTime);
+      if (this.props.workspace) {
+        const asDate = new Date(this.props.workspace.lastModifiedTime);
         return asDate.toDateString();
       } else {
         return 'Loading...';
@@ -270,9 +267,9 @@ export const WorkspaceAbout = fp.flow(
     }
 
     get workspaceInitialCreditsExpirationTime(): string {
-      if (this.state?.workspace?.initialCredits) {
+      if (this.props?.workspace?.initialCredits) {
         const asDate = new Date(
-          this.state.workspace.initialCredits.expirationEpochMillis
+          this.props.workspace.initialCredits.expirationEpochMillis
         );
         return asDate.toDateString();
       } else {
@@ -281,25 +278,25 @@ export const WorkspaceAbout = fp.flow(
     }
 
     get workspaceGcpBillingSpendUrl(): string {
-      return this.state.workspace
+      return this.props.workspace
         ? 'https://console.cloud.google.com/billing/' +
-            this.state.workspace.billingAccountName.replace(
+            this.props.workspace.billingAccountName.replace(
               'billingAccounts/',
               ''
             ) +
             '/reports;grouping=GROUP_BY_SKU?project=' +
-            this.state.workspace.googleProject +
+            this.props.workspace.googleProject +
             '&authuser=' +
             this.props.profileState.profile.username
         : '';
     }
 
     get workspaceBucketUrl(): string {
-      return this.state.workspace
+      return this.props.workspace
         ? 'https://console.cloud.google.com/storage/browser/' +
-            this.state.workspace.googleBucketName +
+            this.props.workspace.googleBucketName +
             '?project=' +
-            this.state.workspace.googleProject +
+            this.props.workspace.googleProject +
             '&authuser=' +
             this.props.profileState.profile.username
         : '';
@@ -307,8 +304,7 @@ export const WorkspaceAbout = fp.flow(
 
     onShare() {
       this.setState({ sharing: false });
-      const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
-      this.loadUserRoles(workspace);
+      this.loadUserRoles(this.props.workspace);
     }
 
     render() {
@@ -317,11 +313,13 @@ export const WorkspaceAbout = fp.flow(
         cdrVersionTiersResponse,
       } = this.props;
       const {
-        workspace,
         workspaceUserRoles,
         sharing,
         showPublishConsentModal,
+        showExtensionModal,
       } = this.state;
+
+      const { workspace } = this.props;
       const featuredCategory = workspace?.featuredCategory;
       const notPublished = !featuredCategory;
       const isWorkspaceOwner =
@@ -489,7 +487,16 @@ export const WorkspaceAbout = fp.flow(
                       <div style={{ fontSize: '0.75rem' }}>
                         {this.workspaceInitialCreditsExpirationTime}
                       </div>
-                      <LinkButton>Request Extension</LinkButton>
+                      {this.props.profileState.profile
+                        .eligibleForInitialCreditsExtension && (
+                        <LinkButton
+                          onClick={() =>
+                            this.setState({ showExtensionModal: true })
+                          }
+                        >
+                          Request Extension
+                        </LinkButton>
+                      )}
                     </div>
                   </>
                 )}
@@ -590,9 +597,26 @@ export const WorkspaceAbout = fp.flow(
               onConfirm={() => {
                 workspace.featuredCategory =
                   FeaturedWorkspaceCategory.COMMUNITY;
-                this.setState({ workspace, showPublishConsentModal: false });
+                currentWorkspaceStore.next(workspace);
+                this.setState({ showPublishConsentModal: false });
               }}
               onCancel={() => this.setState({ showPublishConsentModal: false })}
+            />
+          )}
+          {showExtensionModal && (
+            <ExtendInitialCreditsModal
+              onClose={(updatedProfile: Profile) => {
+                profileStore.get().updateCache(updatedProfile);
+                workspacesApi()
+                  .getWorkspace(workspace.namespace, workspace.terraName)
+                  .then((updatedWorkspace) => {
+                    currentWorkspaceStore.next({
+                      ...updatedWorkspace.workspace,
+                      accessLevel: updatedWorkspace.accessLevel,
+                    });
+                  })
+                  .finally(() => this.setState({ showExtensionModal: false }));
+              }}
             />
           )}
         </div>
