@@ -159,7 +159,6 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "tanagraEnabled": true,
       "needsV8GenomicExtractionWorkflow": true
     }
   ]
