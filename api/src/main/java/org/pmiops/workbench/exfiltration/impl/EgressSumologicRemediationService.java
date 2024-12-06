@@ -3,7 +3,6 @@ package org.pmiops.workbench.exfiltration.impl;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
 import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
-import com.google.common.base.Strings;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
@@ -21,10 +20,8 @@ import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
-import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.user.UserAdminService;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,9 +61,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
         userService,
         leonardoNotebooksClient,
         egressEventAuditor,
-        egressEventDao,
-        egressEventMapper,
-        userAdminService);
+        egressEventDao);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
     this.egressEventMapper = egressEventMapper;
@@ -76,12 +71,9 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   @Override
   protected void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
-    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    String environmentType =
-        appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
-            .map(LeonardoAppUtils::appDisplayName)
-            .orElse("Jupyter");
-    mailService.sendEgressRemediationEmail(user, action, environmentType);
+    // null for Jupyter
+    String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    mailService.sendEgressRemediationEmail(user, action, gkeServiceName);
   }
 
   @Override

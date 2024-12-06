@@ -943,6 +943,14 @@ task listDisks(type: JavaExec) {
     }
 }
 
+task sendEmail(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    mainClass = "org.pmiops.workbench.tools.SendEmail"
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
 dependencies {
     testImplementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
     testImplementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
