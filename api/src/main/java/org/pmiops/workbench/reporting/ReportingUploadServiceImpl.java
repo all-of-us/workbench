@@ -155,6 +155,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getTableId(CohortColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
+    //This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
   }
 
   /** Batch uploads {@link ReportingLeonardoAppUsage}. */
