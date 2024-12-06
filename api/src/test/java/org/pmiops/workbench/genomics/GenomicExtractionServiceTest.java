@@ -458,7 +458,7 @@ public class GenomicExtractionServiceTest {
   @Test
   public void submitExtractionJob() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1", "2", "3"));
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -487,7 +487,7 @@ public class GenomicExtractionServiceTest {
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1"));
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -506,7 +506,7 @@ public class GenomicExtractionServiceTest {
     final List<String> largePersonIdList =
         LongStream.range(1, 376).boxed().map(Object::toString).toList();
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -531,7 +531,7 @@ public class GenomicExtractionServiceTest {
                 .setNeedsV8GenomicExtractionWorkflow(true));
     targetWorkspace = workspaceDao.save(targetWorkspace.setCdrVersion(cdrV8));
 
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -550,7 +550,7 @@ public class GenomicExtractionServiceTest {
 
     assertThrows(
         FailedPreconditionException.class,
-        () -> genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset));
+        () -> genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null));
   }
 
   @Test
@@ -561,7 +561,7 @@ public class GenomicExtractionServiceTest {
 
     assertThrows(
         FailedPreconditionException.class,
-        () -> genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset));
+        () -> genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null));
   }
 
   @Test

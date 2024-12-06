@@ -50,6 +50,7 @@ interface Props {
   tanagraCohortIds?: string[];
   tanagraFeatureSetIds?: string[];
   tanagraAllParticipantsCohort?: boolean;
+  tanagraHasWGS?: boolean;
 }
 
 const styles = reactStyles({
@@ -69,6 +70,7 @@ export const ExportDatasetModal = ({
   tanagraCohortIds,
   tanagraFeatureSetIds,
   tanagraAllParticipantsCohort,
+  tanagraHasWGS,
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] =
     useState<string[]>(undefined);
@@ -96,7 +98,7 @@ export const ExportDatasetModal = ({
   const createDataSetRequest = (): DataSetRequest => {
     return {
       name: dataset ? dataset.name : 'dataset',
-      ...(dataset?.id
+      ...(dataset?.id && !tanagraHasWGS
         ? { dataSetId: dataset.id }
         : {
             dataSetId: dataset?.id,
@@ -114,9 +116,11 @@ export const ExportDatasetModal = ({
   };
 
   const hasWgs = () => {
-    return fp.includes(
-      PrePackagedConceptSetEnum.WHOLE_GENOME,
-      dataset?.prePackagedConceptSet
+    return (
+      fp.includes(
+        PrePackagedConceptSetEnum.WHOLE_GENOME,
+        dataset?.prePackagedConceptSet
+      ) || !!tanagraHasWGS
     );
   };
 
