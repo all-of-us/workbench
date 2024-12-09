@@ -9,6 +9,8 @@
             <column name="is_vwb" type="boolean" />
             <column name="vwb_workspace_id" type="varchar(80)" />
             <column name="vwb_vm_name" type="varchar(80)" />
+            <column name="gcp_project_id" type="varchar(80)" />
+            <column name="vwb_incident_count" type="bigint" />
         </addColumn>
     </changeSet>
 </databaseChangeLog>

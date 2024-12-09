@@ -101,7 +101,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     this.egressEventAuditor.fireEgressEventForUser(event, egressUser.get());
 
     Optional<DbEgressEvent> maybeEvent =
-        this.maybePersistEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
+        this.maybePersistSumoEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
     maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
   }
 
@@ -115,18 +115,23 @@ public class EgressEventServiceImpl implements EgressEventService {
               egressEvent.getWorkspaceId(), egressEvent.getUserEmail()));
     }
     this.egressEventAuditor.fireVwbEgressEvent(egressEvent, egressUser.get());
-    egressEventDao.save(
-        new DbEgressEvent()
-            .setUser(egressUser.orElse(null))
-            .setWorkspace(egressEvent.getWorkspaceId())
-            .setEgressMegabytes(
-                Optional.ofNullable(egressEvent.getEgressMib())
-                    // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
-                    .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
-                    .orElse(null))
-            .setEgressWindowSeconds(
-                Optional.ofNullable(egressEvent.getTimeWindowDuration()).orElse(null))
-            .setStatus(DbEgressEventStatus.PENDING));
+    DbEgressEvent event =
+        egressEventDao.save(
+            new DbEgressEvent()
+                .setUser(egressUser.orElse(null))
+                .setIsVwb(true)
+                .setVwbWorkspaceId(egressEvent.getWorkspaceId())
+                .setVwbVmName(egressEvent.getVmName())
+                .setVwbIncidentCount(egressEvent.getIncidentCount().intValue())
+                .setEgressMegabytes(
+                    Optional.ofNullable(egressEvent.getEgressMib())
+                        // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
+                        .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
+                        .orElse(null))
+                .setEgressWindowSeconds(
+                    Optional.ofNullable(egressEvent.getTimeWindowDuration()).orElse(null))
+                .setStatus(DbEgressEventStatus.PENDING));
+    taskQueueService.pushEgressEventTask(event.getEgressEventId());
   }
 
   @NotNull
@@ -164,7 +169,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     return windowStart.isBefore(clock.instant().minus(windowDuration.multipliedBy(2L)));
   }
 
-  private Optional<DbEgressEvent> maybePersistEgressEvent(
+  private Optional<DbEgressEvent> maybePersistSumoEgressEvent(
       SumologicEgressEvent event,
       Optional<DbUser> userMaybe,
       Optional<DbWorkspace> workspaceMaybe) {
@@ -176,6 +181,7 @@ public class EgressEventServiceImpl implements EgressEventService {
         egressEventDao.save(
             new DbEgressEvent()
                 .setUser(userMaybe.orElse(null))
+                .setIsVwb(false)
                 .setWorkspace(workspaceMaybe.orElse(null))
                 .setEgressMegabytes(
                     Optional.ofNullable(event.getEgressMib())

@@ -288,6 +288,45 @@ public class EgressEventServiceTest {
     assertThat(dbEvents).hasSize(2);
   }
 
+  @Test
+  public void testHandleVwbEgressEvent() {
+    VwbEgressEventRequest vwbEvent =
+        new VwbEgressEventRequest()
+            .userEmail("testuser@example.com")
+            .workspaceId("testWorkspaceId")
+            .vmName("testVmName")
+            .incidentCount(1L)
+            .egressMib(500.0)
+            .egressMibThreshold(100.0)
+            .gcpProjectId("test-gcp-project")
+            .timeWindowDuration(600L)
+            .timeWindowStart(NOW.toEpochMilli());
+
+    DbUser dbUser = new DbUser();
+    dbUser.setUsername("testuser@example.com");
+    dbUser.setUserId(123L);
+
+    doReturn(Optional.of(dbUser)).when(mockUserService).getByUsername("testuser@example.com");
+
+    egressEventService.handleVwbEvent(vwbEvent);
+
+    verify(mockEgressEventAuditor).fireVwbEgressEvent(vwbEvent, dbUser);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+
+    List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
+    assertThat(dbEvents).hasSize(1);
+    DbEgressEvent dbEvent = Iterables.getOnlyElement(dbEvents);
+    assertThat(dbEvent.getUser()).isEqualTo(dbUser);
+    assertThat(dbEvent.getVwbWorkspaceId()).isEqualTo("testWorkspaceId");
+    assertThat(dbEvent.getVwbVmName()).isEqualTo("testVmName");
+    assertThat(dbEvent.getVwbIncidentCount()).isEqualTo(1);
+    assertThat(dbEvent.getEgressMegabytes()).isEqualTo(500.0);
+    assertThat(dbEvent.getEgressMegabytes()).isEqualTo(500.0 * 1.04858); // Convert MiB
+    assertThat(dbEvent.getGcpProjectId()).isEqualTo("test-gcp-project");
+    assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(600L);
+    assertThat(dbEvent.getIsVwb()).isTrue();
+  }
+
   private static SumologicEgressEvent recentEgressEventForUser(DbUser user) {
     return new SumologicEgressEvent()
         .projectName(DEFAULT_GOOGLE_PROJECT)

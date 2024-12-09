@@ -18,11 +18,13 @@ public interface EgressEventAuditor {
    * event log in the target workspace.
    */
   void fireEgressEvent(SumologicEgressEvent event);
+
   /**
-   * Decorates a Verily Workbench high-egress event with Workbench metadata and fires an audit
-   * event log in the target workspace.
+   * Decorates a Verily Workbench high-egress event with Workbench metadata and fires an audit event
+   * log in the target workspace.
    */
   void fireVwbEgressEvent(VwbEgressEventRequest event, DbUser dbUser);
+
   /**
    * Decorates a Sumologic-reported high-egress event with Workbench metadata and fires an audit
    * event log in the target workspace for the specified user.

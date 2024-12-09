@@ -135,10 +135,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
             .newValueMaybe(event.getGcpProjectId())
             .build());
     events.add(
-        baseEventBuilder
-            .targetPropertyMaybe("vmName")
-            .newValueMaybe(event.getVmName())
-            .build());
+        baseEventBuilder.targetPropertyMaybe("vmName").newValueMaybe(event.getVmName()).build());
     actionAuditService.send(events);
   }
 

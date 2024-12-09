@@ -44,7 +44,9 @@ public class DbEgressEvent {
 
   private String vwbWorkspaceId;
   private String vwbVmName;
+  private String gcpProjectId;
   private boolean isVwb;
+  private int vwbIncidentCount;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -173,10 +175,31 @@ public class DbEgressEvent {
     return this;
   }
 
+  @Column(name = "gcp_project_id")
+  public String getGcpProjectId() {
+    return gcpProjectId;
+  }
+
+  public DbEgressEvent setGcpProjectId(String gcpProjectId) {
+    this.vwbVmName = gcpProjectId;
+    return this;
+  }
+
+  @Column(name = "vwb_incident_count")
+  public int getVwbIncidentCount() {
+    return vwbIncidentCount;
+  }
+
+  public DbEgressEvent setVwbIncidentCount(int vwbIncidentCount) {
+    this.vwbIncidentCount = vwbIncidentCount;
+    return this;
+  }
+
   @Column(name = "is_vwb")
   public boolean getIsVwb() {
     return isVwb;
   }
+
   public DbEgressEvent setIsVwb(boolean isVwb) {
     this.isVwb = isVwb;
     return this;
@@ -201,6 +224,8 @@ public class DbEgressEvent {
         && Objects.equals(sumologicEvent, that.sumologicEvent)
         && Objects.equals(vwbWorkspaceId, that.vwbWorkspaceId)
         && Objects.equals(vwbVmName, that.vwbVmName)
+        && Objects.equals(gcpProjectId, that.gcpProjectId)
+        && Objects.equals(vwbIncidentCount, that.vwbIncidentCount)
         && Objects.equals(isVwb, that.isVwb);
   }
 
@@ -218,6 +243,8 @@ public class DbEgressEvent {
         sumologicEvent,
         vwbWorkspaceId,
         vwbVmName,
+        gcpProjectId,
+        vwbIncidentCount,
         isVwb);
   }
 }

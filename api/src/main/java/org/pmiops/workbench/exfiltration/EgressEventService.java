@@ -5,5 +5,6 @@ import org.pmiops.workbench.model.VwbEgressEventRequest;
 
 public interface EgressEventService {
   void handleEvent(SumologicEgressEvent egressEvent);
+
   void handleVwbEvent(VwbEgressEventRequest egressEvent);
 }
