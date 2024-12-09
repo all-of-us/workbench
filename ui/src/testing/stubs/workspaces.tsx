@@ -3,6 +3,7 @@ import {
   RecentWorkspace,
   RecentWorkspaceResponse,
   SpecificPopulationEnum,
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
@@ -96,21 +97,21 @@ export const workspaceDataStub = {
   accessLevel: WorkspaceAccessLevel.OWNER,
 };
 
-export const userRolesStub = [
+export const userRolesStub: UserRole[] = [
   {
-    email: 'sampleuser1@fake-research-aou.org',
+    userName: 'sampleuser1@fake-research-aou.org',
     givenName: 'Sample',
     familyName: 'User1',
     role: WorkspaceAccessLevel.OWNER,
   },
   {
-    email: 'sampleuser2@fake-research-aou.org',
+    userName: 'sampleuser2@fake-research-aou.org',
     givenName: 'Sample',
     familyName: 'User2',
     role: WorkspaceAccessLevel.WRITER,
   },
   {
-    email: 'sampleuser3@fake-research-aou.org',
+    userName: 'sampleuser3@fake-research-aou.org',
     givenName: 'Sample',
     familyName: 'User3',
     role: WorkspaceAccessLevel.READER,

@@ -7512,7 +7512,10 @@ components:
       - role
       type: object
       properties:
-        email:
+#        email:
+#          type: string
+#          description: Username of the user (DEPRECATED in favor of userName)
+        userName:
           type: string
           description: Username of the user
         givenName:
