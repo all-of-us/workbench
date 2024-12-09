@@ -1,5 +1,6 @@
 package org.pmiops.workbench.leonardo;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -15,7 +16,7 @@ public class LeonardoAppUtils {
   private static final Map<AppType, String> APP_DISPLAY_NAMES =
       Map.of(AppType.CROMWELL, "Cromwell", AppType.RSTUDIO, "RStudio", AppType.SAS, "SAS");
 
-  public static Optional<AppType> appServiceNameToAppType(String gkeServiceName) {
+  public static Optional<AppType> appServiceNameToAppType(@NotNull String gkeServiceName) {
     return Matchers.getGroup(APP_NAME_PATTERN, gkeServiceName, APP_TYPE_GROUP_NAME)
         .map(s -> AppType.valueOf(s.toUpperCase()));
   }
