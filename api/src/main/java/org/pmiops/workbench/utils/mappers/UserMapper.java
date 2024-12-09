@@ -12,7 +12,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
     config = MapStructConfig.class,
     uses = {CommonMappers.class, FirecloudMapper.class})
 public interface UserMapper {
-  @Mapping(target = "userName", source="username")
+  @Mapping(target = "userName", source = "username")
   User toApiUser(DbUser user);
 
   User toUser(UserRole userRole);
@@ -27,7 +27,7 @@ public interface UserMapper {
   @Mapping(source = "dbUser", target = "userModel")
   WorkspaceUserAdminView toWorkspaceUserAdminView(DbUser dbUser, UserRole userRole);
 
-  @Mapping(target = "userModel", source="userRole")
+  @Mapping(target = "userModel", source = "userRole")
   @Mapping(target = "userDatabaseId", ignore = true)
   @Mapping(target = "userAccountCreatedTime", ignore = true)
   WorkspaceUserAdminView toPartialWorkspaceUserAdminView(UserRole userRole);
