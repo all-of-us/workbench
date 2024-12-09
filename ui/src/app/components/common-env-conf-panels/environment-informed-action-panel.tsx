@@ -122,7 +122,6 @@ export const EnvironmentInformedActionPanel = ({
         )}
         <EnvironmentCostEstimator
           {...{ analysisConfig }}
-          data-test-id='cost-estimator'
           isGKEApp={appType !== UIAppType.JUPYTER}
           style={costEstimatorStyle}
         />
