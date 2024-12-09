@@ -181,7 +181,7 @@ public class DbEgressEvent {
   }
 
   public DbEgressEvent setGcpProjectId(String gcpProjectId) {
-    this.vwbVmName = gcpProjectId;
+    this.gcpProjectId = gcpProjectId;
     return this;
   }
 

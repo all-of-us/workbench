@@ -292,7 +292,7 @@ public class EgressEventServiceTest {
   public void testHandleVwbEgressEvent() {
     VwbEgressEventRequest vwbEvent =
         new VwbEgressEventRequest()
-            .userEmail("testuser@example.com")
+            .userEmail(dbUser1.getUsername())
             .workspaceId("testWorkspaceId")
             .vmName("testVmName")
             .incidentCount(1L)
@@ -302,21 +302,17 @@ public class EgressEventServiceTest {
             .timeWindowDuration(600L)
             .timeWindowStart(NOW.toEpochMilli());
 
-    DbUser dbUser = new DbUser();
-    dbUser.setUsername("testuser@example.com");
-    dbUser.setUserId(123L);
-
-    doReturn(Optional.of(dbUser)).when(mockUserService).getByUsername("testuser@example.com");
+    doReturn(Optional.of(dbUser1)).when(mockUserService).getByDatabaseId(dbUser1.getUserId());
 
     egressEventService.handleVwbEvent(vwbEvent);
 
-    verify(mockEgressEventAuditor).fireVwbEgressEvent(vwbEvent, dbUser);
+    verify(mockEgressEventAuditor).fireVwbEgressEvent(vwbEvent, dbUser1);
     verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
     assertThat(dbEvents).hasSize(1);
     DbEgressEvent dbEvent = Iterables.getOnlyElement(dbEvents);
-    assertThat(dbEvent.getUser()).isEqualTo(dbUser);
+    assertThat(dbEvent.getUser()).isEqualTo(dbUser1);
     assertThat(dbEvent.getVwbWorkspaceId()).isEqualTo("testWorkspaceId");
     assertThat(dbEvent.getVwbVmName()).isEqualTo("testVmName");
     assertThat(dbEvent.getVwbIncidentCount()).isEqualTo(1);
