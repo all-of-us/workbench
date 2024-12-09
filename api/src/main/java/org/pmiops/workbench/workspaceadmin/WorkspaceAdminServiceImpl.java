@@ -530,6 +530,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             new WorkspaceUserAdminView() // the MapStruct-generated method won't handle a partial
                 // conversion
                 .role(userRole.getRole())
-                .userModel(userMapper.toApiUser(userRole, null)));
+                .userModel(userMapper.toApiUser(userRole)));
   }
 }
