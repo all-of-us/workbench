@@ -88,7 +88,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     // 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
     var vmOwner =
         userRoles.stream()
-            .map(UserRole::getEmail)
+            .map(UserRole::getUserName)
             .map(userDao::findUserByUsername)
             .filter(user -> user.getRuntimeName().equals(event.getVmPrefix()))
             .findFirst()

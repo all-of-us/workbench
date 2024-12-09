@@ -233,7 +233,8 @@ public class RdrExportServiceImpl implements RdrExportService {
                     (userRole) ->
                         new RdrWorkspaceUser()
                             .userId(
-                                (int) userDao.findUserByUsername(userRole.getEmail()).getUserId())
+                                (int)
+                                    userDao.findUserByUsername(userRole.getUserName()).getUserId())
                             .role(
                                 RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()))
                             .status(RdrWorkspaceUser.StatusEnum.ACTIVE))

@@ -355,8 +355,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     return userRoles.stream()
         .sorted(
-            Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
-        .collect(Collectors.toList());
+            Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getUserName).reversed())
+        .toList();
   }
 
   @Override
@@ -657,7 +657,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
         .stream()
         .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
-        .map(UserRole::getEmail)
+        .map(UserRole::getUserName)
         .map(userService::getByUsernameOrThrow)
         .toList();
   }
