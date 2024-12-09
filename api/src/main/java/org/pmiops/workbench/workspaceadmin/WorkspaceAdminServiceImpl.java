@@ -524,12 +524,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   // the DbUser, but we don't check that here.
   private WorkspaceUserAdminView toWorkspaceUserAdminView(UserRole userRole) {
     return userService
-        .getByUsername(userRole.getEmail())
+        .getByUsername(userRole.getUserName())
         .map(u -> userMapper.toWorkspaceUserAdminView(u, userRole))
-        .orElse(
-            new WorkspaceUserAdminView() // the MapStruct-generated method won't handle a partial
-                // conversion
-                .role(userRole.getRole())
-                .userModel(userMapper.toApiUser(userRole, null)));
+        .orElse(userMapper.toPartialWorkspaceUserAdminView(userRole));
   }
 }
