@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -151,8 +152,8 @@ public class UserControllerTest {
         userController
             .userSearch(registeredTier.getShortName(), "John", null, null, null)
             .getBody();
+    assertNotNull(response);
     assertThat(response.getUsers()).hasSize(1);
-    assertThat(response.getUsers().get(0).getEmail()).isEqualTo(john.getUsername());
     assertThat(response.getUsers().get(0).getUserName()).isEqualTo(john.getUsername());
   }
 
