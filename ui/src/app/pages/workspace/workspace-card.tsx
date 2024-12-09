@@ -296,7 +296,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     </div>
                     {useFeaturedWorkspacePageUi && (
                       <div style={{ fontSize: 12 }}>
-                        Created By: {workspace.creator.split('@')[0]}
+                        Created By: {workspace.creator.userName.split('@')[0]}
                       </div>
                     )}
                   </FlexColumn>
