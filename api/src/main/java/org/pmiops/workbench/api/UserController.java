@@ -46,7 +46,6 @@ public class UserController implements UserApiDelegate {
   private static final Function<DbUser, User> TO_USER_RESPONSE_USER =
       user -> {
         User modelUser = new User();
-        modelUser.setEmail(user.getUsername()); // deprecated, but kept for compatibility
         modelUser.setUserName(user.getUsername());
         modelUser.setGivenName(user.getGivenName());
         modelUser.setFamilyName(user.getFamilyName());

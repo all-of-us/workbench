@@ -9370,9 +9370,6 @@ components:
     User:
       type: object
       properties:
-        email:
-          type: string
-          description: researchallofus email address (deprecated in favor of userName)
         userName:
           type: string
           description: Unique researchallofus username (a Google account email)

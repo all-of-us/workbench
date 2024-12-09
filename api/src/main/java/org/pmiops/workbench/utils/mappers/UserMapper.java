@@ -16,16 +16,12 @@ public interface UserMapper {
   @Mapping(source = "user.username", target = "email")
   UserRole toApiUserRole(DbUser user, RawlsWorkspaceAccessEntry acl);
 
-  @Mapping(source = "contactEmail", target = "email")
   @Mapping(source = "userRole.email", target = "userName")
-  User toApiUser(UserRole userRole, String contactEmail);
-
-  @Mapping(source = "contactEmail", target = "email")
-  @Mapping(source = "username", target = "userName")
-  User toApiUser(DbUser dbUser);
+  User toApiUser(UserRole userRole);
 
   @Mapping(source = "dbUser.userId", target = "userDatabaseId")
   @Mapping(source = "dbUser.creationTime", target = "userAccountCreatedTime")
   @Mapping(source = "dbUser", target = "userModel")
+  @Mapping(source = "userRole.email", target = "userModel.userName")
   WorkspaceUserAdminView toWorkspaceUserAdminView(DbUser dbUser, UserRole userRole);
 }
