@@ -223,7 +223,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
 
-  private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
+  private static final String LOGGED_IN_USERNAME = "bob@researchallofus.org";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";
 
   private static final Concept CLIENT_CONCEPT_1 =
@@ -411,7 +411,7 @@ public class WorkspacesControllerTest {
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
-    currentUser = createUser(LOGGED_IN_USER_EMAIL);
+    currentUser = createUser(LOGGED_IN_USERNAME);
     registeredTier = accessTierDao.save(createRegisteredTier());
 
     when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
@@ -447,9 +447,9 @@ public class WorkspacesControllerTest {
     when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
   }
 
-  private DbUser createUser(String email) {
+  private DbUser createUser(String username) {
     DbUser user = new DbUser();
-    user.setUsername(email);
+    user.setUsername(username);
     user.setDisabled(false);
     return userDao.save(user);
   }
@@ -492,10 +492,11 @@ public class WorkspacesControllerTest {
   private void stubGetWorkspace(
       String workspaceNamespace,
       String workspaceTerraName,
-      String creator,
+      String creatorUsername,
       WorkspaceAccessLevel access) {
     stubGetWorkspace(
-        TestMockFactory.createTerraWorkspace(workspaceNamespace, workspaceTerraName, creator),
+        TestMockFactory.createTerraWorkspace(
+            workspaceNamespace, workspaceTerraName, creatorUsername),
         access);
   }
 
@@ -522,11 +523,11 @@ public class WorkspacesControllerTest {
    * if needed.
    */
   private RawlsWorkspaceDetails stubCloneWorkspace(
-      String toNamespace, String toFirecloudName, String creator) {
+      String toNamespace, String toFirecloudName, String creatorUsername) {
     RawlsWorkspaceDetails fcResponse = new RawlsWorkspaceDetails();
     fcResponse.setNamespace(toNamespace);
     fcResponse.setName(toFirecloudName);
-    fcResponse.setCreatedBy(creator);
+    fcResponse.setCreatedBy(creatorUsername);
     fcResponse.setGoogleProject(CLONE_GOOGLE_PROJECT_ID);
 
     when(fireCloudService.cloneWorkspace(
@@ -604,8 +605,8 @@ public class WorkspacesControllerTest {
   private List<RawlsWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
       Collection<UserRole> collaborators) {
     return collaborators.stream()
-        .map(c -> FirecloudTransforms.buildAclUpdate(c.getEmail(), c.getRole()))
-        .collect(Collectors.toList());
+        .map(c -> FirecloudTransforms.buildAclUpdate(c.getUserName(), c.getRole()))
+        .toList();
   }
 
   private Workspace createWorkspaceAndGrantAccess(WorkspaceAccessLevel accessLevel) {
@@ -651,7 +652,7 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(
         workspace.getNamespace(),
         workspace.getTerraName(),
-        LOGGED_IN_USER_EMAIL,
+        LOGGED_IN_USERNAME,
         WorkspaceAccessLevel.OWNER);
     Workspace retrievedWorkspace =
         workspacesController
@@ -663,7 +664,7 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getCdrVersionId()).isEqualTo(cdrVersionId);
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
-    assertThat(retrievedWorkspace.getCreatorUser().getUserName()).isEqualTo(LOGGED_IN_USER_EMAIL);
+    assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(retrievedWorkspace.getName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getDisplayName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getTerraName()).isEqualTo(testWorkspaceTerraName);
@@ -1034,7 +1035,7 @@ public class WorkspacesControllerTest {
     assertThat(operation2).isEqualTo(operation);
 
     // mocks Terra returning workspace duplication info
-    stubCloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), LOGGED_IN_USER_EMAIL);
+    stubCloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), LOGGED_IN_USERNAME);
 
     DuplicateWorkspaceTaskRequest request2 =
         new DuplicateWorkspaceTaskRequest()
@@ -1370,7 +1371,7 @@ public class WorkspacesControllerTest {
     req.setWorkspace(modWorkspace);
     final RawlsWorkspaceDetails clonedFirecloudWorkspace =
         stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
+            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USERNAME);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
     // assertion below will pass.
     clonedFirecloudWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
@@ -1427,7 +1428,7 @@ public class WorkspacesControllerTest {
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(
-        modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
+        modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USERNAME);
 
     doThrow(new RuntimeException()).when(workspaceDao).save(any(DbWorkspace.class));
 
@@ -1464,7 +1465,7 @@ public class WorkspacesControllerTest {
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(
-        modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
+        modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USERNAME);
 
     workspacesController.cloneWorkspace(
         originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), req);
@@ -1503,7 +1504,7 @@ public class WorkspacesControllerTest {
           final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           req.setWorkspace(modWorkspace);
           stubCloneWorkspace(
-              modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
+              modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USERNAME);
           workspacesController.cloneWorkspace(
               originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), req);
         });
@@ -1520,17 +1521,18 @@ public class WorkspacesControllerTest {
 
   private void addUserRoleToShareWorkspaceRequest(
       ShareWorkspaceRequest shareWorkspaceRequest,
-      String email,
+      String userName,
       WorkspaceAccessLevel workspaceAccessLevel) {
     final UserRole userRole = new UserRole();
-    userRole.setEmail(email);
+    userRole.setUserName(userName);
+    userRole.setEmail(userName);
     userRole.setRole(workspaceAccessLevel);
     shareWorkspaceRequest.addItemsItem(userRole);
   }
 
-  private DbUser createAndSaveUser(String email, long userId) {
+  private DbUser createAndSaveUser(String username, long userId) {
     DbUser writerUser = new DbUser();
-    writerUser.setUsername(email);
+    writerUser.setUsername(username);
     writerUser.setUserId(userId);
     writerUser.setDisabled(false);
 
@@ -1748,7 +1750,7 @@ public class WorkspacesControllerTest {
     req.setWorkspace(modWorkspace);
     final RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
+            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USERNAME);
 
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
@@ -1932,7 +1934,7 @@ public class WorkspacesControllerTest {
 
     RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
+            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USERNAME);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
@@ -2034,12 +2036,12 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(
         modWorkspace.getNamespace(),
         modWorkspace.getTerraName(),
-        LOGGED_IN_USER_EMAIL,
+        LOGGED_IN_USERNAME,
         WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL();
     RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
+            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USERNAME);
 
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.READER);
     Workspace cloned =
@@ -2338,7 +2340,7 @@ public class WorkspacesControllerTest {
                         .put("canCompute", true)
                         .put("canShare", false))
                 .put(
-                    LOGGED_IN_USER_EMAIL,
+                    LOGGED_IN_USERNAME,
                     new JSONObject()
                         .put("accessLevel", "OWNER")
                         .put("canCompute", true)
@@ -2367,11 +2369,24 @@ public class WorkspacesControllerTest {
     List<RawlsWorkspaceACLUpdate> expectedCollaboratorsAfterUpdate =
         convertUserRolesToUpdateAclRequestList(
             Set.of(
-                new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
-                new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
-                new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER),
                 new UserRole()
+                    .userName(cloner.getUsername())
+                    .email(cloner.getUsername())
+                    .role(WorkspaceAccessLevel.OWNER),
+                new UserRole()
+                    .userName(LOGGED_IN_USERNAME)
+                    .email(LOGGED_IN_USERNAME)
+                    .role(WorkspaceAccessLevel.OWNER),
+                new UserRole()
+                    .userName(reader.getUsername())
+                    .email(reader.getUsername())
+                    .role(WorkspaceAccessLevel.READER),
+                new UserRole()
+                    .userName(writer.getUsername())
+                    .email(writer.getUsername())
+                    .role(WorkspaceAccessLevel.WRITER),
+                new UserRole()
+                    .userName(workspaceService.getPublishedWorkspacesGroupEmail())
                     .email(workspaceService.getPublishedWorkspacesGroupEmail())
                     .role(WorkspaceAccessLevel.NO_ACCESS)));
 
@@ -2531,9 +2546,15 @@ public class WorkspacesControllerTest {
         new ShareWorkspaceRequest()
             .workspaceEtag(workspace.getEtag())
             .addItemsItem(
-                new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
+                new UserRole()
+                    .userName(writerUser.getUsername())
+                    .email(writerUser.getUsername())
+                    .role(WorkspaceAccessLevel.WRITER))
             .addItemsItem(
-                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
+                new UserRole()
+                    .userName(ownerUser.getUsername())
+                    .email(ownerUser.getUsername())
+                    .role(WorkspaceAccessLevel.OWNER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspacePatch(
@@ -2584,9 +2605,15 @@ public class WorkspacesControllerTest {
             .workspaceEtag(workspace.getEtag())
             // Removed WRITER, demoted OWNER to READER.
             .addItemsItem(
-                new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.NO_ACCESS))
+                new UserRole()
+                    .userName(writerUser.getUsername())
+                    .email(writerUser.getUsername())
+                    .role(WorkspaceAccessLevel.NO_ACCESS))
             .addItemsItem(
-                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.READER));
+                new UserRole()
+                    .userName(ownerUser.getUsername())
+                    .email(ownerUser.getUsername())
+                    .role(WorkspaceAccessLevel.READER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspacePatch(
@@ -2642,6 +2669,7 @@ public class WorkspacesControllerTest {
             // Removing writer.
             .addItemsItem(
                 new UserRole()
+                    .userName(writerUser.getUsername())
                     .email(writerUser.getUsername())
                     .role(WorkspaceAccessLevel.NO_ACCESS));
 
@@ -2668,8 +2696,9 @@ public class WorkspacesControllerTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+        shareWorkspaceRequest, LOGGED_IN_USERNAME, WorkspaceAccessLevel.OWNER);
     UserRole writer = new UserRole();
+    writer.setUserName("writerfriend@gmail.com");
     writer.setEmail("writerfriend@gmail.com");
     shareWorkspaceRequest.addItemsItem(writer);
 
@@ -2697,7 +2726,7 @@ public class WorkspacesControllerTest {
         createWorkspaceACL(
             new JSONObject()
                 .put(
-                    LOGGED_IN_USER_EMAIL,
+                    LOGGED_IN_USERNAME,
                     new JSONObject()
                         .put("accessLevel", "OWNER")
                         .put("canCompute", true)
@@ -2722,6 +2751,7 @@ public class WorkspacesControllerTest {
     final ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole reader = new UserRole();
+    reader.setUserName(readerUser.getUsername());
     reader.setEmail(readerUser.getUsername());
     reader.setRole(WorkspaceAccessLevel.NO_ACCESS);
     shareWorkspaceRequest.addItemsItem(reader);
@@ -2816,7 +2846,10 @@ public class WorkspacesControllerTest {
 
     assertThat(resp.getItems())
         .containsExactly(
-            new UserRole().email(currentUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
+            new UserRole()
+                .userName(currentUser.getUsername())
+                .email(currentUser.getUsername())
+                .role(WorkspaceAccessLevel.OWNER));
   }
 
   @Test
@@ -2887,7 +2920,7 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(
         workspace.getNamespace(),
         workspace.getTerraName(),
-        LOGGED_IN_USER_EMAIL,
+        LOGGED_IN_USERNAME,
         WorkspaceAccessLevel.OWNER);
     DbWorkspace dbWorkspace =
         workspaceDao.getRequired(workspace.getNamespace(), workspace.getTerraName());

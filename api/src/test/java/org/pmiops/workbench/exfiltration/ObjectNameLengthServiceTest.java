@@ -45,7 +45,7 @@ public class ObjectNameLengthServiceTest {
 
   public static final String GOOGLE_PROJECT = "google-project";
   public static final String FIRECLOUD_NAME = "firecloud-name";
-  public static final String USER_EMAIL = "test@aou.com";
+  public static final String USERNAME = "test@aou.com";
   public static final String NAMESPACE = "namespace";
   public static final String PET_ACCOUNT = "pet@service.com";
 
@@ -97,15 +97,15 @@ public class ObjectNameLengthServiceTest {
 
     List<UserRole> userRoles =
         Collections.singletonList(
-            new UserRole().role(WorkspaceAccessLevel.OWNER).email(USER_EMAIL));
+            new UserRole().role(WorkspaceAccessLevel.OWNER).email(USERNAME).userName(USERNAME));
     doReturn(userRoles).when(workspaceService).getFirecloudUserRoles(NAMESPACE, FIRECLOUD_NAME);
 
-    DbUser aUser = new DbUser().setUsername(USER_EMAIL);
+    DbUser aUser = new DbUser().setUsername(USERNAME);
     Set<DbUser> dbUsers = Sets.newHashSet(aUser);
 
     doReturn(dbUsers)
         .when(userService)
-        .findActiveUsersByUsernames(Collections.singletonList(USER_EMAIL));
+        .findActiveUsersByUsernames(Collections.singletonList(USERNAME));
 
     doReturn(Optional.of(PET_ACCOUNT))
         .when(iamService)
@@ -151,18 +151,21 @@ public class ObjectNameLengthServiceTest {
 
     List<UserRole> userRoles =
         Lists.newArrayList(
-            new UserRole().role(WorkspaceAccessLevel.OWNER).email(USER_EMAIL),
-            new UserRole().role(WorkspaceAccessLevel.WRITER).email("1" + USER_EMAIL));
+            new UserRole().role(WorkspaceAccessLevel.OWNER).userName(USERNAME).email(USERNAME),
+            new UserRole()
+                .role(WorkspaceAccessLevel.WRITER)
+                .userName("1" + USERNAME)
+                .email("1" + USERNAME));
     doReturn(userRoles).when(workspaceService).getFirecloudUserRoles(NAMESPACE, FIRECLOUD_NAME);
 
-    DbUser aUser = new DbUser().setUsername(USER_EMAIL);
-    DbUser anotherUser = new DbUser().setUsername("1" + USER_EMAIL);
+    DbUser aUser = new DbUser().setUsername(USERNAME);
+    DbUser anotherUser = new DbUser().setUsername("1" + USERNAME);
 
     Set<DbUser> dbUsers = Sets.newHashSet(aUser, anotherUser);
 
     doReturn(dbUsers)
         .when(userService)
-        .findActiveUsersByUsernames(Lists.newArrayList(USER_EMAIL, "1" + USER_EMAIL));
+        .findActiveUsersByUsernames(Lists.newArrayList(USERNAME, "1" + USERNAME));
 
     doReturn(Optional.of(PET_ACCOUNT))
         .when(iamService)
