@@ -2819,9 +2819,8 @@ public class WorkspacesControllerTest {
             .getBody();
 
     assertNotNull(resp);
-    List<UserRole> roles = resp.getItems();
-    assertThat(roles).hasSize(1);
-    UserRole role = roles.get(0);
+    assertThat(resp.getItems()).hasSize(1);
+    UserRole role = resp.getItems().get(0);
     assertThat(role.getUserName()).isEqualTo(currentUser.getUsername());
     assertThat(role.getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
   }
