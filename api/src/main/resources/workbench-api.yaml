@@ -7508,13 +7508,15 @@ components:
           format: double
     UserRole:
       required:
-      - email
+      - userName
+      - givenName
+      - familyName
       - role
       type: object
       properties:
-#        email:
-#          type: string
-#          description: Username of the user (DEPRECATED in favor of userName)
+        email:
+          type: string
+          description: Username of the user (DEPRECATED in favor of userName)
         userName:
           type: string
           description: Username of the user
@@ -9372,6 +9374,10 @@ components:
           format: int32
     User:
       type: object
+      required:
+      - userName
+      - givenName
+      - familyName
       properties:
         userName:
           type: string
