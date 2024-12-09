@@ -107,10 +107,7 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(Optional.of(dbWorkspace));
 
     final UserRole collaborator =
-        new UserRole()
-            .userName("test@test.test")
-            .email("test@test.test")
-            .role(WorkspaceAccessLevel.WRITER);
+        new UserRole().userName("test@test.test").role(WorkspaceAccessLevel.WRITER);
     final List<UserRole> collaborators = List.of(collaborator);
     when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_TERRA_NAME))
         .thenReturn(collaborators);

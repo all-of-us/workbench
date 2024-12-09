@@ -52,7 +52,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 public class EgressEventAuditorTest {
 
   private static final long USER_ID = 1L;
-  private static final String USER_EMAIL = "user@researchallofus.org";
+  private static final String USERNAME = "user@researchallofus.org";
   private static final long WORKSPACE_ID = 1L;
   private static final String WORKSPACE_NAMESPACE = "aou-rw-test-c7dec260";
   private static final String GOOGLE_PROJECT = "gcp-project-id";
@@ -90,8 +90,8 @@ public class EgressEventAuditorTest {
   public void setUp() {
     dbUser = new DbUser();
     dbUser.setUserId(USER_ID);
-    dbUser.setUsername(USER_EMAIL);
-    when(mockUserDao.findUsersByUsernameIn(Collections.singletonList(USER_EMAIL)))
+    dbUser.setUsername(USERNAME);
+    when(mockUserDao.findUsersByUsernameIn(Collections.singletonList(USERNAME)))
         .thenReturn(List.of(dbUser));
 
     dbWorkspace = new DbWorkspace();
@@ -100,7 +100,7 @@ public class EgressEventAuditorTest {
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(Optional.of(dbWorkspace));
-    firecloudUserRoles.add(new UserRole().userName(USER_EMAIL).email(USER_EMAIL));
+    firecloudUserRoles.add(new UserRole().username(USERNAME));
     when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(firecloudUserRoles);
   }
@@ -127,7 +127,7 @@ public class EgressEventAuditorTest {
     assertThat(events.stream().map(ActionAuditEvent::agentIdMaybe).collect(Collectors.toSet()))
         .containsExactly(USER_ID);
     assertThat(events.stream().map(ActionAuditEvent::agentEmailMaybe).collect(Collectors.toSet()))
-        .containsExactly(USER_EMAIL);
+        .containsExactly(USERNAME);
     assertThat(events.stream().map(ActionAuditEvent::targetIdMaybe).collect(Collectors.toSet()))
         .containsExactly(WORKSPACE_ID);
 
@@ -175,7 +175,7 @@ public class EgressEventAuditorTest {
     assertThat(events.stream().map(ActionAuditEvent::agentIdMaybe).collect(Collectors.toSet()))
         .containsExactly(USER_ID);
     assertThat(events.stream().map(ActionAuditEvent::agentEmailMaybe).collect(Collectors.toSet()))
-        .containsExactly(USER_EMAIL);
+        .containsExactly(USERNAME);
     assertThat(events.stream().map(ActionAuditEvent::targetIdMaybe).collect(Collectors.toSet()))
         .containsExactly(WORKSPACE_ID);
 

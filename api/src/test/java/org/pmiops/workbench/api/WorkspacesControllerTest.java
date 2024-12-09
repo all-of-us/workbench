@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
@@ -1525,7 +1526,6 @@ public class WorkspacesControllerTest {
       WorkspaceAccessLevel workspaceAccessLevel) {
     final UserRole userRole = new UserRole();
     userRole.setUserName(userName);
-    userRole.setEmail(userName);
     userRole.setRole(workspaceAccessLevel);
     shareWorkspaceRequest.addItemsItem(userRole);
   }
@@ -2369,25 +2369,12 @@ public class WorkspacesControllerTest {
     List<RawlsWorkspaceACLUpdate> expectedCollaboratorsAfterUpdate =
         convertUserRolesToUpdateAclRequestList(
             Set.of(
-                new UserRole()
-                    .userName(cloner.getUsername())
-                    .email(cloner.getUsername())
-                    .role(WorkspaceAccessLevel.OWNER),
-                new UserRole()
-                    .userName(LOGGED_IN_USERNAME)
-                    .email(LOGGED_IN_USERNAME)
-                    .role(WorkspaceAccessLevel.OWNER),
-                new UserRole()
-                    .userName(reader.getUsername())
-                    .email(reader.getUsername())
-                    .role(WorkspaceAccessLevel.READER),
-                new UserRole()
-                    .userName(writer.getUsername())
-                    .email(writer.getUsername())
-                    .role(WorkspaceAccessLevel.WRITER),
+                new UserRole().userName(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
+                new UserRole().userName(LOGGED_IN_USERNAME).role(WorkspaceAccessLevel.OWNER),
+                new UserRole().userName(reader.getUsername()).role(WorkspaceAccessLevel.READER),
+                new UserRole().userName(writer.getUsername()).role(WorkspaceAccessLevel.WRITER),
                 new UserRole()
                     .userName(workspaceService.getPublishedWorkspacesGroupEmail())
-                    .email(workspaceService.getPublishedWorkspacesGroupEmail())
                     .role(WorkspaceAccessLevel.NO_ACCESS)));
 
     currentUser = cloner;
@@ -2546,15 +2533,9 @@ public class WorkspacesControllerTest {
         new ShareWorkspaceRequest()
             .workspaceEtag(workspace.getEtag())
             .addItemsItem(
-                new UserRole()
-                    .userName(writerUser.getUsername())
-                    .email(writerUser.getUsername())
-                    .role(WorkspaceAccessLevel.WRITER))
+                new UserRole().userName(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
             .addItemsItem(
-                new UserRole()
-                    .userName(ownerUser.getUsername())
-                    .email(ownerUser.getUsername())
-                    .role(WorkspaceAccessLevel.OWNER));
+                new UserRole().userName(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspacePatch(
@@ -2607,13 +2588,9 @@ public class WorkspacesControllerTest {
             .addItemsItem(
                 new UserRole()
                     .userName(writerUser.getUsername())
-                    .email(writerUser.getUsername())
                     .role(WorkspaceAccessLevel.NO_ACCESS))
             .addItemsItem(
-                new UserRole()
-                    .userName(ownerUser.getUsername())
-                    .email(ownerUser.getUsername())
-                    .role(WorkspaceAccessLevel.READER));
+                new UserRole().userName(ownerUser.getUsername()).role(WorkspaceAccessLevel.READER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspacePatch(
@@ -2670,7 +2647,6 @@ public class WorkspacesControllerTest {
             .addItemsItem(
                 new UserRole()
                     .userName(writerUser.getUsername())
-                    .email(writerUser.getUsername())
                     .role(WorkspaceAccessLevel.NO_ACCESS));
 
     stubFcUpdateWorkspaceACL();
@@ -2699,7 +2675,6 @@ public class WorkspacesControllerTest {
         shareWorkspaceRequest, LOGGED_IN_USERNAME, WorkspaceAccessLevel.OWNER);
     UserRole writer = new UserRole();
     writer.setUserName("writerfriend@gmail.com");
-    writer.setEmail("writerfriend@gmail.com");
     shareWorkspaceRequest.addItemsItem(writer);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
@@ -2752,7 +2727,6 @@ public class WorkspacesControllerTest {
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole reader = new UserRole();
     reader.setUserName(readerUser.getUsername());
-    reader.setEmail(readerUser.getUsername());
     reader.setRole(WorkspaceAccessLevel.NO_ACCESS);
     shareWorkspaceRequest.addItemsItem(reader);
 
@@ -2844,12 +2818,12 @@ public class WorkspacesControllerTest {
             .getFirecloudWorkspaceUserRoles(workspace.getNamespace(), workspace.getTerraName())
             .getBody();
 
-    assertThat(resp.getItems())
-        .containsExactly(
-            new UserRole()
-                .userName(currentUser.getUsername())
-                .email(currentUser.getUsername())
-                .role(WorkspaceAccessLevel.OWNER));
+    assertNotNull(resp);
+    List<UserRole> roles = resp.getItems();
+    assertThat(roles).hasSize(1);
+    UserRole role = roles.get(0);
+    assertThat(role.getUserName()).isEqualTo(currentUser.getUsername());
+    assertThat(role.getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
   }
 
   @Test
