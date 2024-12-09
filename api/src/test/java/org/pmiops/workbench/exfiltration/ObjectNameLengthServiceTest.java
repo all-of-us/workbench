@@ -97,7 +97,7 @@ public class ObjectNameLengthServiceTest {
 
     List<UserRole> userRoles =
         Collections.singletonList(
-            new UserRole().role(WorkspaceAccessLevel.OWNER).email(USERNAME).userName(USERNAME));
+            new UserRole().role(WorkspaceAccessLevel.OWNER).userName(USERNAME));
     doReturn(userRoles).when(workspaceService).getFirecloudUserRoles(NAMESPACE, FIRECLOUD_NAME);
 
     DbUser aUser = new DbUser().setUsername(USERNAME);
@@ -151,11 +151,8 @@ public class ObjectNameLengthServiceTest {
 
     List<UserRole> userRoles =
         Lists.newArrayList(
-            new UserRole().role(WorkspaceAccessLevel.OWNER).userName(USERNAME).email(USERNAME),
-            new UserRole()
-                .role(WorkspaceAccessLevel.WRITER)
-                .userName("1" + USERNAME)
-                .email("1" + USERNAME));
+            new UserRole().role(WorkspaceAccessLevel.OWNER).userName(USERNAME),
+            new UserRole().role(WorkspaceAccessLevel.WRITER).userName("1" + USERNAME));
     doReturn(userRoles).when(workspaceService).getFirecloudUserRoles(NAMESPACE, FIRECLOUD_NAME);
 
     DbUser aUser = new DbUser().setUsername(USERNAME);
