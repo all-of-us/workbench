@@ -12,10 +12,12 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
     config = MapStructConfig.class,
     uses = {CommonMappers.class, FirecloudMapper.class})
 public interface UserMapper {
+  // used internally by the generated implementation of toWorkspaceUserAdminView()
   @Mapping(target = "userName", source = "username")
-  User toApiUser(DbUser user);
+  User mapperInternalToUser(DbUser user);
 
-  User toUser(UserRole userRole);
+  // used internally by the generated implementation of toPartialWorkspaceUserAdminView()
+  User mapperInternalToUser(UserRole userRole);
 
   @Mapping(source = "acl", target = "role")
   @Mapping(source = "user.username", target = "email")
