@@ -79,7 +79,6 @@ const RequestExtensionLink = ({
     <LinkButton onClick={onRequestExtension} style={{ display: 'inline' }}>
       request an extension.
     </LinkButton>
-    .
   </>
 );
 
