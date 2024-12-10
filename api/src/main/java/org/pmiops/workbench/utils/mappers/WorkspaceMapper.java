@@ -48,8 +48,10 @@ public interface WorkspaceMapper {
   @Mapping(target = "displayName", source = "dbWorkspace.name")
   @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "creator.userName", source = "dbWorkspace.creator.username")
-  @Mapping(target = "creator.email", ignore = true) // need to work with security before exposing
+  @Mapping(target = "creatorUser.userName", source = "dbWorkspace.creatorUser.username")
+  // Need to work with security before exposing
+  // Should change to contactEmail or institutionalEmail
+  @Mapping(target = "creatorUser.email", ignore = true)
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
       source = "dbWorkspace.creator",
