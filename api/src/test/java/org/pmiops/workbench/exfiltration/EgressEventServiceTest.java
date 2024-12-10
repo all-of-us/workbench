@@ -316,8 +316,7 @@ public class EgressEventServiceTest {
     assertThat(dbEvent.getVwbWorkspaceId()).isEqualTo("testWorkspaceId");
     assertThat(dbEvent.getVwbVmName()).isEqualTo("testVmName");
     assertThat(dbEvent.getVwbIncidentCount()).isEqualTo(1);
-    assertThat(dbEvent.getEgressMegabytes()).isEqualTo(500.0);
-    assertThat(dbEvent.getEgressMegabytes()).isEqualTo(500.0 * 1.04858); // Convert MiB
+    assertThat(dbEvent.getEgressMegabytes()).isEqualTo(524.288); // Convert MiB
     assertThat(dbEvent.getGcpProjectId()).isEqualTo("test-gcp-project");
     assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(600L);
     assertThat(dbEvent.getIsVwb()).isTrue();

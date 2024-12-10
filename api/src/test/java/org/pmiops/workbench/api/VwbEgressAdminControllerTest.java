@@ -34,13 +34,17 @@ public class VwbEgressAdminControllerTest {
 
   private WorkbenchConfig workbenchConfig = new WorkbenchConfig();
   private VwbEgressEventRequest vwbEvent;
+  private DbUser authorizedUser;
 
   @BeforeEach
   public void setUp() {
     this.vwbEgressAdminController =
         new VwbEgressAdminController(mockEgressEventService, mockConfigProvider, mockUserProvider);
+    authorizedUser = new DbUser();
+    authorizedUser.setUsername("test-user@example.com");
     workbenchConfig.vwb = new WorkbenchConfig.VwbConfig();
-    workbenchConfig.vwb.exfilManagerServiceAccount = "authorized-user@example.com";
+    workbenchConfig.vwb.exfilManagerServiceAccount = authorizedUser.getUsername();
+    when(mockConfigProvider.get()).thenReturn(workbenchConfig);
 
     vwbEvent =
         new VwbEgressEventRequest()
@@ -57,11 +61,7 @@ public class VwbEgressAdminControllerTest {
 
   @Test
   public void testCreateVwbEgressEvent() {
-    DbUser dbUser = new DbUser();
-    dbUser.setUsername("test-user@example.com");
-
-    when(mockConfigProvider.get()).thenReturn(workbenchConfig);
-    when(mockUserProvider.get()).thenReturn(dbUser);
+    when(mockUserProvider.get()).thenReturn(authorizedUser);
 
     ResponseEntity<Void> response = vwbEgressAdminController.createVwbEgressEvent(vwbEvent);
 
@@ -74,7 +74,6 @@ public class VwbEgressAdminControllerTest {
     DbUser dbUser = new DbUser();
     dbUser.setUsername("unauthorized-user@example.com");
 
-    when(mockConfigProvider.get()).thenReturn(workbenchConfig);
     when(mockUserProvider.get()).thenReturn(dbUser);
 
     assertThrows(
