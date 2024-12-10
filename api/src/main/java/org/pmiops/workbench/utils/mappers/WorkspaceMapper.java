@@ -128,7 +128,9 @@ public interface WorkspaceMapper {
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creatorUser.userName", source = "creator.username")
-  @Mapping(target = "creatorUser.email", ignore = true) // need to work with security before exposing
+  @Mapping(
+      target = "creatorUser.email",
+      ignore = true) // need to work with security before exposing
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
