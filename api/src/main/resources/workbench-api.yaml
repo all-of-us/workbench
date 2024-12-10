@@ -7278,6 +7278,8 @@ components:
         cdrVersionId:
           type: string
         creator:
+          type: string
+        creatorUser:
           $ref: '#/components/schemas/User'
         billingAccountName:
           type: string
