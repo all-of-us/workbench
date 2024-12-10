@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash';
 
-import { Profile } from 'generated/fetch';
+import { Profile, User } from 'generated/fetch';
 
 import { Button, LinkButton } from 'app/components/buttons';
 import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits-modal';
@@ -88,11 +88,10 @@ const whoseCredits = (isCreator: boolean) => {
   return isCreator ? 'Your' : 'This workspace creator’s';
 };
 
-const workspaceCreatorInformation = (
-  isCreator: boolean,
-  creatorUsername: string
-) => {
-  return isCreator ? '' : `This workspace was created by ${creatorUsername}. `;
+const workspaceCreatorInformation = (isCreator: boolean, creatorUser: User) => {
+  return isCreator
+    ? ''
+    : `This workspace was created by ${creatorUser.givenName} ${creatorUser.familyName}. `;
 };
 
 interface WhatHappenedProps {
@@ -218,7 +217,7 @@ export const InvalidBillingBanner = fp.flow(
 )(({ onClose, navigate, workspace, profileState }: Props) => {
   const profile = profileState.profile;
   const [showExtensionModal, setShowExtensionModal] = React.useState(false);
-  const isCreator = profile?.username === workspace?.creator;
+  const isCreator = profile?.username === workspace?.creatorUser?.userName;
   const isEligibleForExtension = profile?.eligibleForInitialCreditsExtension;
   const isExpired =
     workspace?.initialCredits.expirationEpochMillis < Date.now();
@@ -248,7 +247,7 @@ export const InvalidBillingBanner = fp.flow(
           isCreator,
         }}
       />{' '}
-      {workspaceCreatorInformation(isCreator, workspace?.creator)}
+      {workspaceCreatorInformation(isCreator, workspace?.creatorUser)}
       <WhatToDo
         {...{
           isCreator,

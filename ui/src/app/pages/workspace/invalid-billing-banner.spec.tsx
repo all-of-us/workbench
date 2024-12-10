@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { ProfileApi } from 'generated/fetch';
+import { ProfileApi, User } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render } from '@testing-library/react';
@@ -25,8 +25,16 @@ describe('InvalidBillingBanner', () => {
   const reload = jest.fn();
   const updateCache = jest.fn();
   const warningThresholdDays = 5; // arbitrary
-  const me = ProfileStubVariables.PROFILE_STUB.username;
-  const someOneElse = 'someOneElse@fake-research-aou.org';
+  const me: User = {
+    userName: ProfileStubVariables.PROFILE_STUB.username,
+    givenName: 'Me',
+    familyName: 'Myself',
+  };
+  const someOneElse: User = {
+    userName: 'someOneElse@fake-research-aou.org',
+    givenName: 'Someone',
+    familyName: 'Else',
+  };
 
   const component = () =>
     render(
@@ -79,7 +87,7 @@ describe('InvalidBillingBanner', () => {
         expired,
         expirationEpochMillis: plusDays(Date.now(), daysUntilExpiration),
       },
-      creator: ownedByMe ? me : someOneElse,
+      creatorUser: ownedByMe ? me : someOneElse,
     });
   };
 
@@ -138,7 +146,7 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('Workspace credits are expiring soon');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits are expiring soon. This workspace was ' +
-        'created by someOneElse@fake-research-aou.org. For more information, read the Using All of ' +
+        'created by Someone Else. For more information, read the Using All of ' +
         'Us Initial Credits article on the User Support Hub.'
     );
     expectEditWorkspaceButtonDoesNotExist();
@@ -177,7 +185,7 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('Workspace credits have expired');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits have expired. This workspace was created ' +
-        'by someOneElse@fake-research-aou.org. For more information, read the Using All of Us Initial ' +
+        'by Someone Else. For more information, read the Using All of Us Initial ' +
         'Credits article on the User Support Hub.'
     );
     expectEditWorkspaceButtonDoesNotExist();
@@ -216,7 +224,7 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits have run out. This workspace was created by ' +
-        'someOneElse@fake-research-aou.org. To use the workspace, a valid billing account needs to be provided. ' +
+        'Someone Else. To use the workspace, a valid billing account needs to be provided. ' +
         'To learn more about establishing a billing account, read the Paying for Your Research article ' +
         'on the User Support Hub.'
     );
@@ -256,7 +264,7 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits have run out. This workspace was created by ' +
-        'someOneElse@fake-research-aou.org. To use the workspace, a valid billing account needs to be provided. ' +
+        'Someone Else. To use the workspace, a valid billing account needs to be provided. ' +
         'To learn more about establishing a billing account, read the Paying for Your Research article ' +
         'on the User Support Hub.'
     );
