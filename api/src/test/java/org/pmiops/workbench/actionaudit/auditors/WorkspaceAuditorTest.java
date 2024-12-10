@@ -310,7 +310,7 @@ public class WorkspaceAuditorTest {
         .name(in.getName())
         .namespace(in.getNamespace())
         .cdrVersionId(in.getCdrVersionId())
-        .creator(in.getCreator())
+        .creatorUser(in.getCreatorUser())
         .billingAccountName(in.getBillingAccountName())
         .googleBucketName(in.getGoogleBucketName())
         .accessTierShortName(in.getAccessTierShortName())
