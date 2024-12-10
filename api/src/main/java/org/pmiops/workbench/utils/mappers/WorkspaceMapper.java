@@ -127,8 +127,8 @@ public interface WorkspaceMapper {
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
-  @Mapping(target = "creator.userName", source = "creator.username") // need to work with security before exposing
-  @Mapping(target = "creator.email", ignore = true)
+  @Mapping(target = "creatorUser.userName", source = "creator.username")
+  @Mapping(target = "creatorUser.email", ignore = true) // need to work with security before exposing
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
