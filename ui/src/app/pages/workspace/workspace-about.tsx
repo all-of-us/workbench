@@ -606,16 +606,22 @@ export const WorkspaceAbout = fp.flow(
           {showExtensionModal && (
             <ExtendInitialCreditsModal
               onClose={(updatedProfile: Profile) => {
-                profileStore.get().updateCache(updatedProfile);
-                workspacesApi()
-                  .getWorkspace(workspace.namespace, workspace.terraName)
-                  .then((updatedWorkspace) => {
-                    currentWorkspaceStore.next({
-                      ...updatedWorkspace.workspace,
-                      accessLevel: updatedWorkspace.accessLevel,
-                    });
-                  })
-                  .finally(() => this.setState({ showExtensionModal: false }));
+                if (updatedProfile) {
+                  profileStore.get().updateCache(updatedProfile);
+                  workspacesApi()
+                    .getWorkspace(workspace.namespace, workspace.terraName)
+                    .then((updatedWorkspace) => {
+                      currentWorkspaceStore.next({
+                        ...updatedWorkspace.workspace,
+                        accessLevel: updatedWorkspace.accessLevel,
+                      });
+                    })
+                    .finally(() =>
+                      this.setState({ showExtensionModal: false })
+                    );
+                } else {
+                  this.setState({ showExtensionModal: false });
+                }
               }}
             />
           )}
