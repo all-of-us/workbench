@@ -861,6 +861,7 @@ public class InitialCreditsServiceTest {
   public void test_none() {
     DbUser user = new DbUser();
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
@@ -870,6 +871,7 @@ public class InitialCreditsServiceTest {
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(true).setExpirationTime(NOW));
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
@@ -883,10 +885,11 @@ public class InitialCreditsServiceTest {
                         .setExpirationTime(NOW)));
     when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
-  public void test_nullTimestamp() {
+  public void test_nullExpirationTimestamp() {
     DbUser user =
         new DbUser()
             .setUserInitialCreditsExpiration(
@@ -895,12 +898,30 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void test_validTimestamp() {
+  public void test_nullExtensionTimestamp() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(false).setExtensionTime(null));
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
+  }
+
+  @Test
+  public void test_validExpirationTimestamp() {
     DbUser user =
         new DbUser()
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(false).setExpirationTime(NOW));
     assertThat(initialCreditsService.getCreditsExpiration(user)).hasValue(NOW);
+  }
+
+  @Test
+  public void test_validExtensionTimestamp() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(false).setExtensionTime(NOW));
+    assertThat(initialCreditsService.getCreditsExtension(user)).hasValue(NOW);
   }
 
   @Test
