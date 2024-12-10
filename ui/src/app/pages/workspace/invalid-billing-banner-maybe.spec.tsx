@@ -7,7 +7,7 @@ import { ProfileApi, User } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render } from '@testing-library/react';
-import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
+import { InvalidBillingBannerMaybe } from 'app/pages/workspace/invalid-billing-banner-maybe';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { plusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -39,7 +39,7 @@ describe('InvalidBillingBanner', () => {
   const component = () =>
     render(
       <MemoryRouter>
-        <InvalidBillingBanner />
+        <InvalidBillingBannerMaybe />
       </MemoryRouter>
     );
 
