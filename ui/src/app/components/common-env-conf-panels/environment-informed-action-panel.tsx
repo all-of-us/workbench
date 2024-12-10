@@ -130,7 +130,7 @@ export const EnvironmentInformedActionPanel = ({
           <CostsDrawnFrom
             {...{ creatorFreeCreditsRemaining }}
             usingInitialCredits={isUsingFreeTierBillingAccount(workspace)}
-            userIsCreator={profile.username === workspace.creator}
+            userIsCreator={profile.username === workspace.creatorUser.userName}
             billingAccountName={workspace.billingAccountName}
             style={{
               borderLeft: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
@@ -143,7 +143,7 @@ export const EnvironmentInformedActionPanel = ({
         <CostsDrawnFrom
           {...{ creatorFreeCreditsRemaining }}
           usingInitialCredits={isUsingFreeTierBillingAccount(workspace)}
-          userIsCreator={profile.username === workspace.creator}
+          userIsCreator={profile.username === workspace.creatorUser.userName}
           billingAccountName={workspace.billingAccountName}
         />
       )}

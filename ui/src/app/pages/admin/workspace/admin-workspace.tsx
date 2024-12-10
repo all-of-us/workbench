@@ -155,7 +155,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               <>
                 <Collaborators
                   {...{ collaborators }}
-                  creator={workspace.creator}
+                  creator={workspace.creatorUser.userName}
                 />
                 <CohortBuilder {...{ workspaceObjects }} />
                 <CloudStorageObjects

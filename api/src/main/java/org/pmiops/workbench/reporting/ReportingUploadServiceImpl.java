@@ -135,6 +135,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getTableId(WorkspaceColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
   }
 
   /** Batch uploads {@link ReportingUser}. */
@@ -145,6 +147,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getTableId(UserColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
   }
 
   /** Batch uploads {@link ReportingCohort}. */
@@ -155,6 +159,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getTableId(CohortColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
   }
 
   /** Batch uploads {@link ReportingLeonardoAppUsage}. */
@@ -166,6 +172,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getTableId(LeonardoAppUsageColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
   }
 
   /** Batch uploads {@link ReportingNewUserSatisfactionSurvey}. */
@@ -177,6 +185,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getTableId(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
   }
 
   @Override
@@ -187,6 +197,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getTableId(UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
   }
 
   @Override
@@ -197,6 +209,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             getTableId(UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
   }
 
   /** Batch uploads a reporting table. */

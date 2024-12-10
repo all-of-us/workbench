@@ -27,7 +27,7 @@ export const BasicInformation = ({
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Billing Account Type'>
           {isUsingFreeTierBillingAccount(workspace)
-            ? `Initial credits (${workspace.creator})`
+            ? `Initial credits (${workspace.creatorUser.userName})`
             : 'User provided'}
         </WorkspaceInfoField>
         {isUsingFreeTierBillingAccount(workspace) && (
