@@ -670,7 +670,7 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getCdrVersionId()).isEqualTo(cdrVersionId);
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
-    assertThat(retrievedWorkspace.getCreator().getUserName()).isEqualTo(LOGGED_IN_USER_EMAIL);
+    assertThat(retrievedWorkspace.getCreatorUser().getUserName()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(retrievedWorkspace.getName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getDisplayName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getTerraName()).isEqualTo(testWorkspaceTerraName);
@@ -906,7 +906,7 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(
         workspace.getNamespace(),
         workspace.getTerraName(),
-        workspace.getCreator().getUserName(),
+        workspace.getCreatorUser().getUserName(),
         WorkspaceAccessLevel.READER);
 
     WorkspaceOperation operation =
@@ -1251,7 +1251,7 @@ public class WorkspacesControllerTest {
           stubGetWorkspace(
               ws.getNamespace(),
               ws.getTerraName(),
-              ws.getCreator().getUserName(),
+              ws.getCreatorUser().getUserName(),
               WorkspaceAccessLevel.READER);
           workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         });
@@ -1270,7 +1270,7 @@ public class WorkspacesControllerTest {
           stubGetWorkspace(
               ws.getNamespace(),
               ws.getTerraName(),
-              ws.getCreator().getUserName(),
+              ws.getCreatorUser().getUserName(),
               WorkspaceAccessLevel.WRITER);
           workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         });
@@ -2109,7 +2109,7 @@ public class WorkspacesControllerTest {
     assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
     assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
     assertThat(clonedConceptSet.getCriteriums()).isEqualTo(originalConceptSet.getCriteriums());
-    assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreator().getUserName());
+    assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreatorUser().getUserName());
     assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
     assertThat(clonedConceptSet.getLastModifiedTime())
         .isEqualTo(clonedWorkspace.getLastModifiedTime());
@@ -2187,7 +2187,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-    assertThat(workspace2.getCreator().getUserName()).isEqualTo(cloner.getUsername());
+    assertThat(workspace2.getCreatorUser().getUserName()).isEqualTo(cloner.getUsername());
   }
 
   @Test
@@ -2404,7 +2404,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-    assertThat(clonedWorkspace.getCreator().getUserName()).isEqualTo(cloner.getUsername());
+    assertThat(clonedWorkspace.getCreatorUser().getUserName()).isEqualTo(cloner.getUsername());
 
     verify(fireCloudService)
         .updateWorkspaceACL(
@@ -2848,7 +2848,7 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(
         ws.getNamespace(),
         ws.getTerraName(),
-        ws.getCreator().getUserName(),
+        ws.getCreatorUser().getUserName(),
         WorkspaceAccessLevel.OWNER);
     when(mockInitialCreditsService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
 
@@ -2867,7 +2867,7 @@ public class WorkspacesControllerTest {
           stubGetWorkspace(
               ws.getNamespace(),
               ws.getTerraName(),
-              ws.getCreator().getUserName(),
+              ws.getCreatorUser().getUserName(),
               WorkspaceAccessLevel.READER);
           workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName());
         });
@@ -2880,7 +2880,7 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(
         ws.getNamespace(),
         ws.getTerraName(),
-        ws.getCreator().getUserName(),
+        ws.getCreatorUser().getUserName(),
         WorkspaceAccessLevel.OWNER);
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
         workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName()).getBody();
