@@ -115,7 +115,7 @@ public class WorkspaceAuditorTest {
     final long now = System.currentTimeMillis();
 
     User creator = new User();
-    creator.setEmail("user@fake-research-aou.org");
+    creator.setUserName("user@fake-research-aou.org");
 
     workspace1 =
         new Workspace()
@@ -124,7 +124,7 @@ public class WorkspaceAuditorTest {
             .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
-            .creator(creator)
+            .creatorUser(creator)
             .billingAccountName("big-bux")
             .googleBucketName("bucket o' science")
             .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
@@ -293,7 +293,7 @@ public class WorkspaceAuditorTest {
             // changes
             .name("a new name")
             .namespace("a new namespace")
-            .creator(creator);
+            .creatorUser(creator);
     final int wsChanges = 3;
 
     workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
