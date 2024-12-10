@@ -619,7 +619,7 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(
-        ws.getNamespace(), ws.getTerraName(), ws.getCreator().getUserName(), accessLevel);
+        ws.getNamespace(), ws.getTerraName(), ws.getCreatorUser().getUserName(), accessLevel);
     return ws;
   }
 

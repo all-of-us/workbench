@@ -217,9 +217,9 @@ public class WorkspaceMapperTest {
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
     assertThat(ws.getNamespace()).isEqualTo(FIRECLOUD_NAMESPACE);
     assertThat(ws.getCdrVersionId()).isEqualTo(Long.toString(CDR_VERSION_ID));
-    assertThat(ws.getCreator().getUserName()).isEqualTo(CREATOR_EMAIL);
-    assertThat(ws.getCreator().getGivenName()).isEqualTo(CREATOR_GIVEN_NAME);
-    assertThat(ws.getCreator().getFamilyName()).isEqualTo(CREATOR_FAMILY_NAME);
+    assertThat(ws.getCreatorUser().getUserName()).isEqualTo(CREATOR_EMAIL);
+    assertThat(ws.getCreatorUser().getGivenName()).isEqualTo(CREATOR_GIVEN_NAME);
+    assertThat(ws.getCreatorUser().getFamilyName()).isEqualTo(CREATOR_FAMILY_NAME);
     assertThat(ws.getInitialCredits().getExpirationEpochMillis())
         .isEqualTo(INITIAL_CREDITS_EXPIRATION_TIMESTAMP.getTime());
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
