@@ -300,6 +300,9 @@ export const InvalidBillingBanner = fp.flow(
                   });
                 })
                 .finally(() => setShowExtensionModal(false));
+            } else {
+              // In the case of cancel, just close the modal
+              setShowExtensionModal(false);
             }
           }}
         />
