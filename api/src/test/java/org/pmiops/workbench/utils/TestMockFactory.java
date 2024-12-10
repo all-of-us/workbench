@@ -121,7 +121,6 @@ public class TestMockFactory {
     ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     User creator = new User();
-    creator.setEmail("jay@contact.org");
     creator.setUserName("jay@unit-test-research-aou.org");
     creator.setGivenName("Jay");
     creator.setFamilyName("Tester");
@@ -138,7 +137,7 @@ public class TestMockFactory {
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .googleProject(DEFAULT_GOOGLE_PROJECT)
         .creationTime(1588097211621L)
-        .creator(creator)
+        .creatorUser(creator)
         .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())
         .lastModifiedTime(1588097211621L)
         .googleProject(DEFAULT_GOOGLE_PROJECT)
