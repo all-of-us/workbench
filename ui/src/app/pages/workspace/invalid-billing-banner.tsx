@@ -71,7 +71,7 @@ const RequestExtensionLink = ({
   onRequestExtension,
 }: BillingUpdateOptionsProps) => (
   <LinkButton onClick={onRequestExtension} style={{ display: 'inline' }}>
-    request an extension.
+    request an extension
   </LinkButton>
 );
 
@@ -107,7 +107,9 @@ const WhatHappened = ({
   } else if (isExpired && isEligibleForExtension) {
     whatIsHappening = 'have expired.';
   } else if (isExpiringSoon && isEligibleForExtension) {
-    whatIsHappening = 'are expiring soon.';
+    whatIsHappening = `are expiring soon, which may affect ${
+      isCreator ? 'your' : 'the'
+    } data and analyses${isCreator ? ' in your workspace' : ''}.`;
   }
   // The case when isExpiringSoon && !isEligibleForExtension
   // never happens because the banner is not shown in that case.
@@ -144,14 +146,17 @@ const WhatToDo = ({
   if (isExhausted || (isExpired && !isEligibleForExtension)) {
     return (
       <>
-        To use the workspace, a valid billing account needs to be added{' '}
+        To use the workspace, a valid billing account needs to be added
         {isCreator && (
-          <EditWorkspaceLink
-            {...{ onRequestExtension, navigate, onClose, workspace }}
-          />
+          <>
+            {' '}
+            <EditWorkspaceLink
+              {...{ onRequestExtension, navigate, onClose, workspace }}
+            />
+          </>
         )}
-        . For more information, read "<BillingAccountArticleLink />" on the User
-        Support Hub.
+        . To learn more about establishing a billing account, read "
+        <BillingAccountArticleLink />" on the User Support Hub.
       </>
     );
   } else {
@@ -165,14 +170,15 @@ const WhatToDo = ({
               <RequestExtensionLink
                 {...{ onRequestExtension, navigate, onClose, workspace }}
               />{' '}
-              or setup a valid billing account{' '}
+              or set up a valid billing account{' '}
               <EditWorkspaceLink
                 {...{ onRequestExtension, navigate, onClose, workspace }}
-              />{' '}
+              />
+              {'. '}
             </>
           )}
-        For more information, read "<InitialCreditsArticleLink />" on the User
-        Support Hub.
+        For more information, read "
+        <InitialCreditsArticleLink />" on the User Support Hub.
       </>
     );
   }

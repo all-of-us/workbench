@@ -125,10 +125,10 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits are expiring soon');
     expect(getBannerText()).toMatch(
-      'Your initial credits are expiring soon. You can setup your billing account by visiting the ' +
-        'Edit Workspace page. If necessary, you can request an extension to your initial credit ' +
-        'expiration date here. For more information, read the Using All of Us Initial Credits article on ' +
-        'the User Support Hub.'
+      'Your initial credits are expiring soon, which may affect your data and analyses in ' +
+        'your workspace. You can request an extension or set up a valid billing account on the ' +
+        'Edit Workspace page. For more information, read "Using All of Us Initial Credits" on the ' +
+        'User Support Hub.'
     );
     expectEditWorkspaceButtonExists();
   });
@@ -145,9 +145,9 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits are expiring soon');
     expect(getBannerText()).toMatch(
-      'This workspace creator’s initial credits are expiring soon. This workspace was ' +
-        'created by Someone Else. For more information, read the Using All of ' +
-        'Us Initial Credits article on the User Support Hub.'
+      'This workspace creator’s initial credits are expiring soon, which may affect the data ' +
+        'and analyses. This workspace was created by Someone Else. For more information, ' +
+        'read "Using All of Us Initial Credits" on the User Support Hub.'
     );
     expectEditWorkspaceButtonDoesNotExist();
   });
@@ -164,10 +164,9 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits have expired');
     expect(getBannerText()).toMatch(
-      'Your initial credits have expired. You can setup your billing account by visiting the ' +
-        'Edit Workspace page. If necessary, you can request an extension to your initial credit ' +
-        'expiration date here. For more information, read the Using All of Us Initial Credits article on ' +
-        'the User Support Hub.'
+      'Your initial credits have expired. You can request an extension or set up a valid ' +
+        'billing account on the Edit Workspace page. For more information, ' +
+        'read "Using All of Us Initial Credits" on the User Support Hub.'
     );
     expectEditWorkspaceButtonExists();
   });
@@ -184,9 +183,9 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits have expired');
     expect(getBannerText()).toMatch(
-      'This workspace creator’s initial credits have expired. This workspace was created ' +
-        'by Someone Else. For more information, read the Using All of Us Initial ' +
-        'Credits article on the User Support Hub.'
+      'This workspace creator’s initial credits have expired. This workspace was created by ' +
+        'Someone Else. For more information, read "Using All of Us Initial Credits" on the ' +
+        'User Support Hub.'
     );
     expectEditWorkspaceButtonDoesNotExist();
   });
@@ -204,9 +203,8 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'Your initial credits have run out. To use the workspace, a valid billing account needs ' +
-        'to be provided. You can setup your billing account by visiting the Edit Workspace page. To ' +
-        'learn more about establishing a billing account, read the Paying for Your Research article on ' +
-        'the User Support Hub.'
+        'to be added on the Edit Workspace page. To learn more about establishing a billing account, ' +
+        'read "Paying for Your Research" on the User Support Hub.'
     );
     expectEditWorkspaceButtonExists();
   });
@@ -224,9 +222,9 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits have run out. This workspace was created by ' +
-        'Someone Else. To use the workspace, a valid billing account needs to be provided. ' +
-        'To learn more about establishing a billing account, read the Paying for Your Research article ' +
-        'on the User Support Hub.'
+        'Someone Else. To use the workspace, a valid billing account needs to be added. ' +
+        'To learn more about establishing a billing account, read "Paying for Your Research" on the ' +
+        'User Support Hub.'
     );
     expectEditWorkspaceButtonDoesNotExist();
   });
@@ -244,9 +242,8 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'Your initial credits have run out. To use the workspace, a valid billing account needs ' +
-        'to be provided. You can setup your billing account by visiting the Edit Workspace page. To ' +
-        'learn more about establishing a billing account, read the Paying for Your Research article on ' +
-        'the User Support Hub.'
+        'to be added on the Edit Workspace page. To learn more about establishing a billing account, ' +
+        'read "Paying for Your Research" on the User Support Hub.'
     );
     expectEditWorkspaceButtonExists();
   });
@@ -264,9 +261,9 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     expect(getBannerText()).toMatch(
       'This workspace creator’s initial credits have run out. This workspace was created by ' +
-        'Someone Else. To use the workspace, a valid billing account needs to be provided. ' +
-        'To learn more about establishing a billing account, read the Paying for Your Research article ' +
-        'on the User Support Hub.'
+        'Someone Else. To use the workspace, a valid billing account needs to be added. ' +
+        'To learn more about establishing a billing account, ' +
+        'read "Paying for Your Research" on the User Support Hub.'
     );
     expectEditWorkspaceButtonDoesNotExist();
   });
