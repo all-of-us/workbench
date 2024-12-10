@@ -10,7 +10,7 @@ import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import colors from 'app/styles/colors';
-import { detachableDiskPricePerMonth } from 'app/utils/machines';
+import { persistentDiskPricePerMonth } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 
 const { useState, Fragment } = React;
@@ -69,7 +69,7 @@ export const OfferDeleteDiskWithUpdate = ({
             Your disk will be saved for later and can be reattached when you
             next configure a standard VM analysis environment. You will continue
             to incur persistent disk cost at{' '}
-            <b>{formatUsd(detachableDiskPricePerMonth(disk))}</b> per month.
+            <b>{formatUsd(persistentDiskPricePerMonth(disk))}</b> per month.
           </p>
         </div>
         <div style={styles.confirmWarning}>
