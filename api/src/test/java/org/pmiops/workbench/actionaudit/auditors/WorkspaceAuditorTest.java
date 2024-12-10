@@ -37,6 +37,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -113,6 +114,9 @@ public class WorkspaceAuditorTest {
             .researchOutcomeList(Collections.emptyList());
     final long now = System.currentTimeMillis();
 
+    User creator = new User();
+    creator.setUserName("user@fake-research-aou.org");
+
     workspace1 =
         new Workspace()
             .etag("etag_1")
@@ -120,7 +124,7 @@ public class WorkspaceAuditorTest {
             .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
-            .creator("user@fake-research-aou.org")
+            .creatorUser(creator)
             .billingAccountName("big-bux")
             .googleBucketName("bucket o' science")
             .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
@@ -279,6 +283,8 @@ public class WorkspaceAuditorTest {
             .timeReviewed(workspace1.getResearchPurpose().getTimeReviewed() + 1000L)
             .controlSet(!workspace1.getResearchPurpose().isControlSet());
     final int rpChanges = 5;
+    User creator = new User();
+    creator.setUserName("user10@fake-research-aou.org");
 
     Workspace editedWorkspace =
         clone(workspace1)
@@ -287,7 +293,7 @@ public class WorkspaceAuditorTest {
             // changes
             .name("a new name")
             .namespace("a new namespace")
-            .creator("user10@fake-research-aou.org");
+            .creatorUser(creator);
     final int wsChanges = 3;
 
     workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
@@ -304,7 +310,7 @@ public class WorkspaceAuditorTest {
         .name(in.getName())
         .namespace(in.getNamespace())
         .cdrVersionId(in.getCdrVersionId())
-        .creator(in.getCreator())
+        .creatorUser(in.getCreatorUser())
         .billingAccountName(in.getBillingAccountName())
         .googleBucketName(in.getGoogleBucketName())
         .accessTierShortName(in.getAccessTierShortName())

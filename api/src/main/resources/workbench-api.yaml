@@ -7279,6 +7279,10 @@ components:
           type: string
         creator:
           type: string
+          description: |
+            # TODO: Remove this field. Deprecated. Use creatorUser instead.
+        creatorUser:
+          $ref: '#/components/schemas/User'
         billingAccountName:
           type: string
         googleBucketName:

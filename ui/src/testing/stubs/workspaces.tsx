@@ -61,6 +61,7 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
     billingAccountName: 'billing-account',
     billingStatus: BillingStatus.ACTIVE,
     adminLocked: false,
+    creatorUser: {},
   };
 }
 
