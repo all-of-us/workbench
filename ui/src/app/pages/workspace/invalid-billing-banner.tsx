@@ -59,27 +59,20 @@ const EditWorkspaceLink = ({
   onClose,
   workspace,
 }: BillingUpdateOptionsProps) => (
-  <>
-    You can setup your billing account by visiting the{' '}
-    <LinkButton
-      onClick={() => onEditWorkspace(navigate, onClose, workspace)}
-      style={{ display: 'inline' }}
-    >
-      Edit Workspace
-    </LinkButton>{' '}
-    page.
-  </>
+  <LinkButton
+    onClick={() => onEditWorkspace(navigate, onClose, workspace)}
+    style={{ display: 'inline' }}
+  >
+    on the Edit Workspace page
+  </LinkButton>
 );
 
 const RequestExtensionLink = ({
   onRequestExtension,
 }: BillingUpdateOptionsProps) => (
-  <>
-    If necessary, you can{' '}
-    <LinkButton onClick={onRequestExtension} style={{ display: 'inline' }}>
-      request an extension.
-    </LinkButton>
-  </>
+  <LinkButton onClick={onRequestExtension} style={{ display: 'inline' }}>
+    request an extension.
+  </LinkButton>
 );
 
 const whoseCredits = (isCreator: boolean) => {
@@ -151,16 +144,14 @@ const WhatToDo = ({
   if (isExhausted || (isExpired && !isEligibleForExtension)) {
     return (
       <>
-        To use the workspace, a valid billing account needs to be provided.{' '}
+        To use the workspace, a valid billing account needs to be added{' '}
         {isCreator && (
-          <>
-            <EditWorkspaceLink
-              {...{ onRequestExtension, navigate, onClose, workspace }}
-            />{' '}
-          </>
+          <EditWorkspaceLink
+            {...{ onRequestExtension, navigate, onClose, workspace }}
+          />
         )}
-        To learn more about establishing a billing account, read the{' '}
-        <BillingAccountArticleLink /> article on the User Support Hub.
+        . For more information, read "<BillingAccountArticleLink />" on the User
+        Support Hub.
       </>
     );
   } else {
@@ -170,16 +161,18 @@ const WhatToDo = ({
           isEligibleForExtension &&
           (isExpired || isExpiringSoon) && (
             <>
-              <EditWorkspaceLink
+              You can{' '}
+              <RequestExtensionLink
                 {...{ onRequestExtension, navigate, onClose, workspace }}
               />{' '}
-              <RequestExtensionLink
+              or setup a valid billing account{' '}
+              <EditWorkspaceLink
                 {...{ onRequestExtension, navigate, onClose, workspace }}
               />{' '}
             </>
           )}
-        For more information, read the <InitialCreditsArticleLink /> article on
-        the User Support Hub.
+        For more information, read "<InitialCreditsArticleLink />" on the User
+        Support Hub.
       </>
     );
   }
