@@ -61,6 +61,11 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
     billingAccountName: 'billing-account',
     billingStatus: BillingStatus.ACTIVE,
     adminLocked: false,
+    initialCredits: {
+      exhausted: false,
+      expired: false,
+      expirationEpochMillis: new Date().getTime(),
+    },
   };
 }
 
