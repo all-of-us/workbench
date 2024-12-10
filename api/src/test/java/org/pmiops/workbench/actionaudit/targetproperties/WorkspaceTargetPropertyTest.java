@@ -44,7 +44,7 @@ public class WorkspaceTargetPropertyTest {
 
     long now = System.currentTimeMillis();
     User creator = new User();
-    creator.setEmail("user@fake-research-aou.org");
+    creator.setUserName("user@fake-research-aou.org");
 
     workspace1 =
         new Workspace()
