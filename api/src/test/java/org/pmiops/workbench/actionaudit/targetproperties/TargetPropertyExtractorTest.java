@@ -18,7 +18,7 @@ class TargetPropertyExtractorTest {
   void setUp() {
     long now = System.currentTimeMillis();
     User creator = new User();
-    creator.setEmail("user@fake-research-aou.org");
+    creator.setUserName("user@fake-research-aou.org");
 
     var researchPurpose1 =
         new ResearchPurpose()
@@ -55,7 +55,7 @@ class TargetPropertyExtractorTest {
             .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
-            .creator(creator)
+            .creatorUser(creator)
             .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
             .researchPurpose(researchPurpose1);
   }
