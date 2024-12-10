@@ -48,7 +48,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "displayName", source = "dbWorkspace.name")
   @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "creatorUser.userName", source = "dbWorkspace.creatorUser.username")
+  @Mapping(target = "creatorUser.userName", source = "dbWorkspace.creator.username")
   // Need to work with security before exposing
   // Should change to contactEmail or institutionalEmail
   @Mapping(target = "creatorUser.email", ignore = true)
