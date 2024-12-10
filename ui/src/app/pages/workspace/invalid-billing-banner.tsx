@@ -75,10 +75,9 @@ const RequestExtensionLink = ({
   onRequestExtension,
 }: BillingUpdateOptionsProps) => (
   <>
-    If necessary, you can request an extension to your initial credit expiration
-    date{' '}
+    If necessary, you can{' '}
     <LinkButton onClick={onRequestExtension} style={{ display: 'inline' }}>
-      here
+      request an extension.
     </LinkButton>
     .
   </>
@@ -91,7 +90,8 @@ const whoseCredits = (isCreator: boolean) => {
 const workspaceCreatorInformation = (isCreator: boolean, creatorUser: User) => {
   return isCreator
     ? ''
-    : `This workspace was created by ${creatorUser.givenName} ${creatorUser.familyName}. `;
+    : // This is not rendered when creatorUser is undefined.
+      `This workspace was created by ${creatorUser?.givenName} ${creatorUser?.familyName}. `;
 };
 
 interface WhatHappenedProps {
@@ -216,6 +216,7 @@ export const InvalidBillingBanner = fp.flow(
   withNavigation
 )(({ onClose, navigate, workspace, profileState }: Props) => {
   const profile = profileState.profile;
+  const { creatorUser } = workspace || {};
   const [showExtensionModal, setShowExtensionModal] = React.useState(false);
   const isCreator = profile?.username === workspace?.creatorUser?.userName;
   const isEligibleForExtension = profile?.eligibleForInitialCreditsExtension;
@@ -247,7 +248,7 @@ export const InvalidBillingBanner = fp.flow(
           isCreator,
         }}
       />{' '}
-      {workspaceCreatorInformation(isCreator, workspace?.creatorUser)}
+      {workspaceCreatorInformation(isCreator, creatorUser)}
       <WhatToDo
         {...{
           isCreator,
@@ -275,6 +276,8 @@ export const InvalidBillingBanner = fp.flow(
   return (
     <>
       {!showExtensionModal &&
+        creatorUser?.givenName &&
+        creatorUser?.familyName &&
         ((isExpiringSoon && isEligibleForExtension) ||
           isExpired ||
           isExhausted) && (
