@@ -339,7 +339,7 @@ export const WorkspaceAbout = fp.flow(
       const initialCreditsExtensionTooltipContent = isWorkspaceCreator
         ? profile.eligibleForInitialCreditsExtension
           ? ''
-          : 'You are not currently eligible to extend your initial credits.'
+          : 'You are not eligible to extend your initial credits.'
         : `Contact your workspace creator, ${workspace.creatorUser.givenName} ${workspace.creatorUser.familyName},` +
           ` to update this workspace's billing details.`;
       return (

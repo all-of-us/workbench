@@ -431,7 +431,7 @@ describe('WorkspaceAbout', () => {
 
     await expectTooltip(
       requestExtensionButton,
-      'You are not currently eligible to extend your initial credits.',
+      'You are not eligible to extend your initial credits.',
       user
     );
     expectButtonElementDisabled(requestExtensionButton);
