@@ -453,7 +453,7 @@ describe('WorkspaceAbout', () => {
 
     await expectTooltip(
       requestExtensionButton,
-      `Contact your workspace creator, ${workspace?.creatorUser?.givenName} ${workspace?.creatorUser?.familyName}, to extend initial credits.`,
+      `Contact your workspace creator, ${workspace?.creatorUser?.givenName} ${workspace?.creatorUser?.familyName}, to update this workspace's billing details.`,
       user
     );
     expectButtonElementDisabled(requestExtensionButton);

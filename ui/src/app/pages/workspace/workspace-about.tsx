@@ -341,7 +341,7 @@ export const WorkspaceAbout = fp.flow(
           ? ''
           : 'You are not currently eligible to extend your initial credits.'
         : `Contact your workspace creator, ${workspace.creatorUser.givenName} ${workspace.creatorUser.familyName},` +
-          ` to extend initial credits.`;
+          ` to update this workspace's billing details.`;
       return (
         <div style={styles.mainPage}>
           <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
