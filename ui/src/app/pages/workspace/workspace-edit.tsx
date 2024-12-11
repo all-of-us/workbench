@@ -1430,7 +1430,7 @@ export const WorkspaceEdit = fp.flow(
       return (
         // can set billing account in Create and Duplicate modes
         !this.isMode(WorkspaceEditMode.Edit) ||
-        workspace?.creator === profile?.username
+        workspace?.creatorUser?.userName === profile?.username
       );
     }
 
@@ -1742,7 +1742,7 @@ export const WorkspaceEdit = fp.flow(
                   </div>
                   <FlexRow>
                     <TooltipTrigger
-                      content={`Only the workspace creator ${this.props.workspace?.creator} can change the billing account.`}
+                      content={`Only the workspace creator ${this.props.workspace?.creatorUser?.userName} can change the billing account.`}
                       disabled={this.canSetBillingAccount(
                         this.props.workspace,
                         profile

@@ -66,6 +66,7 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
       expired: false,
       expirationEpochMillis: new Date().getTime(),
     },
+    creatorUser: {},
   };
 }
 

@@ -48,11 +48,18 @@ public interface WorkspaceMapper {
   @Mapping(target = "displayName", source = "dbWorkspace.name")
   @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "creator", source = "dbWorkspace.creator.username")
+  @Mapping(target = "creatorUser.userName", source = "dbWorkspace.creator.username")
+  // Need to work with security before exposing
+  // Should change to contactEmail or institutionalEmail
+  @Mapping(target = "creatorUser.email", ignore = true)
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
       source = "dbWorkspace.creator",
       qualifiedByName = "getInitialCreditsExpiration")
+  @Mapping(
+      target = "initialCredits.extensionEpochMillis",
+      source = "dbWorkspace.creator",
+      qualifiedByName = "getInitialCreditsExtension")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
@@ -124,10 +131,17 @@ public interface WorkspaceMapper {
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
-  @Mapping(target = "creator", source = "creator.username")
+  @Mapping(target = "creatorUser.userName", source = "creator.username")
+  @Mapping(
+      target = "creatorUser.email",
+      ignore = true) // need to work with security before exposing
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
+      source = "creator",
+      qualifiedByName = "getInitialCreditsExpiration")
+  @Mapping(
+      target = "initialCredits.extensionEpochMillis",
       source = "creator",
       qualifiedByName = "getInitialCreditsExpiration")
   @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")

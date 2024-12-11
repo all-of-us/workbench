@@ -14,7 +14,7 @@ public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspa
   TERRA_NAME("terra_name", Workspace::getTerraName),
   NAMESPACE("namespace", Workspace::getNamespace),
   CDR_VERSION_ID("cdr_version_id", Workspace::getCdrVersionId),
-  CREATOR("creator", Workspace::getCreator),
+  CREATOR("creator", workspace -> workspace.getCreatorUser().getUserName()),
   ACCESS_TIER_SHORT_NAME("access_tier_short_name", Workspace::getAccessTierShortName),
 
   // all fields below here relate to research purpose
