@@ -383,11 +383,10 @@ describe('WorkspaceAbout', () => {
     });
     expect(requestExtensionButton).toBeInTheDocument();
 
-    const workspace = currentWorkspaceStore.getValue();
-
     await expectTooltipAbsence(
       requestExtensionButton,
-      `Contact your workspace creator, ${workspace?.creatorUser?.givenName} ${workspace?.creatorUser?.familyName}, to extend initial credits.`,
+      'Contact your workspace creator, ' +
+        `${workspace?.creatorUser?.givenName} ${workspace?.creatorUser?.familyName}, to extend initial credits.`,
       user
     );
     await user.click(requestExtensionButton);
@@ -472,11 +471,13 @@ describe('WorkspaceAbout', () => {
     });
     expect(requestExtensionButton).toBeInTheDocument();
 
-    const workspace = currentWorkspaceStore.getValue();
+    const currentWorkspace = currentWorkspaceStore.getValue();
 
     await expectTooltip(
       requestExtensionButton,
-      `Contact your workspace creator, ${workspace?.creatorUser?.givenName} ${workspace?.creatorUser?.familyName}, to update this workspace's billing details.`,
+      'Contact your workspace creator, ' +
+        `${currentWorkspace?.creatorUser?.givenName} ${currentWorkspace?.creatorUser?.familyName}, ` +
+        "to update this workspace's billing details.",
       user
     );
     expectButtonElementDisabled(requestExtensionButton);
