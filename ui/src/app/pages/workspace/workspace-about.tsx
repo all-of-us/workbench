@@ -324,6 +324,8 @@ export const WorkspaceAbout = fp.flow(
       const notPublished = !featuredCategory;
       const isWorkspaceOwner =
         workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
+      const isWorkspaceCreator =
+        workspace?.creatorUser.userName === profile.username;
 
       const workspaceLocked = workspace?.adminLocked;
       // isWorkspaceOwner notPublished disabled
@@ -333,6 +335,13 @@ export const WorkspaceAbout = fp.flow(
       // false           false        false
       const publishButtonToolTipDisabled =
         isWorkspaceOwner && notPublished && !workspaceLocked;
+
+      const initialCreditsExtensionTooltipContent = isWorkspaceCreator
+        ? profile.eligibleForInitialCreditsExtension
+          ? ''
+          : 'You are not currently eligible to extend your initial credits.'
+        : `Contact your workspace creator, ${workspace.creatorUser.givenName} ${workspace.creatorUser.familyName},` +
+          ` to extend initial credits.`;
       return (
         <div style={styles.mainPage}>
           <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
@@ -487,26 +496,25 @@ export const WorkspaceAbout = fp.flow(
                       <div style={{ fontSize: '0.75rem' }}>
                         {this.workspaceInitialCreditsExpirationTime}
                       </div>
-                      {profile.eligibleForInitialCreditsExtension && (
-                        <TooltipTrigger
-                          content={`Contact your workspace creator, ${workspace.creatorUser.givenName} ${workspace.creatorUser.familyName}, to extend initial credits.`}
+                      <TooltipTrigger
+                        content={initialCreditsExtensionTooltipContent}
+                        disabled={
+                          isWorkspaceCreator &&
+                          profile.eligibleForInitialCreditsExtension
+                        }
+                      >
+                        <LinkButton
                           disabled={
-                            workspace.creatorUser.userName === profile.username
+                            !isWorkspaceCreator ||
+                            !profile.eligibleForInitialCreditsExtension
+                          }
+                          onClick={() =>
+                            this.setState({ showExtensionModal: true })
                           }
                         >
-                          <LinkButton
-                            disabled={
-                              workspace.creatorUser.userName !==
-                              profile.username
-                            }
-                            onClick={() =>
-                              this.setState({ showExtensionModal: true })
-                            }
-                          >
-                            Request Extension
-                          </LinkButton>
-                        </TooltipTrigger>
-                      )}
+                          Request Extension
+                        </LinkButton>
+                      </TooltipTrigger>
                     </div>
                   </>
                 )}

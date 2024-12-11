@@ -326,7 +326,7 @@ describe('WorkspaceAbout', () => {
     screen.getByText(/tue mar 17 1998/i);
   });
 
-  it('creator should be able to request extension', async () => {
+  it('eligble creator should be able to request extension', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
       creatorUser: {
@@ -371,6 +371,48 @@ describe('WorkspaceAbout', () => {
     expect(
       await screen.findByText(/request credit expiration date extension/i)
     ).toBeInTheDocument();
+  });
+
+  it('ineligble creator should not be able to request extension', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      creatorUser: {
+        userName: profile.username,
+        givenName: profile.givenName,
+        familyName: profile.familyName,
+      },
+      billingAccountName: 'billingAccounts/free',
+      initialCredits: {
+        exhausted: false,
+        expired: true,
+        expirationEpochMillis: nowPlusDays(-1),
+      },
+    });
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        freeTierBillingAccountId: 'free',
+      },
+    });
+    profileStore.set({
+      ...profileStore.get(),
+      profile: {
+        ...profile,
+        eligibleForInitialCreditsExtension: false,
+      },
+    });
+    component();
+    const requestExtensionButton = screen.getByRole('button', {
+      name: /request extension/i,
+    });
+    expect(requestExtensionButton).toBeInTheDocument();
+
+    await expectTooltip(
+      requestExtensionButton,
+      'You are not currently eligible to extend your initial credits.',
+      user
+    );
+    expectButtonElementDisabled(requestExtensionButton);
   });
 
   it('non-creator should not be able to request extension', async () => {
