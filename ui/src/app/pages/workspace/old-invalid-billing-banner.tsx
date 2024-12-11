@@ -19,7 +19,7 @@ interface Props extends NavigationProps {
   onClose: Function;
 }
 
-export const InvalidBillingBanner = fp.flow(
+export const OldInvalidBillingBanner = fp.flow(
   withCurrentWorkspace(),
   withUserProfile(),
   withNavigation

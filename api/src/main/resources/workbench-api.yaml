@@ -2326,7 +2326,6 @@ paths:
           description: The egress event was successfully handled.
           content: {}
       x-codegen-request-body-name: request
-
   /v1/admin/users/{userId}/egressBypassWindow:
     get:
       tags:
@@ -13147,6 +13146,9 @@ components:
         expired:
           type: boolean
         expirationEpochMillis:
+          type: integer
+          format: int64
+        extensionEpochMillis:
           type: integer
           format: int64
     VwbEgressEventRequest:
