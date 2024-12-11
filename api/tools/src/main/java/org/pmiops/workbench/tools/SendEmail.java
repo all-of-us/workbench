@@ -70,7 +70,8 @@ public class SendEmail extends Tool {
               ? EgressRemediationAction.DISABLE_USER
               : EgressRemediationAction.SUSPEND_COMPUTE;
 
-      DbUser user = new DbUser().setUsername(username).setContactEmail(contactEmail).setGivenName(givenName);
+      DbUser user =
+          new DbUser().setUsername(username).setContactEmail(contactEmail).setGivenName(givenName);
 
       // TODO: add other options
       if (whichEmail.equals("egress")) {
