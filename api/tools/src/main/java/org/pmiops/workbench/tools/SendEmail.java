@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Import;
   ./project.rb send-email \
   --username joel@fake-research-aou.org \
   --contact thibault@broadinstitute.org \
+  --given_name thibault \
   --disable
 */
 public class SendEmail extends Tool {
@@ -32,6 +33,9 @@ public class SendEmail extends Tool {
 
   private static final Option usernameOpt =
       Option.builder().longOpt("username").desc("User name").required().hasArg().build();
+
+  private static final Option givenNameOpt =
+      Option.builder().longOpt("given_name").desc("Given name").required().hasArg().build();
 
   private static final Option userContactOpt =
       Option.builder().longOpt("contact").desc("User contact email").required().hasArg().build();
@@ -50,7 +54,8 @@ public class SendEmail extends Tool {
           .addOption(whichEmailOpt)
           .addOption(usernameOpt)
           .addOption(userContactOpt)
-          .addOption(disableOpt);
+          .addOption(disableOpt)
+          .addOption(givenNameOpt);
 
   @Bean
   public CommandLineRunner run(MailService mailService) {
@@ -59,12 +64,13 @@ public class SendEmail extends Tool {
       String whichEmail = opts.getOptionValue(whichEmailOpt.getLongOpt());
       String username = opts.getOptionValue(usernameOpt.getLongOpt());
       String contactEmail = opts.getOptionValue(userContactOpt.getLongOpt());
+      String givenName = opts.getOptionValue(givenNameOpt.getLongOpt());
       EgressRemediationAction action =
           Boolean.parseBoolean(opts.getOptionValue(disableOpt.getLongOpt()))
               ? EgressRemediationAction.DISABLE_USER
               : EgressRemediationAction.SUSPEND_COMPUTE;
 
-      DbUser user = new DbUser().setUsername(username).setContactEmail(contactEmail);
+      DbUser user = new DbUser().setUsername(username).setContactEmail(contactEmail).setGivenName(givenName);
 
       // TODO: add other options
       if (whichEmail.equals("egress")) {

@@ -3168,6 +3168,12 @@ def send_email(cmd_name, *args)
     'User name.')
 
   op.add_typed_option(
+    '--given_name [given name]',
+    String,
+    ->(opts, v) { opts.given_name = v },
+    'User name.')
+
+  op.add_typed_option(
     '--contact [contact email]',
     String,
     ->(opts, v) { opts.contact = v },
@@ -3186,6 +3192,7 @@ def send_email(cmd_name, *args)
 
   gradle_args = ([
     ["--username", op.opts.username],
+    ["--given_name", op.opts.given_name],
     ["--contact", op.opts.contact],
     ["--disable", op.opts.disable],
     ["--email", op.opts.email],

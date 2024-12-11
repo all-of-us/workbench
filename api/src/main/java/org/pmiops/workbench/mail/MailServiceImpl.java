@@ -415,8 +415,12 @@ public class MailServiceImpl implements MailService {
             .map(LeonardoAppUtils::appDisplayName)
             .orElse("Jupyter");
 
+    System.out.println("DB given name: " + dbUser.getGivenName());
+    String givenName = Optional.ofNullable(dbUser.getGivenName()).orElse("Researcher");
+
     var substitutionMap =
         Map.of(
+            EmailSubstitutionField.FIRST_NAME, givenName,
             EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo(),
             EmailSubstitutionField.ALL_OF_US, AOU_ITALICS,
             EmailSubstitutionField.USERNAME, dbUser.getUsername(),
