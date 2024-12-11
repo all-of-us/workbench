@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { Button, HashLinkButton } from 'app/components/buttons';
+import { Button, HashLinkButton, LinkButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
@@ -30,8 +30,10 @@ import {
   maybeDaysRemaining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
+import { displayDateWithoutHours } from 'app/utils/dates';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
+import { supportUrls } from 'app/utils/zendesk';
 import { ReactComponent as additional } from 'assets/icons/DAR/additional.svg';
 import { ReactComponent as electronic } from 'assets/icons/DAR/electronic.svg';
 import { ReactComponent as genomic } from 'assets/icons/DAR/genomic.svg';
@@ -82,7 +84,6 @@ export const styles = reactStyles({
     gridArea: 'explanation',
   },
   completed: {
-    height: '87px',
     padding: '1em',
     marginLeft: '3%',
     marginRight: '3%',
@@ -98,7 +99,6 @@ export const styles = reactStyles({
     fontSize: '14px',
   },
   controlledRenewal: {
-    height: '87px',
     padding: '1em',
     marginLeft: '3%',
     marginRight: '3%',
@@ -114,7 +114,6 @@ export const styles = reactStyles({
     fontSize: '14px',
   },
   selfBypass: {
-    height: '87px',
     padding: '1em',
     marginLeft: '3%',
     marginRight: '3%',
@@ -515,20 +514,52 @@ const ControlledTierRenewalBanner = () => (
     </HashLinkButton>
   </FlexRow>
 );
-
-const CompletionBanner = () => (
-  <FlexRow data-test-id='dar-completed' style={styles.completed}>
-    <FlexColumn>
-      <div style={styles.completedHeader}>
-        Thank you for completing all the necessary steps
-      </div>
-      <div style={styles.completedText}>
-        Researcher Workbench data access is complete.
-      </div>
-    </FlexColumn>
-    <GetStartedButton style={{ marginLeft: 'auto' }} />
-  </FlexRow>
-);
+interface CompletionBannerProps {
+  profile: Profile;
+  initialCreditsValidityPeriodDays: number;
+  initialCreditsExtensionPeriodDays: number;
+}
+const CompletionBanner = ({
+  profile,
+  initialCreditsValidityPeriodDays,
+  initialCreditsExtensionPeriodDays,
+}: CompletionBannerProps) => {
+  return (
+    <FlexRow data-test-id='dar-completed' style={styles.completed}>
+      <FlexColumn style={{ flex: 0.5 }}>
+        <div style={styles.completedHeader}>
+          Thank you for completing all the necessary steps
+        </div>
+        <div style={styles.completedText}>
+          Researcher Workbench data access is complete.
+        </div>
+        <div style={styles.completedText}>
+          Your credits expire on{' '}
+          {displayDateWithoutHours(profile.initialCreditsExpirationEpochMillis)}
+          .
+        </div>
+        <div style={styles.completedText}>
+          (You have {initialCreditsValidityPeriodDays} days to use credit after
+          gaining data access. You may request an extension when it gets closer
+          to your credit expiration date, which will extend your credit
+          expiration date to a total of {initialCreditsExtensionPeriodDays} days
+          from the day you gained data access.)
+        </div>
+        <div style={styles.completedText}>
+          Learn more{' '}
+          <LinkButton
+            style={{ display: 'inline' }}
+            onClick={() => window.open(supportUrls.initialCredits, '_blank')}
+          >
+            here
+          </LinkButton>
+          .
+        </div>
+      </FlexColumn>
+      <GetStartedButton style={{ marginLeft: 'auto' }} />
+    </FlexRow>
+  );
+};
 
 // TODO is there a better way?
 const Additional = additional;
@@ -576,7 +607,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // Local Variables
     const { profile, reload } = useStore(profileStore);
     const {
-      config: { unsafeAllowSelfBypass },
+      config: {
+        unsafeAllowSelfBypass,
+        initialCreditsValidityPeriodDays,
+        initialCreditsExtensionPeriodDays,
+      },
     } = useStore(serverConfigStore);
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -706,7 +741,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
         {ctNeedsRenewal && <ControlledTierRenewalBanner />}
-        {showCompletionBanner && <CompletionBanner />}
+        {showCompletionBanner && (
+          <CompletionBanner
+            {...{
+              profile,
+              initialCreditsValidityPeriodDays,
+              initialCreditsExtensionPeriodDays,
+            }}
+          />
+        )}
         {unsafeAllowSelfBypass && activeModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}

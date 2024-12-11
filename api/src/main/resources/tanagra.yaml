@@ -598,6 +598,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/EntityOutputPreview"
+        entityIdSql:
+          type: string
+          description: SQL string for the entityId attribute.
       required:
         - entityOutputs
         

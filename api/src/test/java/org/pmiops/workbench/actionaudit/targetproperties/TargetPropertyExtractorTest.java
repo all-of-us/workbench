@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
 
 class TargetPropertyExtractorTest {
@@ -16,6 +17,8 @@ class TargetPropertyExtractorTest {
   @BeforeEach
   void setUp() {
     long now = System.currentTimeMillis();
+    User creator = new User();
+    creator.setUserName("user@fake-research-aou.org");
 
     var researchPurpose1 =
         new ResearchPurpose()
@@ -52,7 +55,7 @@ class TargetPropertyExtractorTest {
             .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
-            .creator("user@fake-research-aou.org")
+            .creatorUser(creator)
             .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
             .researchPurpose(researchPurpose1);
   }

@@ -41,6 +41,7 @@ public class WorkbenchConfig {
   public TermsOfServiceConfig termsOfService;
   public ArtifactRegistryConfig artifactRegistry;
   public BannerConfig banner;
+  public VwbConfig vwb;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -76,6 +77,7 @@ public class WorkbenchConfig {
     config.e2eTestUsers = new E2ETestUserConfig();
     config.termsOfService = new TermsOfServiceConfig();
     config.artifactRegistry = new ArtifactRegistryConfig();
+    config.vwb = new VwbConfig();
     return config;
   }
 
@@ -178,7 +180,6 @@ public class WorkbenchConfig {
     public boolean enableJiraTicketingOnFailure;
 
     public abstract static class VersionedConfig {
-      public String gatkJarUri;
       // 'method' values refer to both the stored Method and the generated Method Configuration
       public String methodNamespace;
       public String methodName;
@@ -194,6 +195,7 @@ public class WorkbenchConfig {
 
     // for extraction workflows compatible with CDR v7 and earlier
     public static class LegacyWorkflowConfig extends VersionedConfig {
+      public String gatkJarUri;
       // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
       public int minExtractionScatterTasks;
       public float extractionScatterTasksPerSample;
@@ -324,6 +326,11 @@ public class WorkbenchConfig {
     // If true, prevents users from taking compliance training, however
     // the training is still required if enableComplianceTraining is true.
     public boolean blockComplianceTraining;
+
+    // If true, users will be able to create workspace in VWB
+    public boolean enableVWBWorkspaceCreation;
+    // If true, AoU API will start accepting egress notification coming from VWB Service
+    public boolean enableVWBEgressMonitor;
   }
 
   public static class ActionAuditConfig {
@@ -465,5 +472,15 @@ public class WorkbenchConfig {
 
   public static class BannerConfig {
     public boolean enableLoginIssueBanner;
+  }
+
+  public static class VwbConfig {
+    public String wsmBaseUrl;
+    public String organizationId;
+    // This will only be used for preview release, later on, each user will have their own pod.
+    public String defaultPodId;
+    // The service account that will be calling AoU API to notify egress alerts. It will be used in
+    // later authZ check.
+    public String exfilManagerServiceAccount;
   }
 }

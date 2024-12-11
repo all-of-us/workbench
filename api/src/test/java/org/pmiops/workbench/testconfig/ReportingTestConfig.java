@@ -24,6 +24,7 @@ public class ReportingTestConfig {
     final WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.reporting.dataset = "wb_reporting";
     workbenchConfig.reporting.maxRowsPerInsert = 2;
+    workbenchConfig.reporting.exportTerraDataWarehouse = true;
     workbenchConfig.server.projectId = "rw-wb-unit-test";
     workbenchConfig.billing.accountId = WORKSPACE__BILLING_ACCOUNT_ID;
     return workbenchConfig;

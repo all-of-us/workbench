@@ -19,7 +19,6 @@ import {
   WorkspaceOperationStatus,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -228,7 +227,10 @@ export const styles = reactStyles({
     width: '11em',
   },
   cdrVersionSpacing: {
-    width: environment.showDataAppsVersionSelect ? '23em' : '30em',
+    width: '30em',
+  },
+  dataAppsVersionSpacing: {
+    width: '23em',
   },
 });
 
@@ -1428,8 +1430,16 @@ export const WorkspaceEdit = fp.flow(
       return (
         // can set billing account in Create and Duplicate modes
         !this.isMode(WorkspaceEditMode.Edit) ||
-        workspace?.creator === profile?.username
+        workspace?.creatorUser?.userName === profile?.username
       );
+    }
+
+    showDataAppsVersionSelect() {
+      const { tiers } = this.props.cdrVersionTiersResponse;
+      // Show the version dropdown if at least one CDR version has tanagraEnabled set to true
+      return fp
+        .flatMap((tier) => tier?.versions, tiers)
+        .some(({ tanagraEnabled }) => tanagraEnabled);
     }
 
     dataAppsVersionOptions() {
@@ -1616,12 +1626,17 @@ export const WorkspaceEdit = fp.flow(
                   >
                     <div
                       data-test-id='select-cdr-version'
-                      style={{ ...styles.select, ...styles.cdrVersionSpacing }}
+                      style={{
+                        ...styles.select,
+                        ...styles.dataAppsVersionSpacing,
+                      }}
                     >
                       <select
                         style={{
                           ...styles.selectInput,
-                          ...styles.cdrVersionSpacing,
+                          ...(this.showDataAppsVersionSelect()
+                            ? styles.dataAppsVersionSpacing
+                            : styles.cdrVersionSpacing),
                         }}
                         aria-label='cdr version dropdown'
                         value={cdrVersionId}
@@ -1656,7 +1671,7 @@ export const WorkspaceEdit = fp.flow(
                     </div>
                   </TooltipTrigger>
                 </FlexColumn>
-                {environment.showDataAppsVersionSelect && (
+                {this.showDataAppsVersionSelect() && (
                   <FlexColumn>
                     <div style={styles.fieldHeader}>
                       Data Apps version
@@ -1727,7 +1742,7 @@ export const WorkspaceEdit = fp.flow(
                   </div>
                   <FlexRow>
                     <TooltipTrigger
-                      content={`Only the workspace creator ${this.props.workspace?.creator} can change the billing account.`}
+                      content={`Only the workspace creator ${this.props.workspace?.creatorUser?.userName} can change the billing account.`}
                       disabled={this.canSetBillingAccount(
                         this.props.workspace,
                         profile

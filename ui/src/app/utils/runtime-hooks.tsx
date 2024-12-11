@@ -335,19 +335,33 @@ export const useCustomRuntime = (
           )
         );
 
-        if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
+        // update the disk in place, if the runtime can also be updated in place (or needs no change)
+        if (
+          mostSevereDiff <= AnalysisDiffState.CAN_UPDATE_IN_PLACE &&
+          mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE
+        ) {
           await updateRuntimeAndInitializeLeoRuntime();
         }
+
         if (mostSevereDiff === AnalysisDiffState.NEEDS_DELETE) {
           const deleteAttachedDisk =
             mostSevereDiskDiff === AnalysisDiffState.NEEDS_DELETE;
           await runtimeApi().deleteRuntime(
             currentWorkspaceNamespace,
             deleteAttachedDisk,
-            {
-              signal: aborter.signal,
-            }
+            { signal: aborter.signal }
           );
+
+          if (
+            !deleteAttachedDisk &&
+            diskNeedsSizeIncrease(requestedDisk, existingDisk)
+          ) {
+            await disksApi().updateDisk(
+              currentWorkspaceNamespace,
+              existingDisk.name,
+              requestedDisk.size
+            );
+          }
         } else if (
           [
             AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,

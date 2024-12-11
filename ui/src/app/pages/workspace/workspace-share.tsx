@@ -494,8 +494,8 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                   >
                     When you share this workspace as a ‘Writer’ or an ‘Owner’,
                     the initial credits of the creator of the workspace (
-                    {this.props.workspace.creator}) will be used for all
-                    analysis in this workspace.
+                    {this.props.workspace.creatorUser.userName}) will be used
+                    for all analysis in this workspace.
                   </div>
                 )}
               </ModalTitle>

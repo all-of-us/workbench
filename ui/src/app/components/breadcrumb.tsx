@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Link, matchPath } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
@@ -11,7 +12,8 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
-import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
+import { InvalidBillingBannerMaybe } from 'app/pages/workspace/invalid-billing-banner-maybe';
+import { OldInvalidBillingBanner } from 'app/pages/workspace/old-invalid-billing-banner';
 import {
   analysisTabName,
   analysisTabPath,
@@ -30,6 +32,7 @@ import {
   MatchParams,
   RouteDataStore,
   routeDataStore,
+  serverConfigStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -308,179 +311,160 @@ interface Props {
   routeData: RouteDataStore;
 }
 
-interface State {
-  showInvalidBillingBanner: boolean;
-}
-
 export const Breadcrumb = fp.flow(
   withCurrentWorkspace(),
   withCurrentCohort(),
   withCurrentCohortReview(),
   withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
-)(
-  class extends React.Component<Props, State> {
-    constructor(props) {
-      super(props);
-      this.state = {
-        showInvalidBillingBanner: false,
-      };
-    }
+)((props: Props) => {
+  const enableInitialCreditsExpiration =
+    serverConfigStore.get().config.enableInitialCreditsExpiration;
+  const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
+    enableInitialCreditsExpiration
+  );
 
-    componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (
-        !prevProps.workspace &&
-        this.props.workspace &&
-        this.props.workspace.billingStatus === BillingStatus.INACTIVE
-      ) {
-        this.setState({ showInvalidBillingBanner: true });
-      } else if (prevProps.workspace && !this.props.workspace) {
-        this.setState({ showInvalidBillingBanner: false });
-      } else if (
-        prevProps.workspace &&
-        this.props.workspace &&
-        prevProps.workspace !== this.props.workspace
-      ) {
-        // Workspace was reloaded
-        if (
-          prevProps.workspace.billingStatus !==
-          this.props.workspace.billingStatus
-        ) {
-          this.setState({
-            showInvalidBillingBanner:
-              this.props.workspace.billingStatus === BillingStatus.INACTIVE,
-          });
-        }
+  useEffect(() => {
+    // TODO: This is only needed for OldInvalidBillingBanner.
+    // Remove once initial credit expiration is live
+    if (!enableInitialCreditsExpiration) {
+      const newShowInvalidBillingBanner =
+        props?.workspace?.billingStatus === BillingStatus.INACTIVE;
+
+      if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
+        setShowInvalidBillingBanner(newShowInvalidBillingBanner);
       }
     }
+  }, [props?.workspace]);
 
-    trail(): Array<BreadcrumbData> {
-      const workspaceMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:terraName',
-      });
-      const { ns = '', terraName = '' } = workspaceMatch
-        ? workspaceMatch.params
-        : {};
+  const trail = (): Array<BreadcrumbData> => {
+    const workspaceMatch = matchPath<MatchParams>(location.pathname, {
+      path: '/workspaces/:ns/:terraName',
+    });
+    const { ns = '', terraName = '' } = workspaceMatch
+      ? workspaceMatch.params
+      : {};
 
-      const cohortMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:terraName/data/cohorts/:cid',
-      });
-      const { cid = '' } = cohortMatch ? cohortMatch.params : {};
+    const cohortMatch = matchPath<MatchParams>(location.pathname, {
+      path: '/workspaces/:ns/:terraName/data/cohorts/:cid',
+    });
+    const { cid = '' } = cohortMatch ? cohortMatch.params : {};
 
-      const conceptSetMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:terraName/data/concepts/sets/:csid',
-      });
-      const { csid = '' } = conceptSetMatch ? conceptSetMatch.params : {};
+    const conceptSetMatch = matchPath<MatchParams>(location.pathname, {
+      path: '/workspaces/:ns/:terraName/data/concepts/sets/:csid',
+    });
+    const { csid = '' } = conceptSetMatch ? conceptSetMatch.params : {};
 
-      const participantMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:terraName/data/cohorts/:cid/review/participants/:pid',
-      });
-      const { pid = '' } = participantMatch ? participantMatch.params : {};
+    const participantMatch = matchPath<MatchParams>(location.pathname, {
+      path: '/workspaces/:ns/:terraName/data/cohorts/:cid/review/participants/:pid',
+    });
+    const { pid = '' } = participantMatch ? participantMatch.params : {};
 
-      // WARNING
-      // because this pattern *also* matches previews and user apps, it must be checked AFTER those in the cond()
-      const analysisMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:terraName/${analysisTabName}/:nbName`,
-      });
+    // WARNING
+    // because this pattern *also* matches previews and user apps, it must be checked AFTER those in the cond()
+    const analysisMatch = matchPath<MatchParams>(location.pathname, {
+      path: `/workspaces/:ns/:terraName/${analysisTabName}/:nbName`,
+    });
 
-      const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:terraName/${analysisTabName}/preview/:nbName`,
-      });
+    const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
+      path: `/workspaces/:ns/:terraName/${analysisTabName}/preview/:nbName`,
+    });
 
-      const userAppMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:terraName/${analysisTabName}/userApp/:appType`,
-      });
+    const userAppMatch = matchPath<MatchParams>(location.pathname, {
+      path: `/workspaces/:ns/:terraName/${analysisTabName}/userApp/:appType`,
+    });
 
-      const {
-        nbName = '',
-        appType = '',
-        breadcrumbType,
-      } = cond<MatchParams & { breadcrumbType: BreadcrumbType }>(
-        [
-          !!analysisPreviewMatch,
-          () => ({
-            ...analysisPreviewMatch.params,
-            breadcrumbType: BreadcrumbType.AnalysisPreview,
-          }),
-        ],
-        [
-          !!userAppMatch,
-          () => ({
-            ...userAppMatch.params,
-            breadcrumbType: BreadcrumbType.UserApp,
-          }),
-        ],
-        [
-          // this check must go after analysisPreviewMatch and userAppMatch
-          !!analysisMatch,
-          () => ({
-            ...analysisMatch.params,
-            breadcrumbType: BreadcrumbType.Analysis,
-          }),
-        ],
-        () => ({ breadcrumbType: this.props.routeData.breadcrumb })
-      );
+    const {
+      nbName = '',
+      appType = '',
+      breadcrumbType,
+    } = cond<MatchParams & { breadcrumbType: BreadcrumbType }>(
+      [
+        !!analysisPreviewMatch,
+        () => ({
+          ...analysisPreviewMatch.params,
+          breadcrumbType: BreadcrumbType.AnalysisPreview,
+        }),
+      ],
+      [
+        !!userAppMatch,
+        () => ({
+          ...userAppMatch.params,
+          breadcrumbType: BreadcrumbType.UserApp,
+        }),
+      ],
+      [
+        // this check must go after analysisPreviewMatch and userAppMatch
+        !!analysisMatch,
+        () => ({
+          ...analysisMatch.params,
+          breadcrumbType: BreadcrumbType.Analysis,
+        }),
+      ],
+      () => ({ breadcrumbType: props.routeData.breadcrumb })
+    );
 
-      return getTrail(
-        breadcrumbType,
-        this.props.workspace,
-        this.props.cohort,
-        this.props.cohortReview,
-        this.props.conceptSet,
-        { ns, terraName, cid, csid, pid, nbName, appType }
-      );
-    }
+    return getTrail(
+      breadcrumbType,
+      props.workspace,
+      props.cohort,
+      props.cohortReview,
+      props.conceptSet,
+      { ns, terraName, cid, csid, pid, nbName, appType }
+    );
+  };
 
-    first(): Array<BreadcrumbData> {
-      return fp.dropRight(1, this.trail());
-    }
+  const first = (): Array<BreadcrumbData> => {
+    return fp.dropRight(1, trail());
+  };
 
-    last(): BreadcrumbData {
-      return fp.last(this.trail());
-    }
+  const last = (): BreadcrumbData => {
+    return fp.last(trail());
+  };
 
-    render() {
-      return (
-        <React.Fragment>
-          {this.state.showInvalidBillingBanner && (
-            <InvalidBillingBanner
-              onClose={() => this.setState({ showInvalidBillingBanner: false })}
-            />
-          )}
-
-          <div
-            style={{
-              marginLeft: '4.875rem',
-              display: 'inline-block',
-            }}
-          >
-            {this.first().map(({ label, url }, i) => {
-              return (
-                <React.Fragment key={i}>
-                  <BreadcrumbLink href={url} style={styles.firstLink}>
-                    {label}
-                  </BreadcrumbLink>
-                  <span
-                    style={{
-                      color: colors.primary,
-                    }}
-                  >
-                    {' '}
-                    &gt;{' '}
-                  </span>
-                </React.Fragment>
-              );
-            })}
-            {this.last() && (
-              <div>
-                <BreadcrumbLink href={this.last().url} style={styles.lastLink}>
-                  {this.last().label}
-                </BreadcrumbLink>
-              </div>
-            )}
+  return (
+    <>
+      {showInvalidBillingBanner &&
+        (enableInitialCreditsExpiration ? (
+          <InvalidBillingBannerMaybe
+            onClose={() => setShowInvalidBillingBanner(false)}
+          />
+        ) : (
+          <OldInvalidBillingBanner
+            onClose={() => setShowInvalidBillingBanner(false)}
+          />
+        ))}
+      <div
+        style={{
+          marginLeft: '4.875rem',
+          display: 'inline-block',
+        }}
+      >
+        {first().map(({ label, url }, i) => {
+          return (
+            <React.Fragment key={i}>
+              <BreadcrumbLink href={url} style={styles.firstLink}>
+                {label}
+              </BreadcrumbLink>
+              <span
+                style={{
+                  color: colors.primary,
+                }}
+              >
+                {' '}
+                &gt;{' '}
+              </span>
+            </React.Fragment>
+          );
+        })}
+        {last() && (
+          <div>
+            <BreadcrumbLink href={last().url} style={styles.lastLink}>
+              {last().label}
+            </BreadcrumbLink>
           </div>
-        </React.Fragment>
-      );
-    }
-  }
-);
+        )}
+      </div>
+    </>
+  );
+});

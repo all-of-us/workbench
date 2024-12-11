@@ -101,6 +101,12 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                 CohortColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(CohortColumnValueExtractor.TABLE_NAME)),
             Map.entry(
+                LeonardoAppUsageColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getAppUsageRowCount(
+                    workbenchConfigProvider.get()
+                        .reporting
+                        .terraWarehouseLeoAppUsageTableId)), // get source row count
+            Map.entry(
                 NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
                     NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
@@ -161,11 +167,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                     getUploadResult(
                         snapshot,
                         DatasetConceptSetColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getDatasetConceptSets),
-                    getUploadResult(
-                        snapshot,
-                        LeonardoAppUsageColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getLeonardoAppUsage)));
+                        ReportingSnapshot::getDatasetConceptSets)));
     verifyStopwatch.stop();
     logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
     return result;

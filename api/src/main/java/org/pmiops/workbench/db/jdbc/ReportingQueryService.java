@@ -146,7 +146,13 @@ public interface ReportingQueryService {
 
   int getTableRowCount(String tableName);
 
+  int getAppUsageRowCount(String tableName);
+
   int getWorkspaceCount();
 
-  List<ReportingLeonardoAppUsage> getLeonardoAppUsage();
+  List<ReportingLeonardoAppUsage> getLeonardoAppUsage(long limit, long offset);
+
+  default Stream<List<ReportingLeonardoAppUsage>> getBatchedLeonardoAppUsageStream() {
+    return getBatchedStream(this::getLeonardoAppUsage);
+  }
 }

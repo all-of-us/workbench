@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
 
 public class WorkspaceTargetPropertyTest {
@@ -42,13 +43,15 @@ public class WorkspaceTargetPropertyTest {
             .anticipatedFindings("a 4-leaf clover");
 
     long now = System.currentTimeMillis();
+    User creator = new User();
+    creator.setUserName("user@fake-research-aou.org");
 
     workspace1 =
         new Workspace()
             .name("Workspace 1")
             .terraName("workspace1")
             .namespace("aou-rw-local1-c4be869a")
-            .creator("user@fake-research-aou.org")
+            .creatorUser(creator)
             .cdrVersionId("1")
             .researchPurpose(researchPurposeAllFieldsPopulated)
             .creationTime(now)
@@ -61,7 +64,7 @@ public class WorkspaceTargetPropertyTest {
             .name("Workspace 2")
             .terraName("workspace2")
             .namespace("aou-rw-local1-c4be869a")
-            .creator("user@fake-research-aou.org")
+            .creatorUser(creator)
             .cdrVersionId("33")
             .researchPurpose(researchPurpose2)
             .creationTime(now)

@@ -577,7 +577,7 @@ public class DataSetServiceTest {
     dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
-    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset, false);
 
     List<DataSet> datasets =
         dataSetServiceImpl.getDataSets(
@@ -598,7 +598,7 @@ public class DataSetServiceTest {
           dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
           dbDataset.setWorkspaceId(cohort.getWorkspaceId());
           dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
-          dataSetServiceImpl.saveDataSet(dbDataset);
+          dataSetServiceImpl.saveDataSet(dbDataset, false);
           dataSetServiceImpl.getDataSets(101L, ResourceType.COHORT, cohort.getCohortId());
         });
   }
@@ -616,7 +616,7 @@ public class DataSetServiceTest {
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
     dbDataset.setInvalid(false);
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
-    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset, false);
 
     DbDataset dbDataset_invalid = new DbDataset();
     dbDataset_invalid.setName("Data Set dirty");
@@ -624,7 +624,7 @@ public class DataSetServiceTest {
     dbDataset_invalid.setWorkspaceId(cohort.getWorkspaceId());
     dbDataset_invalid.setInvalid(true);
     dbDataset_invalid.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
-    dataSetServiceImpl.saveDataSet(dbDataset_invalid);
+    dataSetServiceImpl.saveDataSet(dbDataset_invalid, false);
 
     List<DataSet> datasets =
         dataSetServiceImpl.getDataSets(
@@ -644,7 +644,7 @@ public class DataSetServiceTest {
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     dbDataset.setWorkspaceId(workspace.getWorkspaceId());
     dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
-    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset, false);
 
     List<DataSet> datasets =
         dataSetServiceImpl.getDataSets(
@@ -664,14 +664,14 @@ public class DataSetServiceTest {
     dbDataset.setWorkspaceId(workspace.getWorkspaceId());
     dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset.setInvalid(false);
-    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset, false);
 
     DbDataset dbDataset_invalid = new DbDataset();
     dbDataset_invalid.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     dbDataset_invalid.setWorkspaceId(workspace.getWorkspaceId());
     dbDataset_invalid.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset_invalid.setInvalid(true);
-    dataSetServiceImpl.saveDataSet(dbDataset_invalid);
+    dataSetServiceImpl.saveDataSet(dbDataset_invalid, false);
 
     List<DataSet> datasets =
         dataSetServiceImpl.getDataSets(
@@ -694,7 +694,7 @@ public class DataSetServiceTest {
           dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
           dbDataset.setWorkspaceId(WORKSPACE_ID);
           dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
-          dataSetServiceImpl.saveDataSet(dbDataset);
+          dataSetServiceImpl.saveDataSet(dbDataset, false);
           dataSetServiceImpl.getDataSets(
               101L, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
         });
@@ -819,7 +819,7 @@ public class DataSetServiceTest {
   @Test
   public void test_userRecentModifiedEntry_saveDataSet() {
     DbDataset dbDataset = createDbDataSetEntry();
-    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset, false);
     verify(userRecentResourceService)
         .updateDataSetEntry(dbDataset.getWorkspaceId(), dbDataset.getCreatorId(), dataset.getId());
   }

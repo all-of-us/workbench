@@ -48,17 +48,26 @@ public interface WorkspaceMapper {
   @Mapping(target = "displayName", source = "dbWorkspace.name")
   @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "creator", source = "dbWorkspace.creator.username")
+  @Mapping(target = "creatorUser.userName", source = "dbWorkspace.creator.username")
+  // Need to work with security before exposing
+  // Should change to contactEmail or institutionalEmail
+  @Mapping(target = "creatorUser.email", ignore = true)
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
       source = "dbWorkspace.creator",
       qualifiedByName = "getInitialCreditsExpiration")
+  @Mapping(
+      target = "initialCredits.extensionEpochMillis",
+      source = "dbWorkspace.creator",
+      qualifiedByName = "getInitialCreditsExtension")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
   @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
+  @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
+  @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
@@ -122,10 +131,17 @@ public interface WorkspaceMapper {
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
-  @Mapping(target = "creator", source = "creator.username")
+  @Mapping(target = "creatorUser.userName", source = "creator.username")
+  @Mapping(
+      target = "creatorUser.email",
+      ignore = true) // need to work with security before exposing
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
+      source = "creator",
+      qualifiedByName = "getInitialCreditsExpiration")
+  @Mapping(
+      target = "initialCredits.extensionEpochMillis",
       source = "creator",
       qualifiedByName = "getInitialCreditsExpiration")
   @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
@@ -139,6 +155,8 @@ public interface WorkspaceMapper {
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
+  @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(
       DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService);
@@ -202,6 +220,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "initialCreditsExpired", ignore = true)
   @Mapping(target = "initialCreditsExhausted", ignore = true)
   @Mapping(target = "usesTanagra", ignore = true)
+  @Mapping(target = "vwbWorkspace", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

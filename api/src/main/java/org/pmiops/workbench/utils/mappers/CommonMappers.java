@@ -1,7 +1,10 @@
 package org.pmiops.workbench.utils.mappers;
 
+import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
+
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
+import jakarta.inject.Provider;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -11,9 +14,12 @@ import java.util.Optional;
 import org.mapstruct.Context;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +27,11 @@ import org.springframework.stereotype.Service;
 public class CommonMappers {
 
   private final Clock clock;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  public CommonMappers(Clock clock) {
+  public CommonMappers(Clock clock, Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clock = clock;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   public Long timestamp(Timestamp timestamp) {
@@ -125,5 +133,20 @@ public class CommonMappers {
   public Long getInitialCreditsExpiration(
       DbUser source, @Context InitialCreditsService initialCreditsService) {
     return initialCreditsService.getCreditsExpiration(source).map(this::timestamp).orElse(null);
+  }
+
+  @Named("getInitialCreditsExtension")
+  @Nullable
+  public Long getInitialCreditsExtension(
+      DbUser source, @Context InitialCreditsService initialCreditsService) {
+    return initialCreditsService.getCreditsExtension(source).map(this::timestamp).orElse(null);
+  }
+
+  @Named("getBillingStatus")
+  public BillingStatus getBillingStatus(DbWorkspace dbWorkspace) {
+    return (isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfigProvider.get())
+            && (dbWorkspace.isInitialCreditsExhausted() || dbWorkspace.isInitialCreditsExpired()))
+        ? BillingStatus.INACTIVE
+        : BillingStatus.ACTIVE;
   }
 }

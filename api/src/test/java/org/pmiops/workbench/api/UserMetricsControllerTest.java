@@ -1,10 +1,10 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.storage.BlobId;
@@ -26,6 +26,7 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -59,13 +60,18 @@ import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
 public class UserMetricsControllerTest {
+
+  private static WorkbenchConfig workbenchConfig;
 
   @Mock private CloudStorageClient mockCloudStorageClient;
   @Mock private UserRecentResourceService mockUserRecentResourceService;
@@ -113,10 +119,17 @@ public class UserMetricsControllerTest {
     CohortService.class,
     ConceptSetService.class,
   })
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig workbenchConfig() {
+      return workbenchConfig;
+    }
+  }
 
   @BeforeEach
   public void setUp() {
+    workbenchConfig = createEmptyConfig();
     DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
 
     accessTierDao.save(dbCdrVersion.getAccessTier());

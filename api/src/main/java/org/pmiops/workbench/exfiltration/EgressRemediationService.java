@@ -29,8 +29,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.user.UserAdminService;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 
 /** Service for automated egress alert remediation. */
 public abstract class EgressRemediationService {
@@ -50,9 +48,6 @@ public abstract class EgressRemediationService {
   private final LeonardoApiClient leonardoNotebooksClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventDao egressEventDao;
-  private final UserAdminService userAdminService;
-
-  private final EgressEventMapper egressEventMapper;
 
   public EgressRemediationService(
       Clock clock,
@@ -60,17 +55,13 @@ public abstract class EgressRemediationService {
       UserService userService,
       LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
-      EgressEventDao egressEventDao,
-      EgressEventMapper egressEventMapper,
-      UserAdminService userAdminService) {
+      EgressEventDao egressEventDao) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
-    this.egressEventMapper = egressEventMapper;
-    this.userAdminService = userAdminService;
   }
 
   public void remediateEgressEvent(long egressEventId) {

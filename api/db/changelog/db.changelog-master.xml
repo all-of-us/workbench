@@ -250,6 +250,9 @@
   <include file="changelog/db.changelog-240-cdr-version-hasFitbitDevice-field.xml"/>
   <include file="changelog/db.changelog-241-replace-user-initial-credits-expiration-status.xml"/>
   <include file="changelog/db.changelog-242-remove-old-workspace-columns.xml"/>
+  <include file="changelog/db.changelog-243-replace-extension-count.xml"/>
+  <include file="changelog/db.changelog-244-add-is-vwb-workspace-column.xml"/>
+  <include file="changelog/db.changelog-245-add-vwb-template-id-cdr-version.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.initialcredits;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 
 import jakarta.annotation.Nullable;
@@ -9,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.mapstruct.Named;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -29,6 +32,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -276,7 +280,7 @@ public class InitialCreditsService {
    *
    * @param user - The user whose initial credits expiration time is being checked
    * @return The expiration time of the user's initial credits, if they have a
-   *     UserInitialCreditsExpiration record and they have not been bypassed personally or
+   *     UserInitialCreditsExpiration record, and they have not been bypassed personally or
    *     institutionally.
    */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
@@ -284,6 +288,21 @@ public class InitialCreditsService {
         .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
         .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
+  }
+
+  /**
+   * For the given user, check when the user's initial credits were extended, if relevant.
+   *
+   * @param user - The user whose initial credits extension time is being checked
+   * @return The extension time of the user's initial credits, if they have a
+   *     UserInitialCreditsExpiration record, and they have not been bypassed personally or
+   *     institutionally.
+   */
+  public Optional<Timestamp> getCreditsExtension(DbUser user) {
+    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
+        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
+        .map(DbUserInitialCreditsExpiration::getExtensionTime);
   }
 
   /**
@@ -337,24 +356,63 @@ public class InitialCreditsService {
     userInitialCreditsExpiration.setBypassed(isBypassed);
   }
 
-  public void extendInitialCreditsExpiration(DbUser user) {
+  public DbUser extendInitialCreditsExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
+    // This handles the case existing users that have not yet been migrated but also those who have
+    // not yet completed RT training.
     if (userInitialCreditsExpiration == null) {
-      throw new WorkbenchException("User does not have initial credits expiration set.");
+      throw new BadRequestException(
+          "User does not have initial credits expiration set, so they cannot extend their expiration date.");
     }
-    if (userInitialCreditsExpiration.getExtensionCount() != 0) {
-      throw new WorkbenchException(
+
+    if (institutionService.shouldBypassForCreditsExpiration(user)) {
+      throw new BadRequestException(
+          "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.");
+    }
+
+    if (userInitialCreditsExpiration.isBypassed()) {
+      throw new BadRequestException(
+          "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.");
+    }
+
+    if (userInitialCreditsExpiration.getExtensionTime() != null) {
+      throw new BadRequestException(
           "User has already extended their initial credits expiration and cannot extend further.");
+    }
+    if (!areCreditsExpiringSoon(user)) {
+      throw new BadRequestException(
+          "User's initial credits are not close enough to their expiration date to be extended.");
     }
     userInitialCreditsExpiration.setExpirationTime(
         new Timestamp(
             userInitialCreditsExpiration.getCreditStartTime().getTime()
                 + TimeUnit.DAYS.toMillis(
                     workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
-    userInitialCreditsExpiration.setExtensionCount(
-        userInitialCreditsExpiration.getExtensionCount() + 1);
-    userDao.save(user);
+    userInitialCreditsExpiration.setExtensionTime(clockNow());
+    return userDao.save(user);
+  }
+
+  @Named("checkInitialCreditsExtensionEligibility")
+  public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        dbUser.getUserInitialCreditsExpiration();
+    Instant now = Instant.now();
+    WorkbenchConfig.BillingConfig billingConfig = workbenchConfigProvider.get().billing;
+
+    return initialCreditsExpiration != null
+        && initialCreditsExpiration.getExtensionTime() == null
+        && initialCreditsExpiration.getCreditStartTime() != null
+        && now.isAfter(
+            initialCreditsExpiration
+                .getExpirationTime()
+                .toInstant()
+                .minus(billingConfig.initialCreditsExpirationWarningDays, DAYS))
+        && now.isBefore(
+            initialCreditsExpiration
+                .getCreditStartTime()
+                .toInstant()
+                .plus(billingConfig.initialCreditsExtensionPeriodDays, DAYS));
   }
 
   private void checkExpiration(DbUser user) {

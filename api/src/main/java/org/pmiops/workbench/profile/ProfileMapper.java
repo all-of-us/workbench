@@ -32,7 +32,8 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
       DbStorageEnums.class,
       DemographicSurveyMapper.class,
       PageVisitMapper.class,
-      UserMapper.class
+      UserMapper.class,
+      InitialCreditsService.class
     })
 public interface ProfileMapper {
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
@@ -43,13 +44,20 @@ public interface ProfileMapper {
   @Mapping(source = "dbUser.duccAgreement.completionTime", target = "duccCompletionTimeEpochMillis")
   @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
   @Mapping(
-      target = "initialCreditsExpirationEpochMillis",
       source = "dbUser",
+      target = "initialCreditsExpirationEpochMillis",
       qualifiedByName = "getInitialCreditsExpiration")
+  @Mapping(
+      source = "dbUser.userInitialCreditsExpiration.extensionTime",
+      target = "initialCreditsExtensionEpochMillis")
   @Mapping(
       source = "dbUser.userInitialCreditsExpiration.bypassed",
       target = "initialCreditsExpirationBypassed",
       defaultValue = "false")
+  @Mapping(
+      target = "eligibleForInitialCreditsExtension",
+      source = "dbUser",
+      qualifiedByName = "checkInitialCreditsExtensionEligibility")
   Profile toModel(
       DbUser dbUser,
       @Context InitialCreditsService initialCreditsService,

@@ -65,8 +65,6 @@ export interface EnvironmentBase {
   // Pass auth token in iframe url
   // WARNING: This is insecure and should only be enabled for local environments
   tanagraLocalAuth: boolean;
-  // Show dropdown on workspace create to select Data Apps V1 (current/legacy) or Data Apps V2 (Tanagra)
-  showDataAppsVersionSelect: boolean;
 }
 
 export interface Environment extends EnvironmentBase {

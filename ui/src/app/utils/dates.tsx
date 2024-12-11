@@ -5,6 +5,8 @@ export const getWholeDaysFromNow = (timeInMillis: number): number =>
   Math.floor((timeInMillis - Date.now()) / MILLIS_PER_DAY);
 export const plusDays = (date: number, days: number): number =>
   date + MILLIS_PER_DAY * days;
+export const minusDays = (date: number, days: number): number =>
+  plusDays(date, -days);
 export const nowPlusDays = (days: number) => plusDays(Date.now(), days);
 
 // To convert datetime strings into human-readable dates in the format

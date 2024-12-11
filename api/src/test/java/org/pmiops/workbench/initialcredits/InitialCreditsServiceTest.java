@@ -3,6 +3,7 @@ package org.pmiops.workbench.initialcredits;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -60,6 +61,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpiryTaskMatchers.UserListMatcher;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -859,6 +861,7 @@ public class InitialCreditsServiceTest {
   public void test_none() {
     DbUser user = new DbUser();
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
@@ -868,6 +871,7 @@ public class InitialCreditsServiceTest {
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(true).setExpirationTime(NOW));
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
@@ -881,10 +885,11 @@ public class InitialCreditsServiceTest {
                         .setExpirationTime(NOW)));
     when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
-  public void test_nullTimestamp() {
+  public void test_nullExpirationTimestamp() {
     DbUser user =
         new DbUser()
             .setUserInitialCreditsExpiration(
@@ -893,12 +898,30 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void test_validTimestamp() {
+  public void test_nullExtensionTimestamp() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(false).setExtensionTime(null));
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
+  }
+
+  @Test
+  public void test_validExpirationTimestamp() {
     DbUser user =
         new DbUser()
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(false).setExpirationTime(NOW));
     assertThat(initialCreditsService.getCreditsExpiration(user)).hasValue(NOW);
+  }
+
+  @Test
+  public void test_validExtensionTimestamp() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(false).setExtensionTime(NOW));
+    assertThat(initialCreditsService.getCreditsExtension(user)).hasValue(NOW);
   }
 
   @Test
@@ -988,6 +1011,123 @@ public class InitialCreditsServiceTest {
             false,
             null,
             NOW));
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_noExpirationRecord() {
+    DbUser user = spyUserDao.save(new DbUser());
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User does not have initial credits expiration set, so they cannot extend their expiration date.",
+        exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_alreadyExtended() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setExtensionTime(DURING_WARNING_PERIOD)
+                        .setBypassed(false)));
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User has already extended their initial credits expiration and cannot extend further.",
+        exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_institutionallyBypassed() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setExtensionTime(null)
+                        .setBypassed(false)));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.",
+        exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_individuallyBypassed() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setExtensionTime(null)
+                        .setBypassed(true)));
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.",
+        exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_notYetExtendedOutsideWindow() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(BEFORE_WARNING_PERIOD)
+                        .setExtensionTime(null)
+                        .setBypassed(false)));
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "User's initial credits are not close enough to their expiration date to be extended.",
+        exception.getMessage());
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_notYetExtendedWithinWindow() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setCreditStartTime(BEFORE_WARNING_PERIOD)
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setExtensionTime(null)
+                        .setBypassed(false)));
+
+    DbUserInitialCreditsExpiration actualExpirationRecord =
+        initialCreditsService
+            .extendInitialCreditsExpiration(user)
+            .getUserInitialCreditsExpiration();
+
+    Timestamp expectedExtensionDate =
+        Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
+    assertEquals(actualExpirationRecord.getExpirationTime(), expectedExtensionDate);
+    assertEquals(actualExpirationRecord.getExtensionTime(), NOW);
   }
 
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {

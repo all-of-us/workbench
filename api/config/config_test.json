@@ -58,10 +58,9 @@
       "extractionScatterTasksPerSample": 4
     },
     "cdrv8plus": {
-      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-after_master_merge-177-gbd0a99c-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-test",
       "methodName": "echo-prototyping",
-      "methodRepoVersion": 2,
+      "methodRepoVersion": 16,
       "methodLogicalVersion": 1
     }
   },
@@ -126,7 +125,9 @@
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
-    "blockComplianceTraining": false
+    "blockComplianceTraining": false,
+    "enableVWBWorkspaceCreation": false,
+    "enableVWBEgressMonitor": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -195,7 +196,7 @@
     ]
   },
   "termsOfService": {
-    "minimumAcceptedAouVersion": 1
+    "minimumAcceptedAouVersion": 2
   },
   "tanagra": {
     "baseUrl": "https:\/\/test.fake-research-aou.org"
@@ -205,5 +206,11 @@
   },
   "banner": {
     "enableLoginIssueBanner": false
+  },
+  "vwb": {
+    "wsmBaseUrl": "https:\/\/terra-devel-wsm.api.verily.com",
+    "organizationId": "79775c0a-3bf7-436a-8ab8-eab316998115",
+    "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b",
+    "exfilManagerServiceAccount": "workbench-exfil-manager@prj-d-1v-ucd.iam.gserviceaccount.com"
   }
 }
