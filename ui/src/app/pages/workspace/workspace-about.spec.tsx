@@ -23,6 +23,8 @@ import {
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  expectTooltip,
+  expectTooltipAbsence,
   renderWithRouter,
   waitForNoSpinner,
 } from 'testing/react-test-helpers';
@@ -324,10 +326,14 @@ describe('WorkspaceAbout', () => {
     screen.getByText(/tue mar 17 1998/i);
   });
 
-  it('should see extension button', async () => {
+  it('creator should be able to request extension', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
-      creator: profile.username,
+      creatorUser: {
+        userName: profile.username,
+        givenName: profile.givenName,
+        familyName: profile.familyName,
+      },
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
@@ -349,10 +355,65 @@ describe('WorkspaceAbout', () => {
       },
     });
     component();
+    const requestExtensionButton = screen.getByRole('button', {
+      name: /request extension/i,
+    });
+    expect(requestExtensionButton).toBeInTheDocument();
+
+    const workspace = currentWorkspaceStore.getValue();
+
+    await expectTooltipAbsence(
+      requestExtensionButton,
+      `Contact your workspace creator, ${workspace?.creatorUser?.givenName} ${workspace?.creatorUser?.familyName}, to extend initial credits.`,
+      user
+    );
+    await user.click(requestExtensionButton);
     expect(
-      screen.getByRole('button', {
-        name: /request extension/i,
-      })
+      await screen.findByText(/request credit expiration date extension/i)
     ).toBeInTheDocument();
+  });
+
+  it('non-creator should not be able to request extension', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      creatorUser: {
+        userName: 'not-the-user@aou-rwb.com',
+        givenName: 'Bob',
+        familyName: 'Pop',
+      },
+      billingAccountName: 'billingAccounts/free',
+      initialCredits: {
+        exhausted: false,
+        expired: true,
+        expirationEpochMillis: nowPlusDays(-1),
+      },
+    });
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        freeTierBillingAccountId: 'free',
+      },
+    });
+    profileStore.set({
+      ...profileStore.get(),
+      profile: {
+        ...profile,
+        eligibleForInitialCreditsExtension: true,
+      },
+    });
+    component();
+    const requestExtensionButton = screen.getByRole('button', {
+      name: /request extension/i,
+    });
+    expect(requestExtensionButton).toBeInTheDocument();
+
+    const workspace = currentWorkspaceStore.getValue();
+
+    await expectTooltip(
+      requestExtensionButton,
+      `Contact your workspace creator, ${workspace?.creatorUser?.givenName} ${workspace?.creatorUser?.familyName}, to extend initial credits.`,
+      user
+    );
+    expectButtonElementDisabled(requestExtensionButton);
   });
 });

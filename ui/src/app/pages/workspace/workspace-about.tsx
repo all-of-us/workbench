@@ -487,16 +487,26 @@ export const WorkspaceAbout = fp.flow(
                       <div style={{ fontSize: '0.75rem' }}>
                         {this.workspaceInitialCreditsExpirationTime}
                       </div>
-                      {profile.eligibleForInitialCreditsExtension &&
-                        workspace.creator === profile.username && (
+                      {profile.eligibleForInitialCreditsExtension && (
+                        <TooltipTrigger
+                          content={`Contact your workspace creator, ${workspace.creatorUser.givenName} ${workspace.creatorUser.familyName}, to extend initial credits.`}
+                          disabled={
+                            workspace.creatorUser.userName === profile.username
+                          }
+                        >
                           <LinkButton
+                            disabled={
+                              workspace.creatorUser.userName !==
+                              profile.username
+                            }
                             onClick={() =>
                               this.setState({ showExtensionModal: true })
                             }
                           >
                             Request Extension
                           </LinkButton>
-                        )}
+                        </TooltipTrigger>
+                      )}
                     </div>
                   </>
                 )}
