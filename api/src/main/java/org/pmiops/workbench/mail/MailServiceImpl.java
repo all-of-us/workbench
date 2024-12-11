@@ -59,18 +59,42 @@ import org.springframework.util.StringUtils;
 
 @Service
 public class MailServiceImpl implements MailService {
+  private static final String AOU_ITALICS = "<i>All of Us</i>";
+  private static final String EGRESS_FORM_LINK =
+      "<a href=\"https://redcap.pmi-ops.org/surveys/?s=YJ8FJXRJD7JY4NK7\">Researcher Account Activity Confirmation</a>";
+  private static final String DOWNLOAD_FORM_LINK =
+      "<a href=\"https://redcap.pmi-ops.org/surveys/?s=YRXMJFJ97J3WMWLE\">Large Data Download Request</a>";
 
   public static final Map<EgressRemediationAction, String> EGRESS_REMEDIATION_ACTION_MAP =
       Map.of(
-          EgressRemediationAction.DISABLE_USER,
-          "Your account has been disabled pending manual review by the <i>All of Us</i> "
-              + "security team.",
           EgressRemediationAction.SUSPEND_COMPUTE,
-          "Your Workbench compute access has been temporarily suspended, and will be "
-              + "automatically restored after a brief duration.");
-  private final Provider<MandrillApi> mandrillApiProvider;
-  private final Provider<CloudStorageClient> cloudStorageClientProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+          String.format(
+              """
+              <div>
+                Your access to analyze the All of Us dataset in the Researcher Workbench has been
+                temporarily suspended and will automatically restore after a brief duration.
+              </div>
+              <div><b>
+                To confirm your activity, please complete the %s form. Your Researcher Workbench account
+                may be suspended if the form is not submitted within 24 hours.
+              </b></div>
+              <div>
+                If you are working with large sized data files due to the nature of your research
+                (i.e.: genomics) or large sized notebooks, you may request a temporary increase in
+                your egress threshold limit by filling out and submitting the %s form.
+              </div>
+              """,
+              EGRESS_FORM_LINK, DOWNLOAD_FORM_LINK),
+          EgressRemediationAction.DISABLE_USER,
+          String.format(
+              """
+              <div><b>
+                Your Researcher Workbench account has been suspended and will remain disabled until
+                you complete the %s form and following manual review by the %s Researcher Workbench
+                security team.
+              </b></div>
+              """,
+              EGRESS_FORM_LINK, AOU_ITALICS));
 
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
 
@@ -109,7 +133,6 @@ public class MailServiceImpl implements MailService {
 
   private static final String OPEN_LI_TAG = "<li>";
   private static final String CLOSE_LI_TAG = "</li>";
-  private static final String AOU_ITALICS = "<i>All of Us</i>";
 
   @VisibleForTesting static final String ATTACHED_DISK_STATUS = "attached to";
 
@@ -130,6 +153,10 @@ public class MailServiceImpl implements MailService {
     API_ERROR,
     SUCCESSFUL
   }
+
+  private final Provider<MandrillApi> mandrillApiProvider;
+  private final Provider<CloudStorageClient> cloudStorageClientProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public MailServiceImpl(
@@ -388,8 +415,11 @@ public class MailServiceImpl implements MailService {
             .map(LeonardoAppUtils::appDisplayName)
             .orElse("Jupyter");
 
+    String givenName = Optional.ofNullable(dbUser.getGivenName()).orElse("Researcher");
+
     var substitutionMap =
         Map.of(
+            EmailSubstitutionField.FIRST_NAME, givenName,
             EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo(),
             EmailSubstitutionField.ALL_OF_US, AOU_ITALICS,
             EmailSubstitutionField.USERNAME, dbUser.getUsername(),
