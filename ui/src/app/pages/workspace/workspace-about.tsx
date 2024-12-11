@@ -40,7 +40,7 @@ import {
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { profileStore } from 'app/utils/stores';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
@@ -489,33 +489,37 @@ export const WorkspaceAbout = fp.flow(
                         )}
                       </div>
                     </div>
-                    <div style={{ ...styles.infoBox }}>
-                      <div style={styles.infoBoxHeader}>
-                        Workspace Initial Credit Expiration
-                      </div>
-                      <div style={{ fontSize: '0.75rem' }}>
-                        {this.workspaceInitialCreditsExpirationTime}
-                      </div>
-                      <TooltipTrigger
-                        content={initialCreditsExtensionTooltipContent}
-                        disabled={
-                          isWorkspaceCreator &&
-                          profile.eligibleForInitialCreditsExtension
-                        }
-                      >
-                        <LinkButton
+
+                    {serverConfigStore.get().config
+                      .enableInitialCreditsExpiration && (
+                      <div style={{ ...styles.infoBox }}>
+                        <div style={styles.infoBoxHeader}>
+                          Workspace Initial Credit Expiration
+                        </div>
+                        <div style={{ fontSize: '0.75rem' }}>
+                          {this.workspaceInitialCreditsExpirationTime}
+                        </div>
+                        <TooltipTrigger
+                          content={initialCreditsExtensionTooltipContent}
                           disabled={
-                            !isWorkspaceCreator ||
-                            !profile.eligibleForInitialCreditsExtension
-                          }
-                          onClick={() =>
-                            this.setState({ showExtensionModal: true })
+                            isWorkspaceCreator &&
+                            profile.eligibleForInitialCreditsExtension
                           }
                         >
-                          Request Extension
-                        </LinkButton>
-                      </TooltipTrigger>
-                    </div>
+                          <LinkButton
+                            disabled={
+                              !isWorkspaceCreator ||
+                              !profile.eligibleForInitialCreditsExtension
+                            }
+                            onClick={() =>
+                              this.setState({ showExtensionModal: true })
+                            }
+                          >
+                            Request Extension
+                          </LinkButton>
+                        </TooltipTrigger>
+                      </div>
+                    )}
                   </>
                 )}
             </div>

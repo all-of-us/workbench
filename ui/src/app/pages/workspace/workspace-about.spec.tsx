@@ -84,6 +84,7 @@ describe('WorkspaceAbout', () => {
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
+        enableInitialCreditsExpiration: true,
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);
@@ -319,11 +320,33 @@ describe('WorkspaceAbout', () => {
       },
     });
     component();
-    screen.logTestingPlaygroundURL();
     expect(
       screen.getByText(/workspace initial credit expiration/i)
     ).toBeInTheDocument();
     screen.getByText(/tue mar 17 1998/i);
+  });
+
+  it('should not see initial credit expiration date when enableInitialCreditsExpiration is false', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      billingAccountName: 'billingAccounts/free',
+      initialCredits: {
+        exhausted: false,
+        expired: false,
+        expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
+      },
+    });
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        freeTierBillingAccountId: 'free',
+        enableInitialCreditsExpiration: false,
+      },
+    });
+    component();
+    expect(
+      screen.queryByText(/workspace initial credit expiration/i)
+    ).not.toBeInTheDocument();
   });
 
   it('eligble creator should be able to request extension', async () => {
