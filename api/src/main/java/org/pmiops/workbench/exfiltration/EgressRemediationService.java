@@ -168,7 +168,7 @@ public abstract class EgressRemediationService {
    * @return the count of logical egress incidents for this user for all time, including any events
    *     which are actively being processed
    */
-  private int getEgressIncidentCountForUser(DbUser user) {
+  protected int getEgressIncidentCountForUser(DbUser user) {
     List<DbEgressEvent> events =
         egressEventDao.findAllByUserAndStatusNot(user, DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
 
