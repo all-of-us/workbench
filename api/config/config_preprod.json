@@ -23,7 +23,12 @@
     "projectNamePrefix": "aou-rw-preprod-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "defaultFreeCreditsDollarLimit": 300.0,
+    "defaultInitialCreditDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
+    "initialCreditCostAlertThresholds": [
       0.5,
       0.75
     ],
@@ -32,8 +37,11 @@
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "freeTierCronUserBatchSize": 100,
+    "initialCreditCronUserBatchSize": 100,
     "minutesBeforeLastFreeTierJob": 60,
-    "numberOfDaysToConsiderForFreeTierUsageUpdate": 2
+    "minutesBeforeLastInitialCreditJob": 60,
+    "numberOfDaysToConsiderForFreeTierUsageUpdate": 2,
+    "numberOfDaysToConsiderForInitialCreditUsageUpdate": 2
   },
   "auth": {
     "serviceAccountApiUsers": [
