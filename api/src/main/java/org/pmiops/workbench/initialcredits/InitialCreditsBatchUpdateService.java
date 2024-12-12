@@ -70,7 +70,8 @@ public class InitialCreditsBatchUpdateService {
    *
    * @param userIdList
    */
-  public void checkAndAlertFreeTierBillingUsage(List<Long> userIdList) {
+  public void checkCreditsExhaustionForUserIDs(List<Long> userIdList) {
+
     Set<String> googleProjectsForUserSet = workspaceDao.getGoogleProjectForUserList(userIdList);
 
     List<DbGoogleProjectPerCost> googleProjectPerCostList =
@@ -87,7 +88,7 @@ public class InitialCreditsBatchUpdateService {
     Set<DbUser> dbUserSet =
         userIdList.stream().map(userDao::findUserByUserId).collect(Collectors.toSet());
 
-    initialCreditsService.checkFreeTierBillingUsageForUsers(dbUserSet, userWorkspaceBQCosts);
+    initialCreditsService.checkInitialCreditUsageForUsers(dbUserSet, userWorkspaceBQCosts);
   }
 
   /**
@@ -112,7 +113,7 @@ public class InitialCreditsBatchUpdateService {
           String.format(
               "Processing users batch of size/total: %d/%d. Current iteration is: %d",
               usersPartition.size(), numberOfUsers, count++));
-      initialCreditsService.checkFreeTierBillingUsageForUsers(
+      initialCreditsService.checkInitialCreditUsageForUsers(
           new HashSet<>(usersPartition), allBQCosts);
     }
 
