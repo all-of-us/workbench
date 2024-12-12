@@ -2436,14 +2436,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/checkFreeTierBillingUsage:
+  /v1/cron/checkForInitialCreditExhaustion:
     get:
       tags:
         - offlineBilling
         - cron
-      description: Find and alert users that have exceeded their free tier billing
-        usage
-      operationId: checkFreeTierBillingUsage
+      description: Find and alert users that have exhausted their allocated initial credits
+      operationId: checkForInitialCreditExhaustion
       security: [ ]
       responses:
         204:
