@@ -46,8 +46,8 @@ public class TaskQueueService {
       BASE_PATH + "/deleteTestUserWorkspacesInRawls";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH =
       BASE_PATH + "/checkCreditsExpirationForUserIDs";
-  private static final String CHECK_AND_ALERT_FREE_TIER_USAGE =
-      BASE_PATH + "/checkAndAlertFreeTierBillingUsage";
+  private static final String CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_PATH =
+      BASE_PATH + "/checkCreditsExhaustionForUserIDs";
 
   private static final String INITIAL_CREDITS_EXPIRY_PATH =
       BASE_PATH + "/handleInitialCreditsExpiry";
@@ -59,7 +59,7 @@ public class TaskQueueService {
   private static final String DELETE_TEST_WORKSPACES_QUEUE_NAME = "deleteTestUserWorkspacesQueue";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
       "deleteTestUserRawlsWorkspacesQueue";
-  private static final String FREE_TIER_BILLING_QUEUE = "freeTierBillingQueue";
+  private static final String CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_QUEUE_NAME = "freeTierBillingQueue";
   private static final String EXPIRED_FREE_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
       "checkCreditsExpirationForUserIDsQueue";
@@ -120,15 +120,6 @@ public class TaskQueueService {
                     AUDIT_PROJECTS_QUEUE_NAME,
                     AUDIT_PROJECTS_PATH,
                     new AuditProjectAccessRequest().userIds(batch)));
-  }
-
-  public void groupAndPushFreeTierBilling(List<Long> userIds) {
-    Integer freeTierCronUserBatchSize =
-        workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
-    CloudTasksUtils.partitionList(userIds, freeTierCronUserBatchSize)
-        .forEach(
-            batch ->
-                createAndPushTask(FREE_TIER_BILLING_QUEUE, CHECK_AND_ALERT_FREE_TIER_USAGE, batch));
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
@@ -219,6 +210,15 @@ public class TaskQueueService {
             .users(users)
             .dbCostByCreator(dbCostByCreator)
             .liveCostByCreator(liveCostByCreator));
+  }
+
+  public void groupAndPushCheckInitialCreditExhaustionTasks(List<Long> userIds) {
+    Integer freeTierCronUserBatchSize =
+        workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
+    CloudTasksUtils.partitionList(userIds, freeTierCronUserBatchSize)
+        .forEach(
+            batch ->
+                createAndPushTask(CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_QUEUE_NAME, CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_PATH, batch));
   }
 
   public void groupAndPushCheckInitialCreditExpirationTasks(List<Long> userIds) {

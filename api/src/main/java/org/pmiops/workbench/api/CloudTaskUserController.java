@@ -121,21 +121,6 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
     return ResponseEntity.noContent().build();
   }
 
-  /**
-   * Takes in batch of user Ids check whether users have incurred sufficient cost in their
-   * workspaces to trigger alerts due to passing thresholds or exceeding limits
-   *
-   * @param body : Batch of user IDs from cloud task queue: freeTierBillingQueue
-   * @return
-   */
-  @Override
-  public ResponseEntity<Void> checkAndAlertFreeTierBillingUsage(List<Long> userIdsList) {
-    if (userIdsList != null && userIdsList.size() > 0) {
-      freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(userIdsList);
-    }
-    return ResponseEntity.noContent().build();
-  }
-
   @Override
   public ResponseEntity<Void> synchronizeUserAccess(SynchronizeUserAccessRequest request) {
     int errorCount = 0;
@@ -174,6 +159,21 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     log.info(String.format("successfully synchronized %d users", request.getUserIds().size()));
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Takes in batch of user Ids check whether users have incurred sufficient cost in their
+   * workspaces to trigger alerts due to passing thresholds or exceeding limits
+   *
+   * @param body : Batch of user IDs from cloud task queue: freeTierBillingQueue
+   * @return
+   */
+  @Override
+  public ResponseEntity<Void> checkCreditsExhaustionForUserIDs(List<Long> userIdsList) {
+    if (userIdsList != null && userIdsList.size() > 0) {
+      freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(userIdsList);
+    }
     return ResponseEntity.noContent().build();
   }
 
