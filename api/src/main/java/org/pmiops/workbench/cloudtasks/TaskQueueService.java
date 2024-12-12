@@ -49,7 +49,7 @@ public class TaskQueueService {
   private static final String CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_PATH =
       BASE_PATH + "/checkCreditsExhaustionForUserIDs";
 
-  private static final String INITIAL_CREDITS_EXPIRY_PATH =
+  private static final String EXHAUSTED_INITIAL_CREDITS_PATH =
       BASE_PATH + "/handleInitialCreditsExpiry";
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
@@ -60,7 +60,7 @@ public class TaskQueueService {
   private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
       "deleteTestUserRawlsWorkspacesQueue";
   private static final String CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_QUEUE_NAME = "freeTierBillingQueue";
-  private static final String EXPIRED_FREE_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
+  private static final String EXHAUSTED_INITIAL_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
       "checkCreditsExpirationForUserIDsQueue";
 
@@ -204,8 +204,8 @@ public class TaskQueueService {
   public void pushCheckInitialCreditExhaustionTask(
       List<Long> users, Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
     createAndPushTask(
-        EXPIRED_FREE_CREDITS_QUEUE_NAME,
-        INITIAL_CREDITS_EXPIRY_PATH,
+        EXHAUSTED_INITIAL_CREDITS_QUEUE_NAME,
+        EXHAUSTED_INITIAL_CREDITS_PATH,
         new ExpiredInitialCreditsEventRequest()
             .users(users)
             .dbCostByCreator(dbCostByCreator)
@@ -214,7 +214,7 @@ public class TaskQueueService {
 
   public void groupAndPushCheckInitialCreditExhaustionTasks(List<Long> userIds) {
     Integer freeTierCronUserBatchSize =
-        workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
+        workbenchConfigProvider.get().billing.initialCreditCronUserBatchSize;
     CloudTasksUtils.partitionList(userIds, freeTierCronUserBatchSize)
         .forEach(
             batch ->

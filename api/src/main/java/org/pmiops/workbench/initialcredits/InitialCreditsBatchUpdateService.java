@@ -104,7 +104,7 @@ public class InitialCreditsBatchUpdateService {
     long numberOfUsers = Iterators.size(freeTierActiveWorkspaceCreators.iterator());
     int count = 0;
 
-    Map<String, Double> allBQCosts = getFreeTierWorkspaceCostsFromBQ();
+    Map<String, Double> allBQCosts = getInitialCreditWorkspaceCostsFromBQ();
 
     logger.info(String.format("Retrieved all BQ costs, size is: %d", allBQCosts.size()));
 
@@ -122,7 +122,7 @@ public class InitialCreditsBatchUpdateService {
     logger.info("Checking Free Tier Billing usage - finish");
   }
 
-  public Map<String, Double> getFreeTierWorkspaceCostsFromBQ() {
+  public Map<String, Double> getInitialCreditWorkspaceCostsFromBQ() {
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
                 "SELECT id, SUM(cost) cost FROM `"
@@ -142,7 +142,7 @@ public class InitialCreditsBatchUpdateService {
 
   private int freeTierCronUserBatchSizeFromConfig() {
     Integer freeTierCronUserBatchSize =
-        workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
+        workbenchConfigProvider.get().billing.initialCreditCronUserBatchSize;
     logger.info(String.format("freeTierCronUserBatchSize is %d", freeTierCronUserBatchSize));
 
     if (freeTierCronUserBatchSize == null || !batchSizeRange.contains(freeTierCronUserBatchSize)) {

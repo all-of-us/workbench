@@ -51,7 +51,7 @@ public class OfflineBillingControllerTest {
     verify(mockGoogleProjectPerCostDao).batchInsertProjectPerCost(anyList());
 
     // Confirm that task as pushed with User Id List
-    verify(mockTaskQueueService).groupAndPushFreeTierBilling(Arrays.asList(1L, 2L, 3L));
+    verify(mockTaskQueueService).groupAndPushCheckInitialCreditExhaustionTasks(Arrays.asList(1L, 2L, 3L));
   }
 
   private void mockUserId() {
@@ -64,7 +64,7 @@ public class OfflineBillingControllerTest {
     freeTierForAllWorkspace.put("2", 0.4);
     freeTierForAllWorkspace.put("3", 1d);
     freeTierForAllWorkspace.put("4", 0.34);
-    when(mockFreeTierBillingUpdateService.getFreeTierWorkspaceCostsFromBQ())
+    when(mockFreeTierBillingUpdateService.getInitialCreditWorkspaceCostsFromBQ())
         .thenReturn(freeTierForAllWorkspace);
   }
 }
