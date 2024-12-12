@@ -213,9 +213,9 @@ public class TaskQueueService {
   }
 
   public void groupAndPushCheckInitialCreditExhaustionTasks(List<Long> userIds) {
-    Integer freeTierCronUserBatchSize =
+    Integer initialCreditCronUserBatchSize =
         workbenchConfigProvider.get().billing.initialCreditCronUserBatchSize;
-    CloudTasksUtils.partitionList(userIds, freeTierCronUserBatchSize)
+    CloudTasksUtils.partitionList(userIds, initialCreditCronUserBatchSize)
         .forEach(
             batch ->
                 createAndPushTask(CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_QUEUE_NAME, CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_PATH, batch));

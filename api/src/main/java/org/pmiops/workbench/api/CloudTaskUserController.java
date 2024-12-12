@@ -55,7 +55,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
   private final AccessModuleService accessModuleService;
-  private final InitialCreditsBatchUpdateService freeTierBillingUpdateService;
+  private final InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   private final InitialCreditsService initialCreditsService;
 
   CloudTaskUserController(
@@ -63,13 +63,13 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       CloudResourceManagerService cloudResourceManagerService,
       UserService userService,
       AccessModuleService accessModuleService,
-      InitialCreditsBatchUpdateService freeTierBillingUpdateService,
+      InitialCreditsBatchUpdateService initialCreditsBatchUpdateService,
       InitialCreditsService initialCreditsService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.accessModuleService = accessModuleService;
-    this.freeTierBillingUpdateService = freeTierBillingUpdateService;
+    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.initialCreditsService = initialCreditsService;
   }
 
@@ -172,7 +172,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   @Override
   public ResponseEntity<Void> checkCreditsExhaustionForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && userIdsList.size() > 0) {
-      freeTierBillingUpdateService.checkCreditsExhaustionForUserIDs(userIdsList);
+      initialCreditsBatchUpdateService.checkCreditsExhaustionForUserIDs(userIdsList);
     }
     return ResponseEntity.noContent().build();
   }

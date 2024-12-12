@@ -4356,11 +4356,11 @@ paths:
   /v1/cloudTask/handleInitialCreditsExpiry:
     post:
       tags:
-        - cloudTaskInitialCreditExpiry
+        - cloudTaskInitialCreditExhaustion
         - cloudTask
       description: |
         Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
-      operationId: handleInitialCreditsExpiry
+      operationId: handleInitialCreditsExhaustion
       security: [ ]
       requestBody:
         description: Users that should be alerted about their free credits use.
@@ -6967,6 +6967,11 @@ components:
             environments.
           default: false
         defaultFreeCreditsDollarLimit:
+          type: number
+          description: DEPRECATED. The default dollar amount of free credits allotted to each
+            user
+          format: double
+        defaultInitialCreditDollarLimit:
           type: number
           description: The default dollar amount of free credits allotted to each
             user

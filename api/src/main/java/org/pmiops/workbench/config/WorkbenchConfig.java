@@ -100,7 +100,7 @@ public class WorkbenchConfig {
     //Use defaultInitialCreditsDollarLimit
     public Double defaultFreeCreditsDollarLimit;
     // The default dollar limit to apply to initial credit usage in this environment.
-    public Double defaultInitialCreditsDollarLimit;
+    public Double defaultInitialCreditDollarLimit;
     @Deprecated(since = "12/12/24", forRemoval = true)
     // Use initialCreditCostAlertThresholds
     public List<Double> freeTierCostAlertThresholds;
