@@ -2449,13 +2449,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/checkForInitialCreditExhaustion:
+  /v1/cron/checkForInitialCreditUsage:
     get:
       tags:
         - offlineBilling
         - cron
       description: Find and alert users that have exhausted their allocated initial credits
-      operationId: checkForInitialCreditExhaustion
+      operationId: checkForInitialCreditUsage
       security: [ ]
       responses:
         204:

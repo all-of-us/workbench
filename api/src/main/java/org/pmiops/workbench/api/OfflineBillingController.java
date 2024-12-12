@@ -34,7 +34,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> checkForInitialCreditExhaustion() {
+  public ResponseEntity<Void> checkForInitialCreditUsage() {
     // Get cost for all workspace from BQ
     Map<String, Double> initialCreditCostsForAllWorkspace =
         initialCreditsBatchUpdateService.getInitialCreditWorkspaceCostsFromBQ();
