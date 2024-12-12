@@ -33,11 +33,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CloudTaskInitialCreditsExpiryController
-    implements CloudTaskInitialCreditExpiryApiDelegate {
+public class CloudTaskInitialCreditsExhaustionController
+    implements CloudTaskInitialCreditExhaustionApiDelegate {
 
   private static final Logger logger =
-      LoggerFactory.getLogger(CloudTaskInitialCreditsExpiryController.class);
+      LoggerFactory.getLogger(CloudTaskInitialCreditsExhaustionController.class);
 
   private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
@@ -46,7 +46,7 @@ public class CloudTaskInitialCreditsExpiryController
   private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
 
-  CloudTaskInitialCreditsExpiryController(
+  CloudTaskInitialCreditsExhaustionController(
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       UserDao userDao,
@@ -121,7 +121,7 @@ public class CloudTaskInitialCreditsExpiryController
       Map<Long, Double> liveCostByCreator,
       Set<DbUser> newlyExpiredUsers) {
     final List<Double> costThresholdsInDescOrder =
-        workbenchConfig.get().billing.freeTierCostAlertThresholds;
+        workbenchConfig.get().billing.initialCreditCostAlertThresholds;
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
     Map<Long, DbUser> usersCache =
@@ -183,7 +183,7 @@ public class CloudTaskInitialCreditsExpiryController
                         e.getValue(),
                         Math.max(
                             dbCostByCreator.get(e.getKey()), liveCostByCreator.get(e.getKey())),
-                        workbenchConfig.get().billing.defaultFreeCreditsDollarLimit))
+                        workbenchConfig.get().billing.defaultInitialCreditDollarLimit))
             .map(Map.Entry::getValue)
             .collect(Collectors.toSet());
 
@@ -271,7 +271,7 @@ public class CloudTaskInitialCreditsExpiryController
 
     final double limit =
         getUserFreeTierDollarLimit(
-            user, workbenchConfig.get().billing.defaultFreeCreditsDollarLimit);
+            user, workbenchConfig.get().billing.defaultInitialCreditDollarLimit);
     final double remainingBalance = limit - currentCost;
 
     // this shouldn't happen, but it did (RW-4678)
