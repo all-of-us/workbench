@@ -40,7 +40,7 @@ fi
 
 TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET" | tail -n +3 | cut -d " " -f 3 )
 
-SKIP_TABLES=("cb_data_filter" "cb_person" "survey_module" "domain_card")
+SKIP_TABLES=("cb_data_filter" "cb_person" "survey_module" "domain_card", "prep_pfhh_observation")
 
 declare -A CLUSTERED_TABLES
 CLUSTERED_TABLES["cb_search_all_events"]="concept_id"

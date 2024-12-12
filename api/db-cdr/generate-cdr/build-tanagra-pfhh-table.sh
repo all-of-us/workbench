@@ -24,6 +24,12 @@ echo "Loading data into table - prep_pfhh_non_answer_insert"
 bq load --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.prep_pfhh_non_answer_insert" \
 "gs://$BUCKET/$FOLDER/prep_pfhh_non_answer_insert.csv" "$SCHEMA_PATH/prep_pfhh_non_answer_insert.json"
 
+echo "Deleting prep_pfhh_observation"
+bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_pfhh_observation"
+
+echo "Creating prep_pfhh_observation"
+bq --quiet --project_id="$BQ_PROJECT" mk --schema=generate-cdr/bq-schemas/prep_pfhh_observation.json "$BQ_DATASET.prep_pfhh_observation"
+
 ##############################################################
 # PFHH Source Data
 ##############################################################
