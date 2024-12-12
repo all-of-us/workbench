@@ -4347,15 +4347,14 @@ paths:
           description: Workspaces deleted
           content: {}
       x-codegen-request-body-name: request
-  /v1/cloudTask/checkAndAlertFreeTierBillingUsage:
+  /v1/cloudTask/checkCreditsExhaustionForUserIDs:
     post:
       tags:
         - cloudTaskUser
         - cloudTask
       description: |
-        Check whether users have incurred sufficient cost in their workspaces to trigger alerts 
-        due to passing thresholds or exceeding limits
-      operationId: checkAndAlertFreeTierBillingUsageBatch
+        Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to passing thresholds or exceeding limits
+      operationId: checkCreditsExhaustionForUserIDsBatch
       security: [ ]
       requestBody:
         description: A batch of users needs to be checked, and alerts need to be sent regarding 

@@ -51,7 +51,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
     List<Long> allUserIds = userService.getAllUserIds();
 
-    taskQueueService.groupAndPushFreeTierBilling(allUserIds);
+    taskQueueService.groupAndPushCheckInitialCreditExhaustionTasks(allUserIds);
     log.info("Pushed all users to Cloud Task for Free Tier Billing");
 
     return ResponseEntity.noContent().build();
