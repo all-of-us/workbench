@@ -172,7 +172,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   @Override
   public ResponseEntity<Void> checkCreditsExhaustionForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && userIdsList.size() > 0) {
-      freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(userIdsList);
+      freeTierBillingUpdateService.checkCreditsExhaustionForUserIDs(userIdsList);
     }
     return ResponseEntity.noContent().build();
   }

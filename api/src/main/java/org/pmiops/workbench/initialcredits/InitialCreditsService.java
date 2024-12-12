@@ -102,7 +102,7 @@ public class InitialCreditsService {
    * Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to
    * passing thresholds or exceeding limits.
    */
-  public void checkFreeTierBillingUsageForUsers(
+  public void checkInitialCreditUsageForUsers(
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
     String userIdsAsString =
         users.stream()
@@ -132,7 +132,7 @@ public class InitialCreditsService {
       return;
     }
 
-    taskQueueService.pushInitialCreditsExpiryTask(
+    taskQueueService.pushCheckInitialCreditExhaustionTask(
         filteredUsers.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
   }
 
