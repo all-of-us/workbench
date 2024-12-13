@@ -37,7 +37,7 @@
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
     "freeTierCronUserBatchSize": 5,
-    "initialCreditsCronUserBatchSize": 5,
+    "initialCreditCronUserBatchSize": 5,
     "minutesBeforeLastFreeTierJob": 60,
     "minutesBeforeLastInitialCreditJob": 60,
     "numberOfDaysToConsiderForFreeTierUsageUpdate": 2,
