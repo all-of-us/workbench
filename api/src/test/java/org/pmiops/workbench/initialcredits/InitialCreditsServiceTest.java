@@ -137,7 +137,8 @@ public class InitialCreditsServiceTest {
   @BeforeEach
   public void setUp() throws MessagingException {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.initialCreditCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
+    workbenchConfig.billing.initialCreditCostAlertThresholds =
+        new ArrayList<>(Doubles.asList(.5, .75));
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.defaultInitialCreditDollarLimit = 1000.0;
     workbenchConfig.billing.initialCreditCronUserBatchSize = 10;
@@ -221,7 +222,8 @@ public class InitialCreditsServiceTest {
   public void checkFreeTierBillingUsage_altDollarThresholds() {
 
     // set alert thresholds at 30% and 65% instead
-    workbenchConfig.billing.initialCreditCostAlertThresholds = new ArrayList<>(Doubles.asList(.3, .65));
+    workbenchConfig.billing.initialCreditCostAlertThresholds =
+        new ArrayList<>(Doubles.asList(.3, .65));
 
     final double limit = 100.0;
     final double costUnderThreshold = 29.9;
