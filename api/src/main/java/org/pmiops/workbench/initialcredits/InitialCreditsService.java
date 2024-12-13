@@ -631,7 +631,8 @@ public class InitialCreditsService {
   }
 
   private Integer getMinutesBeforeLastFreeTierJob() {
-    return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastInitialCreditJob)
+    return Optional.ofNullable(
+            workbenchConfigProvider.get().billing.minutesBeforeLastInitialCreditJob)
         .orElse(120);
   }
 

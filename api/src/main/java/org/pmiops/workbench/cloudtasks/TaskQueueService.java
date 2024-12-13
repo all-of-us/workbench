@@ -59,7 +59,8 @@ public class TaskQueueService {
   private static final String DELETE_TEST_WORKSPACES_QUEUE_NAME = "deleteTestUserWorkspacesQueue";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
       "deleteTestUserRawlsWorkspacesQueue";
-  private static final String CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_QUEUE_NAME = "freeTierBillingQueue";
+  private static final String CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_QUEUE_NAME =
+      "freeTierBillingQueue";
   private static final String EXHAUSTED_INITIAL_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
       "checkCreditsExpirationForUserIDsQueue";
@@ -218,7 +219,10 @@ public class TaskQueueService {
     CloudTasksUtils.partitionList(userIds, initialCreditCronUserBatchSize)
         .forEach(
             batch ->
-                createAndPushTask(CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_QUEUE_NAME, CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_PATH, batch));
+                createAndPushTask(
+                    CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_QUEUE_NAME,
+                    CHECK_CREDITS_EXHAUSTION_FOR_USER_IDS_PATH,
+                    batch));
   }
 
   public void groupAndPushCheckInitialCreditExpirationTasks(List<Long> userIds) {

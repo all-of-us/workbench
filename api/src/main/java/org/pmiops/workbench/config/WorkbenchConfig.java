@@ -93,17 +93,22 @@ public class WorkbenchConfig {
       return fullBillingAccountName(accountId);
     }
 
-    // The full table name for the BigQuery billing export, which is read from by the initial credit usage
+    // The full table name for the BigQuery billing export, which is read from by the initial credit
+    // usage
     // usage tracking cron endpoint.
     public String exportBigQueryTable;
+
     @Deprecated(since = "12/12/24", forRemoval = true)
-    //Use defaultInitialCreditsDollarLimit
+    // Use defaultInitialCreditsDollarLimit
     public Double defaultFreeCreditsDollarLimit;
+
     // The default dollar limit to apply to initial credit usage in this environment.
     public Double defaultInitialCreditDollarLimit;
+
     @Deprecated(since = "12/12/24", forRemoval = true)
     // Use initialCreditCostAlertThresholds
     public List<Double> freeTierCostAlertThresholds;
+
     // Thresholds for email alerting based on initial credit usage, by cost
     public List<Double> initialCreditCostAlertThresholds;
     // The contact email from Carahsoft for billing account setup
@@ -112,12 +117,14 @@ public class WorkbenchConfig {
     @Deprecated(since = "12/12/24", forRemoval = true)
     // Use initialCreditCronUserBatchSize
     public Integer freeTierCronUserBatchSize;
+
     // The batch size used by the cron job to process users
     public Integer initialCreditCronUserBatchSize;
 
     @Deprecated(since = "12/12/24", forRemoval = true)
     // Use minutesBeforeLastInitialCreditJob
     public Integer minutesBeforeLastFreeTierJob;
+
     // The number of minutes elapsed after the last cron run to update the initial credit billing
     // information
     public Integer minutesBeforeLastInitialCreditJob;
@@ -126,7 +133,8 @@ public class WorkbenchConfig {
     // Use numberOfDaysToConsiderForInitialCreditUsageUpdate
     public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
 
-    // A value that defines the number of days to consider between the last update of the initial credit
+    // A value that defines the number of days to consider between the last update of the initial
+    // credit
     // usage in the database and the last workspace update when calculating the eligibility of a
     // workspace initial credit usage to be updated. To account for charges that may occur after the
     // workspace gets deleted and after the last cron had run
