@@ -23,12 +23,7 @@
     "accountId": "01DDC8-7ED304-6E46FE",
     "projectNamePrefix": "aou-rw-staging-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
-    "defaultFreeCreditsDollarLimit": 300.0,
     "defaultInitialCreditDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [
-      0.5,
-      0.75
-    ],
     "initialCreditCostAlertThresholds": [
       0.5,
       0.75
@@ -37,11 +32,8 @@
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
-    "freeTierCronUserBatchSize": 100,
     "initialCreditCronUserBatchSize": 100,
-    "minutesBeforeLastFreeTierJob": 60,
     "minutesBeforeLastInitialCreditJob": 60,
-    "numberOfDaysToConsiderForFreeTierUsageUpdate": 2,
     "numberOfDaysToConsiderForInitialCreditUsageUpdate": 2
   },
   "auth": {
