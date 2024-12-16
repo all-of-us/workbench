@@ -108,6 +108,12 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
     return false;
   }
 
+  @Override
+  protected void getEgressIncidentCountForUser(DbEgressEvent event, EgressRemediationAction action)
+      throws ApiException {
+
+  }
+
   private boolean isUserBypassedForLargeFileDownload(DbEgressEvent event) {
     return userAdminService.getCurrentEgressBypassWindow(event.getUser().getUserId()) != null
         && event.getEgressMegabytes() != null

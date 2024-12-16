@@ -11,6 +11,7 @@
             <column name="vwb_vm_name" type="varchar(80)" />
             <column name="gcp_project_id" type="varchar(80)" />
             <column name="vwb_incident_count" type="bigint" />
+            <column name="vwb_egress_event_id" type="varchar(80)" />
         </addColumn>
     </changeSet>
 </databaseChangeLog>

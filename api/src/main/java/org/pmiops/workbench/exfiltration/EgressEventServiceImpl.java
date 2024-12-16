@@ -120,7 +120,8 @@ public class EgressEventServiceImpl implements EgressEventService {
             new DbEgressEvent()
                 .setUser(egressUser.orElse(null))
                 .setIsVwb(true)
-                .setVwbWorkspaceId(egressEvent.getWorkspaceId())
+                .setVwbEgressEventId(egressEvent.getVwbEgressEventId())
+                .setVwbWorkspaceId(egressEvent.getVwbWorkspaceId())
                 .setVwbVmName(egressEvent.getVmName())
                 .setVwbIncidentCount(egressEvent.getIncidentCount().intValue())
                 .setEgressMegabytes(

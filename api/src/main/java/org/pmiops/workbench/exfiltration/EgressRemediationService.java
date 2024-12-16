@@ -170,7 +170,7 @@ public abstract class EgressRemediationService {
    */
   private int getEgressIncidentCountForUser(DbUser user) {
     List<DbEgressEvent> events =
-        egressEventDao.findAllByUserAndStatusNot(user, DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
+        egressEventDao.findAllByUserAndStatusNotIn(user, List.of(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE, DbEgressEventStatus.BYPASSED));
 
     // If any egress alerts are missing workspace metadata (this should not happen), consider each
     // as unique incidents.
@@ -288,4 +288,7 @@ public abstract class EgressRemediationService {
             "stopped %d runtimes and %d apps for user %s",
             stoppedRuntimeCount, stoppedAppCount, userEmail));
   }
+
+  protected abstract void getEgressIncidentCountForUser(DbEgressEvent event,
+      EgressRemediationAction action) throws ApiException;
 }

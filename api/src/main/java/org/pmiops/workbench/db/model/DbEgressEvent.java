@@ -45,6 +45,7 @@ public class DbEgressEvent {
   private String vwbWorkspaceId;
   private String vwbVmName;
   private String gcpProjectId;
+  private String vwbEgressEventId;
   private boolean isVwb;
   private int vwbIncidentCount;
 
@@ -182,6 +183,16 @@ public class DbEgressEvent {
 
   public DbEgressEvent setGcpProjectId(String gcpProjectId) {
     this.gcpProjectId = gcpProjectId;
+    return this;
+  }
+
+  @Column(name = "vwb_egress_event_id")
+  public String getVwbEgressEventId() {
+    return vwbEgressEventId;
+  }
+
+  public DbEgressEvent setVwbEgressEventId(String vwbEgressEventId) {
+    this.vwbEgressEventId = vwbEgressEventId;
     return this;
   }
 

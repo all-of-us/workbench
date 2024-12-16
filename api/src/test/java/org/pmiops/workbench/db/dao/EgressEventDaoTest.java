@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -53,6 +54,27 @@ public class EgressEventDaoTest {
     DbEgressEvent updatedEvent = egressEventDao.findById(event.getEgressEventId()).orElse(null);
     assertThat(updatedEvent.getStatus())
         .isEqualTo(DbEgressEvent.DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
+  }
+
+  @Test
+  public void testFindAllByUserAndStatusNotIn() {
+    DbEgressEvent event1 = createValidDbEgressEvent();
+    event1.setStatus(DbEgressEventStatus.PENDING);
+    egressEventDao.save(event1);
+
+    DbEgressEvent event2 = createValidDbEgressEvent();
+    event2.setStatus(DbEgressEventStatus.REMEDIATED);
+    egressEventDao.save(event2);
+
+    DbEgressEvent event3 = createValidDbEgressEvent();
+    event3.setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
+    egressEventDao.save(event3);
+
+    List<DbEgressEventStatus> excludedStatuses = List.of(DbEgressEventStatus.REMEDIATED, DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
+    List<DbEgressEvent> result = egressEventDao.findAllByUserAndStatusNotIn(user, excludedStatuses);
+
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0).getStatus()).isEqualTo(DbEgressEventStatus.PENDING);
   }
 
   private DbEgressEvent createValidDbEgressEvent() {

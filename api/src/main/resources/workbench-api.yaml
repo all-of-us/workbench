@@ -13152,9 +13152,12 @@ components:
           type: integer
           format: int64
           description: current incident count for the user in the workspace
-        workspaceId:
+        vwbWorkspaceId:
           type: string
           description: UUID of a VWB workspace
+        vwbEgressEventId:
+          type: string
+          description: UUID of a VWB egress event
         egress_mib:
           type: number
           description: The total amount of egress detected during the window, in mebibytes
