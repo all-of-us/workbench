@@ -72,7 +72,8 @@ describe('InvalidBillingBanner', () => {
     exhausted: boolean,
     expired: boolean,
     expiringSoon: boolean,
-    ownedByMe: boolean
+    ownedByMe: boolean,
+    eligibleForExtension: boolean
   ) => {
     // Set expiration date to be in the past if expired, in the future if not.
     // If expiring soon, set it to be within the warning threshold, and just outside otherwise.
@@ -86,6 +87,7 @@ describe('InvalidBillingBanner', () => {
         exhausted,
         expired,
         expirationEpochMillis: plusDays(Date.now(), daysUntilExpiration),
+        eligibleForExtension,
       },
       creatorUser: ownedByMe ? me : someOneElse,
     });
@@ -118,7 +120,14 @@ describe('InvalidBillingBanner', () => {
     const expired = false;
     const expiringSoon = true;
     const ownedByMe = true;
-    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    const eligibleForExtension = true;
+    setupWorkspace(
+      exhausted,
+      expired,
+      expiringSoon,
+      ownedByMe,
+      eligibleForExtension
+    );
     setProfileExtensionEligibility(true);
 
     component();
@@ -138,7 +147,14 @@ describe('InvalidBillingBanner', () => {
     const expired = false;
     const expiringSoon = true;
     const ownedByMe = false;
-    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    const eligibleForExtension = true;
+    setupWorkspace(
+      exhausted,
+      expired,
+      expiringSoon,
+      ownedByMe,
+      eligibleForExtension
+    );
     setProfileExtensionEligibility(true);
 
     component();
@@ -157,7 +173,14 @@ describe('InvalidBillingBanner', () => {
     const expired = true;
     const expiringSoon = false;
     const ownedByMe = true;
-    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    const eligibleForExtension = true;
+    setupWorkspace(
+      exhausted,
+      expired,
+      expiringSoon,
+      ownedByMe,
+      eligibleForExtension
+    );
     setProfileExtensionEligibility(true);
 
     component();
@@ -176,7 +199,14 @@ describe('InvalidBillingBanner', () => {
     const expired = true;
     const expiringSoon = false;
     const ownedByMe = false;
-    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    const eligibleForExtension = true;
+    setupWorkspace(
+      exhausted,
+      expired,
+      expiringSoon,
+      ownedByMe,
+      eligibleForExtension
+    );
     setProfileExtensionEligibility(true);
 
     component();
@@ -195,7 +225,14 @@ describe('InvalidBillingBanner', () => {
     const expired = true;
     const expiringSoon = false;
     const ownedByMe = true;
-    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    const eligibleForExtension = false;
+    setupWorkspace(
+      exhausted,
+      expired,
+      expiringSoon,
+      ownedByMe,
+      eligibleForExtension
+    );
     setProfileExtensionEligibility(false);
 
     component();
@@ -214,7 +251,14 @@ describe('InvalidBillingBanner', () => {
     const expired = true;
     const expiringSoon = false;
     const ownedByMe = false;
-    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    const eligibleForExtension = false;
+    setupWorkspace(
+      exhausted,
+      expired,
+      expiringSoon,
+      ownedByMe,
+      eligibleForExtension
+    );
     setProfileExtensionEligibility(false);
 
     component();
@@ -234,7 +278,14 @@ describe('InvalidBillingBanner', () => {
     const expired = false;
     const expiringSoon = false;
     const ownedByMe = true;
-    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    const eligibleForExtension = false;
+    setupWorkspace(
+      exhausted,
+      expired,
+      expiringSoon,
+      ownedByMe,
+      eligibleForExtension
+    );
     setProfileExtensionEligibility(false);
 
     component();
@@ -253,7 +304,14 @@ describe('InvalidBillingBanner', () => {
     const expired = false;
     const expiringSoon = false;
     const ownedByMe = false;
-    setupWorkspace(exhausted, expired, expiringSoon, ownedByMe);
+    const eligibleForExtension = false;
+    setupWorkspace(
+      exhausted,
+      expired,
+      expiringSoon,
+      ownedByMe,
+      eligibleForExtension
+    );
     setProfileExtensionEligibility(false);
 
     component();
