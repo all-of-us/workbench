@@ -649,7 +649,7 @@ export const InitialCreditBypassSwitch = ({
   label,
 }: InitialCreditBypassSwitchProps) => {
   const hasExpired = expirationEpochMillis <= Date.now();
-  const date = formatDate(expirationEpochMillis, '-');
+  const date = formatDate(expirationEpochMillis, '');
   return (
     <FlexColumn style={{ paddingTop: '1.5rem' }}>
       <label style={{ ...commonStyles.label, padding: 0 }}>{label}</label>
@@ -660,7 +660,7 @@ export const InitialCreditBypassSwitch = ({
             ? 'Credits will not expire'
             : hasExpired
             ? `Credits expired on ${date}`
-            : `Credits will expire on ${date}`
+            : `Credits will expire${date ? ` on ${date}` : ''}`
         }
         checked={currentlyBypassed}
         onToggle={onChange}
