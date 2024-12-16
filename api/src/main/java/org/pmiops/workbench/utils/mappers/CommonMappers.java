@@ -1,5 +1,6 @@
 package org.pmiops.workbench.utils.mappers;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 
 import com.google.common.base.Strings;
@@ -8,6 +9,7 @@ import jakarta.inject.Provider;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -17,6 +19,7 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -148,5 +151,27 @@ public class CommonMappers {
             && (dbWorkspace.isInitialCreditsExhausted() || dbWorkspace.isInitialCreditsExpired()))
         ? BillingStatus.INACTIVE
         : BillingStatus.ACTIVE;
+  }
+
+  @Named("checkInitialCreditsExtensionEligibility")
+  public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        dbUser.getUserInitialCreditsExpiration();
+    Instant now = Instant.now();
+    WorkbenchConfig.BillingConfig billingConfig = workbenchConfigProvider.get().billing;
+
+    return initialCreditsExpiration != null
+        && initialCreditsExpiration.getExtensionTime() == null
+        && initialCreditsExpiration.getCreditStartTime() != null
+        && now.isAfter(
+            initialCreditsExpiration
+                .getExpirationTime()
+                .toInstant()
+                .minus(billingConfig.initialCreditsExpirationWarningDays, DAYS))
+        && now.isBefore(
+            initialCreditsExpiration
+                .getCreditStartTime()
+                .toInstant()
+                .plus(billingConfig.initialCreditsExtensionPeriodDays, DAYS));
   }
 }

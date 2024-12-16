@@ -13141,6 +13141,9 @@ components:
     InitialCreditResponse:
       type: object
       properties:
+        eligibleForExtension:
+          type: boolean
+          description: Whether the workspace's owner is eligible for an extension
         exhausted:
           type: boolean
         expired:
