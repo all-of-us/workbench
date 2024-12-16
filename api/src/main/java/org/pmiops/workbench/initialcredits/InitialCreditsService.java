@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.mapstruct.Named;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -393,7 +392,6 @@ public class InitialCreditsService {
     return userDao.save(user);
   }
 
-  @Named("checkInitialCreditsExtensionEligibility")
   public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
     DbUserInitialCreditsExpiration initialCreditsExpiration =
         dbUser.getUserInitialCreditsExpiration();

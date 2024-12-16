@@ -149,4 +149,10 @@ public class CommonMappers {
         ? BillingStatus.INACTIVE
         : BillingStatus.ACTIVE;
   }
+
+  @Named("checkInitialCreditsExtensionEligibility")
+  public boolean checkInitialCreditsExtensionEligibility(
+      DbUser dbUser, @Context InitialCreditsService initialCreditsService) {
+    return initialCreditsService.checkInitialCreditsExtensionEligibility(dbUser);
+  }
 }

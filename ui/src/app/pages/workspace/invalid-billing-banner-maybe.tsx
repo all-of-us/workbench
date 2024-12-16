@@ -217,7 +217,8 @@ export const InvalidBillingBannerMaybe = fp.flow(
   const { creatorUser } = workspace || {};
   const [showExtensionModal, setShowExtensionModal] = React.useState(false);
   const isCreator = profile?.username === workspace?.creatorUser?.userName;
-  const isEligibleForExtension = profile?.eligibleForInitialCreditsExtension;
+  const isEligibleForExtension =
+    workspace?.initialCredits?.eligibleForExtension;
   const isExpired =
     workspace?.initialCredits.expirationEpochMillis < Date.now();
   const isExpiringSoon =

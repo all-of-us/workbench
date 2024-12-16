@@ -53,6 +53,10 @@ public interface WorkspaceMapper {
   // Should change to contactEmail or institutionalEmail
   @Mapping(target = "creatorUser.email", ignore = true)
   @Mapping(
+      target = "initialCredits.eligibleForExtension",
+      source = "dbWorkspace.creator",
+      qualifiedByName = "checkInitialCreditsExtensionEligibility")
+  @Mapping(
       target = "initialCredits.expirationEpochMillis",
       source = "dbWorkspace.creator",
       qualifiedByName = "getInitialCreditsExpiration")
@@ -135,6 +139,7 @@ public interface WorkspaceMapper {
   @Mapping(
       target = "creatorUser.email",
       ignore = true) // need to work with security before exposing
+  @Mapping(target = "initialCredits.eligibleForExtension", ignore = true)
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
