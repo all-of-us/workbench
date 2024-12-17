@@ -1131,12 +1131,15 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void test_checkInitialCreditsExtensionEligibility_noRemainingCredits(){
+  public void test_checkInitialCreditsExtensionEligibility_noRemainingCredits() {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     user.setUserInitialCreditsExpiration(
-        new DbUserInitialCreditsExpiration().setCreditStartTime(NOW).setExpirationTime(NOW).setExtensionTime(null));
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(NOW)
+            .setExpirationTime(NOW)
+            .setExtensionTime(null));
 
     workspaceFreeTierUsageDao.save(
         new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(300.0));
@@ -1145,12 +1148,15 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void test_checkInitialCreditsExtensionEligibility_hasRemainingCredits(){
+  public void test_checkInitialCreditsExtensionEligibility_hasRemainingCredits() {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     user.setUserInitialCreditsExpiration(
-        new DbUserInitialCreditsExpiration().setCreditStartTime(NOW).setExpirationTime(NOW).setExtensionTime(null));
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(NOW)
+            .setExpirationTime(NOW)
+            .setExtensionTime(null));
 
     workspaceFreeTierUsageDao.save(
         new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(30.0));
