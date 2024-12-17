@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_SERVICE_QUALIFIER;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -98,7 +99,11 @@ public class EgressRemediationServiceTest {
 
   @Autowired
   @Qualifier(EGRESS_SUMOLOGIC_SERVICE_QUALIFIER)
-  private EgressRemediationService egressRemediationService;
+  private EgressRemediationService sumologicEgressRemediationService;
+
+  @Autowired
+  @Qualifier(EGRESS_VWB_SERVICE_QUALIFIER)
+  private EgressRemediationService vwbEgressRemediationService;
 
   @Autowired private EgressJiraHandler egressJiraHandler;
 
@@ -180,13 +185,14 @@ public class EgressRemediationServiceTest {
   @Test
   public void testRemediateEgressEvent_notFound() {
     assertThrows(
-        NotFoundException.class, () -> egressRemediationService.remediateEgressEvent(123L));
+        NotFoundException.class,
+        () -> sumologicEgressRemediationService.remediateEgressEvent(123L));
   }
 
   @Test
   public void testRemediateEgressEvent_alreadyRemediated() {
     long eventId = saveNewEvent(newGCEEvent().setStatus(DbEgressEventStatus.REMEDIATED));
-    egressRemediationService.remediateEgressEvent(eventId);
+    sumologicEgressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
@@ -197,7 +203,7 @@ public class EgressRemediationServiceTest {
   public void testRemediateEgressEvent_emptyPolicy() {
     workbenchConfig.egressAlertRemediationPolicy = null;
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
@@ -209,7 +215,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(disableUserAfter(10));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
@@ -222,7 +228,7 @@ public class EgressRemediationServiceTest {
         .thenReturn(new EgressBypassWindow());
 
     long eventId = saveNewEvent(newGCEEvent().setEgressMegabytes((float) (200)));
-    egressRemediationService.remediateEgressEvent(eventId);
+    sumologicEgressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
@@ -237,7 +243,7 @@ public class EgressRemediationServiceTest {
 
     long eventId = saveNewEvent(newGCEEvent().setEgressMegabytes((float) (110 * 1024)));
 
-    egressRemediationService.remediateEgressEvent(eventId);
+    sumologicEgressRemediationService.remediateEgressEvent(eventId);
 
     assertComputeSuspended(Duration.ofMinutes(1));
   }
@@ -247,7 +253,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)), disableUserAfter(2));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeSuspended(Duration.ofMinutes(1));
@@ -262,7 +268,7 @@ public class EgressRemediationServiceTest {
             disableUserAfter(3));
 
     saveOldEvents(Duration.ofDays(1));
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeSuspended(Duration.ofMinutes(2));
@@ -282,7 +288,7 @@ public class EgressRemediationServiceTest {
             .mapToObj(Duration::ofDays)
             .collect(Collectors.toList())
             .toArray(new Duration[] {}));
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     assertThat(getDbUser().getDisabled()).isTrue();
     assertComputeNotSuspended();
@@ -295,7 +301,7 @@ public class EgressRemediationServiceTest {
     // Two events within an hour of each-other should merge
     saveOldEvents(Duration.ofHours(22), Duration.ofHours(23));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     // 2 "incidents" == 2 minute suspension
     assertComputeSuspended(Duration.ofMinutes(2));
@@ -306,7 +312,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy = suspendXMinutesOnXIncidentsPolicy();
 
     saveOldEvents(Duration.ofMinutes(1), Duration.ofMinutes(2));
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     // All 3 events should merge into a single logical incident.
     assertComputeSuspended(Duration.ofMinutes(1));
@@ -321,7 +327,7 @@ public class EgressRemediationServiceTest {
         oldEvent(Duration.ofHours(3)).setWorkspace(dbWorkspace2),
         oldEvent(Duration.ofHours(4)).setWorkspace(dbWorkspace2));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     // The two events in workspace 2 merge, the other old event and new event do not merge.
     assertComputeSuspended(Duration.ofMinutes(3));
@@ -336,7 +342,7 @@ public class EgressRemediationServiceTest {
         oldEvent(Duration.ofHours(3)).setWorkspace(null),
         oldEvent(Duration.ofHours(3)).setWorkspace(null));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     // None of the events merge
     assertComputeSuspended(Duration.ofMinutes(4));
@@ -348,7 +354,7 @@ public class EgressRemediationServiceTest {
 
     // events 1, 2 should be merged but 3 should not
     saveOldEvents(Duration.ofMinutes(300), Duration.ofMinutes(250), Duration.ofMinutes(200));
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     // 1 merged old incident, 1 standalone, and the active event
     assertComputeSuspended(Duration.ofMinutes(3));
@@ -361,7 +367,7 @@ public class EgressRemediationServiceTest {
     saveOldEvents(
         oldEvent(Duration.ofHours(3)).setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     // Only the active event is considered
     assertComputeSuspended(Duration.ofMinutes(1));
@@ -373,7 +379,7 @@ public class EgressRemediationServiceTest {
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
     long eventId = saveNewEvent();
-    egressRemediationService.remediateEgressEvent(eventId);
+    sumologicEgressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeSuspended(Duration.ofMinutes(1));
@@ -392,7 +398,7 @@ public class EgressRemediationServiceTest {
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
     long eventId = saveNewGKEEvent(AppType.RSTUDIO);
-    egressRemediationService.remediateEgressEvent(eventId);
+    sumologicEgressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeSuspended(Duration.ofMinutes(1));
@@ -411,7 +417,7 @@ public class EgressRemediationServiceTest {
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
     long eventId = saveNewGKEEvent(AppType.CROMWELL);
-    egressRemediationService.remediateEgressEvent(eventId);
+    sumologicEgressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
@@ -424,7 +430,7 @@ public class EgressRemediationServiceTest {
         ImmutableList.of(disableUserAfter(1));
 
     long eventId = saveNewEvent();
-    egressRemediationService.remediateEgressEvent(eventId);
+    sumologicEgressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isTrue();
     assertComputeNotSuspended();
@@ -443,7 +449,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
     verify(mockEgressEventAuditor).fireRemediateEgressEvent(any(), notNull());
   }
 
@@ -453,7 +459,7 @@ public class EgressRemediationServiceTest {
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
     saveOldEvents(oldEvent(Duration.ofMinutes(30L)).setStatus(DbEgressEventStatus.REMEDIATED));
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     verifyNoInteractions(mockMailService);
   }
@@ -468,7 +474,7 @@ public class EgressRemediationServiceTest {
             .setStatus(DbEgressEventStatus.REMEDIATED)
             .setWorkspace(dbWorkspace2),
         oldEvent(Duration.ofHours(2L)).setStatus(DbEgressEventStatus.REMEDIATED));
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
@@ -482,7 +488,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     verifyNoInteractions(mockJiraApi);
   }
@@ -497,7 +503,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     ArgumentCaptor<IssueUpdateDetails> captor = ArgumentCaptor.forClass(IssueUpdateDetails.class);
     verify(mockJiraApi).createIssue(captor.capture(), anyBoolean());
@@ -532,7 +538,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    sumologicEgressRemediationService.remediateEgressEvent(saveNewEvent());
 
     ArgumentCaptor<Comment> captor = ArgumentCaptor.forClass(Comment.class);
     verify(mockJiraApi).addComment(captor.capture(), eq("123"));

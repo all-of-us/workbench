@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-@Service(ExfiltrationUtils.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER)
+@Service(ExfiltrationUtils.EGRESS_VWB_SERVICE_QUALIFIER)
 public class EgressVwbRemediationService extends EgressRemediationService {
   private static final Logger logger =
       Logger.getLogger(EgressVwbRemediationService.class.getName());
@@ -74,6 +74,7 @@ public class EgressVwbRemediationService extends EgressRemediationService {
   @Override
   protected void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
+    // TODO(RW-14138): Vwb email support
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
     String environmentType =
         appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
@@ -100,8 +101,8 @@ public class EgressVwbRemediationService extends EgressRemediationService {
   }
 
   @Override
-  protected void getEgressIncidentCountForUser(DbEgressEvent event, EgressRemediationAction action) throws ApiException {
-    egressJiraHandler.logEventToJira(event, action);
+  protected int getEgressIncidentCountForUser(DbEgressEvent event, DbUser user) {
+    return event.getVwbIncidentCount();
   }
 
   private boolean isUserBypassedForLargeFileDownload(DbEgressEvent event) {

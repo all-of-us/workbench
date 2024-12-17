@@ -102,7 +102,7 @@ public class EgressEventServiceImpl implements EgressEventService {
 
     Optional<DbEgressEvent> maybeEvent =
         this.maybePersistSumoEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
-    maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
+    maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId(), false));
   }
 
   @Override
@@ -112,7 +112,7 @@ public class EgressEventServiceImpl implements EgressEventService {
       logger.severe(
           String.format(
               "An egress event happened for workspace: %s, but we're unable to find a user %s.",
-              egressEvent.getWorkspaceId(), egressEvent.getUserEmail()));
+              egressEvent.getVwbWorkspaceId(), egressEvent.getUserEmail()));
     }
     this.egressEventAuditor.fireVwbEgressEvent(egressEvent, egressUser.get());
     DbEgressEvent event =
@@ -132,7 +132,7 @@ public class EgressEventServiceImpl implements EgressEventService {
                 .setEgressWindowSeconds(
                     Optional.ofNullable(egressEvent.getTimeWindowDuration()).orElse(null))
                 .setStatus(DbEgressEventStatus.PENDING));
-    taskQueueService.pushEgressEventTask(event.getEgressEventId());
+    taskQueueService.pushEgressEventTask(event.getEgressEventId(), true);
   }
 
   @NotNull

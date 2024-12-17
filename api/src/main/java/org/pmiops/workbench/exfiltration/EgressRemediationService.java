@@ -100,7 +100,7 @@ public abstract class EgressRemediationService {
       return;
     }
     // Gather/merge past alerts into an incident history
-    int egressIncidentCount = getEgressIncidentCountForUser(user);
+    int egressIncidentCount = getEgressIncidentCountForUser(event, user);
 
     // Determine escalating remediation action, if any
     EgressAlertRemediationPolicy egressPolicy =
@@ -110,7 +110,7 @@ public abstract class EgressRemediationService {
     // Execute the action, if any
     escalation.ifPresent(
         e -> {
-          EgressRemediationAction action = getEgressRemediationAction(user, e);
+          EgressRemediationAction action = getEgressRemediationAction(user, e, event);
 
           if (egressPolicy != null && egressPolicy.enableJiraTicketing) {
             try {
@@ -135,18 +135,26 @@ public abstract class EgressRemediationService {
   }
 
   @NotNull
-  private EgressRemediationAction getEgressRemediationAction(DbUser user, Escalation e) {
-    EgressRemediationAction action;
-    if (e.disableUser != null) {
-      disableUser(user);
-      action = EgressRemediationAction.DISABLE_USER;
-    } else if (e.suspendCompute != null) {
-      suspendUserCompute(user, Duration.ofMinutes(e.suspendCompute.durationMinutes));
-      action = EgressRemediationAction.SUSPEND_COMPUTE;
+  private EgressRemediationAction getEgressRemediationAction(
+      DbUser user, Escalation e, DbEgressEvent event) {
+    if (event.getIsVwb()) {
+      if (e.disableUser != null) {
+        disableUserVwbDataAccess(user);
+        return EgressRemediationAction.DISABLE_USER;
+      } else if (e.suspendCompute != null) {
+        // Compute will be suspended by VWB.
+        return EgressRemediationAction.SUSPEND_COMPUTE;
+      }
     } else {
-      throw new ServerErrorException("egress alert policy is invalid: " + e);
+      if (e.disableUser != null) {
+        disableUser(user);
+        return EgressRemediationAction.DISABLE_USER;
+      } else if (e.suspendCompute != null) {
+        suspendUserCompute(user, Duration.ofMinutes(e.suspendCompute.durationMinutes));
+        return EgressRemediationAction.SUSPEND_COMPUTE;
+      }
     }
-    return action;
+    throw new ServerErrorException("egress alert policy is invalid: " + e);
   }
 
   protected abstract void sendEgressRemediationEmail(
@@ -168,9 +176,11 @@ public abstract class EgressRemediationService {
    * @return the count of logical egress incidents for this user for all time, including any events
    *     which are actively being processed
    */
-  private int getEgressIncidentCountForUser(DbUser user) {
+  protected int getEgressIncidentCountForUser(DbEgressEvent event, DbUser user) {
     List<DbEgressEvent> events =
-        egressEventDao.findAllByUserAndStatusNotIn(user, List.of(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE, DbEgressEventStatus.BYPASSED));
+        egressEventDao.findAllByUserAndStatusNotIn(
+            user,
+            List.of(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE, DbEgressEventStatus.BYPASSED));
 
     // If any egress alerts are missing workspace metadata (this should not happen), consider each
     // as unique incidents.
@@ -280,6 +290,18 @@ public abstract class EgressRemediationService {
     stopUserRuntimesAndApps(user.getUsername());
   }
 
+  protected void disableUserVwbDataAccess(DbUser user) {
+    userService.updateUserWithRetries(
+        u -> {
+          u.setDisabled(true);
+          return u;
+        },
+        user,
+        Agent.asSystem());
+
+    // TODO: Lock user access in VWB.
+  }
+
   private void stopUserRuntimesAndApps(String userEmail) {
     int stoppedRuntimeCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(userEmail);
     int stoppedAppCount = leonardoNotebooksClient.deleteUserAppsAsService(userEmail);
@@ -288,7 +310,4 @@ public abstract class EgressRemediationService {
             "stopped %d runtimes and %d apps for user %s",
             stoppedRuntimeCount, stoppedAppCount, userEmail));
   }
-
-  protected abstract void getEgressIncidentCountForUser(DbEgressEvent event,
-      EgressRemediationAction action) throws ApiException;
 }

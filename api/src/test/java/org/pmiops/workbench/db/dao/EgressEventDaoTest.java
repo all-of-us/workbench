@@ -70,7 +70,8 @@ public class EgressEventDaoTest {
     event3.setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
     egressEventDao.save(event3);
 
-    List<DbEgressEventStatus> excludedStatuses = List.of(DbEgressEventStatus.REMEDIATED, DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
+    List<DbEgressEventStatus> excludedStatuses =
+        List.of(DbEgressEventStatus.REMEDIATED, DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
     List<DbEgressEvent> result = egressEventDao.findAllByUserAndStatusNotIn(user, excludedStatuses);
 
     assertThat(result).hasSize(1);

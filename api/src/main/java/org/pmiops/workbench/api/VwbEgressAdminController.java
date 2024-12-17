@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exfiltration.EgressEventService;
 import org.pmiops.workbench.model.VwbEgressEventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +33,15 @@ public class VwbEgressAdminController implements VwbEgressAdminApiDelegate {
 
   @Override
   public ResponseEntity<Void> createVwbEgressEvent(VwbEgressEventRequest body) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBEgressMonitor) {
+      throw new ForbiddenException("VWB Egress Monitor is disabled");
+    }
     if (!workbenchConfigProvider
         .get()
         .vwb
         .exfilManagerServiceAccount
         .equals(userProvider.get().getUsername())) {
-      throw new ForbiddenException(
+      throw new UnauthorizedException(
           String.format(
               "User %s is not authorized to create VwbEgressEvent",
               userProvider.get().getUsername()));

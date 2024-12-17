@@ -175,11 +175,11 @@ public class TaskQueueService {
     return CloudTasksUtils.partitionList(workspacesToDelete, batchSize);
   }
 
-  public void pushEgressEventTask(Long eventId) {
+  public void pushEgressEventTask(Long eventId, boolean isVwbEgressEvent) {
     createAndPushTask(
         EGRESS_EVENT_QUEUE_NAME,
         EGRESS_EVENT_PATH,
-        new ProcessEgressEventRequest().eventId(eventId));
+        new ProcessEgressEventRequest().eventId(eventId).isVwbEgressEvent(isVwbEgressEvent));
   }
 
   public void pushCreateWorkspaceTask(long operationId, Workspace workspace) {

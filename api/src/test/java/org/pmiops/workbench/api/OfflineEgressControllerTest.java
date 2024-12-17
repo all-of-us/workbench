@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -56,7 +57,7 @@ public class OfflineEgressControllerTest {
     fakeClock.setInstant(FakeClockConfiguration.NOW.toInstant());
     offlineEgressController.checkPendingEgressEvents();
 
-    verify(mockTaskQueueService, times(2)).pushEgressEventTask(anyLong());
+    verify(mockTaskQueueService, times(2)).pushEgressEventTask(anyLong(), anyBoolean());
   }
 
   @Test
@@ -74,6 +75,6 @@ public class OfflineEgressControllerTest {
   }
 
   private DbEgressEvent newEvent() {
-    return new DbEgressEvent().setStatus(DbEgressEventStatus.PENDING);
+    return new DbEgressEvent().setStatus(DbEgressEventStatus.PENDING).setIsVwb(true);
   }
 }

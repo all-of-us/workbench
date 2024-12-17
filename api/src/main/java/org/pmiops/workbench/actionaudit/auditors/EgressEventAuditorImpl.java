@@ -127,7 +127,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     events.add(
         baseEventBuilder
             .targetPropertyMaybe("vwbWorkspaceId")
-            .newValueMaybe(event.getWorkspaceId())
+            .newValueMaybe(event.getVwbWorkspaceId())
             .build());
     events.add(
         baseEventBuilder

@@ -72,9 +72,4 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
   protected boolean shouldSkipEgressEvent(DbEgressEvent event) {
     return false;
   }
-
-  @Override
-  protected void getEgressIncidentCountForUser(DbEgressEvent event, EgressRemediationAction action)
-      throws ApiException {
-  }
 }

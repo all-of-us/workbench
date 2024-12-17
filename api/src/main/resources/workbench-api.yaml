@@ -11729,6 +11729,10 @@ components:
           type: integer
           description: Egress event ID to be processed
           format: int64
+        isVwbEgressEvent:
+          type: boolean
+          description: Is this a VWB egress event
+          default: false
     DeleteTestUserWorkspacesRequest:
       type: array
       items:

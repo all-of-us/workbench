@@ -10,21 +10,17 @@ import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exfiltration.EgressEventService;
 import org.pmiops.workbench.model.VwbEgressEventRequest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Import(FakeClockConfiguration.class)
+@SpringJUnitConfig
 public class VwbEgressAdminControllerTest {
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private Provider<WorkbenchConfig> mockConfigProvider;
@@ -42,6 +38,9 @@ public class VwbEgressAdminControllerTest {
         new VwbEgressAdminController(mockEgressEventService, mockConfigProvider, mockUserProvider);
     authorizedUser = new DbUser();
     authorizedUser.setUsername("test-user@example.com");
+    workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+    workbenchConfig.featureFlags.enableVWBEgressMonitor = true;
+
     workbenchConfig.vwb = new WorkbenchConfig.VwbConfig();
     workbenchConfig.vwb.exfilManagerServiceAccount = authorizedUser.getUsername();
     when(mockConfigProvider.get()).thenReturn(workbenchConfig);
@@ -49,7 +48,7 @@ public class VwbEgressAdminControllerTest {
     vwbEvent =
         new VwbEgressEventRequest()
             .userEmail("testuser@example.com")
-            .workspaceId("testWorkspaceId")
+            .vwbWorkspaceId("testWorkspaceId")
             .vmName("testVmName")
             .incidentCount(1L)
             .egressMib(500.0)
@@ -75,6 +74,19 @@ public class VwbEgressAdminControllerTest {
     dbUser.setUsername("unauthorized-user@example.com");
 
     when(mockUserProvider.get()).thenReturn(dbUser);
+
+    assertThrows(
+        UnauthorizedException.class,
+        () -> {
+          vwbEgressAdminController.createVwbEgressEvent(vwbEvent);
+        });
+  }
+
+  @Test
+  public void testCreateVwbEgressEvent_flagNotEnabled() {
+    workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+    workbenchConfig.featureFlags.enableVWBEgressMonitor = false;
+    when(mockUserProvider.get()).thenReturn(authorizedUser);
 
     assertThrows(
         ForbiddenException.class,

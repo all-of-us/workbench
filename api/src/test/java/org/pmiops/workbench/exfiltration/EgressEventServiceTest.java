@@ -1,6 +1,7 @@
 package org.pmiops.workbench.exfiltration;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -132,7 +133,7 @@ public class EgressEventServiceTest {
     SumologicEgressEvent event = recentEgressEventForUser(dbUser1);
     egressEventService.handleEvent(event);
     verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
 
     List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
     assertThat(dbEvents).hasSize(1);
@@ -154,7 +155,7 @@ public class EgressEventServiceTest {
 
     egressEventService.handleEvent(event);
     verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
 
     List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
     assertThat(dbEvents).hasSize(1);
@@ -176,7 +177,7 @@ public class EgressEventServiceTest {
 
     egressEventService.handleEvent(event);
     verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
 
     List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
     assertThat(dbEvents).hasSize(1);
@@ -231,7 +232,7 @@ public class EgressEventServiceTest {
 
     fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
     assertThat(dbEvents).hasSize(2);
@@ -256,7 +257,7 @@ public class EgressEventServiceTest {
     fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockEgressEventAuditor).fireEgressEventForUser(oldEgressEvent, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
     assertThat(dbEvents).hasSize(2);
@@ -282,7 +283,7 @@ public class EgressEventServiceTest {
     fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockEgressEventAuditor).fireEgressEventForUser(oldEgressEvent, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
     assertThat(dbEvents).hasSize(2);
@@ -293,7 +294,7 @@ public class EgressEventServiceTest {
     VwbEgressEventRequest vwbEvent =
         new VwbEgressEventRequest()
             .userEmail(dbUser1.getUsername())
-            .workspaceId("testWorkspaceId")
+            .vwbWorkspaceId("testWorkspaceId")
             .vmName("testVmName")
             .incidentCount(1L)
             .egressMib(500.0)
@@ -307,7 +308,7 @@ public class EgressEventServiceTest {
     egressEventService.handleVwbEvent(vwbEvent);
 
     verify(mockEgressEventAuditor).fireVwbEgressEvent(vwbEvent, dbUser1);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong(), anyBoolean());
 
     List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
     assertThat(dbEvents).hasSize(1);
