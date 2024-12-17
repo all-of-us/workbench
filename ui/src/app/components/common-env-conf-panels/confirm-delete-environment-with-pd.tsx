@@ -9,7 +9,7 @@ import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import colors from 'app/styles/colors';
-import { detachableDiskPricePerMonth } from 'app/utils/machines';
+import { persistentDiskPricePerMonth } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 
 import { BackupFilesHelpSection } from './backup-files-help-section';
@@ -80,7 +80,7 @@ export const ConfirmDeleteEnvironmentWithPD = ({
         </p>
         <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 4 }}>
           You will continue to incur persistent disk cost at{' '}
-          <b>{formatUsd(detachableDiskPricePerMonth(disk))}</b> per month. You
+          <b>{formatUsd(persistentDiskPricePerMonth(disk))}</b> per month. You
           can delete your disk at any time via the {appType} configuration
           panel.
         </p>
@@ -178,7 +178,7 @@ export const ConfirmDeleteEnvironmentWithPD = ({
         </p>
         <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 4 }}>
           You will continue to incur persistent disk cost at{' '}
-          <b>{formatUsd(detachableDiskPricePerMonth(disk))}</b> per month.
+          <b>{formatUsd(persistentDiskPricePerMonth(disk))}</b> per month.
         </p>
       </div>
     </div>
