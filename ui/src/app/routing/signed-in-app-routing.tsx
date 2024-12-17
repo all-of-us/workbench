@@ -45,6 +45,7 @@ import {
 } from 'app/utils/access-utils';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
 import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import {
   authorityGuard,
@@ -138,8 +139,18 @@ const WorkspaceSearchAdminPage = fp.flow(
 )(AdminWorkspaceSearch);
 
 export const SignedInRoutes = () => {
-  const { search } = useLocation();
-  const query = new URLSearchParams(search);
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const [pathName, setPathName] = React.useState(location.pathname);
+  React.useEffect(() => {
+    if (
+      pathName.startsWith('/workspaces/') &&
+      !location.pathname.startsWith('/workspaces/')
+    ) {
+      currentWorkspaceStore.next(null);
+    }
+    setPathName(location.pathname);
+  }, [location]);
 
   return (
     <Switch>
