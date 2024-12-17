@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Redirect, Switch, useParams, useRouteMatch } from 'react-router-dom';
+import { Switch, useParams, useRouteMatch } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import * as fp from 'lodash/fp';
 
 import { AppRoute, withRouteData } from 'app/components/app-router';
@@ -489,7 +490,7 @@ export const WorkspaceRoutes = () => {
         />
       </AppRoute>
       <AppRoute exact={false} path={`${path}`}>
-        <Redirect to={'/not-found'} />
+        <Navigate to={'/not-found'} />
       </AppRoute>
     </Switch>
   );
