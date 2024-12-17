@@ -398,7 +398,8 @@ public class InitialCreditsService {
     Instant now = Instant.now();
     WorkbenchConfig.BillingConfig billingConfig = workbenchConfigProvider.get().billing;
 
-    return initialCreditsExpiration != null
+    return userHasRemainingFreeTierCredits(dbUser)
+        && initialCreditsExpiration != null
         && initialCreditsExpiration.getExtensionTime() == null
         && initialCreditsExpiration.getCreditStartTime() != null
         && now.isAfter(
