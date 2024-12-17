@@ -1130,6 +1130,34 @@ public class InitialCreditsServiceTest {
     assertEquals(actualExpirationRecord.getExtensionTime(), NOW);
   }
 
+  @Test
+  public void test_checkInitialCreditsExtensionEligibility_noRemainingCredits(){
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    user.setUserInitialCreditsExpiration(
+        new DbUserInitialCreditsExpiration().setCreditStartTime(NOW).setExpirationTime(NOW).setExtensionTime(null));
+
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(300.0));
+    boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
+    assertThat(eligibility).isFalse();
+  }
+
+  @Test
+  public void test_checkInitialCreditsExtensionEligibility_hasRemainingCredits(){
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    user.setUserInitialCreditsExpiration(
+        new DbUserInitialCreditsExpiration().setCreditStartTime(NOW).setExpirationTime(NOW).setExtensionTime(null));
+
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(30.0));
+    boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
+    assertThat(eligibility).isTrue();
+  }
+
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {
     Field idField = Field.of("id", LegacySQLTypeName.STRING);
     Field costField = Field.of("cost", LegacySQLTypeName.FLOAT);
