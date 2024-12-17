@@ -12,7 +12,6 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -81,11 +80,11 @@ public class EgressEventDaoTest {
   private DbEgressEvent createValidDbEgressEvent() {
     DbEgressEvent event = new DbEgressEvent();
     event.setUser(user);
-    event.setWorkspace(new DbWorkspace());
     event.setCreationTime(CURRENT_TIMESTAMP);
     event.setStatus(DbEgressEvent.DbEgressEventStatus.PENDING);
     event.setEgressWindowSeconds(3600L);
     event.setVwbWorkspaceId("testWorkspaceId");
+    event.setLastModifiedTime(CURRENT_TIMESTAMP);
     event.setVwbVmName("testVmName");
     event.setGcpProjectId("test-project");
     event.setIsVwb(true);
