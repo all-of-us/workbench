@@ -23,15 +23,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import okhttp3.Call;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.legacy_leonardo_client.ApiClient;
-import org.pmiops.workbench.legacy_leonardo_client.ApiException;
-import org.pmiops.workbench.legacy_leonardo_client.ApiResponse;
-import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.boot.CommandLineRunner;
@@ -89,7 +88,7 @@ public class ManageLeonardoRuntimes {
     return api;
   }
 
-  private String runtimeId(LeonardoListRuntimeResponse r) {
+  private String runtimeId(ListRuntimeResponse r) {
     return leonardoMapper.toGoogleProject(r.getCloudContext()) + "/" + r.getRuntimeName();
   }
 
@@ -113,14 +112,14 @@ public class ManageLeonardoRuntimes {
     }
   }
 
-  private String formatTabular(LeonardoListRuntimeResponse r) {
+  private String formatTabular(ListRuntimeResponse r) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(r.getLabels()).getAsJsonObject();
     String creator = "unknown";
     if (labels.has("created-by")) {
       creator = labels.get("created-by").getAsString();
     }
-    LeonardoRuntimeStatus status = LeonardoRuntimeStatus.UNKNOWN;
+    ClusterStatus status = ClusterStatus.UNKNOWN;
     if (r.getStatus() != null) {
       status = r.getStatus();
     }
@@ -134,10 +133,10 @@ public class ManageLeonardoRuntimes {
         toWholeSeconds(r.getAuditInfo().getDestroyedDate()));
   }
 
-  private void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
-    Function<LeonardoListRuntimeResponse, String> toGoogle =
+  private void printFormatted(List<ListRuntimeResponse> runtimes, OutputFormat fmt) {
+    Function<ListRuntimeResponse, String> toGoogle =
         r -> leonardoMapper.toGoogleProject(r.getCloudContext());
-    Stream<LeonardoListRuntimeResponse> stream =
+    Stream<ListRuntimeResponse> stream =
         runtimes.stream()
             .sorted(
                 Comparator.comparing(toGoogle)
@@ -165,10 +164,25 @@ public class ManageLeonardoRuntimes {
       throws IOException, ApiException {
     RuntimesApi api = newApiClient(apiUrl);
 
-    List<LeonardoListRuntimeResponse> runtimes;
+    List<ListRuntimeResponse> runtimes;
     if (googleProjectId.isPresent()) {
       runtimes = api.listRuntimesByProject(googleProjectId.get(), null, includeDeleted);
     } else {
+      /*
+      I see an error for
+        ./project.rb list-runtimes --project all-of-us-workbench-test fails with
+
+      com.google.gson.JsonSyntaxException: java.io.IOException: The JSON string is invalid for
+      OneOfRuntimeConfigInResponse with oneOf schemas: AzureConfig, DataprocConfig,
+      GceWithPdConfigInResponse. 2 class(es) match the result, expected 1. Detailed failure message
+      for oneOf schemas: [Deserialization for DataprocConfig failed with
+      `The required field `numberOfWorkers` is not found in the JSON string:
+      {"machineType":"n1-standard-4","persistentDiskId":23905,"cloudService":"GCE",
+      "bootDiskSize":250,"zone":"us-central1-c","gpuConfig":null,"configType":"GceWithPdConfig"}`.].
+       JSON: {"machineType":"n1-standard-4","persistentDiskId":23905,"cloudService":"GCE",
+       "bootDiskSize":250,"zone":"us-central1-c","gpuConfig":null,"configType":"GceWithPdConfig"}
+       */
+
       runtimes = api.listRuntimes(null, includeDeleted);
     }
     printFormatted(runtimes, fmt);
@@ -188,22 +202,35 @@ public class ManageLeonardoRuntimes {
     String googleProject = parts[0];
     String runtimeName = parts[1];
 
+    /*
+       what I want to do is:
+         GetRuntimeResponse runtime = client.getRuntime(googleProject, runtimeName);
+
+       but I see an error for:
+         ./project.rb describe-runtime --project all-of-us-workbench-test --id aou-rw-test-154a8b2d/all-of-us-3979
+
+       Caused by: java.io.IOException: The JSON string is invalid for OneOfRuntimeConfigInResponse
+       with oneOf schemas: AzureConfig, DataprocConfig, GceWithPdConfigInResponse. 2 class(es) match
+       the result, expected 1. Detailed failure message for
+       oneOf schemas: [Deserialization for DataprocConfig failed with `The required field
+       `numberOfWorkers` is not found in the JSON string:
+       {"machineType":"n1-standard-4","persistentDiskId":2526,"cloudService":"GCE",
+       "bootDiskSize":70,"zone":"us-central1-b","gpuConfig":null,"configType":"GceWithPdConfig"}`.].
+        JSON: {"machineType":"n1-standard-4","persistentDiskId":2526,"cloudService":"GCE",
+       "bootDiskSize":70,"zone":"us-central1-b","gpuConfig":null,"configType":"GceWithPdConfig"}
+    */
+
     // Leo's getRuntime API swagger tends to be outdated; issue a raw getRuntime request to ensure
     // we get all available information for debugging.
     RuntimesApi client = newApiClient(apiUrl);
-    Call call =
-        client.getRuntimeCall(
-            googleProject,
-            runtimeName,
-            /* progressListener */ null,
-            /* progressRequestListener */ null);
+    okhttp3.Call call = client.getRuntimeCall(googleProject, runtimeName, /* _callback */ null);
     ApiResponse<Object> resp = client.getApiClient().execute(call, Object.class);
-
     // Parse the response as well so we can log specific structured fields.
-    LeonardoGetRuntimeResponse runtime =
-        PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), LeonardoGetRuntimeResponse.class);
+    GetRuntimeResponse runtime =
+        PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), GetRuntimeResponse.class);
 
     System.out.println(PRETTY_GSON.toJson(resp.getData()));
+
     System.out.printf("\n\nTo inspect logs in cloud storage, run the following:\n\n");
 
     System.out.printf(
@@ -222,7 +249,7 @@ public class ManageLeonardoRuntimes {
     AtomicInteger deleted = new AtomicInteger();
     RuntimesApi api = newApiClient(apiUrl);
     api.listRuntimes(null, false).stream()
-        .sorted(Comparator.comparing(LeonardoListRuntimeResponse::getRuntimeName))
+        .sorted(Comparator.comparing(ListRuntimeResponse::getRuntimeName))
         .filter(
             (r) -> {
               Instant createdDate = Instant.parse(r.getAuditInfo().getCreatedDate());
