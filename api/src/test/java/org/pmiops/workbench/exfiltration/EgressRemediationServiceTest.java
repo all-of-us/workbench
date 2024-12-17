@@ -47,6 +47,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.impl.EgressSumologicRemediationService;
+import org.pmiops.workbench.exfiltration.impl.EgressVwbRemediationService;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressSumologicJiraHandler;
 import org.pmiops.workbench.jira.JiraContent;
@@ -115,6 +116,7 @@ public class EgressRemediationServiceTest {
   @Import({
     EgressEventMapperImpl.class,
     EgressSumologicRemediationService.class,
+    EgressVwbRemediationService.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
     JiraService.class,

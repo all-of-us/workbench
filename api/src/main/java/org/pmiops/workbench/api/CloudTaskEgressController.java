@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_SERVICE_QUALIFIER;
 
-import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,8 +18,8 @@ public class CloudTaskEgressController implements CloudTaskEgressApiDelegate {
   public CloudTaskEgressController(
       @Qualifier(EGRESS_SUMOLOGIC_SERVICE_QUALIFIER)
           EgressRemediationService sumologicEgressRemediationService,
-      @Qualifier(EGRESS_VWB_SERVICE_QUALIFIER) EgressRemediationService vwbEgressRemediationService,
-      EgressEventDao egressEventDao) {
+      @Qualifier(EGRESS_VWB_SERVICE_QUALIFIER)
+          EgressRemediationService vwbEgressRemediationService) {
     this.sumologicEgressRemediationService = sumologicEgressRemediationService;
     this.vwbEgressRemediationService = vwbEgressRemediationService;
   }

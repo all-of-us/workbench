@@ -123,6 +123,7 @@ public class EgressEventServiceImpl implements EgressEventService {
                 .setVwbEgressEventId(egressEvent.getVwbEgressEventId())
                 .setVwbWorkspaceId(egressEvent.getVwbWorkspaceId())
                 .setVwbVmName(egressEvent.getVmName())
+                .setGcpProjectId(egressEvent.getGcpProjectId())
                 .setVwbIncidentCount(egressEvent.getIncidentCount().intValue())
                 .setEgressMegabytes(
                     Optional.ofNullable(egressEvent.getEgressMib())

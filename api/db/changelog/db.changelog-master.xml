@@ -253,7 +253,7 @@
   <include file="changelog/db.changelog-243-replace-extension-count.xml"/>
   <include file="changelog/db.changelog-244-add-is-vwb-workspace-column.xml"/>
   <include file="changelog/db.changelog-245-add-vwb-template-id-cdr-version.xml"/>
-  <include file="changelog/db.db.changelog-246-add-vwb-egress-event-columns.xml"/>
+  <include file="changelog/db.changelog-246-add-vwb-egress-event-columns.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
