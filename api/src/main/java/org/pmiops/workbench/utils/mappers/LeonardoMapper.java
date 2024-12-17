@@ -239,7 +239,6 @@ public interface LeonardoMapper {
   @ValueMapping(source = "CROMWELL", target = MappingConstants.NULL)
   AllowedChartName toLeonardoAllowedChartName(AppType appType);
 
-  @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
   DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
   @Named("mapAppType")

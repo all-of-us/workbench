@@ -53,6 +53,7 @@ export enum RuntimeStatusRequest {
 export const diskTypeLabels = {
   [DiskType.STANDARD]: 'Standard Disk',
   [DiskType.SSD]: 'Solid State Disk',
+  [DiskType.BALANCED]: 'Balanced Disk',
 };
 
 export interface DiskConfig {
