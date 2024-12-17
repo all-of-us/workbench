@@ -395,10 +395,11 @@ public class InitialCreditsService {
   public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
     DbUserInitialCreditsExpiration initialCreditsExpiration =
         dbUser.getUserInitialCreditsExpiration();
-    Instant now = Instant.now();
+    Instant now = clock.instant();
     WorkbenchConfig.BillingConfig billingConfig = workbenchConfigProvider.get().billing;
 
-    return initialCreditsExpiration != null
+    return userHasRemainingFreeTierCredits(dbUser)
+        && initialCreditsExpiration != null
         && initialCreditsExpiration.getExtensionTime() == null
         && initialCreditsExpiration.getCreditStartTime() != null
         && now.isAfter(
