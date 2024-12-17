@@ -192,7 +192,7 @@ describe(WorkspaceEdit.name, () => {
   it('displays workspaces duplicate page', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     renderComponent();
-    await screen.findByText(`Duplicate workspace "${workspace.name}"`);
+    await screen.findByText(`Duplicate workspace "${workspace.displayName}"`);
 
     // Ensure the 'drug development' checkbox is checked when duplicating.
     const drugDevelopmentCheckbox: HTMLInputElement = screen.getByTestId(
@@ -484,7 +484,7 @@ describe(WorkspaceEdit.name, () => {
       const cdrUpgradeMessage = screen.getByTestId(
         'cdr-version-upgrade'
       ).textContent;
-      expect(cdrUpgradeMessage).toContain(altCdrWorkspace.name);
+      expect(cdrUpgradeMessage).toContain(altCdrWorkspace.displayName);
       expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage);
     });
   });
@@ -657,18 +657,20 @@ describe(WorkspaceEdit.name, () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     renderComponent();
 
-    userEvent.click(await screen.findByTestId('review-request-btn-false'));
+    await userEvent.click(
+      await screen.findByTestId('review-request-btn-false')
+    );
 
     const numBefore = workspacesApi.workspaceOperations.length;
-    userEvent.click(
-      await screen.findByRole('button', {
-        name: /Duplicate Workspace/i,
-      })
+    await userEvent.click(
+      await screen.findByRole('button', { name: /Duplicate Workspace/i })
     );
 
     const confirmSaveButton = await screen.findByRole('button', {
       name: 'Confirm',
     });
+
+    // multiple clicks
 
     await user.click(confirmSaveButton);
     await user.click(confirmSaveButton);
@@ -1089,7 +1091,7 @@ describe(WorkspaceEdit.name, () => {
     ).toBeInTheDocument();
   });
 
-  it('Should trim workspace name', async () => {
+  it('Should trim workspace name appropriately', async () => {
     renderComponent();
     const workspaceNameTextBox = await screen.findByTestId('workspace-name');
     await userEvent.type(

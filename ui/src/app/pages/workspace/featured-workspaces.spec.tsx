@@ -91,7 +91,7 @@ describe('Featured Workspace List', () => {
       });
       expect(
         screen.queryByText(
-          WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME +
+          WorkspaceStubVariables.DEFAULT_WORKSPACE_DISPLAY_NAME +
             featuredCategory[index]
         )
       ).toBeInTheDocument();
