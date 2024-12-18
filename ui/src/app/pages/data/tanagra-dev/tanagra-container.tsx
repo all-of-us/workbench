@@ -46,7 +46,9 @@ export const TanagraContainer = fp.flow(
   const [localReload, setLocalReload] = useState(0);
   const tanagraUrl = `${
     serverConfigStore.get().config.tanagraBaseUrl
-  }/tanagra/ui#/tanagra/underlays/aou${bigqueryDataset}/studies/${namespace}/${splat}${
+  }/tanagra/ui#/tanagra/underlays/aou${
+    bigqueryDataset.split('_')[0]
+  }/studies/${namespace}/${splat}${
     environment.tanagraLocalAuth ? `/?token=${getAccessToken()}` : ''
   }`;
 
