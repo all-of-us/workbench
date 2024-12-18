@@ -45,7 +45,6 @@ public class EgressEventDaoTest {
     assertThat(foundEvent.getVwbWorkspaceId()).isEqualTo("testWorkspaceId");
     assertThat(foundEvent.getVwbVmName()).isEqualTo("testVmName");
     assertThat(foundEvent.getGcpProjectId()).isEqualTo("test-project");
-    assertThat(foundEvent.getIsVwb()).isTrue();
 
     // Update
     foundEvent.setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);

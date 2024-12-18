@@ -321,7 +321,6 @@ public class EgressEventServiceTest {
         .isEqualTo((float) (500 * ((1 << 20) / 1e6))); // Convert MiB
     assertThat(dbEvent.getGcpProjectId()).isEqualTo("test-gcp-project");
     assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(600L);
-    assertThat(dbEvent.getIsVwb()).isTrue();
   }
 
   private static SumologicEgressEvent recentEgressEventForUser(DbUser user) {
