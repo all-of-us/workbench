@@ -13141,6 +13141,11 @@ components:
     InitialCreditResponse:
       type: object
       properties:
+        expirationBypassed:
+          type: boolean
+          default: false
+          description: When set to true, the user will not be required to spend their
+            initial credits within the expiration period.
         eligibleForExtension:
           type: boolean
           description: Whether the workspace's owner is eligible for an extension
