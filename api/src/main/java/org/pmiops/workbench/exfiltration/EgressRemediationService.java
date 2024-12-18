@@ -137,7 +137,7 @@ public abstract class EgressRemediationService {
   @NotNull
   private EgressRemediationAction getEgressRemediationAction(
       DbUser user, Escalation e, DbEgressEvent event) {
-    if (event.getIsVwb()) {
+    if (ExfiltrationUtils.isVwbEgressEvent(event)) {
       if (e.disableUser != null) {
         disableUserVwbDataAccess(user);
         return EgressRemediationAction.DISABLE_USER;

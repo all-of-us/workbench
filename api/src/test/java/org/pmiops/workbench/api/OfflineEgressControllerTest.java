@@ -75,6 +75,8 @@ public class OfflineEgressControllerTest {
   }
 
   private DbEgressEvent newEvent() {
-    return new DbEgressEvent().setStatus(DbEgressEventStatus.PENDING).setIsVwb(true);
+    return new DbEgressEvent()
+        .setStatus(DbEgressEventStatus.PENDING)
+        .setVwbWorkspaceId("wb-test-123");
   }
 }

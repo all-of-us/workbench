@@ -119,7 +119,6 @@ public class EgressEventServiceImpl implements EgressEventService {
         egressEventDao.save(
             new DbEgressEvent()
                 .setUser(egressUser.orElse(null))
-                .setIsVwb(true)
                 .setVwbEgressEventId(egressEvent.getVwbEgressEventId())
                 .setVwbWorkspaceId(egressEvent.getVwbWorkspaceId())
                 .setVwbVmName(egressEvent.getVmName())
@@ -183,7 +182,6 @@ public class EgressEventServiceImpl implements EgressEventService {
         egressEventDao.save(
             new DbEgressEvent()
                 .setUser(userMaybe.orElse(null))
-                .setIsVwb(false)
                 .setWorkspace(workspaceMaybe.orElse(null))
                 .setEgressMegabytes(
                     Optional.ofNullable(event.getEgressMib())

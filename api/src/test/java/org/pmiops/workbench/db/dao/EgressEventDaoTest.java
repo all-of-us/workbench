@@ -87,7 +87,7 @@ public class EgressEventDaoTest {
     event.setLastModifiedTime(CURRENT_TIMESTAMP);
     event.setVwbVmName("testVmName");
     event.setGcpProjectId("test-project");
-    event.setIsVwb(true);
+    ;
     return event;
   }
 }

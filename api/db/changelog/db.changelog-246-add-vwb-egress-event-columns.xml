@@ -6,7 +6,6 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet author="yonghao" id="db.changelog-246-add-is-vwb-egress-event-column">
         <addColumn tableName="egress_event">
-            <column name="is_vwb" type="boolean" />
             <column name="vwb_workspace_id" type="varchar(80)" />
             <column name="vwb_vm_name" type="varchar(80)" />
             <column name="gcp_project_id" type="varchar(80)" />

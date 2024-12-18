@@ -46,7 +46,6 @@ public class DbEgressEvent {
   private String vwbVmName;
   private String gcpProjectId;
   private String vwbEgressEventId;
-  private boolean isVwb;
   private int vwbIncidentCount;
 
   @Id
@@ -206,16 +205,6 @@ public class DbEgressEvent {
     return this;
   }
 
-  @Column(name = "is_vwb")
-  public boolean getIsVwb() {
-    return isVwb;
-  }
-
-  public DbEgressEvent setIsVwb(boolean isVwb) {
-    this.isVwb = isVwb;
-    return this;
-  }
-
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -236,8 +225,7 @@ public class DbEgressEvent {
         && Objects.equals(vwbWorkspaceId, that.vwbWorkspaceId)
         && Objects.equals(vwbVmName, that.vwbVmName)
         && Objects.equals(gcpProjectId, that.gcpProjectId)
-        && Objects.equals(vwbIncidentCount, that.vwbIncidentCount)
-        && Objects.equals(isVwb, that.isVwb);
+        && Objects.equals(vwbIncidentCount, that.vwbIncidentCount);
   }
 
   @Override
@@ -255,7 +243,6 @@ public class DbEgressEvent {
         vwbWorkspaceId,
         vwbVmName,
         gcpProjectId,
-        vwbIncidentCount,
-        isVwb);
+        vwbIncidentCount);
   }
 }
