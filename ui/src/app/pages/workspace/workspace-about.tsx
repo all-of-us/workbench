@@ -43,7 +43,7 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
@@ -473,7 +473,7 @@ export const WorkspaceAbout = fp.flow(
               </div>
               {workspace &&
                 WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
-                isUsingFreeTierBillingAccount(workspace) && (
+                isUsingInitialCredits(workspace) && (
                   <>
                     <div style={{ ...styles.infoBox, height: '3.75rem' }}>
                       <div style={styles.infoBoxHeader}>
