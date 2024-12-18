@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { BillingStatus, Workspace } from 'generated/fetch';
+import { Workspace } from 'generated/fetch';
 
-import { isValidBilling } from '../utils/workspace-utils';
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
@@ -12,6 +11,7 @@ import { reactStyles } from 'app/utils';
 import { runtimeStore, userAppsStore, useStore } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
+import { isValidBilling } from 'app/utils/workspace-utils';
 
 import { AppBanner } from './apps-panel/app-banner';
 import { ExpandedApp } from './apps-panel/expanded-app';

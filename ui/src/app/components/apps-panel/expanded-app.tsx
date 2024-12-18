@@ -7,14 +7,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import {
-  AppStatus,
-  BillingStatus,
-  UserAppEnvironment,
-  Workspace,
-} from 'generated/fetch';
+import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
-import { isValidBilling } from '../../utils/workspace-utils';
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
@@ -47,6 +41,7 @@ import {
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
+import { isValidBilling } from 'app/utils/workspace-utils';
 
 import { AppBanner } from './app-banner';
 import { AppsPanelButton } from './apps-panel-button';
