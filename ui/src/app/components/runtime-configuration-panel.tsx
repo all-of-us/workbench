@@ -54,7 +54,7 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 
 import { UIAppType } from './apps-panel/utils';
 import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
@@ -328,7 +328,7 @@ export const RuntimeConfigurationPanel = fp.flow(
 
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
       {
-        usingInitialCredits: isUsingFreeTierBillingAccount(workspace),
+        usingInitialCredits: isUsingInitialCredits(workspace),
         creatorFreeCreditsRemaining,
         analysisConfig,
       }
