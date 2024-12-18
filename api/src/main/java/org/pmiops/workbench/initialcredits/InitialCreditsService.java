@@ -355,6 +355,15 @@ public class InitialCreditsService {
     userInitialCreditsExpiration.setBypassed(isBypassed);
   }
 
+  public boolean isExpirationBypassed(DbUser user) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+
+    return userInitialCreditsExpiration != null
+        && (userInitialCreditsExpiration.isBypassed()
+            || institutionService.shouldBypassForCreditsExpiration(user));
+  }
+
   public DbUser extendInitialCreditsExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
