@@ -5,6 +5,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEventRequest;
+import org.pmiops.workbench.model.VwbEgressEventRequest;
 
 /**
  * Auditor service which handles collecting audit logs for high-egress events. These events are
@@ -17,6 +18,12 @@ public interface EgressEventAuditor {
    * event log in the target workspace.
    */
   void fireEgressEvent(SumologicEgressEvent event);
+
+  /**
+   * Decorates a Verily Workbench high-egress event with Workbench metadata and fires an audit event
+   * log in the target workspace.
+   */
+  void fireVwbEgressEvent(VwbEgressEventRequest event, DbUser dbUser);
 
   /**
    * Decorates a Sumologic-reported high-egress event with Workbench metadata and fires an audit

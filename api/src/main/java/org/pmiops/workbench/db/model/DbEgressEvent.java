@@ -42,6 +42,12 @@ public class DbEgressEvent {
 
   private String bucketAuditEvent;
 
+  private String vwbWorkspaceId;
+  private String vwbVmName;
+  private String gcpProjectId;
+  private String vwbEgressEventId;
+  private int vwbIncidentCount;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "egress_event_id", nullable = false)
@@ -149,6 +155,56 @@ public class DbEgressEvent {
     return this;
   }
 
+  @Column(name = "vwb_workspace_id")
+  public String getVwbWorkspaceId() {
+    return vwbWorkspaceId;
+  }
+
+  public DbEgressEvent setVwbWorkspaceId(String vwbWorkspaceId) {
+    this.vwbWorkspaceId = vwbWorkspaceId;
+    return this;
+  }
+
+  @Column(name = "vwb_vm_name")
+  public String getVwbVmName() {
+    return vwbVmName;
+  }
+
+  public DbEgressEvent setVwbVmName(String vwbVmName) {
+    this.vwbVmName = vwbVmName;
+    return this;
+  }
+
+  @Column(name = "gcp_project_id")
+  public String getGcpProjectId() {
+    return gcpProjectId;
+  }
+
+  public DbEgressEvent setGcpProjectId(String gcpProjectId) {
+    this.gcpProjectId = gcpProjectId;
+    return this;
+  }
+
+  @Column(name = "vwb_egress_event_id")
+  public String getVwbEgressEventId() {
+    return vwbEgressEventId;
+  }
+
+  public DbEgressEvent setVwbEgressEventId(String vwbEgressEventId) {
+    this.vwbEgressEventId = vwbEgressEventId;
+    return this;
+  }
+
+  @Column(name = "vwb_incident_count")
+  public int getVwbIncidentCount() {
+    return vwbIncidentCount;
+  }
+
+  public DbEgressEvent setVwbIncidentCount(int vwbIncidentCount) {
+    this.vwbIncidentCount = vwbIncidentCount;
+    return this;
+  }
+
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -165,7 +221,11 @@ public class DbEgressEvent {
         && Objects.equals(creationTime, that.creationTime)
         && Objects.equals(lastModifiedTime, that.lastModifiedTime)
         && status == that.status
-        && Objects.equals(sumologicEvent, that.sumologicEvent);
+        && Objects.equals(sumologicEvent, that.sumologicEvent)
+        && Objects.equals(vwbWorkspaceId, that.vwbWorkspaceId)
+        && Objects.equals(vwbVmName, that.vwbVmName)
+        && Objects.equals(gcpProjectId, that.gcpProjectId)
+        && Objects.equals(vwbIncidentCount, that.vwbIncidentCount);
   }
 
   @Override
@@ -179,6 +239,10 @@ public class DbEgressEvent {
         creationTime,
         lastModifiedTime,
         status,
-        sumologicEvent);
+        sumologicEvent,
+        vwbWorkspaceId,
+        vwbVmName,
+        gcpProjectId,
+        vwbIncidentCount);
   }
 }

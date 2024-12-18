@@ -5,11 +5,11 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
+import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,20 +27,17 @@ public class OfflineEgressController implements OfflineEgressApiDelegate {
   public ResponseEntity<Void> checkPendingEgressEvents() {
     Timestamp latestModifiedTime = Timestamp.from(clock.instant().minus(PENDING_EVENT_LIMIT));
 
-    List<Long> oldPendingEventIds =
-        egressEventDao
-            .findAllByStatusAndLastModifiedTimeLessThan(
-                DbEgressEventStatus.PENDING, latestModifiedTime)
-            .stream()
-            .map(DbEgressEvent::getEgressEventId)
-            .collect(Collectors.toList());
-    for (long eventId : oldPendingEventIds) {
-      taskQueueService.pushEgressEventTask(eventId);
+    List<DbEgressEvent> oldPendingEvents =
+        egressEventDao.findAllByStatusAndLastModifiedTimeLessThan(
+            DbEgressEventStatus.PENDING, latestModifiedTime);
+    for (DbEgressEvent event : oldPendingEvents) {
+      taskQueueService.pushEgressEventTask(
+          event.getEgressEventId(), ExfiltrationUtils.isVwbEgressEvent(event));
     }
 
-    if (oldPendingEventIds.size() > 0) {
+    if (oldPendingEvents.size() > 0) {
       log.warning(
-          String.format("found and re-enqueued %d old PENDING events", oldPendingEventIds.size()));
+          String.format("found and re-enqueued %d old PENDING events", oldPendingEvents.size()));
     }
     return ResponseEntity.noContent().build();
   }
