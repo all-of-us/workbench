@@ -238,7 +238,7 @@ export const DataComponentTanagra = fp.flow(
       studyId: workspace.namespace,
       cohortCreateInfo: {
         displayName: `Untitled cohort ${new Date().toLocaleString()}`,
-        underlayName: 'aou' + bigqueryDataset,
+        underlayName: 'aou' + bigqueryDataset.split('_')[0],
       },
     };
     const newCohort = await cohortsApi().createCohort(createCohortRequest);

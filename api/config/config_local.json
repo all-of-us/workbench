@@ -60,7 +60,7 @@
     "cdrv8plus": {
       "methodNamespace": "aouwgscohortextraction-test",
       "methodName": "echo-prototyping",
-      "methodRepoVersion": 16,
+      "methodRepoVersion": 18,
       "methodLogicalVersion": 1
     }
   },

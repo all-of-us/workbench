@@ -601,6 +601,7 @@ export const LinkButton = ({
   const linkStyle = {
     style: { color: colors.accent },
     hover: { textDecoration: 'underline' },
+    disabledStyle: { color: colors.disabled },
   };
   return (
     <Clickable

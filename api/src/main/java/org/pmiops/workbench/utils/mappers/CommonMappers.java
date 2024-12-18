@@ -135,11 +135,24 @@ public class CommonMappers {
     return initialCreditsService.getCreditsExpiration(source).map(this::timestamp).orElse(null);
   }
 
+  @Named("getInitialCreditsExtension")
+  @Nullable
+  public Long getInitialCreditsExtension(
+      DbUser source, @Context InitialCreditsService initialCreditsService) {
+    return initialCreditsService.getCreditsExtension(source).map(this::timestamp).orElse(null);
+  }
+
   @Named("getBillingStatus")
   public BillingStatus getBillingStatus(DbWorkspace dbWorkspace) {
     return (isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfigProvider.get())
             && (dbWorkspace.isInitialCreditsExhausted() || dbWorkspace.isInitialCreditsExpired()))
         ? BillingStatus.INACTIVE
         : BillingStatus.ACTIVE;
+  }
+
+  @Named("checkInitialCreditsExtensionEligibility")
+  public boolean checkInitialCreditsExtensionEligibility(
+      DbUser dbUser, @Context InitialCreditsService initialCreditsService) {
+    return initialCreditsService.checkInitialCreditsExtensionEligibility(dbUser);
   }
 }

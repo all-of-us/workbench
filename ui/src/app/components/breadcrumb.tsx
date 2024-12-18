@@ -12,7 +12,8 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
-import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
+import { InvalidBillingBannerMaybe } from 'app/pages/workspace/invalid-billing-banner-maybe';
+import { OldInvalidBillingBanner } from 'app/pages/workspace/old-invalid-billing-banner';
 import {
   analysisTabName,
   analysisTabPath,
@@ -31,6 +32,7 @@ import {
   MatchParams,
   RouteDataStore,
   routeDataStore,
+  serverConfigStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -316,15 +318,22 @@ export const Breadcrumb = fp.flow(
   withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
-  const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
-    useState(false);
+  const enableInitialCreditsExpiration =
+    serverConfigStore.get().config.enableInitialCreditsExpiration;
+  const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
+    enableInitialCreditsExpiration
+  );
 
   useEffect(() => {
-    const newShowInvalidBillingBanner =
-      props?.workspace?.billingStatus === BillingStatus.INACTIVE;
+    // TODO: This is only needed for OldInvalidBillingBanner.
+    // Remove once initial credit expiration is live
+    if (!enableInitialCreditsExpiration) {
+      const newShowInvalidBillingBanner =
+        props?.workspace?.billingStatus === BillingStatus.INACTIVE;
 
-    if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
-      setShowInvalidBillingBanner(newShowInvalidBillingBanner);
+      if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
+        setShowInvalidBillingBanner(newShowInvalidBillingBanner);
+      }
     }
   }, [props?.workspace]);
 
@@ -415,12 +424,16 @@ export const Breadcrumb = fp.flow(
 
   return (
     <>
-      {showInvalidBillingBanner && (
-        <InvalidBillingBanner
-          onClose={() => setShowInvalidBillingBanner(false)}
-        />
-      )}
-
+      {showInvalidBillingBanner &&
+        (enableInitialCreditsExpiration ? (
+          <InvalidBillingBannerMaybe
+            onClose={() => setShowInvalidBillingBanner(false)}
+          />
+        ) : (
+          <OldInvalidBillingBanner
+            onClose={() => setShowInvalidBillingBanner(false)}
+          />
+        ))}
       <div
         style={{
           marginLeft: '4.875rem',

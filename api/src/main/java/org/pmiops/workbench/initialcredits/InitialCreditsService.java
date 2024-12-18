@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.mapstruct.Named;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -280,7 +279,7 @@ public class InitialCreditsService {
    *
    * @param user - The user whose initial credits expiration time is being checked
    * @return The expiration time of the user's initial credits, if they have a
-   *     UserInitialCreditsExpiration record and they have not been bypassed personally or
+   *     UserInitialCreditsExpiration record, and they have not been bypassed personally or
    *     institutionally.
    */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
@@ -288,6 +287,21 @@ public class InitialCreditsService {
         .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
         .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
+  }
+
+  /**
+   * For the given user, check when the user's initial credits were extended, if relevant.
+   *
+   * @param user - The user whose initial credits extension time is being checked
+   * @return The extension time of the user's initial credits, if they have a
+   *     UserInitialCreditsExpiration record, and they have not been bypassed personally or
+   *     institutionally.
+   */
+  public Optional<Timestamp> getCreditsExtension(DbUser user) {
+    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
+        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
+        .map(DbUserInitialCreditsExpiration::getExtensionTime);
   }
 
   /**
@@ -378,14 +392,14 @@ public class InitialCreditsService {
     return userDao.save(user);
   }
 
-  @Named("checkInitialCreditsExtensionEligibility")
   public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
     DbUserInitialCreditsExpiration initialCreditsExpiration =
         dbUser.getUserInitialCreditsExpiration();
-    Instant now = Instant.now();
+    Instant now = clock.instant();
     WorkbenchConfig.BillingConfig billingConfig = workbenchConfigProvider.get().billing;
 
-    return initialCreditsExpiration != null
+    return userHasRemainingFreeTierCredits(dbUser)
+        && initialCreditsExpiration != null
         && initialCreditsExpiration.getExtensionTime() == null
         && initialCreditsExpiration.getCreditStartTime() != null
         && now.isAfter(

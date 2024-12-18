@@ -188,8 +188,7 @@
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
-      "accessTier": "registered",
-      "tanagraEnabled": true
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 13,
@@ -267,6 +266,54 @@
       "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
       "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T",
       "needsV8GenomicExtractionWorkflow": true
+    },
+    {
+      "cdrVersionId": 16,
+      "name": "All of Us Registered Tier Dataset - Test Data Apps Only",
+      "bigqueryProject": "fc-aou-cdr-preprod",
+      "bigqueryDataset": "R2024Q3R4_data_apps_2",
+      "creationTime": "2024-03-29 00:00:00Z",
+      "numParticipants": 628664,
+      "cdrDbName": "r_2024q3_6",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasFitbitDeviceData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "accessTier": "registered",
+      "tanagraEnabled": true
+    },
+    {
+      "cdrVersionId": 17,
+      "name": "All of Us Controlled Tier Dataset - Test Data Apps Only",
+      "bigqueryProject": "fc-aou-cdr-preprod-ct",
+      "bigqueryDataset": "C2024Q3R4_data_apps_2",
+      "wgsBigqueryDataset": "wgs_C2024Q3",
+      "wgsFilterSetName": "echo_v2",
+      "creationTime": "2024-03-29 00:00:00Z",
+      "numParticipants": 633547,
+      "cdrDbName": "c_2024q3_6",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasFitbitDeviceData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "accessTier": "controlled",
+      "storageBasePath": "v8",
+      "wgsHailStoragePath": "wgs/hail.mt",
+      "microarrayHailStoragePath": "microarray/hail.mt",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample/delta",
+      "wgsVdsPath": "wgs/vds/gvs_export.vds",
+      "wgsExomeVcfPath": "wgs/without_ext_aian_prod/vds/exome/vcf",
+      "wgsAcafThresholdVcfPath": "wgs/without_ext_aian_prod/vds/acaf_threshold/vcf",
+      "wgsClinvarVcfPath": "wgs/without_ext_aian_prod/vds/clinvar/vcf",
+      "wgsLongReadsManifestPath": "longreads/manifest.csv",
+      "wgsLongReadsHailGRCh38": "longreads/hail.mt/GRCh38",
+      "wgsLongReadsHailT2T": "longreads/hail.mt/T2T",
+      "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
+      "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T",
+      "needsV8GenomicExtractionWorkflow": true,
+      "tanagraEnabled": true
     }
   ]
 }

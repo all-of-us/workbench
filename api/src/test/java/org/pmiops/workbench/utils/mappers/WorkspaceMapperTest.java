@@ -67,6 +67,8 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 public class WorkspaceMapperTest {
   private static final String FIRECLOUD_NAMESPACE = "aou-xxxxxxx";
   private static final String CREATOR_EMAIL = "ojc@verily.biz";
+  private static final String CREATOR_GIVEN_NAME = "Oscar";
+  private static final String CREATOR_FAMILY_NAME = "Calhoun";
   private static final long CREATOR_USER_ID = 101L;
   private static final long WORKSPACE_DB_ID = 222L;
   private static final int WORKSPACE_VERSION = 2;
@@ -145,6 +147,8 @@ public class WorkspaceMapperTest {
     final DbUser creatorUser =
         new DbUser()
             .setUsername(CREATOR_EMAIL)
+            .setGivenName(CREATOR_GIVEN_NAME)
+            .setFamilyName(CREATOR_FAMILY_NAME)
             .setUserId(CREATOR_USER_ID)
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration()
@@ -200,6 +204,7 @@ public class WorkspaceMapperTest {
             .setGoogleProject(GOOGLE_PROJECT);
 
     workbenchConfig = createEmptyConfig();
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
   }
 
   @Test
@@ -213,7 +218,9 @@ public class WorkspaceMapperTest {
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
     assertThat(ws.getNamespace()).isEqualTo(FIRECLOUD_NAMESPACE);
     assertThat(ws.getCdrVersionId()).isEqualTo(Long.toString(CDR_VERSION_ID));
-    assertThat(ws.getCreator()).isEqualTo(CREATOR_EMAIL);
+    assertThat(ws.getCreatorUser().getUserName()).isEqualTo(CREATOR_EMAIL);
+    assertThat(ws.getCreatorUser().getGivenName()).isEqualTo(CREATOR_GIVEN_NAME);
+    assertThat(ws.getCreatorUser().getFamilyName()).isEqualTo(CREATOR_FAMILY_NAME);
     assertThat(ws.getInitialCredits().getExpirationEpochMillis())
         .isEqualTo(INITIAL_CREDITS_EXPIRATION_TIMESTAMP.getTime());
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);

@@ -60,7 +60,7 @@
     "cdrv8plus": {
       "methodNamespace": "aouwgscohortextraction-preprod",
       "methodName": "GvsExtractCohortFromSampleNamesV8",
-      "methodRepoVersion": 2,
+      "methodRepoVersion": 3,
       "methodLogicalVersion": 1
     }
   },

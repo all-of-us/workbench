@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -68,6 +69,7 @@ import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.user.UserAdminService;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -96,6 +98,7 @@ public class EgressRemediationServiceTest {
   @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
+  @Autowired private EgressEventMapper egressEventMapper;
   @Autowired private UserDao userDao;
 
   @Autowired
@@ -391,7 +394,7 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq("Jupyter"));
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */);
   }
 
   @Test
@@ -408,9 +411,10 @@ public class EgressRemediationServiceTest {
     DbEgressEvent event = egressEventDao.findById(eventId).get();
     assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
+    String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq("RStudio"));
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq(gkeServiceName));
   }
 
   @Test
@@ -443,7 +447,8 @@ public class EgressRemediationServiceTest {
     assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
     verify(mockMailService)
-        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.DISABLE_USER), eq("Jupyter"));
+        .sendEgressRemediationEmail(
+            any(), eq(EgressRemediationAction.DISABLE_USER), isNull() /* Jupyter */);
   }
 
   @Test
@@ -480,7 +485,7 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq("Jupyter"));
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */);
   }
 
   @Test

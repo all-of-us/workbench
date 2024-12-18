@@ -861,6 +861,7 @@ public class InitialCreditsServiceTest {
   public void test_none() {
     DbUser user = new DbUser();
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
@@ -870,6 +871,7 @@ public class InitialCreditsServiceTest {
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(true).setExpirationTime(NOW));
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
@@ -883,10 +885,11 @@ public class InitialCreditsServiceTest {
                         .setExpirationTime(NOW)));
     when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
-  public void test_nullTimestamp() {
+  public void test_nullExpirationTimestamp() {
     DbUser user =
         new DbUser()
             .setUserInitialCreditsExpiration(
@@ -895,12 +898,30 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void test_validTimestamp() {
+  public void test_nullExtensionTimestamp() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(false).setExtensionTime(null));
+    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
+  }
+
+  @Test
+  public void test_validExpirationTimestamp() {
     DbUser user =
         new DbUser()
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(false).setExpirationTime(NOW));
     assertThat(initialCreditsService.getCreditsExpiration(user)).hasValue(NOW);
+  }
+
+  @Test
+  public void test_validExtensionTimestamp() {
+    DbUser user =
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration().setBypassed(false).setExtensionTime(NOW));
+    assertThat(initialCreditsService.getCreditsExtension(user)).hasValue(NOW);
   }
 
   @Test
@@ -1107,6 +1128,40 @@ public class InitialCreditsServiceTest {
         Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
     assertEquals(actualExpirationRecord.getExpirationTime(), expectedExtensionDate);
     assertEquals(actualExpirationRecord.getExtensionTime(), NOW);
+  }
+
+  @Test
+  public void test_checkInitialCreditsExtensionEligibility_noRemainingCredits() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    user.setUserInitialCreditsExpiration(
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(NOW)
+            .setExpirationTime(NOW)
+            .setExtensionTime(null));
+
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(300.0));
+    boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
+    assertThat(eligibility).isFalse();
+  }
+
+  @Test
+  public void test_checkInitialCreditsExtensionEligibility_hasRemainingCredits() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    user.setUserInitialCreditsExpiration(
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(NOW)
+            .setExpirationTime(NOW)
+            .setExtensionTime(null));
+
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(30.0));
+    boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
+    assertThat(eligibility).isTrue();
   }
 
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {
