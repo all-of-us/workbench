@@ -62,9 +62,7 @@ public class EgressVwbRemediationService extends EgressRemediationService {
         userService,
         leonardoNotebooksClient,
         egressEventAuditor,
-        egressEventDao,
-        egressEventMapper,
-        userAdminService);
+        egressEventDao);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
     this.egressEventMapper = egressEventMapper;
