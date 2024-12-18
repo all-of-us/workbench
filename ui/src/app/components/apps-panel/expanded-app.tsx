@@ -91,7 +91,7 @@ const SettingsButton = (props: { onClick: Function; disabled?: boolean }) => {
 
 const PauseRuntimeButton = (props: { workspace: Workspace }) => {
   const {
-    workspace: { billingStatus, namespace, googleProject },
+    workspace: { namespace, googleProject },
   } = props;
 
   const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
