@@ -14,6 +14,7 @@ import {
   Workspace,
 } from 'generated/fetch';
 
+import { isValidBilling } from '../../utils/workspace-utils';
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
@@ -105,7 +106,7 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 
   return (
     <PauseResumeButton
-      disabled={billingStatus === BillingStatus.INACTIVE}
+      disabled={!isValidBilling(props.workspace)}
       externalStatus={fromRuntimeStatus(runtimeStatus)}
       onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
@@ -274,8 +275,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       ? canDeleteRuntime(runtime?.status)
       : canDeleteApp(initialUserAppInfo);
 
-  const billingAccountDisabled =
-    workspace.billingStatus === BillingStatus.INACTIVE;
+  const billingAccountDisabled = !isValidBilling(workspace);
 
   const onClickDelete = switchCase(
     appType,

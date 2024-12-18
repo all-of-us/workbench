@@ -1,14 +1,28 @@
-import { FeaturedWorkspaceCategory, Workspace } from 'generated/fetch';
+import {
+  BillingStatus,
+  FeaturedWorkspaceCategory,
+  Workspace,
+} from 'generated/fetch';
 
 import { serverConfigStore } from 'app/utils/stores';
 
-export const isUsingFreeTierBillingAccount = (
-  workspace: Workspace
-): boolean => {
+export const isUsingInitialCredits = (workspace: Workspace): boolean => {
   return (
     workspace.billingAccountName ===
     'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId
   );
+};
+
+export const isValidBilling = (workspace: Workspace): boolean => {
+  const isInitialCredits = isUsingInitialCredits(workspace);
+  const enableInitialCreditsExpiration =
+    serverConfigStore.get().config.enableInitialCreditsExpiration;
+  return enableInitialCreditsExpiration
+    ? (isInitialCredits &&
+        !workspace.initialCredits.exhausted &&
+        !workspace.initialCredits.expired) ||
+        !isInitialCredits
+    : workspace.billingStatus === BillingStatus.ACTIVE;
 };
 
 export const isCommunityWorkspace = (workspace: Workspace): boolean => {

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { BillingStatus, Workspace } from 'generated/fetch';
 
+import { isValidBilling } from '../utils/workspace-utils';
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
@@ -101,6 +102,7 @@ export const AppsPanel = (props: {
   const addToExpandedApps = (appType: UIAppType) =>
     setUserExpandedApps([...userExpandedApps, appType]);
   const showActiveSection = activeApps.length > 0;
+  const validBilling = isValidBilling(workspace);
 
   return (
     <div data-test-id='apps-panel'>
@@ -146,7 +148,7 @@ export const AppsPanel = (props: {
             ) : (
               <TooltipTrigger
                 key={availableApp.appType}
-                disabled={workspace.billingStatus !== BillingStatus.INACTIVE}
+                disabled={validBilling}
                 content={BILLING_ACCOUNT_DISABLED_TOOLTIP}
               >
                 <div
@@ -158,9 +160,7 @@ export const AppsPanel = (props: {
                   <UnexpandedApp
                     appType={availableApp.appType}
                     key={availableApp.appType}
-                    disabled={
-                      workspace.billingStatus === BillingStatus.INACTIVE
-                    }
+                    disabled={!validBilling}
                     onClick={() =>
                       availableApp.appType === UIAppType.JUPYTER
                         ? addToExpandedApps(availableApp.appType)

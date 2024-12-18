@@ -42,6 +42,7 @@ import { validateNewNotebookName } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
+import { isValidBilling } from 'app/utils/workspace-utils';
 
 interface Props {
   closeFunction: Function;
@@ -341,7 +342,7 @@ export const ExportDatasetModal = ({
       creatingNewNotebook ? existingNotebooks : [],
       'notebookName'
     ),
-    ...(workspace.billingStatus === BillingStatus.INACTIVE
+    ...(!isValidBilling(workspace)
       ? { billing: [ACTION_DISABLED_INVALID_BILLING] }
       : {}),
     ...(!WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
