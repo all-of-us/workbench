@@ -20,7 +20,8 @@ export const isValidBilling = (workspace: Workspace): boolean => {
   return enableInitialCreditsExpiration
     ? (isInitialCredits &&
         !workspace.initialCredits.exhausted &&
-        !workspace.initialCredits.expired) ||
+        (!workspace.initialCredits.expired ||
+          workspace.initialCredits.expirationBypassed)) ||
         !isInitialCredits
     : workspace.billingStatus === BillingStatus.ACTIVE;
 };
