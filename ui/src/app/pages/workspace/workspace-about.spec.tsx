@@ -482,4 +482,32 @@ describe('WorkspaceAbout', () => {
     );
     expectButtonElementDisabled(requestExtensionButton);
   });
+
+  it('should not see initial credit expiration section when bypassed', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      creatorUser: {
+        userName: 'not-the-user@aou-rwb.com',
+        givenName: 'Bob',
+        familyName: 'Pop',
+      },
+      billingAccountName: 'billingAccounts/free',
+      initialCredits: {
+        exhausted: false,
+        expired: true,
+        expirationEpochMillis: nowPlusDays(-1),
+        expirationBypassed: true,
+      },
+    });
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        freeTierBillingAccountId: 'free',
+      },
+    });
+    component();
+    expect(
+      screen.queryByText(/workspace initial credit expiration/i)
+    ).not.toBeInTheDocument();
+  });
 });
