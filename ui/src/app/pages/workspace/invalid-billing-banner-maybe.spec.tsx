@@ -51,6 +51,10 @@ describe('InvalidBillingBanner', () => {
       screen.queryByRole('button', { name: /edit workspace/i })
     ).not.toBeInTheDocument();
 
+  beforeAll(() => {
+    jest.useFakeTimers().setSystemTime(new Date('December 13, 2016 14:54:00'));
+  });
+
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
 
@@ -134,7 +138,7 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits are expiring soon');
     expect(getBannerText()).toMatch(
-      'Your initial credits are expiring soon, which may affect your data and analyses in ' +
+      'Your initial credits will expire on Sat Dec 17 2016, which may affect your data and analyses in ' +
         'your workspace. You can request an extension or set up a valid billing account on the ' +
         'Edit Workspace page. For more information, read "Using All of Us Initial Credits" on the ' +
         'User Support Hub.'
@@ -161,7 +165,7 @@ describe('InvalidBillingBanner', () => {
 
     await screen.findByText('Workspace credits are expiring soon');
     expect(getBannerText()).toMatch(
-      'This workspace creator’s initial credits are expiring soon, which may affect the data ' +
+      'This workspace creator’s initial credits will expire on Sat Dec 17 2016, which may affect the data ' +
         'and analyses. This workspace was created by Someone Else. For more information, ' +
         'read "Using All of Us Initial Credits" on the User Support Hub.'
     );
