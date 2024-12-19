@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
@@ -23,7 +24,8 @@ public interface EgressEventDao
   Page<DbEgressEvent> findAllByUserAndWorkspaceOrderByCreationTimeDesc(
       DbUser user, DbWorkspace workspace, Pageable p);
 
-  List<DbEgressEvent> findAllByUserAndStatusNot(DbUser user, DbEgressEventStatus status);
+  List<DbEgressEvent> findAllByUserAndStatusNotIn(
+      DbUser user, Collection<DbEgressEventStatus> status);
 
   List<DbEgressEvent> findAllByUserAndWorkspaceAndCreationTimeBetweenAndCreationTimeNot(
       DbUser user,

@@ -68,7 +68,9 @@ export const TanagraDev = fp.flow(
             height: '100%',
             width: '100%',
           }}
-          src={`${tanagraUrl}/tanagra/ui#/tanagra/underlays/aou${bigqueryDataset}/studies/${namespace}/export`}
+          src={`${tanagraUrl}/tanagra/ui#/tanagra/underlays/aou${
+            bigqueryDataset.split('_')[0]
+          }/studies/${namespace}/export`}
         />
       </div>
     );

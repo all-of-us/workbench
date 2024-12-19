@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.VwbEgressEventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -100,8 +101,38 @@ public class EgressEventServiceImpl implements EgressEventService {
     this.egressEventAuditor.fireEgressEventForUser(event, egressUser.get());
 
     Optional<DbEgressEvent> maybeEvent =
-        this.maybePersistEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
-    maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
+        this.maybePersistSumoEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
+    maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId(), false));
+  }
+
+  @Override
+  public void handleVwbEvent(VwbEgressEventRequest egressEvent) {
+    Optional<DbUser> egressUser = userService.getByUsername(egressEvent.getUserEmail());
+    if (egressUser.isEmpty()) {
+      logger.severe(
+          String.format(
+              "An egress event happened for workspace: %s, but we're unable to find a user %s.",
+              egressEvent.getVwbWorkspaceId(), egressEvent.getUserEmail()));
+    }
+    this.egressEventAuditor.fireVwbEgressEvent(egressEvent, egressUser.get());
+    DbEgressEvent event =
+        egressEventDao.save(
+            new DbEgressEvent()
+                .setUser(egressUser.orElse(null))
+                .setVwbEgressEventId(egressEvent.getVwbEgressEventId())
+                .setVwbWorkspaceId(egressEvent.getVwbWorkspaceId())
+                .setVwbVmName(egressEvent.getVmName())
+                .setGcpProjectId(egressEvent.getGcpProjectId())
+                .setVwbIncidentCount(egressEvent.getIncidentCount().intValue())
+                .setEgressMegabytes(
+                    Optional.ofNullable(egressEvent.getEgressMib())
+                        // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
+                        .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
+                        .orElse(null))
+                .setEgressWindowSeconds(
+                    Optional.ofNullable(egressEvent.getTimeWindowDuration()).orElse(null))
+                .setStatus(DbEgressEventStatus.PENDING));
+    taskQueueService.pushEgressEventTask(event.getEgressEventId(), true);
   }
 
   @NotNull
@@ -139,7 +170,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     return windowStart.isBefore(clock.instant().minus(windowDuration.multipliedBy(2L)));
   }
 
-  private Optional<DbEgressEvent> maybePersistEgressEvent(
+  private Optional<DbEgressEvent> maybePersistSumoEgressEvent(
       SumologicEgressEvent event,
       Optional<DbUser> userMaybe,
       Optional<DbWorkspace> workspaceMaybe) {

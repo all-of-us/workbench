@@ -136,7 +136,7 @@ ENVIRONMENTS = {
     # turn on authN
     :tanagra_auth_disable_checks => "false",
     :tanagra_auth_gcp_access_token => "true",
-    :tanagra_underlay_files => "aou/R2022Q4R13_preprod,aou/C2022Q4R13_preprod",
+    :tanagra_underlay_files => "aou/R2022Q4R13_preprod,aou/C2022Q4R13_preprod,aou/R2024Q3R4_preprod,aou/C2024Q3R4_preprod",
     :tanagra_tag => "0.0.690",
     :accessTiers => {
       "registered" => {
