@@ -164,4 +164,30 @@ else
   SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_steps_intraday\`"
 fi
 
+if [[ "$TABLE_LIST" == *"prep_device"* ]]
+then
+  echo "CREATE TABLE - device"
+  
+  # Have to delete table since initial run it is  a non-clustered table
+  # BQ won't allow create or replace on non-clustered with clustered.
+  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.device"
+  
+  bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+  "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.device\` CLUSTER BY person_id AS
+  SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_device\`"
+else
+  bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+  "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_device\` AS
+  SELECT ROW_NUMBER() OVER() AS row_id, * FROM \`$BQ_PROJECT.$BQ_DATASET.device\`"
+  
+  # Have to delete table since initial run it is  a non-clustered table
+  # BQ won't allow create or replace on non-clustered with clustered.
+  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.device"
+  
+  echo "CREATE TABLE - device"
+  bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+  "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.device\` CLUSTER BY person_id AS
+  SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_device\`"
+fi
+
 echo "Done creating tables"
