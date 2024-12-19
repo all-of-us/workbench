@@ -397,6 +397,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCdrVersion(cdrVersion);
     dbWorkspace.setGoogleProject(fcWorkspace.getGoogleProject());
     dbWorkspace.setUsesTanagra(workspace.isUsesTanagra());
+    dbWorkspace.setVwbWorkspace(workspace.isVwbWorkspace());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
@@ -465,6 +466,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceTerraName) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
+    WorkspaceService workspaceService =
+            workspaceServiceFactory.getWorkspaceService(dbWorkspace.isVwbWorkspace());
     return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceTerraName));
   }
 
@@ -611,15 +615,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
-    String billingProject = createTerraBillingProject(accessTier);
-    String firecloudName = FireCloudService.toFirecloudName(toWorkspace.getName());
-    RawlsWorkspaceDetails toFcWorkspace =
-        fireCloudService.cloneWorkspace(
-            fromWorkspaceNamespace,
-            fromWorkspaceTerraName,
-            billingProject,
-            firecloudName,
-            accessTier.getAuthDomainName());
+    RawlsWorkspaceDetails toFcWorkspace = workspaceService.cloneWorkspace(fromWorkspaceNamespace, fromWorkspaceTerraName, toWorkspace, toCdrVersion);
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
 
     try {
@@ -667,18 +663,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
-  /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */
-  private String createTerraBillingProject(DbAccessTier accessTier) {
-    DbUser user = userProvider.get();
-    String billingProject = fireCloudService.createBillingProjectName();
-    fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
-
-    // We use the AoU Application Service Account to create the billing account, then add the user
-    // as an additional owner.  In this way, we can make sure that the AoU App SA is an owner on
-    // all billing projects.
-    fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
-    return billingProject;
-  }
 
   @Override
   public ResponseEntity<WorkspaceBillingUsageResponse> getBillingUsage(
