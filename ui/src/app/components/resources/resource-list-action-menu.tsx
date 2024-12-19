@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BillingStatus, WorkspaceResource } from 'generated/fetch';
+import { WorkspaceResource } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { CohortActionMenu } from 'app/components/resources/cohort-action-menu';
@@ -16,6 +16,7 @@ import {
   isNotebook,
 } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import { isValidBilling } from 'app/utils/workspace-utils';
 
 export interface CommonActionMenuProps {
   resource: WorkspaceResource;
@@ -26,10 +27,9 @@ interface Props extends CommonActionMenuProps {
   workspace: WorkspaceData;
 }
 export const ResourceListActionMenu = (props: Props) => {
-  const { resource } = props;
+  const { resource, workspace } = props;
 
-  const inactiveBilling =
-    resource.workspaceBillingStatus === BillingStatus.INACTIVE;
+  const inactiveBilling = !isValidBilling(workspace);
 
   return cond(
     [isCohort(resource), () => <CohortActionMenu {...props} />],

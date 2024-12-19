@@ -5,7 +5,9 @@ import * as React from 'react';
 import { WorkspaceResource } from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { renderWithRouter } from 'testing/react-test-helpers';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
@@ -23,6 +25,10 @@ const COHORT: WorkspaceResource = {
 };
 
 describe(ResourceList.name, () => {
+  beforeEach(async () => {
+    serverConfigStore.set({ config: defaultServerConfig });
+  });
+
   it('should render when there are no resources', async () => {
     renderWithRouter(<ResourceList workspaceResources={[]} />);
     await screen.findByTestId('resources-table');

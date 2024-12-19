@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { Workspace, WorkspaceActiveStatus } from 'generated/fetch';
 
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 
 import { WorkspaceInfoField } from './workspace-info-field';
 import { WorkspacePublishingInfo } from './workspace-publishing-info';
@@ -26,11 +26,11 @@ export const BasicInformation = ({
           {activeStatus}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Billing Account Type'>
-          {isUsingFreeTierBillingAccount(workspace)
+          {isUsingInitialCredits(workspace)
             ? `Initial credits (${workspace.creatorUser.userName})`
             : 'User provided'}
         </WorkspaceInfoField>
-        {isUsingFreeTierBillingAccount(workspace) && (
+        {isUsingInitialCredits(workspace) && (
           <WorkspaceInfoField labelText='Initial Credits Billing Status'>
             {workspace.initialCredits?.exhausted
               ? 'Exhausted'

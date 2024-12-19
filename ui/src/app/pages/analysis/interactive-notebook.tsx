@@ -2,7 +2,7 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
+import { Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
@@ -41,6 +41,7 @@ import { openAppOrConfigPanel } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
+import { isValidBilling } from 'app/utils/workspace-utils';
 import Cookies from 'js-cookie';
 
 import {
@@ -292,7 +293,7 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private get billingLocked() {
-      return this.props.workspace.billingStatus === BillingStatus.INACTIVE;
+      return !isValidBilling(this.props.workspace);
     }
 
     private get canStartRuntimes() {

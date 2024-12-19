@@ -7,12 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import {
-  AppStatus,
-  BillingStatus,
-  UserAppEnvironment,
-  Workspace,
-} from 'generated/fetch';
+import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
@@ -46,6 +41,7 @@ import {
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
+import { isValidBilling } from 'app/utils/workspace-utils';
 
 import { AppBanner } from './app-banner';
 import { AppsPanelButton } from './apps-panel-button';
@@ -95,7 +91,7 @@ const SettingsButton = (props: { onClick: Function; disabled?: boolean }) => {
 
 const PauseRuntimeButton = (props: { workspace: Workspace }) => {
   const {
-    workspace: { billingStatus, namespace, googleProject },
+    workspace: { namespace, googleProject },
   } = props;
 
   const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
@@ -105,7 +101,7 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 
   return (
     <PauseResumeButton
-      disabled={billingStatus === BillingStatus.INACTIVE}
+      disabled={!isValidBilling(props.workspace)}
       externalStatus={fromRuntimeStatus(runtimeStatus)}
       onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
@@ -274,8 +270,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       ? canDeleteRuntime(runtime?.status)
       : canDeleteApp(initialUserAppInfo);
 
-  const billingAccountDisabled =
-    workspace.billingStatus === BillingStatus.INACTIVE;
+  const billingAccountDisabled = !isValidBilling(workspace);
 
   const onClickDelete = switchCase(
     appType,
