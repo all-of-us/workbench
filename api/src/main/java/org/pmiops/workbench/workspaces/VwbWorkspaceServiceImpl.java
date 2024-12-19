@@ -95,12 +95,14 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
-    throw new UnsupportedOperationException("Not implemented in VWB");
+    logger.warn("getFeaturedWorkspaces not implemented in VWB");
+    return Collections.emptyList();
   }
 
   @Override
   public String getPublishedWorkspacesGroupEmail() {
-    throw new UnsupportedOperationException("Not implemented in VWB");
+    logger.warn("getPublishedWorkspacesGroupEmail not implemented in VWB");
+    return null;
   }
 
   @Override
@@ -113,31 +115,37 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
+    logger.warn("saveAndCloneCohortsConceptSetsAndDataSets not implemented in VWB");
     return null;
   }
 
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
+    logger.warn("getFirecloudUserRoles not implemented in VWB");
     return null;
   }
 
   @Override
   public List<DbUserRecentWorkspace> getRecentWorkspaces() {
+    logger.warn("getRecentWorkspaces not implemented in VWB");
     return null;
   }
 
   @Override
   public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
+    logger.warn("updateRecentWorkspaces not implemented in VWB");
     return null;
   }
 
   @Override
   public Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet) {
+    logger.warn("getWorkspacesByGoogleProject not implemented in VWB");
     return null;
   }
 
   @Override
   public DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace) {
+    logger.warn("lookupWorkspaceByNamespace not implemented in VWB");
     return null;
   }
 
@@ -148,31 +156,42 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public CohortList listTanagraCohorts(String workspaceNamespace, Integer offset, Integer limit) {
+    logger.warn("listTanagraCohorts not implemented in VWB");
     return null;
   }
 
   @Override
   public FeatureSetList listTanagraFeatureSets(
       String workspaceNamespace, Integer offset, Integer limit) {
+    logger.warn("listTanagraFeatureSets not implemented in VWB");
     return null;
   }
 
   @Override
   public void cloneTanagraCohort(
-      Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace) {}
+      Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace) {
+    logger.warn("cloneTanagraCohort not implemented in VWB");
+  }
 
   @Override
   public void cloneTanagraFeatureSet(
-      FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace) {}
+      FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace) {
+    logger.warn("cloneTanagraFeatureSet not implemented in VWB");
+  }
 
   @Override
-  public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {}
+  public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
+    logger.warn("updateInitialCreditsExhaustion not implemented in VWB");
+  }
 
   @Override
-  public void publishCommunityWorkspace(DbWorkspace workspace) {}
+  public void publishCommunityWorkspace(DbWorkspace workspace) {
+    logger.warn("publishCommunityWorkspace not implemented in VWB");
+  }
 
   @Override
   public List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
+    logger.warn("getWorkspaceOwnerList not implemented in VWB");
     return null;
   }
 
@@ -202,6 +221,7 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
       String fromWorkspaceId,
       Workspace toWorkspace,
       DbCdrVersion cdrVersion) {
+    logger.warn("cloneWorkspace not implemented in VWB");
     return null;
   }
 }
