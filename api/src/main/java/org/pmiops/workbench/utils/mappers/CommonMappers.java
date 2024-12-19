@@ -155,4 +155,10 @@ public class CommonMappers {
       DbUser dbUser, @Context InitialCreditsService initialCreditsService) {
     return initialCreditsService.checkInitialCreditsExtensionEligibility(dbUser);
   }
+
+  @Named("isInitialCreditExpirationBypassed")
+  public boolean isInitialCreditExpirationBypassed(
+      DbUser dbUser, @Context InitialCreditsService initialCreditsService) {
+    return initialCreditsService.isExpirationBypassed(dbUser);
+  }
 }
