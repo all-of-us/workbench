@@ -5,7 +5,9 @@ import { UserMetricsApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { screen } from '@testing-library/react';
 import { RecentResources } from 'app/pages/homepage/recent-resources';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { renderWithRouter } from 'testing/react-test-helpers';
 import {
   UserMetricsApiStub,
@@ -15,6 +17,7 @@ import { workspaceStubs } from 'testing/stubs/workspaces';
 
 describe('RecentResourcesComponent', () => {
   beforeEach(() => {
+    serverConfigStore.set({ config: defaultServerConfig });
     registerApiClient(UserMetricsApi, new UserMetricsApiStub());
   });
 

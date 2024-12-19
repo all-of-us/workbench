@@ -8,6 +8,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import defaultServerConfig from '../../../testing/default-server-config';
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -30,7 +31,11 @@ import {
   currentWorkspaceStore,
   sidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { MatchParams, userAppsStore } from 'app/utils/stores';
+import {
+  MatchParams,
+  serverConfigStore,
+  userAppsStore,
+} from 'app/utils/stores';
 
 import {
   createListAppsRStudioResponse,
@@ -44,6 +49,7 @@ let mockAppsApi;
 let mockNotebooksApi;
 
 beforeEach(async () => {
+  serverConfigStore.set({ config: defaultServerConfig });
   currentWorkspaceStore.next({
     ...workspaceStubs[0],
     accessLevel: WorkspaceAccessLevel.WRITER,
