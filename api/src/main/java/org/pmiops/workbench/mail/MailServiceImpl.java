@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
 public class MailServiceImpl implements MailService {
   private static final String AOU_ITALICS = "<i>All of Us</i>";
   private static final String EGRESS_FORM_LINK =
-      "<a href=\"https://redcap.pmi-ops.org/surveys/?s=YJ8FJXRJD7JY4NK7\">Researcher Account Activity Confirmation</a>";
+      "<a href=\"https://redcap.pmi-ops.org/surveys/?s=K4PA9H8E979AHJEP\">Researcher Account Activity Confirmation</a>";
   private static final String DOWNLOAD_FORM_LINK =
       "<a href=\"https://redcap.pmi-ops.org/surveys/?s=YRXMJFJ97J3WMWLE\">Large Data Download Request</a>";
 
