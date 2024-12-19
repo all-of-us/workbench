@@ -359,8 +359,8 @@ public class InitialCreditsService {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
 
-    // After initial credit expiration is live,  userInitialCreditsExpiration should never be null except for
-    // users who have not yet finished training. Could we safely remove this?
+    // After initial credit expiration is live,  userInitialCreditsExpiration should never be null
+    // except for users who have not yet finished training. Could we safely remove this?
     return userInitialCreditsExpiration != null
         && (userInitialCreditsExpiration.isBypassed()
             || institutionService.shouldBypassForCreditsExpiration(user));
