@@ -55,6 +55,10 @@ describe('InvalidBillingBanner', () => {
     jest.useFakeTimers().setSystemTime(new Date('December 13, 2016 14:54:00'));
   });
 
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
 
