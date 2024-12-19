@@ -468,7 +468,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceTerraName) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     WorkspaceService workspaceService =
-            workspaceServiceFactory.getWorkspaceService(dbWorkspace.isVwbWorkspace());
+        workspaceServiceFactory.getWorkspaceService(dbWorkspace.isVwbWorkspace());
     return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceTerraName));
   }
 
@@ -615,7 +615,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
-    RawlsWorkspaceDetails toFcWorkspace = workspaceService.cloneWorkspace(fromWorkspaceNamespace, fromWorkspaceTerraName, toWorkspace, toCdrVersion);
+    RawlsWorkspaceDetails toFcWorkspace =
+        workspaceService.cloneWorkspace(
+            fromWorkspaceNamespace, fromWorkspaceTerraName, toWorkspace, toCdrVersion);
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
 
     try {
@@ -662,7 +664,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
-
 
   @Override
   public ResponseEntity<WorkspaceBillingUsageResponse> getBillingUsage(
