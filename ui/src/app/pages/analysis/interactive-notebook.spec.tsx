@@ -8,7 +8,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import defaultServerConfig from '../../../testing/default-server-config';
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -37,6 +36,7 @@ import {
   userAppsStore,
 } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   createListAppsRStudioResponse,
   createListAppsSASResponse,

@@ -9,7 +9,6 @@ import {
   RuntimeApi,
 } from 'generated/fetch';
 
-import defaultServerConfig from '../../testing/default-server-config';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
@@ -17,6 +16,7 @@ import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import { AppsApi as LeoAppsApi } from 'notebooks-generated/fetch';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { LeoAppsApiStub } from 'testing/stubs/leo-apps-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
