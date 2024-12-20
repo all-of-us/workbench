@@ -217,7 +217,6 @@ public class TestMockFactory {
     doAnswer(
             invocation -> {
               Workspace capturedWorkspace = (Workspace) invocation.getArguments()[0];
-              DbCdrVersion capturedCdrVersion = (DbCdrVersion) invocation.getArguments()[1];
               RawlsWorkspaceDetails fcWorkspace =
                   createTerraWorkspace(
                       capturedWorkspace.getNamespace(), capturedWorkspace.getName(), null);
