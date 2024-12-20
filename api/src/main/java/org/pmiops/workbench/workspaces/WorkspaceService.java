@@ -3,11 +3,11 @@ package org.pmiops.workbench.workspaces;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.tanagra.model.Cohort;
 import org.pmiops.workbench.tanagra.model.CohortList;
 import org.pmiops.workbench.tanagra.model.FeatureSet;
@@ -90,4 +90,12 @@ public interface WorkspaceService {
   void publishCommunityWorkspace(DbWorkspace workspace);
 
   List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace);
+
+  RawlsWorkspaceDetails createWorkspace(Workspace workspace, DbCdrVersion cdrVersion);
+
+  RawlsWorkspaceDetails cloneWorkspace(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      Workspace toWorkspace,
+      DbCdrVersion cdrVersion);
 }

@@ -28,6 +28,8 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -262,6 +264,71 @@ public class WorkspaceAuthServiceTest {
         .removeOwnerFromBillingProjectAsService(anyString(), anyString());
     verify(mockFireCloudService, times(expectedBpAdditions))
         .addOwnerToBillingProject(anyString(), anyString());
+  }
+
+  @Test
+  public void validateWorkspaceTierAccess_userHasControlledTierAccess() {
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setCdrVersion(
+        new DbCdrVersion()
+            .setAccessTier(
+                new DbAccessTier().setShortName(AccessTierService.CONTROLLED_TIER_SHORT_NAME)));
+    when(mockAccessTierService.getAccessTierShortNamesForUser(any(DbUser.class)))
+        .thenReturn(List.of(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+
+    assertDoesNotThrow(() -> workspaceAuthService.validateWorkspaceTierAccess(dbWorkspace));
+  }
+
+  @Test
+  public void validateWorkspaceTierAccess_userHasRegisteredTierAccess() {
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setCdrVersion(
+        new DbCdrVersion()
+            .setAccessTier(
+                new DbAccessTier().setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)));
+    when(mockAccessTierService.getAccessTierShortNamesForUser(any(DbUser.class)))
+        .thenReturn(
+            List.of(
+                AccessTierService.REGISTERED_TIER_SHORT_NAME,
+                AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+
+    assertDoesNotThrow(() -> workspaceAuthService.validateWorkspaceTierAccess(dbWorkspace));
+  }
+
+  @Test
+  public void validateWorkspaceTierAccess_userDoesNotHaveControlledTierAccess() {
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setCdrVersion(
+        new DbCdrVersion()
+            .setAccessTier(
+                new DbAccessTier().setShortName(AccessTierService.CONTROLLED_TIER_SHORT_NAME)));
+    when(mockAccessTierService.getAccessTierShortNamesForUser(any(DbUser.class)))
+        .thenReturn(List.of(AccessTierService.REGISTERED_TIER_SHORT_NAME));
+
+    ForbiddenException thrown =
+        assertThrows(
+            ForbiddenException.class,
+            () -> workspaceAuthService.validateWorkspaceTierAccess(dbWorkspace));
+
+    assertThat(thrown).hasMessageThat().contains("User with username");
+  }
+
+  @Test
+  public void validateWorkspaceTierAccess_userDoesNotHaveRegisteredTierAccess() {
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setCdrVersion(
+        new DbCdrVersion()
+            .setAccessTier(
+                new DbAccessTier().setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)));
+    when(mockAccessTierService.getAccessTierShortNamesForUser(any(DbUser.class)))
+        .thenReturn(List.of(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+
+    ForbiddenException thrown =
+        assertThrows(
+            ForbiddenException.class,
+            () -> workspaceAuthService.validateWorkspaceTierAccess(dbWorkspace));
+
+    assertThat(thrown).hasMessageThat().contains("User with username");
   }
 
   private DbWorkspace stubDaoGetRequired(
