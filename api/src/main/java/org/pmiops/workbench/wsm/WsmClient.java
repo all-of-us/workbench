@@ -107,7 +107,7 @@ public class WsmClient {
       }
       retries++;
       Thread.sleep(10_000);
-    } while (!(state == State.BROKEN) && retries < 12);
+    } while (!(State.BROKEN == state) && retries < 12);
     throw new WorkbenchException("Workspace creation is still in progress");
   }
 

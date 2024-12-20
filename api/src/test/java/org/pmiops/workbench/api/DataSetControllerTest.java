@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -144,12 +145,11 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.wsm.WsmClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -209,6 +209,9 @@ public class DataSetControllerTest {
   @Autowired private WorkspacesController workspacesController;
 
   @Autowired private FirecloudMapper firecloudMapper;
+
+  @Autowired private WorkspaceService workspaceService;
+  @Autowired private WorkspaceServiceFactory workspaceServiceFactory;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
@@ -282,6 +285,8 @@ public class DataSetControllerTest {
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
     WorkspaceOperationMapper.class,
+    WorkspaceServiceFactory.class,
+    WsmClient.class
   })
   static class Configuration {
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
@@ -350,6 +355,8 @@ public class DataSetControllerTest {
             .researchPurpose(new ResearchPurpose())
             .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
             .billingAccountName("billing-account");
+
+    when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
