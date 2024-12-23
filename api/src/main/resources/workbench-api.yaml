@@ -7067,6 +7067,10 @@ components:
         defaultGceVmZone:
           type: string
           description: The zone that is selected by default when creating a GCE VM. This must be one of the values specified in gceVmZones.
+        enableVWBWorkspaceCreation:
+          type: boolean
+          default: false
+          description: If true, enable the creating workspaces in Verily Workbench
     AccessModuleConfig:
       required:
       - expirable

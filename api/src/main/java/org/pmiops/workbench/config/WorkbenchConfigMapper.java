@@ -68,5 +68,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "isDownForMaintenance", source = "config.server.isDownForMaintenance")
   @Mapping(target = "gceVmZones", source = "config.firecloud.gceVmZones")
   @Mapping(target = "defaultGceVmZone", source = "config.firecloud.defaultGceVmZone")
+  @Mapping(target = "enableVWBWorkspaceCreation", source = "config.featureFlags.enableVWBWorkspaceCreation")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }
