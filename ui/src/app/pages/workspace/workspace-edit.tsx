@@ -232,6 +232,9 @@ export const styles = reactStyles({
   dataAppsVersionSpacing: {
     width: '23em',
   },
+  labEnvironmentSpacing: {
+    width: '20em',
+  },
 });
 
 // default to creating workspaces in the Registered Tier
@@ -1714,6 +1717,38 @@ export const WorkspaceEdit = fp.flow(
                 )}
               </FlexRow>
             </WorkspaceEditSection>
+            {this.isMode(WorkspaceEditMode.Create) &&
+              serverConfigStore.get().config.enableVWBWorkspaceCreation && (
+                <WorkspaceEditSection
+                  header='Research Environment'
+                  description='All of Us is now on Verily Workbench. Securely analyze data with intuitive tools and enhanced privacy.'
+                  descriptionStyle={{ marginLeft: '0rem' }}
+                >
+                  <select
+                    style={{
+                      ...styles.selectInput,
+                      ...styles.labEnvironmentSpacing,
+                    }}
+                    value={this.state.workspace.vwbWorkspace ? 'VWB' : 'AOU'}
+                    onChange={(v: React.FormEvent<HTMLSelectElement>) => {
+                      const selectedLab = v.currentTarget.value;
+                      this.setState(
+                        fp.set(
+                          ['workspace', 'vwbWorkspace'],
+                          selectedLab === 'VWB'
+                        )
+                      );
+                    }}
+                  >
+                    <option key='aou' value='AOU'>
+                      Researcher Workbench (legacy)
+                    </option>
+                    <option key='wb' value='VWB'>
+                      Verily Workbench
+                    </option>
+                  </select>
+                </WorkspaceEditSection>
+              )}
             {this.isMode(WorkspaceEditMode.Duplicate) && (
               <WorkspaceEditSection header='Options for duplicate workspace'>
                 <CheckBox
