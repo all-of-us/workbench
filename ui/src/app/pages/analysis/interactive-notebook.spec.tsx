@@ -30,8 +30,13 @@ import {
   currentWorkspaceStore,
   sidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { MatchParams, userAppsStore } from 'app/utils/stores';
+import {
+  MatchParams,
+  serverConfigStore,
+  userAppsStore,
+} from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   createListAppsRStudioResponse,
   createListAppsSASResponse,
@@ -44,6 +49,7 @@ let mockAppsApi;
 let mockNotebooksApi;
 
 beforeEach(async () => {
+  serverConfigStore.set({ config: defaultServerConfig });
   currentWorkspaceStore.next({
     ...workspaceStubs[0],
     accessLevel: WorkspaceAccessLevel.WRITER,

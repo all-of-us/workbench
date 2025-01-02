@@ -17,7 +17,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { formatUsd } from 'app/utils/numbers';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 
 import { EnvironmentCostEstimator } from './environment-cost-estimator';
 import { StartStopEnvironmentButton } from './start-stop-environment-button';
@@ -129,7 +129,7 @@ export const EnvironmentInformedActionPanel = ({
         {showCostsDrawnFromWithCosts && (
           <CostsDrawnFrom
             {...{ creatorFreeCreditsRemaining }}
-            usingInitialCredits={isUsingFreeTierBillingAccount(workspace)}
+            usingInitialCredits={isUsingInitialCredits(workspace)}
             userIsCreator={profile.username === workspace.creatorUser.userName}
             billingAccountName={workspace.billingAccountName}
             style={{
@@ -142,7 +142,7 @@ export const EnvironmentInformedActionPanel = ({
       {!showCostsDrawnFromWithCosts && (
         <CostsDrawnFrom
           {...{ creatorFreeCreditsRemaining }}
-          usingInitialCredits={isUsingFreeTierBillingAccount(workspace)}
+          usingInitialCredits={isUsingInitialCredits(workspace)}
           userIsCreator={profile.username === workspace.creatorUser.userName}
           billingAccountName={workspace.billingAccountName}
         />
