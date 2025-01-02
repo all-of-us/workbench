@@ -14,12 +14,13 @@ class CloudSqlProxyContext < ServiceAccountContext
     super do
       ps = nil
       docker_container_id = nil
-      instance = "#{@project}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307"
+      instance = "#{@project}:us-central1:workbenchmaindb"
       if Workbench.in_docker?
         ps = fork do
           exec(*%W{
           cloud_sql_proxy
-            -instances #{instance}
+            --port 3307
+            #{instance}
             -credential_file=#{@path}
           })
         end
@@ -33,8 +34,9 @@ class CloudSqlProxyContext < ServiceAccountContext
              -p 0.0.0.0:3307:3307
              --rm
              --name #{DOCKER_PROXY_NAME}
-             gcr.io/cloudsql-docker/gce-proxy:1.19.1 /cloud_sql_proxy
-             -instances=#{instance}
+             gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.2 /cloud_sql_proxy
+             --port 3307
+             #{instance}
              -credential_file=/config
           }).chomp
       end
