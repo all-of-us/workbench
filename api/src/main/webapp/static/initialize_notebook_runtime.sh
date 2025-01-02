@@ -48,7 +48,10 @@ cat <<EOF | sudo -E -u jupyter tee ${ignore_file}
 !LICENSE*
 EOF
 
-sudo -E -u jupyter /usr/bin/git config --global core.excludesfile ${ignore_file}
+# Ignore error if this fails. This is a best-effort attempt to set the global gitignore for users.
+sudo -E -u jupyter /usr/bin/git config --global core.excludesfile ${ignore_file} || true
+# Ignore error if this fails. This is a best-effort attempt to clean up trash for users.
+sudo -E -u jupyter rm -rf /home/jupyter/.local/share/Trash/files/* || true
 
 # Initialize a default nextflow config. Don't overwrite in case the user has
 # customized their nextflow config file on their PD.
