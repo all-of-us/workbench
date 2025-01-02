@@ -43,8 +43,7 @@ ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
 ENV GRADLE_VERSION 7.6.1
 
-RUN curl -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip \
-  && ls /tmp/ \
+RUN curl -L -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip \
   && unzip /tmp/gradle.zip -d /opt/gradle
 ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
