@@ -101,7 +101,7 @@ public class InitialCreditsService {
    * Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to
    * passing thresholds or exceeding limits.
    */
-  public void checkFreeTierBillingUsageForUsers(
+  public void checkInitialCreditUsageForUsers(
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
     String userIdsAsString =
         users.stream()
@@ -116,7 +116,7 @@ public class InitialCreditsService {
       logger.info("No workspaces require updates");
       return;
     }
-    updateFreeTierUsageInDb(allCostsInDbForUsers, liveCostsInBQ, workspaceByProject);
+    updateInitialCreditUsageInDb(allCostsInDbForUsers, liveCostsInBQ, workspaceByProject);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator = getDbCostByCreatorCache(allCostsInDbForUsers);
@@ -131,7 +131,7 @@ public class InitialCreditsService {
       return;
     }
 
-    taskQueueService.pushInitialCreditsExpiryTask(
+    taskQueueService.pushCheckInitialCreditExhaustionTask(
         filteredUsers.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
   }
 
@@ -148,7 +148,7 @@ public class InitialCreditsService {
    */
   private Set<DbUser> filterUsersHigherThanTheLowestThreshold(
       Set<DbUser> users, final Map<Long, Double> liveCostByCreator) {
-    return workbenchConfigProvider.get().billing.freeTierCostAlertThresholds.stream()
+    return workbenchConfigProvider.get().billing.initialCreditCostAlertThresholds.stream()
         .min(Comparator.naturalOrder())
         .map(
             lowestThreshold ->
@@ -201,7 +201,7 @@ public class InitialCreditsService {
    */
   public double getUserFreeTierDollarLimit(DbUser user) {
     return CostComparisonUtils.getUserFreeTierDollarLimit(
-        user, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
+        user, workbenchConfigProvider.get().billing.defaultInitialCreditDollarLimit);
   }
 
   /**
@@ -225,7 +225,7 @@ public class InitialCreditsService {
         && (previousLimitMaybe != null
             || CostComparisonUtils.costsDiffer(
                 newDollarLimit,
-                workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit))) {
+                workbenchConfigProvider.get().billing.defaultInitialCreditDollarLimit))) {
 
       // TODO: prevent setting this limit directly except in this method?
       user.setFreeTierCreditsLimitDollarsOverride(newDollarLimit);
@@ -569,7 +569,7 @@ public class InitialCreditsService {
                                         < Duration.ofDays(
                                                 workbenchConfigProvider.get()
                                                     .billing
-                                                    .numberOfDaysToConsiderForFreeTierUsageUpdate)
+                                                    .numberOfDaysToConsiderForInitialCreditUsageUpdate)
                                             .toMillis()))))
             .collect(Collectors.toList());
 
@@ -610,7 +610,7 @@ public class InitialCreditsService {
   }
 
   /**
-   * Use the live cost from BQ to update the workspace free tier usage in the DB.
+   * Use the live cost from BQ to update the workspace initial credit usage in the DB.
    *
    * @param workspaceCostViews List of {@link WorkspaceCostView} containing all workspaces for the
    *     current batch of users
@@ -618,7 +618,7 @@ public class InitialCreditsService {
    *     workspaces and the values are the workspace IDs.
    * @return a Map of all live costs.
    */
-  private void updateFreeTierUsageInDb(
+  private void updateInitialCreditUsageInDb(
       List<WorkspaceCostView> workspaceCostViews,
       Map<String, Double> allCostsInBqByProject,
       Map<String, Long> workspaceByProject) {
@@ -637,11 +637,12 @@ public class InitialCreditsService {
 
   private boolean costAboveLimit(final DbUser user, final double currentCost) {
     return CostComparisonUtils.costAboveLimit(
-        user, currentCost, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
+        user, currentCost, workbenchConfigProvider.get().billing.defaultInitialCreditDollarLimit);
   }
 
   private Integer getMinutesBeforeLastFreeTierJob() {
-    return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob)
+    return Optional.ofNullable(
+            workbenchConfigProvider.get().billing.minutesBeforeLastInitialCreditJob)
         .orElse(120);
   }
 
