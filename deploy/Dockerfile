@@ -27,7 +27,7 @@ RUN n 18
 ENV CLOUD_SDK_VERSION 503.0.0
 
 WORKDIR /root
-RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
+RUN curl -o gcloud.tgz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
   tar -xf gcloud.tgz && \
   ./google-cloud-sdk/install.sh  --quiet && \
   ./google-cloud-sdk/bin/gcloud components install app-engine-java && \
@@ -43,7 +43,7 @@ ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
 ENV GRADLE_VERSION 7.6.1
 
-RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip \
+RUN curl -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
   && unzip /tmp/gradle.zip -d /opt/gradle
 ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 

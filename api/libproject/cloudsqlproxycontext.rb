@@ -21,7 +21,7 @@ class CloudSqlProxyContext < ServiceAccountContext
           cloud_sql_proxy
             --port 3307
             #{instance}
-            --credential-file=#{@path}
+            --credentials-file=#{@path}
           })
         end
       else
@@ -37,7 +37,7 @@ class CloudSqlProxyContext < ServiceAccountContext
              gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.2 /cloud_sql_proxy
              --port 3307
              #{instance}
-             --credential-file=/config
+             --credentials-file=/config
           }).chomp
       end
       begin
