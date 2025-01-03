@@ -56,6 +56,12 @@
       "methodLogicalVersion": 3,
       "minExtractionScatterTasks": 350,
       "extractionScatterTasksPerSample": 4
+    },
+    "cdrv8plus": {
+      "methodNamespace": "aouwgscohortextraction-prod",
+      "methodName": "GvsExtractCohortFromSampleNamesV8",
+      "methodRepoVersion": 1,
+      "methodLogicalVersion": 1
     }
   },
   "cdr": {
