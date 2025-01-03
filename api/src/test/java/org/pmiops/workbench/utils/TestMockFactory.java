@@ -1,6 +1,7 @@
 package org.pmiops.workbench.utils;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -67,6 +68,7 @@ import org.pmiops.workbench.model.YesNoPreferNot;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 
 public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
@@ -208,6 +210,28 @@ public class TestMockFactory {
             })
         .when(fireCloudService)
         .createWorkspace(anyString(), anyString(), anyString());
+  }
+
+  public static void stubCreateFcWorkspace(
+      WorkspaceService workspaceService, FireCloudService fireCloudService) {
+    doAnswer(
+            invocation -> {
+              Workspace capturedWorkspace = (Workspace) invocation.getArguments()[0];
+              RawlsWorkspaceDetails fcWorkspace =
+                  createTerraWorkspace(
+                      capturedWorkspace.getNamespace(), capturedWorkspace.getName(), null);
+
+              RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+              fcResponse.setWorkspace(fcWorkspace);
+              fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
+
+              doReturn(fcResponse)
+                  .when(fireCloudService)
+                  .getWorkspace(capturedWorkspace.getNamespace(), capturedWorkspace.getName());
+              return fcWorkspace;
+            })
+        .when(workspaceService)
+        .createWorkspace(any(Workspace.class), any(DbCdrVersion.class));
   }
 
   public static void stubCreateBillingProject(FireCloudService fireCloudService) {

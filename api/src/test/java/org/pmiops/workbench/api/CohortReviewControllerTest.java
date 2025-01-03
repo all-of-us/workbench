@@ -3,8 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -142,9 +141,11 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
+import org.pmiops.workbench.wsm.WsmClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -219,6 +220,8 @@ public class CohortReviewControllerTest {
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortReviewController cohortReviewController;
 
+  @Autowired WorkspaceServiceFactory workspaceServiceFactory;
+
   private enum TestConcepts {
     RACE_ASIAN("Asian", 8515, CriteriaType.RACE),
     RACE_WHITE("White", 8527, CriteriaType.RACE),
@@ -285,7 +288,7 @@ public class CohortReviewControllerTest {
     WorkspaceServiceImpl.class,
     WorkspaceAuthService.class,
     WorkspacesController.class,
-    AccessTierServiceImpl.class,
+    AccessTierServiceImpl.class
   })
   @MockBean({
     AccessModuleService.class,
@@ -309,6 +312,8 @@ public class CohortReviewControllerTest {
     WorkspaceOperationMapper.class,
     WorkspaceResourcesService.class,
     WorkspaceService.class,
+    WorkspaceServiceFactory.class,
+    WsmClient.class
   })
   static class Configuration {
     @Bean
@@ -2781,7 +2786,9 @@ public class CohortReviewControllerTest {
     tmpWorkspace.setCdrVersionId(String.valueOf(cdrVersionId));
     tmpWorkspace.setBillingAccountName("billing-account");
 
-    TestMockFactory.stubCreateFcWorkspace(fireCloudService);
+    when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
+
+    TestMockFactory.stubCreateFcWorkspace(workspaceService, fireCloudService);
 
     tmpWorkspace = workspacesController.createWorkspace(tmpWorkspace).getBody();
     stubWorkspaceAccessLevel(Objects.requireNonNull(tmpWorkspace), RawlsWorkspaceAccessLevel.OWNER);

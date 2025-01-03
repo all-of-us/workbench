@@ -32,13 +32,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -71,6 +65,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +76,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>This needs to implement an interface to support Transactional
  */
 @Service
+@Primary
 public class WorkspaceServiceImpl implements WorkspaceService {
 
   protected static final int RECENT_WORKSPACE_COUNT = 4;
@@ -206,7 +202,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceTerraName) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
-    validateWorkspaceTierAccess(dbWorkspace);
+    workspaceAuthService.validateWorkspaceTierAccess(dbWorkspace);
 
     RawlsWorkspaceResponse fcResponse;
     RawlsWorkspaceDetails fcWorkspace;
@@ -366,26 +362,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     List<DbUserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
     return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces, userId);
-  }
-
-  /**
-   * Throw ForbiddenException if logged in user doesnt have the same Tier Access as that of
-   * workspace
-   *
-   * @param dbWorkspace
-   */
-  private void validateWorkspaceTierAccess(DbWorkspace dbWorkspace) {
-    String workspaceAccessTier = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
-
-    List<String> accessTiers = accessTierService.getAccessTierShortNamesForUser(userProvider.get());
-
-    if (!accessTiers.contains(workspaceAccessTier)) {
-      throw new ForbiddenException(
-          String.format(
-              "User with username %s does not have access to the '%s' access tier required by "
-                  + "workspace '%s'",
-              userProvider.get().getUsername(), workspaceAccessTier, dbWorkspace.getName()));
-    }
   }
 
   private List<DbUserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
@@ -660,5 +636,49 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .map(UserRole::getEmail)
         .map(userService::getByUsernameOrThrow)
         .toList();
+  }
+
+  @Override
+  public RawlsWorkspaceDetails createWorkspace(Workspace workspace, DbCdrVersion cdrVersion) {
+    DbAccessTier accessTier = cdrVersion.getAccessTier();
+    String billingProject = createTerraBillingProject(accessTier);
+    String firecloudName = FireCloudService.toFirecloudName(workspace.getName());
+    RawlsWorkspaceDetails fcWorkspace =
+        fireCloudService.createWorkspace(
+            billingProject, firecloudName, accessTier.getAuthDomainName());
+    return fcWorkspace;
+  }
+
+  @Override
+  public RawlsWorkspaceDetails cloneWorkspace(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      Workspace toWorkspace,
+      DbCdrVersion cdrVersion) {
+    // Note: please keep any initialization logic here in sync with createWorkspace().
+    DbAccessTier accessTier = cdrVersion.getAccessTier();
+    String billingProject = createTerraBillingProject(accessTier);
+    String firecloudName = FireCloudService.toFirecloudName(toWorkspace.getName());
+    RawlsWorkspaceDetails toFcWorkspace =
+        fireCloudService.cloneWorkspace(
+            fromWorkspaceNamespace,
+            fromWorkspaceId,
+            billingProject,
+            firecloudName,
+            accessTier.getAuthDomainName());
+    return toFcWorkspace;
+  }
+
+  /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */
+  private String createTerraBillingProject(DbAccessTier accessTier) {
+    DbUser user = userProvider.get();
+    String billingProject = fireCloudService.createBillingProjectName();
+    fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
+
+    // We use the AoU Application Service Account to create the billing account, then add the user
+    // as an additional owner.  In this way, we can make sure that the AoU App SA is an owner on
+    // all billing projects.
+    fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
+    return billingProject;
   }
 }
