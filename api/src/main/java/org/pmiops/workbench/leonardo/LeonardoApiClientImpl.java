@@ -367,11 +367,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public void deleteRuntimeAsService(String googleProject, String runtimeName) {
+  public void deleteRuntimeAsService(String googleProject, String runtimeName, boolean deleteDisk) {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     legacyLeonardoRetryHandler.run(
         (context) -> {
-          runtimesApi.deleteRuntime(googleProject, runtimeName, /* deleteDisk */ false);
+          runtimesApi.deleteRuntime(googleProject, runtimeName, deleteDisk);
           return null;
         });
   }
@@ -708,6 +708,18 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
+
+    leonardoRetryHandler.run(
+        context -> {
+          appsApi.deleteApp(dbWorkspace.getGoogleProject(), appName, deleteDisk);
+          return null;
+        });
+  }
+
+  @Override
+  public void deleteAppAsService(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
+      throws WorkbenchException {
+    AppsApi appsApi = serviceAppsApiProvider.get();
 
     leonardoRetryHandler.run(
         context -> {

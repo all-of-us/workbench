@@ -178,7 +178,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         continue;
       }
 
-      leonardoApiClient.deleteRuntimeAsService(googleProject, runtime.getRuntimeName());
+      leonardoApiClient.deleteRuntimeAsService(
+          googleProject, runtime.getRuntimeName(), /* deleteDisk */ false);
     }
     log.info(
         String.format(
