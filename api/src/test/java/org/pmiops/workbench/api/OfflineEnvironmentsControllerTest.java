@@ -234,7 +234,7 @@ public class OfflineEnvironmentsControllerTest {
     stubRuntimes(Collections.emptyList());
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), anyBoolean());
   }
 
   @Test
@@ -242,7 +242,7 @@ public class OfflineEnvironmentsControllerTest {
     stubRuntimes(List.of(runtimeWithAge(Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), anyBoolean());
   }
 
   @Test
@@ -250,7 +250,7 @@ public class OfflineEnvironmentsControllerTest {
     stubRuntimes(List.of(runtimeWithAge(RUNTIME_MAX_AGE.plusMinutes(5))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any(), any());
+    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any(), anyBoolean());
   }
 
   @Test
@@ -261,7 +261,7 @@ public class OfflineEnvironmentsControllerTest {
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), anyBoolean());
   }
 
   @Test
@@ -271,7 +271,7 @@ public class OfflineEnvironmentsControllerTest {
         List.of(runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any(), any());
+    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any(), anyBoolean());
   }
 
   @Test
@@ -282,7 +282,7 @@ public class OfflineEnvironmentsControllerTest {
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), anyBoolean());
   }
 
   @Test
@@ -292,7 +292,7 @@ public class OfflineEnvironmentsControllerTest {
             runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(LeonardoRuntimeStatus.DELETING)));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), anyBoolean());
   }
 
   @Test
