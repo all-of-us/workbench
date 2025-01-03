@@ -47,6 +47,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.legacy_leonardo_client.ApiException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
@@ -172,9 +173,7 @@ public class OfflineRuntimeControllerTest {
 
   private List<LeonardoListRuntimeResponse> toListRuntimeResponseList(
       List<LeonardoGetRuntimeResponse> runtimes) {
-    return runtimes.stream()
-        .map(leonardoMapper::toListRuntimeResponse)
-        .collect(Collectors.toList());
+    return runtimes.stream().map(leonardoMapper::toListRuntimeResponse).toList();
   }
 
   private void stubRuntimes(List<LeonardoGetRuntimeResponse> runtimes) {
@@ -231,69 +230,69 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testDeleteOldRuntimesNoResults() throws Exception {
+  public void testDeleteOldRuntimesNoResults() {
     stubRuntimes(Collections.emptyList());
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
   }
 
   @Test
-  public void testDeleteOldRuntimesActiveRuntime() throws Exception {
+  public void testDeleteOldRuntimesActiveRuntime() {
     stubRuntimes(List.of(runtimeWithAge(Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
   }
 
   @Test
-  public void testDeleteOldRuntimesActiveTooOld() throws Exception {
+  public void testDeleteOldRuntimesActiveTooOld() {
     stubRuntimes(List.of(runtimeWithAge(RUNTIME_MAX_AGE.plusMinutes(5))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any());
+    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any(), any());
   }
 
   @Test
-  public void testDeleteOldRuntimesIdleYoung() throws Exception {
+  public void testDeleteOldRuntimesIdleYoung() {
     // Running for under the IDLE_MAX_AGE, idle for 10 hours
     stubRuntimes(
         List.of(
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
   }
 
   @Test
-  public void testDeleteOldRuntimesIdleOld() throws Exception {
+  public void testDeleteOldRuntimesIdleOld() {
     // Running for >IDLE_MAX_AGE, idle for 10 hours
     stubRuntimes(
         List.of(runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any());
+    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any(), any());
   }
 
   @Test
-  public void testDeleteOldRuntimesBrieflyIdleOld() throws Exception {
+  public void testDeleteOldRuntimesBrieflyIdleOld() {
     // Running for >IDLE_MAX_AGE, idle for only 15 minutes
     stubRuntimes(
         List.of(
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
   }
 
   @Test
-  public void testDeleteOldRuntimesOtherStatusFiltered() throws Exception {
+  public void testDeleteOldRuntimesOtherStatusFiltered() {
     stubRuntimes(
         List.of(
             runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(LeonardoRuntimeStatus.DELETING)));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any(), any());
   }
 
   @Test
@@ -327,7 +326,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckPersistentDisksInitialThresholdNotification() throws Exception {
+  public void testCheckPersistentDisksInitialThresholdNotification() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
     stubDisks(List.of(idleDisk(Duration.ofDays(14L))));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -338,7 +337,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckPersistentDisksPeriodicThresholdNotification() throws Exception {
+  public void testCheckPersistentDisksPeriodicThresholdNotification() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
     stubDisks(
         List.of(
@@ -353,7 +352,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckPersistentDisksMultipleOwners() throws Exception {
+  public void testCheckPersistentDisksMultipleOwners() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1, user2));
     stubDisks(List.of(idleDisk(Duration.ofDays(30L))));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -364,7 +363,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckPersistentDisksSkipsUnknownUser() throws Exception {
+  public void testCheckPersistentDisksSkipsUnknownUser() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
 
     ListPersistentDiskResponse mysteryDisk = idleDisk(Duration.ofDays(14L));
@@ -380,7 +379,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckPersistentDisksContinuesOnMailFailure() throws Exception {
+  public void testCheckPersistentDisksContinuesOnMailFailure() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
     stubDisks(
         List.of(
@@ -402,7 +401,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckPersistentDisksFreeTier() throws Exception {
+  public void testCheckPersistentDisksFreeTier() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
     stubDisks(List.of(idleDisk(Duration.ofDays(14L))));
 
@@ -418,7 +417,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testIsDiskAttached_Gce_attached() throws Exception {
+  public void testIsDiskAttached_Gce_attached() throws ApiException {
     int diskId = 1;
     ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse =
@@ -434,7 +433,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testIsDiskAttached_Gce_multiple() throws Exception {
+  public void testIsDiskAttached_Gce_multiple() throws ApiException {
     int diskId = 1;
     int otherDiskId = 2;
     ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
@@ -459,7 +458,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testIsDiskAttached_Gce_mismatch() throws Exception {
+  public void testIsDiskAttached_Gce_mismatch() throws ApiException {
     int diskId = 1;
     int otherDiskId = 2;
     ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
@@ -477,7 +476,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testIsDiskAttached_Gce_no_runtimes() throws Exception {
+  public void testIsDiskAttached_Gce_no_runtimes() throws ApiException {
     int diskId = 1;
     ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
 
@@ -488,7 +487,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testIsDiskAttached_GKE_App_attached() throws Exception {
+  public void testIsDiskAttached_GKE_App_attached() throws ApiException {
     String diskName = "my-disk-name";
     ListPersistentDiskResponse diskResponse =
         new ListPersistentDiskResponse()
@@ -502,7 +501,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testIsDiskAttached_GKE_App_multiple() throws Exception {
+  public void testIsDiskAttached_GKE_App_multiple() throws ApiException {
     String diskName = "my-disk-name";
     String otherDiskName = "other-disk-name";
     ListPersistentDiskResponse diskResponse =
@@ -520,7 +519,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testIsDiskAttached_GKE_App_mismatch() throws Exception {
+  public void testIsDiskAttached_GKE_App_mismatch() throws ApiException {
     String diskName = "my-disk-name";
     String otherDiskName = "other-disk-name";
     ListPersistentDiskResponse diskResponse =
@@ -535,7 +534,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testIsDiskAttached_GKE_App_no_apps() throws Exception {
+  public void testIsDiskAttached_GKE_App_no_apps() throws ApiException {
     String diskName = "my-disk-name";
     ListPersistentDiskResponse diskResponse =
         new ListPersistentDiskResponse()

@@ -54,7 +54,8 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** Deletes a notebook runtime as the appengine SA, to be used only for admin operations */
-  void deleteRuntimeAsService(String googleProject, String runtimeName) throws WorkbenchException;
+  void deleteRuntimeAsService(String googleProject, String runtimeName, boolean deleteDisk)
+      throws WorkbenchException;
 
   /**
    * Stops all runtimes created by the user, if any can be stopped. Returns the count of stopped
@@ -141,6 +142,9 @@ public interface LeonardoApiClient {
    * @param deleteDisk whether the app's persistent disk should also be deleted
    */
   void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
+      throws WorkbenchException;
+
+  void deleteAppAsService(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
       throws WorkbenchException;
 
   int deleteUserAppsAsService(String userEmail);
