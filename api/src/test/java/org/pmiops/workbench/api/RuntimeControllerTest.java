@@ -875,6 +875,8 @@ public class RuntimeControllerTest {
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
+    // TODO: does all this go away for the new client?
+
     Gson gson = new Gson();
     LeonardoMachineConfig createLeonardoMachineConfig =
         gson.fromJson(
