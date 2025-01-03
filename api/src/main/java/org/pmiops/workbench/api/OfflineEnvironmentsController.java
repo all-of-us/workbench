@@ -53,8 +53,8 @@ import org.springframework.web.bind.annotation.RestController;
  * Workbench service account.
  */
 @RestController
-public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
-  private static final Logger log = Logger.getLogger(OfflineRuntimeController.class.getName());
+public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDelegate {
+  private static final Logger log = Logger.getLogger(OfflineEnvironmentsController.class.getName());
 
   // On the n'th day of inactivity on a PD, a notification is sent.
   private static final Set<Integer> INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS = ImmutableSet.of(14);
@@ -77,7 +77,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private final Clock clock;
 
   @Autowired
-  OfflineRuntimeController(
+  OfflineEnvironmentsController(
       FireCloudService firecloudService,
       InitialCreditsService initialCreditsService,
       MailService mailService,

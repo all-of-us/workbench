@@ -76,7 +76,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 
 @DataJpaTest
-public class OfflineRuntimeControllerTest {
+public class OfflineEnvironmentsControllerTest {
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Duration RUNTIME_MAX_AGE = Duration.ofDays(14);
   private static final Duration RUNTIME_IDLE_MAX_AGE = Duration.ofDays(7);
@@ -86,7 +86,7 @@ public class OfflineRuntimeControllerTest {
   @Import({
     FakeClockConfiguration.class,
     LeonardoMapperImpl.class,
-    OfflineRuntimeController.class,
+    OfflineEnvironmentsController.class,
   })
   static class Configuration {
     @Bean
@@ -100,7 +100,7 @@ public class OfflineRuntimeControllerTest {
   @MockBean private LeonardoApiClient mockLeonardoApiClient;
   @MockBean private MailService mockMailService;
 
-  @Autowired private OfflineRuntimeController controller;
+  @Autowired private OfflineEnvironmentsController controller;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;

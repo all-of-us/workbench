@@ -2374,7 +2374,7 @@ paths:
   /v1/cron/deleteOldRuntimes:
     get:
       tags:
-      - offlineRuntime
+      - offlineEnvironments
       - cron
       description: Endpoint meant to be called offline to trigger runtime checks and
         cleanup. Enforces upgrade by deletion and re-creation for older runtime deployments.
@@ -2388,7 +2388,7 @@ paths:
   /v1/cron/checkPersistentDisks:
     get:
       tags:
-      - offlineRuntime
+      - offlineEnvironments
       - cron
       description: 'Endpoint meant to be called offline to check for old / detached
         persistent disks. Notifies workspace owners at configurable intervals about
