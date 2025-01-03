@@ -13,10 +13,14 @@ import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**
- * Encapsulate Leonardo's Notebooks API interaction details and provide a simple/mockable interface
- * for internal use.
+ * Encapsulate Leonardo's API interaction details and provide a simple/mockable interface for
+ * internal use.
  */
 public interface LeonardoApiClient {
+  //
+  // Runtime endpoints
+  //
+
   /**
    * lists all runtimes in the environment as the appengine SA, to be used only for admin operations
    */
@@ -50,7 +54,8 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** Deletes a notebook runtime as the appengine SA, to be used only for admin operations */
-  void deleteRuntimeAsService(String googleProject, String runtimeName) throws WorkbenchException;
+  void deleteRuntimeAsService(String googleProject, String runtimeName, boolean deleteDisk)
+      throws WorkbenchException;
 
   /**
    * Stops all runtimes created by the user, if any can be stopped. Returns the count of stopped
@@ -61,6 +66,10 @@ public interface LeonardoApiClient {
   /** Gets information about a notebook runtime */
   LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName)
       throws WorkbenchException;
+
+  //
+  // Welder endpoints - "notebooks" client
+  //
 
   /** Send files over to notebook runtime */
   void localizeForRuntime(String googleProject, String runtimeName, Map<String, String> fileList)
@@ -78,6 +87,10 @@ public interface LeonardoApiClient {
   StorageLink createStorageLinkForApp(
       String googleProject, String appName, StorageLink storageLink);
 
+  //
+  // Disk endpoints
+  //
+
   /** Deletes a persistent disk */
   void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;
 
@@ -92,6 +105,16 @@ public interface LeonardoApiClient {
   /** List all persistent disks owned by authenticated user in google project */
   List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject);
+
+  /** List all persistent disks */
+  List<ListPersistentDiskResponse> listDisksAsService();
+
+  /** List all persistent disks in google project */
+  List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
+
+  //
+  // Apps endpoints
+  //
 
   /**
    * Creates Leonardo app owned by the current authenticated user.
@@ -121,18 +144,23 @@ public interface LeonardoApiClient {
   void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
       throws WorkbenchException;
 
+  void deleteAppAsService(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
+      throws WorkbenchException;
+
+  int deleteUserAppsAsService(String userEmail);
+
+  //
+  // Status endpoints
+  //
+
   /**
    * @return true if Leonardo service is okay, false otherwise.
    */
   boolean getLeonardoStatus();
 
-  int deleteUserAppsAsService(String userEmail);
-
-  /** List all persistent disks */
-  List<ListPersistentDiskResponse> listDisksAsService();
-
-  /** List all persistent disks in google project */
-  List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
+  //
+  // Resources endpoints
+  //
 
   void deleteAllResources(String googleProject, boolean deleteDisk);
 }

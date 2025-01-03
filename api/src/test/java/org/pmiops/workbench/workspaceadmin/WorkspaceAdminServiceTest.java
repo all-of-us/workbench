@@ -407,7 +407,8 @@ public class WorkspaceAdminServiceTest {
     workspaceAdminService.deleteRuntime(WORKSPACE_NAMESPACE, testLeoRuntime.getRuntimeName());
 
     verify(mockLeonardoApiClient)
-        .deleteRuntimeAsService(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
+        .deleteRuntimeAsService(
+            GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName(), /* deleteDisk */ false);
     verify(mockLeonardoRuntimeAuditor)
         .fireDeleteRuntime(GOOGLE_PROJECT_ID, testLeoListRuntimeResponse.getRuntimeName());
   }
