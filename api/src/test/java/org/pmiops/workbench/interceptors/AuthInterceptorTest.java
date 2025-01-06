@@ -245,10 +245,11 @@ public class AuthInterceptorTest {
     workbenchConfig.vwb.exfilManagerServiceAccount = "exfil@vwb.org";
     Userinfo userInfo = new Userinfo();
     userInfo.setEmail("exfil@vwb.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(userDao.findUserByUsername("exfil@vwb.org")).thenReturn(new DbUser());
     when(mockRequest.getRequestURL())
         .thenReturn(new StringBuffer("api.test.fake-research-aou.org"));
     when(mockRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
-    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
 
     assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
   }
