@@ -1,6 +1,8 @@
 package org.pmiops.workbench.wsm;
 
 import jakarta.inject.Provider;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -94,21 +96,29 @@ public class WsmClient {
    */
   public void waitForWorkspaceCreation(String workspaceId)
       throws InterruptedException, ApiException {
-    int retries = 0;
+    Duration timeout = Duration.ofMinutes(2);
+    Duration pollInterval = Duration.ofSeconds(10);
+    Instant deadline = Instant.now().plus(timeout);
     State state = State.CREATING;
-    // Wait for 2 minutes for the workspace creation before giving up
-    do {
+
+    for (Instant now = Instant.now(); now.isBefore(deadline); now = Instant.now()) {
       WorkspaceDescription workspaceDescription =
           workspaceServiceApi.get().getWorkspace(workspaceId, null);
       state = workspaceDescription.getOperationState().getState();
-      logger.debug("Workspace state: {}", state);
+      logger.debug("Vwb Workspace state: {}", state);
+
       if (state == State.READY) {
         return;
       }
-      retries++;
-      Thread.sleep(10_000);
-    } while (State.BROKEN != state && retries < 12);
-    throw new WorkbenchException("Workspace creation is still in progress");
+
+      if (state == State.BROKEN) {
+        throw new WorkbenchException("Vwb Workspace creation failed with state: " + state);
+      }
+
+      Thread.sleep(pollInterval.toMillis());
+    }
+
+    throw new WorkbenchException("Workspace creation is still in progress after timeout");
   }
 
   /**

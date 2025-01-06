@@ -244,7 +244,7 @@ public interface WorkspaceMapper {
   TestUserRawlsWorkspace toTestUserRawlsWorkspace(RawlsWorkspaceDetails workspace, String username);
 
   @Mapping(target = "workspaceId", source = "workspace.id")
-  @Mapping(target = "namespace", source = "workspace.userFacingId")
+  @Mapping(target = "namespace", source = "workspace.id")
   @Mapping(target = "createdBy", source = "workspace.createdBy")
   @Mapping(target = "name", source = "workspace.displayName")
   @Mapping(target = "attributes", ignore = true)
