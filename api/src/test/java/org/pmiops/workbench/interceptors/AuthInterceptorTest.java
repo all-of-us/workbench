@@ -240,6 +240,20 @@ public class AuthInterceptorTest {
   }
 
   @Test
+  public void preHandleGet_isVwbSA() throws Exception {
+    mockGetCallWithBearerToken();
+    workbenchConfig.vwb.exfilManagerServiceAccount = "exfil@vwb.org";
+    Userinfo userInfo = new Userinfo();
+    userInfo.setEmail("exfil@vwb.org");
+    when(mockRequest.getRequestURL())
+        .thenReturn(new StringBuffer("api.test.fake-research-aou.org"));
+    when(mockRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
+  }
+
+  @Test
   public void preHandleGet_firecloudLookupSucceedsNoUserRecordWrongDomain() throws Exception {
     mockGetCallWithBearerToken();
     Userinfo userInfo = new Userinfo();

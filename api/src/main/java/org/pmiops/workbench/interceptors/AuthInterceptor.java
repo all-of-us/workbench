@@ -159,15 +159,15 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
     }
     String gsuiteDomainSuffix =
         "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
-    if (!userName.endsWith(gsuiteDomainSuffix)) {
+    if (!userName.endsWith(gsuiteDomainSuffix) && !isVwbServiceAccount(userName)) {
       // Temporarily set the authentication with no user, so we can look up what user this
       // corresponds to in FireCloud.
       SecurityContextHolder.getContext()
           .setAuthentication(
               new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
-      // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
-      // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
-      // the user it was created for.
+      // If the email is neither in our GSuite domain nor VWB SA, try FireCloud; we could be
+      // dealing with a pet service account. In both AofU and FireCloud, the pet SA is treated as
+      // if it were the user it was created for.
       userName = fireCloudService.getMe().getUserInfo().getUserEmail();
       if (!userName.endsWith(gsuiteDomainSuffix)) {
         log.info(
@@ -270,5 +270,10 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
       }
     }
     return true; // No @AuthorityRequired annotation found at runtime, default to allowed.
+  }
+
+  /** Returns {@code true} if caller is VWB service accounts. */
+  private boolean isVwbServiceAccount(String userName) {
+    return userName.contains(workbenchConfigProvider.get().vwb.exfilManagerServiceAccount);
   }
 }
