@@ -77,10 +77,10 @@ const expectExpandableApp = async (user: UserEvent, appName: string) => {
   expect(findActiveApps()).not.toBeInTheDocument();
   expect(findAvailableApps(false)).toBeInTheDocument();
 
-  // Click unexpanded Jupyter app
+  // Click unexpanded app
 
-  const jupyter = expectUnexpandedApp(appName);
-  jupyter.click();
+  const unexpandedApp = expectUnexpandedApp(appName);
+  unexpandedApp.click();
 
   await waitFor(() => expectExpandedApp(appName));
 
