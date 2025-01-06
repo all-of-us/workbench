@@ -41,7 +41,7 @@ RUN curl -o /tmp/cloud_sql_proxy https://storage.googleapis.com/cloud-sql-connec
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
-ENV GRADLE_VERSION 7.6.1
+ENV GRADLE_VERSION 7.6.4
 
 RUN curl -L -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip \
   && unzip /tmp/gradle.zip -d /opt/gradle
