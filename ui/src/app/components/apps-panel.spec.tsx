@@ -91,7 +91,7 @@ const expectExpandableApp = async (user: UserEvent, appName: string) => {
   expect(findAvailableApps(false)).toBeInTheDocument();
 };
 
-const expectAppsPanelToBeDisabled = async (user: UserEvent) => {
+const expectAppsInAppsPanelToBeDisabled = async (user: UserEvent) => {
   expect(findActiveApps()).not.toBeInTheDocument();
   expect(findAvailableApps(false)).toBeInTheDocument();
 
@@ -225,7 +225,7 @@ describe(AppsPanel.name, () => {
 
     const { container } = await component();
     expect(container).toBeInTheDocument();
-    await expectAppsPanelToBeDisabled(user);
+    await expectAppsInAppsPanelToBeDisabled(user);
   });
 
   it('should disable apps when initial credit expiration is true and initial credits are expired', async () => {
@@ -245,7 +245,7 @@ describe(AppsPanel.name, () => {
 
     const { container } = await component();
     expect(container).toBeInTheDocument();
-    await expectAppsPanelToBeDisabled(user);
+    await expectAppsInAppsPanelToBeDisabled(user);
   });
 
   it('should disable apps when initial credit expiration is true, initial credits are expired, and expiration is bypassed', async () => {
