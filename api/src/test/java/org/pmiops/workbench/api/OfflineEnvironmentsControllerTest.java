@@ -36,7 +36,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -87,6 +89,8 @@ public class OfflineEnvironmentsControllerTest {
     FakeClockConfiguration.class,
     LeonardoMapperImpl.class,
     OfflineEnvironmentsController.class,
+    TaskQueueService.class,
+    WorkbenchLocationConfigService.class,
   })
   static class Configuration {
     @Bean
