@@ -27,6 +27,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
+import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @Mapper(
     config = MapStructConfig.class,
@@ -241,4 +242,24 @@ public interface WorkspaceMapper {
 
   @Mapping(target = "terraName", source = "workspace.name")
   TestUserRawlsWorkspace toTestUserRawlsWorkspace(RawlsWorkspaceDetails workspace, String username);
+
+  @Mapping(target = "workspaceId", source = "workspace.id")
+  @Mapping(target = "namespace", source = "workspace.id")
+  @Mapping(target = "createdBy", source = "workspace.createdBy")
+  @Mapping(target = "name", source = "workspace.displayName")
+  @Mapping(target = "attributes", ignore = true)
+  @Mapping(target = "authorizationDomain", ignore = true)
+  @Mapping(target = "bucketName", ignore = true)
+  @Mapping(target = "isLocked", ignore = true)
+  @Mapping(target = "lastModified", source = "lastUpdatedDate")
+  @Mapping(target = "workflowCollectionName", ignore = true)
+  @Mapping(target = "googleProject", source = "gcpContext.projectId")
+  @Mapping(target = "googleProjectNumber", ignore = true)
+  @Mapping(target = "workspaceVersion", ignore = true)
+  @Mapping(target = "billingAccount", ignore = true)
+  @Mapping(target = "errorMessage", ignore = true)
+  @Mapping(target = "billingAccountErrorMessage", ignore = true)
+  @Mapping(target = "completedCloneWorkspaceFileTransfer", ignore = true)
+  @Mapping(target = "cloudPlatform", ignore = true)
+  RawlsWorkspaceDetails toWorkspaceDetails(WorkspaceDescription workspace);
 }

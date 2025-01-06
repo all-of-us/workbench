@@ -28,7 +28,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
 @SecondaryTable(
