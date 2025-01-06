@@ -54,7 +54,10 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
-import { isUsingInitialCredits } from 'app/utils/workspace-utils';
+import {
+  isUsingInitialCredits,
+  isValidBilling,
+} from 'app/utils/workspace-utils';
 
 import { UIAppType } from './apps-panel/utils';
 import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
@@ -355,8 +358,10 @@ export const RuntimeConfigurationPanel = fp.flow(
     // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
     // Eventually we will be removing this option altogether
 
+    const validBilling = isValidBilling(workspace);
+
     const runtimeCanBeCreated =
-      workspace.billingStatus === BillingStatus.ACTIVE &&
+      validBilling &&
       errorMessageContent.length === 0 &&
       ((analysisConfig.computeType === ComputeType.Standard &&
         analysisConfig.diskConfig.detachable) ||
@@ -364,7 +369,7 @@ export const RuntimeConfigurationPanel = fp.flow(
           !analysisConfig.diskConfig.detachable));
 
     let runtimeCannotBeCreatedExplanation;
-    if (workspace.billingStatus !== BillingStatus.ACTIVE) {
+    if (!validBilling) {
       runtimeCannotBeCreatedExplanation = BILLING_ACCOUNT_DISABLED_TOOLTIP;
     }
 
