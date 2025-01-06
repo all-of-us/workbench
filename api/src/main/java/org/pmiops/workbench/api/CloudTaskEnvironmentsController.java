@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -37,7 +38,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
         .map(workspaceService::lookupWorkspaceByNamespace)
         .forEach(
             ws -> {
-              explore(ws);
+              //              explore(ws);
               deleteUnshared(ws);
             });
 
@@ -60,12 +61,11 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
 
     var runtimes = leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject());
     runtimes.forEach(
-        runtimeResponse ->
+        runtime ->
             LOGGER.info(
                 String.format(
                     "Runtime %s created by user %s",
-                    runtimeResponse.getRuntimeName(),
-                    runtimeResponse.getAuditInfo().getCreator())));
+                    runtime.getRuntimeName(), runtime.getAuditInfo().getCreator())));
 
     var apps = leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
     apps.forEach(
@@ -104,26 +104,26 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
         apps.stream().filter(app -> !currentUsers.contains(app.getCreator())).toList();
 
     if (!runtimesToDelete.isEmpty()) {
-      String.format(
-          "Deleting %d runtimes for workspace %s/%s (ID %d) out of %d total",
-          runtimesToDelete.size(),
-          dbWorkspace.getWorkspaceNamespace(),
-          dbWorkspace.getFirecloudName(),
-          dbWorkspace.getWorkspaceId(),
-          runtimes.size());
+      LOGGER.info(
+          String.format(
+              "Deleting %d runtimes for workspace %s/%s (ID %d) out of %d total",
+              runtimesToDelete.size(),
+              dbWorkspace.getWorkspaceNamespace(),
+              dbWorkspace.getFirecloudName(),
+              dbWorkspace.getWorkspaceId(),
+              runtimes.size()));
       runtimesToDelete.forEach(
           runtime -> {
-            //            try {
-            //              leonardoApiClient.deleteRuntimeAsService(
-            //                  dbWorkspace.getGoogleProject(), runtime.getRuntimeName(), /*
-            // deleteDisk */ true);
-            //            } catch (WorkbenchException e) {
-            //              LOGGER.warning(
-            //                  String.format(
-            //                      "Failed to delete runtime %s in project %s: %s",
-            //                      runtime.getRuntimeName(), dbWorkspace.getGoogleProject(),
-            // e.getMessage()));
-            //            }
+            try {
+              leonardoApiClient.deleteRuntimeAsService(
+                  dbWorkspace.getGoogleProject(), runtime.getRuntimeName(), /*
+             deleteDisk */ true);
+            } catch (WorkbenchException e) {
+              LOGGER.warning(
+                  String.format(
+                      "Failed to delete runtime %s in project %s: %s",
+                      runtime.getRuntimeName(), dbWorkspace.getGoogleProject(), e.getMessage()));
+            }
           });
     }
 
@@ -138,16 +138,15 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
               apps.size()));
       appsToDelete.forEach(
           app -> {
-            //            try {
-            //              leonardoApiClient.deleteAppAsService(
-            //                  app.getAppName(), dbWorkspace, /* deleteDisk */ true);
-            //            } catch (WorkbenchException e) {
-            //              LOGGER.warning(
-            //                  String.format(
-            //                      "Failed to delete app %s in project %s: %s",
-            //                      app.getAppName(), dbWorkspace.getGoogleProject(),
-            // e.getMessage()));
-            //            }
+            try {
+              leonardoApiClient.deleteAppAsService(
+                  app.getAppName(), dbWorkspace, /* deleteDisk */ true);
+            } catch (WorkbenchException e) {
+              LOGGER.warning(
+                  String.format(
+                      "Failed to delete app %s in project %s: %s",
+                      app.getAppName(), dbWorkspace.getGoogleProject(), e.getMessage()));
+            }
           });
     }
 
@@ -170,16 +169,15 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
               disks.size()));
       disksToDelete.forEach(
           disk -> {
-            //            try {
-            //              leonardoApiClient.deletePersistentDiskAsService(
-            //                  dbWorkspace.getGoogleProject(), disk.getName());
-            //            } catch (WorkbenchException e) {
-            //              LOGGER.warning(
-            //                  String.format(
-            //                      "Failed to delete disk %s in project %s: %s",
-            //                      disk.getName(), dbWorkspace.getGoogleProject(),
-            // e.getMessage()));
-            //            }
+            try {
+              leonardoApiClient.deletePersistentDiskAsService(
+                  dbWorkspace.getGoogleProject(), disk.getName());
+            } catch (WorkbenchException e) {
+              LOGGER.warning(
+                  String.format(
+                      "Failed to delete disk %s in project %s: %s",
+                      disk.getName(), dbWorkspace.getGoogleProject(), e.getMessage()));
+            }
           });
     }
   }
