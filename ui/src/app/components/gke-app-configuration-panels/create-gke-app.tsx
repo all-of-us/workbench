@@ -503,7 +503,7 @@ export const CreateGkeApp = ({
             {...{ billingStatus, createAppRequest }}
             existingApp={app}
             existingDisk={disk}
-            workspaceNamespace={workspace.namespace}
+            workspace={workspace}
             username={profile.username}
             style={openOrCreateButtonStyle}
             onDismiss={() => {
