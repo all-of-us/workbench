@@ -4,7 +4,6 @@ import {
   AppsApi,
   AppStatus,
   AppType,
-  BillingStatus,
   CreateAppRequest,
   Disk,
   DisksApi,
