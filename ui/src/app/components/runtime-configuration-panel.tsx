@@ -3,7 +3,6 @@ import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
 import {
-  BillingStatus,
   Disk,
   Runtime,
   RuntimeConfigurationType,

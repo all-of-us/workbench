@@ -3,7 +3,6 @@ import { CSSProperties, useState } from 'react';
 
 import {
   AppType,
-  BillingStatus,
   CreateAppRequest,
   Disk,
   UserAppEnvironment,
