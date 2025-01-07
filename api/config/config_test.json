@@ -163,7 +163,8 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
-    "usersPerCheckInitialCreditsExpirationTask": 50
+    "usersPerCheckInitialCreditsExpirationTask": 50,
+    "workspacesPerDeleteWorkspaceEnvironmentsTask": 50
   },
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": false,
