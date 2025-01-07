@@ -21,6 +21,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -92,7 +93,6 @@ public class DbWorkspace {
   private String adminLockedReason;
 
   private boolean initialCreditsExhausted;
-  private boolean initialCreditsExpired;
 
   private DbFeaturedCategory featuredCategory;
   private boolean usesTanagra;
@@ -644,6 +644,7 @@ public class DbWorkspace {
   @Deprecated(since = "September 2024", forRemoval = true)
   @Column(name = "billing_status")
   public BillingStatus getBillingStatus() {
+    boolean initialCreditsExpired = creator.getUserInitialCreditsExpiration().getExpirationTime().before(Timestamp.from(Instant.now()));
     return (initialCreditsExhausted || initialCreditsExpired
         ? BillingStatus.INACTIVE
         : BillingStatus.ACTIVE);
@@ -774,16 +775,6 @@ public class DbWorkspace {
 
   public DbWorkspace setInitialCreditsExhausted(boolean initialCreditsExhausted) {
     this.initialCreditsExhausted = initialCreditsExhausted;
-    return this;
-  }
-
-  @Column(name = "initial_credits_expired")
-  public boolean isInitialCreditsExpired() {
-    return initialCreditsExpired;
-  }
-
-  public DbWorkspace setInitialCreditsExpired(boolean initialCreditsExpired) {
-    this.initialCreditsExpired = initialCreditsExpired;
     return this;
   }
 

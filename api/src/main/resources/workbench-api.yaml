@@ -13159,8 +13159,6 @@ components:
           description: Whether the workspace's owner is eligible for an extension
         exhausted:
           type: boolean
-        expired:
-          type: boolean
         expirationEpochMillis:
           type: integer
           format: int64
