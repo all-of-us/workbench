@@ -55,7 +55,8 @@ public interface MailService {
   void sendEgressRemediationEmail(
       final DbUser user,
       EgressRemediationAction egressRemediationAction,
-      @Nullable String gkeServiceName)
+      @Nullable String gkeServiceName,
+      boolean isVwbEgress)
       throws MessagingException;
 
   void sendNewUserSatisfactionSurveyEmail(DbUser dbUser, String surveyLink)

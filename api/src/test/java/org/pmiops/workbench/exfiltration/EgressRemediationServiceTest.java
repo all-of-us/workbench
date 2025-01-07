@@ -12,7 +12,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_JIRA_HANDLER_QUALIFIER;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -51,6 +53,7 @@ import org.pmiops.workbench.exfiltration.impl.EgressSumologicRemediationService;
 import org.pmiops.workbench.exfiltration.impl.EgressVwbRemediationService;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressSumologicJiraHandler;
+import org.pmiops.workbench.exfiltration.jirahandler.EgressVwbJiraHandler;
 import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.JiraService.IssueProperty;
@@ -109,7 +112,13 @@ public class EgressRemediationServiceTest {
   @Qualifier(EGRESS_VWB_SERVICE_QUALIFIER)
   private EgressRemediationService vwbEgressRemediationService;
 
-  @Autowired private EgressJiraHandler egressJiraHandler;
+  @Autowired
+  @Qualifier(SUMOLOGIC_JIRA_HANDLER_QUALIFIER)
+  private EgressJiraHandler sumoEgressJiraHandler;
+
+  @Autowired
+  @Qualifier(EGRESS_VWB_JIRA_HANDLER_QUALIFIER)
+  private EgressJiraHandler vwbEgressJiraHandler;
 
   private long userId;
   private DbWorkspace dbWorkspace;
@@ -123,7 +132,8 @@ public class EgressRemediationServiceTest {
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
     JiraService.class,
-    EgressSumologicJiraHandler.class
+    EgressSumologicJiraHandler.class,
+    EgressVwbJiraHandler.class
   })
   @MockBean({
     CommonMappers.class,
@@ -394,7 +404,7 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */);
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */, false);
   }
 
   @Test
@@ -414,7 +424,7 @@ public class EgressRemediationServiceTest {
     String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq(gkeServiceName));
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq(gkeServiceName), false);
   }
 
   @Test
@@ -448,7 +458,7 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.DISABLE_USER), isNull() /* Jupyter */);
+            any(), eq(EgressRemediationAction.DISABLE_USER), isNull() /* Jupyter */, false);
   }
 
   @Test
@@ -485,7 +495,7 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */);
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */, false);
   }
 
   @Test

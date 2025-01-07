@@ -1,6 +1,6 @@
 package org.pmiops.workbench.exfiltration.impl;
 
-import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_JIRA_HANDLER_QUALIFIER;
 import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
 import com.google.common.base.Strings;
@@ -53,7 +53,7 @@ public class EgressVwbRemediationService extends EgressRemediationService {
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
       EgressEventMapper egressEventMapper,
-      @Qualifier(SUMOLOGIC_JIRA_HANDLER_QUALIFIER) EgressJiraHandler egressJiraHandler,
+      @Qualifier(EGRESS_VWB_JIRA_HANDLER_QUALIFIER) EgressJiraHandler egressJiraHandler,
       MailService mailService,
       UserAdminService userAdminService) {
     super(
@@ -72,13 +72,12 @@ public class EgressVwbRemediationService extends EgressRemediationService {
   @Override
   protected void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
-    // TODO(RW-14138): Vwb email support
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
     String environmentType =
         appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
             .map(LeonardoAppUtils::appDisplayName)
             .orElse("Jupyter");
-    mailService.sendEgressRemediationEmail(user, action, environmentType);
+    mailService.sendEgressRemediationEmail(user, action, environmentType, true);
   }
 
   @Override

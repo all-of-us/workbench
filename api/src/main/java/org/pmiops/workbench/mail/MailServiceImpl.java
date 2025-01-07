@@ -97,7 +97,7 @@ public class MailServiceImpl implements MailService {
               EGRESS_FORM_LINK, AOU_ITALICS));
 
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
-
+  private static final String EGRESS_SOURCE = " when using the <b>%s</b> application";
   private static final String EGRESS_REMEDIATION_RESOURCE =
       "emails/egress_remediation/content.html";
   private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE =
@@ -407,15 +407,22 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendEgressRemediationEmail(
-      DbUser dbUser, EgressRemediationAction action, @Nullable String gkeServiceName)
+      DbUser dbUser,
+      EgressRemediationAction action,
+      @Nullable String gkeServiceName,
+      boolean isVwbEgress)
       throws MessagingException {
     String remediation = EGRESS_REMEDIATION_ACTION_MAP.get(action);
-    String environmentType =
-        appServiceNameToAppType(Strings.nullToEmpty(gkeServiceName))
-            .map(LeonardoAppUtils::appDisplayName)
-            .orElse("Jupyter");
-
     String givenName = Optional.ofNullable(dbUser.getGivenName()).orElse("Researcher");
+
+    String egressSource = "";
+    if (!isVwbEgress) {
+      String environmentType =
+          appServiceNameToAppType(Strings.nullToEmpty(gkeServiceName))
+              .map(LeonardoAppUtils::appDisplayName)
+              .orElse("Jupyter");
+      egressSource = String.format(EGRESS_SOURCE, environmentType);
+    }
 
     var substitutionMap =
         Map.of(
@@ -424,7 +431,7 @@ public class MailServiceImpl implements MailService {
             EmailSubstitutionField.ALL_OF_US, AOU_ITALICS,
             EmailSubstitutionField.USERNAME, dbUser.getUsername(),
             EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediation,
-            EmailSubstitutionField.ENVIRONMENT_TYPE, environmentType);
+            EmailSubstitutionField.EGRESS_SOURCE, egressSource);
 
     String htmlMessage = buildHtml(EGRESS_REMEDIATION_RESOURCE, substitutionMap);
 

@@ -229,7 +229,7 @@ public class MailServiceImplTest {
     workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail = "egress@aou.com";
     DbUser user = createDbUser();
     mailService.sendEgressRemediationEmail(
-        user, EgressRemediationAction.SUSPEND_COMPUTE, "Jupyter");
+        user, EgressRemediationAction.SUSPEND_COMPUTE, "Jupyter", false);
 
     verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
     MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
@@ -242,6 +242,7 @@ public class MailServiceImplTest {
 
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
     assertThat(gotHtml).contains("temporarily suspended");
+    assertThat(gotHtml).contains("when using the <b>Jupyter</b> application");
     assertThat(gotHtml).doesNotContain("${");
   }
 
@@ -251,7 +252,8 @@ public class MailServiceImplTest {
     workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails =
         ImmutableList.of("egress-cc@aou.com");
     DbUser user = createDbUser();
-    mailService.sendEgressRemediationEmail(user, EgressRemediationAction.DISABLE_USER, "Jupyter");
+    mailService.sendEgressRemediationEmail(
+        user, EgressRemediationAction.DISABLE_USER, "Jupyter", false);
 
     verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
     MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
@@ -264,6 +266,29 @@ public class MailServiceImplTest {
 
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
     assertThat(gotHtml).contains("will remain disabled");
+    assertThat(gotHtml).contains("when using the <b>Jupyter</b> application");
+    assertThat(gotHtml).doesNotContain("${");
+  }
+
+  @Test
+  public void testSendEgressRemediationEmail_vwbEgress() throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail = "egress@aou.com";
+    DbUser user = createDbUser();
+    mailService.sendEgressRemediationEmail(
+        user, EgressRemediationAction.SUSPEND_COMPUTE, "Jupyter", true);
+
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
+    MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+
+    assertThat(((MandrillMessage) got.getMessage()).getFromEmail()).isEqualTo("egress@aou.com");
+    List<RecipientAddress> receipts = ((MandrillMessage) got.getMessage()).getTo();
+    assertThat(receipts)
+        .containsExactly(
+            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO));
+
+    String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+    assertThat(gotHtml).contains("temporarily suspended");
+    assertThat(gotHtml).doesNotContain("when using the <b>Jupyter</b> application");
     assertThat(gotHtml).doesNotContain("${");
   }
 
