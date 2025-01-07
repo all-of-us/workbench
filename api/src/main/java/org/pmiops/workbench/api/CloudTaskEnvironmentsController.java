@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.leonardo.LeonardoStatusUtils;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,12 +97,16 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
     var runtimes = leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject());
     var runtimesToDelete =
         runtimes.stream()
+            .filter(LeonardoStatusUtils::canDeleteRuntime)
             .filter(runtime -> !currentUsers.contains(runtime.getAuditInfo().getCreator()))
             .toList();
 
     var apps = leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
     var appsToDelete =
-        apps.stream().filter(app -> !currentUsers.contains(app.getCreator())).toList();
+        apps.stream()
+            .filter(LeonardoStatusUtils::canDeleteApp)
+            .filter(app -> !currentUsers.contains(app.getCreator()))
+            .toList();
 
     if (!runtimesToDelete.isEmpty()) {
       LOGGER.info(
@@ -155,6 +160,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
     var disks = leonardoApiClient.listDisksByProjectAsService(dbWorkspace.getGoogleProject());
     var disksToDelete =
         disks.stream()
+            .filter(LeonardoStatusUtils::canDeleteDisk)
             .filter(disk -> !currentUsers.contains(disk.getAuditInfo().getCreator()))
             .toList();
 
