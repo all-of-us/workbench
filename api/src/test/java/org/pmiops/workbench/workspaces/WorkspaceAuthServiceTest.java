@@ -280,8 +280,10 @@ public class WorkspaceAuthServiceTest {
       boolean initialCreditsExhausted,
       boolean initialCreditsExpired,
       boolean initialCreditExpirationBypass) {
-    final DbUserInitialCreditsExpiration dbUserInitialCreditsExpiration = new DbUserInitialCreditsExpiration().setBypassed(initialCreditExpirationBypass);
-    final DbUser user = new DbUser().setUserInitialCreditsExpiration(dbUserInitialCreditsExpiration);
+    final DbUserInitialCreditsExpiration dbUserInitialCreditsExpiration =
+        new DbUserInitialCreditsExpiration().setBypassed(initialCreditExpirationBypass);
+    final DbUser user =
+        new DbUser().setUserInitialCreditsExpiration(dbUserInitialCreditsExpiration);
     final DbWorkspace toReturn =
         new DbWorkspace()
             .setWorkspaceNamespace(namespace)
