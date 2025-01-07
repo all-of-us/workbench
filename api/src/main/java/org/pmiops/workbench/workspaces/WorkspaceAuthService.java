@@ -60,7 +60,9 @@ public class WorkspaceAuthService {
       throws ForbiddenException {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     if (isInitialCredits(workspace.getBillingAccountName(), workbenchConfigProvider.get())
-        && (workspace.isInitialCreditsExhausted() || workspace.isInitialCreditsExpired())) {
+        && (workspace.isInitialCreditsExhausted()
+            || (workspace.isInitialCreditsExpired()
+                && !workspace.getCreator().getUserInitialCreditsExpiration().isBypassed()))) {
       throw new ForbiddenException(
           String.format(
               "Workspace (%s) is using initial credits that have either expired or have been exhausted.",
