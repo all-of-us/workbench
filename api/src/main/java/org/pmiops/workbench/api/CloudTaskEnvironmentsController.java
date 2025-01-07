@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
+
 import com.google.common.base.Stopwatch;
 import jakarta.inject.Provider;
 import java.util.List;
@@ -41,15 +43,16 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
         String.format(
             "Deleting unshared environments for %d workspaces.", workspaceNamespaces.size()));
 
-    stopwatchProvider.get().start();
+    // temp timing for batch sizing
+    var stopwatch = stopwatchProvider.get().start();
     workspaceNamespaces.stream()
         .map(workspaceService::lookupWorkspaceByNamespace)
         .forEach(this::deleteUnshared);
-    var elapsed = stopwatchProvider.get().stop().elapsed();
+    var elapsed = stopwatch.stop().elapsed();
     LOGGER.info(
         String.format(
             "Deleted unshared environments for %d workspaces in %s.",
-            workspaceNamespaces.size(), elapsed));
+            workspaceNamespaces.size(), formatDurationPretty(elapsed)));
 
     return ResponseEntity.ok().build();
   }
