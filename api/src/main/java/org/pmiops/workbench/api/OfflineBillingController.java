@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineBillingController implements OfflineBillingApiDelegate {
 
-  private final InitialCreditsBatchUpdateService freeTierBillingService;
+  private final InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   private final GoogleProjectPerCostDao googleProjectPerCostDao;
   private final TaskQueueService taskQueueService;
 
@@ -23,24 +23,24 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   @Autowired
   OfflineBillingController(
-      InitialCreditsBatchUpdateService freeTierBillingService,
+      InitialCreditsBatchUpdateService initialCreditsBatchUpdateService,
       GoogleProjectPerCostDao googleProjectPerCostDao,
       UserService userService,
       TaskQueueService taskQueueService) {
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.taskQueueService = taskQueueService;
     this.userService = userService;
     this.googleProjectPerCostDao = googleProjectPerCostDao;
   }
 
   @Override
-  public ResponseEntity<Void> checkFreeTierBillingUsage() {
+  public ResponseEntity<Void> checkForInitialCreditUsage() {
     // Get cost for all workspace from BQ
-    Map<String, Double> freeTierForAllWorkspace =
-        freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();
+    Map<String, Double> initialCreditCostsForAllWorkspace =
+        initialCreditsBatchUpdateService.getInitialCreditWorkspaceCostsFromBQ();
 
     List<DbGoogleProjectPerCost> googleProjectCostList =
-        freeTierForAllWorkspace.entrySet().stream()
+        initialCreditCostsForAllWorkspace.entrySet().stream()
             .map(DbGoogleProjectPerCost::new)
             .collect(Collectors.toList());
 
@@ -51,7 +51,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
     List<Long> allUserIds = userService.getAllUserIds();
 
-    taskQueueService.groupAndPushFreeTierBilling(allUserIds);
+    taskQueueService.groupAndPushCheckInitialCreditExhaustionTasks(allUserIds);
     log.info("Pushed all users to Cloud Task for Free Tier Billing");
 
     return ResponseEntity.noContent().build();
