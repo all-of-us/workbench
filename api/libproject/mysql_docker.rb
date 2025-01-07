@@ -10,7 +10,8 @@ def maybe_dockerize_mysql_cmd(cmd, interactive=false, tty=false)
 
   # Otherwise, containerize mysql usage. This avoids the requirement for devs to
   # have mysql installed on their workstations.
-  return "docker run " +
+  
+  cmd_with_docker = "docker run " +
       "--rm " +
       (interactive ? "-i " : "") +
       (tty ? "-t " : "") +
@@ -18,4 +19,5 @@ def maybe_dockerize_mysql_cmd(cmd, interactive=false, tty=false)
       "--entrypoint '' " +
       "mariadb:10.11.8 " +
       cmd
+  return cmd_with_docker
 end
