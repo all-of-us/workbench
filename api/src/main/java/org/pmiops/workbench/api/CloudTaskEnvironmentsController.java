@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Stopwatch;
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -19,12 +21,16 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
       Logger.getLogger(CloudTaskEnvironmentsController.class.getName());
 
   private final LeonardoApiClient leonardoApiClient;
+  private final Provider<Stopwatch> stopwatchProvider;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public CloudTaskEnvironmentsController(
-      LeonardoApiClient leonardoApiClient, WorkspaceService workspaceService) {
+      LeonardoApiClient leonardoApiClient,
+      Provider<Stopwatch> stopwatchProvider,
+      WorkspaceService workspaceService) {
     this.leonardoApiClient = leonardoApiClient;
+    this.stopwatchProvider = stopwatchProvider;
     this.workspaceService = workspaceService;
   }
 
@@ -35,54 +41,17 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
         String.format(
             "Deleting unshared environments for %d workspaces.", workspaceNamespaces.size()));
 
+    stopwatchProvider.get().start();
     workspaceNamespaces.stream()
         .map(workspaceService::lookupWorkspaceByNamespace)
-        .forEach(
-            ws -> {
-              //              explore(ws);
-              deleteUnshared(ws);
-            });
-
-    return ResponseEntity.ok().build();
-  }
-
-  private void explore(DbWorkspace dbWorkspace) {
+        .forEach(this::deleteUnshared);
+    var elapsed = stopwatchProvider.get().stop().elapsed();
     LOGGER.info(
         String.format(
-            "Exploring workspace %s/%s (ID %d)",
-            dbWorkspace.getWorkspaceNamespace(),
-            dbWorkspace.getFirecloudName(),
-            dbWorkspace.getWorkspaceId()));
+            "Deleted unshared environments for %d workspaces in %s.",
+            workspaceNamespaces.size(), elapsed));
 
-    var roles =
-        workspaceService.getFirecloudUserRoles(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    roles.forEach(
-        ur -> LOGGER.info(String.format("Role %s for user %s", ur.getRole(), ur.getEmail())));
-
-    var runtimes = leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject());
-    runtimes.forEach(
-        runtime ->
-            LOGGER.info(
-                String.format(
-                    "Runtime %s created by user %s",
-                    runtime.getRuntimeName(), runtime.getAuditInfo().getCreator())));
-
-    var apps = leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
-    apps.forEach(
-        app ->
-            LOGGER.info(
-                String.format(
-                    "App %s (%s) created by user %s",
-                    app.getAppName(), app.getAppType(), app.getCreator())));
-
-    var disks = leonardoApiClient.listDisksByProjectAsService(dbWorkspace.getGoogleProject());
-    disks.forEach(
-        disk ->
-            LOGGER.info(
-                String.format(
-                    "Disk %s created by user %s",
-                    disk.getName(), disk.getAuditInfo().getCreator())));
+    return ResponseEntity.ok().build();
   }
 
   private void deleteUnshared(DbWorkspace dbWorkspace) {
