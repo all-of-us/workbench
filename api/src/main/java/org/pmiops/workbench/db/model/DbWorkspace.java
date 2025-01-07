@@ -641,7 +641,7 @@ public class DbWorkspace {
   @Column(name = "billing_status")
   public BillingStatus getBillingStatus() {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        creator.getUserInitialCreditsExpiration();
+        creator != null ? creator.getUserInitialCreditsExpiration() : null;
     boolean initialCreditsExpirationBypassed =
         userInitialCreditsExpiration != null && userInitialCreditsExpiration.isBypassed();
     return (initialCreditsExhausted || (initialCreditsExpired && !initialCreditsExpirationBypassed)
