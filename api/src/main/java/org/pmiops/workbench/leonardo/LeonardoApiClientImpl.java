@@ -32,6 +32,7 @@ import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest;
@@ -98,6 +99,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   private final LeonardoApiClientFactory leonardoApiClientFactory;
   private final Provider<RuntimesApi> runtimesApiProvider;
+  private final Provider<org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi>
+      newRuntimesApiProvider;
   private final Provider<RuntimesApi> serviceRuntimesApiProvider;
 
   private final Provider<ResourcesApi> resourcesApiProvider;
@@ -119,7 +122,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Autowired
   public LeonardoApiClientImpl(
       LeonardoApiClientFactory leonardoApiClientFactory,
-      @Qualifier(LeonardoConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
+      @Qualifier(LeonardoConfig.LEGACY_USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
+      @Qualifier(LeonardoConfig.USER_RUNTIMES_API)
+          Provider<org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi>
+              newRuntimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
           Provider<RuntimesApi> serviceRuntimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_RESOURCE_API) Provider<ResourcesApi> resourcesApiProvider,
@@ -139,6 +145,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       WorkspaceDao workspaceDao) {
     this.leonardoApiClientFactory = leonardoApiClientFactory;
     this.runtimesApiProvider = runtimesApiProvider;
+    this.newRuntimesApiProvider = newRuntimesApiProvider;
     this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
     this.resourcesApiProvider = resourcesApiProvider;
     this.proxyApiProvider = proxyApiProvider;
@@ -349,13 +356,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName) {
-    RuntimesApi runtimesApi = runtimesApiProvider.get();
+  public GetRuntimeResponse getRuntime(String googleProject, String runtimeName) {
+    org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi runtimesApi =
+        newRuntimesApiProvider.get();
     try {
-      return legacyLeonardoRetryHandler.runAndThrowChecked(
+      return leonardoRetryHandler.runAndThrowChecked(
           (context) -> runtimesApi.getRuntime(googleProject, runtimeName));
-    } catch (org.pmiops.workbench.legacy_leonardo_client.ApiException e) {
-      throw ExceptionUtils.convertLegacyLeonardoException(e);
+    } catch (ApiException e) {
+      throw ExceptionUtils.convertLeonardoException(e);
     }
   }
 
