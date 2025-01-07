@@ -2374,7 +2374,7 @@ paths:
   /v1/cron/deleteOldRuntimes:
     get:
       tags:
-      - offlineRuntime
+      - offlineEnvironments
       - cron
       description: Endpoint meant to be called offline to trigger runtime checks and
         cleanup. Enforces upgrade by deletion and re-creation for older runtime deployments.
@@ -2388,7 +2388,7 @@ paths:
   /v1/cron/checkPersistentDisks:
     get:
       tags:
-      - offlineRuntime
+      - offlineEnvironments
       - cron
       description: 'Endpoint meant to be called offline to check for old / detached
         persistent disks. Notifies workspace owners at configurable intervals about
@@ -2399,6 +2399,19 @@ paths:
       responses:
         204:
           description: Disks were checked and handled successfully.
+          content: {}
+  /v1/cron/deleteUnsharedWorkspaceEnvironments:
+    get:
+      tags:
+        - offlineEnvironments
+        - cron
+      description: 'Endpoint meant to be called offline to delete Runtimes, Apps, and Disks for
+        users who have been removed from workspaces. Only executable via App Engine cronjob.'
+      operationId: deleteUnsharedWorkspaceEnvironments
+      security: []
+      responses:
+        204:
+          description: Environments and Disks were deleted successfully, where appropriate.
           content: {}
   /v1/cron/bulkAuditProjectAccess:
     get:
@@ -4390,6 +4403,28 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserIdList'
+        required: true
+      responses:
+        200:
+          description: Check Credits Expiration For User IDs Task Ran Successfully
+          content: { }
+      x-codegen-request-body-name: request
+  /v1/cloudTask/deleteUnsharedWorkspaceEnvironments:
+    post:
+      tags:
+        - cloudTaskEnvironments
+        - cloudTask
+      description: |
+        Run the business logic to delete Runtimes, Apps, and Disks for
+        users who have been removed from workspaces
+      operationId: ctDeleteUnsharedWorkspaceEnvironments
+      security: [ ]
+      requestBody:
+        description: Workspaces to check for unshared environments and disks.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceNamespaceList'
         required: true
       responses:
         200:
@@ -11727,6 +11762,10 @@ components:
       items:
         type: integer
         format: int64
+    WorkspaceNamespaceList:
+      type: array
+      items:
+        type: string
     ProcessEgressEventRequest:
       required:
       - eventId

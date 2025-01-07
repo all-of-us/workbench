@@ -410,6 +410,8 @@ public class WorkbenchConfig {
     public Integer usersPerSynchronizeAccessTask;
     // Number of users to process within a single check initial credits expiration task.
     public Integer usersPerCheckInitialCreditsExpirationTask;
+    // Number of workspaces to process within a single delete workspace environments task.
+    public Integer workspacesPerDeleteWorkspaceEnvironmentsTask;
   }
 
   /**
