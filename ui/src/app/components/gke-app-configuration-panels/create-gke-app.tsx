@@ -500,10 +500,9 @@ export const CreateGkeApp = ({
           />
         ) : (
           <CreateGkeAppButton
-            {...{ billingStatus, createAppRequest }}
+            {...{ billingStatus, createAppRequest, workspace }}
             existingApp={app}
             existingDisk={disk}
-            workspace={workspace}
             username={profile.username}
             style={openOrCreateButtonStyle}
             onDismiss={() => {
