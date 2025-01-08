@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.dataset.GenomicDatasetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -99,7 +99,7 @@ public class GenomicExtractionServiceTest {
   @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
   @Autowired WorkspaceDao workspaceDao;
 
-  @MockBean DataSetService mockDataSetService;
+  @MockBean GenomicDatasetService mockGenomicDatasetService;
   @MockBean FireCloudService mockFireCloudService;
   @MockBean JiraService mockJiraService;
   @MockBean MethodConfigurationsApi mockMethodConfigurationsApi;
@@ -457,7 +457,8 @@ public class GenomicExtractionServiceTest {
 
   @Test
   public void submitExtractionJob() throws ApiException {
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1", "2", "3"));
+    when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
+        .thenReturn(List.of("1", "2", "3"));
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
@@ -486,7 +487,7 @@ public class GenomicExtractionServiceTest {
 
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1"));
+    when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1"));
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
@@ -505,7 +506,8 @@ public class GenomicExtractionServiceTest {
   public void submitExtractionJob_many() throws ApiException {
     final List<String> largePersonIdList =
         LongStream.range(1, 376).boxed().map(Object::toString).toList();
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
+    when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
+        .thenReturn(largePersonIdList);
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
@@ -520,7 +522,8 @@ public class GenomicExtractionServiceTest {
 
   @Test
   public void submitExtractionJob_v8() throws ApiException {
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1", "2", "3"));
+    when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
+        .thenReturn(List.of("1", "2", "3"));
 
     DbCdrVersion cdrV8 =
         cdrVersionDao.save(
@@ -546,7 +549,8 @@ public class GenomicExtractionServiceTest {
 
   @Test
   public void submitExtractionJob_noWgsData() {
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(Collections.emptyList());
+    when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
+        .thenReturn(Collections.emptyList());
 
     assertThrows(
         FailedPreconditionException.class,
@@ -557,7 +561,8 @@ public class GenomicExtractionServiceTest {
   public void submitExtractionJob_tooManySamples() {
     final List<String> largePersonIdList =
         LongStream.range(1, 6_000).boxed().map(Object::toString).toList();
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
+    when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
+        .thenReturn(largePersonIdList);
 
     assertThrows(
         FailedPreconditionException.class,

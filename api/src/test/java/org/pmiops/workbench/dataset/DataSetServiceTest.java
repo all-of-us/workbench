@@ -3,7 +3,6 @@ package org.pmiops.workbench.dataset;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -524,35 +523,6 @@ public class DataSetServiceTest {
         dataSetServiceImpl.findDataDictionaryEntry("gender", "PERSON");
     assertThat(dataDictionaryEntry).isNotNull();
     assertThat(dataDictionaryEntry.getDescription()).isEqualTo("Gender testing");
-  }
-
-  @Test
-  public void testGetPersonIdsWithWholeGenome_cohorts() {
-    mockPersonIdQuery();
-    DbCohort cohort2 = cohortDao.save(buildSimpleCohort(workspace));
-
-    DbDataset dataset = new DbDataset();
-    dataset.setCohortIds(ImmutableList.of(cohort.getCohortId(), cohort2.getCohortId()));
-    dataSetServiceImpl.getPersonIdsWithWholeGenome(dataset);
-
-    // Two participant criteria, one per cohort.
-    verify(mockCohortQueryBuilder)
-        .buildUnionedParticipantIdQuery(argThat(criteriaList -> criteriaList.size() == 2));
-  }
-
-  @Test
-  public void testGetPersonIdsWithWholeGenome_allParticipants() {
-    mockPersonIdQuery();
-
-    DbDataset dataset = new DbDataset();
-    dataset.setIncludesAllParticipants(true);
-    dataSetServiceImpl.getPersonIdsWithWholeGenome(dataset);
-
-    // Expect one participant criteria: "has WGS".
-    // Note: this is dipping too much into implementation, but options are limited with the high
-    // amount of mocking in this test.
-    verify(mockCohortQueryBuilder)
-        .buildUnionedParticipantIdQuery(argThat(criteriaList -> criteriaList.size() == 1));
   }
 
   @Test
