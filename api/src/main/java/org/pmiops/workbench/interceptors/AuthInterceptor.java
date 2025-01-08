@@ -143,7 +143,8 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
 
     // TODO: check Google group membership to ensure user is in registered user group
 
-    if (workbenchConfigProvider.get().auth.serviceAccountApiUsers.contains(userName)) {
+    if (workbenchConfigProvider.get().auth.serviceAccountApiUsers.contains(userName)
+        || isVwbServiceAccount(userName)) {
       // Whitelisted service accounts are able to make API calls, too.
       // TODO: stop treating service accounts as normal users, have a separate table for them,
       // administrators.

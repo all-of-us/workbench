@@ -407,6 +407,18 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendEgressRemediationEmail(
+      DbUser dbUser, EgressRemediationAction action, @Nullable String gkeServiceName)
+      throws MessagingException {
+    sendEgressRemediationEmailCommon(dbUser, action, gkeServiceName, false);
+  }
+
+  @Override
+  public void sendEgressRemediationEmailForVwb(DbUser dbUser, EgressRemediationAction action)
+      throws MessagingException {
+    sendEgressRemediationEmailCommon(dbUser, action, null, true);
+  }
+
+  private void sendEgressRemediationEmailCommon(
       DbUser dbUser,
       EgressRemediationAction action,
       @Nullable String gkeServiceName,
@@ -416,6 +428,7 @@ public class MailServiceImpl implements MailService {
     String givenName = Optional.ofNullable(dbUser.getGivenName()).orElse("Researcher");
 
     String egressSource = "";
+
     if (!isVwbEgress) {
       String environmentType =
           appServiceNameToAppType(Strings.nullToEmpty(gkeServiceName))
