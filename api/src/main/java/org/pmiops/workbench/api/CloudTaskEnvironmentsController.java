@@ -58,10 +58,24 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
   }
 
   private void deleteUnshared(DbWorkspace dbWorkspace) {
-    var currentUsers =
-        workspaceService
-            .getFirecloudUserRoles(
-                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+    // this call often fails on Test.  TODO: investigate.
+    final List<UserRole> userRoles;
+    try {
+      userRoles =
+          workspaceService.getFirecloudUserRoles(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    } catch (WorkbenchException e) {
+      LOGGER.warning(
+          String.format(
+              "Failed to get user roles for workspace %s/%s (ID %d): %s",
+              dbWorkspace.getWorkspaceNamespace(),
+              dbWorkspace.getFirecloudName(),
+              dbWorkspace.getWorkspaceId(),
+              e.getMessage()));
+      return;
+    }
+
+    var currentUsers =userRoles
             .stream()
             .map(UserRole::getEmail)
             .collect(Collectors.toSet());
