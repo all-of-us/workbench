@@ -73,7 +73,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
     // null for Jupyter
     String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
-    mailService.sendEgressRemediationEmail(user, action, gkeServiceName, false);
+    mailService.sendEgressRemediationEmail(user, action, gkeServiceName);
   }
 
   @Override

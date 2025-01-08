@@ -75,7 +75,7 @@ public class SendEmail extends Tool {
 
       // TODO: add other options
       if (whichEmail.equals("egress")) {
-        mailService.sendEgressRemediationEmail(user, action, "Jupyter", false);
+        mailService.sendEgressRemediationEmail(user, action, "Jupyter");
       }
     };
   }

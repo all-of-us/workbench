@@ -77,7 +77,7 @@ public class EgressVwbRemediationService extends EgressRemediationService {
         appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
             .map(LeonardoAppUtils::appDisplayName)
             .orElse("Jupyter");
-    mailService.sendEgressRemediationEmail(user, action, environmentType, true);
+    mailService.sendEgressRemediationEmailForVwb(user, action);
   }
 
   @Override

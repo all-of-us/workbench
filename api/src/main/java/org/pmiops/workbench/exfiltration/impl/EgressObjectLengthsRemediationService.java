@@ -60,7 +60,7 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
     disableUser(user);
     // null for Jupyter
     String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
-    mailService.sendEgressRemediationEmail(user, action, gkeServiceName, false);
+    mailService.sendEgressRemediationEmail(user, action, gkeServiceName);
   }
 
   @Override
