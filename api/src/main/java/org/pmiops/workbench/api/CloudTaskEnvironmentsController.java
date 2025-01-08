@@ -75,10 +75,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
       return;
     }
 
-    var currentUsers =userRoles
-            .stream()
-            .map(UserRole::getEmail)
-            .collect(Collectors.toSet());
+    var currentUsers = userRoles.stream().map(UserRole::getEmail).collect(Collectors.toSet());
 
     var runtimes = leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject());
     var runtimesToDelete =
