@@ -17,6 +17,7 @@ public class ExfiltrationUtils {
   public static final String EGRESS_SUMOLOGIC_SERVICE_QUALIFIER = "sumologicEgressService";
   public static final String SUMOLOGIC_JIRA_HANDLER_QUALIFIER = "sumologicJiraHandler";
   public static final String EGRESS_VWB_SERVICE_QUALIFIER = "vwbEgressService";
+  public static final String EGRESS_VWB_JIRA_HANDLER_QUALIFIER = "vwbJiraHandler";
 
   private static final Pattern VM_PREFIX_PATTERN = Pattern.compile("all-of-us-(?<userid>\\d+)");
   private static final String USER_ID_GROUP_NAME = "userid";
