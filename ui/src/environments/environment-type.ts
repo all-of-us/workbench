@@ -65,6 +65,10 @@ export interface EnvironmentBase {
   // Pass auth token in iframe url
   // WARNING: This is insecure and should only be enabled for local environments
   tanagraLocalAuth: boolean;
+
+  // The URL to use when making API requests against the vwb UI.
+  // This is used to redirect users to the vwb UI after creating a workspace.
+  vwbUiUrl: string;
 }
 
 export interface Environment extends EnvironmentBase {
