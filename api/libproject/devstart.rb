@@ -3171,7 +3171,7 @@ def send_email(cmd_name, *args)
     '--given_name [given name]',
     String,
     ->(opts, v) { opts.given_name = v },
-    'User name.')
+    'User given (first) name.')
 
   op.add_typed_option(
     '--contact [contact email]',
@@ -3186,7 +3186,7 @@ def send_email(cmd_name, *args)
     'If specified, sends the DISABLE_USER egress email.  Defaults to the SUSPEND_COMPUTE egress email.')
   op.opts.disable = false
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.username and opts.contact and opts.email == VALID_EMAIL_OPTION }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.username and opts.given_name and opts.contact and opts.email == VALID_EMAIL_OPTION }
 
   op.parse.validate
 
@@ -3221,4 +3221,90 @@ Common.register_command({
     :invocation => SEND_EMAIL_CMD,
     :description => "Sends a system email.  Currently limited to egress emails.",
     :fn => ->(*args) {send_email(SEND_EMAIL_CMD, *args)}
+})
+
+def run_genomic_extraction(cmd_name, *args)
+  common = Common.new
+
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_typed_option(
+    '--project [project]',
+    String,
+    ->(opts, v) { opts.project = v },
+    'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+    '--namespace [workspace namespace]',
+    String,
+    ->(opts, v) { opts.namespace = v },
+    'The workspace namespace to run the extraction from.')
+
+  op.add_typed_option(
+    '--dataset_id [dataset id]',
+    String,
+    ->(opts, v) { opts.dataset_id = v },
+    'The dataset used in the extraction.')
+
+  op.add_typed_option(
+    '--legacy [true/false]',
+    String,
+    ->(opts, v) { opts.legacy = v },
+    'Use legacy (v7 and earlier) workflow (true) or v8+ workflow (false).')
+
+  op.add_typed_option(
+    '--filter_set [filter set]',
+    String,
+    ->(opts, v) { opts.filter_set = v },
+    'Filter set name.')
+
+  op.add_typed_option(
+    '--cdr_bq_project [project]',
+    String,
+    ->(opts, v) { opts.cdr_bq_project = v },
+    "The CDR's BigQuery project.")
+
+  op.add_typed_option(
+    '--wgs_bq_dataset [dataset]',
+    String,
+    ->(opts, v) { opts.wgs_bq_dataset = v },
+    "The CDR's WGS BigQuery dataset")
+
+  op.add_validator ->(opts) {
+    raise ArgumentError unless opts.namespace and opts.dataset_id and opts.legacy and opts.filter_set and opts.cdr_bq_project and opts.wgs_bq_dataset
+  }
+
+  op.parse.validate
+
+  gradle_args = ([
+    ["--namespace", op.opts.namespace],
+    ["--dataset_id", op.opts.dataset_id],
+    ["--legacy", op.opts.legacy],
+    ["--filter_set", op.opts.filter_set],
+    ["--cdr_bq_project", op.opts.cdr_bq_project],
+    ["--wgs_bq_dataset", op.opts.wgs_bq_dataset],
+ ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+  ENV.update(read_db_vars(gcc))
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.run_inline %W{./gradlew runGenomicExtraction -PappArgs=[#{gradle_args.join(',')}]}
+  end
+
+end
+
+GENOMIC_EXTRACTION_CMD = "run-extraction"
+
+# example usage:
+#   ./project.rb run-extraction
+Common.register_command({
+    :invocation => GENOMIC_EXTRACTION_CMD,
+    :description => "Runs a genomic extraction workflow.  Requires a workspace in the Controlled Tier but can vary from what it specifies in its CDR Configuration.",
+    :fn => ->(*args) {run_genomic_extraction(GENOMIC_EXTRACTION_CMD, *args)}
 })

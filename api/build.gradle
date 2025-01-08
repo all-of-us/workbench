@@ -943,9 +943,19 @@ task listDisks(type: JavaExec) {
     }
 }
 
+// ./project.rb send-email
 task sendEmail(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
     mainClass = "org.pmiops.workbench.tools.SendEmail"
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
+// ./project.rb run-extraction
+task runGenomicExtraction(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    mainClass = "org.pmiops.workbench.tools.RunGenomicExtractionWorkflow"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }

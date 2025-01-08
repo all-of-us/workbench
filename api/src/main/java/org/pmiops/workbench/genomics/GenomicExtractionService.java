@@ -430,7 +430,7 @@ public class GenomicExtractionService {
       boolean useLegacyWorkflow,
       String filterSetName,
       String bigQueryProject,
-      String wgsBigqueryDataset)
+      String wgsBigQueryDataset)
       throws ApiException {
 
     boolean isTanagraEnabled = workspace.isCDRAndWorkspaceTanagraEnabled();
@@ -492,7 +492,7 @@ public class GenomicExtractionService {
                             useLegacyWorkflow,
                             filterSetName,
                             bigQueryProject,
-                            wgsBigqueryDataset,
+                            wgsBigQueryDataset,
                             workspace.getGoogleProject()))
                     .methodConfigVersion(versionedConfig.methodRepoVersion)
                     .methodRepoMethod(createRepoMethodParameter(versionedConfig))
