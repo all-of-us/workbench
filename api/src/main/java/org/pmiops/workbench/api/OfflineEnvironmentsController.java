@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -53,8 +54,8 @@ import org.springframework.web.bind.annotation.RestController;
  * Workbench service account.
  */
 @RestController
-public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
-  private static final Logger log = Logger.getLogger(OfflineRuntimeController.class.getName());
+public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDelegate {
+  private static final Logger log = Logger.getLogger(OfflineEnvironmentsController.class.getName());
 
   // On the n'th day of inactivity on a PD, a notification is sent.
   private static final Set<Integer> INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS = ImmutableSet.of(14);
@@ -66,36 +67,40 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   // idle deletion.
   private static final int IDLE_AFTER_HOURS = 3;
 
-  private final FireCloudService fireCloudService;
-  private final InitialCreditsService initialCreditsService;
-  private final MailService mailService;
-  private final LeonardoApiClient leonardoApiClient;
   private final Provider<WorkbenchConfig> configProvider;
-  private final WorkspaceDao workspaceDao;
-  private final UserDao userDao;
-  private final LeonardoMapper leonardoMapper;
   private final Clock clock;
 
+  private final FireCloudService fireCloudService;
+  private final InitialCreditsService initialCreditsService;
+  private final LeonardoApiClient leonardoApiClient;
+  private final LeonardoMapper leonardoMapper;
+  private final MailService mailService;
+  private final TaskQueueService taskQueueService;
+  private final UserDao userDao;
+  private final WorkspaceDao workspaceDao;
+
   @Autowired
-  OfflineRuntimeController(
+  OfflineEnvironmentsController(
+      Clock clock,
       FireCloudService firecloudService,
       InitialCreditsService initialCreditsService,
-      MailService mailService,
       LeonardoApiClient leonardoApiClient,
+      LeonardoMapper leonardoMapper,
+      MailService mailService,
       Provider<WorkbenchConfig> configProvider,
-      WorkspaceDao workspaceDao,
+      TaskQueueService taskQueueService,
       UserDao userDao,
-      Clock clock,
-      LeonardoMapper leonardoMapper) {
-    this.fireCloudService = firecloudService;
-    this.initialCreditsService = initialCreditsService;
-    this.mailService = mailService;
-    this.leonardoApiClient = leonardoApiClient;
-    this.workspaceDao = workspaceDao;
-    this.userDao = userDao;
+      WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.configProvider = configProvider;
+    this.fireCloudService = firecloudService;
+    this.initialCreditsService = initialCreditsService;
+    this.leonardoApiClient = leonardoApiClient;
     this.leonardoMapper = leonardoMapper;
+    this.mailService = mailService;
+    this.taskQueueService = taskQueueService;
+    this.userDao = userDao;
+    this.workspaceDao = workspaceDao;
   }
 
   /**
@@ -178,7 +183,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         continue;
       }
 
-      leonardoApiClient.deleteRuntimeAsService(googleProject, runtime.getRuntimeName());
+      leonardoApiClient.deleteRuntimeAsService(
+          googleProject, runtime.getRuntimeName(), /* deleteDisk */ false);
     }
     log.info(
         String.format(
@@ -360,5 +366,17 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()
           .anyMatch(userAppEnvironment -> diskName.equals(userAppEnvironment.getDiskName()));
     }
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteUnsharedWorkspaceEnvironments() {
+    List<String> activeNamespaces =
+        workspaceDao.getAllActive().stream().map(DbWorkspace::getWorkspaceNamespace).toList();
+    log.info(
+        String.format(
+            "Queuing %d active workspaces in batches for deletion of unshared resources",
+            activeNamespaces.size()));
+    taskQueueService.groupAndPushDeleteWorkspaceEnvironmentTasks(activeNamespaces);
+    return ResponseEntity.noContent().build();
   }
 }

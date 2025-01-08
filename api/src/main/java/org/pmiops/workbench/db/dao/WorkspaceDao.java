@@ -153,4 +153,11 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "FROM DbWorkspace w "
           + "WHERE w.creator.userId in (:creatoridList)")
   Set<String> getGoogleProjectForUserList(@Param("creatoridList") List<Long> creatorIdList);
+
+  List<DbWorkspace> getAllByActiveStatusEquals(short status);
+
+  default List<DbWorkspace> getAllActive() {
+    return getAllByActiveStatusEquals(
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
 }

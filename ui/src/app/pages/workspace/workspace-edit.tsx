@@ -19,11 +19,12 @@ import {
   WorkspaceOperationStatus,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { InfoIcon, WarningIcon } from 'app/components/icons';
+import { InfoIcon, NewWindowIcon, WarningIcon } from 'app/components/icons';
 import {
   CheckBox,
   RadioButton,
@@ -342,6 +343,8 @@ export interface WorkspaceEditState {
   workspaceCreationErrorMessage: string;
   dataAppsVersion: DataAppsVersions;
   unavailableTier?: string;
+  showWorkspaceCreatedModal?: boolean;
+  vwbWorkspaceId?: string;
 }
 
 export const WorkspaceEdit = fp.flow(
@@ -378,6 +381,7 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
         dataAppsVersion: this.initializeDataAppsVersion(props),
+        showWorkspaceCreatedModal: false,
       };
     }
 
@@ -1221,6 +1225,16 @@ export const WorkspaceEdit = fp.flow(
             workspace.terraName
           );
 
+        if (workspace.vwbWorkspace) {
+          this.setState({
+            showWorkspaceCreatedModal: true,
+            showConfirmationModal: false,
+            loading: false,
+            vwbWorkspaceId: updatedWorkspace.namespace,
+          });
+          return;
+        }
+
         const navigateToWorkspace = () => {
           this.props.navigate([
             'workspaces',
@@ -1497,6 +1511,7 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationError,
         workspaceCreationErrorMessage,
         unavailableTier,
+        showWorkspaceCreatedModal,
       } = this.state;
       const {
         cdrVersionTiersResponse,
@@ -1511,6 +1526,41 @@ export const WorkspaceEdit = fp.flow(
           <div style={{ width: '1120px' }}>
             {loading && (
               <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
+            )}
+            {showWorkspaceCreatedModal && (
+              <Modal>
+                <ModalTitle>Open in Verily Workbench</ModalTitle>
+                <ModalBody>
+                  Your workspace <strong>{this.state.workspace.name}</strong> is
+                  ready. Open it in Verily Workbench to get started.
+                </ModalBody>
+
+                <ModalFooter>
+                  <Button
+                    type='secondary'
+                    onClick={() => {
+                      this.setState({ showWorkspaceCreatedModal: false });
+                      this.props.navigate(['/workspaces']);
+                    }}
+                    style={{ marginRight: '10px', height: '40px' }}
+                  >
+                    Back to List
+                  </Button>
+                  <Button
+                    type='primary'
+                    onClick={() =>
+                      window.open(
+                        `${environment.vwbUiUrl}/workspaces/${this.state.vwbWorkspaceId}`,
+                        '_blank',
+                        'noopener noreferrer'
+                      )
+                    }
+                    style={{ height: '40px' }}
+                  >
+                    Open <NewWindowIcon style={{ marginLeft: '5px' }} />
+                  </Button>
+                </ModalFooter>
+              </Modal>
             )}
             {!hasDefaultCdrVersion(
               this.state.workspace,

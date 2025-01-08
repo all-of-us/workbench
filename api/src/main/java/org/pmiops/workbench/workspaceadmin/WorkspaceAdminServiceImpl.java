@@ -274,7 +274,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete) {
     final String googleProject =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
-    leonardoApiClient.deleteRuntimeAsService(googleProject, runtimeNameToDelete);
+    leonardoApiClient.deleteRuntimeAsService(
+        googleProject, runtimeNameToDelete, /* deleteDisk */ false);
 
     // fetch again to confirm deletion
     LeonardoGetRuntimeResponse refreshedRuntime =
