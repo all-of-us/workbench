@@ -404,7 +404,7 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */, false);
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */, eq(false));
   }
 
   @Test
@@ -424,7 +424,7 @@ public class EgressRemediationServiceTest {
     String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq(gkeServiceName), false);
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq(gkeServiceName), eq(false));
   }
 
   @Test
@@ -458,7 +458,7 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.DISABLE_USER), isNull() /* Jupyter */, false);
+            any(), eq(EgressRemediationAction.DISABLE_USER), isNull() /* Jupyter */, eq(false));
   }
 
   @Test
@@ -495,7 +495,7 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */, false);
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), isNull() /* Jupyter */, eq(false));
   }
 
   @Test
