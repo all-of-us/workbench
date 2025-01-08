@@ -48,7 +48,7 @@ public class EgressVwbJiraHandler extends EgressJiraHandler {
     log.info(
         String.format("Found %d jira issues with label: high-egress", results.getIssues().size()));
     if (results.getIssues().isEmpty()) {
-      createJiraIssueWithLabels(event, action, envShortName, new String[] {"high-egress"});
+      createJiraIssueWithLabels(event, action, envShortName, new String[] {"high-egress", "vwb"});
     } else {
       createJiraComment(event, action, results);
     }
