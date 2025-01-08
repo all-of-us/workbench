@@ -343,7 +343,7 @@ export interface WorkspaceEditState {
   workspaceCreationErrorMessage: string;
   dataAppsVersion: DataAppsVersions;
   unavailableTier?: string;
-  showWorkspaceCreatedPopup?: boolean;
+  showWorkspaceCreatedModal?: boolean;
   vwbWorkspaceId?: string;
 }
 
@@ -381,7 +381,7 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
         dataAppsVersion: this.initializeDataAppsVersion(props),
-        showWorkspaceCreatedPopup: false,
+        showWorkspaceCreatedModal: false,
       };
     }
 
@@ -1227,7 +1227,8 @@ export const WorkspaceEdit = fp.flow(
 
         if (workspace.vwbWorkspace) {
           this.setState({
-            showWorkspaceCreatedPopup: true,
+            showWorkspaceCreatedModal: true,
+            showConfirmationModal: false,
             loading: false,
             vwbWorkspaceId: updatedWorkspace.namespace,
           });
@@ -1510,7 +1511,7 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationError,
         workspaceCreationErrorMessage,
         unavailableTier,
-        showWorkspaceCreatedPopup,
+        showWorkspaceCreatedModal,
       } = this.state;
       const {
         cdrVersionTiersResponse,
@@ -1526,26 +1527,24 @@ export const WorkspaceEdit = fp.flow(
             {loading && (
               <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
             )}
-            {showWorkspaceCreatedPopup && (
+            {showWorkspaceCreatedModal && (
               <Modal>
-                <ModalTitle>Workspace ready in Verily Workbench</ModalTitle>
+                <ModalTitle>Open in Verily Workbench</ModalTitle>
                 <ModalBody>
-                  Your workspace "{this.state.workspace.name}" has been
-                  successfully created. Start exploring your new research
-                  environment.
-                  <br />
+                  Your workspace <strong>{this.state.workspace.name}</strong> is
+                  ready. Open it in Verily Workbench to get started.
                 </ModalBody>
 
                 <ModalFooter>
                   <Button
-                    type='secondaryLight'
+                    type='secondary'
                     onClick={() => {
-                      this.setState({ showWorkspaceCreatedPopup: false });
+                      this.setState({ showWorkspaceCreatedModal: false });
                       this.props.navigate(['/workspaces']);
                     }}
-                    style={{ marginRight: '10px' }}
+                    style={{ marginRight: '10px', height: '40px' }}
                   >
-                    Stay here
+                    Back to List
                   </Button>
                   <Button
                     type='primary'
@@ -1556,9 +1555,9 @@ export const WorkspaceEdit = fp.flow(
                         'noopener noreferrer'
                       )
                     }
+                    style={{ height: '40px' }}
                   >
-                    Take me there{' '}
-                    <NewWindowIcon style={{ marginLeft: '5px' }} />
+                    Open <NewWindowIcon style={{ marginLeft: '5px' }} />
                   </Button>
                 </ModalFooter>
               </Modal>
