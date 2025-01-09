@@ -105,7 +105,7 @@ public class DbEgressEvent {
     return this;
   }
 
-  @Column(name = "time_window_start", nullable = false)
+  @Column(name = "time_window_start", nullable = true)
   public Timestamp getTimeWindowStart() {
     return timeWindowStart;
   }
