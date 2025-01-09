@@ -346,9 +346,15 @@ export const CustomizePanel = ({
             gcePersistentDisk
           );
 
+          const dataprocConfig = analysisConfig.dataprocConfig && {
+            ...analysisConfig.dataprocConfig,
+            masterDiskSize: diskConfig.size,
+          };
+
           setAnalysisConfig({
             ...analysisConfig,
             diskConfig,
+            dataprocConfig,
             detachedDisk: diskConfig.detachable ? null : gcePersistentDisk,
           });
         }}
