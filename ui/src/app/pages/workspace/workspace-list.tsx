@@ -4,7 +4,9 @@ import * as fp from 'lodash/fp';
 
 import { Profile, WorkspaceAccessLevel } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { AlertDanger } from 'app/components/alert';
+import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
@@ -17,10 +19,8 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles, withUserProfile } from 'app/utils';
 import { hasTierAccess } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
-import { WorkspacePermissions } from 'app/utils/workspace-permissions';
-import { Button } from 'app/components/buttons';
-import { environment } from 'environments/environment';
 import { serverConfigStore } from 'app/utils/stores';
+import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
   fadeBox: {
