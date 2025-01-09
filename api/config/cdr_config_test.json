@@ -90,7 +90,7 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "publicReleaseNumber": 5
+      "publicReleaseNumber": 3
     },
     {
       "cdrVersionId": 6,
@@ -144,7 +144,7 @@
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
       "tanagraEnabled": true,
-      "publicReleaseNumber": 5
+      "publicReleaseNumber": 4
     },
     {
       "cdrVersionId": 9,
