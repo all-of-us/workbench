@@ -89,6 +89,6 @@ cron:
     Check the Runtimes, Apps, and Disks of all active Workspaces and delete those created by users
     who no longer have access to the Workspaces.
   url: /v1/cron/deleteUnsharedWorkspaceEnvironments
-  schedule: every day 19:30
+  schedule: 1st mon of jan 17:00
   timezone: America/Chicago
   target: api
