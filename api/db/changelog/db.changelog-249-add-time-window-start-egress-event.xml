@@ -6,7 +6,9 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet author="yonghao" id="db.changelog-249-add-time-window-start-egress-event">
         <addColumn tableName="egress_event">
-            <column name="time_window_start" type="datetime" />
+            <column name="time_window_start" type="datetime" >
+                <constraints nullable="true"/>
+            </column>
         </addColumn>
     </changeSet>
 </databaseChangeLog>
