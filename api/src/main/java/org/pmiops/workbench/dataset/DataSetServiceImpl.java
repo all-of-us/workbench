@@ -74,7 +74,6 @@ import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptSet;
-import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
@@ -86,10 +85,6 @@ import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
-import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.tanagra.model.EntityOutputPreview;
@@ -1370,81 +1365,6 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public List<String> getPersonIdsWithWholeGenome(DbDataset dataSet) {
-    List<ParticipantCriteria> participantCriteriaList;
-    if (Boolean.TRUE.equals(dataSet.getIncludesAllParticipants())) {
-      // Select all participants with WGS data.
-      participantCriteriaList =
-          ImmutableList.of(
-              new ParticipantCriteria(
-                  new CohortDefinition().addIncludesItem(createHasWgsSearchGroup())));
-    } else {
-      participantCriteriaList =
-          cohortService.findAllByCohortIdIn(dataSet.getCohortIds()).stream()
-              .map(
-                  cohort -> {
-                    final CohortDefinition cohortDefinition =
-                        new Gson().fromJson(cohort.getCriteria(), CohortDefinition.class);
-                    // AND the existing search criteria with participants having genomics data.
-                    cohortDefinition.addIncludesItem(createHasWgsSearchGroup());
-                    return new ParticipantCriteria(cohortDefinition);
-                  })
-              .collect(Collectors.toList());
-    }
-
-    final QueryJobConfiguration participantIdQuery =
-        cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
-
-    return Streams.stream(
-            bigQueryService
-                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
-                .getValues())
-        .map(personId -> personId.get(0).getValue().toString())
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<String> getTanagraPersonIdsWithWholeGenome(
-      DbWorkspace workspace, TanagraGenomicDataRequest tanagraGenomicDataRequest) {
-    List<ParticipantCriteria> participantCriteriaList;
-    final QueryJobConfiguration participantIdQuery;
-    if (Boolean.TRUE.equals(tanagraGenomicDataRequest.isAllParticipants())) {
-      // Select all participants with WGS data.
-      participantCriteriaList =
-          ImmutableList.of(
-              new ParticipantCriteria(
-                  new CohortDefinition().addIncludesItem(createHasWgsSearchGroup())));
-      participantIdQuery =
-          cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
-    } else {
-      try {
-        DataSetRequest dataSetRequest =
-            new DataSetRequest()
-                .tanagraCohortIds(tanagraGenomicDataRequest.getCohortIds())
-                .tanagraFeatureSetIds(tanagraGenomicDataRequest.getFeatureSetIds());
-        ExportPreviewRequest exportPreviewRequest =
-            createExportPreviewRequest(dataSetRequest, workspace);
-        String underlayName = "aou" + workspace.getCdrVersion().getBigqueryDataset();
-        String cohortsQuery =
-            tanagraApiProvider
-                .get()
-                .describeExport(exportPreviewRequest, underlayName)
-                .getEntityIdSql();
-        participantIdQuery = cohortQueryBuilder.buildTanagraWGSPersonIdQuery(cohortsQuery);
-      } catch (ApiException e) {
-        throw new BadRequestException("Bad Request: " + e.getMessage());
-      }
-    }
-
-    return Streams.stream(
-            bigQueryService
-                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
-                .getValues())
-        .map(personId -> personId.get(0).getValue().toString())
-        .collect(Collectors.toList());
-  }
-
-  @Override
   public List<DomainWithDomainValues> getValueListFromDomain(
       Long conceptSetId, String domainValue) {
     Domain domain =
@@ -1529,19 +1449,6 @@ public class DataSetServiceImpl implements DataSetService {
     if (!workspaceConceptSetIds.containsAll(conceptSetIds)) {
       throw new NotFoundException("one or more of the requested concept sets were not found");
     }
-  }
-
-  private SearchGroup createHasWgsSearchGroup() {
-    return new SearchGroup()
-        .items(
-            ImmutableList.of(
-                new SearchGroupItem()
-                    .type(Domain.WHOLE_GENOME_VARIANT.toString())
-                    .addSearchParametersItem(
-                        new SearchParameter()
-                            .domain(Domain.WHOLE_GENOME_VARIANT.toString())
-                            .type(CriteriaType.PPI.toString())
-                            .group(false))));
   }
 
   // Capitalizes the first letter of a string and lowers the remaining ones.

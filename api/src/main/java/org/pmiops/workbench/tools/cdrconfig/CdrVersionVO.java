@@ -57,4 +57,6 @@ public class CdrVersionVO {
   public Boolean needsV8GenomicExtractionWorkflow;
 
   public String vwbTemplateId;
+
+  public int publicReleaseNumber;
 }
