@@ -1,4 +1,4 @@
-package org.pmiops.workbench.wsm;
+package org.pmiops.workbench.vwb.wsm.wsm;
 
 import jakarta.inject.Provider;
 import java.time.Duration;
