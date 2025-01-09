@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.VersionedConfig;
-import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.dataset.GenomicDatasetService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
@@ -75,8 +75,8 @@ public class GenomicExtractionService {
 
   private static final int EARLIEST_SUPPORTED_LEGACY_METHOD_VERSION = 3;
 
-  private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
+  private final GenomicDatasetService genomicDatasetService;
   private final JiraService jiraService;
   private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
@@ -90,8 +90,8 @@ public class GenomicExtractionService {
 
   @Autowired
   public GenomicExtractionService(
-      DataSetService dataSetService,
       FireCloudService fireCloudService,
+      GenomicDatasetService genomicDatasetService,
       JiraService jiraService,
       @Qualifier(StorageConfig.GENOMIC_EXTRACTION_STORAGE_CLIENT)
           Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
@@ -103,8 +103,8 @@ public class GenomicExtractionService {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuthService workspaceAuthService,
       Clock clock) {
-    this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.genomicDatasetService = genomicDatasetService;
     this.jiraService = jiraService;
     this.submissionApiProvider = submissionsApiProvider;
     this.extractionServiceAccountCloudStorageClientProvider =
@@ -413,9 +413,9 @@ public class GenomicExtractionService {
 
     List<String> personIds =
         isTanagraEnabled
-            ? dataSetService.getTanagraPersonIdsWithWholeGenome(
+            ? genomicDatasetService.getTanagraPersonIdsWithWholeGenome(
                 workspace, tanagraGenomicDataRequest)
-            : dataSetService.getPersonIdsWithWholeGenome(dataSet);
+            : genomicDatasetService.getPersonIdsWithWholeGenome(dataSet);
     if (personIds.isEmpty()) {
       throw new FailedPreconditionException(
           "provided cohort contains no participants with whole genome data");
