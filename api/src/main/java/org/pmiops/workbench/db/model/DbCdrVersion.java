@@ -210,7 +210,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_data")
   public Boolean getHasFitbitData() {
-    return hasFitbitData != null && hasFitbitData;
+    return Boolean.TRUE.equals(hasFitbitData);
   }
 
   public DbCdrVersion setHasFitbitData(Boolean hasFitbitData) {
@@ -220,7 +220,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_copesurvey_data")
   public Boolean getHasCopeSurveyData() {
-    return hasCopeSurveyData != null && hasCopeSurveyData;
+    return Boolean.TRUE.equals(hasCopeSurveyData);
   }
 
   public DbCdrVersion setHasCopeSurveyData(Boolean hasCopeSurveyData) {
@@ -230,7 +230,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_sleep_data")
   public Boolean getHasFitbitSleepData() {
-    return hasFitbitSleepData != null && hasFitbitSleepData;
+    return Boolean.TRUE.equals(hasFitbitSleepData);
   }
 
   public DbCdrVersion setHasFitbitSleepData(Boolean hasFitbitSleepData) {
@@ -240,7 +240,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_device_data")
   public Boolean getHasFitbitDeviceData() {
-    return hasFitbitDeviceData != null && hasFitbitDeviceData;
+    return Boolean.TRUE.equals(hasFitbitDeviceData);
   }
 
   public DbCdrVersion setHasFitbitDeviceData(Boolean hasFitbitDeviceData) {
@@ -250,7 +250,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_survey_conduct_data")
   public Boolean getHasSurveyConductData() {
-    return hasSurveyConductData != null && hasSurveyConductData;
+    return Boolean.TRUE.equals(hasSurveyConductData);
   }
 
   public DbCdrVersion setHasSurveyConductData(Boolean hasSurveyConductData) {
@@ -260,7 +260,7 @@ public class DbCdrVersion {
 
   @Column(name = "tanagra_enabled")
   public Boolean getTanagraEnabled() {
-    return tanagraEnabled != null && tanagraEnabled;
+    return Boolean.TRUE.equals(tanagraEnabled);
   }
 
   public DbCdrVersion setTanagraEnabled(Boolean tanagraEnabled) {
