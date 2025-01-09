@@ -1,23 +1,16 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import * as ReactDOM from 'react-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import {
-  BrowserRouter,
-  Link,
-  Redirect,
-  Route,
-  useLocation,
-  useParams,
-  useRouteMatch,
-} from 'react-router-dom';
+  CompatRoute,
+  CompatRouter,
+  Navigate,
+} from 'react-router-dom-v5-compat';
 import * as fp from 'lodash/fp';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { routeDataStore } from 'app/utils/stores';
 import { buildPageTitleForEnvironment } from 'app/utils/title';
-
-import { Button } from './buttons';
-import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
 
 export interface Guard {
   allowed: () => boolean;
@@ -25,11 +18,6 @@ export interface Guard {
   redirectPath?: string;
   renderBlocked?: () => React.ReactElement;
 }
-
-export const usePath = () => {
-  const { path } = useRouteMatch();
-  return path;
-};
 
 export const parseQueryParams = (search: string) => {
   return new URLSearchParams(search);
@@ -77,43 +65,9 @@ export const withFullHeight =
     );
   };
 
-// This function is invoked if react-router `<Prompt>` is rendered by a component that wants the user to
-// confirm navigating away from the page. The default behavior of <Prompt> is being overridden by this
-// getUserConfirmation function so we can provide a custom styled warning modal instead of the browser's default.
-const getUserConfirmation = (message, callback) => {
-  const modal = document.createElement('div');
-  document.body.appendChild(modal);
-
-  const withCleanup = (answer) => {
-    ReactDOM.unmountComponentAtNode(modal);
-    document.body.removeChild(modal);
-    callback(answer);
-  };
-
-  ReactDOM.render(
-    <Modal>
-      <ModalTitle>Warning!</ModalTitle>
-      <ModalBody>{message}</ModalBody>
-      <ModalFooter>
-        <Button type='link' onClick={() => withCleanup(false)}>
-          Cancel
-        </Button>
-        <Button type='primary' onClick={() => withCleanup(true)}>
-          Discard Changes
-        </Button>
-      </ModalFooter>
-    </Modal>,
-    modal
-  );
-};
-
-export const AppRouter = ({ children }): React.ReactElement => {
-  return (
-    <BrowserRouter getUserConfirmation={getUserConfirmation}>
-      {children}
-    </BrowserRouter>
-  );
-};
+export const AppRouter = ({ children }): React.ReactElement => (
+  <CompatRouter>{children}</CompatRouter>
+);
 
 // Most internal routing is done via custom styled Button, not via text, so we only want to use anchor styling
 // if we explicitly set it on the RouteLink
@@ -145,17 +99,12 @@ export const AppRoute = ({
     fp.find(({ allowed }) => !allowed(), guards) || {};
 
   return (
-    <Route exact={exact} path={path}>
+    <CompatRoute {...{ path, exact }}>
       {cond<React.ReactNode>(
-        [redirectPath, () => <Redirect to={redirectPath} />],
+        [redirectPath, () => <Navigate to={redirectPath} />],
         [renderBlocked, () => renderBlocked()],
         () => children
       )}
-    </Route>
+    </CompatRoute>
   );
-};
-
-export const Navigate = ({ to }): React.ReactElement => {
-  const location = useLocation();
-  return <Redirect to={{ pathname: to, state: { from: location } }} />;
 };

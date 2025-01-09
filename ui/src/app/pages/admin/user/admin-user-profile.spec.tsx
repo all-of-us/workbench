@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { MemoryRouter, Route } from 'react-router';
+import { MemoryRouter } from 'react-router';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 
 import {
   AccessModule,
@@ -80,9 +81,11 @@ describe('AdminUserProfile', () => {
   ) => {
     return render(
       <MemoryRouter initialEntries={[`/admin/users/${usernameWithoutGsuite}`]}>
-        <Route path='/admin/users/:usernameWithoutGsuiteDomain'>
-          <AdminUserProfile hideSpinner={() => {}} showSpinner={() => {}} />
-        </Route>
+        <CompatRouter>
+          <CompatRoute path='/admin/users/:usernameWithoutGsuiteDomain'>
+            <AdminUserProfile hideSpinner={() => {}} showSpinner={() => {}} />
+          </CompatRoute>
+        </CompatRouter>
       </MemoryRouter>
     );
   };
