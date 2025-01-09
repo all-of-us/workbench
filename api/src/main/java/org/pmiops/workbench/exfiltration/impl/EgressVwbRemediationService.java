@@ -72,11 +72,6 @@ public class EgressVwbRemediationService extends EgressRemediationService {
   @Override
   protected void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
-    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    String environmentType =
-        appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
-            .map(LeonardoAppUtils::appDisplayName)
-            .orElse("Jupyter");
     mailService.sendEgressRemediationEmailForVwb(user, action);
   }
 
