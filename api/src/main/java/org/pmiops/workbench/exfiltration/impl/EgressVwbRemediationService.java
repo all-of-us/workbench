@@ -1,9 +1,7 @@
 package org.pmiops.workbench.exfiltration.impl;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_JIRA_HANDLER_QUALIFIER;
-import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
-import com.google.common.base.Strings;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
@@ -20,9 +18,7 @@ import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.user.UserAdminService;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;

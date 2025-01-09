@@ -37,7 +37,7 @@ public interface EgressEventMapper {
       long timeWindowEnd = timeWindowStart + timeWindowMillis;
 
       target.timeWindowStartEpochMillis(timeWindowStart).timeWindowEndEpochMillis(timeWindowEnd);
-    } else if(source.getVwbEgressEventId() !=null) {
+    } else if (source.getVwbEgressEventId() != null) {
       long timeWindowStart = source.getTimeWindowStart().getTime();
       long timeWindowMillis = source.getEgressWindowSeconds() * 1000;
       long timeWindowEnd = timeWindowStart + timeWindowMillis;
