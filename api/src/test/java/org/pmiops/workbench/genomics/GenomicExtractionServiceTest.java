@@ -99,8 +99,8 @@ public class GenomicExtractionServiceTest {
   @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
   @Autowired WorkspaceDao workspaceDao;
 
-  @MockBean GenomicDatasetService mockGenomicDatasetService;
   @MockBean FireCloudService mockFireCloudService;
+  @MockBean GenomicDatasetService mockGenomicDatasetService;
   @MockBean JiraService mockJiraService;
   @MockBean MethodConfigurationsApi mockMethodConfigurationsApi;
   @MockBean SubmissionsApi mockSubmissionsApi;
@@ -115,10 +115,10 @@ public class GenomicExtractionServiceTest {
   @TestConfiguration
   @Import({
     AccessTierServiceImpl.class,
-    GenomicExtractionService.class,
-    GenomicExtractionMapperImpl.class,
     CommonMappers.class,
-    WorkspaceAuthService.class
+    GenomicExtractionMapperImpl.class,
+    GenomicExtractionService.class,
+    WorkspaceAuthService.class,
   })
   static class Configuration {
     @Bean

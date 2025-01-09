@@ -49,10 +49,8 @@ public class GenomicDatasetServiceImpl implements GenomicDatasetService {
     List<ParticipantCriteria> participantCriteriaList;
     if (Boolean.TRUE.equals(dataSet.getIncludesAllParticipants())) {
       // Select all participants with WGS data.
-      participantCriteriaList =
-          List.of(
-              new ParticipantCriteria(
-                  new CohortDefinition().addIncludesItem(createHasWgsSearchGroup())));
+      var cd = new CohortDefinition().addIncludesItem(createHasWgsSearchGroup());
+      participantCriteriaList = List.of(new ParticipantCriteria(cd));
     } else {
       participantCriteriaList =
           cohortService.findAllByCohortIdIn(dataSet.getCohortIds()).stream()
