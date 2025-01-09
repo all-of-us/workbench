@@ -92,7 +92,7 @@ const AdminNotebookViewComponent = (props: Props) => {
     workspaceAdminApi()
       .getWorkspaceAdminView(workspaceNamespace)
       .then((workspaceAdminView) =>
-        setWorkspaceName(workspaceAdminView.workspace.name)
+        setWorkspaceName(workspaceAdminView.workspace.displayName)
       );
   }, []);
 

@@ -140,7 +140,7 @@ export const CloudEnvironmentsTable = ({
         emptyMessage='No active cloud environments exist for this workspace.'
       >
         <Column field='appType' header='Environment Type' />
-        <Column field='name' header='Name' />
+        <Column field='name' header='Name' /> // displayName?
         <Column field='creator' header='Creator' />
         <Column field='createdTime' header='Created Time' />
         <Column field='lastAccessedTime' header='Last Accessed Time' />
