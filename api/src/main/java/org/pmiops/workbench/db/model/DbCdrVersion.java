@@ -65,6 +65,8 @@ public class DbCdrVersion {
 
   private String vwbTemplateId;
 
+  private int publicReleaseNumber;
+
   @Id
   @Column(name = "cdr_version_id")
   public long getCdrVersionId() {
@@ -208,7 +210,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_data")
   public Boolean getHasFitbitData() {
-    return hasFitbitData == null ? false : hasFitbitData;
+    return hasFitbitData != null && hasFitbitData;
   }
 
   public DbCdrVersion setHasFitbitData(Boolean hasFitbitData) {
@@ -218,7 +220,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_copesurvey_data")
   public Boolean getHasCopeSurveyData() {
-    return hasCopeSurveyData == null ? false : hasCopeSurveyData;
+    return hasCopeSurveyData != null && hasCopeSurveyData;
   }
 
   public DbCdrVersion setHasCopeSurveyData(Boolean hasCopeSurveyData) {
@@ -228,7 +230,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_sleep_data")
   public Boolean getHasFitbitSleepData() {
-    return hasFitbitSleepData == null ? false : hasFitbitSleepData;
+    return hasFitbitSleepData != null && hasFitbitSleepData;
   }
 
   public DbCdrVersion setHasFitbitSleepData(Boolean hasFitbitSleepData) {
@@ -238,7 +240,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_device_data")
   public Boolean getHasFitbitDeviceData() {
-    return hasFitbitDeviceData == null ? false : hasFitbitDeviceData;
+    return hasFitbitDeviceData != null && hasFitbitDeviceData;
   }
 
   public DbCdrVersion setHasFitbitDeviceData(Boolean hasFitbitDeviceData) {
@@ -248,7 +250,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_survey_conduct_data")
   public Boolean getHasSurveyConductData() {
-    return hasSurveyConductData == null ? false : hasSurveyConductData;
+    return hasSurveyConductData != null && hasSurveyConductData;
   }
 
   public DbCdrVersion setHasSurveyConductData(Boolean hasSurveyConductData) {
@@ -258,7 +260,7 @@ public class DbCdrVersion {
 
   @Column(name = "tanagra_enabled")
   public Boolean getTanagraEnabled() {
-    return tanagraEnabled == null ? false : tanagraEnabled;
+    return tanagraEnabled != null && tanagraEnabled;
   }
 
   public DbCdrVersion setTanagraEnabled(Boolean tanagraEnabled) {
@@ -518,6 +520,15 @@ public class DbCdrVersion {
     return this;
   }
 
+  @Column(name = "public_release_number")
+  public int getPublicReleaseNumber() {
+    return publicReleaseNumber;
+  }
+
+  public void setPublicReleaseNumber(int publicReleaseNumber) {
+    this.publicReleaseNumber = publicReleaseNumber;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -571,13 +582,13 @@ public class DbCdrVersion {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof DbCdrVersion)) {
+    if (!(o instanceof DbCdrVersion that)) {
       return false;
     }
-    DbCdrVersion that = (DbCdrVersion) o;
     return cdrVersionId == that.cdrVersionId
         && archivalStatus == that.archivalStatus
         && numParticipants == that.numParticipants
+        && publicReleaseNumber == that.publicReleaseNumber
         && Objects.equals(isDefault, that.isDefault)
         && Objects.equals(name, that.name)
         && Objects.equals(accessTier, that.accessTier)

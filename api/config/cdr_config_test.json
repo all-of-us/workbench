@@ -30,7 +30,8 @@
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
       "numParticipants": 0,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 1
     },
     {
       "cdrVersionId": 2,
@@ -42,7 +43,8 @@
       "cdrDbName": "synth_r_2019q4_44",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 2
     },
     {
       "cdrVersionId": 3,
@@ -54,7 +56,8 @@
       "cdrDbName": "synth_r_2019q4_44",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 3
     },
     {
       "cdrVersionId": 4,
@@ -67,7 +70,8 @@
       "numParticipants": 0,
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 3
     },
     {
       "cdrVersionId": 5,
@@ -85,7 +89,8 @@
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
-      "accessTier": "controlled"
+      "accessTier": "controlled",
+      "publicReleaseNumber": 5
     },
     {
       "cdrVersionId": 6,
@@ -96,7 +101,8 @@
       "bigqueryDataset": "",
       "creationTime": "2020-08-26 00:09:51Z",
       "numParticipants": 0,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 3
     },
     {
       "cdrVersionId": 7,
@@ -113,7 +119,8 @@
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered",
-      "tanagraEnabled": true
+      "tanagraEnabled": true,
+      "publicReleaseNumber": 4
     },
     {
       "cdrVersionId": 8,
@@ -136,7 +143,8 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "tanagraEnabled": true
+      "tanagraEnabled": true,
+      "publicReleaseNumber": 5
     },
     {
       "cdrVersionId": 9,
@@ -159,7 +167,8 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "needsV8GenomicExtractionWorkflow": true
+      "needsV8GenomicExtractionWorkflow": true,
+      "publicReleaseNumber": 8
     }
   ]
 }
