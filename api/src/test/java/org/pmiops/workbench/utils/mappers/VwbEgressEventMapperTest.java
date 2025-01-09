@@ -39,7 +39,6 @@ public class VwbEgressEventMapperTest {
     long timeWindowStartMilli = timeStart.getTime();
     long timeWindowDurationSeconds = Duration.ofHours(1L).getSeconds();
     double egressMB = 201.0;
-    double egressMib = 200.0;
 
     assertThat(
             mapper.toApiEvent(

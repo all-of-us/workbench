@@ -20,7 +20,6 @@ import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.user.UserAdminService;
-import org.pmiops.workbench.utils.mappers.VwbEgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,6 @@ public class EgressVwbRemediationService extends EgressRemediationService {
 
   private final EgressJiraHandler egressJiraHandler;
   private final MailService mailService;
-  private final VwbEgressEventMapper vwbEgressEventMapper;
   private final UserAdminService userAdminService;
 
   @Autowired
@@ -48,7 +46,6 @@ public class EgressVwbRemediationService extends EgressRemediationService {
       LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
-      VwbEgressEventMapper vwbEgressEventMapper,
       @Qualifier(EGRESS_VWB_JIRA_HANDLER_QUALIFIER) EgressJiraHandler egressJiraHandler,
       MailService mailService,
       UserAdminService userAdminService) {
@@ -61,7 +58,6 @@ public class EgressVwbRemediationService extends EgressRemediationService {
         egressEventDao);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
-    this.vwbEgressEventMapper = vwbEgressEventMapper;
     this.userAdminService = userAdminService;
   }
 
