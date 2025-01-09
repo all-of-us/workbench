@@ -68,7 +68,7 @@ import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
-import org.pmiops.workbench.vwb.wsm.wsm.WsmClient;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

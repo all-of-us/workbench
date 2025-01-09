@@ -1,4 +1,4 @@
-package org.pmiops.workbench.vwb.wsm.wsm;
+package org.pmiops.workbench.vwb.wsm;
 
 import jakarta.inject.Provider;
 import jakarta.servlet.http.HttpServletResponse;

@@ -13,7 +13,7 @@ import org.pmiops.workbench.model.WorkspaceOperation;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.vwb.wsm.wsm.WsmClient;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 
 @Mapper(config = MapStructConfig.class)
 public interface WorkspaceOperationMapper {
