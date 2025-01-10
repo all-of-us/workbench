@@ -3245,7 +3245,13 @@ def run_genomic_extraction(cmd_name, *args)
     '--dataset_id [dataset id]',
     String,
     ->(opts, v) { opts.dataset_id = v },
-    'The dataset used in the extraction.')
+    'The dataset to record in the DB as associated with this extraction (arbitrary but must exist).')
+
+  op.add_typed_option(
+    '--person_ids ["id1, id2, id3"]',
+    String,
+    ->(opts, v) { opts.person_ids = v },
+    'The person IDs to be used in the extraction.')
 
   op.add_typed_option(
     '--legacy [true/false]',
@@ -3272,7 +3278,7 @@ def run_genomic_extraction(cmd_name, *args)
     "The CDR's WGS BigQuery dataset")
 
   op.add_validator ->(opts) {
-    raise ArgumentError unless opts.namespace and opts.dataset_id and opts.legacy and opts.filter_set and opts.cdr_bq_project and opts.wgs_bq_dataset
+    raise ArgumentError unless opts.namespace and opts.dataset_id and opts.person_ids and opts.legacy and opts.filter_set and opts.cdr_bq_project and opts.wgs_bq_dataset
   }
 
   op.parse.validate
@@ -3280,6 +3286,7 @@ def run_genomic_extraction(cmd_name, *args)
   gradle_args = ([
     ["--namespace", op.opts.namespace],
     ["--dataset_id", op.opts.dataset_id],
+    ["--person_ids", op.opts.person_ids],
     ["--legacy", op.opts.legacy],
     ["--filter_set", op.opts.filter_set],
     ["--cdr_bq_project", op.opts.cdr_bq_project],

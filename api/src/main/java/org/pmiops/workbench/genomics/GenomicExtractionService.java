@@ -413,30 +413,8 @@ public class GenomicExtractionService {
     boolean useLegacyWorkflow =
         !Boolean.TRUE.equals(cdrVersion.getNeedsV8GenomicExtractionWorkflow());
 
-    return submitGenomicExtractionJob(
-        workspace,
-        dataSet,
-        tanagraGenomicDataRequest,
-        useLegacyWorkflow,
-        cdrVersion.getWgsFilterSetName(),
-        cdrVersion.getBigqueryProject(),
-        cdrVersion.getWgsBigqueryDataset());
-  }
-
-  public GenomicExtractionJob submitGenomicExtractionJob(
-      DbWorkspace workspace,
-      DbDataset dataSet,
-      TanagraGenomicDataRequest tanagraGenomicDataRequest,
-      boolean useLegacyWorkflow,
-      String filterSetName,
-      String bigQueryProject,
-      String wgsBigQueryDataset)
-      throws ApiException {
-
-    boolean isTanagraEnabled = workspace.isCDRAndWorkspaceTanagraEnabled();
-
     List<String> personIds =
-        isTanagraEnabled
+        workspace.isCDRAndWorkspaceTanagraEnabled()
             ? genomicDatasetService.getTanagraPersonIdsWithWholeGenome(
                 workspace, tanagraGenomicDataRequest)
             : genomicDatasetService.getPersonIdsWithWholeGenome(dataSet);
@@ -451,6 +429,26 @@ public class GenomicExtractionService {
                   + "for extraction is %d",
               personIds.size(), MAX_EXTRACTION_SAMPLE_COUNT));
     }
+
+    return submitGenomicExtractionJob(
+        workspace,
+        dataSet,
+        personIds,
+        useLegacyWorkflow,
+        cdrVersion.getWgsFilterSetName(),
+        cdrVersion.getBigqueryProject(),
+        cdrVersion.getWgsBigqueryDataset());
+  }
+
+  public GenomicExtractionJob submitGenomicExtractionJob(
+      DbWorkspace workspace,
+      DbDataset dataSet,
+      List<String> personIds,
+      boolean useLegacyWorkflow,
+      String filterSetName,
+      String bigQueryProject,
+      String wgsBigQueryDataset)
+      throws ApiException {
 
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;

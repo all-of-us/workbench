@@ -3,6 +3,8 @@ package org.pmiops.workbench.tools;
 import com.google.api.services.oauth2.model.Userinfo;
 import jakarta.inject.Provider;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -33,7 +35,6 @@ import org.pmiops.workbench.genomics.GenomicExtractionMapperImpl;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.GoogleConfig;
 import org.pmiops.workbench.jira.JiraService;
-import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 import org.pmiops.workbench.rawls.RawlsApiClientFactory;
 import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.sam.SamApiClientFactory;
@@ -113,7 +114,14 @@ public class RunGenomicExtractionWorkflow extends Tool {
   private static final Option datasetOpt =
       Option.builder()
           .longOpt("dataset_id")
-          .desc("The dataset ID to use in the extraction")
+          .desc("The dataset ID to record in the DB (but not actually use) for the extraction")
+          .required()
+          .hasArg()
+          .build();
+  private static final Option personIdsOpt =
+      Option.builder()
+          .longOpt("person_ids")
+          .desc("The person IDs to use in the extraction")
           .required()
           .hasArg()
           .build();
@@ -145,6 +153,7 @@ public class RunGenomicExtractionWorkflow extends Tool {
       new Options()
           .addOption(workspaceNamespaceOpt)
           .addOption(datasetOpt)
+          .addOption(personIdsOpt)
           .addOption(legacyOpt)
           .addOption(filterSetOpt)
           .addOption(bqProjOpt)
@@ -183,19 +192,21 @@ public class RunGenomicExtractionWorkflow extends Tool {
                         String.format(
                             "Dataset %d not found in workspace %s", datasetId, namespace)));
 
+    List<String> personIds =
+        Arrays.stream(opts.getOptionValue(personIdsOpt.getLongOpt()).split(","))
+            .map(String::trim)
+            .toList();
+
     boolean useLegacyWorkflow =
         Boolean.parseBoolean(opts.getOptionValue(legacyOpt.getLongOpt(), "false"));
     String filterSetName = opts.getOptionValue(filterSetOpt.getLongOpt());
     String bigQueryProject = opts.getOptionValue(bqProjOpt.getLongOpt());
     String wgsBigQueryDataset = opts.getOptionValue(wgsDatasetOpt.getLongOpt());
 
-    // not supported by this tool
-    TanagraGenomicDataRequest tanagraIsNotSupported = null;
-
     service.submitGenomicExtractionJob(
         workspace,
         dataSet,
-        tanagraIsNotSupported,
+        personIds,
         useLegacyWorkflow,
         filterSetName,
         bigQueryProject,
