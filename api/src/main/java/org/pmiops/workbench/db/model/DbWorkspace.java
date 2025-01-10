@@ -40,6 +40,13 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
     pkJoinColumns = @PrimaryKeyJoinColumn(name = "workspace_id"))
 @Table(name = "workspace")
 public class DbWorkspace {
+  public enum AiANResearchPlan {
+    EXCLUSIVE_AI_AN_POPULATION,
+    CASE_CONTROL_AI_AN,
+    FINDINGS_BY_AI_AN,
+    NO_AI_AN_ANALYSIS
+  }
+
   private String firecloudUuid;
 
   private long workspaceId;
@@ -98,6 +105,8 @@ public class DbWorkspace {
   private boolean usesTanagra;
 
   private Boolean isVwbWorkspace;
+
+  private AiANResearchPlan aianResearchPlan;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -795,6 +804,16 @@ public class DbWorkspace {
   public DbWorkspace setUsesTanagra(boolean usesTanagra) {
     this.usesTanagra = usesTanagra;
     return this;
+  }
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "rp_aian_research_plan")
+  public AiANResearchPlan getAianResearchPlan() {
+    return aianResearchPlan;
+  }
+
+  public void setAianResearchPlan(AiANResearchPlan aianResearchPlan) {
+    this.aianResearchPlan = aianResearchPlan;
   }
 
   @Transient
