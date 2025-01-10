@@ -3272,7 +3272,8 @@ def run_genomic_extraction(cmd_name, *args)
     "The CDR's WGS BigQuery dataset")
 
   op.add_validator ->(opts) {
-    raise ArgumentError unless opts.namespace and opts.dataset_id and opts.legacy and opts.filter_set and opts.cdr_bq_project and opts.wgs_bq_dataset
+    all_params_set = opts.namespace and opts.dataset_id and opts.legacy and opts.filter_set and opts.cdr_bq_project and opts.wgs_bq_dataset
+    raise ArgumentError unless all_params_set
   }
 
   op.parse.validate
