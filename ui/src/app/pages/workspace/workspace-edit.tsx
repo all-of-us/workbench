@@ -5,6 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
 
 import {
+  AIANResearchPlan,
   ArchivalStatus,
   BillingAccount,
   CdrVersion,
@@ -50,6 +51,7 @@ import {
   PrimaryPurposeItems,
   RequestForReviewFooter,
   researchOutcomes,
+  researchPlanMap,
   ResearchPurposeDescription,
   ResearchPurposeItem,
   ResearchPurposeItems,
@@ -322,6 +324,7 @@ export interface WorkspaceEditProps
 }
 
 export interface WorkspaceEditState {
+  selectedAIANResearchPlan: AIANResearchPlan;
   billingAccountFetched: boolean;
   billingAccounts: Array<BillingAccount>;
   cdrVersions: Array<CdrVersion>;
@@ -361,6 +364,7 @@ export const WorkspaceEdit = fp.flow(
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
+        selectedAIANResearchPlan: null,
         billingAccountFetched: false,
         billingAccounts: [],
         cdrVersions: this.initializeCdrVersions(props),
@@ -1485,6 +1489,7 @@ export const WorkspaceEdit = fp.flow(
       const highlightBilling = !!params.get('highlightBilling');
 
       const {
+        selectedAIANResearchPlan,
         workspace: {
           name,
           billingAccountName,
@@ -1517,6 +1522,12 @@ export const WorkspaceEdit = fp.flow(
         cdrVersionTiersResponse,
         profileState: { profile },
       } = this.props;
+
+      const publicCDRVersionNumber: number = getCdrVersion(
+        this.state.workspace,
+        cdrVersionTiersResponse
+      ).publicReleaseNumber;
+      const askAboutAIAN: boolean = publicCDRVersionNumber >= 8;
 
       const errors = this.validate();
       return (
@@ -2202,10 +2213,59 @@ export const WorkspaceEdit = fp.flow(
               </FlexRow>
             </WorkspaceEditSection>
 
+            {/* AIAN section*/}
+            {askAboutAIAN && (
+              <WorkspaceEditSection
+                header={researchPurposeQuestions[9].header}
+                index='6.'
+                description={researchPurposeQuestions[9].description}
+                style={{ width: '72rem' }}
+              >
+                <FlexColumn style={{ marginLeft: '1.5rem' }}>
+                  <FlexRow>
+                    <div style={{ ...styles.header, marginRight: '0.6rem' }}>
+                      6.1
+                    </div>
+                    <div style={styles.header}>
+                      Does your research plan require any of the following with
+                      respect to individuals who self-identify as American
+                      Indian or Alaska Native (AI/AN) or who are genetically
+                      similar to populations with inferred Indigenous American
+                      genetic ancestry? Select the option that best describes
+                      your plans.
+                    </div>
+                  </FlexRow>
+                  <div style={{ marginLeft: '1.5rem' }}>
+                    {Array.from(researchPlanMap.keys()).map(
+                      (researchPlanOption) => (
+                        <FlexRow>
+                          <RadioButton
+                            name={`Option-${researchPlanOption}`}
+                            style={{ marginRight: '0.75rem' }}
+                            onChange={() =>
+                              this.setState({
+                                selectedAIANResearchPlan: researchPlanOption,
+                              })
+                            }
+                            checked={
+                              researchPlanOption === selectedAIANResearchPlan
+                            }
+                          />
+                          <label style={styles.text}>
+                            {researchPlanMap.get(researchPlanOption)}
+                          </label>
+                        </FlexRow>
+                      )
+                    )}
+                  </div>
+                </FlexColumn>
+              </WorkspaceEditSection>
+            )}
+
             {/* Request for review section*/}
             <WorkspaceEditSection
               header={researchPurposeQuestions[8].header}
-              index='6.'
+              index={askAboutAIAN ? '7.' : '6.'}
               indent={true}
             >
               <FlexRow style={styles.text}>
@@ -2398,8 +2458,8 @@ export const WorkspaceEdit = fp.flow(
                         )}
                         {errors.reviewRequested && (
                           <li>
-                            You must pick an answer for review of stigmatizing
-                            research (Question 6)
+                            {`You must pick an answer for review of stigmatizing
+                            research (Question ${askAboutAIAN ? 7 : 6})`}
                           </li>
                         )}
                       </BulletAlignedUnorderedList>
