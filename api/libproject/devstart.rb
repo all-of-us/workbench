@@ -2713,7 +2713,7 @@ def deploy_tanagra(cmd_name, args)
 
   Dir.chdir('../tanagra-aou-utils/tanagra') do
     common.status "Building Tanagra API..."
-    common.run_inline("GITHUB_ACTOR='dolbeew' GITHUB_TOKEN='#{op.opts.auth_token}' ./gradlew -x test -PisMySQL clean service:build")
+    common.run_inline("./gradlew -x test -PisMySQL clean service:build")
 
     common.status "Copying jar into appengine folder..."
     common.run_inline("mkdir -p ../appengine && cp ./service/build/libs/*SNAPSHOT.jar ../appengine/tanagraapi.jar")
