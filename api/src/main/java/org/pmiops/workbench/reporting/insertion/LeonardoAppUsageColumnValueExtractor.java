@@ -21,7 +21,9 @@ public enum LeonardoAppUsageColumnValueExtractor
   START_TIME("start_time", v -> toInsertRowString(v.getStartTime())),
   STOP_TIME("stop_time", v -> toInsertRowString(v.getStopTime())),
   CREATED_DATE("created_date", v -> toInsertRowString(v.getCreatedDate())),
-  DESTROYED_DATE("destroyed_date", v -> toInsertRowString(v.getDestroyedDate()));
+  DESTROYED_DATE("destroyed_date", v -> toInsertRowString(v.getDestroyedDate())),
+  ENVIRONMENT_VARIABLES(
+      "environment_variables", ReportingLeonardoAppUsage::getEnvironmentVariables);
 
   public static final String TABLE_NAME = "leonardo_app_usage";
 
