@@ -637,7 +637,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     var queryString =
         String.format(
             "SELECT appId, appName, status, createdDate, destroyedDate, "
-                + "startTime, stopTime, creator "
+                + "startTime, stopTime, creator, customEnvironmentVariables "
                 + "FROM `"
                 + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
                 + "` au "
@@ -663,6 +663,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
       FieldValues.getDateTime(row, "destroyedDate").ifPresent(res::setDestroyedDate);
       FieldValues.getDateTime(row, "startTime").ifPresent(res::setStartTime);
       FieldValues.getDateTime(row, "stopTime").ifPresent(res::setStopTime);
+      FieldValues.getString(row, "customEnvironmentVariables")
+          .ifPresent(res::setEnvironmentVariables);
       FieldValues.getString(row, "appName")
           .ifPresent(
               appName -> {
