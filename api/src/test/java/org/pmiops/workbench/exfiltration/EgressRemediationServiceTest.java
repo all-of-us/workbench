@@ -72,8 +72,10 @@ import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.user.UserAdminService;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
-import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapperImpl;
+import org.pmiops.workbench.utils.mappers.VwbEgressEventMapper;
+import org.pmiops.workbench.utils.mappers.VwbEgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -101,7 +103,8 @@ public class EgressRemediationServiceTest {
   @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
-  @Autowired private EgressEventMapper egressEventMapper;
+  @Autowired private SumologicEgressEventMapper sumologicEgressEventMapper;
+  @Autowired private VwbEgressEventMapper vwbEgressEventMapper;
   @Autowired private UserDao userDao;
 
   @Autowired
@@ -126,7 +129,8 @@ public class EgressRemediationServiceTest {
 
   @TestConfiguration
   @Import({
-    EgressEventMapperImpl.class,
+    VwbEgressEventMapperImpl.class,
+    SumologicEgressEventMapperImpl.class,
     EgressSumologicRemediationService.class,
     EgressVwbRemediationService.class,
     FakeClockConfiguration.class,
@@ -421,7 +425,8 @@ public class EgressRemediationServiceTest {
     DbEgressEvent event = egressEventDao.findById(eventId).get();
     assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
-    String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    String gkeServiceName =
+        sumologicEgressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
     verify(mockMailService)
         .sendEgressRemediationEmail(
             any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq(gkeServiceName));

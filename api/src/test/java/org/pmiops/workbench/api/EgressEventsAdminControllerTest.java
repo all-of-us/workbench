@@ -60,7 +60,8 @@ import org.pmiops.workbench.model.UpdateEgressEventRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapperImpl;
+import org.pmiops.workbench.utils.mappers.VwbEgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -102,7 +103,8 @@ public class EgressEventsAdminControllerTest {
   @Import({
     CommonMappers.class,
     EgressEventsAdminController.class,
-    EgressEventMapperImpl.class,
+    SumologicEgressEventMapperImpl.class,
+    VwbEgressEventMapperImpl.class,
     EgressLogService.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class

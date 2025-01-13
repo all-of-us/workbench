@@ -17,7 +17,7 @@ import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.model.EgressEvent;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
+import org.pmiops.workbench.utils.mappers.VwbEgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,13 +27,14 @@ public class EgressVwbJiraHandler extends EgressJiraHandler {
   private static final Logger log = Logger.getLogger(EgressVwbJiraHandler.class.getName());
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final EgressEventMapper egressEventMapper;
+  private final VwbEgressEventMapper vwbEgressEventMapper;
 
   @Autowired
   public EgressVwbJiraHandler(
-      Provider<WorkbenchConfig> workbenchConfigProvider, EgressEventMapper egressEventMapper) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      VwbEgressEventMapper vwbEgressEventMapper) {
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.egressEventMapper = egressEventMapper;
+    this.vwbEgressEventMapper = vwbEgressEventMapper;
   }
 
   /**
@@ -91,7 +92,7 @@ public class EgressVwbJiraHandler extends EgressJiraHandler {
   private Stream<AtlassianContent> jiraEventDescriptionShort(
       DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbWorkspace> workspace = Optional.ofNullable(event.getWorkspace());
-    EgressEvent apiEvent = egressEventMapper.toApiEvent(event);
+    EgressEvent apiEvent = vwbEgressEventMapper.toApiEvent(event);
     return Stream.of(
         JiraContent.text(String.format("Egress event details (as RW admin): ", action)),
         JiraContent.link(

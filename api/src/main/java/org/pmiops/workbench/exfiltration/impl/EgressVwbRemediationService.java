@@ -1,9 +1,7 @@
 package org.pmiops.workbench.exfiltration.impl;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_JIRA_HANDLER_QUALIFIER;
-import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
-import com.google.common.base.Strings;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
@@ -20,11 +18,8 @@ import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.user.UserAdminService;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -41,7 +36,6 @@ public class EgressVwbRemediationService extends EgressRemediationService {
 
   private final EgressJiraHandler egressJiraHandler;
   private final MailService mailService;
-  private final EgressEventMapper egressEventMapper;
   private final UserAdminService userAdminService;
 
   @Autowired
@@ -52,7 +46,6 @@ public class EgressVwbRemediationService extends EgressRemediationService {
       LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
-      EgressEventMapper egressEventMapper,
       @Qualifier(EGRESS_VWB_JIRA_HANDLER_QUALIFIER) EgressJiraHandler egressJiraHandler,
       MailService mailService,
       UserAdminService userAdminService) {
@@ -65,18 +58,12 @@ public class EgressVwbRemediationService extends EgressRemediationService {
         egressEventDao);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
-    this.egressEventMapper = egressEventMapper;
     this.userAdminService = userAdminService;
   }
 
   @Override
   protected void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
-    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    String environmentType =
-        appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
-            .map(LeonardoAppUtils::appDisplayName)
-            .orElse("Jupyter");
     mailService.sendEgressRemediationEmailForVwb(user, action);
   }
 
