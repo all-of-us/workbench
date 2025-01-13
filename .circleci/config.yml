@@ -743,9 +743,6 @@ jobs:
     steps:
       - checkout-code
       - gcloud-auth-login-oidc-test
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:/8QFZ5ytJ3u6K77z9HM7Q3/4YDK6s9cTltoNvH5Lg+s"
       - run:
           name: Deploy Tanagra API and UI to "test" App Engine
           working_directory: ~/workbench
