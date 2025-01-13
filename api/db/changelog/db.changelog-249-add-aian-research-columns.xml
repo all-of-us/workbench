@@ -6,7 +6,8 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet author="eric" id="db.changelog-249-add-aian-research-plan-column">
         <addColumn tableName="workspace">
-            <column name="rp_aian_research_plan" type="ENUM('EXCLUSIVE_AI_AN_POPULATION','CASE_CONTROL_AI_AN','FINDINGS_BY_AI_AN', 'NO_AI_AN_ANALYSIS')"/>
+            <column name="rp_aian_research_type" type="ENUM('EXCLUSIVE_AI_AN_POPULATION','CASE_CONTROL_AI_AN','FINDINGS_BY_AI_AN', 'NO_AI_AN_ANALYSIS')"/>
+            <column name="rp_aian_research_details" type="varchar(1000)"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

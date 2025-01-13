@@ -7587,8 +7587,10 @@ components:
       - socialBehavioral
       type: object
       properties:
-        aianResearchPlan:
-          $ref: '#/components/schemas/AIANResearchPlan'
+        aianResearchDetails:
+          type: string
+        aianResearchType:
+          $ref: '#/components/schemas/AIANResearchType'
         additionalNotes:
           type: string
         approved:
@@ -13256,7 +13258,7 @@ components:
         userEmail:
           type: string
           description: The user that causes egress alert
-    AIANResearchPlan:
+    AIANResearchType:
       type: string
       description: Research plan for American Indian or Alaska Native participants
       enum:

@@ -40,7 +40,8 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
     pkJoinColumns = @PrimaryKeyJoinColumn(name = "workspace_id"))
 @Table(name = "workspace")
 public class DbWorkspace {
-  public enum AiANResearchPlan {
+
+  public enum AIANResearchType {
     EXCLUSIVE_AI_AN_POPULATION,
     CASE_CONTROL_AI_AN,
     FINDINGS_BY_AI_AN,
@@ -106,7 +107,9 @@ public class DbWorkspace {
 
   private Boolean isVwbWorkspace;
 
-  private AiANResearchPlan aianResearchPlan;
+  private AIANResearchType aianResearchType;
+  private String aianResearchDetails;
+
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -807,13 +810,22 @@ public class DbWorkspace {
   }
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "rp_aian_research_plan")
-  public AiANResearchPlan getAianResearchPlan() {
-    return aianResearchPlan;
+  @Column(name = "rp_aian_research_type")
+  public AIANResearchType getAianResearchType() {
+    return aianResearchType;
   }
 
-  public void setAianResearchPlan(AiANResearchPlan aianResearchPlan) {
-    this.aianResearchPlan = aianResearchPlan;
+  public void setAianResearchType(AIANResearchType aianResearchType) {
+    this.aianResearchType = aianResearchType;
+  }
+
+  @Column(name = "rp_aian_research_details")
+  public String getAianResearchDetails() {
+    return aianResearchDetails;
+  }
+
+  public void setAianResearchDetails(String aianResearchDetails) {
+    this.aianResearchDetails = aianResearchDetails;
   }
 
   @Transient
