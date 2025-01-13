@@ -712,10 +712,6 @@ public class ReportingQueryServiceTest {
     Field creatorField = Field.of("creator", LegacySQLTypeName.STRING);
     FieldValue creatorValue = FieldValue.of(Attribute.PRIMITIVE, "user@email.com");
 
-    Field customEnvironmentVariablesField =
-        Field.of("customEnvironmentVariables", LegacySQLTypeName.STRING);
-    FieldValue customEnvironmentVariablesValue = FieldValue.of(Attribute.PRIMITIVE, "env vars");
-
     Field createdDateField = Field.of("createdDate", LegacySQLTypeName.TIMESTAMP);
     FieldValue createdDateValue =
         FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(1).getEpochSecond()));
@@ -738,7 +734,6 @@ public class ReportingQueryServiceTest {
             appNameField,
             statusField,
             creatorField,
-            customEnvironmentVariablesField,
             createdDateField,
             destroyedDateDateField,
             startTimeField,
@@ -752,7 +747,6 @@ public class ReportingQueryServiceTest {
                     appNameValue,
                     statusValue,
                     creatorValue,
-                    customEnvironmentVariablesValue,
                     createdDateValue,
                     destroyedDateValue,
                     startTimeValue,
@@ -772,8 +766,7 @@ public class ReportingQueryServiceTest {
                 .createdDate(now.plusSeconds(1).atOffset(ZoneOffset.UTC).withNano(0))
                 .destroyedDate(now.plusSeconds(2).atOffset(ZoneOffset.UTC).withNano(0))
                 .startTime(now.plusSeconds(3).atOffset(ZoneOffset.UTC).withNano(0))
-                .stopTime(now.plusSeconds(4).atOffset(ZoneOffset.UTC).withNano(0))
-                .environmentVariables("env vars"));
+                .stopTime(now.plusSeconds(4).atOffset(ZoneOffset.UTC).withNano(0)));
   }
 
   private Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
