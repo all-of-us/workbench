@@ -3309,7 +3309,14 @@ end
 GENOMIC_EXTRACTION_CMD = "run-extraction"
 
 # example usage:
-#   ./project.rb run-extraction
+# ./project.rb run-extraction \
+# --namespace aou-rw-test-0bead07c \
+# --dataset_id 65204 \
+# --person-ids "20201244" \
+# --legacy false \
+# --filter_set echo-controls \
+# --cdr_bq_project fc-aou-cdr-synth-test-2 \
+# --wgs_bq_dataset echo_controls
 Common.register_command({
     :invocation => GENOMIC_EXTRACTION_CMD,
     :description => "Runs a genomic extraction workflow.  Requires a workspace in the Controlled Tier but can vary from what it specifies in its CDR Configuration.",
