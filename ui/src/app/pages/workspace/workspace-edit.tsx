@@ -2219,24 +2219,21 @@ export const WorkspaceEdit = fp.flow(
               <WorkspaceEditSection
                 header={researchPurposeQuestions[9].header}
                 index='6.'
+                indent={true}
                 description={researchPurposeQuestions[9].description}
                 style={{ width: '72rem' }}
               >
-                <FlexColumn style={{ marginLeft: '1.5rem' }}>
+                {/* RadioGroup: AIAN Research Type */}
+                <FlexColumn>
                   <FlexRow>
                     <div style={{ ...styles.header, marginRight: '0.6rem' }}>
                       6.1
                     </div>
                     <div style={styles.header}>
-                      Does your research plan require any of the following with
-                      respect to individuals who self-identify as American
-                      Indian or Alaska Native (AI/AN) or who are genetically
-                      similar to populations with inferred Indigenous American
-                      genetic ancestry? Select the option that best describes
-                      your plans.
+                      {researchPurposeQuestions[10].header}
                     </div>
                   </FlexRow>
-                  <div style={{ marginLeft: '1.5rem' }}>
+                  <div>
                     {Array.from(aianResearchTypeMap.keys()).map(
                       (aianResearchTypeOption) => (
                         <FlexRow>
@@ -2267,6 +2264,16 @@ export const WorkspaceEdit = fp.flow(
                     )}
                   </div>
                 </FlexColumn>
+                {/* TextBox: AIAN Research Description*/}
+                <WorkspaceResearchSummary
+                  researchPurpose={researchPurposeQuestions[11]}
+                  researchValue={aianResearchDetails}
+                  onChange={(v) =>
+                    this.updateResearchPurpose('aianResearchDetails', v.trim())
+                  }
+                  index='6.2'
+                  id='aianResearchDetails'
+                />
               </WorkspaceEditSection>
             )}
 

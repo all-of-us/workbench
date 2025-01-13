@@ -434,6 +434,19 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
     ),
     description: '',
   },
+  {
+    header:
+      'Does your research plan require any of the following with respect to individuals who ' +
+      'self-identify as American Indian or Alaska Native (AI/AN) or who are genetically similar to ' +
+      'populations with inferred Indigenous American genetic ancestry? Select the option that ' +
+      'best describes your plans.',
+    description: '',
+  },
+  {
+    header:
+      'Please explain your response by sharing specific details about your study design.',
+    description: <div>(Free text; 1000 character limit)</div>,
+  },
 ];
 
 export interface SpecificPopulationItem {
