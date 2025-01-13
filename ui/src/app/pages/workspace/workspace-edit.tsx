@@ -5,7 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
 
 import {
-  AIANResearchPlan,
+  AIANResearchType,
   ArchivalStatus,
   BillingAccount,
   CdrVersion,
@@ -47,11 +47,11 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CreateBillingAccountModal } from 'app/pages/workspace/create-billing-account-modal';
 import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
 import {
+  aianResearchTypeMap,
   disseminateFindings,
   PrimaryPurposeItems,
   RequestForReviewFooter,
   researchOutcomes,
-  researchPlanMap,
   ResearchPurposeDescription,
   ResearchPurposeItem,
   ResearchPurposeItems,
@@ -324,7 +324,6 @@ export interface WorkspaceEditProps
 }
 
 export interface WorkspaceEditState {
-  selectedAIANResearchPlan: AIANResearchPlan;
   billingAccountFetched: boolean;
   billingAccounts: Array<BillingAccount>;
   cdrVersions: Array<CdrVersion>;
@@ -364,7 +363,6 @@ export const WorkspaceEdit = fp.flow(
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
-        selectedAIANResearchPlan: null,
         billingAccountFetched: false,
         billingAccounts: [],
         cdrVersions: this.initializeCdrVersions(props),
@@ -626,6 +624,8 @@ export const WorkspaceEdit = fp.flow(
         accessTierShortName: DEFAULT_ACCESS_TIER,
         cdrVersionId: '',
         researchPurpose: {
+          aianResearchType: null,
+          aianResearchDetails: '',
           ancestry: false,
           anticipatedFindings: '',
           commercialPurpose: false,
@@ -1489,13 +1489,14 @@ export const WorkspaceEdit = fp.flow(
       const highlightBilling = !!params.get('highlightBilling');
 
       const {
-        selectedAIANResearchPlan,
         workspace: {
           name,
           billingAccountName,
           cdrVersionId,
           accessTierShortName,
           researchPurpose: {
+            aianResearchDetails,
+            aianResearchType,
             anticipatedFindings,
             intendedStudy,
             scientificApproach,
@@ -2236,23 +2237,30 @@ export const WorkspaceEdit = fp.flow(
                     </div>
                   </FlexRow>
                   <div style={{ marginLeft: '1.5rem' }}>
-                    {Array.from(researchPlanMap.keys()).map(
-                      (researchPlanOption) => (
+                    {Array.from(aianResearchTypeMap.keys()).map(
+                      (aianResearchTypeOption) => (
                         <FlexRow>
                           <RadioButton
-                            name={`Option-${researchPlanOption}`}
+                            name={`Option-${aianResearchTypeOption}`}
                             style={{ marginRight: '0.75rem' }}
-                            onChange={() =>
-                              this.setState({
-                                selectedAIANResearchPlan: researchPlanOption,
-                              })
-                            }
+                            onChange={() => {
+                              this.setState(
+                                fp.set(
+                                  [
+                                    'workspace',
+                                    'researchPurpose',
+                                    'aianResearchType',
+                                  ],
+                                  aianResearchTypeOption
+                                )
+                              );
+                            }}
                             checked={
-                              researchPlanOption === selectedAIANResearchPlan
+                              aianResearchTypeOption === aianResearchType
                             }
                           />
                           <label style={styles.text}>
-                            {researchPlanMap.get(researchPlanOption)}
+                            {aianResearchTypeMap.get(aianResearchTypeOption)}
                           </label>
                         </FlexRow>
                       )

@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import {
-  AIANResearchPlan,
+  AIANResearchType,
   DisseminateResearchEnum,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
@@ -692,28 +692,28 @@ export const RequestForReviewFooter =
   'should any new concerns arise based on study outcomes, please contact the RAB for ' +
   'assistance through the User Support Hub menu in your workspace.';
 
-export const researchPlanMap: Map<AIANResearchPlan, string> = new Map([
+export const aianResearchTypeMap: Map<AIANResearchType, string> = new Map([
   [
-    AIANResearchPlan.EXCLUSIVE_AI_AN_POPULATION,
+    AIANResearchType.EXCLUSIVE_AI_AN_POPULATION,
     'I am planning to conduct my study using a study population exclusively including individuals ' +
       'who self-identify as AI/AN and/or who exhibit genetic similarity to populations with inferred ' +
       'Indigenous American genetic ancestry.',
   ],
   [
-    AIANResearchPlan.CASE_CONTROL_AI_AN,
+    AIANResearchType.CASE_CONTROL_AI_AN,
     'I am planning to conduct a case/control study where either the “case” or the “control” ' +
       'population consists exclusively of individuals who self-identify as AI/AN and/or who exhibit ' +
       'genetic similarity to populations with inferred Indigenous American genetic ancestry.',
   ],
   [
-    AIANResearchPlan.FINDINGS_BY_AI_AN,
+    AIANResearchType.FINDINGS_BY_AI_AN,
     'I am planning to break down my findings by race/ethnicity and/or ancestral genetic similarity ' +
       'in such a way that may raise findings that are specific to individuals who self-identify as ' +
       'AI/AN and/or who exhibit genetic similarity to populations with inferred Indigenous American ' +
       'genetic ancestry.',
   ],
   [
-    AIANResearchPlan.NO_AI_AN_ANALYSIS,
+    AIANResearchType.NO_AI_AN_ANALYSIS,
     'I will not conduct any analyses that would yield findings specific to AI/AN populations and/or ' +
       'populations who exhibit genetic similarity to populations with inferred Indigenous American ' +
       'genetic ancestry. If that changes, I will immediately update my responses on this form to ' +
