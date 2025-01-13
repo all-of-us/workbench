@@ -1134,6 +1134,26 @@ export const WorkspaceEdit = fp.flow(
       this.saveWorkspace();
     }
 
+    getAskAboutAIAN() {
+      const publicCDRVersionNumber: number = getCdrVersion(
+        this.state.workspace,
+        this.props.cdrVersionTiersResponse
+      ).publicReleaseNumber;
+
+      return publicCDRVersionNumber >= 8;
+    }
+
+    /* Deeply clones the provided workspace and makes any adjustments necessary without
+     * adjusting local state. */
+    preProcessWorkspace(workspace: Workspace) {
+      const adjustedWorkspace = structuredClone(workspace);
+      if (!this.getAskAboutAIAN()) {
+        adjustedWorkspace.researchPurpose.aianResearchType = null;
+        adjustedWorkspace.researchPurpose.aianResearchDetails = null;
+      }
+      return adjustedWorkspace;
+    }
+
     private async pollForAsyncWorkspaceOperation(
       operation: () => Promise<WorkspaceOperation>,
       errorText: string
@@ -1162,14 +1182,16 @@ export const WorkspaceEdit = fp.flow(
     }
 
     private async apiCreateWorkspaceAsync(): Promise<Workspace> {
+      const adjustedWorkspace = this.preProcessWorkspace(this.state.workspace);
       return this.pollForAsyncWorkspaceOperation(
         async () =>
-          await workspacesApi().createWorkspaceAsync(this.state.workspace),
+          await workspacesApi().createWorkspaceAsync(adjustedWorkspace),
         'Workspace creation failed'
       );
     }
 
     private async apiDuplicateWorkspaceAsync(): Promise<Workspace> {
+      const adjustedWorkspace = this.preProcessWorkspace(this.state.workspace);
       return this.pollForAsyncWorkspaceOperation(
         async () =>
           await workspacesApi().duplicateWorkspaceAsync(
@@ -1177,7 +1199,7 @@ export const WorkspaceEdit = fp.flow(
             this.props.workspace.terraName,
             {
               includeUserRoles: this.state.cloneUserRole,
-              workspace: this.state.workspace,
+              workspace: adjustedWorkspace,
             }
           ),
         'Workspace duplication failed'
@@ -1524,11 +1546,7 @@ export const WorkspaceEdit = fp.flow(
         profileState: { profile },
       } = this.props;
 
-      const publicCDRVersionNumber: number = getCdrVersion(
-        this.state.workspace,
-        cdrVersionTiersResponse
-      ).publicReleaseNumber;
-      const askAboutAIAN: boolean = publicCDRVersionNumber >= 8;
+      const askAboutAIAN: boolean = this.getAskAboutAIAN();
 
       const errors = this.validate();
       return (
