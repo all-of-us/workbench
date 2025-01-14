@@ -5,7 +5,6 @@ import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
 
 import {
-  AIANResearchType,
   ArchivalStatus,
   BillingAccount,
   CdrVersion,
@@ -1146,7 +1145,7 @@ export const WorkspaceEdit = fp.flow(
     /* Deeply clones the provided workspace and makes any adjustments necessary without
      * adjusting local state. */
     preProcessWorkspace(workspace: Workspace) {
-      const adjustedWorkspace = structuredClone(workspace);
+      const adjustedWorkspace = JSON.parse(JSON.stringify(workspace));
       if (!this.getAskAboutAIAN()) {
         adjustedWorkspace.researchPurpose.aianResearchType = null;
         adjustedWorkspace.researchPurpose.aianResearchDetails = null;
@@ -2251,11 +2250,12 @@ export const WorkspaceEdit = fp.flow(
                       {researchPurposeQuestions[10].header}
                     </div>
                   </FlexRow>
-                  <div>
+                  <div style={{ marginLeft: '1.35rem' }}>
                     {Array.from(aianResearchTypeMap.keys()).map(
                       (aianResearchTypeOption) => (
-                        <FlexRow>
+                        <FlexRow style={{ paddingBottom: '0.9rem' }}>
                           <RadioButton
+                            id={`Option-${aianResearchTypeOption}`}
                             name={`Option-${aianResearchTypeOption}`}
                             style={{ marginRight: '0.75rem' }}
                             onChange={() => {
@@ -2274,7 +2274,10 @@ export const WorkspaceEdit = fp.flow(
                               aianResearchTypeOption === aianResearchType
                             }
                           />
-                          <label style={styles.text}>
+                          <label
+                            htmlFor={`Option-${aianResearchTypeOption}`}
+                            style={styles.text}
+                          >
                             {aianResearchTypeMap.get(aianResearchTypeOption)}
                           </label>
                         </FlexRow>
@@ -2291,6 +2294,7 @@ export const WorkspaceEdit = fp.flow(
                   }
                   index='6.2'
                   id='aianResearchDetails'
+                  ariaLabel='AIAN Research Description text field'
                 />
               </WorkspaceEditSection>
             )}
