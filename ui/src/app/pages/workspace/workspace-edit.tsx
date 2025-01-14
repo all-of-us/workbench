@@ -1346,6 +1346,8 @@ export const WorkspaceEdit = fp.flow(
           name,
           billingAccountName,
           researchPurpose: {
+            aianResearchDetails,
+            aianResearchType,
             anticipatedFindings,
             diseaseFocusedResearch,
             diseaseOfFocus,
@@ -1363,6 +1365,8 @@ export const WorkspaceEdit = fp.flow(
         },
       } = this.state;
       const values: object = {
+        aianResearchDetails,
+        aianResearchType,
         name,
         billingAccountName,
         anticipatedFindings,
@@ -1438,6 +1442,14 @@ export const WorkspaceEdit = fp.flow(
                 'Other methods of disseminating research findings'
               )
             : {},
+        aianResearchType: this.getAskAboutAIAN()
+          ? {
+              presence: true,
+            }
+          : {},
+        aianResearchDetails: this.getAskAboutAIAN()
+          ? requiredStringWithMaxLength(1000)
+          : {},
       };
 
       return validate(values, constraints, { fullMessages: false });
@@ -2497,6 +2509,18 @@ export const WorkspaceEdit = fp.flow(
                           <li>
                             {`You must pick an answer for review of stigmatizing
                             research (Question ${askAboutAIAN ? 7 : 6})`}
+                          </li>
+                        )}
+                        {errors.aianResearchType && (
+                          <li>
+                            You must select the type of AIAN research you are
+                            conducting (Question 6.1)
+                          </li>
+                        )}
+                        {errors.aianResearchDetails && (
+                          <li>
+                            You must provide details about your study design
+                            (Question 6.2)
                           </li>
                         )}
                       </BulletAlignedUnorderedList>
