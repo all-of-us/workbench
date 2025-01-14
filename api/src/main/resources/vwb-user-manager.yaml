@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Terra User Manager
+  title: Verily Workbench User Manager
   description: |
     Terra User Manager
 

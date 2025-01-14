@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Terra Exfil Manager
+  title: Verily Workbench Exfil Manager
   description: |
     Terra Exfil Manager
 
