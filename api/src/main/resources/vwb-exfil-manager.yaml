@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: Terra Exfil Manager
+  description: |
+    Terra Exfil Manager
+
+  version: 0.0.1
+
+security:
+  - authorization: [ openid, email, profile ]
+  - bearerAuth: [ ]
+
+paths:
+  # Unauthenticated Paths
+  /status:
+    get:
+      security: [ ]
+      summary: Returns the operational status of the service
+      operationId: serviceStatus
+      tags: [ Public ]
+      responses:
+        '200':
+          description: Service can process requests
+        '500':
+          description: |
+            Service cannot process requests. That might be because dependent services are
+            unavailable, or because there is a problem with the service itself.
+
+  /egress-events/{egressEventId}/status:
+    patch:
+      summary: Update an egress event status. Currently, only status (REMEDIATED or VERIFIED_FALSE_POSITIVE) is allow, other status will be rejected
+      operationId: updateEgressEventStatus
+      tags: [EgressEvent]
+      parameters:
+        - name: egressEventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEgressEventStatusBody'
+      responses:
+        '200':
+          description: Egress event status updated successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    UpdateEgressEventStatusBody:
+      type: object
+      required: [ status ]
+      properties:
+        status:
+          type: string
+          enum:
+            - REMEDIATED
+            - VERIFIED_FALSE_POSITIVE
+    ErrorReport:
+      type: object
+      required: [ message, statusCode, causes ]
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+        causes:
+          type: array
+          items:
+            type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+    NotFound:
+      description: Not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+    NotImplemented:
+      description: Not implemented
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+    PermissionDenied:
+      description: Permission denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+  securitySchemes:
+    authorization:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://accounts.google.com/o/oauth2/auth
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization
+    bearerAuth:
+      type: http
+      scheme: bearer
