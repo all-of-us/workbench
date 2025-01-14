@@ -22,7 +22,9 @@ buildscript {
     ext {
         GAE_VERSION = '2.0.31'
         GOOGLE_AUTH_LIBRARY_VERSION = '1.30.1'
-        GSON_VERSION = '2.11.0'
+        // error for 2.11
+        // org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'javers' defined in org.pmiops.workbench.config.CommonConfig: Failed to instantiate [org.javers.core.Javers]: Factory method 'javers' threw exception with message: Cannot override built-in adapter for class com.google.gson.JsonElement
+        GSON_VERSION = '2.10'
         HIBERNATE_VERSION = '6.5.2.Final'
         JACKSON_VERSION = '2.18.2'
         LIQUIBASE_VERSION = '4.29.2'
