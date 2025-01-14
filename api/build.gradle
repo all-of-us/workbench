@@ -444,6 +444,8 @@ dependencies {
 
     // TODO: consider switching google deps to the BOM.  https://cloud.google.com/java/docs/bom
 
+    implementation platform('com.google.cloud:google-cloud-bom:0.195.0')
+
     implementation("com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION") {
         exclude group: 'com.google.api-client', module: 'google-api-client-servlet'
     }
