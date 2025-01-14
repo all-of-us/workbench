@@ -98,12 +98,10 @@ public class InitialCreditsServiceTest {
   @MockBean private LeonardoApiClient leonardoApiClient;
   @MockBean private InstitutionService institutionService;
 
-  @Autowired BigQueryService bigQueryService;
   @Autowired InitialCreditsService initialCreditsService;
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-  @Autowired WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
 
   @Autowired private TaskQueueService taskQueueService;
 
@@ -1163,25 +1161,6 @@ public class InitialCreditsServiceTest {
         new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(30.0));
     boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
     assertThat(eligibility).isTrue();
-  }
-
-  private TableResult mockBQTableResult(final Map<String, Double> costMap) {
-    Field idField = Field.of("id", LegacySQLTypeName.STRING);
-    Field costField = Field.of("cost", LegacySQLTypeName.FLOAT);
-    Schema s = Schema.of(idField, costField);
-
-    List<FieldValueList> tableRows =
-        costMap.entrySet().stream()
-            .map(
-                e -> {
-                  FieldValue id = FieldValue.of(Attribute.PRIMITIVE, e.getKey());
-                  FieldValue cost = FieldValue.of(Attribute.PRIMITIVE, e.getValue().toString());
-                  return FieldValueList.of(Arrays.asList(id, cost));
-                })
-            .collect(Collectors.toList());
-
-    return BigQueryUtils.newTableResult(
-        s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
   }
 
   private void assertSingleWorkspaceTestDbState(
