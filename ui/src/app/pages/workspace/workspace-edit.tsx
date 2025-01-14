@@ -2505,12 +2505,6 @@ export const WorkspaceEdit = fp.flow(
                         {errors.otherPopulationDetails && (
                           <li>{errors.otherPopulationDetails}</li>
                         )}
-                        {errors.reviewRequested && (
-                          <li>
-                            {`You must pick an answer for review of stigmatizing
-                            research (Question ${askAboutAIAN ? 7 : 6})`}
-                          </li>
-                        )}
                         {errors.aianResearchType && (
                           <li>
                             You must select the type of AIAN research you are
@@ -2521,6 +2515,12 @@ export const WorkspaceEdit = fp.flow(
                           <li>
                             You must provide details about your study design
                             (Question 6.2)
+                          </li>
+                        )}
+                        {errors.reviewRequested && (
+                          <li>
+                            {`You must pick an answer for review of stigmatizing
+                            research (Question ${askAboutAIAN ? 7 : 6})`}
                           </li>
                         )}
                       </BulletAlignedUnorderedList>
