@@ -402,7 +402,6 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
     implementation "com.github.java-json-tools:json-patch:1.13"
-    implementation "com.github.rholder:guava-retrying:2.0.0"
     // 6.0.0+ causes a failure in ProfileServiceTest
     implementation 'org.javers:javers-core:5.15.0'
     implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
@@ -442,7 +441,23 @@ dependencies {
     implementation 'io.netty:netty-common:4.1.112.Final'
     implementation 'org.json:json:20231013'
 
-    // TODO: consider switching google deps to the BOM.  https://cloud.google.com/java/docs/bom
+
+    // Assure compatible dependencies by using Bills of Materials (BOMs)
+    // https://cloud.google.com/java/docs/bom
+
+    implementation platform('com.google.cloud:google-cloud-bom:0.233.0')
+    implementation platform('com.google.cloud:libraries-bom:26.52.0')
+
+    // do not specify versions for these dependencies, because they are set by the BOM
+
+    implementation 'com.google.cloud:google-cloud-bigquery'
+    implementation 'com.google.cloud:google-cloud-iamcredentials'
+    implementation 'com.google.cloud:google-cloud-logging'
+    implementation 'com.google.cloud:google-cloud-monitoring'
+    implementation 'com.google.cloud:google-cloud-trace'
+    implementation 'com.google.cloud:google-cloud-storage'
+    implementation 'com.google.cloud:google-cloud-tasks'
+
 
     implementation("com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION") {
         exclude group: 'com.google.api-client', module: 'google-api-client-servlet'
@@ -460,15 +475,7 @@ dependencies {
     //     Required by:
     //         project : > com.google.cloud.sql:mysql-socket-factory:1.11.2
     implementation 'com.google.cloud.sql:mysql-socket-factory:1.11.1'
-    implementation 'com.google.cloud:google-cloud-bigquery:2.25.0'
-    implementation 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
-    implementation 'com.google.cloud:google-cloud-logging:3.11.5'
-    implementation 'com.google.cloud:google-cloud-monitoring:3.40.0'
-    implementation 'com.google.cloud:google-cloud-trace:2.39.0'
-    implementation 'com.google.cloud:google-cloud-storage:2.13.0'
-    implementation 'com.google.cloud:google-cloud-tasks:2.3.11'
     implementation "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    implementation 'com.google.guava:guava:32.0.1-jre'
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
     implementation 'com.google.protobuf:protobuf-java:3.25.5'
     implementation 'com.google.protobuf:protobuf-java-util:3.25.5'

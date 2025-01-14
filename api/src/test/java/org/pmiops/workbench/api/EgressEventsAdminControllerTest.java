@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValue.Attribute;
@@ -58,6 +57,7 @@ import org.pmiops.workbench.model.ListEgressEventsRequest;
 import org.pmiops.workbench.model.ListEgressEventsResponse;
 import org.pmiops.workbench.model.UpdateEgressEventRequest;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapperImpl;
@@ -522,6 +522,6 @@ public class EgressEventsAdminControllerTest {
                 })
             .collect(Collectors.toList());
 
-    return new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    return BigQueryUtils.newTableResult(schema, tableRows);
   }
 }
