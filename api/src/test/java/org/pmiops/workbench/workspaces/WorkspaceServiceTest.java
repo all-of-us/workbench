@@ -115,7 +115,6 @@ public class WorkspaceServiceTest {
     ConceptSetService.class,
     DataSetService.class,
     FeaturedWorkspaceMapper.class,
-    InitialCreditsService.class,
     IamService.class,
     InitialCreditsService.class,
     ProfileMapper.class,

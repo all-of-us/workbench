@@ -210,7 +210,6 @@ public class CohortsControllerTest {
     DirectoryService.class,
     FeaturedWorkspaceMapper.class,
     FireCloudService.class,
-    InitialCreditsService.class,
     LeonardoApiClient.class,
     IamService.class,
     InitialCreditsService.class,

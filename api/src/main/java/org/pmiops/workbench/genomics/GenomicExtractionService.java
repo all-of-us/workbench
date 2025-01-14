@@ -315,13 +315,16 @@ public class GenomicExtractionService {
   }
 
   private Map<String, String> getWorkflowInputs(
-      DbWorkspace workspace,
       WgsCohortExtractionConfig cohortExtractionConfig,
       String extractionUuid,
       List<String> personIds,
       String extractionFolder,
       String outputDir,
-      boolean useLegacyWorkflow) {
+      boolean useLegacyWorkflow,
+      String filterSetName,
+      String bigQueryProject,
+      String wgsBigqueryDataset,
+      String workspaceGoogleProject) {
 
     String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
     if (destinationParts.length != 2) {
@@ -333,7 +336,6 @@ public class GenomicExtractionService {
 
     Map<String, String> maybeInputs = new HashMap<>();
 
-    String filterSetName = workspace.getCdrVersion().getWgsFilterSetName();
     if (!Strings.isNullOrEmpty(filterSetName)) {
       // If set, apply a joint callset filter during the extraction. There may be multiple such
       // filters defined within a GVS BigQuery dataset (see the filter_set table to view options).
@@ -390,13 +392,9 @@ public class GenomicExtractionService {
                 + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"")
-        .put(
-            EXTRACT_WORKFLOW_NAME + ".gvs_project",
-            "\"" + workspace.getCdrVersion().getBigqueryProject() + "\"")
-        .put(
-            EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
-            "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
-        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".gvs_project", "\"" + bigQueryProject + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".gvs_dataset", "\"" + wgsBigqueryDataset + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspaceGoogleProject + "\"")
         // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
         // etc
         .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
@@ -408,11 +406,15 @@ public class GenomicExtractionService {
   public GenomicExtractionJob submitGenomicExtractionJob(
       DbWorkspace workspace, DbDataset dataSet, TanagraGenomicDataRequest tanagraGenomicDataRequest)
       throws ApiException {
+    var cdrVersion = workspace.getCdrVersion();
 
-    boolean isTanagraEnabled = workspace.isCDRAndWorkspaceTanagraEnabled();
+    // we use different workflows based on the CDR version:
+    // one version for v7 or earlier, and one for v8 or later
+    boolean useLegacyWorkflow =
+        !Boolean.TRUE.equals(cdrVersion.getNeedsV8GenomicExtractionWorkflow());
 
     List<String> personIds =
-        isTanagraEnabled
+        workspace.isCDRAndWorkspaceTanagraEnabled()
             ? genomicDatasetService.getTanagraPersonIdsWithWholeGenome(
                 workspace, tanagraGenomicDataRequest)
             : genomicDatasetService.getPersonIdsWithWholeGenome(dataSet);
@@ -428,10 +430,25 @@ public class GenomicExtractionService {
               personIds.size(), MAX_EXTRACTION_SAMPLE_COUNT));
     }
 
-    // we use different workflows based on the CDR version:
-    // one version for v7 or earlier, and one for v8 or later
-    boolean useLegacyWorkflow =
-        !Boolean.TRUE.equals(workspace.getCdrVersion().getNeedsV8GenomicExtractionWorkflow());
+    return submitGenomicExtractionJob(
+        workspace,
+        dataSet,
+        personIds,
+        useLegacyWorkflow,
+        cdrVersion.getWgsFilterSetName(),
+        cdrVersion.getBigqueryProject(),
+        cdrVersion.getWgsBigqueryDataset());
+  }
+
+  public GenomicExtractionJob submitGenomicExtractionJob(
+      DbWorkspace workspace,
+      DbDataset dataSet,
+      List<String> personIds,
+      boolean useLegacyWorkflow,
+      String filterSetName,
+      String bigQueryProject,
+      String wgsBigQueryDataset)
+      throws ApiException {
 
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
@@ -465,13 +482,16 @@ public class GenomicExtractionService {
                 new FirecloudMethodConfiguration()
                     .inputs(
                         getWorkflowInputs(
-                            workspace,
                             cohortExtractionConfig,
                             extractionUuid,
                             personIds,
                             extractionFolder,
                             outputDir,
-                            useLegacyWorkflow))
+                            useLegacyWorkflow,
+                            filterSetName,
+                            bigQueryProject,
+                            wgsBigQueryDataset,
+                            workspace.getGoogleProject()))
                     .methodConfigVersion(versionedConfig.methodRepoVersion)
                     .methodRepoMethod(createRepoMethodParameter(versionedConfig))
                     .name(extractionUuid)

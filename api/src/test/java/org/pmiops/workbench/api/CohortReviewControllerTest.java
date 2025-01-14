@@ -300,7 +300,6 @@ public class CohortReviewControllerTest {
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
-    InitialCreditsService.class,
     IamService.class,
     InitialCreditsService.class,
     LeonardoApiClient.class,
