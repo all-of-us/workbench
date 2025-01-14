@@ -110,7 +110,6 @@ public class DbWorkspace {
   private AIANResearchType aianResearchType;
   private String aianResearchDetails;
 
-
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
