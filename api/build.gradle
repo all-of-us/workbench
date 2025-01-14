@@ -463,11 +463,11 @@ dependencies {
     implementation("com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION") {
         exclude group: 'com.google.api-client', module: 'google-api-client-servlet'
     }
-    implementation 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20220919-2.0.0'
-    implementation 'com.google.apis:google-api-services-cloudbilling:v1-rev20220908-2.0.0'
-    implementation 'com.google.apis:google-api-services-cloudresourcemanager:v3-rev20220925-2.0.0'
+    implementation 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20241210-2.0.0'
+    implementation 'com.google.apis:google-api-services-cloudbilling:v1-rev20241011-2.0.0'
+    implementation 'com.google.apis:google-api-services-cloudresourcemanager:v3-rev20240310-2.0.0'
     implementation 'com.google.apis:google-api-services-oauth2:v2-rev20200213-2.0.0'
-    implementation 'com.google.apis:google-api-services-iam:v1-rev20220825-2.0.0'
+    implementation 'com.google.apis:google-api-services-iam:v1-rev20241114-2.0.0'
     implementation 'com.google.api-client:google-api-client-appengine:2.7.1'
     implementation "com.google.auth:google-auth-library-appengine:$project.ext.GOOGLE_AUTH_LIBRARY_VERSION"
     implementation "com.google.auth:google-auth-library-oauth2-http:$project.ext.GOOGLE_AUTH_LIBRARY_VERSION"
