@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortreview.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -94,9 +93,7 @@ public class CohortReviewMapperTest {
                     ageAtEventValue,
                     rankValue)));
 
-    TableResult result =
-        BigQueryUtils.newTableResult(
-            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(s, tableRows);
 
     ParticipantChartData participantChartData =
         new ParticipantChartData()
@@ -203,9 +200,7 @@ public class CohortReviewMapperTest {
                     strengthValue,
                     routeValue,
                     refRangeValue)));
-    TableResult result =
-        BigQueryUtils.newTableResult(
-            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     ParticipantData participantData =
         new ParticipantData()
@@ -248,9 +243,7 @@ public class CohortReviewMapperTest {
         Collections.singletonList(
             FieldValueList.of(Arrays.asList(domainValue, typeValue, vocabularyValue)));
 
-    TableResult result =
-        BigQueryUtils.newTableResult(
-            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(s, tableRows);
 
     Vocabulary vocabulary = new Vocabulary().domain("domain").type("type").vocabulary("vocabulary");
     assertThat(cohortReviewMapper.tableResultToVocabulary(result))

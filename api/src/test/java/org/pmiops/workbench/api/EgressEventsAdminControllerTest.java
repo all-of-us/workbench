@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValue.Attribute;
@@ -523,7 +522,6 @@ public class EgressEventsAdminControllerTest {
                 })
             .collect(Collectors.toList());
 
-    return BigQueryUtils.newTableResult(
-        schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    return BigQueryUtils.newTableResult(schema, tableRows);
   }
 }

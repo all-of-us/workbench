@@ -21,7 +21,6 @@ import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValue.Attribute;
@@ -759,9 +758,7 @@ public class ReportingQueryServiceTest {
                     startTimeValue,
                     stopTimeValue)));
 
-    TableResult tableResult =
-        BigQueryUtils.newTableResult(
-            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult tableResult = BigQueryUtils.newTableResult(s, tableRows);
     when(bigQueryService.executeQuery(any(QueryJobConfiguration.class))).thenReturn(tableResult);
     assertThat(reportingQueryService.getLeonardoAppUsage(10, 0))
         .containsExactly(

@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortreview.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -117,9 +116,7 @@ public class ParticipantCohortStatusMapperTest {
                     sexAtBirthConceptIdValue,
                     deceasedValue)));
 
-    TableResult result =
-        BigQueryUtils.newTableResult(
-            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(s, tableRows);
 
     Date birthDate =
         participantCohortStatusMapper.getBirthDate(result.iterateAll().iterator().next());
