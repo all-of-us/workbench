@@ -468,7 +468,7 @@ dependencies {
     implementation 'com.google.apis:google-api-services-cloudresourcemanager:v3-rev20220925-2.0.0'
     implementation 'com.google.apis:google-api-services-oauth2:v2-rev20200213-2.0.0'
     implementation 'com.google.apis:google-api-services-iam:v1-rev20220825-2.0.0'
-    implementation 'com.google.api-client:google-api-client-appengine:2.5.0'
+    implementation 'com.google.api-client:google-api-client-appengine:2.7.1'
     implementation "com.google.auth:google-auth-library-appengine:$project.ext.GOOGLE_AUTH_LIBRARY_VERSION"
     implementation "com.google.auth:google-auth-library-oauth2-http:$project.ext.GOOGLE_AUTH_LIBRARY_VERSION"
     // 1.11.2+ results in a compilation error:
