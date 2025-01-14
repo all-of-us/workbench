@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import { mockNavigate } from 'setupTests';
 
 import {
+  AIANResearchType,
   DisseminateResearchEnum,
   ProfileApi,
   ResearchOutcomeEnum,
@@ -57,6 +58,8 @@ import {
 import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
+import { aianResearchTypeMap } from './workspace-edit-text';
 
 jest.mock('app/utils/project-billing-info', () => ({
   getBillingAccountInfo: () =>
@@ -1128,5 +1131,91 @@ describe(WorkspaceEdit.name, () => {
     expect(screen.getByTestId('billing-dropdown')).toHaveStyle(
       `background-color: ${colors.highlight}`
     );
+  });
+
+  it('should only display AIAN research questions when CDR >= v8', async () => {
+    workspaceEditMode = WorkspaceEditMode.Create;
+    renderComponent();
+
+    /* Select AIAN Research Plan */
+    const selectedAIANResearchType = aianResearchTypeMap.get(
+      AIANResearchType.CASE_CONTROL_AI_AN
+    );
+    const selectedAIANResearchTypeRadioElement = screen.getByRole('radio', {
+      name: selectedAIANResearchType,
+    });
+    expect(selectedAIANResearchTypeRadioElement).toBeInTheDocument();
+    await user.click(selectedAIANResearchTypeRadioElement);
+
+    /* Describe AIAN Research Plan */
+    const aianResearchDescription = screen.getByRole('textbox', {
+      name: /text area describing the aian research description text field/i,
+    });
+    expect(aianResearchDescription).toBeInTheDocument();
+    await user.clear(aianResearchDescription);
+    await user.paste('Example AIAN Research Description');
+
+    /* Switch to CDR Version < 8 */
+    const cdrVersionSelect = screen.getByRole('combobox', {
+      name: /cdr version dropdown/i,
+    }) as HTMLSelectElement;
+    await userEvent.selectOptions(cdrVersionSelect, [
+      CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
+    ]);
+
+    /* Dismiss old study warning */
+    await user.click(
+      screen.getByRole('checkbox', {
+        name: /i will use this workspace to complete an existing study or replicate a previous study\./i,
+      })
+    );
+    await user.click(
+      screen.getByRole('checkbox', {
+        name: /in the workspace description below, i will identify which study i am continuing or replicating\./i,
+      })
+    );
+    await user.click(
+      screen.getByRole('button', {
+        name: /continue/i,
+      })
+    );
+
+    /* Confirm AIAN Research Plan is not visible */
+    expect(
+      screen.queryByRole('radio', {
+        name: selectedAIANResearchType,
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('textbox', {
+        name: /text area describing the aian research description text field/i,
+      })
+    ).not.toBeInTheDocument();
+
+    /* Switch back to CDR >= 8 */
+    await userEvent.selectOptions(cdrVersionSelect, [
+      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
+    ]);
+
+    /* Confirm AIAN Research Plan fields persisted */
+    const selectedAIANResearchTypeRadioElementAfterReturn = screen.queryByRole(
+      'radio',
+      {
+        name: selectedAIANResearchType,
+      }
+    );
+    expect(selectedAIANResearchTypeRadioElementAfterReturn).toBeInTheDocument();
+    expect(selectedAIANResearchTypeRadioElementAfterReturn).toBeChecked();
+    const aianResearchDescriptionElementAfterReturn = screen.getByRole(
+      'textbox',
+      {
+        name: /text area describing the aian research description text field/i,
+      }
+    );
+    expect(aianResearchDescriptionElementAfterReturn).toBeInTheDocument();
+    const aianResearchDescriptionTextAfterReturn = within(
+      aianResearchDescriptionElementAfterReturn
+    ).getByText('Example AIAN Research Description');
+    expect(aianResearchDescriptionTextAfterReturn).toBeInTheDocument();
   });
 });
