@@ -38,6 +38,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: true,
           creationTime: 0,
           bigqueryDataset: '',
+          publicReleaseNumber: 8,
         },
         {
           name: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
@@ -49,6 +50,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: false,
           creationTime: 0,
           bigqueryDataset: '',
+          publicReleaseNumber: 7,
         },
       ],
     },
@@ -69,6 +71,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: true,
           creationTime: 0,
           bigqueryDataset: '',
+          publicReleaseNumber: 8,
         },
       ],
     },
