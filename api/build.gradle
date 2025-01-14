@@ -442,10 +442,11 @@ dependencies {
     implementation 'org.json:json:20231013'
 
 
-    // Assure compatible dependencies by using the Bill of Materials (BOM)
+    // Assure compatible dependencies by using Bills of Materials (BOMs)
     // https://cloud.google.com/java/docs/bom
 
     implementation platform('com.google.cloud:google-cloud-bom:0.233.0')
+    implementation platform('com.google.cloud:libraries-bom:26.52.0')
 
     // do not specify versions for these dependencies, because they are set by the BOM
 
