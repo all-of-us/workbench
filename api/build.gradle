@@ -445,7 +445,9 @@ dependencies {
     // Provides a Bill of Materials (BOM) for google cloud packages.  https://cloud.google.com/java/docs/bom
     // Assures compatible dependencies.
 
-    implementation platform('com.google.cloud:google-cloud-bom:0.195.0')
+    // 233 is too high.  No EmptyTableResult in BigQuery
+    implementation platform('com.google.cloud:google-cloud-bom:0.200.0')
+
 
     // do not specify versions for these dependencies, because they are set by the BOM
 
