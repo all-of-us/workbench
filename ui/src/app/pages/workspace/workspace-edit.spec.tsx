@@ -128,6 +128,8 @@ describe(WorkspaceEdit.name, () => {
       // fields in the workspace form.
       researchPurpose: {
         ...workspaceStubs[0].researchPurpose,
+        aianResearchType: AIANResearchType.FINDINGS_BY_AI_AN,
+        aianResearchDetails: 'Plan to study AI/AN populations',
         intendedStudy: 'intendedStudy ',
         anticipatedFindings: 'anticipatedFindings ',
         scientificApproach: 'scientificApproach ',
@@ -330,6 +332,9 @@ describe(WorkspaceEdit.name, () => {
     await user.click(screen.getByTestId('specific-population-no'));
 
     const saveButton = screen.getByRole('button', { name: 'Update Workspace' });
+
+    await user.hover(saveButton);
+    screen.logTestingPlaygroundURL();
 
     await waitFor(() => {
       expectButtonElementEnabled(saveButton);
@@ -1267,7 +1272,7 @@ describe(WorkspaceEdit.name, () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should show AIAN validation when CDR <8', async () => {
+  it('should not show AIAN validation when CDR <8', async () => {
     workspaceEditMode = WorkspaceEditMode.Create;
     renderComponent();
 
