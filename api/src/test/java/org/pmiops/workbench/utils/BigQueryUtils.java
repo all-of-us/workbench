@@ -8,6 +8,10 @@ import com.google.cloud.bigquery.TableResult;
 public class BigQueryUtils {
   public static TableResult newTableResult(
       Schema schema, long totalRows, Page<FieldValueList> pageNoSchema) {
-    return BigQueryUtils.newTableResult(schema, totalRows, pageNoSchema);
+    return TableResult.newBuilder()
+        .setSchema(schema)
+        .setTotalRows(totalRows)
+        .setPageNoSchema(pageNoSchema)
+        .build();
   }
 }
