@@ -186,6 +186,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -544,7 +545,8 @@ public class WorkspacesControllerTest {
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     List<FieldValueList> tableRows = List.of(FieldValueList.of(List.of(countValue)));
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     // construct the second TableResult call
     Field personId = Field.of("person_id", LegacySQLTypeName.STRING);
@@ -582,7 +584,8 @@ public class WorkspacesControllerTest {
                     sexAtBirthConceptIdValue,
                     deceasedValue)));
     TableResult result2 =
-        new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
+        BigQueryUtils.newTableResult(
+            schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null)).thenReturn(result, result2);

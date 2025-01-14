@@ -19,6 +19,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -117,7 +118,8 @@ public class ParticipantCohortStatusMapperTest {
                     deceasedValue)));
 
     TableResult result =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     Date birthDate =
         participantCohortStatusMapper.getBirthDate(result.iterateAll().iterator().next());

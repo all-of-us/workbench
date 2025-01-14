@@ -69,6 +69,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -1179,7 +1180,8 @@ public class InitialCreditsServiceTest {
                 })
             .collect(Collectors.toList());
 
-    return new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    return BigQueryUtils.newTableResult(
+        s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
   }
 
   private void assertSingleWorkspaceTestDbState(

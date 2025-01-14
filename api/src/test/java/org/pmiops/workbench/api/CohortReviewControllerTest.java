@@ -133,6 +133,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -2466,7 +2467,8 @@ public class CohortReviewControllerTest {
         Collections.singletonList(
             FieldValueList.of(Arrays.asList(nameValue, raceValue, ageRangeValue, countValue)));
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
   }
@@ -2496,7 +2498,8 @@ public class CohortReviewControllerTest {
                     ageAtEventValue,
                     rankValue)));
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
@@ -2515,7 +2518,8 @@ public class CohortReviewControllerTest {
         Collections.singletonList(
             FieldValueList.of(Arrays.asList(typeValue, domainValue, vocabularyValue)));
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
@@ -2534,7 +2538,8 @@ public class CohortReviewControllerTest {
         Collections.singletonList(FieldValueList.of(Arrays.asList(countValue, birthDatetimeValue)));
 
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
@@ -2635,7 +2640,8 @@ public class CohortReviewControllerTest {
                     routeValue,
                     refRangeValue)));
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
@@ -2702,7 +2708,8 @@ public class CohortReviewControllerTest {
     List<FieldValueList> tableRows =
         Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     // construct the second TableResult call
     Field personId = Field.of("person_id", LegacySQLTypeName.STRING);
@@ -2740,7 +2747,8 @@ public class CohortReviewControllerTest {
                     sexAtBirthConceptIdValue,
                     deceasedValue)));
     TableResult result2 =
-        new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
+        BigQueryUtils.newTableResult(
+            schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result, result2);

@@ -98,6 +98,7 @@ import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -759,7 +760,8 @@ public class ReportingQueryServiceTest {
                     stopTimeValue)));
 
     TableResult tableResult =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
     when(bigQueryService.executeQuery(any(QueryJobConfiguration.class))).thenReturn(tableResult);
     assertThat(reportingQueryService.getLeonardoAppUsage(10, 0))
         .containsExactly(

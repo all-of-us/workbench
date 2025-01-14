@@ -21,6 +21,7 @@ import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -178,7 +179,8 @@ public class CohortBuilderMapperTest {
             FieldValueList.of(Arrays.asList(nameValue, conceptIdValue, countValue)));
 
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     CohortChartData cohortChartData = new CohortChartData().name("name").conceptId(77L).count(10L);
     assertThat(cohortBuilderMapper.tableResultToCohortChartData(result))
@@ -202,7 +204,8 @@ public class CohortBuilderMapperTest {
             FieldValueList.of(Arrays.asList(nameValue, raceValue, ageRangeValue, countValue)));
 
     TableResult result =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     DemoChartInfo demoChartInfo = new DemoChartInfo().name("name").ageRange("2-11").count(10L);
     assertThat(cohortBuilderMapper.tableResultToDemoChartInfo(result))
@@ -221,7 +224,8 @@ public class CohortBuilderMapperTest {
         Collections.singletonList(FieldValueList.of(Arrays.asList(idValue, countValue)));
 
     TableResult result =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     EthnicityInfo ethnicityInfo = new EthnicityInfo().ethnicity("eth").count(10L);
     assertThat(cohortBuilderMapper.tableResultToEthnicityInfo(result))

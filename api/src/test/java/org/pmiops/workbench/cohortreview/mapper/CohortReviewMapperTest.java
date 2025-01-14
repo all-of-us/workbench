@@ -14,6 +14,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -94,7 +95,8 @@ public class CohortReviewMapperTest {
                     rankValue)));
 
     TableResult result =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     ParticipantChartData participantChartData =
         new ParticipantChartData()
@@ -202,7 +204,8 @@ public class CohortReviewMapperTest {
                     routeValue,
                     refRangeValue)));
     TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     ParticipantData participantData =
         new ParticipantData()
@@ -246,7 +249,8 @@ public class CohortReviewMapperTest {
             FieldValueList.of(Arrays.asList(domainValue, typeValue, vocabularyValue)));
 
     TableResult result =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        BigQueryUtils.newTableResult(
+            s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     Vocabulary vocabulary = new Vocabulary().domain("domain").type("type").vocabulary("vocabulary");
     assertThat(cohortReviewMapper.tableResultToVocabulary(result))

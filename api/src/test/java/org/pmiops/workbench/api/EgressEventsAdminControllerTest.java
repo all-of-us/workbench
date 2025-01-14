@@ -58,6 +58,7 @@ import org.pmiops.workbench.model.ListEgressEventsRequest;
 import org.pmiops.workbench.model.ListEgressEventsResponse;
 import org.pmiops.workbench.model.UpdateEgressEventRequest;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapperImpl;
@@ -522,6 +523,7 @@ public class EgressEventsAdminControllerTest {
                 })
             .collect(Collectors.toList());
 
-    return new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    return BigQueryUtils.newTableResult(
+        schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
   }
 }
