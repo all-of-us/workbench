@@ -98,9 +98,6 @@ configurations {
     __bigQueryTest__Compile.extendsFrom testImplementation
     __bigQueryTest__Runtime.extendsFrom testRuntime
 
-    __contractTest__Compile.extendsFrom testImplementation
-    __contractTest__Runtime.extendsFrom testRuntime
-
     __integration__Compile.extendsFrom testImplementation
     __integration__Runtime.extendsFrom testRuntime
 
@@ -327,18 +324,6 @@ sourceSets {
             compileClasspath += main.output + test.output + generated.output
             runtimeClasspath += main.output + test.output + generated.output
             srcDir file('src/bigquerytest/java')
-        }
-    }
-
-    // contract testing sources
-    __contractTest__ {
-        resources {
-            srcDir "contracttest/**"
-        }
-        java {
-            compileClasspath += main.output + generated.output
-            runtimeClasspath += main.output + generated.output
-            srcDir file('src/contracttest/java')
         }
     }
 
@@ -639,22 +624,9 @@ task integrationTest(type: Test) {
     // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
 
-task contractTest(type: Test) {
-    group = LifecycleBasePlugin.VERIFICATION_GROUP
-    description = 'Run contract test suite.'
-    testClassesDirs = sourceSets.__contractTest__.output.classesDirs
-    classpath = sourceSets.__contractTest__.runtimeClasspath
-    outputs.upToDateWhen { false }
-
-    useJUnitPlatform()
-
-    // Option to control size of stack trace:
-    // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
-}
-
 task bigQueryTest(type: Test) {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
-    description = 'Runs BigQery test suite.'
+    description = 'Runs BigQuery test suite.'
     testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs
     classpath = sourceSets.__bigQueryTest__.runtimeClasspath
 
@@ -964,8 +936,6 @@ task runGenomicExtraction(type: JavaExec) {
 }
 
 dependencies {
-    testImplementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
-    testImplementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
     modules {
     module("org.aspectj:aspectjrt") { replacedBy("org.aspectj:aspectjweaver") }
     module("org.springframework:spring-jcl") { replacedBy("commons-logging:commons-logging") }

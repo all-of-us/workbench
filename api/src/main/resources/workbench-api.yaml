@@ -11891,7 +11891,7 @@ components:
             ID in the MySQL database and BigQuery Audit Database for the workspace queried.
           format: int64
       description: |
-        Represents the results of a query into the audit dataset in BigQery without filtering or transformation.
+        Represents the results of a query into the audit dataset in BigQuery without filtering or transformation.
     UserAuditLogQueryResponse:
       required:
       - actions
