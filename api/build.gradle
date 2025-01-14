@@ -197,6 +197,8 @@ swaggerSources {
     tanagra swagger3JavaClient("tanagra.yaml", "tanagra")
 
     wsmanager swagger3JavaClient("ws-manager.yaml", "wsmanager")
+    vwbum swagger3JavaClient("vwb-user-manager.yaml", "vwb.user")
+    vwbexfil swagger3JavaClient("vwb-exfil-manager.yaml", "vwb.exfil")
 
     // Workbench needs a special configuration style, as we generate Spring server
     // bindings in this case.
@@ -943,9 +945,19 @@ task listDisks(type: JavaExec) {
     }
 }
 
+// ./project.rb send-email
 task sendEmail(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
     mainClass = "org.pmiops.workbench.tools.SendEmail"
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
+// ./project.rb run-extraction
+task runGenomicExtraction(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    mainClass = "org.pmiops.workbench.tools.RunGenomicExtractionWorkflow"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }

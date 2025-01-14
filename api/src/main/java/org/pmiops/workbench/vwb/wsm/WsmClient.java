@@ -1,4 +1,4 @@
-package org.pmiops.workbench.wsm;
+package org.pmiops.workbench.vwb.wsm;
 
 import jakarta.inject.Provider;
 import java.time.Duration;
@@ -10,7 +10,15 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.api.WorkspaceApi;
-import org.pmiops.workbench.wsmanager.model.*;
+import org.pmiops.workbench.wsmanager.model.CloneWorkspaceV2Request;
+import org.pmiops.workbench.wsmanager.model.CloneWorkspaceV2Result;
+import org.pmiops.workbench.wsmanager.model.GrantRoleRequestBody;
+import org.pmiops.workbench.wsmanager.model.IamRole;
+import org.pmiops.workbench.wsmanager.model.JobControl;
+import org.pmiops.workbench.wsmanager.model.Properties;
+import org.pmiops.workbench.wsmanager.model.Property;
+import org.pmiops.workbench.wsmanager.model.State;
+import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

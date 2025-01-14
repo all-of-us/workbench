@@ -1,0 +1,2531 @@
+openapi: 3.0.3
+info:
+  title: Verily Workbench User Manager
+  description: |
+    Terra User Manager
+
+  version: 0.0.1
+paths:
+  # Unauthenticated Paths
+  /status:
+    get:
+      security: [ ]
+      summary: Returns the operational status of the service
+      operationId: serviceStatus
+      tags: [ Public ]
+      responses:
+        '200':
+          description: Service can process requests
+        '500':
+          description: |
+            Service cannot process requests. That might be because dependent services are
+            unavailable, or because there is a problem with the service itself.
+
+  /version:
+    get:
+      security: [ ]
+      summary: Returns the deployed version of the service
+      operationId: serviceVersion
+      tags: [ Public ]
+      responses:
+        '200':
+          description: Version properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionProperties'
+
+  # User profile management
+  /api/profile:
+    parameters:
+      - $ref: '#/components/parameters/ProfilePath'
+      - $ref: '#/components/parameters/UserEmail'
+    get:
+      summary: |
+        Retrieve a profile property.
+
+        Leaving ProfilePath empty will return the entire profile object. Otherwise,
+        the path will be traversed and either return the found value or null.
+
+        If userEmail is set, requester must be SAM admin, and userEmail's profile is returned.
+        Otherwise, requester's profile is returned.
+      operationId: getUserProfile
+      tags: [ Profile ]
+      responses:
+        '200':
+          $ref: '#/components/responses/LookupResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      summary: |
+        Set a profile property.
+
+        ProfilePath must not be empty, as it is an error to attempt to overwrite the entire
+        profile object. On success, the value to set will be returned.
+
+        If userEmail is set, requester must be SAM admin, and userEmail's profile is modified.
+        Otherwise, requester's profile is modified.
+      operationId: setUserProfile
+      tags: [ Profile ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnyObject'
+      responses:
+        '200':
+          $ref: '#/components/responses/LookupResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  ## Admin endpoints
+  /api/admin/v1/users/{userEmail}:
+    parameters:
+      - $ref: '#/components/parameters/EmailAddressPath'
+    delete:
+      summary: Delete a user
+      operationId: deleteUser
+      tags: [ Admin ]
+      responses:
+        '204':
+          description: User successfully deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin/v1/users/{userEmail}/organization:
+    parameters:
+      - $ref: '#/components/parameters/EmailAddressPath'
+    post:
+      summary: Move a user from one organization to another
+      operationId: moveUser
+      tags: [ Admin ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveUserRequest'
+      responses:
+        '200':
+          description: User successfully moved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin/v1/environments:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/PodEnvironmentTypeQuery'
+        - $ref: '#/components/parameters/PageToken'
+        - $ref: '#/components/parameters/Limit'
+      summary: List environment data for all pods managed by the User Manager instance
+      description: |
+        If podEnvironmentType is specified, results are filtered to return only
+        pod environments of that type.  Otherwise all Environment Data for all
+        pods is returned.
+      operationId: listPodEnvironments
+      tags: [ Admin ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodEnvironmentList'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin/v1/organizations/{orgId}/pods/{podId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/PodId'
+    get:
+      summary: Retrieve a pod managed by the User Manager instance
+      description: |
+        Retrieve a pod description by org and pod Uxid. Intended to be called by workbench services.
+      operationId: getPodAsAdmin
+      tags: [ Admin ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodDescription'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin/v1/addrole:
+    post:
+      summary: Add a role to an existing resource
+      description: |
+        For a given resource type, add the role with the associated members to all instances
+        of the resource type that the caller has access to. This is used to migrate the
+        permission model of the User Manager resources. The inputs are all in terms of Sam
+        string names of roles and types.
+      operationId: addRole
+      tags: [ Admin ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminAddRoleRequest'
+      responses:
+        '204':
+          description: User successfully deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin/v1/cleanup-grants:
+    post:
+      summary: Report or cleanup orphan grants
+      operationId: cleanupGrants
+      tags: [ Admin ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCleanupGrantsRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AdminCleanupGrantsResponse'
+        '202':
+          $ref: '#/components/responses/AdminCleanupGrantsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin/v1/cleanup-grants/result/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/JobId'
+    get:
+      summary: |
+        Gets the result of an async request to cleanup grants
+      operationId: cleanupGrantsResult
+      tags: [ Admin ]
+      responses:
+        '200':
+          $ref: '#/components/responses/AdminCleanupGrantsResponse'
+        '202':
+          $ref: '#/components/responses/AdminCleanupGrantsResponse'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  ## Workbench
+  /api/workbenches/v1:
+    post:
+      summary: Bootstrap the workbench environment
+      description: |
+        This endpoint creates the configured workbench resource in Sam, if it does not
+        already exist. It creates the organization under that workbench using the
+        embedded organization create request. The listed admin emails are invited
+        to that organization. They are also added to the workbench admin candidates
+        group, so they can do access-on-demand to the ADMIN role and do any further
+        initialization.
+      operationId: createWorkbench
+      tags: [ Workbench ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkbenchCreateRequest'
+      responses:
+        '200':
+          description: Response to createWorkbench request is the created organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDescriptionV2'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/workbenches/v1/access:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/MemberQueryOptional'
+      summary: List users and groups and their roles on the workbench
+      description: |
+        If memberEmail is specified, then a single member is listed. If no memberEmail
+        is specified, then all members are listed.
+      operationId: listMemberWorkbenchRoles
+      tags: [ Workbench ]
+      responses:
+        '200':
+          description: Member list is successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkbenchMemberRoleList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/MemberQuery'
+        - $ref: '#/components/parameters/WorkbenchRoleQuery'
+      summary: Grant workbench candidate role to a user or group
+      description: |
+        Both MemberEmail and WorkbenchRole must be specified.
+        Only AOD_SUPPORT and AOD_ADMIN roles are allowed to be granted.
+      operationId: grantMemberWorkbenchRole
+      tags: [ Workbench ]
+      responses:
+        '204':
+          description: Role was granted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      parameters:
+        - $ref: '#/components/parameters/MemberQuery'
+        - $ref: '#/components/parameters/WorkbenchRoleQuery'
+      summary: Revoke workbench role from a user or group
+      description: |
+        Both MemberEmail and WorkbenchRole must be specified.
+        Only AOD_SUPPORT and AOD_ADMIN roles are allowed to be granted.
+      operationId: revokeMemberWorkbenchRole
+      tags: [ Workbench ]
+      responses:
+        '204':
+          description: Role was revoked successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/workbenches/v1/aod:
+    put:
+      summary: |
+        Requests access on demand for a particular role on the workbench
+      operationId: workbenchAccessOnDemand
+      tags: [ Workbench ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessOnDemandRequest'
+      responses:
+        '204':
+          description: Successful access
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  ## Organization
+  /api/organizations/v2:
+    post:
+      summary: Create a new organization
+      operationId: createOrganizationV2
+      tags: [ OrganizationV2 ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreateRequest'
+      responses:
+        '200':
+          description: Response to createOrganization request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDescriptionV2'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/PageToken'
+        - $ref: '#/components/parameters/Limit'
+      summary: List organizations where the caller has access
+      operationId: listOrganizationsV2
+      tags: [ OrganizationV2 ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDescriptionListV2'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+    get:
+      summary: Retrieve the description of one organization
+      operationId: getOrganizationV2
+      tags: [ OrganizationV2 ]
+      responses:
+        '200':
+          description: Response to getOrganization request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDescriptionV2'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Update mutable organization metadata
+      operationId: updateOrganizationV2
+      tags: [ OrganizationV2 ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUpdateRequestV2'
+      responses:
+        '200':
+          description: Response to getOrganization request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDescriptionV2'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/byUserFacingId/{orgUserFacingId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgUserFacingId'
+    get:
+      deprecated: true
+      summary: |
+        DEPRECATED - use /api/organizations/v2/{orgId} with the encoded UFID.
+        Retrieve the description of one organization with the user facing id
+      operationId: getOrganizationByUserFacingIdV2
+      tags: [ OrganizationV2 ]
+      responses:
+        '200':
+          description: Response to getOrganization request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDescriptionV2'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/byUserFacingId/{orgUserFacingId}/aod:
+    parameters:
+      - $ref: '#/components/parameters/OrgUserFacingId'
+    put:
+      deprecated: true
+      summary: Request organization access on demand by user facing id
+      operationId: organizationAccessOnDemandByUserFacingId
+      tags: [ OrganizationV2 ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessOnDemandRequest'
+      responses:
+        '204':
+          description: Successful access
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/byUserFacingId/{orgUserFacingId}/pod/{userFacingId}/aod:
+    parameters:
+      - $ref: '#/components/parameters/OrgUserFacingId'
+      - $ref: '#/components/parameters/UserFacingId'
+    put:
+      deprecated: true
+      summary: |
+        DEPRECATED - use /api/organizations/v2/{orgId}/pod/{podId}/aod with the
+        ids presented as encoded UFIDs.
+        Request pod access on demand by user facing id
+      operationId: podAccessOnDemandByUserFacingId
+      tags: [ Pod ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessOnDemandRequest'
+      responses:
+        '204':
+          description: Successful access
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/delete:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+    post:
+      summary: Delete an organization. Done as a POST since it requires a body which isn't allowed in a DELETE.
+      operationId: deleteOrganizationV2
+      tags: [ OrganizationV2 ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteOrganizationRequest'
+      responses:
+        '200':
+          description: Response to getOrganization request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/delete-result/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/JobId'
+    get:
+      summary: |
+        Gets the result of an async organization delete.
+      operationId: getDeleteOrganizationResultV2
+      tags: [ OrganizationV2 ]
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResultResponse'
+        '202':
+          $ref: '#/components/responses/JobResultResponse'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/aod:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+    put:
+      summary: |
+        Requests access on demand for a particular role
+      operationId: organizationAccessOnDemand
+      tags: [ OrganizationV2 ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessOnDemandRequest'
+      responses:
+        '204':
+          description: Successful access
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  # Groups
+  /api/organizations/v2/{orgId}/groups:
+    get:
+      summary: enumerate the groups in an organization
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/PageToken'
+        - $ref: '#/components/parameters/Limit'
+      operationId: listOrganizationGroups
+      tags: [ WorkbenchGroup ]
+      responses:
+        '200':
+          description: Successful respons
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupDescriptionList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+      summary: Create a workbench group
+      operationId: createGroup
+      tags: [ WorkbenchGroup ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '204':
+          description: Successful creation
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/groups/{groupName}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/GroupName'
+    delete:
+      summary: Delete the group
+      operationId: deleteGroup
+      tags: [ WorkbenchGroup ]
+      responses:
+        '204':
+          description: Successful deletion
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  # Pods
+  /api/organizations/v2/{orgId}/pods:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+    get:
+      summary: List the pods in an organization
+      operationId: listPods
+      tags: [ Pod ]
+      responses:
+        '200':
+          description: Response to listPods request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodDescriptionList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: Create a new Pod
+      operationId: createPod
+      tags: [ Pod ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodCreateRequest'
+      responses:
+        '200':
+          description: Response to createPod request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodDescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/{podId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/PodId'
+
+    get:
+      summary: Retrieve the pod Metadata
+      operationId: getPod
+      parameters:
+        - in: query
+          name: action
+          required: false
+          schema:
+            $ref: '#/components/schemas/PodAction'
+      tags: [ Pod ]
+      responses:
+        '200':
+          description: Response to getPod request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodDescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: update the Pod Metadata
+      operationId: updatePod
+      tags: [ Pod ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PodUpdateResponse'
+        '202':
+          $ref: '#/components/responses/PodUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/{podId}/update-result/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/PodId'
+      - $ref: '#/components/parameters/JobId'
+    get:
+      summary: |
+        Gets the result of an async Pod update.
+      operationId: getUpdatePodResult
+      tags: [ Pod ]
+      responses:
+        '200':
+          $ref: '#/components/responses/PodUpdateResponse'
+        '202':
+          $ref: '#/components/responses/PodUpdateResponse'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/byUserFacingId/{userFacingId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/UserFacingId'
+    get:
+      deprecated: true
+      summary: |
+        DEPRECATED - use /api/organizations/v2/{orgId}/pod/{podId} with the
+        ids presented as encoded UFIDs.
+        Retrieve the Pod Metadata by user facing id
+      operationId: getPodByUserFacingId
+      tags: [ Pod ]
+      responses:
+        '200':
+          description: Response to getPodByUserFacingId request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodDescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/{podId}/delete:
+    post:
+      summary: Delete a Pod resource
+      operationId: deletePod
+      tags: [ Pod ]
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/PodId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeletePodRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResultResponse'
+        '202':
+          $ref: '#/components/responses/JobResultResponse'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/{podId}/delete-result/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/PodId'
+      - $ref: '#/components/parameters/JobId'
+    get:
+      summary: |
+        Gets the result of an async Pod delete.
+      operationId: getDeletePodResult
+      tags: [ Pod ]
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResultResponse'
+        '202':
+          $ref: '#/components/responses/JobResultResponse'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/{podId}/aod:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/PodId'
+    put:
+      summary: |
+        Requests access on demand for a particular role on a pod
+      operationId: podAccessOnDemand
+      tags: [ Pod ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessOnDemandRequest'
+      responses:
+        '204':
+          description: Successful access
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  # Users
+  /api/organizations/v2/{orgId}/users:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+    post:
+      summary: Create a user in an organization
+      operationId: createUserV2
+      tags: [ UserV2 ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '200':
+          description: Response to createUser request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: List the members in an organization, including both users in UM
+        and users that do not but have roles on the organization
+        sam resource.
+      operationId: listOrganizationMembersV2
+      tags: [ OrganizationV2 ]
+      parameters:
+        - $ref: '#/components/parameters/PageToken'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: List of the members in the organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationMemberList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/users/{userEmail}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/EmailAddressPath'
+    get:
+      summary: Get a member user on an organization
+      description: |
+        Retrieve a member on the the pod.
+      operationId: getOrganizationMemberV2
+      tags: [ OrganizationV2 ]
+      responses:
+        '200':
+          description: Organization member. If the member does not have roles on the iam
+            resource, an empty list of roles is returned. If the member is not
+            in UM, then the userDescription is null.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationMember'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Set the user state
+      operationId: setUserStateV2
+      tags: [ UserV2 ]
+      parameters:
+        - $ref: '#/components/parameters/UserState'
+      responses:
+        '200':
+          description: Response to setUserState request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/{podId}/users:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/PodId'
+    get:
+      summary: List the members that have roles on a pod.
+      operationId: listPodMembers
+      tags: [ Pod ]
+      parameters:
+        - $ref: '#/components/parameters/PageToken'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: List of the members with roles on the pod
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodMemberList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/{podId}/users/{userEmail}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/PodId'
+      - $ref: '#/components/parameters/EmailAddressPath'
+    get:
+      summary: Get a member on a pod
+      description: |
+        Retrieve a member on the the pod.
+      operationId: getPodMember
+      tags: [ Pod ]
+      responses:
+        '200':
+          description: Pod member. If the member does not have roles on the iam
+            resource, an empty list of roles is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodMember'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/access:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/MemberQuery'
+        - $ref: '#/components/parameters/OrganizationRoleQuery'
+      summary: Grant Organization Role to a user or group
+      operationId: grantMemberOrganizationRoleV2
+      tags: [ OrganizationV2 ]
+      responses:
+        '204':
+          description: Role was granted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      parameters:
+        - $ref: '#/components/parameters/MemberQuery'
+        - $ref: '#/components/parameters/OrganizationRoleQuery'
+      summary: Revoke Organization Role from a user or group
+      operationId: revokeMemberOrganizationRoleV2
+      tags: [ OrganizationV2 ]
+      responses:
+        '204':
+          description: Role was revoked successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/pods/{podId}/access:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/PodId'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/MemberQuery'
+        - $ref: '#/components/parameters/PodRoleQuery'
+      summary: Grant Pod Role to a user or group
+      operationId: grantMemberPodRole
+      tags: [ Pod ]
+      responses:
+        '204':
+          description: Role was granted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      parameters:
+        - $ref: '#/components/parameters/MemberQuery'
+        - $ref: '#/components/parameters/PodRoleQuery'
+      summary: Revoke Pod Role from a user or group
+      operationId: revokeMemberPodRole
+      tags: [ Pod ]
+      responses:
+        '204':
+          description: User Pod role successfully revoked
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/users/self:
+    get:
+      summary: Get the user's own details
+      operationId: getSelfV2
+      tags: [ UserV2 ]
+      responses:
+        '200':
+          description: Response to getSelf request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SelfDescription'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      summary: User accepts terms of service
+      operationId: acceptTermsOfServiceV2
+      tags: [ UserV2 ]
+      parameters:
+        - $ref: '#/components/parameters/AcceptToS'
+      responses:
+        '204':
+          description: Acceptance recorded
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/users/validate-billing-account/{billingAccountId}:
+    parameters:
+      - $ref: '#/components/parameters/BillingAccountId'
+    get:
+      deprecated: true
+      summary: |
+        DEPRECATED - use /api/organizations/v2/{orgId}/validate-billing-account/{billingAccountId}
+        Validate user permission for a billingAcountId
+      operationId: validateUserBillingAccount
+      tags: [ UserV2 ]
+      responses:
+        '204':
+          description: User's billing account permission is valid
+        '403':
+          description: User's billing account permission is invalid
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/organizations/v2/{orgId}/validate-billing-account/{billingAccountId}:
+    parameters:
+      - $ref: '#/components/parameters/OrgId'
+      - $ref: '#/components/parameters/BillingAccountId'
+    get:
+      summary: Validate user permission for a billingAcountId
+      operationId: validateUserBillingAccountV2
+      tags: [ UserV2 ]
+      responses:
+        '204':
+          description: User's billing account permission is valid
+        '403':
+          description: User's billing account permission is invalid
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+
+  /api/organizations/v2/users/pods:
+    get:
+      summary: Retrieve the list of pods the calling user has access to
+      operationId: listUserPods
+      tags: [ Pod ]
+      responses:
+        '200':
+          description: List of pod descriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodDescriptionList'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/workspaces/v1/{workspaceId}/aod:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    put:
+      summary: |
+        Requests access on demand for the support role on a workspace
+      operationId: workspaceAccessOnDemand
+      tags: [ Workspace ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessOnDemandRequest'
+      responses:
+        '204':
+          description: Successful access
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/workspaces/v1/byUserFacingId/{userFacingId}/aod:
+    parameters:
+      - $ref: '#/components/parameters/UserFacingId'
+    put:
+      deprecated: true
+      summary: |
+        DEPRECATED - use /api/organizations/v2/{orgId}/aod with the
+        id presented as encoded UFID.
+        Requests access on demand for the support role on a workspace
+      operationId: workspaceAccessOnDemandByUserFacingId
+      tags: [ Workspace ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessOnDemandRequest'
+      responses:
+        '204':
+          description: Successful access
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/groups/v1:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/PageToken'
+        - $ref: '#/components/parameters/Limit'
+      summary: List all groups the user has a role on.
+      operationId: listAccessibleGroups
+      tags: [ WorkbenchGroup ]
+      responses:
+        '200':
+          description: List of pod descriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupAndRolesList'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/groups/v1/{groupName}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/GroupName'
+        - $ref: '#/components/parameters/OrgIdQuery'
+      summary: |
+        List the direct membership of a group. If the orgId is provided, we
+        find an org-scoped group. Otherwise, we find a global group.
+      operationId: listGroupMembership
+      tags : [ Workbench Group ]
+      responses:
+        '200':
+          description: List of the members with roles on the pod
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMemberList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/groups/v1/{groupName}/access:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/GroupName'
+        - $ref: '#/components/parameters/OrgIdQuery'
+      summary: |
+        List the direct membership of a group. If the orgId is provided, we
+        find an org-scoped group. Otherwise, we find a global group.
+      operationId: setGroupAccess
+      tags : [ Workbench Group ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAccessRequest'
+      responses:
+        '204':
+          description: Success
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    # Please keep alphabetized
+    AdminAddRoleRequest:
+      type: object
+      required: [ resoureType , role ]
+      properties:
+        resourceType:
+          type: string
+        role:
+          type: string
+        memberEmails:
+          type: array
+          items:
+            type: string
+        descendantPermissions:
+          type: array
+          items:
+            type: object
+            required: [ resourceType, role ]
+            properties:
+              resourceType:
+                type: string
+              role:
+                type: string
+
+    AdminCleanupGrantsReport:
+      type: object
+      required: [ orphans ]
+      properties:
+        orphans:
+          type: array
+          items:
+            type: object
+            required: [ resourceType, resourceId, role, email ]
+            properties:
+              resourceType:
+                description: The string name of the resource type
+                type: string
+              resourceId:
+                description: The string resource id
+                type: string
+              role:
+                description: The string name of the role
+                type: string
+              email:
+                description: Email of the grantee of the orphan grant
+                type: string
+
+    AdminCleanupGrantsRequest:
+      type: object
+      required: [ mode, jobControl ]
+      properties:
+        mode:
+          $ref: '#/components/schemas/CleanupMode'
+        jobControl:
+          $ref: '#/components/schemas/JobControl'
+
+    AdminCleanupGrantsResult:
+      type: object
+      required: [ jobReport ]
+      properties:
+        cleanupReport:
+          $ref: '#/components/schemas/AdminCleanupGrantsReport'
+        jobReport:
+          $ref: '#/components/schemas/JobReport'
+        errorReport:
+          $ref: '#/components/schemas/ErrorReport'
+
+    AcceptTosState:
+      type: string
+      enum: [ 'ACCEPT' ]
+
+    AccessOnDemandRequest:
+      type: object
+      description: Access on demand request; only SUPPORT and ADMIN are allowed
+      required: [ role ]
+      properties:
+        role:
+          $ref: '#/components/schemas/WorkbenchRole'
+        reason:
+          description: required reason for access demand
+          type: string
+
+    AnyObject:
+      type: object
+      required: [value]
+      properties:
+        value: {}
+
+    CleanupMode:
+      type: string
+      description: whether to report results or cleanup as well
+      enum: [ 'REPORT', 'CLEANUP' ]
+
+    CreateGroupRequest:
+      type: object
+      required: [ organizationId, groupName ]
+      description: |
+        Request body for creating a workbench group
+      properties:
+        groupName:
+          type: string
+        syncGroup:
+          type: boolean
+          default: true
+        expirationDays:
+          type: integer
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolePrincipals'
+
+    DeleteOrganizationRequest:
+      type: object
+      required: [ jobControl ]
+      description: |
+        Request body for asynchronously deleting an organization.
+      properties:
+        jobControl:
+          $ref: '#/components/schemas/JobControl'
+
+    DeletePodRequest:
+      type: object
+      required: [ jobControl ]
+      description: |
+        Request body for asynchronously deleting a pod.
+      properties:
+        jobControl:
+          $ref: '#/components/schemas/JobControl'
+
+    DeleteWorkbenchRequest:
+      type: object
+      required: [ jobControl ]
+      description: |
+        Request body for asynchronously deleting a workbench.
+      properties:
+        jobControl:
+          $ref: '#/components/schemas/JobControl'
+
+    EmailAddress:
+      type: string
+      description: The user's email address
+      format: email
+
+    ErrorReport:
+      type: object
+      required: [message, statusCode, causes]
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+        causes:
+          type: array
+          items:
+            type: string
+
+    ExpirationDays:
+      description: Specify the expiration time of a grant
+      type: integer
+
+    GroupAndRoles:
+      description: |
+        Group that a user has access to. OrgId is optional. If present, the group is scoped to the
+        organization. If absent, group is global and will eventually be migrated.
+      type: object
+      required: [ groupName, roles ]
+      properties:
+        orgId:
+          $ref: '#/components/schemas/OrgId'
+        groupName:
+          description: name of the group
+          type: string
+        roles:
+          description: roles the user has on the group
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRole'
+
+    GroupAndRolesList:
+      description: |
+        One page of the list of accessible groups. If pageToken is not present, no more pages
+        are available.
+      type: object
+      required: [ groupList ]
+      properties:
+        groupList:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupAndRoles'
+        pageToken:
+          type: string
+
+    GroupDescription:
+      description: description of one group
+      type: object
+      required: [ scope_label, group_name, internal_name, createdDate, createdBy, lastUpdatedDate, lastUpdatedBy ]
+      properties:
+        scopeLabel:
+          type: string
+        groupName:
+          type: string
+        internalName:
+          type: string
+        createdBy:
+          description: User email of creator
+          type: string
+        createdDate:
+          description: Timestamp of creation
+          type: string
+          format: date-time
+        lastUpdatedBy:
+          description: User email of last update
+          type: string
+        lastUpdatedDate:
+          description: Timestamp of last update
+          type: string
+          format: date-time
+
+    GroupDescriptionList:
+      type: object
+      properties:
+        groups:
+          description: List of groups
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupDescription'
+        pageToken:
+          type: string
+
+    GroupMember:
+      description: One member of a group
+      type: object
+      required: [ principal, roles ]
+      properties:
+        principal:
+          $ref: '#/components/schemas/Principal'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRole'
+
+    GroupMemberList:
+      description: List of group members
+      type: array
+      items:
+        $ref: '#/components/schemas/GroupMember'
+
+    GroupRole:
+      description: Enum of Group Roles.
+      type: string
+      enum:
+        - ADMIN
+        - MEMBER
+        - READER
+        - SUPPORT
+
+    GroupRolePrincipals:
+      type: object
+      required: [ roleName ]
+      description: |
+        List of principals that have a role
+      properties:
+        role:
+          $ref: '#/components/schemas/GroupRole'
+        principals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Principal'
+
+    JobControl:
+      type: object
+      required: [ id ]
+      properties:
+        id:
+          description: >-
+            Unique identifier for the job. Best practice is for job identifier to be a UUID,
+            a ShortUUID, or other globally unique identifier.
+          type: string
+
+    JobReport:
+      type: object
+      required: [ id, status, statusCode, resultURL ]
+      properties:
+        id:
+          description: caller-provided unique identifier for the job
+          type: string
+        description:
+          description: caller-provided description of the job
+          type: string
+        status:
+          description: status of the job
+          type: string
+          enum: [ 'RUNNING', 'SUCCEEDED', 'FAILED' ]
+        statusCode:
+          description: HTTP code providing status of the job.
+          type: integer
+        submitted:
+          description: timestamp when the job was submitted; in ISO-8601 format
+          type: string
+        completed:
+          description: >-
+            timestamp when the job completed - in ISO-8601 format. Present if
+            status is SUCCEEDED or FAILED.
+          type: string
+        resultURL:
+          description: >-
+            URL where the result of the job can be retrieved. Equivalent to a
+            Location header in HTTP.
+          type: string
+
+    JobResult:
+      type: object
+      description: |
+        The result of an async call that triggers a stairway job.
+      required: [ jobReport ]
+      properties:
+        jobReport:
+          $ref: '#/components/schemas/JobReport'
+        errorReport:
+          $ref: '#/components/schemas/ErrorReport'
+
+    LookupPath:
+      type: string
+      description: Paths are specified in dot notation. For example, "user.name.first"
+
+    MemberEmail:
+      type: string
+      format: email
+      example: "?member=user@example.com"
+
+    MoveUserRequest:
+      type: object
+      required: [ sourceOrgUfid, targetOrgUfid ]
+      properties:
+        sourceOrgUfid:
+          type: string
+          description: The user facing id of the organization to move the user from
+        targetOrgUfid:
+          type: string
+          description: The user facing id of the organization to move the user to
+
+    OrgId:
+      type: string
+      description: |
+        The globally unique organization identifier; either UUID or UFID.
+        If it is a UFID, it must be prefixed with a tilde (~).
+
+    OrganizationCreateRequest:
+      type: object
+      required: [ userFacingId, displayName ]
+      properties:
+        userFacingId:
+          $ref: '#/components/schemas/UserFacingId'
+        description:
+          description: A description of the organization
+          type: string
+        displayName:
+          description: A display name for the organization
+          type: string
+        tosRequired:
+          type: boolean
+          description: ToS required for this organization
+        groupName:
+          type: string
+          description: A name for the organization group.
+
+    OrganizationDescriptionV2:
+      type: object
+      required: [ organizationId, userFacingId, displayName, tosRequired, highestRole, createdBy, createdDate, lastUpdatedBy, lastUpdatedDate ]
+      properties:
+        organizationId:
+          type: string
+          format: uuid
+        userFacingId:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        tosRequired:
+          type: boolean
+        highestRole:
+          $ref: '#/components/schemas/OrganizationRole'
+        groupName:
+          type: string
+        createdBy:
+          description: User email of creator
+          type: string
+        createdDate:
+          description: Timestamp of creation
+          type: string
+          format: date-time
+        lastUpdatedBy:
+          description: User email of last update
+          type: string
+        lastUpdatedDate:
+          description: Timestamp of last update
+          type: string
+          format: date-time
+
+    OrganizationDescriptionListV2:
+      type: object
+      properties:
+        totalResults:
+          type: integer
+        pageToken:
+          type: string
+        results:
+          description: List of organizations
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationDescriptionV2'
+
+    OrganizationMember:
+      type: object
+      required: [ memberEmail ]
+      properties:
+        memberEmail:
+          $ref: '#/components/schemas/MemberEmail'
+        memberRoles:
+          $ref: '#/components/schemas/OrganizationRoleList'
+        # null if the member has a role on the crg iam resource but is not a user in UM.
+        userDescription:
+          $ref: '#/components/schemas/UserDescription'
+
+    OrganizationMemberList:
+      type: object
+      properties:
+        totalResults:
+          type: integer
+        pageToken:
+          type: string
+        results:
+          description: List of members in the organization
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationMember'
+
+    OrganizationRole:
+      type: string
+      description: Enum of User Roles.
+      enum:
+        - ADMIN
+        - GROUP_CREATOR
+        - POD_MANAGER
+        - SUPERADMIN
+        - SUPPORT
+        - USER
+
+    OrganizationRoleList:
+      type: array
+      items:
+        $ref: '#/components/schemas/OrganizationRole'
+
+    OrganizationUpdateRequestV2:
+      type: object
+      properties:
+        userFacingId:
+          $ref: '#/components/schemas/UserFacingId'
+        description:
+          description: |
+            If present, update the description of the organization. Otherwise, make no change
+          type: string
+        displayName:
+          description: |
+            If present, update the display name of the organization. Otherwise, make no change
+          type: string
+
+    PodAction:
+      type: string
+      enum:
+        - CREATE_WORKSPACE
+        - READ_METADATA
+
+    PodCreateRequest:
+      type: object
+      required: [ userFacingId, groupName ]
+      properties:
+        userFacingId:
+          $ref: '#/components/schemas/UserFacingId'
+        description:
+          description: A description of the Pod
+          type: string
+        environment:
+          $ref: '#/components/schemas/PodEnvironment'
+        groupName:
+          type: string
+          description: A name for the pod group.
+
+    PodDescription:
+      type: object
+      required: [ podId, userFacingId, orgId, environmentData, createdBy, createdDate, lastUpdatedBy, lastUpdatedDate ]
+      properties:
+        podId:
+          type: string
+          format: uuid
+        userFacingId:
+          type: string
+        description:
+          type: string
+        orgId:
+          type: string
+          format: uuid
+        orgUserFacingId:
+          type: string
+        environmentData:
+          $ref: '#/components/schemas/PodEnvironment'
+        groupName:
+          type: string
+        createdBy:
+          description: User email of creator
+          type: string
+        createdDate:
+          description: Timestamp of creation
+          type: string
+          format: date-time
+        lastUpdatedBy:
+          description: User email of last update
+          type: string
+        lastUpdatedDate:
+          description: Timestamp of last update
+          type: string
+          format: date-time
+
+    PodDescriptionList:
+      type: object
+      properties:
+        results:
+          description: List of Pods
+          type: array
+          items:
+            $ref: '#/components/schemas/PodDescription'
+
+    PodEnvironment:
+      type: object
+      description: |
+        If the environment type is AWS, then environmentDataAws must be present. If the environment type
+        is GCP, then environmentDataGcp must be present.
+      required: [ environmentType ]
+      properties:
+        environmentType:
+          $ref: '#/components/schemas/PodEnvironmentType'
+        environmentDataAws:
+          $ref: '#/components/schemas/PodEnvironmentDataAws'
+        environmentDataGcp:
+          $ref: '#/components/schemas/PodEnvironmentDataGcp'
+
+    PodEnvironmentDataAws:
+      type: object
+      required: [ discoveryRoleArn, discoveryBucketName, discoveryBucketRegion, authenticationGoogleJwtAudience ]
+      properties:
+        discoveryRoleArn:
+          type: string
+        discoveryBucketName:
+          type: string
+        discoveryBucketRegion:
+          type: string
+        authenticationGoogleJwtAudience:
+          type: string
+        containerRepositories:
+          type: array
+          items:
+            type: string
+
+    PodEnvironmentDataGcp:
+      type: object
+      required: [ billingAccountId ]
+      properties:
+        # biller is ignored by UM and is not populated
+        biller:
+          deprecated: true
+          type: string
+        billingAccountId:
+          type: string
+
+    PodEnvironmentList:
+      type: object
+      properties:
+        totalResults:
+          type: integer
+        pageToken:
+          type: string
+        results:
+          description: List of pod environment descriptions
+          type: array
+          items:
+            $ref: '#/components/schemas/PodEnvironment'
+
+    PodEnvironmentType:
+      type: string
+      description: Enum of environment types.
+      enum:
+        - GCP
+        - AWS
+
+    PodMember:
+      type: object
+      required: [ memberEmail, memberRoles ]
+      properties:
+        memberEmail:
+          $ref: '#/components/schemas/MemberEmail'
+        memberRoles:
+          $ref: '#/components/schemas/PodRoleList'
+
+    PodMemberList:
+      type: object
+      properties:
+        totalResults:
+          type: integer
+        pageToken:
+          type: string
+        results:
+          description: List of members in the pod
+          type: array
+          items:
+            $ref: '#/components/schemas/PodMember'
+
+    PodRole:
+      type: string
+      description: Enum of pod roles.
+      enum:
+        - ADMIN
+        - USER
+        - SUPPORT
+
+    PodRoleList:
+      type: array
+      items:
+        $ref: '#/components/schemas/PodRole'
+
+    PodUpdateRequest:
+      type: object
+      required: [ jobControl ]
+      properties:
+        userFacingId:
+          $ref: '#/components/schemas/UserFacingId'
+        description:
+          description: |
+            If present, update the description of the pod. Otherwise, make no change
+          type: string
+        environment:
+          $ref: '#/components/schemas/PodEnvironment'
+        jobControl:
+          $ref: '#/components/schemas/JobControl'
+
+    PodUpdateResult:
+      type: object
+      required: [ jobReport ]
+      properties:
+        podDescription:
+          $ref: '#/components/schemas/PodDescription'
+        jobReport:
+          $ref: '#/components/schemas/JobReport'
+        errorReport:
+          $ref: '#/components/schemas/ErrorReport'
+
+    Principal:
+      type: object
+      description: |
+        A user principal or a group principal. One or the other is required.
+      properties:
+        userPrincipal:
+          $ref: '#/components/schemas/PrincipalUser'
+        groupPrincipal:
+          $ref: '#/components/schemas/PrincipalWorkbenchGroup'
+        globalGroupPrincipal:
+          $ref: '#/components/schemas/PrincipalGlobalGroup'
+
+    PrincipalWorkbenchGroup:
+      type: object
+      required: [ organizationId, groupName ]
+      description: |
+        Description of a workbench group that has a role on a resource
+      properties:
+        organizationId:
+          type: string
+          format: uuid
+        groupName:
+          type: string
+
+    PrincipalGlobalGroup:
+      deprecated: true
+      type: object
+      required: [ groupName ]
+      properties:
+        groupName:
+          type: string
+
+    PrincipalUser:
+      type: object
+      required: [ email ]
+      description: |
+        Description of a user or service account that has a role on a resource
+      properties:
+        email:
+          type: string
+
+    SelfDescription:
+      type: object
+      description: The user's own details. Minimal version of UserDescription.
+      required: [ userId, organizationId, orgUserFacingId, userEmail, userProxyGroupEmail, activeState, tosState ]
+      properties:
+        userId:
+          description: The user's unique identifier. Should equal the Sam Subject ID.
+          type: string
+        organizationId:
+          description: The organization the user belongs to.
+          type: string
+          format: uuid
+        orgUserFacingId:
+          type: string
+        userEmail:
+          type: string
+        userProxyGroupEmail:
+          type: string
+        activeState:
+          $ref: "#/components/schemas/UserActiveState"
+        tosState:
+          $ref: "#/components/schemas/UserTosState"
+
+    SetAccessOperation:
+      type: string
+      enum: [ 'GRANT', 'REVOKE' ]
+
+    SetAccessRequest:
+      description: |
+        Request an access operation: grant/revoke of a role on a group
+        The expiration is only used for GRANT of a user principal. Otherwise,
+        it is ignored. If not specified, it defaults to the group setting.
+      type: object
+      required: [ principal, operation, role ]
+      properties:
+        principal:
+          $ref: '#/components/schemas/Principal'
+        operation:
+          $ref: '#/components/schemas/SetAccessOperation'
+        role:
+          $ref: '#/components/schemas/GroupRole'
+        expiration:
+          $ref: '#/components/schemas/ExpirationDays'
+
+    UserActiveState:
+      type: string
+      description: Enum of User Active States.
+      enum:
+        - INVITED
+        - DECLINED
+        - ENABLED
+        - DISABLED
+        - ARCHIVED
+
+    UserCreateRequest:
+      type: object
+      description: |
+        Create user will automatically grant Org User role.
+      required: [ email ]
+      properties:
+        email:
+          description: The user's email address
+          type: string
+          format: email
+
+    UserDescription:
+      type: object
+      required: [ userId, email, organizationId, orgUserFacingId, activeState, tosState, createdBy, createdDate, lastUpdatedBy, lastUpdatedDate ]
+      properties:
+        userId:
+          description: The user's unique identifier. Should equal the Sam Subject ID.
+          type: string
+        email:
+          description: The user's email
+          type: string
+        organizationId:
+          type: string
+          format: uuid
+        orgUserFacingId:
+          type: string
+        activeState:
+          $ref: "#/components/schemas/UserActiveState"
+        tosState:
+          $ref: "#/components/schemas/UserTosState"
+        createdBy:
+          description: User email of creator
+          type: string
+        createdDate:
+          description: Timestamp of creation
+          type: string
+          format: date-time
+        lastUpdatedBy:
+          description: User email of last update
+          type: string
+        lastUpdatedDate:
+          description: Timestamp of last update
+          type: string
+          format: date-time
+
+    UserFacingId:
+      type: string
+      pattern: '^[a-z0-9][-_a-z0-9]{2,62}$'
+      description: |
+        Human-settable, mutable id. ID must have 3-63 characters, contain
+        lowercase letters, numbers, dashes, or underscores, and start with
+        lowercase letter or number.
+      example: "my-user-facing-id"
+
+    UserTosState:
+      type: string
+      description: Enum of User TOS States.
+      enum:
+        - TOS_REQUIRED
+        - TOS_OK
+
+    VersionProperties:
+      type: object
+      required: [ gitTag, gitHash, github, build ]
+      properties:
+        gitTag:
+          type: string
+          description: Git tag of currently deployed app.
+        gitHash:
+          type: string
+          description: Git hash of currently deployed app.
+        github:
+          type: string
+          description: Github link to currently deployed commit.
+        build:
+          type: string
+          description: Version of the currently deployed app declared in build.gradle. Client and server versions are linked.
+
+    WorkbenchCreateRequest:
+      type: object
+      properties:
+        organizationCreateRequest:
+          $ref: '#/components/schemas/OrganizationCreateRequest'
+        workbenchAdminEmails:
+          description: list of emails of users to be in the org and workbench admins
+          type: array
+          items:
+            type: string
+
+    WorkbenchMemberRole:
+      type: object
+      properties:
+        memberEmail:
+          $ref: '#/components/schemas/MemberEmail'
+        memberRoles:
+          $ref: '#/components/schemas/WorkbenchRoleList'
+
+    WorkbenchMemberRoleList:
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkbenchMemberRole'
+
+    WorkbenchRole:
+      type: string
+      description: Enum of Workbench Roles.
+      enum:
+        - MANAGER
+        - SUPERADMIN
+        - ADMIN
+        - SUPPORT
+        - AOD_SUPPORT
+        - AOD_ADMIN
+
+    WorkbenchRoleList:
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkbenchRole'
+
+  parameters:
+    AcceptToS:
+      name: state
+      in: query
+      description: The ToS acceptance state
+      required: true
+      schema:
+        $ref: '#/components/schemas/AcceptTosState'
+
+    BillingAccountId:
+      name: billingAccountId
+      in: path
+      required: true
+      description: GCP BillingAccountId
+      schema:
+        type: string
+        example: "123456-123456-123456"
+
+    EmailAddressPath:
+      name: userEmail
+      in: path
+      description: The email address of a user, group, or SA
+      required: true
+      schema:
+        type: string
+        format: email
+        example: "user@example.com"
+
+    GroupName:
+      name: groupName
+      in: path
+      description: |
+        The name of a group, unique within the organization.
+      required: true
+      schema:
+        type: string
+
+    JobId:
+      name: jobId
+      in: path
+      description: The globally unique job identifier
+      required: true
+      schema:
+        type: string
+
+    Limit:
+      name: limit
+      in: query
+      description: The maximum number of list items to return. Default 10
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 10
+
+    MemberQuery:
+      name: member
+      in: query
+      description: The email address of a user, group, or SA
+      required: true
+      schema:
+        $ref: '#/components/schemas/MemberEmail'
+
+    MemberQueryOptional:
+      name: member
+      in: query
+      description: Optional email address of a user, group, or SA
+      required: false
+      schema:
+        $ref: '#/components/schemas/MemberEmail'
+
+    PageToken:
+      name: pageToken
+      in: query
+      description: A previously returned page token describing where to resume a list
+      required: false
+      schema:
+        type: string
+        example: "MA=="
+
+    PodEnvironmentTypeQuery:
+      name: environmentType
+      in: query
+      description: Environment type to filter on
+      schema:
+        $ref: '#/components/schemas/PodEnvironmentType'
+
+    PodId:
+      name: podId
+      in: path
+      description: |
+        The unique pod identifier; either UUID or UFID.
+        If it is a UFID, it must be prefixed with a tilde (~).
+      required: true
+      schema:
+        type: string
+
+    PodRoleQuery:
+      name: role
+      in: query
+      description: Enum of User Roles.
+      required: true
+      schema:
+        $ref: '#/components/schemas/PodRole'
+
+    ProfilePath:
+      name: path
+      in: query
+      description: Lookup path of a user profile property
+      explode: false
+      schema:
+        $ref: '#/components/schemas/LookupPath'
+
+    OrganizationRoleQuery:
+      name: role
+      in: query
+      description: The member's role in an organization
+      required: true
+      schema:
+        $ref: '#/components/schemas/OrganizationRole'
+
+    OrgId:
+      name: orgId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/OrgId'
+
+    OrgIdQuery:
+      name: orgId
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/OrgId'
+
+    OrgUserFacingId:
+      name: orgUserFacingId
+      in: path
+      description: |
+        Human-settable, mutable id. ID must have 3-63 characters, contain
+        lowercase letters, numbers, dashes, or underscores, and start with
+        lowercase letter or number.
+      required: true
+      schema:
+        type: string
+        example: "my-org-id"
+
+    UserEmail:
+      name: userEmail
+      in: query
+      required: false
+      description: Target a specific user by their email address.
+      schema:
+        type: string
+
+    UserFacingId:
+      name: userFacingId
+      in: path
+      description: |
+        Human-settable, mutable id. ID must have 3-63 characters, contain
+        lowercase letters, numbers, dashes, or underscores, and start with
+        lowercase letter or number.
+      required: true
+      schema:
+        type: string
+
+    UserId:
+      name: userId
+      in: path
+      description: The globally unique user identifier
+      required: true
+      schema:
+        type: string
+
+    UserState:
+      name: state
+      in: query
+      description: The state to set the user to
+      required: true
+      schema:
+        $ref: '#/components/schemas/UserActiveState'
+
+    WorkbenchRoleQuery:
+      name: role
+      in: query
+      description: Role to request
+      required: true
+      schema:
+        $ref: '#/components/schemas/WorkbenchRole'
+
+    WorkspaceId:
+      name: workspaceId
+      in: path
+      description: |
+        The globally unique workspace identifier; either UUID or UFID.
+        If it is a UFID, it must be prefixed with a tilde (~).
+      required: true
+      schema:
+        type: string
+
+  responses:
+    # Keep alphabetized please
+    AdminCleanupGrantsResponse:
+      description: List of cleaned up grants
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminCleanupGrantsResult'
+
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+    Conflict:
+      description: Request conflicts with current state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+    JobResultResponse:
+      description: Result of a job (failed or succeeded)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JobResult'
+
+    LookupResult:
+      description: Value of requested property
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AnyObject'
+
+    NotFound:
+      description: Not found (or unauthorized)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+    PermissionDenied:
+      description: Permission denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+    PodUpdateResponse:
+      description: Result of a pod update request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PodUpdateResult'
+
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+
+  securitySchemes:
+    authorization:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://accounts.google.com/o/oauth2/auth
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+security:
+  - authorization: [ openid, email, profile ]
+  - bearerAuth: [ ]
+

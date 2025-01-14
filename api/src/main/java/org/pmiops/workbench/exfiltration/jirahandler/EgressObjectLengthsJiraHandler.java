@@ -20,7 +20,7 @@ import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.model.BucketAuditEntry;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +31,14 @@ public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
       Logger.getLogger(EgressObjectLengthsJiraHandler.class.getName());
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final EgressEventMapper egressEventMapper;
+  private final SumologicEgressEventMapper sumologicEgressEventMapper;
 
   @Autowired
   public EgressObjectLengthsJiraHandler(
-      Provider<WorkbenchConfig> workbenchConfigProvider, EgressEventMapper egressEventMapper) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      SumologicEgressEventMapper sumologicEgressEventMapper) {
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.egressEventMapper = egressEventMapper;
+    this.sumologicEgressEventMapper = sumologicEgressEventMapper;
   }
 
   @Override
@@ -89,7 +90,7 @@ public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
   private Stream<AtlassianContent> jiraEventDescriptionShort(
       DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbWorkspace> workspace = Optional.ofNullable(event.getWorkspace());
-    BucketAuditEntry bucketAuditEntry = egressEventMapper.toBucketAuditEntry(event);
+    BucketAuditEntry bucketAuditEntry = sumologicEgressEventMapper.toBucketAuditEntry(event);
     return Stream.of(
         JiraContent.text(String.format("Egress event details (as RW admin): ", action)),
         JiraContent.link(

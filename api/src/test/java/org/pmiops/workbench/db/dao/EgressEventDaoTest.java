@@ -45,6 +45,7 @@ public class EgressEventDaoTest {
     assertThat(foundEvent.getVwbWorkspaceId()).isEqualTo("testWorkspaceId");
     assertThat(foundEvent.getVwbVmName()).isEqualTo("testVmName");
     assertThat(foundEvent.getGcpProjectId()).isEqualTo("test-project");
+    assertThat(foundEvent.getTimeWindowStart()).isEqualTo(CURRENT_TIMESTAMP);
 
     // Update
     foundEvent.setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
@@ -86,7 +87,7 @@ public class EgressEventDaoTest {
     event.setLastModifiedTime(CURRENT_TIMESTAMP);
     event.setVwbVmName("testVmName");
     event.setGcpProjectId("test-project");
-    ;
+    event.setTimeWindowStart(CURRENT_TIMESTAMP);
     return event;
   }
 }

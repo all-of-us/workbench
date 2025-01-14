@@ -37,6 +37,7 @@ public class DbEgressEvent {
   private Long egressWindowSeconds;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
+  private Timestamp timeWindowStart;
   private DbEgressEventStatus status;
   private String sumologicEvent;
 
@@ -101,6 +102,16 @@ public class DbEgressEvent {
 
   public DbEgressEvent setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+    return this;
+  }
+
+  @Column(name = "time_window_start", nullable = true)
+  public Timestamp getTimeWindowStart() {
+    return timeWindowStart;
+  }
+
+  public DbEgressEvent setTimeWindowStart(Timestamp timeWindowStart) {
+    this.timeWindowStart = timeWindowStart;
     return this;
   }
 

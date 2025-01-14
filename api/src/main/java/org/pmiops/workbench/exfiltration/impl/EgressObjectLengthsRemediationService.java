@@ -18,7 +18,7 @@ import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 @Service(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
 public class EgressObjectLengthsRemediationService extends EgressRemediationService {
 
-  private final EgressEventMapper egressEventMapper;
+  private final SumologicEgressEventMapper sumologicEgressEventMapper;
   private final EgressJiraHandler egressJiraHandler;
   private final MailService mailService;
 
@@ -38,7 +38,7 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
       LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
-      EgressEventMapper egressEventMapper,
+      SumologicEgressEventMapper sumologicEgressEventMapper,
       @Qualifier(ExfiltrationUtils.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER)
           EgressJiraHandler egressJiraHandler,
       MailService mailService) {
@@ -49,7 +49,7 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
         leonardoNotebooksClient,
         egressEventAuditor,
         egressEventDao);
-    this.egressEventMapper = egressEventMapper;
+    this.sumologicEgressEventMapper = sumologicEgressEventMapper;
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
   }
@@ -59,7 +59,8 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
     disableUser(user);
     // null for Jupyter
-    String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    String gkeServiceName =
+        sumologicEgressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
     mailService.sendEgressRemediationEmail(user, action, gkeServiceName);
   }
 

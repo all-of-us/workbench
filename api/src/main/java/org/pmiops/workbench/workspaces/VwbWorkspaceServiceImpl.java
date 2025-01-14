@@ -18,7 +18,7 @@ import org.pmiops.workbench.tanagra.model.FeatureSet;
 import org.pmiops.workbench.tanagra.model.FeatureSetList;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.wsm.WsmClient;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;

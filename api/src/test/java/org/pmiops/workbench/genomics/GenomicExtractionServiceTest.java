@@ -66,6 +66,7 @@ import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.model.GenomicExtractionJob;
+import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -459,7 +460,8 @@ public class GenomicExtractionServiceTest {
   public void submitExtractionJob() throws ApiException {
     when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
         .thenReturn(List.of("1", "2", "3"));
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
+    TanagraGenomicDataRequest tanagraRequest = null;
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, tanagraRequest);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -488,7 +490,8 @@ public class GenomicExtractionServiceTest {
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
     when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any())).thenReturn(List.of("1"));
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
+    TanagraGenomicDataRequest tanagraRequest = null;
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, tanagraRequest);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -508,7 +511,8 @@ public class GenomicExtractionServiceTest {
         LongStream.range(1, 376).boxed().map(Object::toString).toList();
     when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
         .thenReturn(largePersonIdList);
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
+    TanagraGenomicDataRequest tanagraRequest = null;
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, tanagraRequest);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -534,7 +538,8 @@ public class GenomicExtractionServiceTest {
                 .setNeedsV8GenomicExtractionWorkflow(true));
     targetWorkspace = workspaceDao.save(targetWorkspace.setCdrVersion(cdrV8));
 
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null);
+    TanagraGenomicDataRequest tanagraRequest = null;
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, tanagraRequest);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -552,9 +557,12 @@ public class GenomicExtractionServiceTest {
     when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
         .thenReturn(Collections.emptyList());
 
+    TanagraGenomicDataRequest tanagraRequest = null;
     assertThrows(
         FailedPreconditionException.class,
-        () -> genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null));
+        () ->
+            genomicExtractionService.submitGenomicExtractionJob(
+                targetWorkspace, dataset, tanagraRequest));
   }
 
   @Test
@@ -564,9 +572,12 @@ public class GenomicExtractionServiceTest {
     when(mockGenomicDatasetService.getPersonIdsWithWholeGenome(any()))
         .thenReturn(largePersonIdList);
 
+    TanagraGenomicDataRequest tanagraRequest = null;
     assertThrows(
         FailedPreconditionException.class,
-        () -> genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset, null));
+        () ->
+            genomicExtractionService.submitGenomicExtractionJob(
+                targetWorkspace, dataset, tanagraRequest));
   }
 
   @Test

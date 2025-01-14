@@ -1,4 +1,4 @@
-package org.pmiops.workbench.wsm;
+package org.pmiops.workbench.vwb.wsm;
 
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
