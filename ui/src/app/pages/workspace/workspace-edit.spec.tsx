@@ -334,7 +334,6 @@ describe(WorkspaceEdit.name, () => {
     const saveButton = screen.getByRole('button', { name: 'Update Workspace' });
 
     await user.hover(saveButton);
-    screen.logTestingPlaygroundURL();
 
     await waitFor(() => {
       expectButtonElementEnabled(saveButton);
