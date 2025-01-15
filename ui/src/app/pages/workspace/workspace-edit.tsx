@@ -2275,7 +2275,10 @@ export const WorkspaceEdit = fp.flow(
                   <div style={{ marginLeft: '1.35rem' }}>
                     {Array.from(aianResearchTypeMap.keys()).map(
                       (aianResearchTypeOption) => (
-                        <FlexRow style={{ paddingBottom: '0.9rem' }}>
+                        <FlexRow
+                          key={aianResearchTypeOption}
+                          style={{ paddingBottom: '0.9rem' }}
+                        >
                           <RadioButton
                             id={`Option-${aianResearchTypeOption}`}
                             name={`Option-${aianResearchTypeOption}`}
