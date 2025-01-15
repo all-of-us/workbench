@@ -2518,8 +2518,13 @@ export const WorkspaceEdit = fp.flow(
                         )}
                         {errors.aianResearchDetails && (
                           <li>
-                            You must provide details about your study design
-                            (Question 6.2)
+                            {' '}
+                            Answer for{' '}
+                            <i>
+                              Please explain your response by sharing specific
+                              details about your study design. (Question 6.2)
+                            </i>{' '}
+                            {errors.aianResearchDetails}
                           </li>
                         )}
                         {errors.reviewRequested && (
