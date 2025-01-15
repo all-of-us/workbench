@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
-import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
@@ -404,11 +403,11 @@ public class ProfileService {
    * subfields. For example, a pathPrefix of 'address' will match a field change for both 'address'
    * and for 'address.zipCode'.
    */
-  private List<Change> getChangesWithPrefix(final Diff diff, final String pathPrefix) {
+  private List<Change> getChangesWithPrefix(final @Nonnull Diff diff, final String pathPrefix) {
     return diff.getChanges(
         change ->
-            change instanceof PropertyChange
-                && ((PropertyChange) change).getPropertyNameWithPath().startsWith(pathPrefix));
+            change instanceof PropertyChange propertyChange
+                && propertyChange.getPropertyNameWithPath().startsWith(pathPrefix));
   }
 
   /**
@@ -418,27 +417,8 @@ public class ProfileService {
    * @param field which field to check
    * @return true if there are difference between the Profiles
    */
-  private boolean fieldChanged(Diff diff, String field) {
-    return getChangesWithPrefix(diff, field).size() > 0;
-  }
-
-  /**
-   * Is this a new Profile?
-   *
-   * @param diff a Diff between two profiles
-   * @return true if the Profile is new
-   */
-  private boolean isNewProfile(Diff diff) {
-
-    return diff.getChanges(
-                change ->
-                    change instanceof NewObject
-                        && change
-                            .getAffectedGlobalId()
-                            .getTypeName()
-                            .equals(Profile.class.getCanonicalName()))
-            .size()
-        > 0;
+  private boolean fieldChanged(@Nonnull Diff diff, String field) {
+    return !getChangesWithPrefix(diff, field).isEmpty();
   }
 
   /**
@@ -457,31 +437,29 @@ public class ProfileService {
    */
   @VisibleForTesting
   public void validateProfile(@Nonnull Profile updatedProfile, @Nullable Profile previousProfile) {
-    final Diff diff = javers.compare(previousProfile, updatedProfile);
+    boolean isNewProfile = previousProfile == null;
+    final Diff diff = isNewProfile ? null : javers.compare(previousProfile, updatedProfile);
 
-    validateProfileForCorrectness(diff, updatedProfile);
+    validateProfileForCorrectness(isNewProfile, diff, updatedProfile);
 
-    if (userService.hasAuthority(userProvider.get().getUserId(), Authority.ACCESS_CONTROL_ADMIN)) {
-      validateChangesAllowedByAdmin(diff);
-    } else {
-      validateChangesAllowedByUser(diff);
+    if (!isNewProfile) {
+      if (userService.hasAuthority(
+          userProvider.get().getUserId(), Authority.ACCESS_CONTROL_ADMIN)) {
+        validateChangesAllowedByAdmin(diff);
+      } else {
+        validateChangesAllowedByUser(diff);
+      }
     }
   }
 
   private void validateProfileForCorrectness(
-      @Nullable Profile previousProfile, @Nonnull Profile profile) throws BadRequestException {
-
-    final Diff diff = javers.compare(previousProfile, profile);
-    validateProfileForCorrectness(diff, profile);
-  }
-
-  private void validateProfileForCorrectness(Diff diff, @Nonnull Profile profile)
+      boolean isNewProfile, @Nullable Diff diff, @Nonnull Profile profile)
       throws BadRequestException {
 
-    if (isNewProfile(diff) || fieldChanged(diff, "username")) {
+    if (isNewProfile || fieldChanged(diff, "username")) {
       validateUsername(profile);
     }
-    if (isNewProfile(diff) || fieldChanged(diff, "contactEmail")) {
+    if (isNewProfile || fieldChanged(diff, "contactEmail")) {
       validateContactEmail(profile);
 
       // only validate if the new profile has an affiliation - some older users do not
@@ -489,16 +467,16 @@ public class ProfileService {
         validateAffiliationEmail(profile);
       }
     }
-    if (isNewProfile(diff) || fieldChanged(diff, "givenName")) {
+    if (isNewProfile || fieldChanged(diff, "givenName")) {
       validateGivenName(profile);
     }
-    if (isNewProfile(diff) || fieldChanged(diff, "familyName")) {
+    if (isNewProfile || fieldChanged(diff, "familyName")) {
       validateFamilyName(profile);
     }
-    if (isNewProfile(diff) || fieldChanged(diff, "address")) {
+    if (isNewProfile || fieldChanged(diff, "address")) {
       validateAddress(profile);
     }
-    if (isNewProfile(diff) || fieldChanged(diff, "areaOfResearch")) {
+    if (isNewProfile || fieldChanged(diff, "areaOfResearch")) {
       validateAreaOfResearch(profile);
     }
     if (fieldChanged(diff, "verifiedInstitutionalAffiliation")) {
@@ -537,8 +515,9 @@ public class ProfileService {
    * @throws BadRequestException
    */
   public void validateNewProfile(Profile profile) throws BadRequestException {
-    final Profile dummyProfile = null;
-    validateProfileForCorrectness(dummyProfile, profile);
+    boolean isNewProfile = true;
+    Diff dummyDiff = null;
+    validateProfileForCorrectness(isNewProfile, dummyDiff, profile);
   }
 
   public List<AdminTableUser> getAdminTableUsers() {

@@ -139,7 +139,7 @@ public final class QueryParameterValues {
   public static Optional<OffsetDateTime> rowToInsertStringToOffsetTimestamp(
       @Nullable String bqTimeString) {
     return Optional.ofNullable(bqTimeString)
-        .filter(s -> s.length() > 0)
+        .filter(s -> !s.isEmpty())
         .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::parse)
         .map(LocalDateTime::from)
         .map(ldt -> OffsetDateTime.of(ldt, ZoneOffset.UTC));

@@ -99,7 +99,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
                                 .map(this::getId)
                                 .orElse("[id unknown]")))
                 .collect(Collectors.toList());
-        if (unauthorizedLogs.size() > 0) {
+        if (!unauthorizedLogs.isEmpty()) {
           log.warning(
               "User "
                   + user.getUsername()
@@ -130,7 +130,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> checkAndAlertFreeTierBillingUsage(List<Long> userIdsList) {
-    if (userIdsList != null && userIdsList.size() > 0) {
+    if (userIdsList != null && !userIdsList.isEmpty()) {
       freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(userIdsList);
     }
     return ResponseEntity.noContent().build();

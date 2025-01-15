@@ -23,17 +23,17 @@ public class LogFormatters {
       result += String.format("%d days ", duration.toDays());
     }
 
-    if (result.length() > 0 || duration.toHours() > 0) {
+    if (!result.isEmpty() || duration.toHours() > 0) {
       result +=
           String.format("%dh ", duration.toHours() - TimeUnit.DAYS.toHours(duration.toDays()));
     }
 
-    if (result.length() > 0 || duration.toMinutes() > 0) {
+    if (!result.isEmpty() || duration.toMinutes() > 0) {
       result +=
           String.format(
               "%dm ", duration.toMinutes() - TimeUnit.HOURS.toMinutes(duration.toHours()));
     }
-    if (result.length() > 0 || duration.getSeconds() > 0) {
+    if (!result.isEmpty() || duration.getSeconds() > 0) {
       result +=
           String.format(
               "%ds ", duration.getSeconds() - TimeUnit.MINUTES.toSeconds(duration.toMinutes()));
