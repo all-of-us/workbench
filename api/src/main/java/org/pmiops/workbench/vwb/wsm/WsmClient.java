@@ -36,7 +36,7 @@ public class WsmClient {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   public WsmClient(
-      @Qualifier(WsmConfig.SERVICE_ACCOUNT_WORKSPACE_API)
+      @Qualifier(WsmConfig.WSM_SERVICE_ACCOUNT_WORKSPACE_API)
           Provider<WorkspaceApi> workspaceServiceApi,
       WsmRetryHandler wsmRetryHandler,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
