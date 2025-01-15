@@ -425,8 +425,8 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
           target='_blank'
         >
           {' '}
-          &nbsp;policy on respectful research involving American Indian and
-          Alaska Native (AI/AN) populations
+          policy on respectful research involving American Indian and Alaska
+          Native (AI/AN) populations
         </StyledExternalLink>
         . The following questions are intended to assess the relevance of the
         policy to your research.
