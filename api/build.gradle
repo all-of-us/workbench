@@ -479,8 +479,6 @@ dependencies {
     implementation 'com.google.cloud.sql:mysql-socket-factory:1.11.1'
     implementation "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.37.0'
-    // required by google-oauth-client-jetty
-    implementation 'io.grpc:grpc-core:1.69.0'
 
     implementation 'com.google.protobuf:protobuf-java:3.25.5'
     implementation 'com.google.protobuf:protobuf-java-util:3.25.5'
