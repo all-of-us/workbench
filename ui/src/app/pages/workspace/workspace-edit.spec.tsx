@@ -1289,7 +1289,7 @@ describe(WorkspaceEdit.name, () => {
     });
     await user.hover(saveButton);
 
-    // Ensuring that inappropriate validation message doe snot appear
+    // Ensuring that inappropriate validation message does not appear
     expect(
       screen.queryByText(
         /you must select the type of AIAN research you are conducting \(question 6\.1\)/i
