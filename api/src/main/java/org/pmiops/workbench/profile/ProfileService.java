@@ -438,7 +438,7 @@ public class ProfileService {
   @VisibleForTesting
   public void validateProfile(@Nonnull Profile updatedProfile, @Nullable Profile previousProfile) {
     boolean isNewProfile = previousProfile == null;
-    final Diff diff = isNewProfile ? null : javers.compare(previousProfile, updatedProfile);
+    final Diff diff = javers.compare(previousProfile, updatedProfile);
 
     validateProfileForCorrectness(isNewProfile, diff, updatedProfile);
 
@@ -453,7 +453,7 @@ public class ProfileService {
   }
 
   private void validateProfileForCorrectness(
-      boolean isNewProfile, @Nullable Diff diff, @Nonnull Profile profile)
+      boolean isNewProfile, @Nonnull Diff diff, @Nonnull Profile profile)
       throws BadRequestException {
 
     if (isNewProfile || fieldChanged(diff, "username")) {
@@ -516,7 +516,8 @@ public class ProfileService {
    */
   public void validateNewProfile(Profile profile) throws BadRequestException {
     boolean isNewProfile = true;
-    Diff dummyDiff = null;
+    Profile previousProfile = null;
+    Diff dummyDiff = javers.compare(previousProfile, profile);
     validateProfileForCorrectness(isNewProfile, dummyDiff, profile);
   }
 
