@@ -51,7 +51,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
             ResourceType.COHORT_REVIEW,
             ResourceType.CONCEPT_SET,
             ResourceType.DATASET);
-    if (resourceTypes.size() == 0) {
+    if (resourceTypes.isEmpty()) {
       throw new BadRequestException("Must provide at least one resource type");
     }
 
