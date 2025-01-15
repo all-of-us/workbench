@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExfilManagerClient {
 
-  private final Provider<EgressEventApi> eggresEventApi;
+  private final Provider<EgressEventApi> egressEventApi;
   private final ExfilManagerRetryHandler exfilRetryHandler;
 
   // Mapping of DbEgressEventStatus to StatusEnum that is allowed to update
@@ -26,7 +26,7 @@ public class ExfilManagerClient {
   @Autowired
   public ExfilManagerClient(
       Provider<EgressEventApi> egressEventApiProvider, ExfilManagerRetryHandler exfilRetryHandler) {
-    this.eggresEventApi = egressEventApiProvider;
+    this.egressEventApi = egressEventApiProvider;
     this.exfilRetryHandler = exfilRetryHandler;
   }
 
@@ -43,7 +43,7 @@ public class ExfilManagerClient {
 
     exfilRetryHandler.run(
         context -> {
-          eggresEventApi
+          egressEventApi
               .get()
               .updateEgressEventStatus(
                   new UpdateEgressEventStatusBody().status(statusEnum),
