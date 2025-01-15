@@ -1243,7 +1243,8 @@ describe(WorkspaceEdit.name, () => {
       'aianResearchDetailsError'
     );
     expect(aianResearchDetailsError.textContent).toContain(
-      'Answer for Please explain your response by sharing specific details about your study design. (Question 6.2) cannot be blank'
+      'Answer for Please explain your response by sharing specific details about your ' +
+        'study design. (Question 6.2) cannot be blank'
     );
 
     // Select appropriate AIAN Research Values
