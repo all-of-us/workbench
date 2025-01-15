@@ -644,7 +644,11 @@ public class DbWorkspace {
   @Deprecated(since = "September 2024", forRemoval = true)
   @Column(name = "billing_status")
   public BillingStatus getBillingStatus() {
-    return (initialCreditsExhausted || initialCreditsExpired
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        creator != null ? creator.getUserInitialCreditsExpiration() : null;
+    boolean initialCreditsExpirationBypassed =
+        userInitialCreditsExpiration != null && userInitialCreditsExpiration.isBypassed();
+    return (initialCreditsExhausted || (initialCreditsExpired && !initialCreditsExpirationBypassed)
         ? BillingStatus.INACTIVE
         : BillingStatus.ACTIVE);
   }

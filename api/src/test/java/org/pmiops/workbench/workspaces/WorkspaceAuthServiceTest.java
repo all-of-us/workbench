@@ -31,6 +31,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -92,7 +93,16 @@ public class WorkspaceAuthServiceTest {
   public void test_validateInitialCreditUsage_valid() {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
-    stubDaoGetRequired(namespace, fcName, false, false);
+    stubDaoGetRequired(namespace, fcName, false, false, false);
+
+    assertDoesNotThrow(() -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
+  }
+
+  @Test
+  public void test_validateInitialCreditUsage_bypassed() {
+    final String namespace = "wsns";
+    final String fcName = "firecloudname";
+    stubDaoGetRequired(namespace, fcName, false, true, true);
 
     assertDoesNotThrow(() -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
   }
@@ -102,7 +112,7 @@ public class WorkspaceAuthServiceTest {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     config.billing.accountId = "free-tier";
-    stubDaoGetRequired(namespace, fcName, true, true);
+    stubDaoGetRequired(namespace, fcName, true, false, false);
 
     assertThrows(
         ForbiddenException.class,
@@ -255,7 +265,7 @@ public class WorkspaceAuthServiceTest {
     stubRegisteredTier();
     stubUpdateAcl(namespace, fcName);
     stubFcGetAcl(namespace, fcName, originalAcl);
-    DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, false, false);
+    DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, false, false, false);
 
     workspaceAuthService.patchWorkspaceAcl(workspace, updates);
     verify(mockFireCloudService)
@@ -335,14 +345,20 @@ public class WorkspaceAuthServiceTest {
       String namespace,
       String fcName,
       boolean initialCreditsExhausted,
-      boolean initialCreditsExpired) {
+      boolean initialCreditsExpired,
+      boolean initialCreditExpirationBypass) {
+    final DbUserInitialCreditsExpiration dbUserInitialCreditsExpiration =
+        new DbUserInitialCreditsExpiration().setBypassed(initialCreditExpirationBypass);
+    final DbUser user =
+        new DbUser().setUserInitialCreditsExpiration(dbUserInitialCreditsExpiration);
     final DbWorkspace toReturn =
         new DbWorkspace()
             .setWorkspaceNamespace(namespace)
             .setFirecloudName(fcName)
             .setInitialCreditsExhausted(initialCreditsExhausted)
             .setInitialCreditsExpired(initialCreditsExpired)
-            .setBillingAccountName(config.billing.initialCreditsBillingAccountName());
+            .setBillingAccountName(config.billing.initialCreditsBillingAccountName())
+            .setCreator(user);
     when(mockWorkspaceDao.getRequired(namespace, fcName)).thenReturn(toReturn);
     return toReturn;
   }
