@@ -40,7 +40,7 @@ public class ExfilManagerRetryHandler extends TerraServiceRetryHandler<ApiExcept
         logger.log(
             getLogLevel(responseCode),
             String.format(
-                "Exception calling WorkspaceManager API with response: %s",
+                "Exception calling ExfilManager API with response: %s",
                 ((ApiException) t).getResponseBody()),
             t);
       } else {
