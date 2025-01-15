@@ -1142,15 +1142,20 @@ export const WorkspaceEdit = fp.flow(
       return publicCDRVersionNumber >= 8;
     }
 
-    /* Deeply clones the provided workspace and makes any adjustments necessary without
-     * adjusting local state. */
+    /* Deeply clones relevant sections of the provided workspace and makes any adjustments
+     *necessary without adjusting local state. */
     preProcessWorkspace(workspace: Workspace) {
-      const adjustedWorkspace = JSON.parse(JSON.stringify(workspace));
-      if (!this.getAskAboutAIAN()) {
-        adjustedWorkspace.researchPurpose.aianResearchType = null;
-        adjustedWorkspace.researchPurpose.aianResearchDetails = null;
+      if (this.getAskAboutAIAN()) {
+        return workspace;
       }
-      return adjustedWorkspace;
+      return {
+        ...workspace,
+        researchPurpose: {
+          ...workspace.researchPurpose,
+          aianResearchType: null,
+          aianResearchDetails: null,
+        },
+      };
     }
 
     private async pollForAsyncWorkspaceOperation(
