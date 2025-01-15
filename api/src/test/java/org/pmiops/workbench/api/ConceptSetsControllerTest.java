@@ -253,7 +253,6 @@ public class ConceptSetsControllerTest {
     FeaturedWorkspaceMapper.class,
     FireCloudService.class,
     FirecloudMapperImpl.class,
-    InitialCreditsService.class,
     IamService.class,
     InitialCreditsService.class,
     MailService.class,

@@ -272,7 +272,6 @@ public class DataSetControllerTest {
     ConceptBigQueryService.class,
     DirectoryService.class,
     FeaturedWorkspaceMapper.class,
-    InitialCreditsService.class,
     IamService.class,
     InitialCreditsService.class,
     MailService.class,
