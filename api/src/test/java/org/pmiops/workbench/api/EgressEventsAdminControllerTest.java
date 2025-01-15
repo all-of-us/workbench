@@ -3,7 +3,9 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.Field;
@@ -35,6 +37,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -62,15 +65,19 @@ import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapperImpl;
 import org.pmiops.workbench.utils.mappers.VwbEgressEventMapperImpl;
+import org.pmiops.workbench.vwb.exfil.ExfilManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
 public class EgressEventsAdminControllerTest {
+  private static WorkbenchConfig workbenchConfig;
 
   private static final Instant TIME0 = Instant.parse("2020-06-11T01:30:00.02Z");
 
@@ -90,6 +97,7 @@ public class EgressEventsAdminControllerTest {
 
   @Autowired private FakeClock fakeClock;
   @Autowired private BigQueryService mockBigQueryService;
+  @MockBean private ExfilManagerClient exfilManagerClient;
 
   private DbUser user1;
   private DbUser user2;
@@ -115,16 +123,20 @@ public class EgressEventsAdminControllerTest {
   })
   static class Configuration {
     @Bean
-    WorkbenchConfig config() {
-      WorkbenchConfig c = new WorkbenchConfig();
-      c.firecloud = new FireCloudConfig();
-      c.firecloud.workspaceLogsProject = "fake-terra-logs";
-      return c;
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig workbenchConfig() {
+      return workbenchConfig;
     }
   }
 
   @BeforeEach
   public void setUp() {
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.firecloud = new FireCloudConfig();
+    workbenchConfig.firecloud.workspaceLogsProject = "fake-terra-logs";
+    workbenchConfig.featureFlags = new FeatureFlagsConfig();
+    workbenchConfig.featureFlags.enableVWBEgressMonitor = false;
+
     user1 = saveNewUser("user1@asdf.com");
     user2 = saveNewUser("user2@asdf.com");
     user3 = saveNewUser("user3@asdf.com");
@@ -420,6 +432,31 @@ public class EgressEventsAdminControllerTest {
   }
 
   @Test
+  public void testUpdateEgressEvent_vwb() {
+    workbenchConfig.featureFlags.enableVWBEgressMonitor = true;
+    String eventId = saveNewVwbEventWithStatus(DbEgressEventStatus.REMEDIATED);
+
+    EgressEvent got =
+        controller
+            .updateEgressEvent(
+                eventId,
+                new UpdateEgressEventRequest()
+                    .egressEvent(
+                        new EgressEvent().status(EgressEventStatus.VERIFIED_FALSE_POSITIVE)))
+            .getBody();
+
+    assertThat(got.getStatus()).isEqualTo(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
+
+    // Call another endpoint to verify that the change was actually persisted
+    List<EgressEvent> gotEvents =
+        controller.listEgressEvents(new ListEgressEventsRequest()).getBody().getEvents();
+    assertThat(gotEvents).hasSize(1);
+    assertThat(gotEvents.get(0).getStatus()).isEqualTo(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
+    verify(exfilManagerClient)
+        .updateEgressEventStatus(any(), eq(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE));
+  }
+
+  @Test
   public void testAuditEgressEvent() throws Exception {
     String eventId = saveNewEvent(user1, workspace1, TIME0);
 
@@ -467,6 +504,16 @@ public class EgressEventsAdminControllerTest {
 
   private String saveNewEventWithStatus(DbEgressEventStatus status) {
     DbEgressEvent e = egressEventDao.save(newEvent().setStatus(status));
+    return Long.toString(e.getEgressEventId());
+  }
+
+  private String saveNewVwbEventWithStatus(DbEgressEventStatus status) {
+    DbEgressEvent e =
+        egressEventDao.save(
+            newEvent()
+                .setStatus(status)
+                .setVwbEgressEventId("vwb-12")
+                .setVwbWorkspaceId("vwb-ws-123"));
     return Long.toString(e.getEgressEventId());
   }
 

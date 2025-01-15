@@ -13,22 +13,11 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class ExfilManagerConfig {
-  public static final String EXFIL_SERVICE_ACCOUNT_API_CLIENT = "EXFIL_SERVICE_ACCOUNT_API_CLIENT";
-
-  /**
-   * Creates a EXFIL API client, unauthenticated. Most clients should use an authenticated, request
-   * scoped bean instead of calling this directly.
-   */
-  private ApiClient newApiClient(WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.vwb.exfilManagerBaseUrl);
-    return apiClient;
-  }
-
-  @Bean(name = EXFIL_SERVICE_ACCOUNT_API_CLIENT)
+  @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient apiClient(WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = newApiClient(workbenchConfig);
+    ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(workbenchConfig.vwb.exfilManagerBaseUrl);
     try {
       apiClient.setAccessToken(
           ServiceAccounts.getScopedServiceAccessToken(VwbApiClientUtils.SCOPES));
