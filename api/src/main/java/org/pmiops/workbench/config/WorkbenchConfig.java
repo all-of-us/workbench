@@ -478,6 +478,7 @@ public class WorkbenchConfig {
 
   public static class VwbConfig {
     public String wsmBaseUrl;
+    public String exfilManagerBaseUrl;
     public String organizationId;
     // This will only be used for preview release, later on, each user will have their own pod.
     public String defaultPodId;
