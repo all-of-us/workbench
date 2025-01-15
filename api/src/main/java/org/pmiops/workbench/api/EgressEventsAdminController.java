@@ -3,10 +3,12 @@ package org.pmiops.workbench.api;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import jakarta.inject.Provider;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -29,6 +31,7 @@ import org.pmiops.workbench.model.UpdateEgressEventRequest;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
 import org.pmiops.workbench.utils.mappers.VwbEgressEventMapper;
+import org.pmiops.workbench.vwb.exfil.ExfilManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +55,8 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
   private final EgressEventDao egressEventDao;
+  private final Provider<WorkbenchConfig> configProvider;
+  private final ExfilManagerClient exfilManagerClient;
 
   @Autowired
   public EgressEventsAdminController(
@@ -61,7 +66,9 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
       EgressEventAuditor egressEventAuditor,
       UserDao userDao,
       WorkspaceDao workspaceDao,
-      EgressEventDao egressEventDao) {
+      EgressEventDao egressEventDao,
+      Provider<WorkbenchConfig> configProvider,
+      ExfilManagerClient exfilManagerClient) {
     this.egressLogService = egressLogService;
     this.sumologicEgressEventMapper = sumologicEgressEventMapper;
     this.vwbEgressEventMapper = vwbEgressEventMapper;
@@ -69,6 +76,8 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.egressEventDao = egressEventDao;
+    this.configProvider = configProvider;
+    this.exfilManagerClient = exfilManagerClient;
   }
 
   @AuthorityRequired(Authority.SECURITY_ADMIN)
@@ -171,6 +180,10 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
             request.getEgressEvent().getStatus(), dbEgressEvent); // Dynamically choose the mapper
     DbEgressEvent updatedEvent = egressEventDao.save(dbEgressEvent.setStatus(toStatus));
 
+    if (configProvider.get().featureFlags.enableVWBEgressMonitor
+        && dbEgressEvent.getVwbWorkspaceId() != null) {
+      exfilManagerClient.updateEgressEventStatus(dbEgressEvent, toStatus);
+    }
     egressEventAuditor.fireAdminEditEgressEvent(dbEgressEvent, updatedEvent);
 
     return ResponseEntity.ok(toApiEvent(updatedEvent)); // Dynamically choose the mapper
