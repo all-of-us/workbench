@@ -405,7 +405,7 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
     implementation "com.github.java-json-tools:json-patch:1.13"
-    implementation 'org.javers:javers-core:6.0.0'
+    implementation 'org.javers:javers-core:7.7.0'
     implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     implementation "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
 
