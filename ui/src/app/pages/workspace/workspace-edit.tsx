@@ -107,6 +107,8 @@ import { supportUrls } from 'app/utils/zendesk';
 import { OldCdrVersionModal } from './old-cdr-version-modal';
 import { UnavailableTierModal } from './unavailable-tier-modal';
 
+export const EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN = 8;
+
 export const styles = reactStyles({
   categoryRow: {
     display: 'flex',
@@ -1139,7 +1141,10 @@ export const WorkspaceEdit = fp.flow(
         this.props.cdrVersionTiersResponse
       ).publicReleaseNumber;
 
-      return publicCDRVersionNumber >= 8;
+      return (
+        publicCDRVersionNumber >=
+        EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN
+      );
     }
 
     /* Deeply clones relevant sections of the provided workspace and makes any adjustments
