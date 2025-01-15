@@ -25,7 +25,7 @@ public class ExfilManagerConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient serviceAccountApiClient(WorkbenchConfig workbenchConfig) {
+  public ApiClient apiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = newApiClient(workbenchConfig);
     try {
       apiClient.setAccessToken(
