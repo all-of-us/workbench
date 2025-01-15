@@ -1,5 +1,6 @@
 package org.pmiops.workbench.vwb.exfil;
 
+import jakarta.inject.Qualifier;
 import java.io.IOException;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -15,7 +16,7 @@ import org.springframework.web.context.annotation.RequestScope;
 public class ExfilManagerConfig {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient apiClient(WorkbenchConfig workbenchConfig) {
+  public org.pmiops.workbench.vwb.exfil.ApiClient apiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.vwb.exfilManagerBaseUrl);
     try {
