@@ -4,6 +4,7 @@ import {
   CdrVersionTiersResponse,
 } from 'generated/fetch';
 
+import { EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN } from 'app/pages/workspace/workspace-edit';
 import {
   AccessTierDisplayNames,
   AccessTierShortNames,
@@ -38,7 +39,8 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: true,
           creationTime: 0,
           bigqueryDataset: '',
-          publicReleaseNumber: 8,
+          publicReleaseNumber:
+            EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN,
         },
         {
           name: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
@@ -50,7 +52,8 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: false,
           creationTime: 0,
           bigqueryDataset: '',
-          publicReleaseNumber: 7,
+          publicReleaseNumber:
+            EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN - 1,
         },
       ],
     },
@@ -71,7 +74,8 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: true,
           creationTime: 0,
           bigqueryDataset: '',
-          publicReleaseNumber: 8,
+          publicReleaseNumber:
+            EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN,
         },
       ],
     },
