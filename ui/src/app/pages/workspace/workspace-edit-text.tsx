@@ -2,11 +2,13 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import {
+  AIANResearchType,
   DisseminateResearchEnum,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
 } from 'generated/fetch';
 
+import { StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { SupportMailto } from 'app/components/support';
@@ -414,6 +416,37 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
       </span>
     ),
   },
+  {
+    header: (
+      <div>
+        <AoU /> has a{' '}
+        <StyledExternalLink
+          href='http://researchallofus.org/PolicyRespectfulAIANResearch'
+          target='_blank'
+        >
+          {' '}
+          policy on respectful research involving American Indian and Alaska
+          Native (AI/AN) populations
+        </StyledExternalLink>
+        . The following questions are intended to assess the relevance of the
+        policy to your research.
+      </div>
+    ),
+    description: '',
+  },
+  {
+    header:
+      'Does your research plan require any of the following with respect to individuals who ' +
+      'self-identify as American Indian or Alaska Native (AI/AN) or who are genetically similar to ' +
+      'populations with inferred Indigenous American genetic ancestry? Select the option that ' +
+      'best describes your plans.',
+    description: '',
+  },
+  {
+    header:
+      'Please explain your response by sharing specific details about your study design.',
+    description: <div>(Free text; 1000 character limit)</div>,
+  },
 ];
 
 export interface SpecificPopulationItem {
@@ -671,3 +704,32 @@ export const RequestForReviewFooter =
   'address questions about potentially stigmatizing research. As your research progresses, ' +
   'should any new concerns arise based on study outcomes, please contact the RAB for ' +
   'assistance through the User Support Hub menu in your workspace.';
+
+export const aianResearchTypeMap: Map<AIANResearchType, string> = new Map([
+  [
+    AIANResearchType.EXCLUSIVE_AI_AN_POPULATION,
+    'I am planning to conduct my study using a study population exclusively including individuals ' +
+      'who self-identify as AI/AN and/or who exhibit genetic similarity to populations with inferred ' +
+      'Indigenous American genetic ancestry.',
+  ],
+  [
+    AIANResearchType.CASE_CONTROL_AI_AN,
+    'I am planning to conduct a case/control study where either the “case” or the “control” ' +
+      'population consists exclusively of individuals who self-identify as AI/AN and/or who exhibit ' +
+      'genetic similarity to populations with inferred Indigenous American genetic ancestry.',
+  ],
+  [
+    AIANResearchType.FINDINGS_BY_AI_AN,
+    'I am planning to break down my findings by race/ethnicity and/or ancestral genetic similarity ' +
+      'in such a way that may raise findings that are specific to individuals who self-identify as ' +
+      'AI/AN and/or who exhibit genetic similarity to populations with inferred Indigenous American ' +
+      'genetic ancestry.',
+  ],
+  [
+    AIANResearchType.NO_AI_AN_ANALYSIS,
+    'I will not conduct any analyses that would yield findings specific to AI/AN populations and/or ' +
+      'populations who exhibit genetic similarity to populations with inferred Indigenous American ' +
+      'genetic ancestry. If that changes, I will immediately update my responses on this form to ' +
+      'reflect that change. ',
+  ],
+]);
