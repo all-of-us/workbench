@@ -441,7 +441,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
     implementation 'commons-codec:commons-codec:1.17.0'
     implementation 'com.auth0:java-jwt:4.4.0'
-    implementation 'io.netty:netty-common:4.1.112.Final'
+    implementation 'io.netty:netty-common:4.1.117.Final'
     implementation 'org.json:json:20250107'
 
 
