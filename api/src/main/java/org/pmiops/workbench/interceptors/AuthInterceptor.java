@@ -275,6 +275,7 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
 
   /** Returns {@code true} if caller is VWB service accounts. */
   private boolean isVwbServiceAccount(String userName) {
-    return userName.equals(workbenchConfigProvider.get().vwb.exfilManagerServiceAccount);
+    return workbenchConfigProvider.get().vwb != null
+        && userName.equals(workbenchConfigProvider.get().vwb.exfilManagerServiceAccount);
   }
 }
