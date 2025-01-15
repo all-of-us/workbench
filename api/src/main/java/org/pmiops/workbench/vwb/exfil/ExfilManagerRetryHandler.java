@@ -20,7 +20,7 @@ public class ExfilManagerRetryHandler extends TerraServiceRetryHandler<ApiExcept
   private static class ExfilManagerRetryPolicy extends ResponseCodeRetryPolicy {
 
     public ExfilManagerRetryPolicy() {
-      super("WorkspaceManager API");
+      super("VWB Exfil Manager API");
     }
 
     @Override
