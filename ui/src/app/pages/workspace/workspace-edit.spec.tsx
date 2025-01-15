@@ -1237,11 +1237,14 @@ describe(WorkspaceEdit.name, () => {
       )
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByText(
-        /you must provide details about your study design \(question 6\.2\)/i
-      )
-    ).toBeInTheDocument();
+    /* The text of this error message is broken up by tags inside the text,
+     * so it necessitates a different approach. */
+    const aianResearchDetailsError = screen.getByTestId(
+      'aianResearchDetailsError'
+    );
+    expect(aianResearchDetailsError.textContent).toContain(
+      'Answer for Please explain your response by sharing specific details about your study design. (Question 6.2) cannot be blank'
+    );
 
     // Select appropriate AIAN Research Values
     const selectedAIANResearchTypeRadioElement = screen.getByRole('radio', {

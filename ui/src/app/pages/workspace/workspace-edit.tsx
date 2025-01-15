@@ -2525,13 +2525,13 @@ export const WorkspaceEdit = fp.flow(
                           </li>
                         )}
                         {errors.aianResearchDetails && (
-                          <li>
+                          <li data-test-id='aianResearchDetailsError'>
                             {' '}
                             Answer for{' '}
                             <i>
                               Please explain your response by sharing specific
                               details about your study design. (Question 6.2)
-                            </i>{' '}
+                            </i>
                             {errors.aianResearchDetails}
                           </li>
                         )}
