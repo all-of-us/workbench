@@ -403,10 +403,18 @@ export class LeoRuntimeInitializer {
           )
         );
       } else if (this.isNotFoundError(e)) {
-        // A not-found error is somewhat expected, if a runtime has recently been deleted or
-        // hasn't been created yet.
+        const previousRuntime = { ...this.currentRuntime };
+        /* In the case where the previousRuntime is not null and its
+         * status is DELETING, we should resolve the polling promise,
+         * because deleting worked successfully.
+         */
         this.currentRuntime = null;
         this.onPoll(null);
+        if (previousRuntime?.status === RuntimeStatus.DELETING) {
+          this.currentRuntime = null;
+          this.onPoll(null);
+          return this.resolve(null);
+        }
       } else if (this.isClientError(e)) {
         return this.reject(
           new ExceededErrorCountError(
