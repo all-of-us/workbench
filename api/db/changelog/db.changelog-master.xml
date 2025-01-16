@@ -257,6 +257,7 @@
   <include file="changelog/db.changelog-247-drop-nonnull-sumologic-column-egress-event.xml"/>
   <include file="changelog/db.changelog-248-add-public-release-number-column.xml"/>
   <include file="changelog/db.changelog-249-add-time-window-start-egress-event.xml"/>
+  <include file="changelog/db.changelog-250-add-aian-research-columns.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

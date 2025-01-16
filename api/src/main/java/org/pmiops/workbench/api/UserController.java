@@ -169,7 +169,7 @@ public class UserController implements UserApiDelegate {
     List<List<DbUser>> pagedUsers =
         Lists.partition(users, Optional.ofNullable(pageSize).orElse(DEFAULT_PAGE_SIZE));
 
-    if (pagedUsers.size() == 0) {
+    if (pagedUsers.isEmpty()) {
       return ResponseEntity.ok(response);
     }
 

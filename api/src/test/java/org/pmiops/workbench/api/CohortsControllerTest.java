@@ -796,7 +796,7 @@ public class CohortsControllerTest {
                     cohort.getId(),
                     new Cohort().name("updated-name").etag(eTag)));
     String errMsg = "missing required update field 'etag'";
-    if (eTag != null && eTag.length() > 0) {
+    if (eTag != null && !eTag.isEmpty()) {
       errMsg = String.format("Invalid etag provided: %s", eTag);
     }
     assertThat(exception).hasMessageThat().isEqualTo(errMsg);
