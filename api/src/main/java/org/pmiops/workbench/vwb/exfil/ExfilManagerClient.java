@@ -21,7 +21,8 @@ public class ExfilManagerClient {
 
   // Mapping of DbEgressEventStatus to StatusEnum that is allowed to update
   private static final Map<DbEgressEventStatus, StatusEnum> SUPPORTED_EGRESS_STATUS_MAPPING =
-      ImmutableMap.of(DbEgressEventStatus.REMEDIATED, StatusEnum.REMEDIATED);
+      ImmutableMap.of(
+          DbEgressEventStatus.VERIFIED_FALSE_POSITIVE, StatusEnum.VERIFIED_FALSE_POSITIVE);
 
   @Autowired
   public ExfilManagerClient(
