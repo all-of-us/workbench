@@ -411,8 +411,6 @@ export class LeoRuntimeInitializer {
         this.currentRuntime = null;
         this.onPoll(null);
         if (previousRuntime?.status === RuntimeStatus.DELETING) {
-          this.currentRuntime = null;
-          this.onPoll(null);
           return this.resolve(null);
         }
       } else if (this.isClientError(e)) {
