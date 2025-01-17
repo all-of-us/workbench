@@ -32,7 +32,7 @@ const styles = reactStyles({
     borderRadius: '23px',
   },
   mainHeader: {
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 600,
     color: colors.primary,
     marginBottom: '0.75rem',
@@ -100,7 +100,7 @@ export const ResearchPurpose = fp.flow(
   return (
     <FadeBox>
       <div style={styles.mainHeader}>
-        Primary purpose of project
+        Research Use Statement Questions
         <Clickable
           disabled={!isOwner}
           style={{
@@ -125,6 +125,7 @@ export const ResearchPurpose = fp.flow(
           />
         </Clickable>
       </div>
+      <div style={styles.sectionHeader}>Primary purpose of project</div>
       <div style={styles.sectionContentContainer}>
         {selectedResearchPurposeItems &&
           selectedResearchPurposeItems.length > 0 && (
