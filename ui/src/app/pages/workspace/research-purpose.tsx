@@ -5,6 +5,7 @@ import { Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { EditComponentReact } from 'app/icons/edit';
 import {
+  aianResearchTypeMap,
   disseminateFindings,
   researchOutcomes,
   researchPurposeQuestions,
@@ -236,6 +237,23 @@ export const ResearchPurpose = fp.flow(
           </div>
         </React.Fragment>
       )}
+
+      {/* AI/AN Research Approach section*/}
+      <div style={styles.sectionHeader}>AI/AN Research Approach</div>
+      <div style={styles.sectionContentContainer}>
+        <div style={styles.sectionSubHeader}>
+          {researchPurposeQuestions[10].header}
+        </div>
+        <div style={{ ...styles.sectionItemWithBackground, padding: '15px' }}>
+          {aianResearchTypeMap.get(workspace.researchPurpose.aianResearchType)}
+        </div>
+        <div style={styles.sectionSubHeader}>
+          {researchPurposeQuestions[11].header}
+        </div>
+        <div style={{ ...styles.sectionItemWithBackground, padding: '15px' }}>
+          {workspace.researchPurpose.aianResearchDetails}
+        </div>
+      </div>
     </FadeBox>
   );
 });
