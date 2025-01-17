@@ -343,22 +343,22 @@ public class GenomicExtractionService {
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".filter_set_name", "\"" + filterSetName + "\"");
     }
 
+    // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
+    // keeping overhead low and limiting footprint on shared extraction quota.
+    int minScatter =
+        Math.min(
+            cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
+            LEGACY_MAX_EXTRACTION_SCATTER);
+    int desiredScatter =
+        Math.round(
+            personIds.size()
+                * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
+    int scatterCount =
+        Ints.constrainToRange(desiredScatter, minScatter, LEGACY_MAX_EXTRACTION_SCATTER);
+
+    maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
+
     if (useLegacyWorkflow) {
-      // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
-      // keeping overhead low and limiting footprint on shared extraction quota.
-      int minScatter =
-          Math.min(
-              cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
-              LEGACY_MAX_EXTRACTION_SCATTER);
-      int desiredScatter =
-          Math.round(
-              personIds.size()
-                  * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
-      int scatterCount =
-          Ints.constrainToRange(desiredScatter, minScatter, LEGACY_MAX_EXTRACTION_SCATTER);
-
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
-
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"");
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
