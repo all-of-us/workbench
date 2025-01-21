@@ -81,18 +81,24 @@ describe(CreateGkeAppButton.name, () => {
 
   beforeEach(() => {
     const freeTierBillingAccountId = 'FreeTierBillingAccountId';
+    const workspaceStub = buildWorkspaceStub();
     defaultProps = {
       createAppRequest: defaultCromwellCreateRequest,
       existingApp: null,
       workspace: {
-        ...buildWorkspaceStub(),
+        ...workspaceStub,
         billingAccountName: `billingAccounts/${freeTierBillingAccountId}`,
         namespace: workspaceNamespace,
+        initialCredits: {
+          ...workspaceStub.initialCredits,
+          expirationEpochMillis: new Date('2025-01-01').getTime(),
+        },
       },
       onDismiss: () => {},
       username: ProfileStubVariables.PROFILE_STUB.username,
     };
 
+    jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
     serverConfigStore.set({
       config: { ...defaultServerConfig, freeTierBillingAccountId },
     });
@@ -102,6 +108,7 @@ describe(CreateGkeAppButton.name, () => {
   });
   afterEach(() => {
     jest.resetAllMocks();
+    jest.useRealTimers();
   });
 
   describe('should allow creating a GKE app for certain app statuses', () => {
@@ -113,6 +120,8 @@ describe(CreateGkeAppButton.name, () => {
         createAppRequest: defaultCromwellCreateRequest,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
+
+      screen.logTestingPlaygroundURL();
 
       const button = await waitFor(() => {
         const createButton = findCreateButton();

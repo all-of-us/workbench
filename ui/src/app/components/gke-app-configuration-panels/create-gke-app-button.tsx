@@ -54,11 +54,15 @@ export function CreateGkeAppButton({
     !!existingDisk &&
     createAppRequest.persistentDiskRequest.size < existingDisk.size;
 
+  const active = isAppActive(existingApp);
+  const validBilling = isValidBilling(workspace);
+  const diskSizeValid = isDiskSizeValid(createAppRequest);
+
   const createEnabled =
     !creatingApp &&
-    !isAppActive(existingApp) &&
-    isValidBilling(workspace) &&
-    isDiskSizeValid(createAppRequest) &&
+    !active &&
+    validBilling &&
+    diskSizeValid &&
     !wouldDecreaseDiskSize;
 
   const appTypeString = appTypeToString[createAppRequest.appType];
