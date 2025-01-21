@@ -25,7 +25,7 @@ const styles = {
   },
   sectionItemWithBackground: {
     padding: '10px',
-    backgroundColor: colors.white,
+    backgroundColor: 'transparent',
     color: colors.primary,
     marginLeft: '0.75rem',
     borderRadius: '3px',
