@@ -353,6 +353,21 @@ form .form-block > label,
   color: #262262 !important
 }
 
+.p-accordion-header-link {
+  border: 1px solid #c8c8c8 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgb(38, 34, 98) !important;
+}
+
+.p-accordion-content {
+  background: transparent !important;
+}
+
+.p-accordion .p-accordion-header .p-accordion-header-link {
+  font-weight: 400 !important;
+}
+
 .hover-style:hover {
   --hover-backgroundColor: var(--app-hover-backgroundColor);
   --hover-border: var(--app-hover-border);
