@@ -334,6 +334,8 @@ public class GenomicExtractionService {
       throw new ServerErrorException();
     }
 
+    Map<String, String> maybeInputs = new HashMap<>();
+    
     // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
     // keeping overhead low and limiting footprint on shared extraction quota.
     int minScatter =
@@ -345,8 +347,6 @@ public class GenomicExtractionService {
             personIds.size()
                 * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
     int scatterCount = Ints.constrainToRange(desiredScatter, minScatter, MAX_EXTRACTION_SCATTER);
-
-    Map<String, String> maybeInputs = new HashMap<>();
 
     if (!Strings.isNullOrEmpty(filterSetName)) {
       // If set, apply a joint callset filter during the extraction. There may be multiple such
@@ -362,10 +362,15 @@ public class GenomicExtractionService {
       maybeInputs.put(
           EXTRACT_WORKFLOW_NAME + ".gatk_override",
           "\"" + cohortExtractionConfig.legacyVersions.gatkJarUri + "\"");
+
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
     } else {
       // Added Nov 2024
       // replaces extraction_uuid and cohort_table_prefix which are now set to this value
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".call_set_identifier", "\"" + extractionUuid + "\"");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".extract_scatter_count_override",
+          Integer.toString(scatterCount));
     }
 
     Blob personIdsFile =
@@ -396,7 +401,6 @@ public class GenomicExtractionService {
         // etc
         .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
         .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
-        .put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount))
         .putAll(maybeInputs)
         .build();
   }
