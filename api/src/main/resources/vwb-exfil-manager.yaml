@@ -26,7 +26,7 @@ paths:
             Service cannot process requests. That might be because dependent services are
             unavailable, or because there is a problem with the service itself.
 
-  /egress-events/{egressEventId}/status:
+  /api/egress-events/v1/{egressEventId}/status:
     patch:
       summary: Update an egress event status. Currently, only status (REMEDIATED or VERIFIED_FALSE_POSITIVE) is allow, other status will be rejected
       operationId: updateEgressEventStatus
