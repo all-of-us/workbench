@@ -46,6 +46,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CreateBillingAccountModal } from 'app/pages/workspace/create-billing-account-modal';
 import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
 import {
+  RequestForReviewFooter,
   toolTipText,
   tooltipTextBillingWarning,
   toolTipTextDemographic,

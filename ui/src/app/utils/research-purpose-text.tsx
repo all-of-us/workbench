@@ -11,6 +11,10 @@ import {
 import { StyledExternalLink } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU, AouTitle } from 'app/components/text-wrappers';
+import {
+  toolTipTextDemographic,
+  toolTipTextDucc,
+} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
 
 export const ResearchPurposeDescription = (
