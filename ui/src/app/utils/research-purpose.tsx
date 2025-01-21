@@ -3,13 +3,13 @@ import * as fp from 'lodash/fp';
 
 import { ResearchPurpose, SpecificPopulationEnum } from 'generated/fetch';
 
+import colors from 'app/styles/colors';
 import {
   PrimaryPurposeItems,
   ResearchPurposeItem,
   ResearchPurposeItems,
   SpecificPopulationItems,
-} from 'app/pages/workspace/workspace-edit-text';
-import colors from 'app/styles/colors';
+} from 'app/utils/workspace-edit-text';
 
 const styles = {
   researchPurposeItemHeader: {
