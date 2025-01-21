@@ -2521,11 +2521,7 @@ components:
             openid: open id authorization
             email: email authorization
             profile: profile authorization
-    bearerAuth:
-      type: http
-      scheme: bearer
 
 security:
   - authorization: [ openid, email, profile ]
-  - bearerAuth: [ ]
 
