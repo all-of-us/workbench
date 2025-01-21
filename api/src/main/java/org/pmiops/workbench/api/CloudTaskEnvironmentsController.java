@@ -45,19 +45,26 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
 
     // temp timing for batch sizing
     var stopwatch = stopwatchProvider.get().start();
-    workspaceNamespaces.stream()
-        .map(workspaceService::lookupWorkspaceByNamespace)
-        .forEach(this::deleteUnshared);
+    List<DbWorkspace> failedUserRoles =
+        workspaceNamespaces.stream()
+            .map(workspaceService::lookupWorkspaceByNamespace)
+            .filter(
+                ws -> {
+                  boolean successfulGetFirecloudUserRoles = deleteUnshared(ws);
+                  return !successfulGetFirecloudUserRoles;
+                })
+            .toList();
     var elapsed = stopwatch.stop().elapsed();
     LOGGER.info(
         String.format(
-            "Deleted unshared environments for %d workspaces in %s.",
-            workspaceNamespaces.size(), formatDurationPretty(elapsed)));
+            "Attempted to delete unshared environments for %d workspaces (%d failures) in %s.",
+            workspaceNamespaces.size(), failedUserRoles.size(), formatDurationPretty(elapsed)));
 
     return ResponseEntity.ok().build();
   }
 
-  private void deleteUnshared(DbWorkspace dbWorkspace) {
+  // return success value of getFirecloudUserRoles()
+  private boolean deleteUnshared(DbWorkspace dbWorkspace) {
     // this call often fails on Test.  TODO: investigate.
     final List<UserRole> userRoles;
     try {
@@ -72,7 +79,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
               dbWorkspace.getFirecloudName(),
               dbWorkspace.getWorkspaceId(),
               e.getMessage()));
-      return;
+      return false;
     }
 
     var currentUsers = userRoles.stream().map(UserRole::getEmail).collect(Collectors.toSet());
@@ -169,5 +176,6 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
             }
           });
     }
+    return true;
   }
 }
