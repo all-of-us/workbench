@@ -83,7 +83,6 @@ interface Props {
 
 export const ResearchPurposeSection = ({ researchPurpose }: Props) => {
   const {
-    reasonForAllOfUs,
     intendedStudy,
     anticipatedFindings,
     populationDetails,

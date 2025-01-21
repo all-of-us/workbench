@@ -152,14 +152,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               reload={async () => await this.populateWorkspaceDetails()}
             />
             <Accordion>
-              <AccordionTab
-                header='Research Purpose'
-                pt={{
-                  header: ({ parent }) => ({
-                    style: { backgroundColor: 'pink' },
-                  }),
-                }}
-              >
+              <AccordionTab header='Research Purpose'>
                 <ResearchPurposeSection {...{ researchPurpose }} />
               </AccordionTab>
             </Accordion>
