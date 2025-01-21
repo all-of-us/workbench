@@ -45,6 +45,13 @@ import { AoU, AouTitle } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CreateBillingAccountModal } from 'app/pages/workspace/create-billing-account-modal';
 import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
+import {
+  toolTipText,
+  tooltipTextBillingWarning,
+  toolTipTextDemographic,
+  toolTipTextDucc,
+  toolTipTextStigmatization,
+} from 'app/pages/workspace/workspace-edit-text';
 import { WorkspaceResearchSummary } from 'app/pages/workspace/workspace-research-summary';
 import { userApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -80,15 +87,10 @@ import {
   getBillingAccountInfo,
   GoogleBillingAccountInfo,
 } from 'app/utils/project-billing-info';
-import { serverConfigStore } from 'app/utils/stores';
-import { delay } from 'app/utils/subscribable';
-import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { WorkspaceData } from 'app/utils/workspace-data';
 import {
   aianResearchTypeMap,
   disseminateFindings,
   PrimaryPurposeItems,
-  RequestForReviewFooter,
   researchOutcomes,
   ResearchPurposeDescription,
   ResearchPurposeItem,
@@ -96,12 +98,11 @@ import {
   researchPurposeQuestions,
   SpecificPopulationItem,
   SpecificPopulationItems,
-  toolTipText,
-  tooltipTextBillingWarning,
-  toolTipTextDemographic,
-  toolTipTextDucc,
-  toolTipTextStigmatization,
-} from 'app/utils/workspace-edit-text';
+} from 'app/utils/research-purpose-text';
+import { serverConfigStore } from 'app/utils/stores';
+import { delay } from 'app/utils/subscribable';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
 
 import { OldCdrVersionModal } from './old-cdr-version-modal';

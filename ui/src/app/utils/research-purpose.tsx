@@ -9,7 +9,7 @@ import {
   ResearchPurposeItem,
   ResearchPurposeItems,
   SpecificPopulationItems,
-} from 'app/utils/workspace-edit-text';
+} from 'app/utils/research-purpose-text';
 
 const styles = {
   researchPurposeItemHeader: {

@@ -1,8 +1,8 @@
 import * as React from 'react';
 
 import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
+import { ResearchPurposeQuestion } from 'app/utils/research-purpose-text';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
-import { ResearchPurposeQuestion } from 'app/utils/workspace-edit-text';
 
 import { WorkspaceEditSection } from './workspace-edit-section';
 

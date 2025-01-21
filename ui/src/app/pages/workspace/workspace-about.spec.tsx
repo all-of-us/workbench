@@ -14,12 +14,12 @@ import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { nowPlusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { SpecificPopulationItems } from 'app/utils/research-purpose-text';
 import {
   cdrVersionStore,
   profileStore,
   serverConfigStore,
 } from 'app/utils/stores';
-import { SpecificPopulationItems } from 'app/utils/workspace-edit-text';
 
 import {
   expectButtonElementDisabled,

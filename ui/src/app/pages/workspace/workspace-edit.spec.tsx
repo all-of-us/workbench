@@ -32,13 +32,13 @@ import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import * as Authentication from 'app/utils/authentication';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { aianResearchTypeMap } from 'app/utils/research-purpose-text';
 import {
   cdrVersionStore,
   profileStore,
   serverConfigStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { aianResearchTypeMap } from 'app/utils/workspace-edit-text';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {

@@ -13,7 +13,7 @@ import {
   disseminateFindings,
   researchOutcomes,
   researchPurposeQuestions,
-} from 'app/utils/workspace-edit-text';
+} from 'app/utils/research-purpose-text';
 
 const styles = reactStyles({
   editIcon: {
