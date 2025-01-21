@@ -8,7 +8,6 @@ import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems,
 } from 'app/utils/research-purpose';
-// @ts-ignore
 import {
   aianResearchTypeMap,
   disseminateFindings,
