@@ -38,6 +38,7 @@ import {
   serverConfigStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import { aianResearchTypeMap } from 'app/utils/workspace-edit-text';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -58,8 +59,6 @@ import {
 import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-
-import { aianResearchTypeMap } from './workspace-edit-text';
 
 jest.mock('app/utils/project-billing-info', () => ({
   getBillingAccountInfo: () =>

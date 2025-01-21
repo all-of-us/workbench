@@ -19,6 +19,7 @@ import {
   profileStore,
   serverConfigStore,
 } from 'app/utils/stores';
+import { SpecificPopulationItems } from 'app/utils/workspace-edit-text';
 
 import {
   expectButtonElementDisabled,
@@ -45,7 +46,6 @@ import {
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { WorkspaceAbout } from './workspace-about';
-import { SpecificPopulationItems } from './workspace-edit-text';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
