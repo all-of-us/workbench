@@ -131,7 +131,8 @@
       "hasSurveyConductData": true,
       "accessTier": "registered",
       "tanagraEnabled": true,
-      "publicReleaseNumber": 5
+      "publicReleaseNumber": 5,
+      "vwbTemplateId": "b0ea0e96-5aeb-463b-9e67-2b16e827549a"
     },
     {
       "cdrVersionId": 9,
@@ -154,7 +155,8 @@
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
       "tanagraEnabled": true,
-      "publicReleaseNumber": 5
+      "publicReleaseNumber": 5,
+      "vwbTemplateId": "518946e5-2eae-49f6-8fa2-b4963c1a13f5"
     }
   ]
 }

@@ -2664,6 +2664,11 @@ export const WorkspaceEdit = fp.flow(
                     </span>{' '}
                     (Question 5)
                     <br />
+                    <span style={{ fontWeight: 600 }}>
+                      Approach to handling AI/AN data
+                    </span>{' '}
+                    (Question 6)
+                    <br />
                   </div>
                   <div style={{ marginBottom: '1.5rem' }}>
                     Will be

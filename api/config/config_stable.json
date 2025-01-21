@@ -120,7 +120,7 @@
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": false,
     "blockComplianceTraining": false,
-    "enableVWBWorkspaceCreation": false,
+    "enableVWBWorkspaceCreation": true,
     "enableVWBEgressMonitor": false
   },
   "actionAudit": {
@@ -180,5 +180,10 @@
   },
   "banner": {
     "enableLoginIssueBanner": false
+  },
+  "vwb": {
+    "wsmBaseUrl": "https:\/\/terra-wsm.api.verily.com",
+    "organizationId": "965947ad-83d2-4f09-8a86-9896116704d1",
+    "defaultPodId": "204caa47-e3fe-4745-bee6-dc443375b116"
   }
 }
