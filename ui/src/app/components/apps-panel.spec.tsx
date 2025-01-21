@@ -149,12 +149,19 @@ describe(AppsPanel.name, () => {
     user = userEvent.setup();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should allow a user to expand Jupyter', async () => {
     // initial state: no apps exist
 
     runtimeStub.runtime.status = undefined;
     appsStub.listAppsResponse = [];
-
+    jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+    workspaceStub.initialCredits.expirationEpochMillis = new Date(
+      '2025-01-01'
+    ).getTime();
     const { container } = await component();
     expect(container).toBeInTheDocument();
 
