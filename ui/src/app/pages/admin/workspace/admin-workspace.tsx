@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { Accordion, AccordionTab } from 'primereact/accordion';
 
 import {
   AdminRuntimeFields,
@@ -10,6 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { Error as ErrorDiv } from 'app/components/inputs';
+import { ResearchPurposeSection } from 'app/components/research-purpose-section';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
@@ -29,7 +31,6 @@ import { CloudStorageObjects } from './cloud-storage-objects';
 import { CloudStorageTrafficChart } from './cloud-storage-traffic-chart';
 import { CohortBuilder } from './cohort-builder';
 import { Collaborators } from './collaborators';
-import { ResearchPurposeSection } from './research-purpose-section';
 
 interface Props
   extends WithSpinnerOverlayProps,
@@ -150,7 +151,18 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               {...{ workspace, activeStatus }}
               reload={async () => await this.populateWorkspaceDetails()}
             />
-            <ResearchPurposeSection {...{ researchPurpose }} />
+            <Accordion>
+              <AccordionTab
+                header='Research Purpose'
+                pt={{
+                  header: ({ parent }) => ({
+                    style: { backgroundColor: 'pink' },
+                  }),
+                }}
+              >
+                <ResearchPurposeSection {...{ researchPurpose }} />
+              </AccordionTab>
+            </Accordion>
             {activeStatus === WorkspaceActiveStatus.ACTIVE && (
               <>
                 <Collaborators
