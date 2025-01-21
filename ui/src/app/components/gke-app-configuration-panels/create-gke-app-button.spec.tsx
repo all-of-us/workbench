@@ -82,6 +82,7 @@ describe(CreateGkeAppButton.name, () => {
   beforeEach(() => {
     const freeTierBillingAccountId = 'FreeTierBillingAccountId';
     const workspaceStub = buildWorkspaceStub();
+    const oneMinute = 60 * 1000;
     defaultProps = {
       createAppRequest: defaultCromwellCreateRequest,
       existingApp: null,
@@ -91,14 +92,13 @@ describe(CreateGkeAppButton.name, () => {
         namespace: workspaceNamespace,
         initialCredits: {
           ...workspaceStub.initialCredits,
-          expirationEpochMillis: new Date('2025-01-01').getTime(),
+          expirationEpochMillis: new Date().getTime() + 2 * oneMinute,
         },
       },
       onDismiss: () => {},
       username: ProfileStubVariables.PROFILE_STUB.username,
     };
 
-    jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
     serverConfigStore.set({
       config: { ...defaultServerConfig, freeTierBillingAccountId },
     });
@@ -108,7 +108,6 @@ describe(CreateGkeAppButton.name, () => {
   });
   afterEach(() => {
     jest.resetAllMocks();
-    jest.useRealTimers();
   });
 
   describe('should allow creating a GKE app for certain app statuses', () => {
@@ -166,7 +165,7 @@ describe(CreateGkeAppButton.name, () => {
         ...defaultProps.workspace,
         initialCredits: {
           exhausted: false,
-          expired: true,
+          expirationEpochMillis: new Date().getTime() - 1, // Expired in past
           expirationBypassed: false,
         },
       },
