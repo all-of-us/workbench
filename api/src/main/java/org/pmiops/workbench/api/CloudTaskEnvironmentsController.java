@@ -49,9 +49,9 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
         workspaceNamespaces.stream()
             .map(workspaceService::lookupWorkspaceByNamespace)
             .filter(
-                (ws) -> {
-                  boolean successUserRoles = deleteUnshared(ws);
-                  return !successUserRoles;
+                ws -> {
+                  boolean successfulGetFirecloudUserRoles = deleteUnshared(ws);
+                  return !successfulGetFirecloudUserRoles;
                 })
             .toList();
     var elapsed = stopwatch.stop().elapsed();
@@ -63,7 +63,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
     return ResponseEntity.ok().build();
   }
 
-  // return success value
+  // return success value of getFirecloudUserRoles()
   private boolean deleteUnshared(DbWorkspace dbWorkspace) {
     // this call often fails on Test.  TODO: investigate.
     final List<UserRole> userRoles;
