@@ -121,8 +121,6 @@ describe(CreateGkeAppButton.name, () => {
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
 
-      screen.logTestingPlaygroundURL();
-
       const button = await waitFor(() => {
         const createButton = findCreateButton();
         expectButtonElementEnabled(createButton);
