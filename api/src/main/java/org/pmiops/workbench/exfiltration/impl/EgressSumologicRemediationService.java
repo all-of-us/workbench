@@ -23,7 +23,7 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.user.UserAdminService;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
 
   private final EgressJiraHandler egressJiraHandler;
   private final MailService mailService;
-  private final EgressEventMapper egressEventMapper;
+  private final SumologicEgressEventMapper sumologicEgressEventMapper;
   private final UserAdminService userAdminService;
 
   @Autowired
@@ -51,7 +51,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
       LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
-      EgressEventMapper egressEventMapper,
+      SumologicEgressEventMapper sumologicEgressEventMapper,
       @Qualifier(SUMOLOGIC_JIRA_HANDLER_QUALIFIER) EgressJiraHandler egressJiraHandler,
       MailService mailService,
       UserAdminService userAdminService) {
@@ -64,7 +64,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
         egressEventDao);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
-    this.egressEventMapper = egressEventMapper;
+    this.sumologicEgressEventMapper = sumologicEgressEventMapper;
     this.userAdminService = userAdminService;
   }
 
@@ -72,7 +72,8 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   protected void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
     // null for Jupyter
-    String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    String gkeServiceName =
+        sumologicEgressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
     mailService.sendEgressRemediationEmail(user, action, gkeServiceName);
   }
 
@@ -107,7 +108,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   }
 
   private boolean isCromwellApp(DbEgressEvent event) {
-    String serviceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    String serviceName = sumologicEgressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
     return serviceName != null
         && appServiceNameToAppType(serviceName).equals(Optional.of(AppType.CROMWELL));
   }

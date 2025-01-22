@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { faCircle, faCopy } from '@fortawesome/free-regular-svg-icons';
 import {
+  faArrowUpRightFromSquare,
   faBan,
   faCaretRight,
   faCheck,
@@ -202,4 +203,8 @@ export const CommunityIcon = ({ size = 25, ...props }) => (
     style={{ width: size, height: size }}
     {...props}
   />
+);
+
+export const NewWindowIcon = (props) => (
+  <Icon shape={faArrowUpRightFromSquare} {...props} />
 );

@@ -4,11 +4,13 @@ import * as fp from 'lodash/fp';
 
 import { Profile, WorkspaceAccessLevel } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { AlertDanger } from 'app/components/alert';
+import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
-import { ClrIcon } from 'app/components/icons';
+import { ClrIcon, NewWindowIcon } from 'app/components/icons';
 import { Spinner } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NewWorkspaceButton } from 'app/pages/workspace/new-workspace-button';
@@ -17,6 +19,7 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles, withUserProfile } from 'app/utils';
 import { hasTierAccess } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
@@ -130,6 +133,23 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     }),
                   }}
                 />
+
+                {serverConfigStore.get().config.enableVWBWorkspaceCreation && (
+                  <Button
+                    type='primary'
+                    onClick={() => {
+                      window.open(
+                        `${environment.vwbUiUrl}/workspaces`,
+                        '_blank',
+                        'noopener noreferrer'
+                      );
+                    }}
+                    style={{ marginLeft: 'auto', height: '2.25rem' }}
+                  >
+                    Open Verily Workbench{' '}
+                    <NewWindowIcon style={{ marginLeft: '5px' }} />
+                  </Button>
+                )}
               </FlexRow>
               {errorText && (
                 <AlertDanger>

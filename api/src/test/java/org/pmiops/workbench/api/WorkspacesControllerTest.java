@@ -4,14 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.assertArg;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -28,7 +21,6 @@ import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
@@ -193,6 +185,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -202,12 +195,10 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceOperationMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
@@ -304,6 +295,7 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspacesController workspacesController;
   @Autowired FeaturedWorkspaceDao featuredWorkspaceDao;
+  @Autowired WorkspaceServiceFactory workspaceServiceFactory;
 
   @MockBean AccessTierService accessTierService;
   @MockBean BucketAuditQueryService bucketAuditQueryService;
@@ -397,6 +389,8 @@ public class WorkspacesControllerTest {
     UserRecentResourceService.class,
     UserService.class,
     WorkspaceAuditor.class,
+    WorkspaceServiceFactory.class,
+    WsmClient.class
   })
   static class Configuration {
     @Bean
@@ -450,6 +444,8 @@ public class WorkspacesControllerTest {
 
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
         .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
+
+    when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
   }
 
   private DbUser createUser(String email) {
@@ -547,8 +543,7 @@ public class WorkspacesControllerTest {
     Schema schema = Schema.of(count);
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     List<FieldValueList> tableRows = List.of(FieldValueList.of(List.of(countValue)));
-    TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     // construct the second TableResult call
     Field personId = Field.of("person_id", LegacySQLTypeName.STRING);
@@ -585,8 +580,7 @@ public class WorkspacesControllerTest {
                     ethnicityConceptIdValue,
                     sexAtBirthConceptIdValue,
                     deceasedValue)));
-    TableResult result2 =
-        new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
+    TableResult result2 = BigQueryUtils.newTableResult(schema2, tableRows2);
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null)).thenReturn(result, result2);

@@ -35,7 +35,7 @@ public class OfflineEgressController implements OfflineEgressApiDelegate {
           event.getEgressEventId(), ExfiltrationUtils.isVwbEgressEvent(event));
     }
 
-    if (oldPendingEvents.size() > 0) {
+    if (!oldPendingEvents.isEmpty()) {
       log.warning(
           String.format("found and re-enqueued %d old PENDING events", oldPendingEvents.size()));
     }

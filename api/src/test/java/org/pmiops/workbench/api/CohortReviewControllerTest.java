@@ -3,14 +3,12 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
@@ -134,14 +132,17 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
@@ -219,6 +220,8 @@ public class CohortReviewControllerTest {
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortReviewController cohortReviewController;
 
+  @Autowired WorkspaceServiceFactory workspaceServiceFactory;
+
   private enum TestConcepts {
     RACE_ASIAN("Asian", 8515, CriteriaType.RACE),
     RACE_WHITE("White", 8527, CriteriaType.RACE),
@@ -285,7 +288,7 @@ public class CohortReviewControllerTest {
     WorkspaceServiceImpl.class,
     WorkspaceAuthService.class,
     WorkspacesController.class,
-    AccessTierServiceImpl.class,
+    AccessTierServiceImpl.class
   })
   @MockBean({
     AccessModuleService.class,
@@ -297,7 +300,6 @@ public class CohortReviewControllerTest {
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
-    InitialCreditsService.class,
     IamService.class,
     InitialCreditsService.class,
     LeonardoApiClient.class,
@@ -309,6 +311,8 @@ public class CohortReviewControllerTest {
     WorkspaceOperationMapper.class,
     WorkspaceResourcesService.class,
     WorkspaceService.class,
+    WorkspaceServiceFactory.class,
+    WsmClient.class
   })
   static class Configuration {
     @Bean
@@ -2461,8 +2465,7 @@ public class CohortReviewControllerTest {
     List<FieldValueList> tableRows =
         Collections.singletonList(
             FieldValueList.of(Arrays.asList(nameValue, raceValue, ageRangeValue, countValue)));
-    TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
   }
@@ -2491,8 +2494,7 @@ public class CohortReviewControllerTest {
                     startDateValue,
                     ageAtEventValue,
                     rankValue)));
-    TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
@@ -2510,8 +2512,7 @@ public class CohortReviewControllerTest {
     List<FieldValueList> tableRows =
         Collections.singletonList(
             FieldValueList.of(Arrays.asList(typeValue, domainValue, vocabularyValue)));
-    TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
@@ -2529,8 +2530,7 @@ public class CohortReviewControllerTest {
     List<FieldValueList> tableRows =
         Collections.singletonList(FieldValueList.of(Arrays.asList(countValue, birthDatetimeValue)));
 
-    TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
@@ -2630,8 +2630,7 @@ public class CohortReviewControllerTest {
                     strengthValue,
                     routeValue,
                     refRangeValue)));
-    TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
@@ -2697,8 +2696,7 @@ public class CohortReviewControllerTest {
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     List<FieldValueList> tableRows =
         Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
-    TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     // construct the second TableResult call
     Field personId = Field.of("person_id", LegacySQLTypeName.STRING);
@@ -2735,8 +2733,7 @@ public class CohortReviewControllerTest {
                     ethnicityConceptIdValue,
                     sexAtBirthConceptIdValue,
                     deceasedValue)));
-    TableResult result2 =
-        new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
+    TableResult result2 = BigQueryUtils.newTableResult(schema2, tableRows2);
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result, result2);
@@ -2781,7 +2778,9 @@ public class CohortReviewControllerTest {
     tmpWorkspace.setCdrVersionId(String.valueOf(cdrVersionId));
     tmpWorkspace.setBillingAccountName("billing-account");
 
-    TestMockFactory.stubCreateFcWorkspace(fireCloudService);
+    when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
+
+    TestMockFactory.stubCreateFcWorkspace(workspaceService, fireCloudService);
 
     tmpWorkspace = workspacesController.createWorkspace(tmpWorkspace).getBody();
     stubWorkspaceAccessLevel(Objects.requireNonNull(tmpWorkspace), RawlsWorkspaceAccessLevel.OWNER);

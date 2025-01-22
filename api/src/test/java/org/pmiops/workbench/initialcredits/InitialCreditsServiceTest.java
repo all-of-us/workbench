@@ -18,14 +18,6 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.initialcredits.InitialCreditsExpiryTaskMatchers.MapMatcher;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
-import com.google.cloud.PageImpl;
-import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.FieldValue.Attribute;
-import com.google.cloud.bigquery.FieldValueList;
-import com.google.cloud.bigquery.LegacySQLTypeName;
-import com.google.cloud.bigquery.Schema;
-import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -36,12 +28,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -97,12 +87,10 @@ public class InitialCreditsServiceTest {
   @MockBean private LeonardoApiClient leonardoApiClient;
   @MockBean private InstitutionService institutionService;
 
-  @Autowired BigQueryService bigQueryService;
   @Autowired InitialCreditsService initialCreditsService;
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-  @Autowired WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
 
   @Autowired private TaskQueueService taskQueueService;
 
@@ -1162,24 +1150,6 @@ public class InitialCreditsServiceTest {
         new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(30.0));
     boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
     assertThat(eligibility).isTrue();
-  }
-
-  private TableResult mockBQTableResult(final Map<String, Double> costMap) {
-    Field idField = Field.of("id", LegacySQLTypeName.STRING);
-    Field costField = Field.of("cost", LegacySQLTypeName.FLOAT);
-    Schema s = Schema.of(idField, costField);
-
-    List<FieldValueList> tableRows =
-        costMap.entrySet().stream()
-            .map(
-                e -> {
-                  FieldValue id = FieldValue.of(Attribute.PRIMITIVE, e.getKey());
-                  FieldValue cost = FieldValue.of(Attribute.PRIMITIVE, e.getValue().toString());
-                  return FieldValueList.of(Arrays.asList(id, cost));
-                })
-            .collect(Collectors.toList());
-
-    return new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
   }
 
   private void assertSingleWorkspaceTestDbState(

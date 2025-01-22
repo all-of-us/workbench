@@ -1,13 +1,11 @@
-package org.pmiops.workbench.wsm;
+package org.pmiops.workbench.vwb.wsm;
 
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
-import java.util.List;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.rawls.RawlsApiClientFactory;
+import org.pmiops.workbench.vwb.common.VwbApiClientUtils;
 import org.pmiops.workbench.wsmanager.ApiClient;
 import org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi;
 import org.pmiops.workbench.wsmanager.api.ResourceApi;
@@ -24,11 +22,9 @@ public class WsmConfig {
   public static final String WSM_API_CLIENT = "WSM_API_CLIENT";
   public static final String WSM_WORKSPACE_API = "WSM_WORKSPACE_CLIENT";
 
-  public static final String SERVICE_ACCOUNT_API_CLIENT = "WSM_SERVICE_ACCOUNT_API_CLIENT";
-  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "WSM_SERVICE_ACCOUNT_WORKSPACE_API";
-
-  public static final List<String> SCOPES =
-      ImmutableList.<String>builder().addAll(RawlsApiClientFactory.SCOPES).build();
+  public static final String WSM_SERVICE_ACCOUNT_API_CLIENT = "WSM_SERVICE_ACCOUNT_API_CLIENT";
+  public static final String WSM_SERVICE_ACCOUNT_WORKSPACE_API =
+      "WSM_SERVICE_ACCOUNT_WORKSPACE_API";
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -68,22 +64,23 @@ public class WsmConfig {
     return apiClient;
   }
 
-  @Bean(name = SERVICE_ACCOUNT_API_CLIENT)
+  @Bean(name = WSM_SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient serviceAccountApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = newApiClient(workbenchConfig);
     try {
-      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(SCOPES));
+      apiClient.setAccessToken(
+          ServiceAccounts.getScopedServiceAccessToken(VwbApiClientUtils.SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
     return apiClient;
   }
 
-  @Bean(name = SERVICE_ACCOUNT_WORKSPACE_API)
+  @Bean(name = WSM_SERVICE_ACCOUNT_WORKSPACE_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspaceApi serviceAccountWorkspaceApi(
-      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+      @Qualifier(WSM_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     return new WorkspaceApi(apiClient);
   }
 }

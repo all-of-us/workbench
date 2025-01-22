@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
@@ -85,9 +86,8 @@ import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
@@ -205,6 +205,10 @@ public class ConceptSetsControllerTest {
 
   @Autowired WorkspacesController workspacesController;
 
+  @Autowired WorkspaceServiceFactory workspaceServiceFactory;
+
+  @Autowired WorkspaceService workspaceService;
+
   @Autowired private FakeClock fakeClock;
 
   @TestConfiguration
@@ -249,7 +253,6 @@ public class ConceptSetsControllerTest {
     FeaturedWorkspaceMapper.class,
     FireCloudService.class,
     FirecloudMapperImpl.class,
-    InitialCreditsService.class,
     IamService.class,
     InitialCreditsService.class,
     MailService.class,
@@ -260,6 +263,8 @@ public class ConceptSetsControllerTest {
     WorkspaceAuditor.class,
     WorkspaceOperationMapper.class,
     EgressObjectLengthsRemediationService.class,
+    WorkspaceServiceFactory.class,
+    WsmClient.class
   })
   static class Configuration {
     @Bean
@@ -285,6 +290,8 @@ public class ConceptSetsControllerTest {
   public void setUp() throws Exception {
     // reset after every test
     ConceptSetService.MAX_CONCEPTS_PER_SET = 1000; // original value
+
+    // when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
 
     TestMockFactory.stubCreateBillingProject(fireCloudService);
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
@@ -1630,6 +1637,8 @@ public class ConceptSetsControllerTest {
     tmpWorkspace.setBillingAccountName("billing-account");
 
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
+
+    when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
 
     tmpWorkspace = workspacesController.createWorkspace(tmpWorkspace).getBody();
     stubWorkspaceAccessLevel(tmpWorkspace, workspaceAccessLevel);

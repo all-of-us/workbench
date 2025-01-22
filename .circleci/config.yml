@@ -8,7 +8,6 @@ orbs:
   browser-tools: circleci/browser-tools@1.4.6
   queue: eddiewebb/queue@2.2.1
   coverage-reporter: codacy/coverage-reporter@13.13.7
-  pact: trustedshops-public/pact@3.0.1
   gcp-cli: circleci/gcp-cli@3.2.1
 
 # -------------------------
@@ -23,13 +22,10 @@ parameters:
     default: "/home/circleci/circle-sa-key.json"
   workbench-image:
     type: string
-    default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.28"
+    default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.29"
   db-image:
     type: string
     default: "cimg/mysql:5.7"
-  pact-image:
-    type: string
-    default: "pactfoundation/pact-cli:latest"
 
 # -------------------------
 #   ANCHORS
@@ -121,14 +117,6 @@ executors:
       WORKBENCH_ENV: test
       TEST_MODE: integration
       TZ: "America/New_York"
-
-  # Docker image environment with Pact CLI installed
-  pact-executor:
-    environment:
-      <<: *env-default
-    docker:
-    - image: << pipeline.parameters.pact-image >>
-    working_directory: ~
 
 # -------------------------
 #   COMMANDS

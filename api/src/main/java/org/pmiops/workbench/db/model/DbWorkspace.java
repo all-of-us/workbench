@@ -28,7 +28,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
 @SecondaryTable(
@@ -36,6 +40,14 @@ import org.pmiops.workbench.model.*;
     pkJoinColumns = @PrimaryKeyJoinColumn(name = "workspace_id"))
 @Table(name = "workspace")
 public class DbWorkspace {
+
+  public enum AIANResearchType {
+    EXCLUSIVE_AI_AN_POPULATION,
+    CASE_CONTROL_AI_AN,
+    FINDINGS_BY_AI_AN,
+    NO_AI_AN_ANALYSIS
+  }
+
   private String firecloudUuid;
 
   private long workspaceId;
@@ -94,6 +106,9 @@ public class DbWorkspace {
   private boolean usesTanagra;
 
   private Boolean isVwbWorkspace;
+
+  private AIANResearchType aianResearchType;
+  private String aianResearchDetails;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -795,6 +810,25 @@ public class DbWorkspace {
   public DbWorkspace setUsesTanagra(boolean usesTanagra) {
     this.usesTanagra = usesTanagra;
     return this;
+  }
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "rp_aian_research_type")
+  public AIANResearchType getAianResearchType() {
+    return aianResearchType;
+  }
+
+  public void setAianResearchType(AIANResearchType aianResearchType) {
+    this.aianResearchType = aianResearchType;
+  }
+
+  @Column(name = "rp_aian_research_details")
+  public String getAianResearchDetails() {
+    return aianResearchDetails;
+  }
+
+  public void setAianResearchDetails(String aianResearchDetails) {
+    this.aianResearchDetails = aianResearchDetails;
   }
 
   @Transient

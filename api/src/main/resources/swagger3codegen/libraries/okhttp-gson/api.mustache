@@ -168,7 +168,7 @@ public class {{classname}} {
             Set<ConstraintViolation<{{classname}}>> violations = executableValidator.validateParameters(this, method,
                     parameterValues);
 
-            if (violations.size() == 0) {
+            if (violations.isEmpty()) {
                 okhttp3.Call {{localVariablePrefix}}call = {{operationId}}Call({{#allParams}}{{paramName}}, {{/allParams}}progressListener, progressRequestListener);
                 return {{localVariablePrefix}}call;
 

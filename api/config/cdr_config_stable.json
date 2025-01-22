@@ -29,7 +29,8 @@
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
       "numParticipants": 0,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 1
     },
     {
       "cdrVersionId": 2,
@@ -39,7 +40,8 @@
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
       "numParticipants": 0,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 2
     },
     {
       "cdrVersionId": 3,
@@ -49,7 +51,8 @@
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
       "numParticipants": 0,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 1
     },
     {
       "cdrVersionId": 4,
@@ -59,7 +62,8 @@
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
       "numParticipants": 0,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 2
     },
     {
       "cdrVersionId": 5,
@@ -73,7 +77,8 @@
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 3
     },
     {
       "cdrVersionId": 6,
@@ -87,7 +92,8 @@
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "publicReleaseNumber": 4
     },
     {
       "cdrVersionId": 7,
@@ -106,7 +112,8 @@
       "storageBasePath": "v5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
-      "accessTier": "controlled"
+      "accessTier": "controlled",
+      "publicReleaseNumber": 5
     },
     {
       "cdrVersionId": 8,
@@ -123,7 +130,9 @@
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered",
-      "tanagraEnabled": true
+      "tanagraEnabled": true,
+      "publicReleaseNumber": 5,
+      "vwbTemplateId": "b0ea0e96-5aeb-463b-9e67-2b16e827549a"
     },
     {
       "cdrVersionId": 9,
@@ -145,7 +154,9 @@
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "tanagraEnabled": true
+      "tanagraEnabled": true,
+      "publicReleaseNumber": 5,
+      "vwbTemplateId": "518946e5-2eae-49f6-8fa2-b4963c1a13f5"
     }
   ]
 }

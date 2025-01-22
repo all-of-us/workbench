@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTierCdrVersion;
-import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
@@ -116,7 +115,6 @@ public class WorkspaceServiceTest {
     ConceptSetService.class,
     DataSetService.class,
     FeaturedWorkspaceMapper.class,
-    InitialCreditsService.class,
     IamService.class,
     InitialCreditsService.class,
     ProfileMapper.class,
@@ -652,63 +650,6 @@ public class WorkspaceServiceTest {
     assertThrows(
         FailedPreconditionException.class,
         () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount));
-  }
-
-  @Test
-  public void userWithoutCtTierAccessCTWorkspace() {
-    DbWorkspace dbWorkspace =
-        buildDbWorkspace(
-            workspaceIdIncrementer.getAndIncrement(),
-            "Controlled Tier Workspace",
-            DEFAULT_WORKSPACE_NAMESPACE,
-            WorkspaceActiveStatus.ACTIVE);
-    DbCdrVersion dbCdrVersion = createControlledTierCdrVersion(1);
-    accessTierDao.save(dbCdrVersion.getAccessTier());
-    dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
-    dbWorkspace.setCdrVersion(dbCdrVersion);
-    workspaceDao.save(dbWorkspace);
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            workspaceService.getWorkspace(
-                DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()));
-  }
-
-  @Test
-  public void userWithoutRegisterTierAccessRTWorkspace() {
-    DbWorkspace dbWorkspace = dbWorkspaces.get(0);
-    DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
-    accessTierDao.save(dbCdrVersion.getAccessTier());
-    dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
-    dbWorkspace.setCdrVersion(dbCdrVersion);
-    when(mockAccessTierService.getAccessTierShortNamesForUser(currentUser))
-        .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            workspaceService.getWorkspace(
-                DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()));
-  }
-
-  @Test
-  public void userWithCtTierAccessCTWorkspace() {
-    DbWorkspace dbWorkspace =
-        buildDbWorkspace(
-            workspaceIdIncrementer.getAndIncrement(),
-            "Controlled Tier Workspace",
-            DEFAULT_WORKSPACE_NAMESPACE,
-            WorkspaceActiveStatus.ACTIVE);
-    DbCdrVersion dbCdrVersion = createControlledTierCdrVersion(1);
-    accessTierDao.save(dbCdrVersion.getAccessTier());
-    cdrVersionDao.save(dbCdrVersion);
-    dbWorkspace.setCdrVersion(dbCdrVersion);
-
-    addMockedWorkspace(dbWorkspace);
-
-    when(mockAccessTierService.getAccessTierShortNamesForUser(currentUser))
-        .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
-
-    workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
   }
 
   @Test

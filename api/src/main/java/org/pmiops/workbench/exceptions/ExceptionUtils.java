@@ -140,5 +140,13 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
+  public static WorkbenchException convertExfilManagerException(
+      org.pmiops.workbench.vwb.exfil.ApiException e) {
+    if (isSocketTimeoutException(e.getCause())) {
+      throw new GatewayTimeoutException();
+    }
+    throw codeToException(e.getCode());
+  }
+
   private ExceptionUtils() {}
 }

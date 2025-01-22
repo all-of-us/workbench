@@ -3,10 +3,12 @@ package org.pmiops.workbench.api;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import jakarta.inject.Provider;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -27,7 +29,9 @@ import org.pmiops.workbench.model.ListEgressEventsRequest;
 import org.pmiops.workbench.model.ListEgressEventsResponse;
 import org.pmiops.workbench.model.UpdateEgressEventRequest;
 import org.pmiops.workbench.utils.PaginationToken;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
+import org.pmiops.workbench.utils.mappers.VwbEgressEventMapper;
+import org.pmiops.workbench.vwb.exfil.ExfilManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,26 +49,35 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
       ImmutableSet.of(EgressEventStatus.REMEDIATED, EgressEventStatus.VERIFIED_FALSE_POSITIVE);
 
   private final EgressLogService egressLogService;
-  private final EgressEventMapper egressEventMapper;
+  private final SumologicEgressEventMapper sumologicEgressEventMapper;
+  private final VwbEgressEventMapper vwbEgressEventMapper;
   private final EgressEventAuditor egressEventAuditor;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
   private final EgressEventDao egressEventDao;
+  private final Provider<WorkbenchConfig> configProvider;
+  private final ExfilManagerClient exfilManagerClient;
 
   @Autowired
   public EgressEventsAdminController(
       EgressLogService egressLogService,
-      EgressEventMapper egressEventMapper,
+      SumologicEgressEventMapper sumologicEgressEventMapper,
+      VwbEgressEventMapper vwbEgressEventMapper,
       EgressEventAuditor egressEventAuditor,
       UserDao userDao,
       WorkspaceDao workspaceDao,
-      EgressEventDao egressEventDao) {
+      EgressEventDao egressEventDao,
+      Provider<WorkbenchConfig> configProvider,
+      ExfilManagerClient exfilManagerClient) {
     this.egressLogService = egressLogService;
-    this.egressEventMapper = egressEventMapper;
+    this.sumologicEgressEventMapper = sumologicEgressEventMapper;
+    this.vwbEgressEventMapper = vwbEgressEventMapper;
     this.egressEventAuditor = egressEventAuditor;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.egressEventDao = egressEventDao;
+    this.configProvider = configProvider;
+    this.exfilManagerClient = exfilManagerClient;
   }
 
   @AuthorityRequired(Authority.SECURITY_ADMIN)
@@ -125,9 +138,14 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
       nextPageToken =
           PaginationToken.of(pageable.getPageNumber() + 1, toPaginationParams(request)).toBase64();
     }
+
+    // Use the appropriate mapper dynamically based on vwbWorkspaceId.
     return ResponseEntity.ok(
         new ListEgressEventsResponse()
-            .events(page.stream().map(egressEventMapper::toApiEvent).collect(Collectors.toList()))
+            .events(
+                page.stream()
+                    .map(this::toApiEvent) // Dynamically choose the mapper
+                    .collect(Collectors.toList()))
             .nextPageToken(nextPageToken)
             .totalSize((int) page.getTotalElements()));
   }
@@ -151,19 +169,24 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
               + Joiner.on(", ").join(updateableStatuses));
     }
 
-    EgressEventStatus existingStatus = egressEventMapper.toApiStatus(dbEgressEvent.getStatus());
+    EgressEventStatus existingStatus = toApiStatus(dbEgressEvent); // Dynamically choose the mapper
     if (!updateableStatuses.contains(existingStatus)) {
       throw new FailedPreconditionException(
           "current event status is not manually updatable: " + existingStatus);
     }
 
     DbEgressEventStatus toStatus =
-        egressEventMapper.toDbStatus(request.getEgressEvent().getStatus());
+        toDbStatus(
+            request.getEgressEvent().getStatus(), dbEgressEvent); // Dynamically choose the mapper
     DbEgressEvent updatedEvent = egressEventDao.save(dbEgressEvent.setStatus(toStatus));
 
+    if (configProvider.get().featureFlags.enableVWBEgressMonitor
+        && dbEgressEvent.getVwbWorkspaceId() != null) {
+      exfilManagerClient.updateEgressEventStatus(dbEgressEvent, toStatus);
+    }
     egressEventAuditor.fireAdminEditEgressEvent(dbEgressEvent, updatedEvent);
 
-    return ResponseEntity.ok(egressEventMapper.toApiEvent(updatedEvent));
+    return ResponseEntity.ok(toApiEvent(updatedEvent)); // Dynamically choose the mapper
   }
 
   @AuthorityRequired(Authority.SECURITY_ADMIN)
@@ -174,9 +197,34 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
 
     return ResponseEntity.ok(
         new AuditEgressEventResponse()
-            .egressEvent(egressEventMapper.toApiEvent(dbEgressEvent))
-            .sumologicEvent(egressEventMapper.toSumoLogicEvent(dbEgressEvent))
+            .egressEvent(toApiEvent(dbEgressEvent)) // Dynamically choose the mapper
+            .sumologicEvent(sumologicEgressEventMapper.toSumoLogicEvent(dbEgressEvent))
             .runtimeLogGroups(egressLogService.getRuntimeLogGroups(dbEgressEvent)));
+  }
+
+  // Helper methods to dynamically choose the mapper
+  private EgressEvent toApiEvent(DbEgressEvent dbEgressEvent) {
+    if (dbEgressEvent.getVwbWorkspaceId() != null) {
+      return vwbEgressEventMapper.toApiEvent(dbEgressEvent);
+    } else {
+      return sumologicEgressEventMapper.toApiEvent(dbEgressEvent);
+    }
+  }
+
+  private EgressEventStatus toApiStatus(DbEgressEvent dbEgressEvent) {
+    if (dbEgressEvent.getVwbWorkspaceId() != null) {
+      return vwbEgressEventMapper.toApiStatus(dbEgressEvent.getStatus());
+    } else {
+      return sumologicEgressEventMapper.toApiStatus(dbEgressEvent.getStatus());
+    }
+  }
+
+  private DbEgressEventStatus toDbStatus(EgressEventStatus status, DbEgressEvent dbEgressEvent) {
+    if (dbEgressEvent.getVwbWorkspaceId() != null) {
+      return vwbEgressEventMapper.toDbStatus(status);
+    } else {
+      return sumologicEgressEventMapper.toDbStatus(status);
+    }
   }
 
   private DbEgressEvent mustGetDbEvent(String id) {

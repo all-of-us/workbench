@@ -410,6 +410,8 @@ public class WorkbenchConfig {
     public Integer usersPerSynchronizeAccessTask;
     // Number of users to process within a single check initial credits expiration task.
     public Integer usersPerCheckInitialCreditsExpirationTask;
+    // Number of workspaces to process within a single delete workspace environments task.
+    public Integer workspacesPerDeleteWorkspaceEnvironmentsTask;
   }
 
   /**
@@ -476,6 +478,7 @@ public class WorkbenchConfig {
 
   public static class VwbConfig {
     public String wsmBaseUrl;
+    public String exfilManagerBaseUrl;
     public String organizationId;
     // This will only be used for preview release, later on, each user will have their own pod.
     public String defaultPodId;

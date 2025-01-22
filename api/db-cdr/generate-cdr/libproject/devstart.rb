@@ -38,19 +38,33 @@ end
 
 def service_account_context_for_bq(project, account)
   common = Common.new
-
   original_account = get_active_gcloud_account()
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
   key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
-  ServiceAccountContext.new(
-    project, account, key_file.path).run do
-    common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
-    yield
-  ensure
-    common.status "restoring original gcloud account: #{original_account}"
-    common.run_inline %{gcloud auth login #{original_account}}
+  refresh_interval = 30 * 60 # Refresh every 30 minutes
+
+  refresh_token = lambda do
+    loop do
+      sleep(refresh_interval)
+      common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file.path}}
+    end
   end
+
+  refresh_thread = Thread.new(&refresh_token)
+
+  begin
+    ServiceAccountContext.new(project, account, key_file.path).run do
+      common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file.path}}
+      yield
+    end
+  ensure
+    refresh_thread.kill
+    common.status "restoring original gcloud account: #{original_account}"
+    common.run_inline %W{gcloud auth login #{original_account}}
+  end
+
 end
+
 
 # By default, skip empty lines only.
 def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter = "", table_skip_filter = "^$")

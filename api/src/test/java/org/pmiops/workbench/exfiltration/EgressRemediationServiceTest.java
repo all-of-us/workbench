@@ -12,7 +12,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_JIRA_HANDLER_QUALIFIER;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_VWB_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -51,6 +53,7 @@ import org.pmiops.workbench.exfiltration.impl.EgressSumologicRemediationService;
 import org.pmiops.workbench.exfiltration.impl.EgressVwbRemediationService;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressSumologicJiraHandler;
+import org.pmiops.workbench.exfiltration.jirahandler.EgressVwbJiraHandler;
 import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.JiraService.IssueProperty;
@@ -69,8 +72,10 @@ import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.user.UserAdminService;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
-import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapperImpl;
+import org.pmiops.workbench.utils.mappers.VwbEgressEventMapper;
+import org.pmiops.workbench.utils.mappers.VwbEgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -98,7 +103,8 @@ public class EgressRemediationServiceTest {
   @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
-  @Autowired private EgressEventMapper egressEventMapper;
+  @Autowired private SumologicEgressEventMapper sumologicEgressEventMapper;
+  @Autowired private VwbEgressEventMapper vwbEgressEventMapper;
   @Autowired private UserDao userDao;
 
   @Autowired
@@ -109,7 +115,13 @@ public class EgressRemediationServiceTest {
   @Qualifier(EGRESS_VWB_SERVICE_QUALIFIER)
   private EgressRemediationService vwbEgressRemediationService;
 
-  @Autowired private EgressJiraHandler egressJiraHandler;
+  @Autowired
+  @Qualifier(SUMOLOGIC_JIRA_HANDLER_QUALIFIER)
+  private EgressJiraHandler sumoEgressJiraHandler;
+
+  @Autowired
+  @Qualifier(EGRESS_VWB_JIRA_HANDLER_QUALIFIER)
+  private EgressJiraHandler vwbEgressJiraHandler;
 
   private long userId;
   private DbWorkspace dbWorkspace;
@@ -117,13 +129,15 @@ public class EgressRemediationServiceTest {
 
   @TestConfiguration
   @Import({
-    EgressEventMapperImpl.class,
+    VwbEgressEventMapperImpl.class,
+    SumologicEgressEventMapperImpl.class,
     EgressSumologicRemediationService.class,
     EgressVwbRemediationService.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
     JiraService.class,
-    EgressSumologicJiraHandler.class
+    EgressSumologicJiraHandler.class,
+    EgressVwbJiraHandler.class
   })
   @MockBean({
     CommonMappers.class,
@@ -411,7 +425,8 @@ public class EgressRemediationServiceTest {
     DbEgressEvent event = egressEventDao.findById(eventId).get();
     assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
-    String gkeServiceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    String gkeServiceName =
+        sumologicEgressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
     verify(mockMailService)
         .sendEgressRemediationEmail(
             any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq(gkeServiceName));

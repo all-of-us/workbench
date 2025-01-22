@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -38,17 +39,20 @@ public class WorkspaceAuthService {
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
+  private final AccessTierService accessTierService;
 
   @Autowired
   public WorkspaceAuthService(
       FireCloudService fireCloudService,
       Provider<DbUser> userProvider,
       WorkspaceDao workspaceDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      AccessTierService accessTierService) {
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.workspaceDao = workspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.accessTierService = accessTierService;
   }
 
   /*
@@ -190,5 +194,25 @@ public class WorkspaceAuthService {
         getFirecloudWorkspaceAcl(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
     return workspaceDao.saveWithLastModified(workspace, userProvider.get());
+  }
+
+  /**
+   * Throw ForbiddenException if logged in user doesn't have the same Tier Access as that of
+   * workspace
+   *
+   * @param dbWorkspace
+   */
+  public void validateWorkspaceTierAccess(DbWorkspace dbWorkspace) {
+    String workspaceAccessTier = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
+
+    List<String> accessTiers = accessTierService.getAccessTierShortNamesForUser(userProvider.get());
+
+    if (!accessTiers.contains(workspaceAccessTier)) {
+      throw new ForbiddenException(
+          String.format(
+              "User with username %s does not have access to the '%s' access tier required by "
+                  + "workspace '%s'",
+              userProvider.get().getUsername(), workspaceAccessTier, dbWorkspace.getName()));
+    }
   }
 }

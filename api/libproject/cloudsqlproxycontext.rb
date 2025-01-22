@@ -14,34 +14,38 @@ class CloudSqlProxyContext < ServiceAccountContext
     super do
       ps = nil
       docker_container_id = nil
-      instance = "#{@project}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307"
+      instance = "#{@project}:us-central1:workbenchmaindb"
       if Workbench.in_docker?
         ps = fork do
           exec(*%W{
           cloud_sql_proxy
-            -instances #{instance}
-            -credential_file=#{@path}
+            --port 3307
+            #{instance}
+            --credentials-file=#{@path}
           })
         end
       else
         if common.run(%W{docker kill #{DOCKER_PROXY_NAME}}).success?
           common.warning "found and killed existing cloud sql proxy docker service"
         end
+ 
         docker_container_id = common.capture_stdout(%W{docker run -d
              -u #{ENV["UID"]}
              -v #{@keyfile_path}:/config
-             -p 0.0.0.0:3307:3307
+             --publish 3307:3307 
              --rm
              --name #{DOCKER_PROXY_NAME}
-             gcr.io/cloudsql-docker/gce-proxy:1.19.1 /cloud_sql_proxy
-             -instances=#{instance}
-             -credential_file=/config
+             gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.2
+             --address 0.0.0.0
+             --port 3307
+             --credentials-file=/config
+             #{instance}
           }).chomp
       end
       begin
         common.status "waiting up to #{DEADLINE_SEC}s for cloudsql proxy to start..."
         start = Time.now
-        until common.run(maybe_dockerize_mysql_cmd("mysqladmin ping --host 0.0.0.0 --port 3307 --silent")).success?
+        until common.run(maybe_dockerize_mysql_cmd("mysqladmin ping --host 0.0.0.0 --port 3307")).success?
           if Time.now - start >= DEADLINE_SEC
             raise("mysql docker service did not become available after #{DEADLINE_SEC}s")
           end

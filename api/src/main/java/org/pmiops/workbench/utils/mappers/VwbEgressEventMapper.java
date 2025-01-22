@@ -10,16 +10,15 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.model.BucketAuditEntry;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventStatus;
-import org.pmiops.workbench.model.SumologicEgressEvent;
 
 @Mapper(config = MapStructConfig.class, uses = CommonMappers.class)
-public interface EgressEventMapper {
+public interface VwbEgressEventMapper {
   // these are calculated in addWindowTiming()
   @Mapping(target = "timeWindowStartEpochMillis", ignore = true)
   @Mapping(target = "timeWindowEndEpochMillis", ignore = true)
   @Mapping(target = "sourceUserEmail", source = "user.username")
-  @Mapping(target = "sourceWorkspaceNamespace", source = "workspace.workspaceNamespace")
-  @Mapping(target = "sourceGoogleProject", source = "workspace.googleProject")
+  @Mapping(target = "sourceWorkspaceNamespace", source = "vwbWorkspaceId")
+  @Mapping(target = "sourceGoogleProject", source = "gcpProjectId")
   @Mapping(target = "creationTime", qualifiedByName = "timestampToIso8601String")
   EgressEvent toApiEvent(DbEgressEvent event);
 
@@ -27,24 +26,16 @@ public interface EgressEventMapper {
 
   @AfterMapping
   default void addWindowTiming(DbEgressEvent source, @MappingTarget EgressEvent target) {
-    SumologicEgressEvent sumoEvent = toSumoLogicEvent(source);
-    if (sumoEvent == null) {
+    if (source.getTimeWindowStart() == null) {
       return;
     }
-    if (sumoEvent.getTimeWindowStart() != null) {
-      long timeWindowStart = sumoEvent.getTimeWindowStart();
-      long timeWindowMillis = sumoEvent.getTimeWindowDuration() * 1000;
-      long timeWindowEnd = timeWindowStart + timeWindowMillis;
-
-      target.timeWindowStartEpochMillis(timeWindowStart).timeWindowEndEpochMillis(timeWindowEnd);
-    }
+    long timeWindowStart = source.getTimeWindowStart().getTime();
+    long timeWindowMillis = source.getEgressWindowSeconds() * 1000;
+    long timeWindowEnd = timeWindowStart + timeWindowMillis;
+    target.timeWindowStartEpochMillis(timeWindowStart).timeWindowEndEpochMillis(timeWindowEnd);
   }
 
   DbEgressEventStatus toDbStatus(EgressEventStatus status);
-
-  default SumologicEgressEvent toSumoLogicEvent(DbEgressEvent dbEgressEvent) {
-    return new Gson().fromJson(dbEgressEvent.getSumologicEvent(), SumologicEgressEvent.class);
-  }
 
   default BucketAuditEntry toBucketAuditEntry(DbEgressEvent dbEgressEvent) {
     if (dbEgressEvent.getBucketAuditEvent() == null) {

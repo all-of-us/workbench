@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortreview.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -19,6 +18,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -116,8 +116,7 @@ public class ParticipantCohortStatusMapperTest {
                     sexAtBirthConceptIdValue,
                     deceasedValue)));
 
-    TableResult result =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(s, tableRows);
 
     Date birthDate =
         participantCohortStatusMapper.getBirthDate(result.iterateAll().iterator().next());

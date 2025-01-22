@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.api.gax.paging.Page;
-import com.google.cloud.bigquery.EmptyTableResult;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
@@ -25,6 +24,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.FakeSinglePage;
 import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
@@ -97,9 +97,9 @@ public class ActionAuditQueryServiceTest {
   private static final Page<FieldValueList> WORKSPACE_QUERY_RESULT_PAGE =
       new FakeSinglePage<>(WORKSPACE_RESULT_ROWS);
   private static final TableResult WORKSPACE_TABLE_RESULT =
-      new TableResult(
+      BigQueryUtils.newTableResult(
           WORKSPACE_QUERY_SCHEMA, WORKSPACE_RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
-  private static final TableResult EMPTY_RESULT = new EmptyTableResult(null);
+  private static final TableResult EMPTY_RESULT = BigQueryUtils.emptyTableResult();
   private static final long DEFAULT_LIMIT = 100L;
   private static final Instant DEFAULT_AFTER = Instant.parse("2005-02-14T01:20:00.02Z");
   private static final Instant DEFAULT_BEFORE = Instant.parse("2020-08-30T01:20:00.02Z");
