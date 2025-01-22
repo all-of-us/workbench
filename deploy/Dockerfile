@@ -47,6 +47,8 @@ RUN curl -L -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-
   && unzip /tmp/gradle.zip -d /opt/gradle
 ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
+RUN gem install logger
+RUN  gem install concurrent-ruby -v 1.3.4
 # Force a lower concurrent-ruby version, as we only have Ruby 2.3.
-RUN gem install activesupport -v 6.1.4.6
+RUN gem install activesupport -v 6.1.4.6 --conservative
 RUN gem install jira-ruby
