@@ -4,6 +4,7 @@ import jakarta.inject.Provider;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -15,6 +16,7 @@ import org.pmiops.workbench.wsmanager.model.CloneWorkspaceV2Result;
 import org.pmiops.workbench.wsmanager.model.GrantRoleRequestBody;
 import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.JobControl;
+import org.pmiops.workbench.wsmanager.model.JobReport;
 import org.pmiops.workbench.wsmanager.model.Properties;
 import org.pmiops.workbench.wsmanager.model.Property;
 import org.pmiops.workbench.wsmanager.model.State;
@@ -75,6 +77,20 @@ public class WsmClient {
               workspaceServiceApi
                   .get()
                   .cloneWorkspaceV2(cloneWorkspaceV2Request, sourceWorkspaceUUID);
+
+          Optional.ofNullable(cloneWorkspaceV2Result.getErrorReport()).ifPresent(errorReport -> {
+            JobReport jobReport = cloneWorkspaceV2Result.getJobReport();
+            if(jobReport != null) {
+              logger.error(
+                  " Status code from WSM {}", jobReport.getStatusCode());
+            }
+            logger.error(
+                "Failed to clone workspace {}: {}", sourceWorkspaceUUID, errorReport.getMessage());
+            throw new WorkbenchException(
+                String.format(
+                    "Failed to clone workspace %s: %s",
+                    sourceWorkspaceUUID, errorReport.getMessage()));
+          });
 
           // call the get workspace endpoint to get the full description object
           return workspaceServiceApi
