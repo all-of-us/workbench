@@ -77,20 +77,23 @@ public class WsmClient {
               workspaceServiceApi
                   .get()
                   .cloneWorkspaceV2(cloneWorkspaceV2Request, sourceWorkspaceUUID);
+          JobReport jobReport = cloneWorkspaceV2Result.getJobReport();
+          if (jobReport != null) {
+            logger.error(" Status code from WSM {}", jobReport.getStatusCode());
+          }
 
-          Optional.ofNullable(cloneWorkspaceV2Result.getErrorReport()).ifPresent(errorReport -> {
-            JobReport jobReport = cloneWorkspaceV2Result.getJobReport();
-            if(jobReport != null) {
-              logger.error(
-                  " Status code from WSM {}", jobReport.getStatusCode());
-            }
-            logger.error(
-                "Failed to clone workspace {}: {}", sourceWorkspaceUUID, errorReport.getMessage());
-            throw new WorkbenchException(
-                String.format(
-                    "Failed to clone workspace %s: %s",
-                    sourceWorkspaceUUID, errorReport.getMessage()));
-          });
+          Optional.ofNullable(cloneWorkspaceV2Result.getErrorReport())
+              .ifPresent(
+                  errorReport -> {
+                    logger.error(
+                        "Failed to clone workspace {}: {}",
+                        sourceWorkspaceUUID,
+                        errorReport.getMessage());
+                    throw new WorkbenchException(
+                        String.format(
+                            "Failed to clone workspace %s: %s",
+                            sourceWorkspaceUUID, errorReport.getMessage()));
+                  });
 
           // call the get workspace endpoint to get the full description object
           return workspaceServiceApi
