@@ -240,13 +240,14 @@ export const InvalidBillingBannerMaybe = fp.flow(
     isEligibleForExtension
   );
 
-  const showBanner =
-    !showExtensionModal &&
-    creatorUser?.givenName &&
-    creatorUser?.familyName &&
-    ((!workspace.initialCredits.expirationBypassed &&
-      ((isExpiringSoon && isEligibleForExtension) || isExpired)) ||
-      isExhausted);
+  // const showBanner =
+  //   !showExtensionModal &&
+  //   creatorUser?.givenName &&
+  //   creatorUser?.familyName &&
+  //   ((!workspace.initialCredits.expirationBypassed &&
+  //     ((isExpiringSoon && isEligibleForExtension) || isExpired)) ||
+  //     isExhausted);
+  const showBanner = true;
 
   const message = (
     <>
