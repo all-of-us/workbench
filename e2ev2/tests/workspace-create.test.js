@@ -1,8 +1,5 @@
-const fsp = require('fs').promises
 const config = require('../src/config')
-const impersonate = require('../src/impersonate')
 const tu = require('../src/test-utils')
-const u = require('../src/utils')
 const utils = require("../src/utils");
 
 const browserTest = tu.browserTest(__filename)
@@ -17,8 +14,7 @@ browserTest('create a workspace', async browser => {
   await utils.dismissLeoAuthErrorModal(page);
 
   // Workspace creation isn't really available until billing accounts have been fetched.
-  const [baEventPromise] = await tu.promiseWindowEvent(page, 'billing-accounts-loaded')
-  await Promise.all([baEventPromise, tu.jsClick(page, '[aria-label="Create Workspace"]')])
+  await tu.jsClick(page, '[aria-label="Create Workspace"]')
 
   await expect(page.waitForSelector('title').then(eh => eh.evaluate(n => n.innerText)))
     .resolves.toContain('Create Workspace |')
