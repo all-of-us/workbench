@@ -10,7 +10,7 @@ export OUTPUT_PROJECT=$3 # output project
 export OUTPUT_DATASET=$4 # output dataset
 
 # Check that bq_dataset exists and exit if not
-datasets=$(bq --project_id="$BQ_PROJECT" ls --max_results=1000)
+datasets=$(bq ls --project_id="$BQ_PROJECT" --max_results=1000)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -25,7 +25,7 @@ else
 fi
 
 # Make dataset for cdr cloudsql tables
-datasets=$(bq --project_id="$OUTPUT_PROJECT" ls --max_results=1000)
+datasets=$(bq ls --project_id="$OUTPUT_PROJECT" --max_results=1000)
 re=\\b$OUTPUT_DATASET\\b
 if [[ $datasets =~ $re ]]; then
   echo "$OUTPUT_DATASET exists"
@@ -35,7 +35,7 @@ else
 fi
 
 #Check if tables to be copied over exists in bq project dataset
-tables=$(bq --project_id="$BQ_PROJECT" --dataset="$BQ_DATASET" ls --max_results=1000)
+tables=$(bq ls --project_id="$BQ_PROJECT" --max_results=1000 "$BQ_DATASET")
 cb_cri_table_check=\\bcb_criteria\\b
 cb_cri_attr_table_check=\\bcb_criteria_attribute\\b
 cb_cri_rel_table_check=\\bcb_criteria_relationship\\b
