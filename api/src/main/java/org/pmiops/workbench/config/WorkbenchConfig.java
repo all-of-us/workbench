@@ -197,6 +197,7 @@ public class WorkbenchConfig {
     public static class LegacyWorkflowConfig extends VersionedConfig {
       public String gatkJarUri;
       // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
+      // TODO: move these back to the base VersionedConfig
       public int minExtractionScatterTasks;
       public float extractionScatterTasksPerSample;
     }
