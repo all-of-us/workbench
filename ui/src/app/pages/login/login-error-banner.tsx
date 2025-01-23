@@ -24,7 +24,10 @@ export const LOGIN_ERROR_BANNER = () => (
         </div>
         <div>
           For more information, visit the
-          <a href='https://support.researchallofus.org/hc/en-us/articles/34191004784148' target='blank'>
+          <a
+            href='https://support.researchallofus.org/hc/en-us/articles/34191004784148'
+            target='blank'
+          >
             {' '}
             User Support Hub.
           </a>{' '}
