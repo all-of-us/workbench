@@ -14,7 +14,7 @@ BACKUP_DATASET=${OUTPUT_DATASET}_backup
 TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
 
 # Make dataset for backup
-datasets=$(bq --project_id="$OUTPUT_PROJECT" ls --max_results=1000)
+datasets=$(bq ls --project_id="$OUTPUT_PROJECT" --max_results=1000)
 if [[ $datasets =~ $BACKUP_DATASET ]]; then
   echo "$OUTPUT_PROJECT:$BACKUP_DATASET exists"
 else
