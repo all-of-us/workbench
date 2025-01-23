@@ -22,6 +22,13 @@ export const LOGIN_ERROR_BANNER = () => (
           Users will not be able to access Cromwell, Jupyter, RStudio, or SAS
           during that time, but all ongoing jobs will not be interrupted.
         </div>
+        <div>
+          For more information, visit the
+          <a href='https://support.researchallofus.org/hc/en-us/articles/34191004784148' target='blank'>
+            {' '}
+            User Support Hub.
+          </a>{' '}
+        </div>
       </>
     </ErrorMessage>
   </div>
