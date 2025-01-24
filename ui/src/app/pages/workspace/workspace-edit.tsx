@@ -46,17 +46,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CreateBillingAccountModal } from 'app/pages/workspace/create-billing-account-modal';
 import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
 import {
-  aianResearchTypeMap,
-  disseminateFindings,
-  PrimaryPurposeItems,
   RequestForReviewFooter,
-  researchOutcomes,
-  ResearchPurposeDescription,
-  ResearchPurposeItem,
-  ResearchPurposeItems,
-  researchPurposeQuestions,
-  SpecificPopulationItem,
-  SpecificPopulationItems,
   toolTipText,
   tooltipTextBillingWarning,
   toolTipTextDemographic,
@@ -98,6 +88,18 @@ import {
   getBillingAccountInfo,
   GoogleBillingAccountInfo,
 } from 'app/utils/project-billing-info';
+import {
+  aianResearchTypeMap,
+  disseminateFindings,
+  PrimaryPurposeItems,
+  researchOutcomes,
+  ResearchPurposeDescription,
+  ResearchPurposeItem,
+  ResearchPurposeItems,
+  researchPurposeQuestions,
+  SpecificPopulationItem,
+  SpecificPopulationItems,
+} from 'app/utils/research-purpose-text';
 import { serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';

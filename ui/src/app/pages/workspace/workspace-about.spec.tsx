@@ -14,6 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { nowPlusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { SpecificPopulationItems } from 'app/utils/research-purpose-text';
 import {
   cdrVersionStore,
   profileStore,
@@ -45,7 +46,6 @@ import {
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { WorkspaceAbout } from './workspace-about';
-import { SpecificPopulationItems } from './workspace-edit-text';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
