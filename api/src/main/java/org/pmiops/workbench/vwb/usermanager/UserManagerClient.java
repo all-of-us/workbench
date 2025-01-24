@@ -1,6 +1,7 @@
 package org.pmiops.workbench.vwb.usermanager;
 
 import jakarta.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
@@ -21,14 +22,18 @@ public class UserManagerClient {
 
   private final UserManagerRetryHandler userManagerRetryHandler;
 
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+
   public UserManagerClient(
       @Qualifier(UserManagerConfig.VWB_SERVICE_ACCOUNT_USER_API)
           Provider<UserV2Api> userV2ApiProvider,
       Provider<OrganizationV2Api> organizationV2ApiProvider,
-      UserManagerRetryHandler userManagerRetryHandler) {
+      UserManagerRetryHandler userManagerRetryHandler,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.userV2ApiProvider = userV2ApiProvider;
     this.organizationV2ApiProvider = organizationV2ApiProvider;
     this.userManagerRetryHandler = userManagerRetryHandler;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   public OrganizationMember getOrganizationMember(String organizationId, String userName) {
