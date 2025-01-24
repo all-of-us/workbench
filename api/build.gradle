@@ -39,7 +39,7 @@ buildscript {
         SPRING_BOOT_VERSION = '3.4.1'
         SPRING_FRAMEWORK_VERSION = '6.2.1'
         SPRING_SECURITY_VERSION = '6.4.2'
-        SWAGGER_VERSION = '2.2.25'
+        SWAGGER_VERSION = '2.2.28'
     }
 
     repositories {
