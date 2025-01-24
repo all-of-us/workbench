@@ -71,7 +71,7 @@ public class GenomicExtractionService {
 
   // Scatter count maximum for extraction for CDR v7 and earlier.
   // Affects number of workers and numbers of shards.
-  private static final int LEGACY_MAX_EXTRACTION_SCATTER = 2_000;
+  private static final int MAX_EXTRACTION_SCATTER = 2_000;
 
   private static final int EARLIEST_SUPPORTED_LEGACY_METHOD_VERSION = 3;
 
@@ -334,6 +334,18 @@ public class GenomicExtractionService {
       throw new ServerErrorException();
     }
 
+    // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
+    // keeping overhead low and limiting footprint on shared extraction quota.
+    int minScatter =
+        Math.min(
+            cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
+            MAX_EXTRACTION_SCATTER);
+    int desiredScatter =
+        Math.round(
+            personIds.size()
+                * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
+    int scatterCount = Ints.constrainToRange(desiredScatter, minScatter, MAX_EXTRACTION_SCATTER);
+
     Map<String, String> maybeInputs = new HashMap<>();
 
     if (!Strings.isNullOrEmpty(filterSetName)) {
@@ -344,31 +356,21 @@ public class GenomicExtractionService {
     }
 
     if (useLegacyWorkflow) {
-      // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
-      // keeping overhead low and limiting footprint on shared extraction quota.
-      int minScatter =
-          Math.min(
-              cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
-              LEGACY_MAX_EXTRACTION_SCATTER);
-      int desiredScatter =
-          Math.round(
-              personIds.size()
-                  * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
-      int scatterCount =
-          Ints.constrainToRange(desiredScatter, minScatter, LEGACY_MAX_EXTRACTION_SCATTER);
-
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
-
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"");
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
       maybeInputs.put(
           EXTRACT_WORKFLOW_NAME + ".gatk_override",
           "\"" + cohortExtractionConfig.legacyVersions.gatkJarUri + "\"");
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
     } else {
-      // Added Nov 2024
+      // Added Nov 2024 for v8
       // replaces extraction_uuid and cohort_table_prefix which are now set to this value
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".call_set_identifier", "\"" + extractionUuid + "\"");
+      // added Jan 2025: new parameter name for scatter count override in v8
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".extract_scatter_count_override",
+          Integer.toString(scatterCount));
     }
 
     Blob personIdsFile =
