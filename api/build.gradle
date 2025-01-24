@@ -428,7 +428,7 @@ dependencies {
     implementation "com.google.cloud.opentelemetry:exporter-auto:$project.ext.OPENTELEMETRY_GOOGLE_VERSION-alpha"
 
     implementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
-    implementation 'com.mysql:mysql-connector-j:9.0.0'
+    implementation 'com.mysql:mysql-connector-j:9.2.0'
     implementation "org.apache.commons:commons-collections4:4.5.0-M3"
     implementation 'org.apache.commons:commons-lang3:3.15.0'
     implementation 'org.apache.commons:commons-text:1.13.0'
