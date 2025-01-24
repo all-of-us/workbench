@@ -25,7 +25,7 @@ buildscript {
         GSON_VERSION = '2.11.0'
         HIBERNATE_VERSION = '6.5.2.Final'
         JACKSON_VERSION = '2.18.2'
-        LIQUIBASE_VERSION = '4.29.2'
+        LIQUIBASE_VERSION = '4.31.0'
         // 1.5.7+ results in a runtime error:
         // Logging system failed to initialize using configuration from 'null'
         //  java.lang.NoSuchMethodError: 'java.lang.Object ch.qos.logback.classic.LoggerContext.getConfigurationLock()'
