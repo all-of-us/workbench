@@ -28,6 +28,7 @@ import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
@@ -58,6 +59,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private final DataSetService dataSetService;
   private final CohortService cohortService;
   private final CohortReviewService cohortReviewService;
+  private final InitialCreditsService initialCreditsService;
 
   private int distinctWorkspaceLimit = 5;
 
@@ -73,7 +75,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       UserRecentResourceService userRecentResourceService,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
-      WorkspaceResourceMapper workspaceResourceMapper) {
+      WorkspaceResourceMapper workspaceResourceMapper,
+      InitialCreditsService initialCreditsService) {
     this.cloudStorageClient = cloudStorageClient;
     this.cohortService = cohortService;
     this.cohortReviewService = cohortReviewService;
@@ -85,6 +88,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.workspaceResourceMapper = workspaceResourceMapper;
+    this.initialCreditsService = initialCreditsService;
   }
 
   @VisibleForTesting
@@ -276,7 +280,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         conceptSetService,
         dataSetService,
         cloudStorageClient,
-        workspaceUsers);
+        workspaceUsers,
+        initialCreditsService);
   }
 
   private Optional<BlobId> uriToBlobId(String uri) {
