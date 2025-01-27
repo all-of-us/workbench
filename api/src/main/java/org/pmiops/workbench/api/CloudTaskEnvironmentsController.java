@@ -4,10 +4,15 @@ import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
 
 import com.google.common.base.Stopwatch;
 import jakarta.inject.Provider;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceInaccessibleToSa;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoStatusUtils;
@@ -24,15 +29,18 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
 
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<Stopwatch> stopwatchProvider;
+  private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public CloudTaskEnvironmentsController(
       LeonardoApiClient leonardoApiClient,
       Provider<Stopwatch> stopwatchProvider,
+      WorkspaceDao workspaceDao,
       WorkspaceService workspaceService) {
     this.leonardoApiClient = leonardoApiClient;
     this.stopwatchProvider = stopwatchProvider;
+    this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
   }
 
@@ -45,15 +53,23 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
 
     // temp timing for batch sizing
     var stopwatch = stopwatchProvider.get().start();
-    List<DbWorkspace> failedUserRoles =
+
+    var workspacesAndUsernames =
         workspaceNamespaces.stream()
             .map(workspaceService::lookupWorkspaceByNamespace)
-            .filter(
-                ws -> {
-                  boolean successfulGetFirecloudUserRoles = deleteUnshared(ws);
-                  return !successfulGetFirecloudUserRoles;
-                })
+            .map(ws -> Pair.of(ws, getCurrentUsernames(ws)))
             .toList();
+
+    var failedUserRoles =
+        workspacesAndUsernames.stream()
+            .filter(p -> p.getRight().isEmpty())
+            .map(Pair::getLeft)
+            .toList();
+
+    workspacesAndUsernames.stream()
+        .filter(p -> !p.getRight().isEmpty())
+        .forEach(this::deleteUnshared);
+
     var elapsed = stopwatch.stop().elapsed();
     LOGGER.info(
         String.format(
@@ -63,26 +79,9 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
     return ResponseEntity.ok().build();
   }
 
-  // return success value of getFirecloudUserRoles()
-  private boolean deleteUnshared(DbWorkspace dbWorkspace) {
-    // this call often fails on Test.  TODO: investigate.
-    final List<UserRole> userRoles;
-    try {
-      userRoles =
-          workspaceService.getFirecloudUserRoles(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    } catch (WorkbenchException e) {
-      LOGGER.warning(
-          String.format(
-              "Failed to get user roles for workspace %s/%s (ID %d): %s",
-              dbWorkspace.getWorkspaceNamespace(),
-              dbWorkspace.getFirecloudName(),
-              dbWorkspace.getWorkspaceId(),
-              e.getMessage()));
-      return false;
-    }
-
-    var currentUsers = userRoles.stream().map(UserRole::getEmail).collect(Collectors.toSet());
+  private void deleteUnshared(Pair<DbWorkspace, Set<String>> workspaceAndUsernames) {
+    var dbWorkspace = workspaceAndUsernames.getLeft();
+    var currentUsers = workspaceAndUsernames.getRight();
 
     var runtimes = leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject());
     var runtimesToDelete =
@@ -107,6 +106,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
               dbWorkspace.getFirecloudName(),
               dbWorkspace.getWorkspaceId(),
               runtimes.size()));
+
       runtimesToDelete.forEach(
           runtime -> {
             try {
@@ -131,6 +131,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
               dbWorkspace.getFirecloudName(),
               dbWorkspace.getWorkspaceId(),
               apps.size()));
+
       appsToDelete.forEach(
           app -> {
             try {
@@ -163,6 +164,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
               dbWorkspace.getFirecloudName(),
               dbWorkspace.getWorkspaceId(),
               disks.size()));
+
       disksToDelete.forEach(
           disk -> {
             try {
@@ -176,6 +178,33 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
             }
           });
     }
-    return true;
+  }
+
+  // also creates a DbWorkspaceInaccessibleToSa record if appropriate
+  private Set<String> getCurrentUsernames(DbWorkspace dbWorkspace) {
+    try {
+      return workspaceService
+          .getFirecloudUserRoles(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+          .stream()
+          .map(UserRole::getEmail)
+          .collect(Collectors.toSet());
+    } catch (WorkbenchException e) {
+      LOGGER.warning(
+          String.format(
+              "Failed to get user roles for workspace %s/%s (ID %d).  Marking as inaccessible_to_sa: %s",
+              dbWorkspace.getWorkspaceNamespace(),
+              dbWorkspace.getFirecloudName(),
+              dbWorkspace.getWorkspaceId(),
+              e.getMessage()));
+
+      workspaceDao.save(
+          dbWorkspace.setWorkspaceInaccessibleToSa(
+              new DbWorkspaceInaccessibleToSa()
+                  .setWorkspace(dbWorkspace)
+                  .setNote("Failed to get user roles")));
+
+      return Collections.emptySet();
+    }
   }
 }
