@@ -83,7 +83,8 @@ const body = JSON.stringify(
     }
   ],
   currentDuccVersions: [ 3, 4, 5 ],
-  enableUpdatedDemographicSurvey: true
+  enableUpdatedDemographicSurvey: true,
+  enableInitialCreditsExpiration: true,
 }
 )
 

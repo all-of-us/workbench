@@ -53,7 +53,13 @@ const body = JSON.stringify(
     published: false,
     adminLocked: false,
     adminLockedReason: null,
-    googleProject: 'terra-vpc-sc-dev-99b6969b'
+    googleProject: 'terra-vpc-sc-dev-99b6969b',
+    initialCredits: {
+      exhausted: false,
+      expirationBypassed: true,
+      expirationEpochMillis: 3,
+      extensionEpochMillis: null
+    }
   },
   accessLevel: 'OWNER'
 }

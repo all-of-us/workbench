@@ -54,7 +54,13 @@ const body = JSON.stringify(
       published: false,
       adminLocked: false,
       adminLockedReason: null,
-      googleProject: 'aou-rw-test-53ff4756'
+      googleProject: 'aou-rw-test-53ff4756',
+      initialCredits: {
+        exhausted: false,
+        expirationBypassed: true,
+        expirationEpochMillis: 3,
+        extensionEpochMillis: null
+      }
     },
     accessLevel: 'OWNER'
   }
