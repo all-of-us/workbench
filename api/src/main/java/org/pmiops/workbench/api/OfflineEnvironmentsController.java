@@ -44,6 +44,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,6 +79,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   private final TaskQueueService taskQueueService;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
+  private final WorkspaceService workspaceService;
 
   @Autowired
   OfflineEnvironmentsController(
@@ -90,7 +92,8 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
       Provider<WorkbenchConfig> configProvider,
       TaskQueueService taskQueueService,
       UserDao userDao,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService) {
     this.clock = clock;
     this.configProvider = configProvider;
     this.fireCloudService = firecloudService;
@@ -101,6 +104,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
   }
 
   /**
@@ -371,7 +375,9 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   @Override
   public ResponseEntity<Void> deleteUnsharedWorkspaceEnvironments() {
     List<String> activeNamespaces =
-        workspaceDao.getAllActive().stream().map(DbWorkspace::getWorkspaceNamespace).toList();
+        workspaceService.getWorkspacesAsService().stream()
+            .map(ws -> ws.getWorkspace().getNamespace())
+            .toList();
     log.info(
         String.format(
             "Queuing %d active workspaces in batches for deletion of unshared resources",
