@@ -152,7 +152,8 @@ const body = JSON.stringify(
   newUserSatisfactionSurveyEligibility: true,
   newUserSatisfactionSurveyEligibilityEndTime: "2023-01-10T14:38:10Z",
   generalDiscoverySources: [],
-  partnerDiscoverySources: []
+  partnerDiscoverySources: [],
+  initialCreditsExpirationEpochMillis: Date.now().valueOf() + 1000 * 60 * 60 * 24 * 365,
 }
 )
 
