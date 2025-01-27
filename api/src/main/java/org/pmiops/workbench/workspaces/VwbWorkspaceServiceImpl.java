@@ -95,6 +95,7 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> getWorkspacesAsService() {
+    logger.warn("getWorkspacesAsService not implemented in VWB");
     return Collections.emptyList();
   }
 
