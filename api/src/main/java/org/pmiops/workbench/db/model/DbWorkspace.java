@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.SecondaryTable;
 import jakarta.persistence.Table;
@@ -109,6 +110,8 @@ public class DbWorkspace {
 
   private AIANResearchType aianResearchType;
   private String aianResearchDetails;
+
+  private DbWorkspaceInaccessibleToSa workspaceInaccessibleToSa;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -825,6 +828,21 @@ public class DbWorkspace {
 
   public void setAianResearchDetails(String aianResearchDetails) {
     this.aianResearchDetails = aianResearchDetails;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "workspace")
+  public DbWorkspaceInaccessibleToSa getWorkspaceInaccessibleToSa() {
+    return workspaceInaccessibleToSa;
+  }
+
+  public DbWorkspace setWorkspaceInaccessibleToSa(
+      DbWorkspaceInaccessibleToSa workspaceInaccessibleToSa) {
+    this.workspaceInaccessibleToSa = workspaceInaccessibleToSa;
+    return this;
   }
 
   @Transient
