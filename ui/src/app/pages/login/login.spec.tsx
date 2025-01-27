@@ -40,13 +40,13 @@ describe('LoginComponent', () => {
     ).toBeInTheDocument();
   });
 
-  // it('should show banner if flag is on', () => {
-  //   serverConfigStore.get().config.enableLoginIssueBanner = true;
-  //   component(loginProps);
-  //   expect(
-  //     screen.getByText(
-  //       /Researcher Workbench is currently experiencing an outage\./i
-  //     )
-  //   ).toBeInTheDocument();
-  // });
+  it('should show banner if flag is on', () => {
+    serverConfigStore.get().config.enableLoginIssueBanner = true;
+    component(loginProps);
+    expect(
+      screen.getByText(
+        /Researcher Workbench is currently experiencing an outage\./i
+      )
+    ).toBeInTheDocument();
+  });
 });
