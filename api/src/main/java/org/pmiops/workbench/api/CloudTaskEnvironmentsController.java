@@ -202,11 +202,14 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
               dbWorkspace.getWorkspaceId(),
               e.getMessage()));
 
-      workspaceDao.save(
-          dbWorkspace.setWorkspaceInaccessibleToSa(
-              new DbWorkspaceInaccessibleToSa()
-                  .setWorkspace(dbWorkspace)
-                  .setNote("Failed to get user roles")));
+      // this is not expected to be present, but check just in case, for DB integrity
+      if (dbWorkspace.getWorkspaceInaccessibleToSa() == null) {
+        var inaccessibleToSa =
+            new DbWorkspaceInaccessibleToSa()
+                .setWorkspace(dbWorkspace)
+                .setNote("Failed to get user roles");
+        workspaceDao.save(dbWorkspace.setWorkspaceInaccessibleToSa(inaccessibleToSa));
+      }
 
       return Collections.emptySet();
     }
