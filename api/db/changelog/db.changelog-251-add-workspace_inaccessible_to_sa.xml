@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="thibault" id="changelog-251-add-workspace_inaccessible_to_sa">
+    <createTable tableName="workspace_inaccessible_to_sa">
+      <column name="workspace_inaccessible_to_sa_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="note" type="varchar(200)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint
+      baseTableName="workspace_inaccessible_to_sa"
+      baseColumnNames="workspace_id"
+      referencedTableName="workspace"
+      referencedColumnNames="workspace_id"
+      constraintName="fk_workspace_inaccessible_to_sa_workspace_id"
+      onDelete="CASCADE"/>
+  </changeSet>
+</databaseChangeLog>
