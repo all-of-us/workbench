@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -93,7 +92,6 @@ public class DbWorkspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
-  private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
   private String billingAccountName;
   private String googleProject;
   private boolean adminLocked;
@@ -650,19 +648,6 @@ public class DbWorkspace {
   @Transient
   public boolean isActive() {
     return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
-  }
-
-  @Deprecated(since = "September 2024", forRemoval = true)
-  @Column(name = "billing_status")
-  public BillingStatus getBillingStatus() {
-    return (initialCreditsExhausted || initialCreditsExpired
-        ? BillingStatus.INACTIVE
-        : BillingStatus.ACTIVE);
-  }
-
-  public DbWorkspace setBillingStatus(BillingStatus billingStatus) {
-    this.billingStatus = DbStorageEnums.billingStatusToStorage(billingStatus);
-    return this;
   }
 
   @Column(name = "billing_account_name")
