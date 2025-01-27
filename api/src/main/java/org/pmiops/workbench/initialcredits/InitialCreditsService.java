@@ -36,7 +36,6 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
@@ -454,7 +453,6 @@ public class InitialCreditsService {
         .forEach(
             ws -> {
               ws.setInitialCreditsExpired(true);
-              ws.setBillingStatus(BillingStatus.INACTIVE);
               workspaceDao.save(ws);
               deleteAppsAndRuntimesInWorkspace(ws);
             });
@@ -513,7 +511,6 @@ public class InitialCreditsService {
         .forEach(
             ws -> {
               ws.setInitialCreditsExhausted(false);
-              ws.setBillingStatus(BillingStatus.ACTIVE);
               workspaceDao.save(ws);
             });
   }
