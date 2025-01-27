@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -27,17 +28,20 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
   private final ConceptSetService conceptSetService;
   private final DataSetDao dataSetDao;
   private final WorkspaceResourceMapper workspaceResourceMapper;
+  private final InitialCreditsService initialCreditsService;
 
   @Autowired
   public WorkspaceResourcesServiceImpl(
       CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
       DataSetDao dataSetDao,
-      WorkspaceResourceMapper workspaceResourceMapper) {
+      WorkspaceResourceMapper workspaceResourceMapper,
+      InitialCreditsService initialCreditsService) {
     this.cohortReviewService = cohortReviewService;
     this.conceptSetService = conceptSetService;
     this.dataSetDao = dataSetDao;
     this.workspaceResourceMapper = workspaceResourceMapper;
+    this.initialCreditsService = initialCreditsService;
   }
 
   @Override
@@ -64,7 +68,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
               .map(
                   cohort ->
                       workspaceResourceMapper.fromDbCohort(
-                          dbWorkspace, workspaceAccessLevel, cohort))
+                          dbWorkspace, workspaceAccessLevel, cohort, initialCreditsService))
               .collect(Collectors.toList()));
     }
     if (resourceTypes.contains(ResourceType.COHORT_REVIEW)) {
@@ -76,7 +80,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
               .map(
                   cohortReview ->
                       workspaceResourceMapper.fromCohortReview(
-                          dbWorkspace, workspaceAccessLevel, cohortReview))
+                          dbWorkspace, workspaceAccessLevel, cohortReview, initialCreditsService))
               .collect(Collectors.toList()));
     }
     if (resourceTypes.contains(ResourceType.CONCEPT_SET)) {
@@ -86,7 +90,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
               .map(
                   dbConceptSet ->
                       workspaceResourceMapper.fromDbConceptSet(
-                          dbWorkspace, workspaceAccessLevel, dbConceptSet))
+                          dbWorkspace, workspaceAccessLevel, dbConceptSet, initialCreditsService))
               .collect(Collectors.toList()));
     }
     if (resourceTypes.contains(ResourceType.DATASET)) {
@@ -97,7 +101,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
               .map(
                   dbDataset ->
                       workspaceResourceMapper.fromDbDataset(
-                          dbWorkspace, workspaceAccessLevel, dbDataset))
+                          dbWorkspace, workspaceAccessLevel, dbDataset, initialCreditsService))
               .collect(Collectors.toList()));
     }
     if (resourceTypes.stream().anyMatch(resourceType -> !supportedTypes.contains(resourceType))) {
