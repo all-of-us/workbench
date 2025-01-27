@@ -13,26 +13,15 @@ export const LOGIN_ERROR_BANNER = () => (
     }}
   >
     <ErrorMessage>
-      <>
-        <div>
-          Some of <AoU /> Researcher Workbench's supporting services will be
-          down for maintenance on Sunday (January 26th) from 10-11AM ET.
-        </div>
-        <div>
-          Users will not be able to access Cromwell, Jupyter, RStudio, or SAS
-          during that time, but all ongoing jobs will not be interrupted.
-        </div>
-        <div>
-          For more information, visit the
-          <a
-            href='https://support.researchallofus.org/hc/en-us/articles/34191004784148'
-            target='blank'
-          >
-            {' '}
-            User Support Hub.
-          </a>{' '}
-        </div>
-      </>
+      The <AoU /> Researcher Workbench is currently experiencing an outage. Our
+      team continues to work diligently to resolve this issue as quickly as
+      possible, and we apologize for any inconveniences this may cause. We will
+      provide updates via the
+      <a href='https://support.researchallofus.org/hc/en-us' target='blank'>
+        {' '}
+        User Support Hub homepage
+      </a>{' '}
+      when available.
     </ErrorMessage>
   </div>
 );

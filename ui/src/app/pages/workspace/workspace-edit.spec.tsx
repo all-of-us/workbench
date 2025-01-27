@@ -32,6 +32,7 @@ import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import * as Authentication from 'app/utils/authentication';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { aianResearchTypeMap } from 'app/utils/research-purpose-text';
 import {
   cdrVersionStore,
   profileStore,
@@ -58,8 +59,6 @@ import {
 import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-
-import { aianResearchTypeMap } from './workspace-edit-text';
 
 jest.mock('app/utils/project-billing-info', () => ({
   getBillingAccountInfo: () =>

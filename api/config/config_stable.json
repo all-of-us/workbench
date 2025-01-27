@@ -179,7 +179,7 @@
     "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-rw-stable\/aou-rw-gar-remote-repo-docker-stable"
   },
   "banner": {
-    "enableLoginIssueBanner": true
+    "enableLoginIssueBanner": false
   },
   "vwb": {
     "wsmBaseUrl": "https:\/\/terra-wsm.api.verily.com",
