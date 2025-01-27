@@ -283,10 +283,12 @@ public class InitialCreditsService {
    *     institutionally.
    */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
-    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
-        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
-        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
-        .map(DbUserInitialCreditsExpiration::getExpirationTime);
+    return workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration
+        ? Optional.ofNullable(user.getUserInitialCreditsExpiration())
+            .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+            .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
+            .map(DbUserInitialCreditsExpiration::getExpirationTime)
+        : Optional.empty();
   }
 
   /**
