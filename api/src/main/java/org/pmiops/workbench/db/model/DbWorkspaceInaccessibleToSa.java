@@ -38,7 +38,7 @@ public class DbWorkspaceInaccessibleToSa {
     return workspace;
   }
 
-  public DbWorkspaceInaccessibleToSa setUser(DbWorkspace workspace) {
+  public DbWorkspaceInaccessibleToSa setWorkspace(DbWorkspace workspace) {
     this.workspace = workspace;
     return this;
   }
