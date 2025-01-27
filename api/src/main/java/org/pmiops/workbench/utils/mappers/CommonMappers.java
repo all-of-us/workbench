@@ -143,9 +143,11 @@ public class CommonMappers {
   }
 
   @Named("getBillingStatus")
-  public BillingStatus getBillingStatus(DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService) {
+  public BillingStatus getBillingStatus(
+      DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService) {
     return (isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfigProvider.get())
-            && (dbWorkspace.isInitialCreditsExhausted() || initialCreditsService.areUserCreditsExpired(dbWorkspace.getCreator())))
+            && (dbWorkspace.isInitialCreditsExhausted()
+                || initialCreditsService.areUserCreditsExpired(dbWorkspace.getCreator())))
         ? BillingStatus.INACTIVE
         : BillingStatus.ACTIVE;
   }
