@@ -56,7 +56,6 @@ import org.pmiops.workbench.initialcredits.InitialCreditsExpiryTaskMatchers.User
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -615,10 +614,7 @@ public class InitialCreditsServiceTest {
     // Simulate the user attaching their own billing account to the previously free tier workspace.
     TestTransaction.start();
     workspace = workspaceDao.findDbWorkspaceByWorkspaceId(workspace.getWorkspaceId());
-    workspaceDao.save(
-        workspace
-            .setBillingAccountName(fullBillingAccountName("byo-account"))
-            .setBillingStatus(BillingStatus.ACTIVE));
+    workspaceDao.save(workspace.setBillingAccountName(fullBillingAccountName("byo-account")));
 
     commitTransaction();
   }
@@ -758,8 +754,7 @@ public class InitialCreditsServiceTest {
             .setCreator(user)
             .setWorkspaceNamespace("some other namespace")
             .setGoogleProject("other project")
-            .setBillingAccountName("some other account")
-            .setBillingStatus(BillingStatus.ACTIVE);
+            .setBillingAccountName("some other account");
     workspaceDao.save(userAccountWorkspace);
 
     commitTransaction();
