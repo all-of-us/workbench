@@ -368,7 +368,7 @@ public class InitialCreditsService {
   }
 
   public DbUser extendInitialCreditsExpiration(DbUser user) {
-    if(!workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration) {
+    if (!workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration) {
       throw new BadRequestException("Initial credits extension is disabled.");
     }
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =

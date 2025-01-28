@@ -1007,9 +1007,7 @@ public class InitialCreditsServiceTest {
         assertThrows(
             BadRequestException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "Initial credits extension is disabled.",
-        exception.getMessage());
+    assertEquals("Initial credits extension is disabled.", exception.getMessage());
   }
 
   @Test
