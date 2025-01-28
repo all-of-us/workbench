@@ -231,6 +231,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "initialCreditsExhausted", ignore = true)
   @Mapping(target = "usesTanagra", ignore = true)
   @Mapping(target = "vwbWorkspace", ignore = true)
+  @Mapping(target = "workspaceInaccessibleToSa", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

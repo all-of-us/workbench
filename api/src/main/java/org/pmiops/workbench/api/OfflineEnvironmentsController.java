@@ -371,7 +371,11 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   @Override
   public ResponseEntity<Void> deleteUnsharedWorkspaceEnvironments() {
     List<String> activeNamespaces =
-        workspaceDao.getAllActive().stream().map(DbWorkspace::getWorkspaceNamespace).toList();
+        workspaceDao.getAllActive().stream()
+            // many workspaces (at least on Test) are not accessible to the GAE SA.  Skip these.
+            .filter(ws -> ws.getWorkspaceInaccessibleToSa() == null)
+            .map(DbWorkspace::getWorkspaceNamespace)
+            .toList();
     log.info(
         String.format(
             "Queuing %d active workspaces in batches for deletion of unshared resources",

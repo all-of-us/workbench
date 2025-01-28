@@ -4,10 +4,14 @@ import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
 
 import com.google.common.base.Stopwatch;
 import jakarta.inject.Provider;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceInaccessibleToSa;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoStatusUtils;
@@ -19,20 +23,29 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApiDelegate {
+  public record WorkspaceWithUsers(DbWorkspace workspace, Set<String> usernames) {
+    public boolean hasUsers() {
+      return !usernames.isEmpty();
+    }
+  }
+
   private static final Logger LOGGER =
       Logger.getLogger(CloudTaskEnvironmentsController.class.getName());
 
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<Stopwatch> stopwatchProvider;
+  private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public CloudTaskEnvironmentsController(
       LeonardoApiClient leonardoApiClient,
       Provider<Stopwatch> stopwatchProvider,
+      WorkspaceDao workspaceDao,
       WorkspaceService workspaceService) {
     this.leonardoApiClient = leonardoApiClient;
     this.stopwatchProvider = stopwatchProvider;
+    this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
   }
 
@@ -45,53 +58,44 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
 
     // temp timing for batch sizing
     var stopwatch = stopwatchProvider.get().start();
-    List<DbWorkspace> failedUserRoles =
+
+    var workspacesWithUsers =
         workspaceNamespaces.stream()
             .map(workspaceService::lookupWorkspaceByNamespace)
-            .filter(
-                ws -> {
-                  boolean successfulGetFirecloudUserRoles = deleteUnshared(ws);
-                  return !successfulGetFirecloudUserRoles;
-                })
+            .map(ws -> new WorkspaceWithUsers(ws, getCurrentUsernames(ws)))
             .toList();
+
+    var failedUserRetrievals =
+        workspacesWithUsers.stream()
+            .filter(wu -> !wu.hasUsers())
+            .map(WorkspaceWithUsers::workspace)
+            .toList();
+
+    workspacesWithUsers.stream().filter(WorkspaceWithUsers::hasUsers).forEach(this::deleteUnshared);
+
     var elapsed = stopwatch.stop().elapsed();
     LOGGER.info(
         String.format(
-            "Attempted to delete unshared environments for %d workspaces (%d failures) in %s.",
-            workspaceNamespaces.size(), failedUserRoles.size(), formatDurationPretty(elapsed)));
+            "Attempted to delete unshared environments for %d workspaces (%d failed user retrievals) in %s.",
+            workspaceNamespaces.size(),
+            failedUserRetrievals.size(),
+            formatDurationPretty(elapsed)));
 
     return ResponseEntity.ok().build();
   }
 
-  // return success value of getFirecloudUserRoles()
-  private boolean deleteUnshared(DbWorkspace dbWorkspace) {
-    // this call often fails on Test.  TODO: investigate.
-    final List<UserRole> userRoles;
-    try {
-      userRoles =
-          workspaceService.getFirecloudUserRoles(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    } catch (WorkbenchException e) {
-      LOGGER.warning(
-          String.format(
-              "Failed to get user roles for workspace %s/%s (ID %d): %s",
-              dbWorkspace.getWorkspaceNamespace(),
-              dbWorkspace.getFirecloudName(),
-              dbWorkspace.getWorkspaceId(),
-              e.getMessage()));
-      return false;
-    }
+  private void deleteUnshared(WorkspaceWithUsers workspaceAndUsernames) {
+    var workspace = workspaceAndUsernames.workspace();
+    var currentUsers = workspaceAndUsernames.usernames();
 
-    var currentUsers = userRoles.stream().map(UserRole::getEmail).collect(Collectors.toSet());
-
-    var runtimes = leonardoApiClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject());
+    var runtimes = leonardoApiClient.listRuntimesByProjectAsService(workspace.getGoogleProject());
     var runtimesToDelete =
         runtimes.stream()
             .filter(LeonardoStatusUtils::canDeleteRuntime)
             .filter(runtime -> !currentUsers.contains(runtime.getAuditInfo().getCreator()))
             .toList();
 
-    var apps = leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
+    var apps = leonardoApiClient.listAppsInProjectAsService(workspace.getGoogleProject());
     var appsToDelete =
         apps.stream()
             .filter(LeonardoStatusUtils::canDeleteApp)
@@ -103,21 +107,21 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
           String.format(
               "Deleting %d runtimes for workspace %s/%s (ID %d) out of %d total",
               runtimesToDelete.size(),
-              dbWorkspace.getWorkspaceNamespace(),
-              dbWorkspace.getFirecloudName(),
-              dbWorkspace.getWorkspaceId(),
+              workspace.getWorkspaceNamespace(),
+              workspace.getFirecloudName(),
+              workspace.getWorkspaceId(),
               runtimes.size()));
+
       runtimesToDelete.forEach(
           runtime -> {
             try {
               leonardoApiClient.deleteRuntimeAsService(
-                  dbWorkspace.getGoogleProject(), runtime.getRuntimeName(), /*
-             deleteDisk */ true);
+                  workspace.getGoogleProject(), runtime.getRuntimeName(), /* deleteDisk */ true);
             } catch (WorkbenchException e) {
               LOGGER.warning(
                   String.format(
                       "Failed to delete runtime %s in project %s: %s",
-                      runtime.getRuntimeName(), dbWorkspace.getGoogleProject(), e.getMessage()));
+                      runtime.getRuntimeName(), workspace.getGoogleProject(), e.getMessage()));
             }
           });
     }
@@ -127,27 +131,28 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
           String.format(
               "Deleting %d apps for workspace %s/%s (ID %d) out of %d total",
               appsToDelete.size(),
-              dbWorkspace.getWorkspaceNamespace(),
-              dbWorkspace.getFirecloudName(),
-              dbWorkspace.getWorkspaceId(),
+              workspace.getWorkspaceNamespace(),
+              workspace.getFirecloudName(),
+              workspace.getWorkspaceId(),
               apps.size()));
+
       appsToDelete.forEach(
           app -> {
             try {
               leonardoApiClient.deleteAppAsService(
-                  app.getAppName(), dbWorkspace, /* deleteDisk */ true);
+                  app.getAppName(), workspace, /* deleteDisk */ true);
             } catch (WorkbenchException e) {
               LOGGER.warning(
                   String.format(
                       "Failed to delete app %s in project %s: %s",
-                      app.getAppName(), dbWorkspace.getGoogleProject(), e.getMessage()));
+                      app.getAppName(), workspace.getGoogleProject(), e.getMessage()));
             }
           });
     }
 
     // check disks after runtime and app deletion, because these will delete their associated disks
 
-    var disks = leonardoApiClient.listDisksByProjectAsService(dbWorkspace.getGoogleProject());
+    var disks = leonardoApiClient.listDisksByProjectAsService(workspace.getGoogleProject());
     var disksToDelete =
         disks.stream()
             .filter(LeonardoStatusUtils::canDeleteDisk)
@@ -159,23 +164,54 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
           String.format(
               "Deleting %d disks for workspace %s/%s (ID %d) out of %d total",
               disksToDelete.size(),
-              dbWorkspace.getWorkspaceNamespace(),
-              dbWorkspace.getFirecloudName(),
-              dbWorkspace.getWorkspaceId(),
+              workspace.getWorkspaceNamespace(),
+              workspace.getFirecloudName(),
+              workspace.getWorkspaceId(),
               disks.size()));
+
       disksToDelete.forEach(
           disk -> {
             try {
               leonardoApiClient.deletePersistentDiskAsService(
-                  dbWorkspace.getGoogleProject(), disk.getName());
+                  workspace.getGoogleProject(), disk.getName());
             } catch (WorkbenchException e) {
               LOGGER.warning(
                   String.format(
                       "Failed to delete disk %s in project %s: %s",
-                      disk.getName(), dbWorkspace.getGoogleProject(), e.getMessage()));
+                      disk.getName(), workspace.getGoogleProject(), e.getMessage()));
             }
           });
     }
-    return true;
+  }
+
+  // also creates a DbWorkspaceInaccessibleToSa record if appropriate
+  private Set<String> getCurrentUsernames(DbWorkspace dbWorkspace) {
+    try {
+      return workspaceService
+          .getFirecloudUserRoles(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+          .stream()
+          .map(UserRole::getEmail)
+          .collect(Collectors.toSet());
+    } catch (WorkbenchException e) {
+      LOGGER.warning(
+          String.format(
+              "Failed to get user roles for workspace %s/%s (ID %d).  Marking as inaccessible_to_sa: %s",
+              dbWorkspace.getWorkspaceNamespace(),
+              dbWorkspace.getFirecloudName(),
+              dbWorkspace.getWorkspaceId(),
+              e.getMessage()));
+
+      // this is not expected to be present, but check just in case, for DB integrity
+      if (dbWorkspace.getWorkspaceInaccessibleToSa() == null) {
+        var inaccessibleToSa =
+            new DbWorkspaceInaccessibleToSa()
+                .setWorkspace(dbWorkspace)
+                .setNote("Failed to get user roles");
+        workspaceDao.save(dbWorkspace.setWorkspaceInaccessibleToSa(inaccessibleToSa));
+      }
+
+      return Collections.emptySet();
+    }
   }
 }
