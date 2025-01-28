@@ -368,6 +368,9 @@ public class InitialCreditsService {
   }
 
   public DbUser extendInitialCreditsExpiration(DbUser user) {
+    if(!workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration) {
+      throw new BadRequestException("Initial credits extension is disabled.");
+    }
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     // This handles the case existing users that have not yet been migrated but also those who have
