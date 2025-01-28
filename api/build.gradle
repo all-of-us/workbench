@@ -562,7 +562,7 @@ dependencies {
     // interface [interface org.hibernate.SessionFactory] seems to conflict with Spring's EntityManagerFactoryInfo
     // mixin - consider resetting the 'entityManagerFactoryInterface' property to plain
     // [jakarta.persistence.EntityManagerFactory]
-    // https://stackoverflow.com/questions/78073522/spring-boot-3-2-2-entitymanagerfactory-interface-org-hibernate-sessionfactory-s
+    // https://github.com/spring-projects/spring-boot/issues/39753
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation 'jakarta.servlet:jakarta.servlet-api:6.1.0'
     implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
