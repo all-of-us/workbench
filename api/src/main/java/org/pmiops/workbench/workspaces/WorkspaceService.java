@@ -35,6 +35,8 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> getWorkspaces();
 
+  List<WorkspaceResponse> getWorkspacesAsService();
+
   /**
    * Get all Featured workspaces from the DB.
    *

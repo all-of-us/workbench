@@ -114,6 +114,8 @@ public interface FireCloudService {
 
   List<RawlsWorkspaceListResponse> getWorkspaces();
 
+  List<RawlsWorkspaceListResponse> getWorkspacesAsService();
+
   void deleteWorkspace(String workspaceNamespace, String firecloudName);
 
   FirecloudManagedGroupWithMembers getGroup(String groupName);
