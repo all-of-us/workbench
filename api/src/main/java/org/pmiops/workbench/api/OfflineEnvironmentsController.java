@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -144,9 +145,15 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
 
       // Refetch the runtime to ensure freshness,
       // as this iteration may take some time.
-      final LeonardoGetRuntimeResponse runtime =
-          leonardoApiClient.getRuntimeAsService(
-              googleProject, listRuntimeResponse.getRuntimeName());
+      final LeonardoGetRuntimeResponse runtime;
+      try {
+        runtime =
+            leonardoApiClient.getRuntimeAsService(
+                googleProject, listRuntimeResponse.getRuntimeName());
+      } catch (WorkbenchException e) {
+        log.warning(String.format("error refetching runtime '%s': %s", runtimeId, e.getMessage()));
+        continue;
+      }
 
       if (LeonardoRuntimeStatus.UNKNOWN.equals(runtime.getStatus())
           || runtime.getStatus() == null) {
