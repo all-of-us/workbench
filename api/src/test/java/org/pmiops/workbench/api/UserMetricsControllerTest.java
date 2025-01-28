@@ -42,6 +42,7 @@ import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource.DbUserRecent
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.FileDetail;
@@ -82,6 +83,7 @@ public class UserMetricsControllerTest {
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private WorkspaceAuthService workspaceAuthService;
+  @Mock private InitialCreditsService mockInitialCreditsService;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -251,7 +253,8 @@ public class UserMetricsControllerTest {
             mockUserRecentResourceService,
             workspaceAuthService,
             workspaceDao,
-            workspaceResourceMapper);
+            workspaceResourceMapper,
+            mockInitialCreditsService);
     userMetricsController.setDistinctWorkspaceLimit(5);
   }
 
