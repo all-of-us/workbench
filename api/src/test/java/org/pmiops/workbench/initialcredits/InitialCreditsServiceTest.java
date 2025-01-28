@@ -146,6 +146,7 @@ public class InitialCreditsServiceTest {
     workbenchConfig.billing.initialCreditsExpirationWarningDays = warningPeriodDays;
     workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2L;
+    workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
 
     workspace =
         spyWorkspaceDao.save(
@@ -994,6 +995,21 @@ public class InitialCreditsServiceTest {
             false,
             null,
             NOW));
+  }
+
+  @Test
+  public void test_extendInitialCreditsExpiration_extensionDisabled() {
+    workbenchConfig.featureFlags.enableInitialCreditsExpiration = false;
+
+    DbUser user = spyUserDao.save(new DbUser());
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> initialCreditsService.extendInitialCreditsExpiration(user));
+    assertEquals(
+        "Initial credits extension is disabled.",
+        exception.getMessage());
   }
 
   @Test
