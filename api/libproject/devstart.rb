@@ -3235,10 +3235,10 @@ def run_genomic_extraction(cmd_name, *args)
     'The dataset to record in the DB as associated with this extraction (arbitrary but must exist).')
 
   op.add_typed_option(
-    '--person_ids ["id1, id2, id3"]',
+    '--person_id_file [person_ids.txt]',
     String,
-    ->(opts, v) { opts.person_ids = v },
-    'The person IDs to be used in the extraction.')
+    ->(opts, v) { opts.person_id_file = v },
+    'The file of person IDs to use in the extraction.  skips header row.')
 
   op.add_typed_option(
     '--legacy [true/false]',
@@ -3265,7 +3265,7 @@ def run_genomic_extraction(cmd_name, *args)
     "The CDR's WGS BigQuery dataset")
 
   op.add_validator ->(opts) {
-    raise ArgumentError unless opts.namespace and opts.dataset_id and opts.person_ids and opts.legacy and opts.filter_set and opts.cdr_bq_project and opts.wgs_bq_dataset
+    raise ArgumentError unless opts.namespace and opts.dataset_id and opts.person_id_file and opts.legacy and opts.filter_set and opts.cdr_bq_project and opts.wgs_bq_dataset
   }
 
   op.parse.validate
@@ -3273,7 +3273,7 @@ def run_genomic_extraction(cmd_name, *args)
   gradle_args = ([
     ["--namespace", op.opts.namespace],
     ["--dataset_id", op.opts.dataset_id],
-    ["--person_ids", op.opts.person_ids],
+    ["--person_id_file", op.opts.person_id_file],
     ["--legacy", op.opts.legacy],
     ["--filter_set", op.opts.filter_set],
     ["--cdr_bq_project", op.opts.cdr_bq_project],
@@ -3299,7 +3299,7 @@ GENOMIC_EXTRACTION_CMD = "run-extraction"
 # ./project.rb run-extraction \
 # --namespace aou-rw-test-0bead07c \
 # --dataset_id 65204 \
-# --person-ids "20201244" \
+# --person_id_file dataset_ids.txt \
 # --legacy false \
 # --filter_set echo-controls \
 # --cdr_bq_project fc-aou-cdr-synth-test-2 \

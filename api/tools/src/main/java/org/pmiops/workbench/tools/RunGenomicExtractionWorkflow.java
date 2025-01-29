@@ -3,7 +3,8 @@ package org.pmiops.workbench.tools;
 import com.google.api.services.oauth2.model.Userinfo;
 import jakarta.inject.Provider;
 import java.io.IOException;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
@@ -120,8 +121,8 @@ public class RunGenomicExtractionWorkflow extends Tool {
           .build();
   private static final Option personIdsOpt =
       Option.builder()
-          .longOpt("person_ids")
-          .desc("The person IDs to use in the extraction")
+          .longOpt("person_id_file")
+          .desc("The file of person IDs to use in the extraction.  skips header row.")
           .required()
           .hasArg()
           .build();
@@ -165,7 +166,7 @@ public class RunGenomicExtractionWorkflow extends Tool {
       CdrVersionService cdrVersionService,
       DataSetDao dataSetDao,
       WorkspaceDao workspaceDao)
-      throws ParseException, ApiException {
+      throws ParseException, ApiException, IOException {
     CommandLine opts = new DefaultParser().parse(options, args);
 
     String namespace = opts.getOptionValue(workspaceNamespaceOpt.getLongOpt());
@@ -192,10 +193,12 @@ public class RunGenomicExtractionWorkflow extends Tool {
                         String.format(
                             "Dataset %d not found in workspace %s", datasetId, namespace)));
 
-    List<String> personIds =
-        Arrays.stream(opts.getOptionValue(personIdsOpt.getLongOpt()).split(","))
-            .map(String::trim)
-            .toList();
+    // read file line by line, skipping header row
+    final List<String> personIds;
+    try (final var idStream =
+        Files.lines(Paths.get(opts.getOptionValue(personIdsOpt.getLongOpt())))) {
+      personIds = idStream.skip(1).map(String::trim).toList();
+    }
 
     boolean useLegacyWorkflow =
         Boolean.parseBoolean(opts.getOptionValue(legacyOpt.getLongOpt(), "false"));
