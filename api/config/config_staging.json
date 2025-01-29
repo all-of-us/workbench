@@ -153,6 +153,7 @@
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
     "usersPerCheckInitialCreditsExpirationTask": 50,
+    "usersPerAccessExpirationEmailTask": 500,
     "workspacesPerDeleteWorkspaceEnvironmentsTask": 50
   },
   "egressAlertRemediationPolicy": {
