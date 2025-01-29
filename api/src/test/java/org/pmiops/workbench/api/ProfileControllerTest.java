@@ -115,6 +115,7 @@ import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -155,6 +156,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private UserDao userDao;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private FakeClock fakeClock;
+  @Autowired private VwbUserService vwbUserService;
 
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
@@ -219,7 +221,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     NewUserSatisfactionSurveyService.class,
     TaskQueueService.class,
     LeonardoApiClient.class,
-    VwbAccessService.class
+    VwbAccessService.class,
+    VwbUserService.class
   })
   static class Configuration {
     @Bean
