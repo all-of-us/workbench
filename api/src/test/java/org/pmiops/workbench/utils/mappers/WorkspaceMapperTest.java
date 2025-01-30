@@ -360,7 +360,8 @@ public class WorkspaceMapperTest {
       BillingStatus expectedStatus) {
     workbenchConfig.billing.accountId = INITIAL_CREDITS_BILLING_ACCOUNT_NAME;
     sourceDbWorkspace.setInitialCreditsExhausted(exhausted);
-    CLOCK.setInstant(INITIAL_CREDITS_EXPIRATION_TIMESTAMP.toInstant().plusSeconds(expired ? 1 : -1));
+    CLOCK.setInstant(
+        INITIAL_CREDITS_EXPIRATION_TIMESTAMP.toInstant().plusSeconds(expired ? 1 : -1));
     sourceDbWorkspace.setBillingAccountName(fullBillingAccountName(billingAccount));
     Workspace x =
         workspaceMapper.toApiWorkspace(
