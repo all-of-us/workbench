@@ -537,9 +537,9 @@ public class GenomicExtractionServiceTest {
         cdrVersionDao.save(
             new DbCdrVersion()
                 .setCdrVersionId(8)
+                .setPublicReleaseNumber(8)
                 .setBigqueryProject("bigquery_project")
-                .setWgsBigqueryDataset("wgs_dataset")
-                .setNeedsV8GenomicExtractionWorkflow(true));
+                .setWgsBigqueryDataset("wgs_dataset"));
     targetWorkspace = workspaceDao.save(targetWorkspace.setCdrVersion(cdrV8));
 
     TanagraGenomicDataRequest tanagraRequest = null;

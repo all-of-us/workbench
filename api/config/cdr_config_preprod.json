@@ -279,7 +279,6 @@
       "wgsLongReadsHailT2T": "longreads/hail.mt/T2T",
       "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
       "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T",
-      "needsV8GenomicExtractionWorkflow": true,
       "publicReleaseNumber": 8
     },
     {
@@ -328,7 +327,6 @@
       "wgsLongReadsHailT2T": "longreads/hail.mt/T2T",
       "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
       "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T",
-      "needsV8GenomicExtractionWorkflow": true,
       "tanagraEnabled": true,
       "publicReleaseNumber": -1
     }

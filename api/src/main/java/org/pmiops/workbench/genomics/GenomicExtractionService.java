@@ -402,8 +402,7 @@ public class GenomicExtractionService {
 
     // we use different workflows based on the CDR version:
     // one version for v7 or earlier, and one for v8 or later
-    boolean useLegacyWorkflow =
-        !Boolean.TRUE.equals(cdrVersion.getNeedsV8GenomicExtractionWorkflow());
+    boolean useLegacyWorkflow = cdrVersion.getPublicReleaseNumber() <= 7;
 
     List<String> personIds =
         workspace.isCDRAndWorkspaceTanagraEnabled()

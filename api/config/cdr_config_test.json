@@ -169,7 +169,6 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "needsV8GenomicExtractionWorkflow": true,
       "publicReleaseNumber": 8
     }
   ]
