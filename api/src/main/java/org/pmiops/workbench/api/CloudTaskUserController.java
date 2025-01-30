@@ -162,15 +162,15 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
         // consistent with access module statuses.
         user = userService.syncDuccVersionStatus(user, Agent.asSystem());
       } catch (WorkbenchException e) {
-        log.log(Level.SEVERE, "failed to synchronize access for user " + user.getUsername(), e);
+        log.log(Level.SEVERE, "Failed to synchronize access for user " + user.getUsername(), e);
         errorCount++;
       }
     }
     if (errorCount > 0) {
-      log.severe(String.format("encountered errors on %d/%d users", errorCount, userIds.size()));
+      log.severe(String.format("Encountered errors on %d/%d users", errorCount, userIds.size()));
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    log.info(String.format("successfully synchronized %d users", userIds.size()));
+    log.info(String.format("Successfully synchronized %d users", userIds.size()));
     return ResponseEntity.noContent().build();
   }
 
@@ -184,6 +184,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   public ResponseEntity<Void> checkCreditsExpirationForUserIDsBatch(List<Long> userIds) {
     log.info(String.format("Checking initial credits expiration for %d users...", userIds.size()));
     initialCreditsService.checkCreditsExpirationForUserIDs(userIds);
+    log.info("Done checking initial credits expiration.");
     return ResponseEntity.noContent().build();
   }
 
