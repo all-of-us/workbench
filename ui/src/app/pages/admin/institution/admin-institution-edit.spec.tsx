@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 import * as fp from 'lodash/fp';
 
 import {
@@ -99,9 +100,14 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   const component = (institutionShortName = VERILY.shortName) => {
     return render(
       <MemoryRouter initialEntries={[getAdminUrl(institutionShortName)]}>
-        <Route path='/admin/institution/edit/:institutionId'>
-          <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
-        </Route>
+        <CompatRouter>
+          <CompatRoute path='/admin/institution/edit/:institutionId'>
+            <AdminInstitutionEdit
+              hideSpinner={() => {}}
+              showSpinner={() => {}}
+            />
+          </CompatRoute>
+        </CompatRouter>
       </MemoryRouter>
     );
   };
@@ -622,9 +628,14 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   const component = () => {
     return render(
       <MemoryRouter initialEntries={['/admin/institution/add']}>
-        <Route path='/admin/institution/add'>
-          <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
-        </Route>
+        <CompatRouter>
+          <CompatRoute path='/admin/institution/add'>
+            <AdminInstitutionEdit
+              hideSpinner={() => {}}
+              showSpinner={() => {}}
+            />
+          </CompatRoute>
+        </CompatRouter>
       </MemoryRouter>
     );
   };

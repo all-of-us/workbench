@@ -1,4 +1,5 @@
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 import { mockNavigate } from 'setupTests';
 
 import {
@@ -75,11 +76,13 @@ const renderInteractiveNotebook = (pathParameters: { params: MatchParams }) =>
         }`,
       ]}
     >
-      <Route
-        path={`/workspaces/:ns/:terraName/${analysisTabName}/preview/:nbName`}
-      >
-        <InteractiveNotebook hideSpinner={() => {}} match={pathParameters} />
-      </Route>
+      <CompatRouter>
+        <CompatRoute
+          path={`/workspaces/:ns/:terraName/${analysisTabName}/preview/:nbName`}
+        >
+          <InteractiveNotebook hideSpinner={() => {}} match={pathParameters} />
+        </CompatRoute>
+      </CompatRouter>
     </MemoryRouter>
   );
 
