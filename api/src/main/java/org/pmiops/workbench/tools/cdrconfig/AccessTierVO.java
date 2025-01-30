@@ -14,4 +14,5 @@ public class AccessTierVO {
   public String authDomainGroupEmail;
   public String datasetsBucket;
   public Boolean enableUserWorkflows;
+  public String vwbTierGroupName;
 }

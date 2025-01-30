@@ -197,6 +197,7 @@ swaggerSources {
     wsmanager swagger3JavaClient("ws-manager.yaml", "wsmanager")
     vwbum swagger3JavaClient("vwb-user-manager.yaml", "vwb.user")
     vwbexfil swagger3JavaClient("vwb-exfil-manager.yaml", "vwb.exfil")
+    vwbsam swagger3JavaClient("vwb-sam.yaml", "vwb.sam")
 
     // Workbench needs a special configuration style, as we generate Spring server
     // bindings in this case.

@@ -148,5 +148,13 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
+  public static WorkbenchException convertVwbSamException(
+      org.pmiops.workbench.vwb.sam.ApiException e) {
+    if (isSocketTimeoutException(e.getCause())) {
+      throw new GatewayTimeoutException();
+    }
+    throw codeToException(e.getCode());
+  }
+
   private ExceptionUtils() {}
 }

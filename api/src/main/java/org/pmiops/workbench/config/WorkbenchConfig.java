@@ -332,6 +332,8 @@ public class WorkbenchConfig {
     public boolean enableVWBWorkspaceCreation;
     // If true, AoU API will start accepting egress notification coming from VWB Service
     public boolean enableVWBEgressMonitor;
+    // If true, AoU will call SAM and VWB to add/remove user from VWB tier group.
+    public boolean enableVWBUserAccessManagement;
   }
 
   public static class ActionAuditConfig {
@@ -479,6 +481,7 @@ public class WorkbenchConfig {
 
   public static class VwbConfig {
     public String wsmBaseUrl;
+    public String vwbSamBaseUrl;
     public String exfilManagerBaseUrl;
     public String organizationId;
     // This will only be used for preview release, later on, each user will have their own pod.

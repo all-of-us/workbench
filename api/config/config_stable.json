@@ -121,7 +121,8 @@
     "enableInitialCreditsExpiration": false,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": true,
-    "enableVWBEgressMonitor": false
+    "enableVWBEgressMonitor": false,
+    "enableVWBUserAccessManagement": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
