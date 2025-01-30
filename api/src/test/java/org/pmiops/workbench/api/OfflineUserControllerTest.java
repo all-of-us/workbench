@@ -114,8 +114,7 @@ public class OfflineUserControllerTest {
     offlineUserController.groupAndPushSynchronizeAccessTasks();
 
     // Batch size is 3, so we expect 2 groups.
-    List<List<Long>> expectedRequests = List.of(List.of(1L, 2L, 3L), List.of(4L));
-    for (List<Long> expected : expectedRequests) {
+    for (List<Long> expected : List.of(List.of(1L, 2L, 3L), List.of(4L))) {
       verify(mockCloudTasksClient)
           .createTask(
               matches(Pattern.compile(".*/synchronizeAccessQueue$")),
@@ -129,8 +128,7 @@ public class OfflineUserControllerTest {
     offlineUserController.bulkAuditProjectAccess();
 
     // Batch size is 2, so we expect 2 groups.
-    List<List<Long>> expectedRequests = List.of(List.of(1L, 2L), List.of(3L, 4L));
-    for (List<Long> expected : expectedRequests) {
+    for (List<Long> expected : List.of(List.of(1L, 2L), List.of(3L, 4L))) {
       verify(mockCloudTasksClient)
           .createTask(
               matches(Pattern.compile(".*/auditProjectQueue$")),
@@ -144,8 +142,7 @@ public class OfflineUserControllerTest {
     offlineUserController.checkInitialCreditsExpiration();
 
     // Batch size is 2, so we expect 2 groups.
-    List<List<Long>> expectedRequests = List.of(List.of(1L, 2L), List.of(3L, 4L));
-    for (List<Long> expected : expectedRequests) {
+    for (List<Long> expected : List.of(List.of(1L, 2L), List.of(3L, 4L))) {
       verify(mockCloudTasksClient)
           .createTask(
               matches(Pattern.compile(".*/checkCreditsExpirationForUserIDsQueue$")),
