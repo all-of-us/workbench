@@ -83,17 +83,17 @@ export const AnalyticsTracker = {
         getCurrentPageLabel(suffix)
       ),
     Duplicate: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Duplicate'),
-    DuplicateFeatured: (name) =>
+    DuplicateFeatured: (displayName: string) =>
       triggerEvent(
         AnalyticsCategory.FEATURED_WORKSPACES,
         'Click',
-        `Featured Workspace - Tile - Duplicate - ${name}`
+        `Featured Workspace - Tile - Duplicate - ${displayName}`
       ),
-    NavigateToFeatured: (name) =>
+    NavigateToFeatured: (displayName: string) =>
       triggerEvent(
         AnalyticsCategory.FEATURED_WORKSPACES,
         'Click',
-        `Featured Workspace - Tile - ${name}`
+        `Featured Workspace - Tile - ${displayName}`
       ),
     OpenEditPage: (suffix = '') =>
       triggerEvent(

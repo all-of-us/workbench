@@ -125,7 +125,9 @@ describe('WorkspaceAbout', () => {
         name: /share/i,
       })
     );
-    screen.getByText('Share ' + WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME);
+    screen.getByText(
+      'Share ' + WorkspaceStubVariables.DEFAULT_WORKSPACE_DISPLAY_NAME
+    );
   });
 
   test.each([

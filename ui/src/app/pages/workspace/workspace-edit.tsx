@@ -297,7 +297,7 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
   return (
     <div data-test-id='cdr-version-upgrade' style={styles.cdrVersionUpgrade}>
       <div>
-        {`You're duplicating the workspace "${srcWorkspace.name}" to upgrade from`}{' '}
+        {`You're duplicating the workspace "${srcWorkspace.displayName}" to upgrade from`}{' '}
         {fromCdrVersion} to {toCdrVersion}.
       </div>
       <div>
@@ -624,6 +624,7 @@ export const WorkspaceEdit = fp.flow(
     createWorkspace(): Workspace {
       return {
         name: '',
+        displayName: '',
         accessTierShortName: DEFAULT_ACCESS_TIER,
         cdrVersionId: '',
         researchPurpose: {
@@ -685,9 +686,10 @@ export const WorkspaceEdit = fp.flow(
       }
 
       if (this.isMode(WorkspaceEditMode.Duplicate)) {
-        // This is the only field which is not automatically handled/differentiated
+        // name/displayName is the only field which is not automatically handled/differentiated
         // on the API level.
         workspace.name = 'Duplicate of ' + workspace.name;
+        workspace.displayName = 'Duplicate of ' + workspace.displayName;
         // unselect to prevent unneeded re-review
         workspace.researchPurpose.reviewRequested = undefined;
       }
@@ -1007,9 +1009,9 @@ export const WorkspaceEdit = fp.flow(
         case WorkspaceEditMode.Create:
           return 'Create a new workspace';
         case WorkspaceEditMode.Edit:
-          return 'Edit workspace "' + workspace.name + '"';
+          return 'Edit workspace "' + workspace.displayName + '"';
         case WorkspaceEditMode.Duplicate:
-          return 'Duplicate workspace "' + workspace.name + '"';
+          return 'Duplicate workspace "' + workspace.displayName + '"';
       }
     }
 
@@ -1356,6 +1358,7 @@ export const WorkspaceEdit = fp.flow(
         populationChecked,
         workspace: {
           name,
+          displayName,
           billingAccountName,
           researchPurpose: {
             aianResearchDetails,
@@ -1380,6 +1383,7 @@ export const WorkspaceEdit = fp.flow(
         aianResearchDetails,
         aianResearchType,
         name,
+        displayName,
         billingAccountName,
         anticipatedFindings,
         intendedStudy,
@@ -1414,7 +1418,8 @@ export const WorkspaceEdit = fp.flow(
       // surfaced directly. Currently these constraints are entirely separate
       // from the user facing error strings we render.
       const constraints: object = {
-        name: requiredStringWithMaxLength(80, 'Name'),
+        // name is not included, in order to avoid duplicate error messages
+        displayName: requiredStringWithMaxLength(80, 'Name'),
         // The prefix for these lengthMessages require HTML formatting
         // The prefix string is omitted here and included in the React template below
         billingAccountName: { presence: true },
@@ -1529,6 +1534,11 @@ export const WorkspaceEdit = fp.flow(
       );
     }
 
+    setWorkspaceName(name: string) {
+      this.setState(fp.set(['workspace', 'name'], name));
+      this.setState(fp.set(['workspace', 'displayName'], name));
+    }
+
     render() {
       const params = parseQueryParams(this.props.location.search);
       const highlightBilling = !!params.get('highlightBilling');
@@ -1536,6 +1546,7 @@ export const WorkspaceEdit = fp.flow(
       const {
         workspace: {
           name,
+          displayName,
           billingAccountName,
           cdrVersionId,
           accessTierShortName,
@@ -1667,12 +1678,12 @@ export const WorkspaceEdit = fp.flow(
                     style={styles.textInput}
                     autoFocus
                     placeholder='Workspace Name'
-                    value={name}
-                    onBlur={(v) =>
-                      this.setState(fp.set(['workspace', 'name'], v.trim()))
-                    }
-                    onChange={(v) =>
-                      this.setState(fp.set(['workspace', 'name'], v))
+                    value={displayName}
+                    onBlur={(v: string) => this.setWorkspaceName(v.trim())}
+                    onChange={(v: string) =>
+                      // do not trim, because it would prevent inner spaces
+                      // e.g. it would turn "My Workspace" into "MyWorkspace"
+                      this.setWorkspaceName(v)
                     }
                   />
                 </FlexColumn>
@@ -2603,7 +2614,7 @@ export const WorkspaceEdit = fp.flow(
                 <ModalBody>
                   {this.props.workspaceEditMode === WorkspaceEditMode.Create
                     ? 'You already have a workspace named ' +
-                      name +
+                      displayName +
                       ' Please choose another name'
                     : 'Another client has modified this workspace since the beginning of this editing ' +
                       'session. Please reload to avoid overwriting those changes.'}

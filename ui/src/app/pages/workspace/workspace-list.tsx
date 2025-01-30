@@ -77,7 +77,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         const workspacesReceived = (await workspacesApi().getWorkspaces())
           .items;
         workspacesReceived.sort((a, b) =>
-          a.workspace.name.localeCompare(b.workspace.name)
+          a.workspace.displayName.localeCompare(b.workspace.displayName)
         );
         this.setState({
           workspaceList: workspacesReceived.map(
