@@ -249,12 +249,12 @@ public class UserMetricsControllerTest {
             mockConceptSetService,
             mockDataSetService,
             mockFireCloudService,
+            mockInitialCreditsService,
             mockUserProvider,
             mockUserRecentResourceService,
             workspaceAuthService,
             workspaceDao,
-            workspaceResourceMapper,
-            mockInitialCreditsService);
+            workspaceResourceMapper);
     userMetricsController.setDistinctWorkspaceLimit(5);
   }
 
