@@ -82,7 +82,7 @@ public class UserMetricsControllerTest {
   @Mock private DataSetService mockDataSetService;
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
-  @Mock private WorkspaceAuthService workspaceAuthService;
+  @Mock private WorkspaceAuthService mockWorkspaceAuthService;
   @Mock private InitialCreditsService mockInitialCreditsService;
 
   @Autowired private AccessTierDao accessTierDao;
@@ -252,7 +252,7 @@ public class UserMetricsControllerTest {
             mockInitialCreditsService,
             mockUserProvider,
             mockUserRecentResourceService,
-            workspaceAuthService,
+            mockWorkspaceAuthService,
             workspaceDao,
             workspaceResourceMapper);
     userMetricsController.setDistinctWorkspaceLimit(5);
