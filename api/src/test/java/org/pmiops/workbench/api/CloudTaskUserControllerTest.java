@@ -9,9 +9,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
-import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +25,6 @@ import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.initialcredits.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.AccessModuleStatus;
-import org.pmiops.workbench.model.AuditProjectAccessRequest;
-import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -83,14 +79,13 @@ public class CloudTaskUserControllerTest {
 
   @Test
   public void testBulkProjectAudit() throws Exception {
-    doReturn(ImmutableList.of()).when(mockCloudResourceManagerService).getAllProjectsForUser(userA);
-    doReturn(ImmutableList.of(new Project().setName("aou-rw-test-123").setParent("folder/123")))
+    doReturn(Collections.emptyList())
+        .when(mockCloudResourceManagerService)
+        .getAllProjectsForUser(userA);
+    doReturn(List.of(new Project().setName("aou-rw-test-123").setParent("folder/123")))
         .when(mockCloudResourceManagerService)
         .getAllProjectsForUser(userB);
-    controller.auditProjectAccess(
-        new AuditProjectAccessRequest()
-            .addUserIdsItem(userA.getUserId())
-            .addUserIdsItem(userB.getUserId()));
+    controller.auditProjectAccessBatch(List.of(userA.getUserId(), userB.getUserId()));
     verify(mockCloudResourceManagerService, times(2)).getAllProjectsForUser(any());
   }
 
@@ -104,10 +99,7 @@ public class CloudTaskUserControllerTest {
     // kluge to ensure a valid return value for syncTwoFactorAuthStatus()
     when(mockUserService.syncTwoFactorAuthStatus(userA, Agent.asSystem())).thenReturn(userA);
 
-    controller.synchronizeUserAccess(
-        new SynchronizeUserAccessRequest()
-            .addUserIdsItem(userA.getUserId())
-            .addUserIdsItem(userB.getUserId()));
+    controller.synchronizeUserAccessBatch(List.of(userA.getUserId(), userB.getUserId()));
 
     // Ideally we would use a real implementation of UserService and mock its external deps, but
     // unfortunately UserService is too sprawling to replicate in a unit test.
@@ -124,22 +116,21 @@ public class CloudTaskUserControllerTest {
 
   @Test
   public void testCheckAndAlertFreeTierBillingUsage() {
-    List<Long> userIdList = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
-    controller.checkAndAlertFreeTierBillingUsage(userIdList);
+    List<Long> userIdList = List.of(1L, 2L, 3L);
+    controller.checkAndAlertFreeTierBillingUsageBatch(userIdList);
     verify(mockFreeTierBillingUpdateService).checkAndAlertFreeTierBillingUsage(userIdList);
   }
 
   @Test
   public void testCheckAndAlertFreeTierBillingUsage_noUserListPassedFromTask() {
-    List<Long> userIdList = new ArrayList<>();
-    controller.checkAndAlertFreeTierBillingUsage(userIdList);
-    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(userIdList);
+    controller.checkAndAlertFreeTierBillingUsageBatch(Collections.emptyList());
+    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
   }
 
   @Test
   public void testCheckCreditsExpirationForUserIDs() {
-    List<Long> userIdList = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
-    controller.checkCreditsExpirationForUserIDs(userIdList);
+    List<Long> userIdList = List.of(1L, 2L, 3L);
+    controller.checkCreditsExpirationForUserIDsBatch(userIdList);
     verify(mockInitialCreditsService).checkCreditsExpirationForUserIDs(userIdList);
   }
 }

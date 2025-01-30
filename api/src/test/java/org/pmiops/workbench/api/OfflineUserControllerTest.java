@@ -27,8 +27,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.AuditProjectAccessRequest;
-import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -115,25 +113,15 @@ public class OfflineUserControllerTest {
   public void testGroupAndPushSynchronizeAccessTasks() {
     offlineUserController.groupAndPushSynchronizeAccessTasks();
 
-    // We set a batch size of 3, so we expect two cloud tasks.
-    List<SynchronizeUserAccessRequest> expectedRequests =
-        List.of(
-            new SynchronizeUserAccessRequest().userIds(List.of(1L, 2L, 3L)),
-            new SynchronizeUserAccessRequest().userIds(List.of(4L)));
-    for (SynchronizeUserAccessRequest expected : expectedRequests) {
+    // Batch size is 3, so we expect 2 groups.
+    List<List<Long>> expectedRequests = List.of(List.of(1L, 2L, 3L), List.of(4L));
+    for (List<Long> expected : expectedRequests) {
       verify(mockCloudTasksClient)
           .createTask(
               matches(Pattern.compile(".*/synchronizeAccessQueue$")),
-              argThat(taskRequest -> expected.equals(cloudTaskToSynchronizeRequest(taskRequest))));
+              argThat(taskRequest -> expected.equals(cloudTaskToUserIdList(taskRequest))));
     }
     verifyNoMoreInteractions(mockCloudTasksClient);
-  }
-
-  private SynchronizeUserAccessRequest cloudTaskToSynchronizeRequest(Task t) {
-    return new Gson()
-        .fromJson(
-            t.getAppEngineHttpRequest().getBody().toStringUtf8(),
-            SynchronizeUserAccessRequest.class);
   }
 
   @Test
@@ -141,25 +129,14 @@ public class OfflineUserControllerTest {
     offlineUserController.bulkAuditProjectAccess();
 
     // Batch size is 2, so we expect 2 groups.
-    List<AuditProjectAccessRequest> expectedRequests =
-        List.of(
-            new AuditProjectAccessRequest().userIds(List.of(1L, 2L)),
-            new AuditProjectAccessRequest().userIds(List.of(3L, 4L)));
-    for (AuditProjectAccessRequest expected : expectedRequests) {
+    List<List<Long>> expectedRequests = List.of(List.of(1L, 2L), List.of(3L, 4L));
+    for (List<Long> expected : expectedRequests) {
       verify(mockCloudTasksClient)
           .createTask(
               matches(Pattern.compile(".*/auditProjectQueue$")),
-              argThat(
-                  taskRequest ->
-                      expected.equals(cloudTaskToAuditProjectAccessRequest(taskRequest))));
+              argThat(taskRequest -> expected.equals(cloudTaskToUserIdList(taskRequest))));
     }
     verifyNoMoreInteractions(mockCloudTasksClient);
-  }
-
-  private AuditProjectAccessRequest cloudTaskToAuditProjectAccessRequest(Task t) {
-    return new Gson()
-        .fromJson(
-            t.getAppEngineHttpRequest().getBody().toStringUtf8(), AuditProjectAccessRequest.class);
   }
 
   @Test
