@@ -35,13 +35,14 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
       CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
       DataSetDao dataSetDao,
-      WorkspaceResourceMapper workspaceResourceMapper,
-      InitialCreditsService initialCreditsService) {
+      InitialCreditsService initialCreditsService,
+      WorkspaceResourceMapper workspaceResourceMapper
+      ) {
     this.cohortReviewService = cohortReviewService;
     this.conceptSetService = conceptSetService;
     this.dataSetDao = dataSetDao;
-    this.workspaceResourceMapper = workspaceResourceMapper;
     this.initialCreditsService = initialCreditsService;
+    this.workspaceResourceMapper = workspaceResourceMapper;
   }
 
   @Override
