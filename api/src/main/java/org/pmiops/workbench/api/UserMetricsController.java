@@ -71,24 +71,24 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
+      InitialCreditsService initialCreditsService,
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
-      WorkspaceResourceMapper workspaceResourceMapper,
-      InitialCreditsService initialCreditsService) {
+      WorkspaceResourceMapper workspaceResourceMapper) {
     this.cloudStorageClient = cloudStorageClient;
     this.cohortService = cohortService;
     this.cohortReviewService = cohortReviewService;
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.initialCreditsService = initialCreditsService;
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.workspaceResourceMapper = workspaceResourceMapper;
-    this.initialCreditsService = initialCreditsService;
   }
 
   @VisibleForTesting
