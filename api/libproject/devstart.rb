@@ -3238,7 +3238,8 @@ def run_genomic_extraction(cmd_name, *args)
     '--person_id_file [person_ids.txt]',
     String,
     ->(opts, v) { opts.person_id_file = v },
-    'The file of person IDs to use in the extraction.  skips header row.')
+    'The file of person IDs to use in the extraction.  Note: skips the first row, assumed to be a \
+    header. Person ID lines are plain unquoted text.')
 
   op.add_typed_option(
     '--legacy [true/false]',

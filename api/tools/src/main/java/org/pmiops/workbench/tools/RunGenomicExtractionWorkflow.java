@@ -122,7 +122,9 @@ public class RunGenomicExtractionWorkflow extends Tool {
   private static final Option personIdsOpt =
       Option.builder()
           .longOpt("person_id_file")
-          .desc("The file of person IDs to use in the extraction.  skips header row.")
+          .desc(
+              "The file of person IDs to use in the extraction.  Note: skips the "
+                  + "first row, assumed to be a header. Person ID lines are plain unquoted text.")
           .required()
           .hasArg()
           .build();
