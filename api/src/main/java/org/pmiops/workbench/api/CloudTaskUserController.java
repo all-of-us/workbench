@@ -14,7 +14,6 @@ import java.util.function.IntSupplier;
 import java.util.function.ToIntFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -112,7 +111,8 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
                           Optional.ofNullable(project.getParent())
                               .map(this::getId)
                               .orElse("[id unknown]")))
-              .collect(Collectors.toList());
+              .toList();
+
       if (!unauthorizedLogs.isEmpty()) {
         log.warning(
             "User "
@@ -162,12 +162,9 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private int syncOneUser(DbUser user) {
     try {
       // 2FA synchronization requires an outgoing call to gsuite. For this reason, we
-      // optimize to only verify that users who have 2FA enabled, still have it
-      // enabled.
-      // Users who don't have 2FA will go through an active flow to enable it, and are
-      // not
-      // dependent on this offline check. Disabled users have no access anyways, so
-      // don't
+      // optimize to only verify that users who have 2FA enabled, still have it enabled.
+      // Users who don't have 2FA will go through an active flow to enable it, and are not
+      // dependent on this offline check. Disabled users have no access anyways, so don't
       // bother checking them either.
       if (!user.getDisabled()) {
         Optional<AccessModuleStatus> status =
@@ -178,13 +175,10 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       }
 
       // Note: each module synchronization calls updateUserAccessTiers() which checks
-      // the status
-      // of *all* modules, so this serves as a general fallback as well (e.g. due to
-      // partial
-      // system failures or bugs), ensuring that the database and access tier groups
-      // are
+      // the status of *all* modules, so this serves as a general fallback as well (e.g. due to
+      // partial system failures or bugs), ensuring that the database and access tier groups are
       // consistent with access module statuses.
-      user = userService.syncDuccVersionStatus(user, Agent.asSystem());
+      userService.syncDuccVersionStatus(user, Agent.asSystem());
     } catch (WorkbenchException e) {
       log.log(Level.SEVERE, "Failed to synchronize access for user " + user.getUsername(), e);
       return 1; // error
