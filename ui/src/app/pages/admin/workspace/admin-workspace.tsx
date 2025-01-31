@@ -56,38 +56,30 @@ const AdminWorkspaceImpl = (props: Props) => {
     const { ns } = props.match.params;
     setLoadingWorkspace(true);
 
-    try {
-      const newCloudStorageTraffic =
-        await workspaceAdminApi().getCloudStorageTraffic(ns);
-      setCloudStorageTraffic(newCloudStorageTraffic);
-    } catch (error) {
-      console.log('Error loading cloud storage traffic: ', error);
-    }
+    workspaceAdminApi()
+      .getCloudStorageTraffic(ns)
+      .then((newCloudStorageTraffic) =>
+        setCloudStorageTraffic(newCloudStorageTraffic)
+      )
+      .catch((error) =>
+        console.log('Error loading cloud storage traffic: ', error)
+      );
 
-    try {
-      const newRuntimes = await workspaceAdminApi().adminListRuntimes(ns);
-      setRuntimes(newRuntimes);
-    } catch (error) {
-      handleDataLoadError(error);
-    }
+    workspaceAdminApi()
+      .adminListRuntimes(ns)
+      .then((newRuntimes) => setRuntimes(newRuntimes))
+      .catch((error) => handleDataLoadError(error));
 
-    try {
-      const newUserApps =
-        await workspaceAdminApi().adminListUserAppsInWorkspace(ns);
-      setUserApps(newUserApps);
-    } catch (error) {
-      handleDataLoadError(error);
-    }
+    workspaceAdminApi()
+      .adminListUserAppsInWorkspace(ns)
+      .then((newUserApps) => setUserApps(newUserApps))
+      .catch((error) => handleDataLoadError(error));
 
-    try {
-      const newWorkspaceDetails =
-        await workspaceAdminApi().getWorkspaceAdminView(ns);
-      setWorkspaceDetails(newWorkspaceDetails);
-    } catch (error) {
-      handleDataLoadError(error);
-    } finally {
-      setLoadingWorkspace(false);
-    }
+    workspaceAdminApi()
+      .getWorkspaceAdminView(ns)
+      .then((newWorkspaceDetails) => setWorkspaceDetails(newWorkspaceDetails))
+      .catch((error) => handleDataLoadError(error))
+      .finally(() => setLoadingWorkspace(false));
   };
 
   useEffect(() => {
@@ -103,15 +95,11 @@ const AdminWorkspaceImpl = (props: Props) => {
     const { ns } = props.match.params;
     setLoadingWorkspace(true);
 
-    try {
-      const newWorkspaceDetails =
-        await workspaceAdminApi().getWorkspaceAdminView(ns);
-      setWorkspaceDetails(newWorkspaceDetails);
-    } catch (error) {
-      handleDataLoadError(error);
-    } finally {
-      setLoadingWorkspace(false);
-    }
+    workspaceAdminApi()
+      .getWorkspaceAdminView(ns)
+      .then((newWorkspaceDetails) => setWorkspaceDetails(newWorkspaceDetails))
+      .catch((error) => handleDataLoadError(error))
+      .finally(() => setLoadingWorkspace(false));
   };
 
   const { profile } = profileStore.get();
@@ -134,12 +122,12 @@ const AdminWorkspaceImpl = (props: Props) => {
           {activeStatus === WorkspaceActiveStatus.ACTIVE && (
             <AdminLockWorkspace
               {...{ workspace }}
-              reload={async () => await populateFederatedWorkspaceInformation()}
+              reload={populateFederatedWorkspaceInformation}
             />
           )}
           <BasicInformation
             {...{ workspace, activeStatus }}
-            reload={async () => await populateWorkspaceDetails()}
+            reload={populateWorkspaceDetails}
           />
           <Accordion>
             <AccordionTab header='Research Purpose'>
@@ -164,7 +152,7 @@ const AdminWorkspaceImpl = (props: Props) => {
               <CloudEnvironmentsTable
                 {...{ runtimes, userApps }}
                 workspaceNamespace={workspace.namespace}
-                onDelete={() => populateFederatedWorkspaceInformation()}
+                onDelete={populateFederatedWorkspaceInformation}
               />
               <h2>Egress event history</h2>
               {renderIfAuthorized(
