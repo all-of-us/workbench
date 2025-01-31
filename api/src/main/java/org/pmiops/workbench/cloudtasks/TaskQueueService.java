@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
@@ -140,7 +139,7 @@ public class TaskQueueService {
         .map(
             batch ->
                 createAndPushTask(SYNCHRONIZE_ACCESS_QUEUE_NAME, SYNCHRONIZE_ACCESS_PATH, batch))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public List<String> groupAndPushAccessExpirationEmailTasks(List<Long> userIds) {
@@ -152,7 +151,7 @@ public class TaskQueueService {
             batch ->
                 createAndPushTask(
                     ACCESS_EXPIRATION_EMAIL_QUEUE_NAME, ACCESS_EXPIRATION_EMAIL_PATH, batch))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public void groupAndPushDeleteTestWorkspaceTasks(List<TestUserWorkspace> workspacesToDelete) {
