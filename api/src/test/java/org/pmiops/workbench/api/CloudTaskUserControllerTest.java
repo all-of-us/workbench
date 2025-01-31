@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
+import com.google.common.base.Stopwatch;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
@@ -42,23 +42,24 @@ public class CloudTaskUserControllerTest {
   private DbUser userB;
 
   @Autowired private CloudTaskUserController controller;
-  @Autowired private UserDao userDao;
 
-  @Autowired private AccessModuleService mockAccessModuleService;
-  @Autowired private UserService mockUserService;
-
-  @Autowired private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
-
-  @Autowired private InitialCreditsService mockInitialCreditsService;
+  @MockBean private AccessModuleService mockAccessModuleService;
+  @MockBean private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
+  @MockBean private InitialCreditsService mockInitialCreditsService;
+  @MockBean private UserService mockUserService;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
+  @Import({
+    FakeClockConfiguration.class,
+    CloudTaskUserController.class,
+    Stopwatch.class,
+  })
   @MockBean({
     AccessModuleService.class,
     CloudResourceManagerService.class,
     InitialCreditsBatchUpdateService.class,
+    InitialCreditsService.class,
     UserService.class,
-    InitialCreditsService.class
   })
   static class Configuration {}
 
@@ -74,7 +75,8 @@ public class CloudTaskUserControllerTest {
     user.setUsername(email);
     user.setUserId(incrementedUserId);
     incrementedUserId++;
-    return userDao.save(user);
+    when(mockUserService.getByDatabaseIdOrThrow(user.getUserId())).thenReturn(user);
+    return user;
   }
 
   @Test

@@ -5,7 +5,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
-import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,11 +70,7 @@ public class InitialCreditsBatchUpdateService {
    *
    * @param userIdList
    */
-  public void checkAndAlertFreeTierBillingUsage(@Nullable List<Long> userIdList) {
-    if (userIdList == null || userIdList.isEmpty()) {
-      return;
-    }
-
+  public void checkAndAlertFreeTierBillingUsage(List<Long> userIdList) {
     Set<String> googleProjectsForUserSet = workspaceDao.getGoogleProjectForUserList(userIdList);
 
     List<DbGoogleProjectPerCost> googleProjectPerCostList =
