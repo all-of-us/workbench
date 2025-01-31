@@ -36,7 +36,6 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
@@ -283,10 +282,12 @@ public class InitialCreditsService {
    *     institutionally.
    */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
-    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
-        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
-        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
-        .map(DbUserInitialCreditsExpiration::getExpirationTime);
+    return workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration
+        ? Optional.ofNullable(user.getUserInitialCreditsExpiration())
+            .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+            .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
+            .map(DbUserInitialCreditsExpiration::getExpirationTime)
+        : Optional.empty();
   }
 
   /**
@@ -367,6 +368,9 @@ public class InitialCreditsService {
   }
 
   public DbUser extendInitialCreditsExpiration(DbUser user) {
+    if (!workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration) {
+      throw new BadRequestException("Initial credits extension is disabled.");
+    }
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     // This handles the case existing users that have not yet been migrated but also those who have
@@ -454,7 +458,6 @@ public class InitialCreditsService {
         .forEach(
             ws -> {
               ws.setInitialCreditsExpired(true);
-              ws.setBillingStatus(BillingStatus.INACTIVE);
               workspaceDao.save(ws);
               deleteAppsAndRuntimesInWorkspace(ws);
             });
@@ -513,7 +516,6 @@ public class InitialCreditsService {
         .forEach(
             ws -> {
               ws.setInitialCreditsExhausted(false);
-              ws.setBillingStatus(BillingStatus.ACTIVE);
               workspaceDao.save(ws);
             });
   }
