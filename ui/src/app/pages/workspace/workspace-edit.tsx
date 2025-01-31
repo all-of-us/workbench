@@ -1781,9 +1781,12 @@ export const WorkspaceEdit = fp.flow(
                   <FlexColumn>
                     <div style={styles.fieldHeader}>
                       Data Apps version
-                      <TooltipTrigger content={toolTipText.dataAppsSelect}>
-                        <InfoIcon style={styles.infoIcon} />
-                      </TooltipTrigger>
+                      {/* Only show tooltip for non-prod envs */}
+                      {environment.shouldShowDisplayTag && (
+                        <TooltipTrigger content={toolTipText.dataAppsSelect}>
+                          <InfoIcon style={styles.infoIcon} />
+                        </TooltipTrigger>
+                      )}
                     </div>
                     <TooltipTrigger
                       content='To use a different version of Data Apps, create a new workspace.'
