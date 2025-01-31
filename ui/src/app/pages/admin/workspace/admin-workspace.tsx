@@ -58,27 +58,25 @@ const AdminWorkspaceImpl = (props: Props) => {
 
     workspaceAdminApi()
       .getCloudStorageTraffic(ns)
-      .then((newCloudStorageTraffic) =>
-        setCloudStorageTraffic(newCloudStorageTraffic)
-      )
+      .then(setCloudStorageTraffic)
       .catch((error) =>
         console.log('Error loading cloud storage traffic: ', error)
       );
 
     workspaceAdminApi()
       .adminListRuntimes(ns)
-      .then((newRuntimes) => setRuntimes(newRuntimes))
-      .catch((error) => handleDataLoadError(error));
+      .then(setRuntimes)
+      .catch(handleDataLoadError);
 
     workspaceAdminApi()
       .adminListUserAppsInWorkspace(ns)
-      .then((newUserApps) => setUserApps(newUserApps))
-      .catch((error) => handleDataLoadError(error));
+      .then(setUserApps)
+      .catch(handleDataLoadError);
 
     workspaceAdminApi()
       .getWorkspaceAdminView(ns)
-      .then((newWorkspaceDetails) => setWorkspaceDetails(newWorkspaceDetails))
-      .catch((error) => handleDataLoadError(error))
+      .then(setWorkspaceDetails)
+      .catch(handleDataLoadError)
       .finally(() => setLoadingWorkspace(false));
   };
 
@@ -97,7 +95,7 @@ const AdminWorkspaceImpl = (props: Props) => {
 
     workspaceAdminApi()
       .getWorkspaceAdminView(ns)
-      .then((newWorkspaceDetails) => setWorkspaceDetails(newWorkspaceDetails))
+      .then(setWorkspaceDetails)
       .catch((error) => handleDataLoadError(error))
       .finally(() => setLoadingWorkspace(false));
   };
