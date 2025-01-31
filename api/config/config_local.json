@@ -194,6 +194,6 @@
     "organizationId": "79775c0a-3bf7-436a-8ab8-eab316998115",
     "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b",
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-d-1v-ucd.iam.gserviceaccount.com",
-    "userManagerBaseUrl": "https:\/\/terra-devel-user.api.verily.com"
+    "userManagerBaseUrl": "https:\/\/workbench-dev.verily.com\/api\/user"
   }
 }
