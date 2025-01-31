@@ -4149,7 +4149,7 @@ paths:
       - cloudTask
       description: Task handler which handle request from cloud task queue rdrQueueTest
         to send Researcher data
-      operationId: exportResearcherData
+      operationId: exportResearcherDataBatch
       security: []
       parameters:
       - name: backfill
@@ -4185,7 +4185,7 @@ paths:
       - cloudTask
       description: Task handler which handle request from cloud task queue rdrQueueTest
         to send Workspace data
-      operationId: exportWorkspaceData
+      operationId: exportWorkspaceDataBatch
       security: []
       parameters:
       - name: backfill
@@ -4210,14 +4210,14 @@ paths:
       - cloudTaskUser
       - cloudTask
       description: Audits the provided user's access to GCP resources
-      operationId: auditProjectAccess
+      operationId: auditProjectAccessBatch
       security: []
       requestBody:
-        description: Audit configuration to run.
+        description: The list of users to audit.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AuditProjectAccessRequest'
+              $ref: '#/components/schemas/UserIdList'
         required: true
       responses:
         200:
@@ -4231,14 +4231,14 @@ paths:
       - cloudTask
       description: |
         Check each user to ensure they still meet compliance guidelines.  If they do not, remove them from access tiers.
-      operationId: synchronizeUserAccess
+      operationId: synchronizeUserAccessBatch
       security: []
       requestBody:
         description: Users to synchronize.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SynchronizeUserAccessRequest'
+              $ref: '#/components/schemas/UserIdList'
         required: true
       responses:
         200:
@@ -4271,7 +4271,8 @@ paths:
       - workspaces
       - cloudTask
       description: |
-        Asynchronously creates a workspace. Note: unlike other cloud tasks, this task requires passing along the user's auth credential header.
+        Asynchronously creates a workspace. Note: unlike other cloud tasks, this task requires
+        passing along the user's auth credential header.
       operationId: processCreateWorkspaceTask
       requestBody:
         description: Workspace creation task to process.
@@ -4291,7 +4292,8 @@ paths:
       - workspaces
       - cloudTask
       description: |
-        Asynchronously duplicates a workspace. Note: unlike other cloud tasks, this task requires passing along the user's auth credential header.
+        Asynchronously duplicates a workspace. Note: unlike other cloud tasks, this task requires 
+        passing along the user's auth credential header.
       operationId: processDuplicateWorkspaceTask
       requestBody:
         description: Workspace duplication task to process.
@@ -4311,7 +4313,7 @@ paths:
       - cloudTaskWorkspaces
       - cloudTask
       description: Deletes the requested test user workspaces.
-      operationId: deleteTestUserWorkspaces
+      operationId: deleteTestUserWorkspacesBatch
       security: []
       requestBody:
         description: Batch of workspace deletions to process.
@@ -4332,7 +4334,7 @@ paths:
       - cloudTask
       description: |
         Deletes the requested test user workspaces in Rawls (Terra Workspace service). This may be necessary in case of a mismatch between the RW and Terra views of workspaces
-      operationId: deleteTestUserWorkspacesInRawls
+      operationId: deleteTestUserWorkspacesInRawlsBatch
       security: []
       requestBody:
         description: Batch of Rawls workspace deletions to process.
@@ -4353,7 +4355,7 @@ paths:
         - cloudTask
       description: |
         Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to passing thresholds or exceeding limits
-      operationId: checkAndAlertFreeTierBillingUsage
+      operationId: checkAndAlertFreeTierBillingUsageBatch
       security: [ ]
       requestBody:
         description: A batch of users needs to be checked, and alerts need to be sent regarding the excessive costs incurred in their workspaces.
@@ -4374,7 +4376,7 @@ paths:
         - cloudTask
       description: |
         Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
-      operationId: handleInitialCreditsExpiry
+      operationId: handleInitialCreditsExpiryBatch
       security: [ ]
       requestBody:
         description: Users that should be alerted about their free credits use.
@@ -4395,7 +4397,7 @@ paths:
       - cloudTask
       description: |
         Run the business logic to handle users whose free credits have expired. Including disabling compute, deleting cloud environments, and sending them notifications.
-      operationId: checkCreditsExpirationForUserIDs
+      operationId: checkCreditsExpirationForUserIDsBatch
       security: [ ]
       requestBody:
         description: Users that should be alerted about their free credits use.
@@ -4417,7 +4419,7 @@ paths:
       description: |
         Run the business logic to delete Runtimes, Apps, and Disks for
         users who have been removed from workspaces
-      operationId: ctDeleteUnsharedWorkspaceEnvironments
+      operationId: deleteUnsharedWorkspaceEnvironmentsBatch
       security: [ ]
       requestBody:
         description: Workspaces to check for unshared environments and disks.
@@ -11748,24 +11750,6 @@ components:
         participantCount:
           type: integer
           format: int64
-    AuditProjectAccessRequest:
-      type: object
-      properties:
-        userIds:
-          type: array
-          description: List of users to audit
-          items:
-            type: integer
-            format: int64
-    SynchronizeUserAccessRequest:
-      type: object
-      properties:
-        userIds:
-          type: array
-          description: List of users to synchronize
-          items:
-            type: integer
-            format: int64
     UserIdList:
       type: array
       items:

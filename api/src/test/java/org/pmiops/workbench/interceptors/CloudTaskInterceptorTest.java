@@ -31,7 +31,7 @@ public class CloudTaskInterceptorTest {
 
   private CloudTaskInterceptor interceptor;
 
-  private final String CLOUD_TASK_METHOD_NAME = "exportResearcherData";
+  private final String CLOUD_TASK_METHOD_NAME = "exportResearcherDataBatch";
 
   @BeforeEach
   public void setUp() {

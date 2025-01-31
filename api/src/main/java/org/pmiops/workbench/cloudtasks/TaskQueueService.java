@@ -19,12 +19,10 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
-import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
@@ -118,12 +116,7 @@ public class TaskQueueService {
   public void groupAndPushAuditProjectsTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerAuditTask)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    AUDIT_PROJECTS_QUEUE_NAME,
-                    AUDIT_PROJECTS_PATH,
-                    new AuditProjectAccessRequest().userIds(batch)));
+        .forEach(batch -> createAndPushTask(AUDIT_PROJECTS_QUEUE_NAME, AUDIT_PROJECTS_PATH, batch));
   }
 
   public void groupAndPushFreeTierBilling(List<Long> userIds) {
@@ -143,10 +136,7 @@ public class TaskQueueService {
         .stream()
         .map(
             batch ->
-                createAndPushTask(
-                    SYNCHRONIZE_ACCESS_QUEUE_NAME,
-                    SYNCHRONIZE_ACCESS_PATH,
-                    new SynchronizeUserAccessRequest().userIds(batch)))
+                createAndPushTask(SYNCHRONIZE_ACCESS_QUEUE_NAME, SYNCHRONIZE_ACCESS_PATH, batch))
         .collect(Collectors.toList());
   }
 

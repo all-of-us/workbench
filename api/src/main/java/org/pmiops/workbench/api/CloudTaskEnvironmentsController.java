@@ -37,7 +37,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
   }
 
   @Override
-  public ResponseEntity<Void> ctDeleteUnsharedWorkspaceEnvironments(
+  public ResponseEntity<Void> deleteUnsharedWorkspaceEnvironmentsBatch(
       List<String> workspaceNamespaces) {
     LOGGER.info(
         String.format(

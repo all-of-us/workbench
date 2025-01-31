@@ -104,9 +104,11 @@ public class InitialCreditsService {
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
     String userIdsAsString =
         users.stream()
-            .map(user -> Long.toString(user.getUserId()))
+            .map(DbUser::getUserId)
+            .sorted()
+            .map(l -> Long.toString(l))
             .collect(Collectors.joining(","));
-    logger.info(String.format("Checking billing usage for Users ids: %s ", userIdsAsString));
+    logger.info(String.format("Checking billing usage for user IDs: %s ", userIdsAsString));
     // Current cost in DB
     List<WorkspaceCostView> allCostsInDbForUsers = getAllCostsInDbForUsers(users);
 
@@ -573,10 +575,10 @@ public class InitialCreditsService {
                                                     .billing
                                                     .numberOfDaysToConsiderForFreeTierUsageUpdate)
                                             .toMillis()))))
-            .collect(Collectors.toList());
+            .toList();
 
     logger.info(
-        String.format("Workspaces that require update %d", workspacesThatRequireUpdate.size()));
+        String.format("Workspaces that require updates: %d", workspacesThatRequireUpdate.size()));
 
     return workspacesThatRequireUpdate.stream()
         .collect(
@@ -647,7 +649,6 @@ public class InitialCreditsService {
         .orElse(120);
   }
 
-  @Nullable
   private Map<String, Long> getWorkspaceByProjectCache(
       List<WorkspaceCostView> allCostsInDbForUsers) {
     // No need to proceed since there's nothing to update anyway
@@ -660,8 +661,9 @@ public class InitialCreditsService {
 
     logger.info(
         String.format(
-            "FreeTierBillingUsage: Workspace ids that require updates: %s",
+            "FreeTierBillingUsage: Workspace IDs that require updates: %s",
             workspaceByProject.values().stream()
+                .sorted()
                 .map(workspaceId -> Long.toString(workspaceId))
                 .collect(Collectors.joining(","))));
 
