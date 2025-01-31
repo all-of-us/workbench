@@ -106,6 +106,9 @@ public class CloudTaskUserControllerTest {
     // Ideally we would use a real implementation of UserService and mock its external deps, but
     // unfortunately UserService is too sprawling to replicate in a unit test.
 
+    verify(mockUserService).getByDatabaseIdOrThrow(userA.getUserId());
+    verify(mockUserService).getByDatabaseIdOrThrow(userB.getUserId());
+
     // we only sync 2FA users with completed 2FA
     verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
 
