@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 
@@ -17,7 +17,6 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import { DisksTable } from 'app/pages/admin/workspace/disks-table';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import { hasNewValidProps } from 'app/utils';
 import {
   AuthorityGuardedAction,
   renderIfAuthorized,
@@ -36,166 +35,156 @@ interface Props
   extends WithSpinnerOverlayProps,
     RouteComponentProps<MatchParams> {}
 
-interface State {
-  workspaceDetails?: WorkspaceAdminView;
-  cloudStorageTraffic?: CloudStorageTraffic;
-  loadingWorkspace?: boolean;
-  dataLoadError?: Response;
-  runtimes?: AdminRuntimeFields[];
-  userApps?: UserAppEnvironment[];
-}
+const AdminWorkspaceImpl = (props: Props) => {
+  const [workspaceDetails, setWorkspaceDetails] =
+    useState<WorkspaceAdminView>();
+  const [cloudStorageTraffic, setCloudStorageTraffic] =
+    useState<CloudStorageTraffic>();
+  const [loadingWorkspace, setLoadingWorkspace] = useState<boolean>(false);
+  const [dataLoadError, setDataLoadError] = useState<Response>();
+  const [runtimes, setRuntimes] = useState<AdminRuntimeFields[]>();
+  const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
 
-export class AdminWorkspaceImpl extends React.Component<Props, State> {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      workspaceDetails: {},
-      cloudStorageTraffic: null,
-    };
-  }
-
-  componentDidMount() {
-    this.props.hideSpinner();
-    this.populateFederatedWorkspaceInformation();
-  }
-
-  componentDidUpdate(prevProps: Props) {
-    if (
-      hasNewValidProps(this.props, prevProps, [(p: Props) => p.match.params.ns])
-    ) {
-      this.populateFederatedWorkspaceInformation();
-    }
-  }
-
-  handleDataLoadError = async (error) => {
+  const handleDataLoadError = async (error) => {
     if (error instanceof Response) {
       console.log('error', error, await error.json());
-      this.setState({ dataLoadError: error });
+      setDataLoadError(error);
     }
   };
 
-  async populateFederatedWorkspaceInformation() {
-    const { ns } = this.props.match.params;
-    this.setState({ loadingWorkspace: true });
+  const populateFederatedWorkspaceInformation = async () => {
+    const { ns } = props.match.params;
+    setLoadingWorkspace(true);
 
-    // cloud storage traffic isn't always available (e.g. for a deleted workspace) so we need to allow for that
-    workspaceAdminApi()
-      .getCloudStorageTraffic(ns)
-      .then((cloudStorageTraffic) => this.setState({ cloudStorageTraffic }))
-      .catch(() => {});
+    try {
+      const newCloudStorageTraffic =
+        await workspaceAdminApi().getCloudStorageTraffic(ns);
+      setCloudStorageTraffic(newCloudStorageTraffic);
+    } catch (error) {
+      console.log('Error loading cloud storage traffic: ', error);
+    }
 
-    // runtimes and user apps calls have error modes which cause them to be slow, so execute these in parallel
-    // to the main admin view call
+    try {
+      const newRuntimes = await workspaceAdminApi().adminListRuntimes(ns);
+      setRuntimes(newRuntimes);
+    } catch (error) {
+      handleDataLoadError(error);
+    }
 
-    workspaceAdminApi()
-      .adminListRuntimes(ns)
-      .then((runtimes) => this.setState({ runtimes }))
-      .catch(this.handleDataLoadError);
+    try {
+      const newUserApps =
+        await workspaceAdminApi().adminListUserAppsInWorkspace(ns);
+      setUserApps(newUserApps);
+    } catch (error) {
+      handleDataLoadError(error);
+    }
 
-    workspaceAdminApi()
-      .adminListUserAppsInWorkspace(ns)
-      .then((userApps) => this.setState({ userApps }))
-      .catch(this.handleDataLoadError);
+    try {
+      const newWorkspaceDetails =
+        await workspaceAdminApi().getWorkspaceAdminView(ns);
+      setWorkspaceDetails(newWorkspaceDetails);
+    } catch (error) {
+      handleDataLoadError(error);
+    } finally {
+      setLoadingWorkspace(false);
+    }
+  };
 
-    workspaceAdminApi()
-      .getWorkspaceAdminView(ns)
-      .then((workspaceDetails) => this.setState({ workspaceDetails }))
-      .catch(this.handleDataLoadError)
-      .finally(() => this.setState({ loadingWorkspace: false }));
-  }
+  useEffect(() => {
+    props.hideSpinner();
+    populateFederatedWorkspaceInformation();
+  }, []);
 
-  async populateWorkspaceDetails() {
-    const { ns } = this.props.match.params;
-    this.setState({ loadingWorkspace: true });
+  useEffect(() => {
+    populateFederatedWorkspaceInformation();
+  }, [props.match.params.ns]);
 
-    await workspaceAdminApi()
-      .getWorkspaceAdminView(ns)
-      .then((workspaceDetails) => this.setState({ workspaceDetails }))
-      .catch(this.handleDataLoadError)
-      .finally(() => this.setState({ loadingWorkspace: false }));
-  }
+  const populateWorkspaceDetails = async () => {
+    const { ns } = props.match.params;
+    setLoadingWorkspace(true);
 
-  render() {
-    const { profile } = profileStore.get();
-    const {
-      cloudStorageTraffic,
-      loadingWorkspace,
-      dataLoadError,
-      workspaceDetails: { collaborators, resources, workspace, activeStatus },
-      runtimes,
-      userApps,
-    } = this.state;
-    const { workspaceObjects, cloudStorage } = resources || {};
-    const { researchPurpose } = workspace || {};
-    return (
-      <div style={{ margin: '1.5rem' }}>
-        {dataLoadError && (
-          <ErrorDiv>
-            Error loading data. Please refresh the page or contact the
-            development team.
-          </ErrorDiv>
-        )}
-        {loadingWorkspace && <SpinnerOverlay />}
-        {workspace && (
-          <div>
-            {activeStatus === WorkspaceActiveStatus.ACTIVE && (
-              <AdminLockWorkspace
-                {...{ workspace }}
-                reload={async () =>
-                  await this.populateFederatedWorkspaceInformation()
-                }
-              />
-            )}
-            <BasicInformation
-              {...{ workspace, activeStatus }}
-              reload={async () => await this.populateWorkspaceDetails()}
+    try {
+      const newWorkspaceDetails =
+        await workspaceAdminApi().getWorkspaceAdminView(ns);
+      setWorkspaceDetails(newWorkspaceDetails);
+    } catch (error) {
+      handleDataLoadError(error);
+    } finally {
+      setLoadingWorkspace(false);
+    }
+  };
+
+  const { profile } = profileStore.get();
+  const { collaborators, resources, workspace, activeStatus } =
+    workspaceDetails || {};
+  const { workspaceObjects, cloudStorage } = resources || {};
+  const { researchPurpose } = workspace || {};
+
+  return (
+    <div style={{ margin: '1.5rem' }}>
+      {dataLoadError && (
+        <ErrorDiv>
+          Error loading data. Please refresh the page or contact the development
+          team.
+        </ErrorDiv>
+      )}
+      {loadingWorkspace && <SpinnerOverlay />}
+      {workspace && (
+        <div>
+          {activeStatus === WorkspaceActiveStatus.ACTIVE && (
+            <AdminLockWorkspace
+              {...{ workspace }}
+              reload={async () => await populateFederatedWorkspaceInformation()}
             />
-            <Accordion>
-              <AccordionTab header='Research Purpose'>
-                <ResearchPurposeSection {...{ researchPurpose }} />
-              </AccordionTab>
-            </Accordion>
-            {activeStatus === WorkspaceActiveStatus.ACTIVE && (
-              <>
-                <Collaborators
-                  {...{ collaborators }}
-                  creator={workspace.creatorUser.userName}
-                />
-                <CohortBuilder {...{ workspaceObjects }} />
-                <CloudStorageObjects
-                  {...{ cloudStorage }}
-                  workspaceNamespace={workspace.namespace}
-                />
-                {cloudStorageTraffic?.receivedBytes && (
-                  <CloudStorageTrafficChart {...{ cloudStorageTraffic }} />
-                )}
-                <h2>Cloud Environments</h2>
-                <CloudEnvironmentsTable
-                  {...{ runtimes, userApps }}
-                  workspaceNamespace={workspace.namespace}
-                  onDelete={() => this.populateFederatedWorkspaceInformation()}
-                />
-                <h2>Egress event history</h2>
-                {renderIfAuthorized(
-                  profile,
-                  AuthorityGuardedAction.EGRESS_EVENTS,
-                  () => (
-                    <EgressEventsTable
-                      displayPageSize={10}
-                      sourceWorkspaceNamespace={workspace.namespace}
-                    />
-                  )
-                )}
-                <h2>Disks</h2>
-                <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
-              </>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+          )}
+          <BasicInformation
+            {...{ workspace, activeStatus }}
+            reload={async () => await populateWorkspaceDetails()}
+          />
+          <Accordion>
+            <AccordionTab header='Research Purpose'>
+              <ResearchPurposeSection {...{ researchPurpose }} />
+            </AccordionTab>
+          </Accordion>
+          {activeStatus === WorkspaceActiveStatus.ACTIVE && (
+            <>
+              <Collaborators
+                {...{ collaborators }}
+                creator={workspace.creatorUser.userName}
+              />
+              <CohortBuilder {...{ workspaceObjects }} />
+              <CloudStorageObjects
+                {...{ cloudStorage }}
+                workspaceNamespace={workspace.namespace}
+              />
+              {cloudStorageTraffic?.receivedBytes && (
+                <CloudStorageTrafficChart {...{ cloudStorageTraffic }} />
+              )}
+              <h2>Cloud Environments</h2>
+              <CloudEnvironmentsTable
+                {...{ runtimes, userApps }}
+                workspaceNamespace={workspace.namespace}
+                onDelete={() => populateFederatedWorkspaceInformation()}
+              />
+              <h2>Egress event history</h2>
+              {renderIfAuthorized(
+                profile,
+                AuthorityGuardedAction.EGRESS_EVENTS,
+                () => (
+                  <EgressEventsTable
+                    displayPageSize={10}
+                    sourceWorkspaceNamespace={workspace.namespace}
+                  />
+                )
+              )}
+              <h2>Disks</h2>
+              <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const AdminWorkspace = withRouter(AdminWorkspaceImpl);
