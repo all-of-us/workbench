@@ -486,5 +486,6 @@ public class WorkbenchConfig {
     // The service account that will be calling AoU API to notify egress alerts. It will be used in
     // later authZ check.
     public String exfilManagerServiceAccount;
+    public String userManagerBaseUrl;
   }
 }
