@@ -233,7 +233,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
     return processUserBatch(
         description,
         userIds.size(),
-        () -> userIds.stream().map(userService::getByDatabaseIdOrThrow).mapToInt(fn).sum());
+        () -> userService.findUsersById(userIds).stream().mapToInt(fn).sum());
   }
 
   private int processUserBatch(String description, int size, IntSupplier batchFn) {

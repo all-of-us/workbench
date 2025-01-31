@@ -113,6 +113,8 @@ public interface UserService {
    */
   Set<DbUser> findActiveUsersByUsernames(List<String> usernames);
 
+  List<DbUser> findUsersById(List<Long> ids);
+
   DbUser syncEraCommonsStatus();
 
   /**
@@ -148,9 +150,6 @@ public interface UserService {
   DbUser getByUsernameOrThrow(String username);
 
   Optional<DbUser> getByDatabaseId(long databaseId);
-
-  // same as the above, but throw NotFoundException if not found
-  DbUser getByDatabaseIdOrThrow(long databaseId);
 
   boolean hasAuthority(long userId, Authority required);
 

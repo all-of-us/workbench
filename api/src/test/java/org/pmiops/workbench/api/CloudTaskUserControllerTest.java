@@ -68,6 +68,11 @@ public class CloudTaskUserControllerTest {
     incrementedUserId = 1L;
     userA = createUser("a@fake-research-aou.org");
     userB = createUser("b@fake-research-aou.org");
+
+    when(mockUserService.findUsersById(List.of(userA.getUserId()))).thenReturn(List.of(userA));
+    when(mockUserService.findUsersById(List.of(userB.getUserId()))).thenReturn(List.of(userB));
+    when(mockUserService.findUsersById(List.of(userA.getUserId(), userB.getUserId())))
+        .thenReturn(List.of(userA, userB));
   }
 
   private DbUser createUser(String email) {
@@ -75,7 +80,6 @@ public class CloudTaskUserControllerTest {
     user.setUsername(email);
     user.setUserId(incrementedUserId);
     incrementedUserId++;
-    when(mockUserService.getByDatabaseIdOrThrow(user.getUserId())).thenReturn(user);
     return user;
   }
 
@@ -106,8 +110,7 @@ public class CloudTaskUserControllerTest {
     // Ideally we would use a real implementation of UserService and mock its external deps, but
     // unfortunately UserService is too sprawling to replicate in a unit test.
 
-    verify(mockUserService).getByDatabaseIdOrThrow(userA.getUserId());
-    verify(mockUserService).getByDatabaseIdOrThrow(userB.getUserId());
+    verify(mockUserService).findUsersById(List.of(userA.getUserId(), userB.getUserId()));
 
     // we only sync 2FA users with completed 2FA
     verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
