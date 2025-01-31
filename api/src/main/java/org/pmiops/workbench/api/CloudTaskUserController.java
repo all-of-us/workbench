@@ -239,7 +239,10 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private int processUserBatch(String description, int size, IntSupplier batchFn) {
     log.info(String.format("%s for %d users...", StringUtils.capitalize(description), size));
     var stopwatch = stopwatchProvider.get().start();
+
+    // execute the batch function and get the error count
     int errorCount = batchFn.getAsInt();
+
     var elapsed = stopwatch.stop().elapsed();
     log.info(
         String.format(
