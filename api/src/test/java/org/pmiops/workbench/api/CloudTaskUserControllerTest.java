@@ -128,6 +128,12 @@ public class CloudTaskUserControllerTest {
   }
 
   @Test
+  public void testCheckAndAlertFreeTierBillingUsage_nullPassedFromTask() {
+    controller.checkAndAlertFreeTierBillingUsageBatch(null);
+    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+  }
+
+  @Test
   public void testCheckCreditsExpirationForUserIDs() {
     List<Long> userIdList = List.of(1L, 2L, 3L);
     controller.checkCreditsExpirationForUserIDsBatch(userIdList);

@@ -43,7 +43,6 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
         String.format(
             "Deleting unshared environments for %d workspaces.", workspaceNamespaces.size()));
 
-    // temp timing for batch sizing
     var stopwatch = stopwatchProvider.get().start();
     List<DbWorkspace> failedUserRoles =
         workspaceNamespaces.stream()

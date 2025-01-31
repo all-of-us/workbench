@@ -676,6 +676,12 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public DbUser getByDatabaseIdOrThrow(long databaseId) {
+    return getByDatabaseId(databaseId)
+        .orElseThrow(() -> new NotFoundException("User '" + databaseId + "' not found"));
+  }
+
+  @Override
   public boolean hasAuthority(long userId, Authority required) {
     final Set<Authority> userAuthorities =
         userDao.findUserWithAuthorities(userId).getAuthoritiesEnum();

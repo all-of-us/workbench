@@ -149,6 +149,9 @@ public interface UserService {
 
   Optional<DbUser> getByDatabaseId(long databaseId);
 
+  // same as the above, but throw NotFoundException if not found
+  DbUser getByDatabaseIdOrThrow(long databaseId);
+
   boolean hasAuthority(long userId, Authority required);
 
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);

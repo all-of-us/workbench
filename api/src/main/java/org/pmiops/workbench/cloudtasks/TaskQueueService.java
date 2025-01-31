@@ -40,7 +40,8 @@ public class TaskQueueService {
   private static final String CREATE_WORKSPACE_PATH = BASE_PATH + "/createWorkspace";
   private static final String DUPLICATE_WORKSPACE_PATH = BASE_PATH + "/duplicateWorkspace";
   private static final String DELETE_TEST_WORKSPACES_PATH = BASE_PATH + "/deleteTestUserWorkspaces";
-  private static final String ACCESS_EXPIRATION_EMAIL_PATH = BASE_PATH + "/xxxx";
+  private static final String ACCESS_EXPIRATION_EMAIL_PATH =
+      BASE_PATH + "/sendAccessExpirationEmails";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_PATH =
       BASE_PATH + "/deleteTestUserWorkspacesInRawls";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH =
