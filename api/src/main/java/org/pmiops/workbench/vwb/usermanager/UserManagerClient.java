@@ -1,7 +1,6 @@
 package org.pmiops.workbench.vwb.usermanager;
 
 import jakarta.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
@@ -21,7 +20,6 @@ public class UserManagerClient {
   private final Provider<OrganizationV2Api> organizationV2ApiProvider;
 
   private final UserManagerRetryHandler userManagerRetryHandler;
-
 
   public UserManagerClient(
       @Qualifier(UserManagerConfig.VWB_SERVICE_ACCOUNT_USER_API)
