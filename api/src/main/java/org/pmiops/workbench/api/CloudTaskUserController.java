@@ -19,8 +19,6 @@ import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.initialcredits.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.AccessModuleStatus;
-import org.pmiops.workbench.model.AuditProjectAccessRequest;
-import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,9 +72,10 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> auditProjectAccess(AuditProjectAccessRequest request) {
+  public ResponseEntity<Void> auditProjectAccessBatch(List<Long> userIds) {
+    log.info(String.format("Audit project access for %d users...", userIds.size()));
     int errorCount = 0;
-    for (long userId : request.getUserIds()) {
+    for (long userId : userIds) {
       DbUser user = userDao.findUserByUserId(userId);
 
       // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
@@ -112,12 +111,10 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       }
     }
     if (errorCount > 0) {
-      log.severe(
-          String.format(
-              "encountered errors on %d/%d users", errorCount, request.getUserIds().size()));
+      log.severe(String.format("encountered errors on %d/%d users", errorCount, userIds.size()));
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    log.info(String.format("successfully audited %d users", request.getUserIds().size()));
+    log.info(String.format("successfully audited %d users", userIds.size()));
     return ResponseEntity.noContent().build();
   }
 
@@ -125,21 +122,23 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
    * Takes in batch of user Ids check whether users have incurred sufficient cost in their
    * workspaces to trigger alerts due to passing thresholds or exceeding limits
    *
-   * @param body : Batch of user IDs from cloud task queue: freeTierBillingQueue
+   * @param userIds : Batch of user IDs from cloud task queue: freeTierBillingQueue
    * @return
    */
   @Override
-  public ResponseEntity<Void> checkAndAlertFreeTierBillingUsage(List<Long> userIdsList) {
-    if (userIdsList != null && !userIdsList.isEmpty()) {
-      freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(userIdsList);
+  public ResponseEntity<Void> checkAndAlertFreeTierBillingUsageBatch(List<Long> userIds) {
+    log.info(String.format("Alerting for initial credits usage for %d users...", userIds.size()));
+    if (userIds != null && !userIds.isEmpty()) {
+      freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(userIds);
     }
     return ResponseEntity.noContent().build();
   }
 
   @Override
-  public ResponseEntity<Void> synchronizeUserAccess(SynchronizeUserAccessRequest request) {
+  public ResponseEntity<Void> synchronizeUserAccessBatch(List<Long> userIds) {
+    log.info(String.format("Synchronizing access for %d users...", userIds.size()));
     int errorCount = 0;
-    for (long userId : request.getUserIds()) {
+    for (long userId : userIds) {
       DbUser user = userDao.findUserByUserId(userId);
 
       try {
@@ -163,29 +162,29 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
         // consistent with access module statuses.
         user = userService.syncDuccVersionStatus(user, Agent.asSystem());
       } catch (WorkbenchException e) {
-        log.log(Level.SEVERE, "failed to synchronize access for user " + user.getUsername(), e);
+        log.log(Level.SEVERE, "Failed to synchronize access for user " + user.getUsername(), e);
         errorCount++;
       }
     }
     if (errorCount > 0) {
-      log.severe(
-          String.format(
-              "encountered errors on %d/%d users", errorCount, request.getUserIds().size()));
+      log.severe(String.format("Encountered errors on %d/%d users", errorCount, userIds.size()));
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    log.info(String.format("successfully synchronized %d users", request.getUserIds().size()));
+    log.info(String.format("Successfully synchronized %d users", userIds.size()));
     return ResponseEntity.noContent().build();
   }
 
   /**
    * Takes in batch of user Ids check whether users have initial credits that have expired
    *
-   * @param body : Batch of user IDs from cloud task queue: checkCreditsExpirationForUserIDsQueue
+   * @param userIds : Batch of user IDs from cloud task queue: checkCreditsExpirationForUserIDsQueue
    * @return
    */
   @Override
-  public ResponseEntity<Void> checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
-    initialCreditsService.checkCreditsExpirationForUserIDs(userIdsList);
+  public ResponseEntity<Void> checkCreditsExpirationForUserIDsBatch(List<Long> userIds) {
+    log.info(String.format("Checking initial credits expiration for %d users...", userIds.size()));
+    initialCreditsService.checkCreditsExpirationForUserIDs(userIds);
+    log.info("Done checking initial credits expiration.");
     return ResponseEntity.noContent().build();
   }
 
