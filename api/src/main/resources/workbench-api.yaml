@@ -4359,8 +4359,7 @@ paths:
       operationId: checkAndAlertFreeTierBillingUsageBatch
       security: [ ]
       requestBody:
-        description: |
-          A batch of users needs to be checked, and alerts need to be sent regarding 
+        description: A batch of users needs to be checked, and alerts need to be sent regarding 
           the excessive costs incurred in their workspaces.
         content:
           application/json:
