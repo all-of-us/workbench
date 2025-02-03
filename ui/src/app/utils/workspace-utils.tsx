@@ -1,4 +1,8 @@
-import { FeaturedWorkspaceCategory, Workspace } from 'generated/fetch';
+import {
+  BillingStatus,
+  FeaturedWorkspaceCategory,
+  Workspace,
+} from 'generated/fetch';
 
 import { serverConfigStore } from 'app/utils/stores';
 
