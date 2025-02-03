@@ -4,11 +4,11 @@ import {
   CdrVersionTiersResponse,
 } from 'generated/fetch';
 
-import { EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN } from 'app/pages/workspace/workspace-edit';
 import {
   AccessTierDisplayNames,
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
+import { EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN } from 'app/utils/workspace-utils';
 
 export class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
