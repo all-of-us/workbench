@@ -36,7 +36,6 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
@@ -105,9 +104,11 @@ public class InitialCreditsService {
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
     String userIdsAsString =
         users.stream()
-            .map(user -> Long.toString(user.getUserId()))
+            .map(DbUser::getUserId)
+            .sorted()
+            .map(l -> Long.toString(l))
             .collect(Collectors.joining(","));
-    logger.info(String.format("Checking billing usage for Users ids: %s ", userIdsAsString));
+    logger.info(String.format("Checking billing usage for user IDs: %s ", userIdsAsString));
     // Current cost in DB
     List<WorkspaceCostView> allCostsInDbForUsers = getAllCostsInDbForUsers(users);
 
@@ -369,6 +370,9 @@ public class InitialCreditsService {
   }
 
   public DbUser extendInitialCreditsExpiration(DbUser user) {
+    if (!workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration) {
+      throw new BadRequestException("Initial credits extension is disabled.");
+    }
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     // This handles the case existing users that have not yet been migrated but also those who have
@@ -456,7 +460,6 @@ public class InitialCreditsService {
         .forEach(
             ws -> {
               ws.setInitialCreditsExpired(true);
-              ws.setBillingStatus(BillingStatus.INACTIVE);
               workspaceDao.save(ws);
               deleteAppsAndRuntimesInWorkspace(ws);
             });
@@ -515,7 +518,6 @@ public class InitialCreditsService {
         .forEach(
             ws -> {
               ws.setInitialCreditsExhausted(false);
-              ws.setBillingStatus(BillingStatus.ACTIVE);
               workspaceDao.save(ws);
             });
   }
@@ -573,10 +575,10 @@ public class InitialCreditsService {
                                                     .billing
                                                     .numberOfDaysToConsiderForFreeTierUsageUpdate)
                                             .toMillis()))))
-            .collect(Collectors.toList());
+            .toList();
 
     logger.info(
-        String.format("Workspaces that require update %d", workspacesThatRequireUpdate.size()));
+        String.format("Workspaces that require updates: %d", workspacesThatRequireUpdate.size()));
 
     return workspacesThatRequireUpdate.stream()
         .collect(
@@ -647,7 +649,6 @@ public class InitialCreditsService {
         .orElse(120);
   }
 
-  @Nullable
   private Map<String, Long> getWorkspaceByProjectCache(
       List<WorkspaceCostView> allCostsInDbForUsers) {
     // No need to proceed since there's nothing to update anyway
@@ -660,8 +661,9 @@ public class InitialCreditsService {
 
     logger.info(
         String.format(
-            "FreeTierBillingUsage: Workspace ids that require updates: %s",
+            "FreeTierBillingUsage: Workspace IDs that require updates: %s",
             workspaceByProject.values().stream()
+                .sorted()
                 .map(workspaceId -> Long.toString(workspaceId))
                 .collect(Collectors.joining(","))));
 

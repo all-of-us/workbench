@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -44,6 +45,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,6 +80,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   private final TaskQueueService taskQueueService;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
+  private final WorkspaceService workspaceService;
 
   @Autowired
   OfflineEnvironmentsController(
@@ -90,7 +93,8 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
       Provider<WorkbenchConfig> configProvider,
       TaskQueueService taskQueueService,
       UserDao userDao,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService) {
     this.clock = clock;
     this.configProvider = configProvider;
     this.fireCloudService = firecloudService;
@@ -101,6 +105,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
   }
 
   /**
@@ -126,13 +131,14 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     final Duration maxAge = Duration.ofDays(config.firecloud.notebookRuntimeMaxAgeDays);
     final Duration idleMaxAge = Duration.ofDays(config.firecloud.notebookRuntimeIdleMaxAgeDays);
 
-    final List<LeonardoListRuntimeResponse> listRuntimeResponses =
-        leonardoApiClient.listRuntimesAsService();
+    final List<LeonardoListRuntimeResponse> responses = leonardoApiClient.listRuntimesAsService();
+
+    log.info(String.format("Checking %d runtimes for age and idleness...", responses.size()));
 
     int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
-    for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
+    for (LeonardoListRuntimeResponse listRuntimeResponse : responses) {
       final String googleProject =
           leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
       final String runtimeId =
@@ -140,9 +146,15 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
 
       // Refetch the runtime to ensure freshness,
       // as this iteration may take some time.
-      final LeonardoGetRuntimeResponse runtime =
-          leonardoApiClient.getRuntimeAsService(
-              googleProject, listRuntimeResponse.getRuntimeName());
+      final LeonardoGetRuntimeResponse runtime;
+      try {
+        runtime =
+            leonardoApiClient.getRuntimeAsService(
+                googleProject, listRuntimeResponse.getRuntimeName());
+      } catch (WorkbenchException e) {
+        log.warning(String.format("error refetching runtime '%s': %s", runtimeId, e.getMessage()));
+        continue;
+      }
 
       if (LeonardoRuntimeStatus.UNKNOWN.equals(runtime.getStatus())
           || runtime.getStatus() == null) {
@@ -188,9 +200,9 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     }
     log.info(
         String.format(
-            "deleted %d old runtimes and %d idle runtimes "
+            "Deleted %d old runtimes and %d idle runtimes "
                 + "of %d total runtimes (%d of which were idle)",
-            activeDeletes, unusedDeletes, listRuntimeResponses.size(), idles));
+            activeDeletes, unusedDeletes, responses.size(), idles));
 
     return ResponseEntity.noContent().build();
   }
@@ -206,6 +218,8 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   public ResponseEntity<Void> checkPersistentDisks() {
     // Fetch disks as the service, which gets all disks for all workspaces.
     final List<ListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
+
+    log.info(String.format("Checking %d persistent disks for idleness...", disks.size()));
 
     // Bucket disks by days since last access.
     final Instant now = clock.instant();
@@ -246,7 +260,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
           log.log(
               Level.WARNING,
               String.format(
-                  "failed to send notification for disk '%s/%s'",
+                  "checkPersistentDisks: failed to send notification for disk '%s/%s'",
                   leonardoMapper.toGoogleProject(disk.getCloudContext()), disk.getName()),
               e);
           lastException = e;
@@ -257,12 +271,12 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
 
     log.info(
         String.format(
-            "sent %d notifications successfully (%d skipped, %d failed)",
+            "checkPersistentDisks: sent %d notifications successfully (%d skipped, %d failed)",
             notifySuccess, notifySkip, notifyFail));
     if (lastException != null) {
       throw new ServerErrorException(
           String.format(
-              "%d/%d disk notifications failed to send, see logs for details",
+              "checkPersistentDisks: %d/%d disk notifications failed to send, see logs for details",
               notifyFail, notifySuccess + notifyFail + notifySkip),
           lastException);
     }
@@ -371,7 +385,9 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   @Override
   public ResponseEntity<Void> deleteUnsharedWorkspaceEnvironments() {
     List<String> activeNamespaces =
-        workspaceDao.getAllActive().stream().map(DbWorkspace::getWorkspaceNamespace).toList();
+        workspaceService.getWorkspacesAsService().stream()
+            .map(ws -> ws.getWorkspace().getNamespace())
+            .toList();
     log.info(
         String.format(
             "Queuing %d active workspaces in batches for deletion of unshared resources",

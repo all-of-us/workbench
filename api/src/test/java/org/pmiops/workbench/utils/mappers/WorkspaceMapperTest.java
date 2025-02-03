@@ -6,7 +6,9 @@ import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,7 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -91,6 +94,8 @@ public class WorkspaceMapperTest {
       Set.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
   private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
   private static final String ACCESS_TIER_SHORT_NAME = "registered";
+  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
+  private static final FakeClock CLOCK = new FakeClock(START_INSTANT, ZoneId.systemDefault());
 
   private DbWorkspace sourceDbWorkspace;
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
@@ -131,6 +136,11 @@ public class WorkspaceMapperTest {
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig workbenchConfig() {
       return workbenchConfig;
+    }
+
+    @Bean
+    public Clock clock() {
+      return CLOCK;
     }
   }
 
@@ -205,6 +215,7 @@ public class WorkspaceMapperTest {
 
     workbenchConfig = createEmptyConfig();
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
   }
 
   @Test
@@ -349,7 +360,8 @@ public class WorkspaceMapperTest {
       BillingStatus expectedStatus) {
     workbenchConfig.billing.accountId = INITIAL_CREDITS_BILLING_ACCOUNT_NAME;
     sourceDbWorkspace.setInitialCreditsExhausted(exhausted);
-    sourceDbWorkspace.setInitialCreditsExpired(expired);
+    CLOCK.setInstant(
+        INITIAL_CREDITS_EXPIRATION_TIMESTAMP.toInstant().plusSeconds(expired ? 1 : -1));
     sourceDbWorkspace.setBillingAccountName(fullBillingAccountName(billingAccount));
     Workspace x =
         workspaceMapper.toApiWorkspace(

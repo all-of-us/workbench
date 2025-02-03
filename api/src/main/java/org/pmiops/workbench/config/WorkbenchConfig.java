@@ -411,6 +411,8 @@ public class WorkbenchConfig {
     public Integer usersPerSynchronizeAccessTask;
     // Number of users to process within a single check initial credits expiration task.
     public Integer usersPerCheckInitialCreditsExpirationTask;
+    // Number of users to process within a single access expiration email task.
+    public Integer usersPerAccessExpirationEmailTask;
     // Number of workspaces to process within a single delete workspace environments task.
     public Integer workspacesPerDeleteWorkspaceEnvironmentsTask;
   }
@@ -486,5 +488,6 @@ public class WorkbenchConfig {
     // The service account that will be calling AoU API to notify egress alerts. It will be used in
     // later authZ check.
     public String exfilManagerServiceAccount;
+    public String userManagerBaseUrl;
   }
 }

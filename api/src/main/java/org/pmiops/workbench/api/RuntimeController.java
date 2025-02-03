@@ -29,6 +29,7 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResp
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
@@ -139,8 +140,8 @@ public class RuntimeController implements RuntimeApiDelegate {
     LeonardoListRuntimeResponse mostRecentRuntime =
         mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
 
-    @SuppressWarnings("unchecked")
-    Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
+    Map<String, String> runtimeLabels =
+        LeonardoLabelHelper.toLabelMap(mostRecentRuntime.getLabels());
 
     if (runtimeLabels != null
         && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP

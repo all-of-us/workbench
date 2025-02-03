@@ -538,6 +538,11 @@ public class UserServiceImpl implements UserService {
     return userDao.findUserByUsernameInAndDisabledFalse(usernames);
   }
 
+  @Override
+  public List<DbUser> findUsersById(List<Long> ids) {
+    return userDao.findUserByUserIdIn(ids);
+  }
+
   /**
    * Updates the given user's eraCommons-related fields with the NihStatus object returned from FC.
    *

@@ -32,7 +32,15 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.*;
+import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -42,7 +50,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -180,6 +187,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().getFeaturedCategory() != null)
         .toList();
+  }
+
+  @Override
+  public List<WorkspaceResponse> getWorkspacesAsService() {
+    return workspaceMapper.toApiWorkspaceResponseList(
+        workspaceDao, fireCloudService.getWorkspacesAsService(), initialCreditsService);
   }
 
   @Override
@@ -483,14 +496,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       DbUser creator = workspace.getCreator();
       boolean hasInitialCreditsRemaining =
           initialCreditsService.userHasRemainingFreeTierCredits(creator);
-      workspace.setBillingStatus(
-          hasInitialCreditsRemaining ? BillingStatus.ACTIVE : BillingStatus.INACTIVE);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
       workspace.setInitialCreditsExpired(initialCreditsService.areUserCreditsExpired(creator));
-    } else {
-      // At this point, we can assume that a user provided billing account is open since we
-      // throw a BadRequestException if a closed one is provided
-      workspace.setBillingStatus(BillingStatus.ACTIVE);
     }
   }
 
@@ -595,7 +602,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .forEach(
             ws -> {
               ws.setInitialCreditsExhausted(exhausted);
-              ws.setBillingStatus(exhausted ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
               workspaceDao.save(ws);
             });
   }
