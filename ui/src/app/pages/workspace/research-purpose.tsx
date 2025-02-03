@@ -15,7 +15,7 @@ import { useNavigation } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import { showAIANReasearchPurpose } from 'app/utils/workspace-utils';
+import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 
 const styles = reactStyles({
   editIcon: {
@@ -123,7 +123,7 @@ export const ResearchPurpose = fp.flow(
         </FlexRow>
         <ResearchPurposeSection
           researchPurpose={workspace.researchPurpose}
-          showAIAN={showAIANReasearchPurpose(cdrVersion.publicReleaseNumber)}
+          showAIAN={showAIANResearchPurpose(cdrVersion.publicReleaseNumber)}
         />
       </FadeBox>
     );

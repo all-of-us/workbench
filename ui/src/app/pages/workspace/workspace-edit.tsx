@@ -104,7 +104,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { showAIANReasearchPurpose } from 'app/utils/workspace-utils';
+import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
 
 import { OldCdrVersionModal } from './old-cdr-version-modal';
@@ -1142,7 +1142,7 @@ export const WorkspaceEdit = fp.flow(
         this.props.cdrVersionTiersResponse
       ).publicReleaseNumber;
 
-      return showAIANReasearchPurpose(publicCDRVersionNumber);
+      return showAIANResearchPurpose(publicCDRVersionNumber);
     }
 
     /* Deeply clones relevant sections of the provided workspace and makes any adjustments
