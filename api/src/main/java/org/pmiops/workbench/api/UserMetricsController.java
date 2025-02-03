@@ -76,7 +76,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       UserRecentResourceService userRecentResourceService,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
-      InitialCreditsService initialCreditsService,
       WorkspaceResourceMapper workspaceResourceMapper) {
     this.cloudStorageClient = cloudStorageClient;
     this.cohortService = cohortService;
@@ -89,7 +88,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
-    this.initialCreditsService = initialCreditsService;
     this.workspaceResourceMapper = workspaceResourceMapper;
   }
 
