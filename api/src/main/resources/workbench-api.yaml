@@ -4354,11 +4354,13 @@ paths:
         - cloudTaskUser
         - cloudTask
       description: |
-        Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to passing thresholds or exceeding limits
+        Check whether users have incurred sufficient cost in their workspaces to trigger alerts 
+        due to passing thresholds or exceeding limits
       operationId: checkAndAlertFreeTierBillingUsageBatch
       security: [ ]
       requestBody:
-        description: A batch of users needs to be checked, and alerts need to be sent regarding the excessive costs incurred in their workspaces.
+        description: A batch of users needs to be checked, and alerts need to be sent regarding 
+          the excessive costs incurred in their workspaces.
         content:
           application/json:
             schema:
@@ -4411,6 +4413,32 @@ paths:
           description: Check Credits Expiration For User IDs Task Ran Successfully
           content: { }
       x-codegen-request-body-name: request
+  /v1/cloudTask/sendAccessExpirationEmails:
+    post:
+      tags:
+        - cloudTaskUser
+        - cloudTask
+      description: Check each user daily for access expiration (or approaching expiration)
+        and send expiration or warning emails as appropriate.
+      operationId: sendAccessExpirationEmailsBatch
+      security: []
+      requestBody:
+        description: Users to check for access expiration.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserIdList'
+        required: true
+      responses:
+        204:
+          description: No Error
+          content: {}
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/cloudTask/deleteUnsharedWorkspaceEnvironments:
     post:
       tags:

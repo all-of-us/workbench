@@ -260,7 +260,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
           log.log(
               Level.WARNING,
               String.format(
-                  "failed to send notification for disk '%s/%s'",
+                  "checkPersistentDisks: failed to send notification for disk '%s/%s'",
                   leonardoMapper.toGoogleProject(disk.getCloudContext()), disk.getName()),
               e);
           lastException = e;
@@ -271,12 +271,12 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
 
     log.info(
         String.format(
-            "sent %d notifications successfully (%d skipped, %d failed)",
+            "checkPersistentDisks: sent %d notifications successfully (%d skipped, %d failed)",
             notifySuccess, notifySkip, notifyFail));
     if (lastException != null) {
       throw new ServerErrorException(
           String.format(
-              "%d/%d disk notifications failed to send, see logs for details",
+              "checkPersistentDisks: %d/%d disk notifications failed to send, see logs for details",
               notifyFail, notifySuccess + notifyFail + notifySkip),
           lastException);
     }

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
+import com.google.common.base.Stopwatch;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
@@ -42,23 +42,24 @@ public class CloudTaskUserControllerTest {
   private DbUser userB;
 
   @Autowired private CloudTaskUserController controller;
-  @Autowired private UserDao userDao;
 
-  @Autowired private AccessModuleService mockAccessModuleService;
-  @Autowired private UserService mockUserService;
-
-  @Autowired private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
-
-  @Autowired private InitialCreditsService mockInitialCreditsService;
+  @MockBean private AccessModuleService mockAccessModuleService;
+  @MockBean private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
+  @MockBean private InitialCreditsService mockInitialCreditsService;
+  @MockBean private UserService mockUserService;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
+  @Import({
+    FakeClockConfiguration.class,
+    CloudTaskUserController.class,
+    Stopwatch.class,
+  })
   @MockBean({
     AccessModuleService.class,
     CloudResourceManagerService.class,
     InitialCreditsBatchUpdateService.class,
+    InitialCreditsService.class,
     UserService.class,
-    InitialCreditsService.class
   })
   static class Configuration {}
 
@@ -67,6 +68,11 @@ public class CloudTaskUserControllerTest {
     incrementedUserId = 1L;
     userA = createUser("a@fake-research-aou.org");
     userB = createUser("b@fake-research-aou.org");
+
+    when(mockUserService.findUsersById(List.of(userA.getUserId()))).thenReturn(List.of(userA));
+    when(mockUserService.findUsersById(List.of(userB.getUserId()))).thenReturn(List.of(userB));
+    when(mockUserService.findUsersById(List.of(userA.getUserId(), userB.getUserId())))
+        .thenReturn(List.of(userA, userB));
   }
 
   private DbUser createUser(String email) {
@@ -74,7 +80,7 @@ public class CloudTaskUserControllerTest {
     user.setUsername(email);
     user.setUserId(incrementedUserId);
     incrementedUserId++;
-    return userDao.save(user);
+    return user;
   }
 
   @Test
@@ -104,6 +110,8 @@ public class CloudTaskUserControllerTest {
     // Ideally we would use a real implementation of UserService and mock its external deps, but
     // unfortunately UserService is too sprawling to replicate in a unit test.
 
+    verify(mockUserService).findUsersById(List.of(userA.getUserId(), userB.getUserId()));
+
     // we only sync 2FA users with completed 2FA
     verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
 
@@ -124,6 +132,12 @@ public class CloudTaskUserControllerTest {
   @Test
   public void testCheckAndAlertFreeTierBillingUsage_noUserListPassedFromTask() {
     controller.checkAndAlertFreeTierBillingUsageBatch(Collections.emptyList());
+    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+  }
+
+  @Test
+  public void testCheckAndAlertFreeTierBillingUsage_nullPassedFromTask() {
+    controller.checkAndAlertFreeTierBillingUsageBatch(null);
     verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
   }
 

@@ -113,6 +113,8 @@ public interface UserService {
    */
   Set<DbUser> findActiveUsersByUsernames(List<String> usernames);
 
+  List<DbUser> findUsersById(List<Long> ids);
+
   DbUser syncEraCommonsStatus();
 
   /**

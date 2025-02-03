@@ -42,11 +42,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   @Override
   public ResponseEntity<Void> sendAccessExpirationEmails() {
-    var users = userService.getAllUsers();
-    log.info(
-        String.format("Checking %d users for sending access expiration emails...", users.size()));
-    users.forEach(userService::maybeSendAccessTierExpirationEmails);
-    log.info("Done checking users for sending access expiration emails.");
+    taskQueueService.groupAndPushAccessExpirationEmailTasks(userService.getAllUserIds());
     return ResponseEntity.noContent().build();
   }
 
