@@ -22,12 +22,7 @@ import {
   renderIfAuthorized,
 } from 'app/utils/authorities';
 import { findCdrVersion } from 'app/utils/cdr-versions';
-import {
-  cdrVersionStore,
-  MatchParams,
-  profileStore,
-  useStore,
-} from 'app/utils/stores';
+import { cdrVersionStore, MatchParams, profileStore } from 'app/utils/stores';
 import { showAIANReasearchPurpose } from 'app/utils/workspace-utils';
 
 import { AdminLockWorkspace } from './admin-lock-workspace';
