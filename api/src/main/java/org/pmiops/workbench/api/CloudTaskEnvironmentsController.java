@@ -45,8 +45,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
 
     var stopwatch = stopwatchProvider.get().start();
     List<DbWorkspace> failedUserRoles =
-        workspaceNamespaces.stream()
-            .map(workspaceService::lookupWorkspaceByNamespace)
+        workspaceService.lookupWorkspacesByNamespace(workspaceNamespaces).stream()
             .filter(
                 ws -> {
                   boolean successfulGetFirecloudUserRoles = deleteUnshared(ws);

@@ -853,7 +853,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.CONDITION),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertThat(code).contains(expected);
 
@@ -890,7 +890,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 3, Domain.CONDITION, 1L);
   }
@@ -909,7 +909,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.CONDITION),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
   }
@@ -928,7 +928,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.CONDITION),
                             true,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
   }
@@ -947,7 +947,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.PERSON),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.PERSON))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.PERSON, 1L);
   }
@@ -966,7 +966,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.SURVEY),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.SURVEY))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.SURVEY, 2L);
   }
@@ -986,7 +986,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.SURVEY),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.SURVEY_BASICS))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertThat(code.replaceAll("[ \\s]", "")).contains(expectedConceptId.replaceAll(" ", ""));
   }
@@ -1009,7 +1009,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(
                                 PrePackagedConceptSetEnum.SURVEY_BASICS,
                                 PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertThat(code.replaceAll("[ \\s]", "")).contains(expectedConceptId.replaceAll(" ", ""));
     assertThat(code).contains(expectedFitbitHrLevel);
@@ -1041,7 +1041,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.SURVEY),
                             false,
                             prePackagedConceptSetEnumList)),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertThat(code.replaceAll("[ \\s]", "")).contains(expectedConceptId.replaceAll(" ", ""));
   }
@@ -1060,7 +1060,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.FITBIT_HEART_RATE_LEVEL),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.FITBIT_HEART_RATE_LEVEL, 1L);
   }
@@ -1081,7 +1081,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(
                                 PrePackagedConceptSetEnum.PERSON,
                                 PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
   }
@@ -1100,7 +1100,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.SURVEY),
                             false,
                             ImmutableList.of())),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                workspaceDao.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.SURVEY, 1L);
   }

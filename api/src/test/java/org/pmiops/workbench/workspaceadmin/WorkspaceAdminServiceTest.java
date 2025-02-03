@@ -595,10 +595,6 @@ public class WorkspaceAdminServiceTest {
         .setFirecloudName("fc-" + name);
   }
 
-  private DbWorkspace mustGetDbWorkspace(DbWorkspace w) {
-    return workspaceDao.findDbWorkspaceByWorkspaceId(w.getWorkspaceId());
-  }
-
   private void setupPublishWorkspaceMocks() {
     String rtAuthDomainGroupEmail = "rt@broad.org";
     when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())

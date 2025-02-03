@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -154,6 +155,12 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   @Override
   public DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace) {
     logger.warn("lookupWorkspaceByNamespace not implemented in VWB");
+    return null;
+  }
+
+  @Override
+  public List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces) {
+    logger.warn("lookupWorkspacesByNamespace not implemented in VWB");
     return null;
   }
 
