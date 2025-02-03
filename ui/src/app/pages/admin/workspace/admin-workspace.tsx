@@ -23,7 +23,7 @@ import {
 } from 'app/utils/authorities';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { cdrVersionStore, MatchParams, profileStore } from 'app/utils/stores';
-import { showAIANReasearchPurpose } from 'app/utils/workspace-utils';
+import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 
 import { AdminLockWorkspace } from './admin-lock-workspace';
 import { BasicInformation } from './basic-information';
@@ -107,6 +107,10 @@ const AdminWorkspaceImpl = (props: Props) => {
     workspaceDetails || {};
   const { workspaceObjects, cloudStorage } = resources || {};
   const { researchPurpose } = workspace || {};
+  const cdrVersion = findCdrVersion(
+    workspace?.cdrVersionId,
+    cdrVersionStore.get()
+  );
 
   return (
     <div style={{ margin: '1.5rem' }}>
@@ -133,10 +137,10 @@ const AdminWorkspaceImpl = (props: Props) => {
             <AccordionTab header='Research Purpose'>
               <ResearchPurposeSection
                 {...{ researchPurpose }}
-                showAIAN={showAIANReasearchPurpose(
-                  findCdrVersion(workspace?.cdrVersionId, cdrVersionStore.get())
-                    .publicReleaseNumber
-                )}
+                showAIAN={
+                  cdrVersion &&
+                  showAIANResearchPurpose(cdrVersion.publicReleaseNumber)
+                }
               />
             </AccordionTab>
           </Accordion>
