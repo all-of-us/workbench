@@ -244,9 +244,9 @@ export const InvalidBillingBannerMaybe = fp.flow(
     !showExtensionModal &&
     creatorUser?.givenName &&
     creatorUser?.familyName &&
-    ((!workspace.initialCredits.expirationBypassed &&
-      ((isExpiringSoon && isEligibleForExtension) || isExpired)) ||
-      isExhausted);
+    (isExhausted ||
+      (!workspace.initialCredits.expirationBypassed &&
+        ((isExpiringSoon && isEligibleForExtension) || isExpired)));
 
   const message = (
     <>
