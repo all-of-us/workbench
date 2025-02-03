@@ -63,6 +63,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowStatus;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.model.GenomicExtractionJob;
@@ -121,6 +122,7 @@ public class GenomicExtractionServiceTest {
     GenomicExtractionService.class,
     WorkspaceAuthService.class,
   })
+  @MockBean({InitialCreditsService.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
