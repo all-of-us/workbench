@@ -78,9 +78,13 @@ const styles = reactStyles({
 
 interface Props {
   researchPurpose: ResearchPurpose;
+  showAIAN: boolean;
 }
 
-export const ResearchPurposeSection = ({ researchPurpose }: Props) => {
+export const ResearchPurposeSection = ({
+  researchPurpose,
+  showAIAN,
+}: Props) => {
   const {
     intendedStudy,
     anticipatedFindings,
@@ -214,21 +218,29 @@ export const ResearchPurposeSection = ({ researchPurpose }: Props) => {
       )}
 
       {/* AI/AN Research Approach section*/}
-      <div style={styles.sectionHeader}>AI/AN Research Approach</div>
-      <div style={styles.sectionContentContainer}>
-        <div style={styles.sectionSubHeader}>
-          {researchPurposeQuestions[10].header}
-        </div>
-        <div style={{ ...styles.sectionItemWithBackground, padding: '15px' }}>
-          {aianResearchTypeMap.get(aianResearchType)}
-        </div>
-        <div style={styles.sectionSubHeader}>
-          {researchPurposeQuestions[11].header}
-        </div>
-        <div style={{ ...styles.sectionItemWithBackground, padding: '15px' }}>
-          {aianResearchDetails}
-        </div>
-      </div>
+      {showAIAN && (
+        <>
+          <div style={styles.sectionHeader}>AI/AN Research Approach</div>
+          <div style={styles.sectionContentContainer}>
+            <div style={styles.sectionSubHeader}>
+              {researchPurposeQuestions[10].header}
+            </div>
+            <div
+              style={{ ...styles.sectionItemWithBackground, padding: '15px' }}
+            >
+              {aianResearchTypeMap.get(aianResearchType)}
+            </div>
+            <div style={styles.sectionSubHeader}>
+              {researchPurposeQuestions[11].header}
+            </div>
+            <div
+              style={{ ...styles.sectionItemWithBackground, padding: '15px' }}
+            >
+              {aianResearchDetails}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
