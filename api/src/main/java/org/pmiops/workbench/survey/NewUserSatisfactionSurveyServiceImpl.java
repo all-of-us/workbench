@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
@@ -25,6 +26,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfactionSurveyService {
+  private static final Logger log =
+      Logger.getLogger(NewUserSatisfactionSurveyService.class.getName());
+
   private final Clock clock;
   private final NewUserSatisfactionSurveyOneTimeCodeDao newUserSatisfactionSurveyOneTimeCodeDao;
   private final NewUserSatisfactionSurveyMapper newUserSatisfactionSurveyMapper;
@@ -126,6 +130,11 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
             Timestamp.from(
                 clock.instant().minus(TWO_WEEKS_DAYS + TWO_MONTHS_DAYS, ChronoUnit.DAYS)),
             Timestamp.from(clock.instant().minus(TWO_WEEKS_DAYS, ChronoUnit.DAYS)));
+
+    log.info(
+        String.format(
+            "Emailing %d users to take the new user satisfaction survey...", eligibleUsers.size()));
+
     int errorCount = 0;
     for (DbUser user : eligibleUsers) {
       DbNewUserSatisfactionSurveyOneTimeCode dbNewUserSatisfactionSurveyOneTimeCode =
@@ -148,5 +157,7 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
       throw new ServerErrorException(
           String.format("Failed to send %d new user satisfaction survey emails", errorCount));
     }
+
+    log.info("Done emailing users to take the new user satisfaction survey.");
   }
 }

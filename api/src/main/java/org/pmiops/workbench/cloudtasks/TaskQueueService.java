@@ -13,18 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
-import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
@@ -42,6 +39,8 @@ public class TaskQueueService {
   private static final String CREATE_WORKSPACE_PATH = BASE_PATH + "/createWorkspace";
   private static final String DUPLICATE_WORKSPACE_PATH = BASE_PATH + "/duplicateWorkspace";
   private static final String DELETE_TEST_WORKSPACES_PATH = BASE_PATH + "/deleteTestUserWorkspaces";
+  private static final String ACCESS_EXPIRATION_EMAIL_PATH =
+      BASE_PATH + "/sendAccessExpirationEmails";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_PATH =
       BASE_PATH + "/deleteTestUserWorkspacesInRawls";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH =
@@ -55,6 +54,7 @@ public class TaskQueueService {
       BASE_PATH + "/handleInitialCreditsExpiry";
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
+  private static final String ACCESS_EXPIRATION_EMAIL_QUEUE_NAME = "accessExpirationEmailQueue";
   private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
   private static final String CREATE_WORKSPACE_QUEUE_NAME = "createWorkspaceQueue";
   private static final String DUPLICATE_WORKSPACE_QUEUE_NAME = "duplicateWorkspaceQueue";
@@ -118,12 +118,7 @@ public class TaskQueueService {
   public void groupAndPushAuditProjectsTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerAuditTask)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    AUDIT_PROJECTS_QUEUE_NAME,
-                    AUDIT_PROJECTS_PATH,
-                    new AuditProjectAccessRequest().userIds(batch)));
+        .forEach(batch -> createAndPushTask(AUDIT_PROJECTS_QUEUE_NAME, AUDIT_PROJECTS_PATH, batch));
   }
 
   public void groupAndPushFreeTierBilling(List<Long> userIds) {
@@ -143,11 +138,20 @@ public class TaskQueueService {
         .stream()
         .map(
             batch ->
+                createAndPushTask(SYNCHRONIZE_ACCESS_QUEUE_NAME, SYNCHRONIZE_ACCESS_PATH, batch))
+        .toList();
+  }
+
+  public List<String> groupAndPushAccessExpirationEmailTasks(List<Long> userIds) {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    return CloudTasksUtils.partitionList(
+            userIds, workbenchConfig.offlineBatch.usersPerAccessExpirationEmailTask)
+        .stream()
+        .map(
+            batch ->
                 createAndPushTask(
-                    SYNCHRONIZE_ACCESS_QUEUE_NAME,
-                    SYNCHRONIZE_ACCESS_PATH,
-                    new SynchronizeUserAccessRequest().userIds(batch)))
-        .collect(Collectors.toList());
+                    ACCESS_EXPIRATION_EMAIL_QUEUE_NAME, ACCESS_EXPIRATION_EMAIL_PATH, batch))
+        .toList();
   }
 
   public void groupAndPushDeleteTestWorkspaceTasks(List<TestUserWorkspace> workspacesToDelete) {

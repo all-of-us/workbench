@@ -164,6 +164,7 @@
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
     "usersPerCheckInitialCreditsExpirationTask": 50,
+    "usersPerAccessExpirationEmailTask": 500,
     "workspacesPerDeleteWorkspaceEnvironmentsTask": 50
   },
   "egressAlertRemediationPolicy": {
@@ -195,8 +196,8 @@
     "organizationId": "79775c0a-3bf7-436a-8ab8-eab316998115",
     "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b",
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-d-1v-ucd.iam.gserviceaccount.com",
-    "vwbOrgId": "vwb-aou-test",
     "vwbRegisteredTierGroupName": "aou-test-rt",
     "vwbControlledTierGroupName": "aou-test-ct"
+    "userManagerBaseUrl": "https:\/\/workbench-dev.verily.com\/api\/user"
   }
 }

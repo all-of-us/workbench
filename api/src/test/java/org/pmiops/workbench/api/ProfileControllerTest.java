@@ -41,6 +41,7 @@ import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -217,7 +218,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     BigQueryService.class,
     NewUserSatisfactionSurveyService.class,
     TaskQueueService.class,
-    LeonardoApiClient.class
+    LeonardoApiClient.class,
+    VwbAccessService.class
   })
   static class Configuration {
     @Bean

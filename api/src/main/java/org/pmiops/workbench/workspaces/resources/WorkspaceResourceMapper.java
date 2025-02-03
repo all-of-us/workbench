@@ -4,6 +4,7 @@ import com.google.common.primitives.Longs;
 import java.sql.Timestamp;
 import java.util.Set;
 import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
@@ -21,6 +22,7 @@ import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -50,7 +52,8 @@ public interface WorkspaceResourceMapper {
       qualifiedByName = "getBillingStatus")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  WorkspaceFields fromWorkspace(DbWorkspace dbWorkspace);
+  WorkspaceFields fromWorkspace(
+      DbWorkspace dbWorkspace, @Context InitialCreditsService creditsService);
 
   // a WorkspaceResource has one resource object.  Assign it and ignore all others (keep as NULL).
 
@@ -109,27 +112,43 @@ public interface WorkspaceResourceMapper {
       ResourceFields resourceFields);
 
   default WorkspaceResource fromDbCohort(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohort dbCohort) {
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      DbCohort dbCohort,
+      InitialCreditsService initialCreditsService) {
     return mergeWorkspaceAndResourceFields(
-        fromWorkspace(dbWorkspace), accessLevel, fromDbCohort(dbCohort));
+        fromWorkspace(dbWorkspace, initialCreditsService), accessLevel, fromDbCohort(dbCohort));
   }
 
   default WorkspaceResource fromCohortReview(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview) {
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      CohortReview cohortReview,
+      InitialCreditsService initialCreditsService) {
     return mergeWorkspaceAndResourceFields(
-        fromWorkspace(dbWorkspace), accessLevel, fromCohortReview(cohortReview));
+        fromWorkspace(dbWorkspace, initialCreditsService),
+        accessLevel,
+        fromCohortReview(cohortReview));
   }
 
   default WorkspaceResource fromDbConceptSet(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbConceptSet dbConceptSet) {
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      DbConceptSet dbConceptSet,
+      InitialCreditsService initialCreditsService) {
     return mergeWorkspaceAndResourceFields(
-        fromWorkspace(dbWorkspace), accessLevel, fromDbConceptSet(dbConceptSet));
+        fromWorkspace(dbWorkspace, initialCreditsService),
+        accessLevel,
+        fromDbConceptSet(dbConceptSet));
   }
 
   default WorkspaceResource fromDbDataset(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset) {
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      DbDataset dbDataset,
+      InitialCreditsService initialCreditsService) {
     return mergeWorkspaceAndResourceFields(
-        fromWorkspace(dbWorkspace), accessLevel, fromDbDataset(dbDataset));
+        fromWorkspace(dbWorkspace, initialCreditsService), accessLevel, fromDbDataset(dbDataset));
   }
 
   default WorkspaceResource fromDbUserRecentlyModifiedResource(
@@ -141,9 +160,10 @@ public interface WorkspaceResourceMapper {
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
       CloudStorageClient cloudStorageClient,
-      Set<String> workspaceUsers) {
+      Set<String> workspaceUsers,
+      @Context InitialCreditsService initialCreditsService) {
     return mergeWorkspaceAndResourceFields(
-        fromWorkspace(dbWorkspace),
+        fromWorkspace(dbWorkspace, initialCreditsService),
         fcWorkspace,
         fromDbUserRecentlyModifiedResource(
             dbUserRecentlyModifiedResource,

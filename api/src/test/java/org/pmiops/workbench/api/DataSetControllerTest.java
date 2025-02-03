@@ -52,6 +52,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -285,7 +286,8 @@ public class DataSetControllerTest {
     WorkspaceAuditor.class,
     WorkspaceOperationMapper.class,
     WorkspaceServiceFactory.class,
-    WsmClient.class
+    WsmClient.class,
+    VwbAccessService.class
   })
   static class Configuration {
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)

@@ -138,8 +138,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public void exportUsers(List<Long> userIds, boolean backfill) {
-    List<RdrResearcher> rdrResearchersList =
-        userIds.stream().map(this::toRdrResearcher).collect(Collectors.toList());
+    List<RdrResearcher> rdrResearchersList = userIds.stream().map(this::toRdrResearcher).toList();
 
     try {
       rdrApiProvider.get().exportResearchers(rdrResearchersList, backfill);
@@ -154,7 +153,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     if (!backfill) {
       updateDbRdrExport(RdrEntity.USER, userIds);
     }
-    log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
+    log.info(String.format("Successfully exported researcher data for user IDs: %s", userIds));
   }
 
   /**
@@ -175,7 +174,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                   workspaceId ->
                       toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
               .filter(Objects::nonNull)
-              .collect(Collectors.toList());
+              .toList();
       if (!rdrWorkspacesList.isEmpty()) {
         rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList, backfill);
 
@@ -197,7 +196,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                 workspaceIdsToUpload.size(), workspaceIds.size()));
         log.info(
             String.format(
-                "successfully exported workspace data for workspace IDs: %s",
+                "Successfully exported workspace data for workspace IDs: %s",
                 workspaceIdsToUpload));
       }
     } catch (ApiException ex) {

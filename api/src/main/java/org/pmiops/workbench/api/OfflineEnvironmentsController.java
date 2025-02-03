@@ -131,13 +131,14 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     final Duration maxAge = Duration.ofDays(config.firecloud.notebookRuntimeMaxAgeDays);
     final Duration idleMaxAge = Duration.ofDays(config.firecloud.notebookRuntimeIdleMaxAgeDays);
 
-    final List<LeonardoListRuntimeResponse> listRuntimeResponses =
-        leonardoApiClient.listRuntimesAsService();
+    final List<LeonardoListRuntimeResponse> responses = leonardoApiClient.listRuntimesAsService();
+
+    log.info(String.format("Checking %d runtimes for age and idleness...", responses.size()));
 
     int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
-    for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
+    for (LeonardoListRuntimeResponse listRuntimeResponse : responses) {
       final String googleProject =
           leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
       final String runtimeId =
@@ -199,9 +200,9 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     }
     log.info(
         String.format(
-            "deleted %d old runtimes and %d idle runtimes "
+            "Deleted %d old runtimes and %d idle runtimes "
                 + "of %d total runtimes (%d of which were idle)",
-            activeDeletes, unusedDeletes, listRuntimeResponses.size(), idles));
+            activeDeletes, unusedDeletes, responses.size(), idles));
 
     return ResponseEntity.noContent().build();
   }
@@ -217,6 +218,8 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   public ResponseEntity<Void> checkPersistentDisks() {
     // Fetch disks as the service, which gets all disks for all workspaces.
     final List<ListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
+
+    log.info(String.format("Checking %d persistent disks for idleness...", disks.size()));
 
     // Bucket disks by days since last access.
     final Instant now = clock.instant();
@@ -257,7 +260,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
           log.log(
               Level.WARNING,
               String.format(
-                  "failed to send notification for disk '%s/%s'",
+                  "checkPersistentDisks: failed to send notification for disk '%s/%s'",
                   leonardoMapper.toGoogleProject(disk.getCloudContext()), disk.getName()),
               e);
           lastException = e;
@@ -268,12 +271,12 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
 
     log.info(
         String.format(
-            "sent %d notifications successfully (%d skipped, %d failed)",
+            "checkPersistentDisks: sent %d notifications successfully (%d skipped, %d failed)",
             notifySuccess, notifySkip, notifyFail));
     if (lastException != null) {
       throw new ServerErrorException(
           String.format(
-              "%d/%d disk notifications failed to send, see logs for details",
+              "checkPersistentDisks: %d/%d disk notifications failed to send, see logs for details",
               notifyFail, notifySuccess + notifyFail + notifySkip),
           lastException);
     }
