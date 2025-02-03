@@ -1,17 +1,21 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
+import { CdrVersionTiersResponse } from 'generated/fetch';
+
 import { Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexRow } from 'app/components/flex';
 import { ResearchPurposeSection } from 'app/components/research-purpose-section';
 import { EditComponentReact } from 'app/icons/edit';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
+import { getCdrVersion } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
+import { showAIANReasearchPurpose } from 'app/utils/workspace-utils';
 
 const styles = reactStyles({
   editIcon: {
@@ -75,40 +79,53 @@ const styles = reactStyles({
 
 export const ResearchPurpose = fp.flow(
   withCurrentWorkspace(),
-  withNavigation
-)(({ workspace }: { workspace: WorkspaceData }) => {
-  const [navigate] = useNavigation();
-  const isOwner = WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
+  withNavigation,
+  withCdrVersions()
+)(
+  ({
+    workspace,
+    cdrVersionTiersResponse,
+  }: {
+    workspace: WorkspaceData;
+    cdrVersionTiersResponse: CdrVersionTiersResponse;
+  }) => {
+    const [navigate] = useNavigation();
+    const isOwner = WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
+    const cdrVersion = getCdrVersion(workspace, cdrVersionTiersResponse);
 
-  return (
-    <FadeBox>
-      <FlexRow>
-        <div style={styles.mainHeader}>Research Use Statement Questions</div>
-        <Clickable
-          disabled={!isOwner}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginLeft: '.75rem',
-          }}
-          data-test-id='edit-workspace'
-          onClick={() =>
-            navigate([
-              'workspaces',
-              workspace.namespace,
-              workspace.terraName,
-              'edit',
-            ])
-          }
-        >
-          <EditComponentReact
-            enableHoverEffect={true}
+    return (
+      <FadeBox>
+        <FlexRow>
+          <div style={styles.mainHeader}>Research Use Statement Questions</div>
+          <Clickable
             disabled={!isOwner}
-            style={styles.editIcon}
-          />
-        </Clickable>
-      </FlexRow>
-      <ResearchPurposeSection researchPurpose={workspace.researchPurpose} />
-    </FadeBox>
-  );
-});
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              marginLeft: '.75rem',
+            }}
+            data-test-id='edit-workspace'
+            onClick={() =>
+              navigate([
+                'workspaces',
+                workspace.namespace,
+                workspace.terraName,
+                'edit',
+              ])
+            }
+          >
+            <EditComponentReact
+              enableHoverEffect={true}
+              disabled={!isOwner}
+              style={styles.editIcon}
+            />
+          </Clickable>
+        </FlexRow>
+        <ResearchPurposeSection
+          researchPurpose={workspace.researchPurpose}
+          showAIAN={showAIANReasearchPurpose(cdrVersion.publicReleaseNumber)}
+        />
+      </FadeBox>
+    );
+  }
+);

@@ -21,7 +21,14 @@ import {
   AuthorityGuardedAction,
   renderIfAuthorized,
 } from 'app/utils/authorities';
-import { MatchParams, profileStore } from 'app/utils/stores';
+import { findCdrVersion } from 'app/utils/cdr-versions';
+import {
+  cdrVersionStore,
+  MatchParams,
+  profileStore,
+  useStore,
+} from 'app/utils/stores';
+import { showAIANReasearchPurpose } from 'app/utils/workspace-utils';
 
 import { AdminLockWorkspace } from './admin-lock-workspace';
 import { BasicInformation } from './basic-information';
@@ -129,7 +136,13 @@ const AdminWorkspaceImpl = (props: Props) => {
           />
           <Accordion>
             <AccordionTab header='Research Purpose'>
-              <ResearchPurposeSection {...{ researchPurpose }} />
+              <ResearchPurposeSection
+                {...{ researchPurpose }}
+                showAIAN={showAIANReasearchPurpose(
+                  findCdrVersion(workspace?.cdrVersionId, cdrVersionStore.get())
+                    .publicReleaseNumber
+                )}
+              />
             </AccordionTab>
           </Accordion>
           {activeStatus === WorkspaceActiveStatus.ACTIVE && (
