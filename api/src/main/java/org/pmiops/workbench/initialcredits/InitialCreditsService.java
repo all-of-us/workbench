@@ -435,7 +435,7 @@ public class InitialCreditsService {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
 
-    if (areUserCreditsExpired(user)) {
+    if (areUserCreditsExpired(user) && userInitialCreditsExpiration.getExpirationCleanupTime() == null) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
         && null == userInitialCreditsExpiration.getApproachingExpirationNotificationTime()) {
@@ -456,13 +456,8 @@ public class InitialCreditsService {
                 BillingUtils.isInitialCredits(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .filter(DbWorkspace::isActive)
-        .filter(ws -> !ws.isInitialCreditsExpired())
         .forEach(
-            ws -> {
-              ws.setInitialCreditsExpired(true);
-              workspaceDao.save(ws);
-              deleteAppsAndRuntimesInWorkspace(ws);
-            });
+            this::deleteAppsAndRuntimesInWorkspace);
 
     userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
     userDao.save(user);
