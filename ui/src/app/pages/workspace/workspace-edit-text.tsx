@@ -250,8 +250,15 @@ export const toolTipText = {
   ),
   dataAppsSelect: (
     <div>
-      Choose which versions of Cohort Builder, Concept Search and Dataset
-      Builder to use.
+      <div style={{ fontWeight: 'bold' }}>Data Apps V1</div>
+      <div>
+        This version includes the existing Cohort Builder and Dataset Builder.
+      </div>
+      <div style={{ fontWeight: 'bold' }}>Data Apps V2</div>
+      <div>
+        This version includes a test of new Cohort Builder and Dataset Builder
+        features.
+      </div>
     </div>
   ),
   tierSelect: (

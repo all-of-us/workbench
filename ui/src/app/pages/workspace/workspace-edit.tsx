@@ -104,12 +104,11 @@ import { serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
 
 import { OldCdrVersionModal } from './old-cdr-version-modal';
 import { UnavailableTierModal } from './unavailable-tier-modal';
-
-export const EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN = 8;
 
 export const styles = reactStyles({
   categoryRow: {
@@ -1143,10 +1142,7 @@ export const WorkspaceEdit = fp.flow(
         this.props.cdrVersionTiersResponse
       ).publicReleaseNumber;
 
-      return (
-        publicCDRVersionNumber >=
-        EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN
-      );
+      return showAIANResearchPurpose(publicCDRVersionNumber);
     }
 
     /* Deeply clones relevant sections of the provided workspace and makes any adjustments
@@ -1781,9 +1777,12 @@ export const WorkspaceEdit = fp.flow(
                   <FlexColumn>
                     <div style={styles.fieldHeader}>
                       Data Apps version
-                      <TooltipTrigger content={toolTipText.dataAppsSelect}>
-                        <InfoIcon style={styles.infoIcon} />
-                      </TooltipTrigger>
+                      {/* Only show tooltip for non-prod envs */}
+                      {environment.shouldShowDisplayTag && (
+                        <TooltipTrigger content={toolTipText.dataAppsSelect}>
+                          <InfoIcon style={styles.infoIcon} />
+                        </TooltipTrigger>
+                      )}
                     </div>
                     <TooltipTrigger
                       content='To use a different version of Data Apps, create a new workspace.'
