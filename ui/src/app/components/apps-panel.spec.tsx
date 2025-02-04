@@ -146,10 +146,13 @@ describe(AppsPanel.name, () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, freeTierBillingAccountId },
     });
-    user = userEvent.setup();
+    // AdvanceTimersByTime in order to allow fake timers and RTL queries to work together
+    // https://testing-library.com/docs/user-event/options/#advancetimers
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
 
   afterEach(() => {
+    jest.runOnlyPendingTimers();
     jest.useRealTimers();
   });
 
@@ -168,16 +171,20 @@ describe(AppsPanel.name, () => {
     await expectExpandableApp(user, 'Jupyter');
   });
 
-  it('should disable apps when initial credit expiration is true and initial credits are exhausted', async () => {
+  it('should disable apps when initial credit expiration is enabled and initial credits are exhausted', async () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
         enableInitialCreditsExpiration: true,
       },
     });
+    jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+
     // initial state: no apps exist
     workspaceStub.initialCredits.exhausted = true;
-    workspaceStub.initialCredits.expired = false;
+    workspaceStub.initialCredits.expirationEpochMillis = new Date(
+      '2025-01-01'
+    ).getTime();
     workspaceStub.initialCredits.expirationBypassed = false;
 
     runtimeStub.runtime.status = undefined;
