@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace.AIANResearchType;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disability;
@@ -153,6 +154,18 @@ public class RdrMapperTest {
                 .setSpecificPopulationsEnum(ImmutableSet.of(SpecificPopulationEnum.OTHER))
                 .setOtherPopulationDetails("reptilians"));
     assertThat(got.getWorkspaceDemographic().getOthers()).isEqualTo("reptilians");
+  }
+
+  @Test
+  public void testMapRdrWorkspace_aianResearch() {
+    RdrWorkspace got =
+        rdrMapper.toRdrWorkspace(
+            TestMockFactory.createDbWorkspaceStub(
+                    TestMockFactory.createWorkspace("ns", "Name", "name"), 1L)
+                .setAianResearchDetails("I will not complete research that specifically targets AI/AN populations")
+                .setAianResearchType(AIANResearchType.NO_AI_AN_ANALYSIS));
+    assertThat(got.getAianResearchDetails()).isEqualTo("I will not complete research that specifically targets AI/AN populations");
+    assertThat(got.getAianResearchType().toString()).isEqualTo(AIANResearchType.NO_AI_AN_ANALYSIS.toString());
   }
 
   @Test
