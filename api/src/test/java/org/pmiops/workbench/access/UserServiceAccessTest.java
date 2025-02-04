@@ -125,7 +125,7 @@ public class UserServiceAccessTest {
     MailService.class,
     UserServiceAuditor.class,
     InitialCreditsService.class,
-    VwbAccessService.class
+    VwbAccessService.class,
   })
   @TestConfiguration
   static class Configuration {

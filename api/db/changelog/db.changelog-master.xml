@@ -258,7 +258,6 @@
   <include file="changelog/db.changelog-248-add-public-release-number-column.xml"/>
   <include file="changelog/db.changelog-249-add-time-window-start-egress-event.xml"/>
   <include file="changelog/db.changelog-250-add-aian-research-columns.xml"/>
-  <include file="changelog/db.changelog-252-add-vwb-tier-group-access-tier-table.xml"/>
   <include file="changelog/db.changelog-251-remove-billing-status.xml"/>
   <include file="changelog/db.changelog-252-add-vwb-tier-group-access-tier-table.xml"/>
   <!--

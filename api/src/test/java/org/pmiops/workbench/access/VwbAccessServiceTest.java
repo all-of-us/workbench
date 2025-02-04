@@ -9,7 +9,6 @@ import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
 import jakarta.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.vwb.sam.VwbSamClient;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,13 +18,12 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 public class VwbAccessServiceTest {
   @MockBean private VwbSamClient mockVwbSamClient;
   @MockBean private Provider<WorkbenchConfig> workbenchConfigProvider;
-  @Mock private WorkbenchConfig workbenchConfig;
+  private WorkbenchConfig workbenchConfig = createEmptyConfig();
 
   private VwbAccessService vwbAccessService;
 
   @BeforeEach
   public void setUp() {
-    WorkbenchConfig workbenchConfig = createEmptyConfig();
     workbenchConfig.featureFlags.enableVWBUserAccessManagement = true;
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
     vwbAccessService = new VwbAccessService(mockVwbSamClient, workbenchConfigProvider);
@@ -45,9 +43,8 @@ public class VwbAccessServiceTest {
 
   @Test
   public void testRemoveUserFromVwbTier_featureDisabled() {
-    workbenchConfig.featureFlags.enableVWBUserAccessManagement = true;
+    workbenchConfig.featureFlags.enableVWBUserAccessManagement = false;
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
-
     vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
 
     verify(mockVwbSamClient, never()).removeUserFromGroup(anyString(), anyString());
