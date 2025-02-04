@@ -162,10 +162,13 @@ public class RdrMapperTest {
         rdrMapper.toRdrWorkspace(
             TestMockFactory.createDbWorkspaceStub(
                     TestMockFactory.createWorkspace("ns", "Name", "name"), 1L)
-                .setAianResearchDetails("I will not complete research that specifically targets AI/AN populations")
+                .setAianResearchDetails(
+                    "I will not complete research that specifically targets AI/AN populations")
                 .setAianResearchType(AIANResearchType.NO_AI_AN_ANALYSIS));
-    assertThat(got.getAianResearchDetails()).isEqualTo("I will not complete research that specifically targets AI/AN populations");
-    assertThat(got.getAianResearchType().toString()).isEqualTo(AIANResearchType.NO_AI_AN_ANALYSIS.toString());
+    assertThat(got.getAianResearchDetails())
+        .isEqualTo("I will not complete research that specifically targets AI/AN populations");
+    assertThat(got.getAianResearchType().toString())
+        .isEqualTo(AIANResearchType.NO_AI_AN_ANALYSIS.toString());
   }
 
   @Test
