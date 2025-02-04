@@ -842,10 +842,16 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
+  public void test_initial_credit_expiration_disabled() {
+    workbenchConfig.featureFlags.enableInitialCreditsExpiration = false;
+    DbUser user = new DbUser();
+    assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
+  }
+
+  @Test
   public void test_none() {
     DbUser user = new DbUser();
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
-    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
@@ -855,7 +861,6 @@ public class InitialCreditsServiceTest {
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration().setBypassed(true).setExpirationTime(NOW));
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
-    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
@@ -869,7 +874,6 @@ public class InitialCreditsServiceTest {
                         .setExpirationTime(NOW)));
     when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
     assertThat(initialCreditsService.getCreditsExpiration(user)).isEmpty();
-    assertThat(initialCreditsService.getCreditsExtension(user)).isEmpty();
   }
 
   @Test
