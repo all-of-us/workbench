@@ -80,6 +80,7 @@ public class InitialCreditsServiceTest {
   @SpyBean private UserDao spyUserDao;
 
   @SpyBean private WorkspaceDao spyWorkspaceDao;
+  @SpyBean private WorkspaceInitialCreditUsageService spyWorkspaceInitialCreditUsageService;
 
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private MailService mailService;
@@ -119,7 +120,7 @@ public class InitialCreditsServiceTest {
   private DbWorkspace workspace;
 
   @TestConfiguration
-  @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
+  @Import({InitialCreditsService.class})
   @MockBean({BigQueryService.class, TaskQueueService.class})
   static class Configuration {
     @Bean
@@ -162,6 +163,44 @@ public class InitialCreditsServiceTest {
     workspaceFreeTierUsageDao.deleteAll();
     workspaceDao.deleteAll();
     userDao.deleteAll();
+  }
+
+  @Test
+  public void testGetWorkspaceFreeTierBillingUsage_present() {
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(130.0));
+
+    double usage =
+        initialCreditsService.getWorkspaceFreeTierBillingUsage(workspace);
+
+    assertThat(usage).isEqualTo(130.0);
+  }
+
+  @Test
+  public void testGetWorkspaceFreeTierBillingUsage_missing() {
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    double usage =
+        initialCreditsService.getWorkspaceFreeTierBillingUsage(workspace);
+
+    assertThat(usage).isEqualTo(0.0);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_noUpdates() {
+    final double limit = 100.0;
+
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = limit;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+
+    initialCreditsService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    verifyNoInteractions(spyWorkspaceInitialCreditUsageService);
   }
 
   @Test
