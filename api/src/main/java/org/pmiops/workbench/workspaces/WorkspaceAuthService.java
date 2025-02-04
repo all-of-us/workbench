@@ -50,8 +50,7 @@ public class WorkspaceAuthService {
       InitialCreditsService initialCreditsService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceDao workspaceDao
-  ) {
+      WorkspaceDao workspaceDao) {
     this.accessTierService = accessTierService;
     this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;

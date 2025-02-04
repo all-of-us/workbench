@@ -343,16 +343,17 @@ public class WorkspaceAuthServiceTest {
     assertThat(thrown).hasMessageThat().contains("User with username");
   }
 
-  private DbWorkspace stubDaoGetRequired(
-      boolean initialCredits, boolean initialCreditsExhausted) {
-    final DbUser user =
-        new DbUser();
+  private DbWorkspace stubDaoGetRequired(boolean initialCredits, boolean initialCreditsExhausted) {
+    final DbUser user = new DbUser();
     final DbWorkspace toReturn =
         new DbWorkspace()
             .setWorkspaceNamespace(namespace)
             .setFirecloudName(fcName)
             .setInitialCreditsExhausted(initialCreditsExhausted)
-            .setBillingAccountName(initialCredits ? config.billing.initialCreditsBillingAccountName() : "personal-billing-account")
+            .setBillingAccountName(
+                initialCredits
+                    ? config.billing.initialCreditsBillingAccountName()
+                    : "personal-billing-account")
             .setCreator(user);
     when(mockWorkspaceDao.getRequired(namespace, fcName)).thenReturn(toReturn);
     return toReturn;
