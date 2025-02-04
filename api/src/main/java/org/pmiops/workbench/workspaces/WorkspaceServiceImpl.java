@@ -644,14 +644,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
-    var ownerUsernames =
+    return userDao.findUsersByUsernameIn(
         getFirecloudUserRoles(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
             .stream()
             .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
             .map(UserRole::getEmail)
-            .toList();
-
-    return userDao.findUsersByUsernameIn(ownerUsernames);
+            .toList());
   }
 
   @Override
