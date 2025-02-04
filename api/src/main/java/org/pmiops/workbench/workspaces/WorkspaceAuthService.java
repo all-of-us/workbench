@@ -45,18 +45,19 @@ public class WorkspaceAuthService {
 
   @Autowired
   public WorkspaceAuthService(
-      FireCloudService fireCloudService,
-      Provider<DbUser> userProvider,
-      WorkspaceDao workspaceDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       AccessTierService accessTierService,
-      InitialCreditsService initialCreditsService) {
-    this.fireCloudService = fireCloudService;
-    this.userProvider = userProvider;
-    this.workspaceDao = workspaceDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
+      FireCloudService fireCloudService,
+      InitialCreditsService initialCreditsService,
+      Provider<DbUser> userProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceDao workspaceDao
+  ) {
     this.accessTierService = accessTierService;
+    this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
+    this.userProvider = userProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceDao = workspaceDao;
   }
 
   /*
