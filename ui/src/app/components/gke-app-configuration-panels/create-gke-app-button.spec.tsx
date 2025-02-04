@@ -9,7 +9,7 @@ import {
   DisksApi,
 } from 'generated/fetch';
 
-import { MILLIS_PER_DAY } from '../../utils/dates';
+import { MILLIS_PER_DAY, nowPlusDays } from '../../utils/dates';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -213,7 +213,7 @@ describe(CreateGkeAppButton.name, () => {
         ...defaultProps.workspace,
         initialCredits: {
           exhausted: true,
-          expirationEpochMillis: new Date().getTime() + MILLIS_PER_DAY, // Expire tomorrow
+          expirationEpochMillis: nowPlusDays(1),
           expirationBypassed: false,
         },
       },
