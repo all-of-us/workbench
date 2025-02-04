@@ -3,10 +3,10 @@ import { CSSProperties, useState } from 'react';
 
 import {
   AppType,
-  BillingStatus,
   CreateAppRequest,
   Disk,
   UserAppEnvironment,
+  Workspace,
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
@@ -27,14 +27,14 @@ import {
   isDiskSizeValid,
   unattachedDiskExists,
 } from 'app/utils/user-apps-utils';
+import { isValidBilling } from 'app/utils/workspace-utils';
 
 export interface CreateGKEAppButtonProps {
   createAppRequest: CreateAppRequest;
   existingApp: UserAppEnvironment | null | undefined;
-  workspaceNamespace: string;
+  workspace: Workspace;
   onDismiss: () => void;
   username: string;
-  billingStatus: BillingStatus;
   existingDisk?: Disk;
   style?: CSSProperties;
 }
@@ -42,10 +42,9 @@ export interface CreateGKEAppButtonProps {
 export function CreateGkeAppButton({
   createAppRequest,
   existingApp,
-  workspaceNamespace,
+  workspace,
   onDismiss,
   username,
-  billingStatus,
   existingDisk,
   style,
 }: CreateGKEAppButtonProps) {
@@ -55,11 +54,15 @@ export function CreateGkeAppButton({
     !!existingDisk &&
     createAppRequest.persistentDiskRequest.size < existingDisk.size;
 
+  const active = isAppActive(existingApp);
+  const validBilling = isValidBilling(workspace);
+  const diskSizeValid = isDiskSizeValid(createAppRequest);
+
   const createEnabled =
     !creatingApp &&
-    !isAppActive(existingApp) &&
-    billingStatus === BillingStatus.ACTIVE &&
-    isDiskSizeValid(createAppRequest) &&
+    !active &&
+    validBilling &&
+    diskSizeValid &&
     !wouldDecreaseDiskSize;
 
   const appTypeString = appTypeToString[createAppRequest.appType];
@@ -94,7 +97,7 @@ export function CreateGkeAppButton({
         'Preventing creation because this would cause data loss.',
     ],
     [
-      billingStatus !== BillingStatus.ACTIVE,
+      !isValidBilling(workspace),
       () =>
         'You have either run out of initial credits or have an inactive billing account.',
     ],
@@ -113,12 +116,12 @@ export function CreateGkeAppButton({
           createAppRequest.persistentDiskRequest.size > existingDisk.size
         ) {
           await disksApi().updateDisk(
-            workspaceNamespace,
+            workspace.namespace,
             existingDisk.name,
             createAppRequest.persistentDiskRequest.size
           );
         }
-        return createUserApp(workspaceNamespace, createAppRequest);
+        return createUserApp(workspace.namespace, createAppRequest);
       },
       {
         customErrorResponseFormatter: (error: ApiErrorResponse) =>

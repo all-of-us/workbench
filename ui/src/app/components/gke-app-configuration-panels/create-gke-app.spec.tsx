@@ -56,14 +56,20 @@ import {
 
 const onClose = jest.fn();
 const freeTierBillingAccountId = 'freetier';
+const workspace = workspaceStubs[0];
+const oneHour = 1000 * 60 * 60;
 export const defaultProps: CommonCreateGkeAppProps = {
   onClose,
   creatorFreeCreditsRemaining: null,
   workspace: {
-    ...workspaceStubs[0],
+    ...workspace,
     accessLevel: WorkspaceAccessLevel.WRITER,
     billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+    initialCredits: {
+      ...workspace.initialCredits,
+      expirationEpochMillis: new Date().getTime() + oneHour,
+    },
   },
   profileState: {
     profile: ProfileStubVariables.PROFILE_STUB,

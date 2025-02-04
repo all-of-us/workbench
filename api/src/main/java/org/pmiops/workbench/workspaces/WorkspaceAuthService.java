@@ -20,6 +20,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
@@ -40,19 +41,22 @@ public class WorkspaceAuthService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
   private final AccessTierService accessTierService;
+  private final InitialCreditsService initialCreditsService;
 
   @Autowired
   public WorkspaceAuthService(
+      AccessTierService accessTierService,
       FireCloudService fireCloudService,
+      InitialCreditsService initialCreditsService,
       Provider<DbUser> userProvider,
-      WorkspaceDao workspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      AccessTierService accessTierService) {
-    this.fireCloudService = fireCloudService;
-    this.userProvider = userProvider;
-    this.workspaceDao = workspaceDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
+      WorkspaceDao workspaceDao) {
     this.accessTierService = accessTierService;
+    this.fireCloudService = fireCloudService;
+    this.initialCreditsService = initialCreditsService;
+    this.userProvider = userProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceDao = workspaceDao;
   }
 
   /*
@@ -63,8 +67,10 @@ public class WorkspaceAuthService {
   public void validateInitialCreditUsage(String workspaceNamespace, String workspaceTerraName)
       throws ForbiddenException {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
+    DbUser creator = workspace.getCreator();
     if (isInitialCredits(workspace.getBillingAccountName(), workbenchConfigProvider.get())
-        && (workspace.isInitialCreditsExhausted() || workspace.isInitialCreditsExpired())) {
+        && (workspace.isInitialCreditsExhausted()
+            || initialCreditsService.areUserCreditsExpired(creator))) {
       throw new ForbiddenException(
           String.format(
               "Workspace (%s) is using initial credits that have either expired or have been exhausted.",

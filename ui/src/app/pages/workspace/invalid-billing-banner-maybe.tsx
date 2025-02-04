@@ -240,6 +240,14 @@ export const InvalidBillingBannerMaybe = fp.flow(
     isEligibleForExtension
   );
 
+  const showBanner =
+    !showExtensionModal &&
+    creatorUser?.givenName &&
+    creatorUser?.familyName &&
+    (isExhausted ||
+      (!workspace.initialCredits.expirationBypassed &&
+        ((isExpiringSoon && isEligibleForExtension) || isExpired)));
+
   const message = (
     <>
       <WhatHappened
@@ -280,18 +288,13 @@ export const InvalidBillingBannerMaybe = fp.flow(
 
   return (
     <>
-      {!showExtensionModal &&
-        creatorUser?.givenName &&
-        creatorUser?.familyName &&
-        ((isExpiringSoon && isEligibleForExtension) ||
-          isExpired ||
-          isExhausted) && (
-          <ToastBanner
-            {...{ message, title, footer, onClose }}
-            toastType={ToastType.WARNING}
-            zIndex={500}
-          />
-        )}
+      {showBanner && (
+        <ToastBanner
+          {...{ message, title, footer, onClose }}
+          toastType={ToastType.WARNING}
+          zIndex={500}
+        />
+      )}
       {showExtensionModal && (
         <ExtendInitialCreditsModal
           onClose={(updatedProfile: Profile) => {

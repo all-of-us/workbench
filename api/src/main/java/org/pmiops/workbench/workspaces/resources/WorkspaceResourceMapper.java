@@ -53,7 +53,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   WorkspaceFields fromWorkspace(
-      DbWorkspace dbWorkspace, @Context InitialCreditsService creditsService);
+      DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService);
 
   // a WorkspaceResource has one resource object.  Assign it and ignore all others (keep as NULL).
 

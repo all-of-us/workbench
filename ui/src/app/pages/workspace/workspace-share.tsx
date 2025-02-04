@@ -28,7 +28,7 @@ import { isBlank, reactStyles, withUserProfile } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 
 const styles = reactStyles({
   tooltipLabel: {
@@ -484,7 +484,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                     />
                   </TooltipTrigger>
                 </FlexRow>
-                {isUsingFreeTierBillingAccount(this.props.workspace) && (
+                {isUsingInitialCredits(this.props.workspace) && (
                   <div
                     style={{
                       color: colors.primary,
