@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -120,6 +121,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
   @MockBean private FireCloudService mockFirecloudService;
+  @MockBean private VwbAccessService mockVwbAccessService;
   @MockBean private LeonardoApiClient mockLeonardoApiClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private MailService mailService;

@@ -31,6 +31,7 @@ import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -106,7 +107,7 @@ public class UserServiceTest {
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
   })
-  @MockBean({MailService.class, InitialCreditsService.class})
+  @MockBean({MailService.class, InitialCreditsService.class, VwbAccessService.class})
   @TestConfiguration
   static class Configuration {
     @Bean

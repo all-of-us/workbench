@@ -42,6 +42,7 @@ import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -191,7 +192,8 @@ public class RuntimeControllerTest {
     LeonardoApiClientFactory.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsService.class
+    InitialCreditsService.class,
+    VwbAccessService.class
   })
   static class Configuration {
 

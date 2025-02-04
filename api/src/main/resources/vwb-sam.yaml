@@ -1,0 +1,3585 @@
+openapi: 3.0.1
+info:
+  title: Sam
+  description: |
+    Workbench identity and access management.
+  termsOfService: https://github.com/broadinstitute/sam
+  license:
+    name: BSD
+    url: http://opensource.org/licenses/BSD-3-Clause
+  version: "0.1"
+servers:
+  - url: /
+security:
+  - googleoauth:
+      - openid
+      - email
+      - profile
+  - oidc:
+      - openid
+      - email
+      - profile
+paths:
+  /api/admin/v1/user/{userId}:
+    get:
+      tags:
+        - Admin
+      summary: gets the registration status of the user, by user id
+      operationId: adminGetUserStatus
+      parameters:
+        - name: userId
+          in: path
+          description: User ID to check the status of
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: status of specified user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+    patch:
+      tags:
+        - Admin
+      summary: Updates given fields on a user, by user id
+      operationId: adminUpdateUser
+      parameters:
+        - name: userId
+          in: path
+          description: User ID of the user to be updated
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        200:
+          description: User was updated successfully
+        403:
+          description: You do not have admin privileges
+          content: { }
+        404:
+          description: User not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/admin/v2/user/{userId}:
+    get:
+      tags:
+        - Admin
+      summary: Retrieves a user record, by user id
+      operationId: adminGetUser
+      parameters:
+        - name: userId
+          in: path
+          description: User ID of the user to be retrieved
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User was retrieved successfully
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/User'
+        403:
+          description: You do not have admin privileges
+          content: { }
+        404:
+          description: User not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/admin/v1/user/email/{email}:
+    get:
+      tags:
+        - Admin
+      summary: gets the registration status of the user, by email
+      operationId: adminGetUserByEmail
+      parameters:
+        - name: email
+          in: path
+          description: Email address of user to check
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: status of specified user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+  /api/admin/v2/users:
+    get:
+      tags:
+        - Admin
+      summary: gets the users which match the any of the query params
+      operationId: adminGetUsersByQuery
+      parameters:
+        - name: id
+          in: query
+          description: User Id to find users by
+          schema:
+            type: string
+        - name: googleSubjectId
+          in: query
+          description: GoogleSubjectId to find users by
+          schema:
+            type: string
+        - name: azureB2CId
+          in: query
+          description: AzureB2CId to find users by
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of results returned (max 1000)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+      responses:
+        200:
+          description: list of matching users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        403:
+          description: You do not have service admin privileges
+          content: { }
+        404:
+          description: No matching users found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/admin/v1/user/{userId}/disable:
+    put:
+      tags:
+        - Admin
+      summary: disables the specified user
+      operationId: disableUser
+      parameters:
+        - name: userId
+          in: path
+          description: User ID to disable
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        200:
+          description: status of specified user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+  /api/admin/v1/user/{userId}/enable:
+    put:
+      tags:
+        - Admin
+      summary: enables the specified user
+      operationId: enableUser
+      parameters:
+        - name: userId
+          in: path
+          description: User ID to enable
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        200:
+          description: status of specified user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+  /api/admin/v1/user/{userId}/petServiceAccount:
+    delete:
+      tags:
+        - Admin
+      summary: deletes a user's pet service account
+      operationId: deletePet
+      parameters:
+        - name: userId
+          in: path
+          description: User ID whose pet to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully deleted pet service account
+          content: {}
+        403:
+          description: You do not have admin privileges
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/admin/v1/user/{userId}/petServiceAccount/{project}:
+    delete:
+      tags:
+        - Admin
+      summary: deletes a user's pet service account for a project
+      operationId: deletePetPerProject
+      parameters:
+        - name: userId
+          in: path
+          description: User ID whose pet to delete
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: Google project of the pet
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully deleted pet service account for a project
+          content: {}
+        403:
+          description: You do not have admin privileges
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/admin/v1/resources/{resourceTypeName}/{resourceId}/policies:
+    get:
+      tags:
+        - Admin
+      summary: List the policies for a resource
+      operationId: adminListResourcePolicies
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Policies successfully listed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessPolicyResponseEntryV2'
+        403:
+          description: You do not have permission to perform this action on the resource
+          content: { }
+        404:
+          description: Resource type does not exist or you are not a member of any
+            policy on the resource
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/admin/v1/resources/{resourceTypeName}/{resourceId}/policies/{policyName}/memberEmails/{userEmail}:
+    put:
+      tags:
+        - Admin
+      summary: Add a user to a policy
+      operationId: adminAddUserToPolicy
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+        - name: userEmail
+          in: path
+          description: Email of user to be added
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        204:
+          description: Successfully added a user to the policy
+          content: { }
+        400:
+          description: email is not found
+          content: { }
+        403:
+          description: You do not have permission to alter this policy
+          content: { }
+        404:
+          description: Resource type does not exist, you are not a member of any policy
+            on the resource, or user was not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Admin
+      summary: Remove a user from a policy
+      operationId: adminRemoveUserFromPolicy
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+        - name: userEmail
+          in: path
+          description: Email of user to be removed
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully removed a user from the policy
+          content: { }
+        400:
+          description: email is not found
+          content: { }
+        403:
+          description: You do not have permission to alter this policy
+          content: { }
+        404:
+          description: Resource type does not exist, you are not a member of any policy
+            on the resource, or user was not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/admin/v1/resourceTypes/{resourceTypeName}/policies:
+    get:
+      tags:
+        - Admin
+      summary: List the admin policies for a resource type
+      operationId: listResourceTypeAdminPolicies
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Policies successfully listed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessPolicyResponseEntryV2'
+        403:
+          description: You are not a Sam super admin
+          content: { }
+        404:
+          description: Resource type does not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/admin/v1/resourceTypes/{resourceTypeName}/policies/{policyName}:
+    put:
+      tags:
+        - Admin
+      summary: Create or overwrite an admin policy for a resource type
+      operationId: createOrUpdateResourceTypeAdminPolicies
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of admin policy
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The details of the policy
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/AccessPolicyMembershipRequest'
+        required: true
+      responses:
+        201:
+          description: Policy successfully created/updated
+          content: { }
+        400:
+          description: Policy is invalid
+          content: { }
+        403:
+          description: You are not a Sam super admin
+          content: { }
+        404:
+          description: Resource type does not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Admin
+      summary: Delete an admin policy for a resource type
+      operationId: deleteResourceTypeAdminPolicies
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of admin policy
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully deleted policy
+          content: { }
+        403:
+          description: You are not a Sam super admin
+          content: { }
+        404:
+          description: Policy does not exist or resource type does not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/config/v1/resourceTypes:
+    get:
+      tags:
+        - Config
+      summary: Lists available resource types
+      operationId: listResourceTypes
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceType'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/groups/v1:
+    get:
+      tags:
+        - Group
+      summary: Show all the groups the requesting user belongs to and their policy
+        membership in each group
+      operationId: listGroupMemberships
+      responses:
+        200:
+          description: Managed Group memberships
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManagedGroupMembershipEntry'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/groups/v1/{groupName}:
+    get:
+      tags:
+        - Group
+      summary: Show email address of the group
+      operationId: getGroup
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Group found
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Email address for the group
+        404:
+          description: Group could not be found or you do not have the required permissions
+            on this group
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    post:
+      tags:
+        - Group
+      summary: Create a new group
+      operationId: postGroup
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        201:
+          description: Group created
+          content: {}
+        409:
+          description: Group already exists
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Group
+      summary: Delete group
+      operationId: deleteGroup
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Group deleted
+          content: {}
+        404:
+          description: Group could not be found or you do not have the required permissions
+            on this group
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/groups/v1/{groupName}/requestAccess:
+    post:
+      tags:
+        - Group
+      summary: Request access to a managed group
+      operationId: requestAccess
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        204:
+          description: Request sent
+          content: {}
+        404:
+          description: Group could not be found or you do not have the required permissions
+            on this group
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/groups/v1/{groupName}/accessInstructions:
+    get:
+      tags:
+        - Group
+      summary: gets the access instructions for a managed group
+      operationId: getAccessInstructions
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Access instructions for this group
+          content:
+            application/json:
+              schema:
+                type: string
+        204:
+          description: No access instructions found for this group
+          content: {}
+        404:
+          description: Group could not be found or you do not have the required permissions
+            on this group
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    put:
+      tags:
+        - Group
+      summary: sets the access instructions for a managed group
+      operationId: setAccessInstructions
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        204:
+          description: Successfully set access instructions
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/groups/v1/{groupName}/{policyName}:
+    get:
+      tags:
+        - Group
+      summary: Get email addresses for members of the policy
+      operationId: GetGroupPolicyEmails
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of policy
+          required: true
+          schema:
+            type: string
+            enum:
+              - member
+              - admin
+      responses:
+        200:
+          description: Email addresses in the policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfEmails'
+        404:
+          description: Group could not be found or you do not have the required permissions
+            on this group
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    put:
+      tags:
+        - Group
+      summary: Overwrite email addresses of members of the policy
+      operationId: OverwriteGroupPolicyEmails
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of policy
+          required: true
+          schema:
+            type: string
+            enum:
+              - member
+              - admin
+      requestBody:
+        description: The list of emails
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ArrayOfEmails'
+        required: true
+      responses:
+        201:
+          description: Policy successfully updated
+          content: {}
+        404:
+          description: Group does not exist or you are not a member of the policy
+            for the group
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: emailAddresses
+  /api/groups/v1/{groupName}/{policyName}/{email}:
+    put:
+      tags:
+        - Group
+      summary: Add email to the policy
+      operationId: AddEmailToGroup
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of policy
+          required: true
+          schema:
+            type: string
+            enum:
+              - member
+              - admin
+        - name: email
+          in: path
+          description: Email address
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        204:
+          description: Email successfully added
+          content: {}
+        400:
+          description: Email is invalid
+          content: {}
+        403:
+          description: You do not have permission to alter this policy
+          content: {}
+        404:
+          description: Group does not exist, policy does not exist, or subject with
+            specified email was not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Group
+      summary: Remove email from the policy
+      operationId: RemoveEmailFromGroup
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of policy
+          required: true
+          schema:
+            type: string
+            enum:
+              - member
+              - admin
+        - name: email
+          in: path
+          description: Email address
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Email successfully removed
+          content: {}
+        403:
+          description: You do not have permission to alter this policy
+          content: {}
+        404:
+          description: Group does not exist or policy does not exist
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/google/v1/user/petServiceAccount/{project}:
+    get:
+      tags:
+        - Google
+      summary: gets the pet service account for the specified project
+      operationId: getPetServiceAccount
+      parameters:
+        - name: project
+          in: path
+          description: Google project of the pet
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: user pet service account
+          content:
+            application/json:
+              schema:
+                type: string
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Google
+      summary: deletes the pet service account for the specified project
+      operationId: deletePetServiceAccount
+      parameters:
+        - name: project
+          in: path
+          description: Google project of the pet
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: pet service account deleted
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/google/v1/user/petServiceAccount/{project}/token:
+    post:
+      tags:
+        - Google
+      summary: gets a token for the user's pet service account
+      operationId: getPetServiceAccountToken
+      parameters:
+        - name: project
+          in: path
+          description: Google project of the pet
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Scopes for the token
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ArrayOfScopes'
+        required: true
+      responses:
+        200:
+          description: an access token for the users pet service account
+          content:
+            application/json:
+              schema:
+                type: string
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: scopes
+  /api/google/v1/user/proxyGroup/{email}:
+    get:
+      tags:
+        - Google
+      summary: gets the proxy group email for the specified user
+      operationId: getProxyGroup
+      parameters:
+        - name: email
+          in: path
+          description: User email whose proxy group to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: user proxy group
+          content:
+            application/json:
+              schema:
+                type: string
+        404:
+          description: user not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/google/v1/resource/{resourceTypeName}/{resourceId}/{policyName}/sync:
+    get:
+      tags:
+        - Google
+      summary: Gets the synchronization state (last synchronized date and email) for
+        the group.
+      operationId: syncStatus
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of policy to get synchronization state for
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncStatus'
+        204:
+          description: Group is not synchronized to Google
+          content: {}
+        404:
+          description: Group not found
+          content: {}
+    post:
+      tags:
+        - Google
+      summary: Synchronize a policy's membership with google group. Once called all
+        further membership changes will by automatically synchronized
+      operationId: syncPolicy
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of policy to synchronize
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        200:
+          description: Successfully synchronized membership
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncReport'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/azure/v1/billingProfile/{billingProfileId}/managedResourceGroup:
+    post:
+      tags:
+        - Azure
+      summary: associates billing profile id to managed resource group coordinates
+      operationId: createManagedResourceGroup
+      parameters:
+        - name: billingProfileId
+          in: path
+          description: billing profile id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The details of the managed resource group in which to create the pet
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ManagedResourceGroupCoordinates'
+        required: true
+      responses:
+        201:
+          description: Successfully created managed resource group
+          content: { }
+        400:
+          description: Invalid or incomplete request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: Caller does not have permission to the managed resource group or it cannot be found or is otherwise invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Caller does not have permission to the billing profile or it does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Managed resource group and/or billing profile already has an association
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Azure
+      summary: Deletes the managed resource group coordinates associated with the billing profile id
+      operationId: deleteManagedResourceGroup
+      parameters:
+        - name: billingProfileId
+          in: path
+          description: billing profile id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully deleted managed resource group
+          content: { }
+        403:
+          description: You do not have permission to perform this action on the resource
+          content: { }
+        404:
+          description: Resource does not exist
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+
+  /api/azure/v1/user/petManagedIdentity:
+    post:
+      tags:
+        - Azure
+      summary: gets or creates a pet managed identity for the calling user
+      operationId: getPetManagedIdentity
+      requestBody:
+        description: The details of the managed resource group in which to create the pet
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/GetOrCreatePetManagedIdentityRequest'
+        required: true
+      responses:
+        200:
+          description: Successfully retrieved resource without creating it
+          content:
+            application/json:
+              schema:
+                type: string
+        201:
+          description: Successfully created resource
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          description: Invalid or incomplete request body
+          content: { }
+        403:
+          description: Caller does not have permission to create a pet managed identity in the given managed resource group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/azure/v1/petManagedIdentity/{userEmail}:
+    post:
+      tags:
+        - Azure
+      summary: gets or creates a pet managed identity for the specified user, get_pet_managed_identity
+        action on cloud-extension/azure required
+      operationId: getPetManagedIdentityForUser
+      parameters:
+        - name: userEmail
+          in: path
+          description: User's email address
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The details of the managed resource group in which to create the pet
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/GetOrCreatePetManagedIdentityRequest'
+        required: true
+      responses:
+        200:
+          description: Successfully retrieved resource without creating it
+          content:
+            application/json:
+              schema:
+                type: string
+        201:
+          description: Successfully created resource
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          description: Invalid or incomplete request body
+          content: { }
+        403:
+          description: Caller does not have permission to create a pet managed identity in the given managed resource group
+            or caller does not have get_pet_managed_identity permission on cloud-extension/azure
+          content: { }
+        404:
+          description: User or managed resource group does not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}:
+    get:
+      tags:
+        - Resources
+      summary: List resources (of a resource type) with the caller's roles and actions for each resource. Note that currently this will only show the actions granted directly on the policy and not the default actions on the role.
+      operationId: listResourcesAndPoliciesV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of the resource
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResourcesResponse'
+    post:
+      tags:
+        - Resources
+      summary: Create a new resource, cannot be used when resource type allows both
+        authorization domains and id reuse
+      operationId: createResourceV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to create
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The details of the resource
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateResourceRequestV2'
+        required: true
+      responses:
+        201:
+          description: Successfully created resource, returning resource information
+          content: { }
+        204:
+          description: Successfully created resource
+          content: { }
+        400:
+          description: Invalid policies, invalid auth domain, parent specified but not allowed, or resource type allows
+            auth domains and id reuse
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: Parent does not exist or user does not have add_child permission on parent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Resource already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: resourceCreate
+  /api/resources/v2/{resourceTypeName}/{resourceId}:
+    post:
+      tags:
+        - Resources
+      summary: Create a new resource with default owner policy
+      operationId: createResourceWithDefaultsV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to create
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource to create, must be unique for all resources of
+            given type
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        204:
+          description: Successfully created resource
+          content: { }
+        409:
+          description: Resource already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Resources
+      summary: Delete a resource
+      operationId: deleteResourceV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of the resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of the resource
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully deleted resource
+          content: { }
+        400:
+          description: Cannot delete a resource with children. Delete the children first then try again.
+          content: { }
+        403:
+          description: You do not have permission to perform this action on the resource or permissions on the resource's parent
+          content: { }
+        404:
+          description: Resource type does not exist or you are not a member of any
+            policy on the resource
+          content: { }
+  /api/resources/v2/{resourceTypeName}/{resourceId}/actions:
+    get:
+      tags:
+        - Resources
+      summary: List the actions the user has on the given resource
+      operationId: resourceActionsV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of actions the user has on the given resource. Empty if
+            the user has no actions or the resource does not exist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        404:
+          description: Resource type does not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/authDomain:
+    get:
+      tags:
+        - Resources
+      summary: List the groups in the Auth Domain for a resource
+      operationId: getAuthDomainV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of groups that compose the Auth Domain for this resource.
+            Empty if an Auth Domain has not been set
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        403:
+          description: You do not have permission to perform this action on the resource
+          content: { }
+        404:
+          description: Resource type or resource does not exist or you are not a member
+            of any policy on the resource
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    patch:
+      tags:
+        - Resources
+      summary: Update the groups in the Auth Domain for a resource
+      operationId: patchAuthDomainV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        204:
+          description: Successfully updated domains
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/allUsers:
+    get:
+      tags:
+        - Resources
+      summary: List all of the members of a resource
+      operationId: getAllResourceUsersV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of users in all policies on this resource
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserIdInfo'
+        403:
+          description: You do not have permission to perform this action on the resource
+          content: { }
+        404:
+          description: Resource type or resource does not exist or you are not a member
+            of any policy on the resource
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/leave:
+    delete:
+      tags:
+        - Resources
+      summary: Leave the resource
+      operationId: leaveResourceV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully left resource
+          content: { }
+        403:
+          description: You do not have permission to leave the resource
+          content: { }
+        404:
+          description: Resource does not exist or you are not a member of the resource
+            policy on the resource
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/policies:
+    get:
+      tags:
+        - Resources
+      summary: List the policies for a resource
+      operationId: listResourcePoliciesV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Policies successfully listed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessPolicyResponseEntryV2'
+        403:
+          description: You do not have permission to perform this action on the resource
+          content: { }
+        404:
+          description: Resource type does not exist or you are not a member of any
+            policy on the resource
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/policies/{policyName}:
+    get:
+      tags:
+        - Resources
+      summary: Gets a policy on a resource
+      operationId: getPolicyV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Policy information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessPolicyMembershipV2'
+        403:
+          description: You do not have permission to perform this action on the resource
+          content: { }
+        404:
+          description: Resource type does not exist or you are not a member of any
+            policy on the resource or the policy does not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    put:
+      tags:
+        - Resources
+      summary: Overwrite a policy on a resource
+      operationId: overwritePolicyV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The details of the policy
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/AccessPolicyMembershipRequest'
+        required: true
+      responses:
+        201:
+          description: Policy successfully created/updated
+          content: { }
+        403:
+          description: You do not have permission to perform this action on the resource
+          content: { }
+        404:
+          description: Resource type does not exist or you are not a member of any
+            policy on the resource
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: policyCreate
+    delete:
+      tags:
+        - Resources
+      summary: Deletes a policy on a resource
+      operationId: deletePolicyV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully deleted policy
+          content: { }
+        403:
+          description: You do not have permission to perform this action on the resource
+          content: { }
+        404:
+          description: Policy does not exist or you are not a member of any policies on this resource
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/policies/{policyName}/memberEmails:
+    put:
+      tags:
+        - Resources
+      summary: Overwrite the membership of a policy
+      operationId: overwritePolicyMembersV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: List of member emails to be on the policy
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ArrayOfEmails'
+        required: true
+      responses:
+        204:
+          description: Successfully overwrite membership
+          content: { }
+        400:
+          description: email is not found
+          content: { }
+        403:
+          description: You do not have permission to alter this policy
+          content: { }
+        404:
+          description: Resource type does not exist, you are not a member of any policy
+            on the resource, or a member was not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: memberEmails
+  /api/resources/v2/{resourceTypeName}/{resourceId}/policies/{policyName}/memberEmails/{email}:
+    put:
+      tags:
+        - Resources
+      summary: Add a user to a policy by user email
+      operationId: addUserToPolicyV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: path
+          description: Email of user to be added
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        204:
+          description: Successfully added a user to the policy
+          content: { }
+        400:
+          description: email is not found
+          content: { }
+        403:
+          description: You do not have permission to alter this policy
+          content: { }
+        404:
+          description: Resource type does not exist, you are not a member of any policy
+            on the resource, or user was not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Resources
+      summary: Remove a user from a policy
+      operationId: removeUserFromPolicyV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: path
+          description: Email of user to be removed
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully removed a user from the policy
+          content: { }
+        400:
+          description: email is not found
+          content: { }
+        403:
+          description: You do not have permission to alter this policy
+          content: { }
+        404:
+          description: Resource type does not exist, you are not a member of any policy
+            on the resource, or user was not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/policies/{policyName}/memberPolicies/{memberResourceTypeName}/{memberResourceId}/{memberPolicyName}:
+    put:
+      tags:
+        - Resources
+      summary: Add a member policy to a parent policy
+      operationId: addMemberPolicyV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+        - name: memberResourceTypeName
+          in: path
+          description: Type of resource for the member policy
+          required: true
+          schema:
+            type: string
+        - name: memberResourceId
+          in: path
+          description: Resource id for the member policy
+          required: true
+          schema:
+            type: string
+        - name: memberPolicyName
+          in: path
+          description: Member policy name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        204:
+          description: Successfully added a member policy to the parent policy
+          content: { }
+        403:
+          description: You do not have permission to alter this policy
+          content: { }
+        404:
+          description: Resource type does not exist, you are not a member of any policy
+            on the resource, or member policy was not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Resources
+      summary: Remove a member policy from a parent policy
+      operationId: removeMemberPolicyV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+        - name: memberResourceTypeName
+          in: path
+          description: Type of resource for the member policy
+          required: true
+          schema:
+            type: string
+        - name: memberResourceId
+          in: path
+          description: Resource id for the member policy
+          required: true
+          schema:
+            type: string
+        - name: memberPolicyName
+          in: path
+          description: Member policy name
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully removed a member policy from the parent policy
+          content: { }
+        403:
+          description: You do not have permission to alter this policy
+          content: { }
+        404:
+          description: Resource type does not exist, you are not a member of any policy
+            on the resource, or member policy was not found
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/policies/{policyName}/public:
+    get:
+      tags:
+        - Resources
+      summary: Get the public flag on a policy
+      operationId: getPolicyPublicV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: True if the policy is public, false if the policy is private
+          content:
+            application/json:
+              schema:
+                type: boolean
+        403:
+          description: You do not have permission to read this policy
+          content: { }
+        404:
+          description: Resource type, resource, or policy do not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    put:
+      tags:
+        - Resources
+      summary: Set the public flag on a policy
+      operationId: setPolicyPublicV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of the policy
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: true to make the policy public, false to make it private
+        content:
+          'application/json':
+            schema:
+              type: boolean
+        required: true
+      responses:
+        204:
+          description: Successfully added a user to the policy
+          content: { }
+        403:
+          description: You do not have permission to alter this policy
+          content: { }
+        404:
+          description: Resource type does not exist, you are not a member of any policy
+            on the resource, or user is not permitted to set the public flag on resources
+            of this type
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: public
+  /api/resources/v2/{resourceTypeName}/{resourceId}/roles:
+    get:
+      tags:
+        - Resources
+      summary: Query for the list of roles that the requesting user has on the resource
+      operationId: resourceRolesV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to query
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource to query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: The list of roles that the requesting user has on the resource.
+            Empty if resource does not exist or user has no role on that resource.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        404:
+          description: Resource type does not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/action/{action}:
+    get:
+      tags:
+        - Resources
+      summary: Query if requesting user may perform the action
+      operationId: resourcePermissionV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to query
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource to query
+          required: true
+          schema:
+            type: string
+        - name: action
+          in: path
+          description: Action to perform
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: true if the user may perform the action, false if they may
+            not or the resource does not exist
+          content:
+            application/json:
+              schema:
+                type: boolean
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/action/{action}/userEmail/{userEmail}:
+    get:
+      tags:
+        - Resources
+      summary: Query if the given user may perform the action
+      operationId: resourceActionV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to query
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource to query
+          required: true
+          schema:
+            type: string
+        - name: action
+          in: path
+          description: Action to perform
+          required: true
+          schema:
+            type: string
+        - name: userEmail
+          in: path
+          description: User Email address to check
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: true if the user may perform the action, false if they may
+            not or the resource does not exist
+          content:
+            application/json:
+              schema:
+                type: boolean
+        403:
+          description: You do not have permission to check user action permission
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/parent:
+    get:
+      tags:
+        - Resources
+      summary: Get the parent of a resource if one exists
+      operationId: getResourceParent
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to query
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource to query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Id and type of parent resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullyQualifiedResourceId'
+        403:
+          description: You do not have permission to get the parent for this resource
+          content: {}
+        404:
+          description: You do not have access to this resource, it does not exist, or it does not have a parent resource
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    put:
+      tags:
+        - Resources
+      summary: Set the parent of a resource
+      operationId: setResourceParent
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of child resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of child resource
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The details of the new parent resource
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/FullyQualifiedResourceId'
+      responses:
+        204:
+          description: Resource parent successfully set
+          content: {}
+        400:
+          description: Child resource has an auth domain or new parent would introduce cyclical resource hierarchy
+          content: {}
+        403:
+          description: You do not have permission to set the parent for the child resource, to remove the child of the current parent, to add a child to the new parent, or the new parent does not exist
+          content: {}
+        404:
+          description: You do not have access to this resource, or it does not exist
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Resources
+      summary: Delete the parent of a resource
+      operationId: deleteResourceParent
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to remove parent from
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource to remove parent from
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Resource parent successfully removed
+          content: {}
+        403:
+          description: You do not have permission to set the parent for this resource or to remove this (child) resource from its current parent
+          content: {}
+        404:
+          description: You do not have access to this resource, it does not exist, or it does not currently have a parent resource
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/resources/v2/{resourceTypeName}/{resourceId}/children:
+    get:
+      tags:
+        - Resources
+      summary: List all the direct children of a resource
+      operationId: listResourceChildren
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to query
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource to query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Ids and types of child resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FullyQualifiedResourceId'
+        403:
+          description: You do not have permission to list the children of this resource
+          content: {}
+        404:
+          description: You do not have access to this resource or it does not exist
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/users/v1/{email}:
+    get:
+      tags:
+        - Users
+      summary: Query for the user's subject IDs
+      operationId: getUserIds
+      parameters:
+        - name: email
+          in: path
+          description: Email of the user
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserIdInfo'
+        204:
+          description: the email is recognized as a group, not a user
+          content: {}
+        404:
+          description: User not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/users/v1/invite/{inviteeEmail}:
+    post:
+      tags:
+        - Users
+      summary: create current user in the system using login credentials
+      operationId: inviteUser
+      parameters:
+        - name: inviteeEmail
+          in: path
+          description: email for the user you want to invite
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        201:
+          description: user successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatusDetails'
+        409:
+          description: user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /register/user/v1:
+    get:
+      tags:
+        - Users
+      summary: gets the registration status of the logged in user
+      operationId: getUserStatus
+      parameters:
+        - name: userDetailsOnly
+          in: query
+          description: when set to true does not check the various enabled status of
+            the user
+          schema:
+            type: string
+      responses:
+        200:
+          description: user exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+        404:
+          description: user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    post:
+      tags:
+        - Users
+      summary: create current user in the system using login credentials
+      operationId: createUser
+      responses:
+        201:
+          description: user successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+        409:
+          description: user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /register/user/v2/self:
+    post:
+      tags:
+        - Users
+      summary: create current user in the system using login credentials
+      operationId: createUserV2
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+      responses:
+        201:
+          description: user successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+        409:
+          description: user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /register/user/v2/self/info:
+    get:
+      tags:
+        - Users
+      summary: gets the registration status info of the logged in user
+      operationId: getUserStatusInfo
+      responses:
+        200:
+          description: user exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatusInfo'
+        404:
+          description: user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /register/user/v2/self/diagnostics:
+    get:
+      tags:
+        - Users
+      summary: gets the various enabled statuses of the logged in user
+      operationId: getUserStatusDiagnostics
+      responses:
+        200:
+          description: user exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatusDiagnostics'
+        404:
+          description: user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /register/user/v2/self/termsOfServiceDetails:
+    get:
+      tags:
+        - Terms of Service
+      summary: gets terms of service details, including user's accepted version
+      operationId: getTermsOfServiceDetails
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsOfServiceDetails'
+  /register/user/v2/self/termsOfServiceComplianceStatus:
+    get:
+      tags:
+        - Terms of Service
+      summary: gets info on whether the user has accepted the latest terms of service and if they can use the system based on that
+      operationId: getTermsOfServiceComplianceStatus
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsOfServiceComplianceStatus'
+  /liveness:
+    get:
+      summary: Gets system liveness
+      responses:
+        "200":
+          description: System is up, but other routes may not be ready yet. See /status api for readiness.
+      operationId: getLiveness
+      tags:
+        - Status
+  /status:
+    get:
+      tags:
+        - Status
+      summary: gets system readiness status
+      operationId: getSystemStatus
+      responses:
+        200:
+          description: system ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatus'
+        500:
+          description: one or more subsystems down
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatus'
+  /register/user/v1/termsofservice:
+    post:
+      tags:
+        - Terms of Service
+      summary: accepts terms of service
+      operationId: acceptTermsOfService
+      requestBody:
+        description: Must equal the (double-quoted) url of the Terra Terms of Service
+        content:
+          'application/json':
+            schema:
+              type: string
+        required: true
+      responses:
+        200:
+          description: terms of service successfully accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+        404:
+          description: user cannot be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - Terms of Service
+      summary: rejects terms of service
+      operationId: rejectTermsOfService
+      responses:
+        200:
+          description: terms of service successfully rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatus'
+        404:
+          description: user cannot be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /register/user/v1/termsofservice/status:
+    get:
+      tags:
+        - Terms of Service
+      summary: returns whether or not the user has accepted the current terms of service.
+      operationId: getUserTermsOfServiceStatus
+      responses:
+        200:
+          description: terms of service status is enabled, boolean value denotes users acceptance of the latest
+            terms of service version.
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: if user has accepted the latest version of the terms of service
+        404:
+          description: user not found or terms of service disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /tos/text:
+    get:
+      tags:
+        - Terms of Service
+      summary: gets terms of service text
+      operationId: getTermsOfServiceText
+      responses:
+        200:
+          description: success
+          content:
+            text/plain:
+              schema:
+                type: string
+  /privacy/text:
+    get:
+      tags:
+        - Terms of Service
+      summary: gets privacy policy text
+      operationId: getPrivacyPolicyText
+      responses:
+        200:
+          description: success
+          content:
+            text/plain:
+              schema:
+                type: string
+  /version:
+    get:
+      tags:
+        - Version
+      summary: Returns the currently deployed version of this service.
+      operationId: samVersion
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SamVersion'
+components:
+  schemas:
+    AccessPolicyResponseEntry:
+      required:
+        - policy
+        - policyName
+        - email
+      type: object
+      properties:
+        policyName:
+          type: string
+        policy:
+          $ref: '#/components/schemas/AccessPolicyMembership'
+        email:
+          type: string
+      description: ""
+    AccessPolicyResponseEntryV2:
+      required:
+        - policy
+        - policyName
+        - email
+      type: object
+      properties:
+        policyName:
+          type: string
+        policy:
+          $ref: '#/components/schemas/AccessPolicyMembershipV2'
+        email:
+          type: string
+      description: ""
+    AccessPolicyMembership:
+      required:
+        - actions
+        - memberEmails
+        - roles
+      type: object
+      properties:
+        memberEmails:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            type: string
+        roles:
+          type: array
+          items:
+            type: string
+      description: ""
+    AccessPolicyMembershipV2:
+      required:
+        - actions
+        - memberEmails
+        - roles
+      type: object
+      properties:
+        memberEmails:
+          type: array
+          items:
+            type: string
+        memberPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyInfoResponseBody'
+        actions:
+          type: array
+          items:
+            type: string
+        roles:
+          type: array
+          items:
+            type: string
+        descendantPermissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessPolicyDescendantPermissions'
+      description: ""
+    AccessPolicyMembershipRequest:
+      required:
+        - actions
+        - memberEmails
+        - roles
+      type: object
+      properties:
+        memberEmails:
+          type: array
+          items:
+            type: string
+        memberPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyIdentifiers'
+        actions:
+          type: array
+          items:
+            type: string
+        roles:
+          type: array
+          items:
+            type: string
+        descendantPermissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessPolicyDescendantPermissions'
+      description: ""
+    AccessPolicyDescendantPermissions:
+      required:
+        - resourceType
+        - actions
+        - roles
+      type: object
+      properties:
+        resourceType:
+          type: string
+          description: resource type of descendant resources that these roles and actions apply to
+        actions:
+          type: array
+          description: actions granted on descendant resources of this type
+          items:
+            type: string
+        roles:
+          type: array
+          description: roles granted on descendant resources of this type
+          items:
+            type: string
+    ArrayOfEmails:
+      type: array
+      description: An array of email addresses
+      example:
+        - person@company.com
+        - group_name@company.com
+        - foo@bar.com
+      items:
+        type: string
+    ArrayOfScopes:
+      type: array
+      description: An array of scopes
+      example:
+        - https://www.googleapis.com/auth/userinfo.email
+        - https://www.googleapis.com/auth/userinfo.profile
+      items:
+        type: string
+    SignedUrlRequest:
+      type: object
+      required:
+        - bucketName
+        - blobName
+      properties:
+        bucketName:
+          type: string
+          description: bucket of the blob
+        blobName:
+          type: string
+          description: path to the blob in the bucket
+        duration:
+          type: number
+          description: Optional validity duration of the link in minutes. Defaults to 1 hour.
+          default: 60
+        requesterPays:
+          type: boolean
+          description: Use the pet service account project as the user project in the request.
+          default: true
+    RequesterPaysSignedUrlRequest:
+      type: object
+      required:
+        - gsPath
+      properties:
+        gsPath:
+          type: string
+          description: GS Path to the blob
+        duration:
+          type: number
+          description: Optional validity duration of the link in minutes. Defaults to 1 hour.
+          default: 60
+        requesterPaysProject:
+          type: string
+          description: Optional Google Project to use for billing.
+    CreateResourceRequest:
+      required:
+        - policies
+        - resourceId
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: id of the resource to create
+        policies:
+          type: object
+          description: map of initial policies to create, key is policy name
+          additionalProperties:
+            $ref: '#/components/schemas/AccessPolicyMembership'
+        authDomain:
+          type: array
+          items:
+            type: string
+        returnResource:
+          type: boolean
+          description: return created resource information with 201 response code
+          default: false
+      description: information to create a resource
+    CreateResourceRequestV2:
+      required:
+        - policies
+        - resourceId
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: id of the resource to create
+        policies:
+          type: object
+          description: map of initial policies to create, key is policy name
+          additionalProperties:
+            $ref: '#/components/schemas/AccessPolicyMembershipRequest'
+        authDomain:
+          type: array
+          items:
+            type: string
+        returnResource:
+          type: boolean
+          description: return created resource information with 201 response code
+          default: false
+        parent:
+          $ref: '#/components/schemas/FullyQualifiedResourceId'
+      description: information to create a resource
+    Enabled:
+      required:
+        - allUsersGroup
+        - google
+        - ldap
+      type: object
+      properties:
+        ldap:
+          type: boolean
+          description: true if the user is enabled in ldap
+        allUsersGroup:
+          type: boolean
+          description: true if the user is in the all users group
+        google:
+          type: boolean
+          description: true if the user is in their proxy group
+      description: the status of the user's account
+    ErrorReport:
+      required:
+        - causes
+        - message
+        - source
+        - stackTrace
+      type: object
+      properties:
+        source:
+          type: string
+          description: service causing error
+        message:
+          type: string
+          description: what went wrong
+        exceptionClass:
+          type: string
+          description: class of exception thrown
+        statusCode:
+          type: integer
+          description: HTTP status code
+        causes:
+          type: array
+          description: errors triggering this one
+          items:
+            $ref: '#/components/schemas/ErrorReport'
+        stackTrace:
+          type: array
+          description: stack trace
+          items:
+            $ref: '#/components/schemas/StackTraceElement'
+      description: ""
+    FullyQualifiedResourceId:
+      required:
+        - resourceTypeName
+        - resourceId
+      type: object
+      properties:
+        resourceTypeName:
+          type: string
+          description: The type of the resource
+        resourceId:
+          type: string
+          description: The id of the resource
+      description: type and id of a resource
+    ManagedGroupMembershipEntry:
+      required:
+        - groupEmail
+        - groupName
+        - role
+      type: object
+      properties:
+        groupName:
+          type: string
+          description: The name of the managed group
+        role:
+          type: string
+          description: User's role in the group
+        groupEmail:
+          type: string
+          description: The email address associated with the group
+      description: specification of a managed group with an access policy and the
+        email associated with the managed group
+    PolicyIdentifiers:
+      required:
+        - policyName
+        - resourceTypeName
+        - resourceId
+      type: object
+      properties:
+        policyName:
+          type: string
+          description: The name of the policy
+        resourceTypeName:
+          type: string
+          description: The type of the resource
+        resourceId:
+          type: string
+          description: The id of the resource
+    PolicyInfoResponseBody:
+      required:
+        - policyName
+        - policyEmail
+        - resourceTypeName
+        - resourceId
+      type: object
+      properties:
+        policyName:
+          type: string
+          description: The name of the policy
+        policyEmail:
+          type: string
+          description: The email of the policy
+        resourceTypeName:
+          type: string
+          description: The type of the resource
+        resourceId:
+          type: string
+          description: The id of the resource
+    ResourceAndAccessPolicy:
+      required:
+        - accessPolicyName
+        - resourceId
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: The id of the resource
+        accessPolicyName:
+          type: string
+          description: User's policy for the resource
+        authDomainGroups:
+          type: array
+          items:
+            type: string
+        missingAuthDomainGroups:
+          type: array
+          items:
+            type: string
+        public:
+          type: boolean
+          description: the policy is public when this is true
+      description: specification of a resource with an access policy
+    ResourceRole:
+      required:
+        - actions
+        - roleName
+      type: object
+      properties:
+        roleName:
+          type: string
+          description: The name of the role
+        actions:
+          type: array
+          description: List of actions that can be performed by members of this role
+          items:
+            type: string
+      description: specification of a role for a resource
+    ResourceType:
+      required:
+        - actions
+        - name
+        - ownerRoleName
+        - roles
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the resource type
+        actions:
+          type: array
+          description: List of actions that can be performed on a resource of this
+            type
+          items:
+            type: string
+        roles:
+          type: array
+          description: List of roles that may exist on a resource of this type
+          items:
+            $ref: '#/components/schemas/ResourceRole'
+        ownerRoleName:
+          type: string
+          description: The name of the role that can perform administrative functions
+            on a resource of this type
+      description: specification of a type of resource
+    RolesAndActions:
+      required:
+        - actions
+        - roles
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            type: string
+    SamVersion:
+      type: object
+      properties:
+        version:
+          type: string
+    StackTraceElement:
+      required:
+        - className
+        - fileName
+        - lineNumber
+        - methodName
+      type: object
+      properties:
+        className:
+          type: string
+          description: class name
+        methodName:
+          type: string
+          description: method name
+        fileName:
+          type: string
+          description: source file name
+        lineNumber:
+          type: integer
+          description: line number
+      description: ""
+    SubsystemStatus:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          description: whether this system is up or down from Sam's point of view
+        messages:
+          type: array
+          items:
+            type: string
+      description: status of a subsystem Sam depends on
+    SyncReport:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/SyncReportEntry'
+      description: results of an attempt to synchronize a group
+    SyncReportEntry:
+      required:
+        - email
+        - operation
+      type: object
+      properties:
+        operation:
+          type: string
+        email:
+          type: string
+        errorReport:
+          $ref: '#/components/schemas/ErrorReport'
+    SyncStatus:
+      required:
+        - email
+        - lastSyncDate
+      type: object
+      properties:
+        lastSyncDate:
+          type: string
+        email:
+          type: string
+      description: status of group synchronization
+    SystemStatus:
+      required:
+        - ok
+        - systems
+      type: object
+      properties:
+        ok:
+          type: boolean
+          description: true if everything is ok, false if anything is amiss
+        systems:
+          type: object
+          description: status of each subsystem
+          additionalProperties:
+            $ref: '#/components/schemas/SubsystemStatus'
+      description: status of each aubsystem Sam depends on
+    UserIdInfo:
+      required:
+        - userEmail
+        - userSubjectId
+      type: object
+      properties:
+        userSubjectId:
+          type: string
+          description: user id
+        userEmail:
+          type: string
+          description: user email
+        googleSubjectId:
+          type: string
+          description: google subject id
+      description: ""
+    UserInfo:
+      required:
+        - userEmail
+        - userSubjectId
+      type: object
+      properties:
+        userSubjectId:
+          type: string
+          description: user id
+        userEmail:
+          type: string
+          description: user email
+      description: the user's details
+    UserResourcesResponse:
+      required:
+        - resourceId
+        - direct
+        - inherited
+        - public
+        - authDomainGroups
+        - missingAuthDomainGroups
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: The id of the resource
+        direct:
+          description: roles and actions assigned (via membership or public) by a policy directly on this resource
+          allOf:
+            - $ref: '#/components/schemas/RolesAndActions'
+        inherited:
+          description: roles and actions assigned (via membership or public) by a policy on an ancestor of this resource
+          allOf:
+            - $ref: '#/components/schemas/RolesAndActions'
+        public:
+          description: roles and actions on public policies of this resource or an ancestor of this resource
+          allOf:
+            - $ref: '#/components/schemas/RolesAndActions'
+        authDomainGroups:
+          type: array
+          items:
+            type: string
+        missingAuthDomainGroups:
+          type: array
+          items:
+            type: string
+      description: specification of a resource with an access policy
+    UserStatus:
+      required:
+        - enabled
+        - userInfo
+      type: object
+      properties:
+        userInfo:
+          $ref: '#/components/schemas/UserInfo'
+        enabled:
+          $ref: '#/components/schemas/Enabled'
+      description: ""
+    UserStatusInfo:
+      required:
+        - enabled
+        - userEmail
+        - userSubjectId
+      type: object
+      properties:
+        userSubjectId:
+          type: string
+          description: user id
+        userEmail:
+          type: string
+          description: user email
+        enabled:
+          type: boolean
+          description: true if the user is enabled in ldap
+      description: ""
+    UserStatusDetails:
+      required:
+        - userEmail
+        - userSubjectId
+      type: object
+      properties:
+        userSubjectId:
+          type: string
+          description: user id
+        userEmail:
+          type: string
+          description: user email
+      description: ""
+    UserStatusDiagnostics:
+      required:
+        - enabled
+        - inAllUsersGroup
+        - inGoogleProxyGroup
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: true if the user is enabled in ldap
+        inAllUsersGroup:
+          type: boolean
+          description: true if the user is in the all users group
+        inGoogleProxyGroup:
+          type: boolean
+          description: true if the user is in their proxy group
+      description: ""
+    TermsOfServiceDetails:
+      required:
+        - isEnabled
+        - isGracePeriodEnabled
+        - currentVersion
+        - userAcceptedVersion
+      type: object
+      properties:
+        isEnabled:
+          type: boolean
+          description: true if terms of service is enforced in Sam
+        isGracePeriodEnabled:
+          type: boolean
+          description: true if there is currently a grace period enabled,
+            letting users use the system without accepting the terms of service
+        currentVersion:
+          type: string
+          description: the current version of terms of service for the system
+        userAcceptedVersion:
+          type: string
+          description: the version of the terms of service the user has accepted
+    TermsOfServiceComplianceStatus:
+      required:
+        - userId
+        - userHasAcceptedLatestTos
+        - permitsSystemUsage
+      type: object
+      properties:
+        userId:
+          type: string
+          description: user id terms of service compliance status pertains to
+        userHasAcceptedLatestTos:
+          type: boolean
+          description: has the user accepted the latest terms of service?
+        permitsSystemUsage:
+          type: boolean
+          description: based on the user's currently accepted terms of service version and when the terms of service were last changed,
+            should the user still be permitted to use the system?
+    ManagedResourceGroupCoordinates:
+      required:
+        - tenantId
+        - subscriptionId
+        - managedResourceGroupName
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: the Azure tenant id (UUID)
+          example: 0cb7a640-45a2-4ed6-be9f-63519f86e04b
+        subscriptionId:
+          type: string
+          description: the Azure subscription id (UUID)
+          example: 3efc5bdf-be0e-44e7-b1d7-c08931e3c16c
+        managedResourceGroupName:
+          type: string
+          description: the name of the Azure managed resource group
+          example: my-managed-resource-group
+    GetOrCreatePetManagedIdentityRequest:
+      required:
+        - tenantId
+        - subscriptionId
+        - managedResourceGroupName
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: the Azure tenant id (UUID)
+          example: 0cb7a640-45a2-4ed6-be9f-63519f86e04b
+        subscriptionId:
+          type: string
+          description: the Azure subscription id (UUID)
+          example: 3efc5bdf-be0e-44e7-b1d7-c08931e3c16c
+        managedResourceGroupName:
+          type: string
+          description: the name of the Azure managed resource group
+          example: my-managed-resource-group
+      description: specifies a request for a pet managed identity
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - enabled
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: User's Id
+        googleSubjectId:
+          type: string
+          description: User's Google subject Id
+        email:
+          type: string
+          description: User's email address
+          format: email
+        azureB2CId:
+          type: string
+          description: User's Azure B2C Id
+        enabled:
+          type: boolean
+          description: Whether or not the user is enabled
+        acceptedTosVersion:
+          type: string
+          description: The version of terms of service the user accepted
+        createdAt:
+          type: string
+          format: date-time
+          description: User's time of creation
+        registeredAt:
+          type: string
+          format: date-time
+          description: User's time of registration
+        updatedAt:
+          type: string
+          format: date-time
+          description: User's time of last update
+      description: specification of a User
+    UpdateUserRequest:
+      type: object
+      properties:
+        googleSubjectId:
+          type: string
+          description: User's Google subject Id
+        email:
+          type: string
+          description: User's email address
+          format: email
+        enabled:
+          type: boolean
+          description: Whether or not the user is enabled
+      description: specification of a UpdateUserRequest
+  securitySchemes:
+    googleoauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://accounts.google.com/o/oauth2/auth
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization
+    oidc:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /oauth2/authorize
+          tokenUrl: /oauth2/token
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization

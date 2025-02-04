@@ -26,6 +26,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   private final UserAccessTierDao userAccessTierDao;
 
   private final FireCloudService fireCloudService;
+  private final VwbAccessService vwbAccessService;
 
   private static final Logger log = Logger.getLogger(AccessTierServiceImpl.class.getName());
 
@@ -34,11 +35,13 @@ public class AccessTierServiceImpl implements AccessTierService {
       Clock clock,
       AccessTierDao accessTierDao,
       UserAccessTierDao userAccessTierDao,
-      FireCloudService fireCloudService) {
+      FireCloudService fireCloudService,
+      VwbAccessService vwbAccessService) {
     this.clock = clock;
     this.accessTierDao = accessTierDao;
     this.userAccessTierDao = userAccessTierDao;
     this.fireCloudService = fireCloudService;
+    this.vwbAccessService = vwbAccessService;
   }
 
   /**
@@ -75,6 +78,8 @@ public class AccessTierServiceImpl implements AccessTierService {
   public void addUserToTier(DbUser user, DbAccessTier accessTier) {
     addToAuthDomainIdempotent(user, accessTier);
 
+    vwbAccessService.addUserIntoVwbTier(user.getUsername(), accessTier.getVwbTierGroupName());
+
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
         .ifPresentOrElse(
@@ -107,6 +112,8 @@ public class AccessTierServiceImpl implements AccessTierService {
   @Override
   public void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
     removeFromAuthDomainIdempotent(user, accessTier);
+
+    vwbAccessService.removeUserFromVwbTier(user.getUsername(), accessTier.getVwbTierGroupName());
 
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)

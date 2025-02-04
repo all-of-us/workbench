@@ -18,6 +18,7 @@ public class DbAccessTier {
   private String authDomainGroupEmail;
   private String datasetsBucket;
   private Boolean enableUserWorkflows;
+  private String vwbTierGroupName;
 
   public DbAccessTier() {}
 
@@ -102,6 +103,16 @@ public class DbAccessTier {
     return this;
   }
 
+  @Column(name = "vwb_tier_group_name")
+  public String getVwbTierGroupName() {
+    return vwbTierGroupName;
+  }
+
+  public DbAccessTier setVwbTierGroupName(String vwbTierGroupName) {
+    this.vwbTierGroupName = vwbTierGroupName;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -117,7 +128,8 @@ public class DbAccessTier {
         && Objects.equal(authDomainName, that.authDomainName)
         && Objects.equal(authDomainGroupEmail, that.authDomainGroupEmail)
         && Objects.equal(datasetsBucket, that.datasetsBucket)
-        && Objects.equal(enableUserWorkflows, that.enableUserWorkflows);
+        && Objects.equal(enableUserWorkflows, that.enableUserWorkflows)
+        && Objects.equal(vwbTierGroupName, that.vwbTierGroupName);
   }
 
   @Override
@@ -128,6 +140,7 @@ public class DbAccessTier {
         servicePerimeter,
         authDomainName,
         authDomainGroupEmail,
-        datasetsBucket);
+        datasetsBucket,
+        vwbTierGroupName);
   }
 }

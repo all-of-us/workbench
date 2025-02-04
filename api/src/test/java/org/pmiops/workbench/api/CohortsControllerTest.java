@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -224,7 +225,8 @@ public class CohortsControllerTest {
     WorkspaceOperationMapper.class,
     EgressObjectLengthsRemediationService.class,
     WorkspaceServiceFactory.class,
-    WsmClient.class
+    WsmClient.class,
+    VwbAccessService.class
   })
   static class Configuration {
     @Bean
