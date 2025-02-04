@@ -9,6 +9,7 @@ import {
   DisksApi,
 } from 'generated/fetch';
 
+import { MILLIS_PER_DAY } from '../../utils/dates';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -191,7 +192,7 @@ describe(CreateGkeAppButton.name, () => {
         ...defaultProps.workspace,
         initialCredits: {
           exhausted: false,
-          expired: true,
+          expirationEpochMillis: new Date().getTime() - 1, // Expired in past
           expirationBypassed: true,
         },
       },
@@ -212,7 +213,7 @@ describe(CreateGkeAppButton.name, () => {
         ...defaultProps.workspace,
         initialCredits: {
           exhausted: true,
-          expired: false,
+          expirationEpochMillis: new Date().getTime() + MILLIS_PER_DAY, // Expire tomorrow
           expirationBypassed: false,
         },
       },
