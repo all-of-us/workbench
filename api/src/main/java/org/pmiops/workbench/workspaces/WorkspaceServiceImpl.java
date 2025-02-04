@@ -21,6 +21,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -355,21 +356,23 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     var userMap = userDao.getUsersMappedByUsernames(emailToRole.keySet());
 
-    List<UserRole> userRoles = new ArrayList<>();
-    for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
-      // Filter out groups
-      DbUser user = userMap.get(entry.getKey());
-      if (user == null) {
-        log.log(Level.WARNING, "No user found for " + entry.getKey());
-      } else {
-        userRoles.add(userMapper.toApiUserRole(user, entry.getValue()));
-      }
-    }
-
-    return userRoles.stream()
+    return emailToRole.entrySet().stream()
+        .flatMap(
+            entry -> {
+              String email = entry.getKey();
+              RawlsWorkspaceAccessEntry acl = entry.getValue();
+              DbUser user = userMap.get(entry.getKey());
+              // Filter out groups
+              if (user == null) {
+                log.log(Level.WARNING, "No user found for " + email);
+                return Stream.empty();
+              } else {
+                return Stream.of(userMapper.toApiUserRole(user, acl));
+              }
+            })
         .sorted(
             Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override
