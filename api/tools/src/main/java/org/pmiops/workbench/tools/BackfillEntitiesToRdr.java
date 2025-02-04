@@ -128,9 +128,9 @@ public class BackfillEntitiesToRdr extends Tool {
             idsToExport.size(), entityType);
       } else {
         if (RdrEntity.USER.equals(entityType)) {
-          taskQueueService.groupAndPushRdrResearcherTasks(idsToExport, /* backfill */ true);
+          taskQueueService.groupAndPushRdrResearcherBackfillTasks(idsToExport);
         } else if (RdrEntity.WORKSPACE.equals(entityType)) {
-          taskQueueService.groupAndPushRdrWorkspaceTasks(idsToExport, /* backfill */ true);
+          taskQueueService.groupAndPushRdrWorkspaceBackfillTasks(idsToExport);
         } else {
           throw new IllegalArgumentException("unknown entity type: " + entityType);
         }
