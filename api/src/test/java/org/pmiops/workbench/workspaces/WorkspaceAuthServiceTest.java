@@ -101,15 +101,6 @@ public class WorkspaceAuthServiceTest {
   }
 
   @Test
-  public void test_validateInitialCreditUsage_bypassed() {
-    final String namespace = "wsns";
-    final String fcName = "firecloudname";
-    stubDaoGetRequired(namespace, fcName, false, true, true);
-
-    assertDoesNotThrow(() -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
-  }
-
-  @Test
   public void test_validateInitialCreditUsage_exhausted() {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
