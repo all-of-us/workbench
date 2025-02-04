@@ -64,13 +64,13 @@ public class WorkspaceAuthServiceTest {
 
   @MockBean private AccessTierService mockAccessTierService;
   @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private InitialCreditsService mockInitialCreditsService;
   @MockBean private WorkspaceDao mockWorkspaceDao;
 
   private static WorkbenchConfig config;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, WorkspaceAuthService.class})
-  @MockBean({InitialCreditsService.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -110,11 +110,25 @@ public class WorkspaceAuthServiceTest {
   }
 
   @Test
-  public void test_validateInitialCreditUsage_invalid() {
+  public void test_validateInitialCreditUsage_exhausted() {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     config.billing.accountId = "free-tier";
     stubDaoGetRequired(namespace, fcName, true, false, false);
+    when(mockInitialCreditsService.areUserCreditsExpired(currentUser)).thenReturn(false);
+
+    assertThrows(
+        ForbiddenException.class,
+        () -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
+  }
+
+  @Test
+  public void test_validateInitialCreditUsage_expired() {
+    final String namespace = "wsns";
+    final String fcName = "firecloudname";
+    config.billing.accountId = "free-tier";
+    stubDaoGetRequired(namespace, fcName, false, false, false);
+    when(mockInitialCreditsService.areUserCreditsExpired(currentUser)).thenReturn(true);
 
     assertThrows(
         ForbiddenException.class,
