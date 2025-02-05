@@ -772,7 +772,7 @@ public class InitialCreditsServiceTest {
     final DbWorkspace retrievedWorkspace =
         workspaceDao.findById(userAccountWorkspace.getWorkspaceId()).get();
     assertThat(retrievedWorkspace.isInitialCreditsExhausted()).isEqualTo(false);
-    assertThat(retrievedWorkspace.isInitialCreditsExpired()).isEqualTo(false);
+    assertThat(initialCreditsService.areUserCreditsExpired(user)).isEqualTo(false);
   }
 
   @Test

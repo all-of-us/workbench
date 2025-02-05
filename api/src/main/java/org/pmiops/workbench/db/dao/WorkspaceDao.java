@@ -113,7 +113,10 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   @Query(
       "SELECT w.creator FROM DbWorkspace w "
-          + "WHERE w.billingAccountName in (:initialCreditAccountNames) AND w.creator in (:creators) AND w.initialCreditsExhausted = false AND w.initialCreditsExpired = false")
+          + "JOIN DbUserInitialCreditsExpiration uice ON w.creator = uice.user "
+          + "WHERE w.billingAccountName in (:initialCreditAccountNames) AND w.creator in (:creators) "
+          + "AND w.initialCreditsExhausted = false "
+          + "AND uice.expirationTime > CURRENT_TIMESTAMP")
   Set<DbUser> findCreatorsByActiveInitialCredits(
       @Param("initialCreditAccountNames") List<String> initialCreditAccountNames,
       @Param("creators") Set<DbUser> creators);

@@ -224,7 +224,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
   @Mapping(target = "featuredCategory", ignore = true)
-  @Mapping(target = "initialCreditsExpired", ignore = true)
   @Mapping(target = "initialCreditsExhausted", ignore = true)
   @Mapping(target = "usesTanagra", ignore = true)
   @Mapping(target = "vwbWorkspace", ignore = true)

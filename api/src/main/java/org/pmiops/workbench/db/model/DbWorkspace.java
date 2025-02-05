@@ -773,16 +773,6 @@ public class DbWorkspace {
     return this;
   }
 
-  @Column(name = "initial_credits_expired")
-  public boolean isInitialCreditsExpired() {
-    return initialCreditsExpired;
-  }
-
-  public DbWorkspace setInitialCreditsExpired(boolean initialCreditsExpired) {
-    this.initialCreditsExpired = initialCreditsExpired;
-    return this;
-  }
-
   @Column(name = "uses_tanagra")
   public boolean isUsesTanagra() {
     return usesTanagra;
