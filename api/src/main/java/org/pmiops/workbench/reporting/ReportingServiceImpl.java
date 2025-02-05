@@ -11,11 +11,14 @@ import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtracto
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.LeonardoAppUsageColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,19 +38,23 @@ public class ReportingServiceImpl implements ReportingService {
   private final ReportingUploadService reportingUploadService;
   private final ReportingVerificationService reportingVerificationService;
 
+  // TODO: enforce that this is the same list as in collectRecordsAndUpload()
   @VisibleForTesting
   static final Set<String> BATCH_UPLOADED_TABLES =
       ImmutableSet.of(
           CohortColumnValueExtractor.TABLE_NAME,
-          DatasetColumnValueExtractor.TABLE_NAME,
           DatasetCohortColumnValueExtractor.TABLE_NAME,
+          DatasetColumnValueExtractor.TABLE_NAME,
           DatasetConceptSetColumnValueExtractor.TABLE_NAME,
           DatasetDomainColumnValueExtractor.TABLE_NAME,
-          WorkspaceColumnValueExtractor.TABLE_NAME,
-          UserColumnValueExtractor.TABLE_NAME,
+          InstitutionColumnValueExtractor.TABLE_NAME,
+          LeonardoAppUsageColumnValueExtractor.TABLE_NAME,
           NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
+          UserColumnValueExtractor.TABLE_NAME,
           UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME,
-          UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME);
+          UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME,
+          WorkspaceColumnValueExtractor.TABLE_NAME,
+          WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME);
 
   public ReportingServiceImpl(
       Clock clock,
