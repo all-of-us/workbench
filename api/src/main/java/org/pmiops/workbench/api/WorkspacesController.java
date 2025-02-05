@@ -861,15 +861,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesV2(
-      String ns, String id, List<String> rtStrings) {
-    return getWorkspaceResourcesImpl(
-        ns, id, rtStrings.stream().map(ResourceType::fromValue).collect(Collectors.toList()));
-  }
-
-  ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesImpl(
-      String workspaceNamespace,
-      String workspaceTerraName,
-      List<ResourceType> resourceTypesToFetch) {
+      String workspaceNamespace, String workspaceTerraName, List<String> resourceTypeStrings) {
     WorkspaceAccessLevel workspaceAccessLevel =
         workspaceAuthService.enforceWorkspaceAccessLevel(
             workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.READER);
@@ -881,10 +873,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
     workspaceResourceResponse.addAll(
         workspaceResourcesService.getWorkspaceResources(
-            dbWorkspace, workspaceAccessLevel, resourceTypesToFetch));
+            dbWorkspace,
+            workspaceAccessLevel,
+            resourceTypeStrings.stream().map(ResourceType::fromValue).toList()));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 
+  @Override
   public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse>
       getWorkspaceCreatorFreeCreditsRemaining(
           String workspaceNamespace, String workspaceTerraName) {

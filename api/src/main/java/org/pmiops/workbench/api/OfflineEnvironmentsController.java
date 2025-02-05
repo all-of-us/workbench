@@ -322,7 +322,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
             .collect(Collectors.toList());
 
     // Lookup these users in the database, so we can get their contact email, etc.
-    List<DbUser> dbUsers = userDao.findUserByUsernameIn(notifyUsernames);
+    List<DbUser> dbUsers = userDao.findUsersByUsernameIn(notifyUsernames);
     if (dbUsers.size() != notifyUsernames.size()) {
       log.warning(
           "failed to lookup one or more users in the database: "

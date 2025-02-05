@@ -347,7 +347,7 @@ public class UserDaoTest {
     taylor.setUsername("captain");
     taylor = userDao.save(taylor);
 
-    assertThat(userDao.findUserByUsernameIn(ImmutableList.of("afunk123", "bobo1")))
+    assertThat(userDao.findUsersByUsernameIn(ImmutableList.of("afunk123", "bobo1")))
         .containsExactly(alice, bob);
   }
 

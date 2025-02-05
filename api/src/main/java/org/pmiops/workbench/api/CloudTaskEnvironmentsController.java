@@ -44,20 +44,19 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
             "Deleting unshared environments for %d workspaces.", workspaceNamespaces.size()));
 
     var stopwatch = stopwatchProvider.get().start();
-    List<DbWorkspace> failedUserRoles =
-        workspaceNamespaces.stream()
-            .map(workspaceService::lookupWorkspaceByNamespace)
+    long failedUserRoles =
+        workspaceService.lookupWorkspacesByNamespace(workspaceNamespaces).stream()
             .filter(
                 ws -> {
                   boolean successfulGetFirecloudUserRoles = deleteUnshared(ws);
                   return !successfulGetFirecloudUserRoles;
                 })
-            .toList();
+            .count();
     var elapsed = stopwatch.stop().elapsed();
     LOGGER.info(
         String.format(
             "Attempted to delete unshared environments for %d workspaces (%d failures) in %s.",
-            workspaceNamespaces.size(), failedUserRoles.size(), formatDurationPretty(elapsed)));
+            workspaceNamespaces.size(), failedUserRoles, formatDurationPretty(elapsed)));
 
     return ResponseEntity.ok().build();
   }

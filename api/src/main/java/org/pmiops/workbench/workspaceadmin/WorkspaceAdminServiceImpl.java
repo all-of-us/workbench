@@ -28,6 +28,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -217,9 +218,14 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       DbWorkspace dbWorkspace, String workspaceNamespace) {
     final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
 
+    var userRoles =
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName);
+    var userMap =
+        userService.getUsersMappedByUsernames(userRoles.stream().map(UserRole::getEmail).toList());
+
     final List<WorkspaceUserAdminView> collaborators =
-        workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName).stream()
-            .map(this::toWorkspaceUserAdminView)
+        userRoles.stream()
+            .map(ur -> toWorkspaceUserAdminView(ur, userMap.get(ur.getEmail())))
             .toList();
 
     final AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts =
@@ -360,9 +366,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, AdminLockingRequest adminLockingRequest) {
     log.info(String.format("called setAdminLockedState on wsns %s", workspaceNamespace));
 
-    DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    dbWorkspace.setAdminLocked(true).setAdminLockedReason(adminLockingRequest.getRequestReason());
-    dbWorkspace = workspaceDao.save(dbWorkspace);
+    DbWorkspace dbWorkspace =
+        workspaceDao.save(
+            getWorkspaceByNamespaceOrThrow(workspaceNamespace)
+                .setAdminLocked(true)
+                .setAdminLockedReason(adminLockingRequest.getRequestReason()));
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
     try {
@@ -379,8 +387,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public void setAdminUnlockedState(String workspaceNamespace) {
     log.info(String.format("called setAdminUnlockedState on wsns %s", workspaceNamespace));
 
-    DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    workspaceDao.save(dbWorkspace.setAdminLocked(false));
+    DbWorkspace dbWorkspace =
+        workspaceDao.save(getWorkspaceByNamespaceOrThrow(workspaceNamespace).setAdminLocked(false));
     adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
   }
 
@@ -523,14 +531,14 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   // empty
   // when the user isn't in the DB. The assumption is that the fields agree between the UserRole and
   // the DbUser, but we don't check that here.
-  private WorkspaceUserAdminView toWorkspaceUserAdminView(UserRole userRole) {
-    return userService
-        .getByUsername(userRole.getEmail())
-        .map(u -> userMapper.toWorkspaceUserAdminView(u, userRole))
-        .orElse(
-            new WorkspaceUserAdminView() // the MapStruct-generated method won't handle a partial
-                // conversion
-                .role(userRole.getRole())
-                .userModel(userMapper.toApiUser(userRole, null)));
+  private WorkspaceUserAdminView toWorkspaceUserAdminView(
+      UserRole userRole, @Nullable DbUser userMaybe) {
+    return userMaybe == null
+        ?
+        // the MapStruct-generated method won't handle a partial conversion
+        new WorkspaceUserAdminView()
+            .role(userRole.getRole())
+            .userModel(userMapper.toApiUser(userRole, null))
+        : userMapper.toWorkspaceUserAdminView(userMaybe, userRole);
   }
 }

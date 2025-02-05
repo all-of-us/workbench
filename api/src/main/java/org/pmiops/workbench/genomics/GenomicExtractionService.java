@@ -186,7 +186,7 @@ public class GenomicExtractionService {
                 throw new ServerErrorException("Could not fetch submission status from Terra", e);
               }
             })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private Long getWorkflowSize(FirecloudSubmission firecloudSubmission) throws ApiException {
@@ -201,23 +201,13 @@ public class GenomicExtractionService {
                 firecloudSubmission.getSubmissionId(),
                 firecloudSubmission.getWorkflows().get(0).getWorkflowId());
 
-    final Optional<FirecloudWorkflowOutputs> workflowOutputs =
-        Optional.ofNullable(outputsResponse.getTasks().get(EXTRACT_WORKFLOW_NAME));
-
-    if (workflowOutputs.isPresent()) {
-      final Optional<Object> vcfSizeMbOutput =
-          Optional.ofNullable(
-              workflowOutputs
-                  .get()
-                  .getOutputs()
-                  .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
-
-      if (vcfSizeMbOutput.isPresent() && vcfSizeMbOutput.get() instanceof Double) {
-        return Math.round((Double) vcfSizeMbOutput.get());
-      }
-    }
-
-    return null;
+    return Optional.ofNullable(outputsResponse.getTasks().get(EXTRACT_WORKFLOW_NAME))
+        .map(FirecloudWorkflowOutputs::getOutputs)
+        .flatMap(m -> Optional.ofNullable(m.get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb")))
+        .filter(Double.class::isInstance)
+        .map(o -> (Double) o)
+        .map(Math::round)
+        .orElse(null);
   }
 
   private void maybeNotifyOnJobFailure(

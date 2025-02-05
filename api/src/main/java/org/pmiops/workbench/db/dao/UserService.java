@@ -2,7 +2,9 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.api.services.oauth2.model.Userinfo;
 import jakarta.annotation.Nonnull;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -148,6 +150,8 @@ public interface UserService {
 
   // same as the above, but throw NotFoundException if not found
   DbUser getByUsernameOrThrow(String username);
+
+  Map<String, DbUser> getUsersMappedByUsernames(Collection<String> usernames);
 
   Optional<DbUser> getByDatabaseId(long databaseId);
 
