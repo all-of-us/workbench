@@ -504,7 +504,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "    WHEN (w.billing_account_name = ? AND\n"
             + "      (w.initial_credits_exhausted = 1 OR\n"
             + "      (uice.expiration_time IS NOT NULL AND\n"
-            + "        uice.expiration_time > CURRENT_TIMESTAMP))) \n"
+            + "        uice.expiration_time <= CURRENT_TIMESTAMP))) \n"
             + "    THEN ? \n"
             + "    ELSE ? \n"
             + "  END AS billing_status,\n"
