@@ -1,7 +1,6 @@
 package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
@@ -10,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.EMPTY_SNAPSHOT;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
@@ -57,7 +57,6 @@ import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumn
 import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
-import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -209,7 +208,7 @@ public class ReportingUploadServiceTest {
 
   @Test
   public void testUploadSnapshot_streaming_empty() {
-    reportingUploadService.uploadSnapshot(ReportingTestUtils.EMPTY_SNAPSHOT);
+    reportingUploadService.uploadSnapshot(EMPTY_SNAPSHOT);
     verify(mockBigQueryService, never()).insertAll(any());
   }
 
@@ -224,10 +223,7 @@ public class ReportingUploadServiceTest {
                 Collections.singletonList(createReportingNewUserSatisfactionSurvey()))
             .institutions(
                 IntStream.range(0, 21)
-                    .mapToObj(
-                        id ->
-                            ReportingTestUtils.createReportingInstitution()
-                                .institutionId((long) id))
+                    .mapToObj(id -> createReportingInstitution().institutionId((long) id))
                     .toList());
 
     reportingUploadService.uploadSnapshot(largeSnapshot);

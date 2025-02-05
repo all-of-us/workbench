@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
