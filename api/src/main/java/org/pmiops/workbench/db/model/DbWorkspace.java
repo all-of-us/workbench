@@ -799,8 +799,9 @@ public class DbWorkspace {
     return aianResearchType;
   }
 
-  public void setAianResearchType(AIANResearchType aianResearchType) {
+  public DbWorkspace setAianResearchType(AIANResearchType aianResearchType) {
     this.aianResearchType = aianResearchType;
+    return this;
   }
 
   @Column(name = "rp_aian_research_details")
@@ -808,8 +809,9 @@ public class DbWorkspace {
     return aianResearchDetails;
   }
 
-  public void setAianResearchDetails(String aianResearchDetails) {
+  public DbWorkspace setAianResearchDetails(String aianResearchDetails) {
     this.aianResearchDetails = aianResearchDetails;
+    return this;
   }
 
   @Transient

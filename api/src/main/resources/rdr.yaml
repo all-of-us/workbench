@@ -148,6 +148,10 @@ components:
           type: string
         accessTier:
           $ref: '#/components/schemas/AccessTier'
+        aianResearchDetails:
+          type: string
+        aianResearchType:
+          $ref: '#/components/schemas/AIANResearchType'
     WorkspaceDemographic:
       type: object
       properties:
@@ -649,6 +653,14 @@ components:
         - 'YES'   # quotes needed so Swagger/YAML doesn't autoconvert this to "true"
         - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
         - PREFER_NOT_TO_ANSWER
+    AIANResearchType:
+      type: string
+      description: Research plan for American Indian or Alaska Native participants
+      enum:
+      - EXCLUSIVE_AI_AN_POPULATION
+      - CASE_CONTROL_AI_AN
+      - FINDINGS_BY_AI_AN
+      - NO_AI_AN_ANALYSIS
   securitySchemes:
     googleoauth:
       type: oauth2
