@@ -9,7 +9,6 @@ import {
   DisksApi,
 } from 'generated/fetch';
 
-import { MILLIS_PER_DAY, nowPlusDays } from '../../utils/dates';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -22,6 +21,7 @@ import {
   disksApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { nowPlusDays } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';

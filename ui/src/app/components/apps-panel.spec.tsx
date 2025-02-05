@@ -9,12 +9,12 @@ import {
   RuntimeApi,
 } from 'generated/fetch';
 
-import { WorkspaceData } from '../utils/workspace-data';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
+import { WorkspaceData } from 'app/utils/workspace-data';
 import { AppsApi as LeoAppsApi } from 'notebooks-generated/fetch';
 
 import defaultServerConfig from 'testing/default-server-config';
