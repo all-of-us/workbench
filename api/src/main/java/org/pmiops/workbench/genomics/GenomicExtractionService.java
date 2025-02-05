@@ -327,13 +327,9 @@ public class GenomicExtractionService {
     // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
     // keeping overhead low and limiting footprint on shared extraction quota.
     int minScatter =
-        Math.min(
-            cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
-            MAX_EXTRACTION_SCATTER);
+        Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
     int desiredScatter =
-        Math.round(
-            personIds.size()
-                * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
+        Math.round(personIds.size() * cohortExtractionConfig.extractionScatterTasksPerSample);
     int scatterCount = Ints.constrainToRange(desiredScatter, minScatter, MAX_EXTRACTION_SCATTER);
 
     Map<String, String> maybeInputs = new HashMap<>();
