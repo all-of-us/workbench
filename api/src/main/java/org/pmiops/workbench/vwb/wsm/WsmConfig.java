@@ -61,6 +61,9 @@ public class WsmConfig {
   private ApiClient newApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.vwb.wsmBaseUrl);
+    apiClient.setReadTimeout(60 * 1000);
+    apiClient.setConnectTimeout(60 * 1000);
+    apiClient.setWriteTimeout(60 * 1000);
     return apiClient;
   }
 
