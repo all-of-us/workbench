@@ -63,18 +63,23 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             Map.entry(
                 DatasetCohortColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
-                    DatasetCohortColumnValueExtractor.TABLE_NAME)),
+                    /* TODO: differs from expected dataset_cohort */
+                    "data_set_cohort")),
             Map.entry(
                 DatasetColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(DatasetColumnValueExtractor.TABLE_NAME)),
+                reportingQueryService.getTableRowCount(
+                    /* TODO: differs from expected dataset */
+                    "data_set")),
             Map.entry(
                 DatasetConceptSetColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
-                    DatasetConceptSetColumnValueExtractor.TABLE_NAME)),
+                    /* TODO: differs from expected dataset_concept_set */
+                    "data_set_concept_set")),
             Map.entry(
                 DatasetDomainColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
-                    DatasetDomainColumnValueExtractor.TABLE_NAME)),
+                    /* TODO: differs from expected dataset_domain_value */
+                    "data_set_values")),
             Map.entry(
                 InstitutionColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(InstitutionColumnValueExtractor.TABLE_NAME)),
