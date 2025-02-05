@@ -35,7 +35,10 @@ export const BasicInformation = ({
             {workspace.initialCredits?.exhausted
               ? 'Exhausted'
               : 'Not Exhausted'}
-            , {workspace.initialCredits?.expired ? 'Expired' : 'Not Expired'}
+            ,{' '}
+            {workspace.initialCredits?.expirationEpochMillis <= Date.now()
+              ? 'Expired'
+              : 'Not Expired'}
           </WorkspaceInfoField>
         )}
         <WorkspaceInfoField labelText='Workspace Name'>
