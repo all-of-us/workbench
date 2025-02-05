@@ -196,18 +196,22 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingDataset> getDatasets() {
+  public List<ReportingDataset> getDatasetBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT \n"
-            + "  creation_time,\n"
-            + "  creator_id,\n"
-            + "  data_set_id,\n"
-            + "  description,\n"
-            + "  includes_all_participants,\n"
-            + "  last_modified_time,\n"
-            + "  name,\n"
-            + "  workspace_id\n"
-            + "FROM data_set",
+        String.format(
+            "SELECT \n"
+                + "  creation_time,\n"
+                + "  creator_id,\n"
+                + "  data_set_id,\n"
+                + "  description,\n"
+                + "  includes_all_participants,\n"
+                + "  last_modified_time,\n"
+                + "  name,\n"
+                + "  workspace_id\n"
+                + "FROM data_set\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingDataset()
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
@@ -221,9 +225,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingDatasetCohort> getDatasetCohorts() {
+  public List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT data_set_id, cohort_id\n" + "FROM data_set_cohort",
+        String.format(
+            "SELECT data_set_id, cohort_id\n"
+                + "FROM data_set_cohort\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingDatasetCohort()
                 .cohortId(rs.getLong("cohort_id"))
@@ -231,9 +240,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingDatasetConceptSet> getDatasetConceptSets() {
+  public List<ReportingDatasetConceptSet> getDatasetConceptSetBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT data_set_id, concept_set_id\n" + "FROM data_set_concept_set",
+        String.format(
+            "SELECT data_set_id, concept_set_id\n"
+                + "FROM data_set_concept_set\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingDatasetConceptSet()
                 .datasetId(rs.getLong("data_set_id"))
@@ -241,9 +255,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues() {
+  public List<ReportingDatasetDomainIdValue> getDatasetDomainIdValueBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT data_set_id, domain_id, value\n" + "FROM data_set_values",
+        String.format(
+            "SELECT data_set_id, domain_id, value\n"
+                + "FROM data_set_values\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingDatasetDomainIdValue()
                 .datasetId(rs.getLong("data_set_id"))

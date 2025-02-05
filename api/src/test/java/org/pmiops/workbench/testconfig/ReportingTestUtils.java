@@ -25,7 +25,6 @@ import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.OrganizationType;
-import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -84,12 +83,10 @@ public class ReportingTestUtils {
   public static final Long COHORT__COHORT_ID = 0L;
   public static final Timestamp COHORT__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-06T00:00:00.00Z"));
-  public static final Long COHORT__CREATOR_ID = 2L;
   public static final String COHORT__DESCRIPTION = "foo_4";
   public static final Timestamp COHORT__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-10T00:00:00.00Z"));
   public static final String COHORT__NAME = "foo_6";
-  public static final Long COHORT__WORKSPACE_ID = 7L;
 
   public static final String INSTITUTION__DISPLAY_NAME = "foo_0";
   public static final Long INSTITUTION__INSTITUTION_ID = 2L;
@@ -213,15 +210,11 @@ public class ReportingTestUtils {
         .workspaceId(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
   }
 
-  public static ReportingCohort createReportingCohort() {
-    return new ReportingCohort()
-        .cohortId(COHORT__COHORT_ID)
-        .creationTime(offsetDateTimeUtc(COHORT__CREATION_TIME))
-        .creatorId(COHORT__CREATOR_ID)
-        .description(COHORT__DESCRIPTION)
-        .lastModifiedTime(offsetDateTimeUtc(COHORT__LAST_MODIFIED_TIME))
-        .name(COHORT__NAME)
-        .workspaceId(COHORT__WORKSPACE_ID);
+  public static ReportingWorkspaceFreeTierUsage createReportingWorkspaceFreeTierUsage() {
+    return new ReportingWorkspaceFreeTierUsage()
+        .cost(WORKSPACE_FREE_TIER_USAGE__COST)
+        .userId(WORKSPACE_FREE_TIER_USAGE__USER_ID)
+        .workspaceId(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
   }
 
   public static DbCohort createDbCohort(DbUser creator, DbWorkspace dbWorkspace) {
@@ -246,12 +239,8 @@ public class ReportingTestUtils {
   }
 
   public static int countPopulatedTables(ReportingSnapshot reportingSnapshot) {
-    return oneForNonEmpty(reportingSnapshot.getCohorts())
-        + oneForNonEmpty(reportingSnapshot.getDatasets())
-        + oneForNonEmpty(reportingSnapshot.getDatasetCohorts())
-        + oneForNonEmpty(reportingSnapshot.getDatasetConceptSets())
-        + oneForNonEmpty(reportingSnapshot.getDatasetDomainIdValues())
-        + oneForNonEmpty(reportingSnapshot.getInstitutions());
+    return oneForNonEmpty(reportingSnapshot.getInstitutions())
+        + oneForNonEmpty(reportingSnapshot.getWorkspaceFreeTierUsage());
   }
 
   public static ReportingInstitution createReportingInstitution() {
@@ -329,11 +318,6 @@ public class ReportingTestUtils {
 
   public static ReportingSnapshot createEmptySnapshot() {
     return new ReportingSnapshot()
-        .cohorts(new ArrayList<>())
-        .datasets(new ArrayList<>())
-        .datasetConceptSets(new ArrayList<>())
-        .datasetDomainIdValues(new ArrayList<>())
-        .datasetCohorts(new ArrayList<>())
         .institutions(new ArrayList<>())
         .workspaceFreeTierUsage(new ArrayList<>())
         .newUserSatisfactionSurveys(new ArrayList<>())

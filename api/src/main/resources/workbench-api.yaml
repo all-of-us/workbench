@@ -12176,26 +12176,6 @@ components:
           type: integer
           description: Time at which snapshot is retrieved. Epoch millis.
           format: int64
-        cohorts:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingCohort'
-        datasetCohorts:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingDatasetCohort'
-        datasetConceptSets:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingDatasetConceptSet'
-        datasetDomainIdValues:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingDatasetDomainIdValue'
-        datasets:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingDataset'
         institutions:
           type: array
           items:

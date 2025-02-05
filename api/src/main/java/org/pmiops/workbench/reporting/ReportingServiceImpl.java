@@ -7,6 +7,10 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
@@ -20,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * possibly other sources, then calls the uploadSnapshot() method on the configured
  * ReportingUploadService to upload to various tables in the BigQuery dataset.
  *
- * <p>For tables that are extremely large, we obtain them on smaller batches. The current tables
- * are: Workspace. TODO(RW-6145): Support more tables(e.g. User) as we need.
+ * <p>For large tables (the majority; TODO: all?) we obtain them in batches.
  */
 @Service
 public class ReportingServiceImpl implements ReportingService {
@@ -36,6 +39,10 @@ public class ReportingServiceImpl implements ReportingService {
   static final Set<String> BATCH_UPLOADED_TABLES =
       ImmutableSet.of(
           CohortColumnValueExtractor.TABLE_NAME,
+          DatasetColumnValueExtractor.TABLE_NAME,
+          DatasetCohortColumnValueExtractor.TABLE_NAME,
+          DatasetConceptSetColumnValueExtractor.TABLE_NAME,
+          DatasetDomainColumnValueExtractor.TABLE_NAME,
           WorkspaceColumnValueExtractor.TABLE_NAME,
           UserColumnValueExtractor.TABLE_NAME,
           NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
@@ -72,6 +79,18 @@ public class ReportingServiceImpl implements ReportingService {
     reportingQueryService
         .getBatchedCohortStream()
         .forEach(b -> reportingUploadService.uploadCohortBatch(b, captureTimestamp));
+    reportingQueryService
+        .getBatchedDatasetStream()
+        .forEach(b -> reportingUploadService.uploadDatasetBatch(b, captureTimestamp));
+    reportingQueryService
+        .getBatchedDatasetCohortStream()
+        .forEach(b -> reportingUploadService.uploadDatasetCohortBatch(b, captureTimestamp));
+    reportingQueryService
+        .getBatchedDatasetConceptSetStream()
+        .forEach(b -> reportingUploadService.uploadDatasetConceptSetBatch(b, captureTimestamp));
+    reportingQueryService
+        .getBatchedDatasetDomainIdValueStream()
+        .forEach(b -> reportingUploadService.uploadDatasetDomainIdValueBatch(b, captureTimestamp));
     reportingQueryService
         .getBatchedLeonardoAppUsageStream()
         .forEach(b -> reportingUploadService.uploadLeonardoAppUsageBatch(b, captureTimestamp));

@@ -36,10 +36,6 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
-            .datasets(reportingQueryService.getDatasets())
-            .datasetCohorts(reportingQueryService.getDatasetCohorts())
-            .datasetConceptSets(reportingQueryService.getDatasetConceptSets())
-            .datasetDomainIdValues(reportingQueryService.getDatasetDomainIdValues())
             .institutions(reportingQueryService.getInstitutions())
             .workspaceFreeTierUsage(reportingQueryService.getWorkspaceFreeTierUsage());
 

@@ -2,6 +2,10 @@ package org.pmiops.workbench.reporting;
 
 import java.util.List;
 import org.pmiops.workbench.model.ReportingCohort;
+import org.pmiops.workbench.model.ReportingDataset;
+import org.pmiops.workbench.model.ReportingDatasetCohort;
+import org.pmiops.workbench.model.ReportingDatasetConceptSet;
+import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingSnapshot;
@@ -23,6 +27,15 @@ public interface ReportingUploadService {
   void uploadUserBatch(List<ReportingUser> batch, long captureTimestamp);
 
   void uploadCohortBatch(List<ReportingCohort> batch, long captureTimestamp);
+
+  void uploadDatasetBatch(List<ReportingDataset> batch, long captureTimestamp);
+
+  void uploadDatasetCohortBatch(List<ReportingDatasetCohort> batch, long captureTimestamp);
+
+  void uploadDatasetConceptSetBatch(List<ReportingDatasetConceptSet> batch, long captureTimestamp);
+
+  void uploadDatasetDomainIdValueBatch(
+      List<ReportingDatasetDomainIdValue> batch, long captureTimestamp);
 
   void uploadLeonardoAppUsageBatch(List<ReportingLeonardoAppUsage> batch, long captureTimestamp);
 

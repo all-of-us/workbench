@@ -59,7 +59,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final InsertAllRequestPayloadTransformer<ReportingDatasetConceptSet>
       datasetConceptSetRequestBuilder = DatasetConceptSetColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingDatasetDomainIdValue>
-      datasetDomainIIdValueRequestBuilder = DatasetDomainColumnValueExtractor::values;
+      datasetDomainIdValueRequestBuilder = DatasetDomainColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingInstitution>
       institutionRequestBuilder = InstitutionColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingUser> userRequestBuilder =
@@ -157,6 +157,56 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     uploadBatchTable(
         cohortRequestBuilder.build(
             getTableId(CohortColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  /** Batch uploads {@link ReportingDataset}. */
+  @Override
+  public void uploadDatasetBatch(List<ReportingDataset> batch, long captureTimestamp) {
+    uploadBatchTable(
+        datasetRequestBuilder.build(
+            getTableId(DatasetColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  /** Batch uploads {@link ReportingDatasetCohort}. */
+  @Override
+  public void uploadDatasetCohortBatch(List<ReportingDatasetCohort> batch, long captureTimestamp) {
+    uploadBatchTable(
+        datasetCohortRequestBuilder.build(
+            getTableId(DatasetCohortColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  /** Batch uploads {@link ReportingDatasetConceptSet}. */
+  @Override
+  public void uploadDatasetConceptSetBatch(
+      List<ReportingDatasetConceptSet> batch, long captureTimestamp) {
+    uploadBatchTable(
+        datasetConceptSetRequestBuilder.build(
+            getTableId(DatasetConceptSetColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  /** Batch uploads {@link ReportingDatasetDomainIdValue}. */
+  @Override
+  public void uploadDatasetDomainIdValueBatch(
+      List<ReportingDatasetDomainIdValue> batch, long captureTimestamp) {
+    uploadBatchTable(
+        datasetDomainIdValueRequestBuilder.build(
+            getTableId(DatasetDomainColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
     // This is a test to prove if these batched list are being cleaned up by garbage collection.
@@ -282,30 +332,6 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     final int batchSize = configProvider.get().reporting.maxRowsPerInsert;
     final ImmutableList.Builder<InsertAllRequest> resultBuilder = ImmutableList.builder();
 
-    resultBuilder.addAll(
-        datasetRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getDatasets(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        datasetCohortRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetCohortColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getDatasetCohorts(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        datasetConceptSetRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetConceptSetColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getDatasetConceptSets(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        datasetDomainIIdValueRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetDomainColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getDatasetDomainIdValues(),
-            fixedValues,
-            batchSize));
     resultBuilder.addAll(
         institutionRequestBuilder.buildBatchedRequests(
             getTableId(InstitutionColumnValueExtractor.TABLE_NAME),

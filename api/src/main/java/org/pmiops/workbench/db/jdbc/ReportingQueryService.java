@@ -24,13 +24,29 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 public interface ReportingQueryService {
   long getQueryBatchSize();
 
-  List<ReportingDataset> getDatasets();
+  List<ReportingDataset> getDatasetBatch(long limit, long offset);
 
-  List<ReportingDatasetCohort> getDatasetCohorts();
+  default Stream<List<ReportingDataset>> getBatchedDatasetStream() {
+    return getBatchedStream(this::getDatasetBatch);
+  }
 
-  List<ReportingDatasetConceptSet> getDatasetConceptSets();
+  List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset);
 
-  List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues();
+  default Stream<List<ReportingDatasetCohort>> getBatchedDatasetCohortStream() {
+    return getBatchedStream(this::getDatasetCohortBatch);
+  }
+
+  List<ReportingDatasetConceptSet> getDatasetConceptSetBatch(long limit, long offset);
+
+  default Stream<List<ReportingDatasetConceptSet>> getBatchedDatasetConceptSetStream() {
+    return getBatchedStream(this::getDatasetConceptSetBatch);
+  }
+
+  List<ReportingDatasetDomainIdValue> getDatasetDomainIdValueBatch(long limit, long offset);
+
+  default Stream<List<ReportingDatasetDomainIdValue>> getBatchedDatasetDomainIdValueStream() {
+    return getBatchedStream(this::getDatasetDomainIdValueBatch);
+  }
 
   List<ReportingInstitution> getInstitutions();
 
