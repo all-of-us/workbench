@@ -168,12 +168,12 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName =
         "operationalTerraWorkspaceName";
     workbenchConfig.wgsCohortExtraction.extractionDestinationDataset = "extract-proj.extract-ds";
+    workbenchConfig.wgsCohortExtraction.minExtractionScatterTasks = 100;
+    workbenchConfig.wgsCohortExtraction.extractionScatterTasksPerSample = 4;
     workbenchConfig.wgsCohortExtraction.legacyVersions.methodName = "methodName";
     workbenchConfig.wgsCohortExtraction.legacyVersions.methodNamespace = "methodNamespace";
     workbenchConfig.wgsCohortExtraction.legacyVersions.methodRepoVersion = 10;
     workbenchConfig.wgsCohortExtraction.legacyVersions.methodLogicalVersion = 3;
-    workbenchConfig.wgsCohortExtraction.legacyVersions.minExtractionScatterTasks = 100;
-    workbenchConfig.wgsCohortExtraction.legacyVersions.extractionScatterTasksPerSample = 4;
     workbenchConfig.wgsCohortExtraction.cdrv8plus.methodName = "v8MethodName";
     workbenchConfig.wgsCohortExtraction.cdrv8plus.methodNamespace = "v8MethodNamespace";
     workbenchConfig.wgsCohortExtraction.cdrv8plus.methodRepoVersion = 1;
@@ -537,9 +537,9 @@ public class GenomicExtractionServiceTest {
         cdrVersionDao.save(
             new DbCdrVersion()
                 .setCdrVersionId(8)
+                .setPublicReleaseNumber(8)
                 .setBigqueryProject("bigquery_project")
-                .setWgsBigqueryDataset("wgs_dataset")
-                .setNeedsV8GenomicExtractionWorkflow(true));
+                .setWgsBigqueryDataset("wgs_dataset"));
     targetWorkspace = workspaceDao.save(targetWorkspace.setCdrVersion(cdrV8));
 
     TanagraGenomicDataRequest tanagraRequest = null;

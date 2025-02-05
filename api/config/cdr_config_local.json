@@ -180,7 +180,6 @@
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
       "tanagraEnabled": true,
-      "needsV8GenomicExtractionWorkflow": true,
       "vwbTemplateId": "03e0a1e6-ddbc-499f-bdaa-6c0c91dc295a",
       "publicReleaseNumber": 8
     }

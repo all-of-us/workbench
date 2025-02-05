@@ -178,6 +178,9 @@ public class WorkbenchConfig {
     public String operationalTerraWorkspaceBucket;
     public String extractionDestinationDataset;
     public boolean enableJiraTicketingOnFailure;
+    // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
+    public int minExtractionScatterTasks;
+    public float extractionScatterTasksPerSample;
 
     public abstract static class VersionedConfig {
       // 'method' values refer to both the stored Method and the generated Method Configuration
@@ -196,16 +199,10 @@ public class WorkbenchConfig {
     // for extraction workflows compatible with CDR v7 and earlier
     public static class LegacyWorkflowConfig extends VersionedConfig {
       public String gatkJarUri;
-      // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
-      // TODO: move these back to the base VersionedConfig
-      public int minExtractionScatterTasks;
-      public float extractionScatterTasksPerSample;
     }
 
     // for extraction workflows compatible with CDR v8 and later
-    public static class CDRv8PlusConfig extends VersionedConfig {
-      // TODO: do we need any specific config for v8?
-    }
+    public static class CDRv8PlusConfig extends VersionedConfig {}
 
     public LegacyWorkflowConfig legacyVersions;
     public CDRv8PlusConfig cdrv8plus;

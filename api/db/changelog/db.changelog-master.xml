@@ -260,7 +260,8 @@
   <include file="changelog/db.changelog-250-add-aian-research-columns.xml"/>
   <include file="changelog/db.changelog-251-remove-billing-status.xml"/>
   <include file="changelog/db.changelog-252-add-vwb-tier-group-access-tier-table.xml"/>
-  <include file="changelog/db.changelog-253-remove-initial-credits-expired.xml"/>
+  <include file="changelog/db.changelog-253-rm-needs-v8-genomic-extraction-workflow.xml"/>
+  <include file="changelog/db.changelog-254-remove-initial-credits-expired.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
