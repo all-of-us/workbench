@@ -106,6 +106,13 @@ public class ReportingServiceImpl implements ReportingService {
         .getBatchedUserPartnerDiscoverySourceStream()
         .forEach(
             b -> reportingUploadService.uploadUserPartnerDiscoverySourceBatch(b, captureTimestamp));
+    reportingQueryService
+        .getBatchedWorkspaceFreeTierUsageStream()
+        .forEach(
+            b -> reportingUploadService.uploadWorkspaceFreeTierUsageBatch(b, captureTimestamp));
+    reportingQueryService
+        .getBatchedInstitutionStream()
+        .forEach(b -> reportingUploadService.uploadInstitutionBatch(b, captureTimestamp));
 
     // Third: Verify the count.
     boolean batchUploadSuccess =

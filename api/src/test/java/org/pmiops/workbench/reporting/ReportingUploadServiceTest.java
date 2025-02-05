@@ -6,25 +6,17 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.EMPTY_SNAPSHOT;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingNewUserSatisfactionSurvey;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingWorkspaceFreeTierUsage;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
-import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -32,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -99,21 +90,9 @@ public class ReportingUploadServiceTest {
 
   @BeforeEach
   public void setup() {
-    reportingSnapshot =
-        createEmptySnapshot()
-            .captureTimestamp(NOW.toEpochMilli())
-            .workspaceFreeTierUsage(
-                Collections.singletonList(createReportingWorkspaceFreeTierUsage()))
-            .institutions(Collections.singletonList(createReportingInstitution()));
+    reportingSnapshot = createEmptySnapshot().captureTimestamp(NOW.toEpochMilli());
 
-    snapshotWithNulls =
-        createEmptySnapshot()
-            .captureTimestamp(NOW.toEpochMilli())
-            .workspaceFreeTierUsage(
-                Collections.singletonList(
-                    createReportingWorkspaceFreeTierUsage().workspaceId(null)))
-            .institutions(
-                Collections.singletonList(createReportingInstitution().displayName(null)));
+    snapshotWithNulls = createEmptySnapshot().captureTimestamp(NOW.toEpochMilli());
 
     reportingWorkspaces =
         List.of(
@@ -149,85 +128,9 @@ public class ReportingUploadServiceTest {
   }
 
   @Test
-  public void testUploadSnapshot() {
-    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
-    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
-
-    doReturn(mockInsertAllResponse)
-        .when(mockBigQueryService)
-        .insertAll(any(InsertAllRequest.class));
-    reportingUploadService.uploadSnapshot(reportingSnapshot);
-
-    // One for institution, one for dataset.
-    verify(mockBigQueryService, times(2)).insertAll(insertAllRequestCaptor.capture());
-    final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
-
-    // Institution and dataset table
-    assertThat(requests.size()).isEqualTo(countPopulatedTables(reportingSnapshot));
-
-    final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
-        Multimaps.index(requests, r -> r.getTable().getTable());
-
-    final Optional<InsertAllRequest> institutionRequest =
-        tableIdToInsertAllRequest.get("institution").stream().findFirst();
-    assertThat(institutionRequest).isPresent();
-    assertThat(institutionRequest.get().getRows()).hasSize(1);
-    final RowToInsert firstInstitutionRow = institutionRequest.get().getRows().get(0);
-    assertThat(firstInstitutionRow.getContent().get("short_name"))
-        .isEqualTo(INSTITUTION__SHORT_NAME);
-  }
-
-  @Test
-  public void testUploadSnapshot_streaming_with_nulls() {
-    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
-    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
-
-    doReturn(mockInsertAllResponse)
-        .when(mockBigQueryService)
-        .insertAll(any(InsertAllRequest.class));
-    reportingUploadService.uploadSnapshot(snapshotWithNulls);
-
-    // one for institution, one for dataset.
-    verify(mockBigQueryService, times(2)).insertAll(insertAllRequestCaptor.capture());
-    final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
-
-    // one for institution, one for dataset.
-    assertThat(requests.size()).isEqualTo(countPopulatedTables(snapshotWithNulls));
-
-    final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
-        Multimaps.index(requests, r -> r.getTable().getTable());
-
-    final Optional<InsertAllRequest> institutionRequest =
-        tableIdToInsertAllRequest.get("institution").stream().findFirst();
-    assertThat(institutionRequest).isPresent();
-    assertThat(institutionRequest.get().getRows()).hasSize(1);
-    final RowToInsert firstInstitutionRow = institutionRequest.get().getRows().get(0);
-    assertThat(firstInstitutionRow.getContent().get("short_name"))
-        .isEqualTo(INSTITUTION__SHORT_NAME);
-  }
-
-  @Test
   public void testUploadSnapshot_streaming_empty() {
     reportingUploadService.uploadSnapshot(EMPTY_SNAPSHOT);
     verify(mockBigQueryService, never()).insertAll(any());
-  }
-
-  @Test
-  public void testUploadWithManyBatches() {
-    final ReportingSnapshot largeSnapshot =
-        createEmptySnapshot()
-            .captureTimestamp(NOW.toEpochMilli())
-            .workspaceFreeTierUsage(
-                Collections.singletonList(createReportingWorkspaceFreeTierUsage()))
-            .newUserSatisfactionSurveys(
-                Collections.singletonList(createReportingNewUserSatisfactionSurvey()))
-            .institutions(
-                IntStream.range(0, 21)
-                    .mapToObj(id -> createReportingInstitution().institutionId((long) id))
-                    .toList());
-
-    reportingUploadService.uploadSnapshot(largeSnapshot);
-    verify(mockBigQueryService, times(12)).insertAll(insertAllRequestCaptor.capture());
   }
 
   @Test

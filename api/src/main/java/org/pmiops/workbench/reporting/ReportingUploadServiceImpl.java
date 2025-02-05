@@ -8,7 +8,6 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.TableId;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -115,16 +114,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   @Deprecated
   @Override
   public boolean uploadSnapshot(ReportingSnapshot reportingSnapshot) {
-    final Stopwatch stopwatch = stopwatchProvider.get();
-    final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
-        ImmutableMultimap.builder();
-    final List<InsertAllRequest> insertAllRequests = getInsertAllRequests(reportingSnapshot);
-    final StringBuilder performanceStringBuilder = new StringBuilder();
-    for (InsertAllRequest request : insertAllRequests) {
-      issueInsertAllRequest(stopwatch, responseMapBuilder, performanceStringBuilder, request);
-    }
-    log.info(performanceStringBuilder.toString());
-    return checkResponseAndRowCounts(reportingSnapshot, responseMapBuilder.build());
+    return checkResponseAndRowCounts(reportingSnapshot, ImmutableMultimap.of());
   }
 
   /** Batch uploads {@link ReportingWorkspace}. */
@@ -263,6 +253,29 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     batch = null;
   }
 
+  @Override
+  public void uploadWorkspaceFreeTierUsageBatch(
+      List<ReportingWorkspaceFreeTierUsage> batch, long captureTimestamp) {
+    uploadBatchTable(
+        workspaceFreeTierUsageRequestBuilder.build(
+            getTableId(WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  @Override
+  public void uploadInstitutionBatch(List<ReportingInstitution> batch, long captureTimestamp) {
+    uploadBatchTable(
+        institutionRequestBuilder.build(
+            getTableId(InstitutionColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
   /** Batch uploads a reporting table. */
   private void uploadBatchTable(InsertAllRequest insertAllRequest) {
     final Stopwatch stopwatch = stopwatchProvider.get();
@@ -325,29 +338,6 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     final String dataset = configProvider.get().reporting.dataset;
 
     return TableId.of(projectId, dataset, tableName);
-  }
-
-  private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {
-    final Map<String, Object> fixedValues = getFixedValues(reportingSnapshot.getCaptureTimestamp());
-    final int batchSize = configProvider.get().reporting.maxRowsPerInsert;
-    final ImmutableList.Builder<InsertAllRequest> resultBuilder = ImmutableList.builder();
-
-    resultBuilder.addAll(
-        institutionRequestBuilder.buildBatchedRequests(
-            getTableId(InstitutionColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getInstitutions(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        workspaceFreeTierUsageRequestBuilder.buildBatchedRequests(
-            getTableId(WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getWorkspaceFreeTierUsage(),
-            fixedValues,
-            batchSize));
-
-    return resultBuilder.build().stream()
-        .filter(r -> !r.getRows().isEmpty())
-        .collect(ImmutableList.toImmutableList());
   }
 
   private Map<String, Object> getFixedValues(long snapshotTimestamp) {

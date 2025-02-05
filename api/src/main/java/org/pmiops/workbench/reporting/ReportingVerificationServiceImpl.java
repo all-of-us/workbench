@@ -18,14 +18,12 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUploadDetails;
 import org.pmiops.workbench.model.ReportingUploadResult;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.LeonardoAppUsageColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
@@ -88,7 +86,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
         List.of(
             Map.entry(
                 WorkspaceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getWorkspaceCount()),
+                reportingQueryService.getActiveWorkspaceCount()),
             Map.entry(
                 UserColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(UserColumnValueExtractor.TABLE_NAME)),
@@ -136,17 +134,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
         new ReportingUploadDetails()
             .snapshotTimestamp(snapshot.getCaptureTimestamp())
             .projectId(getProjectId())
-            .dataset(getDataset())
-            .uploads(
-                List.of(
-                    getUploadResult(
-                        snapshot,
-                        WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getWorkspaceFreeTierUsage),
-                    getUploadResult(
-                        snapshot,
-                        InstitutionColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getInstitutions)));
+            .bqDataset(getBigqueryDataset());
     verifyStopwatch.stop();
     logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
     return result;
@@ -168,7 +156,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     return destinationCount.equals(sourceCount);
   }
 
-  public String getDataset() {
+  public String getBigqueryDataset() {
     return workbenchConfigProvider.get().reporting.dataset;
   }
 
@@ -215,6 +203,6 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             + "  `%s.%s.%s` \n"
             + "WHERE\n"
             + "  snapshot_timestamp =  @snapshot_timestamp;";
-    return String.format(queryTemplate, getProjectId(), getDataset(), tableName);
+    return String.format(queryTemplate, getProjectId(), getBigqueryDataset(), tableName);
   }
 }

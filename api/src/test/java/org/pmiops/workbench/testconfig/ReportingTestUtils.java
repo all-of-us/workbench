@@ -8,8 +8,6 @@ import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -234,15 +232,6 @@ public class ReportingTestUtils {
   public static ReportingSnapshot EMPTY_SNAPSHOT =
       createEmptySnapshot().captureTimestamp(SNAPSHOT_INSTANT.toEpochMilli());
 
-  private static <T> int oneForNonEmpty(Collection<T> collection) {
-    return Math.min(collection.size(), 1);
-  }
-
-  public static int countPopulatedTables(ReportingSnapshot reportingSnapshot) {
-    return oneForNonEmpty(reportingSnapshot.getInstitutions())
-        + oneForNonEmpty(reportingSnapshot.getWorkspaceFreeTierUsage());
-  }
-
   public static ReportingInstitution createReportingInstitution() {
     return new ReportingInstitution()
         .displayName(INSTITUTION__DISPLAY_NAME)
@@ -317,10 +306,6 @@ public class ReportingTestUtils {
   }
 
   public static ReportingSnapshot createEmptySnapshot() {
-    return new ReportingSnapshot()
-        .institutions(new ArrayList<>())
-        .workspaceFreeTierUsage(new ArrayList<>())
-        .newUserSatisfactionSurveys(new ArrayList<>())
-        .leonardoAppUsage(new ArrayList<>());
+    return new ReportingSnapshot();
   }
 }

@@ -48,9 +48,17 @@ public interface ReportingQueryService {
     return getBatchedStream(this::getDatasetDomainIdValueBatch);
   }
 
-  List<ReportingInstitution> getInstitutions();
+  List<ReportingInstitution> getInstitutionBatch(long limit, long offset);
 
-  List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsage();
+  default Stream<List<ReportingInstitution>> getBatchedInstitutionStream() {
+    return getBatchedStream(this::getInstitutionBatch);
+  }
+
+  List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsageBatch(long limit, long offset);
+
+  default Stream<List<ReportingWorkspaceFreeTierUsage>> getBatchedWorkspaceFreeTierUsageStream() {
+    return getBatchedStream(this::getWorkspaceFreeTierUsageBatch);
+  }
 
   List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset);
 
@@ -92,6 +100,12 @@ public interface ReportingQueryService {
   default Stream<List<ReportingUserPartnerDiscoverySource>>
       getBatchedUserPartnerDiscoverySourceStream() {
     return getBatchedStream(this::getUserPartnerDiscoverySourceBatch);
+  }
+
+  List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset);
+
+  default Stream<List<ReportingLeonardoAppUsage>> getBatchedLeonardoAppUsageStream() {
+    return getBatchedStream(this::getLeonardoAppUsageBatch);
   }
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
@@ -164,11 +178,5 @@ public interface ReportingQueryService {
 
   int getAppUsageRowCount(String tableName);
 
-  int getWorkspaceCount();
-
-  List<ReportingLeonardoAppUsage> getLeonardoAppUsage(long limit, long offset);
-
-  default Stream<List<ReportingLeonardoAppUsage>> getBatchedLeonardoAppUsageStream() {
-    return getBatchedStream(this::getLeonardoAppUsage);
-  }
+  int getActiveWorkspaceCount();
 }

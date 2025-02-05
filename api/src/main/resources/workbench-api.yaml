@@ -12176,30 +12176,6 @@ components:
           type: integer
           description: Time at which snapshot is retrieved. Epoch millis.
           format: int64
-        institutions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingInstitution'
-        newUserSatisfactionSurveys:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingNewUserSatisfactionSurvey'
-        userGeneralDiscoverySource:
-          type: array
-          items:
-            "$ref": '#/components/schemas/ReportingUserGeneralDiscoverySource'
-        userPartnerDiscoverySource:
-          type: array
-          items:
-            "$ref": '#/components/schemas/ReportingUserPartnerDiscoverySource'
-        workspaceFreeTierUsage:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingWorkspaceFreeTierUsage'
-        leonardoAppUsage:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingLeonardoAppUsage'
       description: |
         Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
     ReportingUploadDetails:
@@ -12211,10 +12187,10 @@ components:
           format: int64
         projectId:
           type: string
-          description: Project containing the BigQuery dataset
-        dataset:
+          description: Google Project containing the BigQuery dataset
+        bqDataset:
           type: string
-          description: Reporting Dataset
+          description: The name of the BigQuery dataset to use for reporting
         uploads:
           type: array
           items:

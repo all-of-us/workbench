@@ -416,7 +416,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testWorkspaceCount() {
     createWorkspaces(5);
-    assertThat(reportingQueryService.getWorkspaceCount()).isEqualTo(5);
+    assertThat(reportingQueryService.getActiveWorkspaceCount()).isEqualTo(5);
   }
 
   @Test
@@ -425,7 +425,7 @@ public class ReportingQueryServiceTest {
     workspaceDao.save(
         workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
     entityManager.flush();
-    assertThat(reportingQueryService.getWorkspaceCount()).isEqualTo(4);
+    assertThat(reportingQueryService.getActiveWorkspaceCount()).isEqualTo(4);
   }
 
   @Test
@@ -516,7 +516,7 @@ public class ReportingQueryServiceTest {
   public void testQueryInstitution() {
     // A simple test to make sure the query works.
     createInstitutionTierRequirement(dbInstitution);
-    final List<ReportingInstitution> institutions = reportingQueryService.getInstitutions();
+    final List<ReportingInstitution> institutions = reportingQueryService.getInstitutionBatch(1, 0);
     assertThat(institutions.size()).isEqualTo(1);
     assertThat(institutions.get(0).getRegisteredTierRequirement())
         .isEqualTo(InstitutionMembershipRequirement.ADDRESSES);
@@ -763,7 +763,7 @@ public class ReportingQueryServiceTest {
 
     TableResult tableResult = BigQueryUtils.newTableResult(s, tableRows);
     when(bigQueryService.executeQuery(any(QueryJobConfiguration.class))).thenReturn(tableResult);
-    assertThat(reportingQueryService.getLeonardoAppUsage(10, 0))
+    assertThat(reportingQueryService.getLeonardoAppUsageBatch(10, 0))
         .containsExactly(
             new ReportingLeonardoAppUsage()
                 .appId(123l)

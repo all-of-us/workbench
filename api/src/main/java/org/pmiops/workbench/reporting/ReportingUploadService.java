@@ -6,6 +6,7 @@ import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingSnapshot;
@@ -13,6 +14,7 @@ import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 /**
  * Service to upload a pre-compiled ReportingSnapshot to the appropriate Reporting dataset and
@@ -47,6 +49,11 @@ public interface ReportingUploadService {
 
   void uploadUserPartnerDiscoverySourceBatch(
       List<ReportingUserPartnerDiscoverySource> batch, long captureTimestamp);
+
+  void uploadWorkspaceFreeTierUsageBatch(
+      List<ReportingWorkspaceFreeTierUsage> batch, long captureTimestamp);
+
+  void uploadInstitutionBatch(List<ReportingInstitution> batch, long captureTimestamp);
 
   /** Uploads a record into VerifiedSnapshot table if upload result is verified. */
   void uploadVerifiedSnapshot(long captureTimestamp);

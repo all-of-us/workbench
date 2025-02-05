@@ -4,7 +4,6 @@ import com.google.common.base.Stopwatch;
 import jakarta.inject.Provider;
 import java.time.Clock;
 import java.util.logging.Logger;
-import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
@@ -15,15 +14,10 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   private static final Logger log = Logger.getLogger(ReportingSnapshotServiceImpl.class.getName());
 
   private final Clock clock;
-  private final ReportingQueryService reportingQueryService;
   private final Provider<Stopwatch> stopwatchProvider;
 
-  public ReportingSnapshotServiceImpl(
-      Clock clock,
-      ReportingQueryService reportingQueryService,
-      Provider<Stopwatch> stopwatchProvider) {
+  public ReportingSnapshotServiceImpl(Clock clock, Provider<Stopwatch> stopwatchProvider) {
     this.clock = clock;
-    this.reportingQueryService = reportingQueryService;
     this.stopwatchProvider = stopwatchProvider;
   }
 
@@ -33,12 +27,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   @Override
   public ReportingSnapshot takeSnapshot() {
     final Stopwatch stopwatch = stopwatchProvider.get().reset().start();
-    final ReportingSnapshot result =
-        new ReportingSnapshot()
-            .captureTimestamp(clock.millis())
-            .institutions(reportingQueryService.getInstitutions())
-            .workspaceFreeTierUsage(reportingQueryService.getWorkspaceFreeTierUsage());
-
+    final ReportingSnapshot result = new ReportingSnapshot().captureTimestamp(clock.millis());
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));
     return result;
