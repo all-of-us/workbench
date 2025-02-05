@@ -259,7 +259,6 @@
       "wgsClinvarMultiHailPath": "wgs/short_read/snpindel/clinvar/multiMT/hail.mt",
       "wgsClinvarSplitHailPath": "wgs/short_read/snpindel/clinvar/splitMT/hail.mt",
       "wgsClinvarVcfPath": "wgs/short_read/snpindel/clinvar/vcf",
-      "needsV8GenomicExtractionWorkflow": true,
       "publicReleaseNumber": 8
     }
   ]
