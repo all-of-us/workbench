@@ -12169,46 +12169,6 @@ components:
           type: string
         newName:
           type: string
-    ReportingSnapshot:
-      type: object
-      properties:
-        captureTimestamp:
-          type: integer
-          description: Time at which snapshot is retrieved. Epoch millis.
-          format: int64
-      description: |
-        Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
-    ReportingUploadDetails:
-      type: object
-      properties:
-        snapshotTimestamp:
-          type: integer
-          description: Snapshot timestamp for this upload, in Epoch millis
-          format: int64
-        projectId:
-          type: string
-          description: Google Project containing the BigQuery dataset
-        bqDataset:
-          type: string
-          description: The name of the BigQuery dataset to use for reporting
-        uploads:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportingUploadResult'
-    ReportingUploadResult:
-      type: object
-      properties:
-        tableName:
-          type: string
-          description: BigQuery table name
-        sourceRowCount:
-          type: integer
-          description: Number of rows in source to be insertted
-          format: int64
-        destinationRowCount:
-          type: integer
-          description: Number of rows present in query
-          format: int64
     ReportingUser:
       type: object
       properties:

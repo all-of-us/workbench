@@ -9,7 +9,6 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
@@ -22,7 +21,6 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
  * insertion path.
  */
 public interface ReportingUploadService {
-  boolean uploadSnapshot(ReportingSnapshot reportingSnapshot);
 
   void uploadWorkspaceBatch(List<ReportingWorkspace> batch, long captureTimestamp);
 

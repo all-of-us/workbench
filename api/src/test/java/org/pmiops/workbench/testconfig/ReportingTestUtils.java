@@ -1,8 +1,6 @@
 package org.pmiops.workbench.testconfig;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
-import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import com.google.common.collect.ImmutableList;
@@ -20,15 +18,9 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
-import org.pmiops.workbench.model.OrganizationType;
-import org.pmiops.workbench.model.ReportingDataset;
-import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 public class ReportingTestUtils {
 
@@ -74,10 +66,6 @@ public class ReportingTestUtils {
   public static final String WORKSPACE__FEATURED_WORKSPACE_CATEGORY =
       FeaturedWorkspaceCategory.COMMUNITY.toString();
 
-  public static final Double WORKSPACE_FREE_TIER_USAGE__COST = 0.500000;
-  public static final Long WORKSPACE_FREE_TIER_USAGE__USER_ID = 1L;
-  public static final Long WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID = 2L;
-
   public static final Long COHORT__COHORT_ID = 0L;
   public static final Timestamp COHORT__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-06T00:00:00.00Z"));
@@ -86,26 +74,15 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-05-10T00:00:00.00Z"));
   public static final String COHORT__NAME = "foo_6";
 
-  public static final String INSTITUTION__DISPLAY_NAME = "foo_0";
-  public static final Long INSTITUTION__INSTITUTION_ID = 2L;
-  public static final OrganizationType INSTITUTION__ORGANIZATION_TYPE_ENUM =
-      OrganizationType.ACADEMIC_RESEARCH_INSTITUTION;
-  public static final String INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT = "foo_4";
-  public static final String INSTITUTION__SHORT_NAME = "foo_5";
-  public static final InstitutionMembershipRequirement INSTITUTION__REGISTERED_TIER_REQUIREMENT =
-      InstitutionMembershipRequirement.DOMAINS;
-
   public static final Timestamp DATASET__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-05T00:00:00.00Z"));
   public static final Long DATASET__CREATOR_ID = 1L;
-  public static final Long DATASET__DATASET_ID = 2L;
   public static final String DATASET__DESCRIPTION = "foo_3";
   public static final Boolean DATASET__INCLUDES_ALL_PARTICIPANTS = true;
   public static final Timestamp DATASET__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-10T00:00:00.00Z"));
   public static final String DATASET__NAME = "foo_6";
   public static final Short DATASET__PRE_PACKAGED_CONCEPT_SET = 7;
-  public static final Long DATASET__WORKSPACE_ID = 8L;
 
   public static final Long NEW_USER_SATISFACTION_SURVEY__ID = 1L;
   public static final Long NEW_USER_SATISFACTION_SURVEY__USER_ID = 2L;
@@ -193,28 +170,6 @@ public class ReportingTestUtils {
     return workspace;
   }
 
-  public static void assertDtoWorkspaceFreeTierUsageFields(
-      ReportingWorkspaceFreeTierUsage workspaceFreeTierUsage) {
-    assertThat(workspaceFreeTierUsage.getCost()).isEqualTo(WORKSPACE_FREE_TIER_USAGE__COST);
-    assertThat(workspaceFreeTierUsage.getUserId()).isEqualTo(WORKSPACE_FREE_TIER_USAGE__USER_ID);
-    assertThat(workspaceFreeTierUsage.getWorkspaceId())
-        .isEqualTo(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
-  }
-
-  public static ReportingWorkspaceFreeTierUsage createDtoWorkspaceFreeTierUsage() {
-    return new ReportingWorkspaceFreeTierUsage()
-        .cost(WORKSPACE_FREE_TIER_USAGE__COST)
-        .userId(WORKSPACE_FREE_TIER_USAGE__USER_ID)
-        .workspaceId(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
-  }
-
-  public static ReportingWorkspaceFreeTierUsage createReportingWorkspaceFreeTierUsage() {
-    return new ReportingWorkspaceFreeTierUsage()
-        .cost(WORKSPACE_FREE_TIER_USAGE__COST)
-        .userId(WORKSPACE_FREE_TIER_USAGE__USER_ID)
-        .workspaceId(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
-  }
-
   public static DbCohort createDbCohort(DbUser creator, DbWorkspace dbWorkspace) {
     final DbCohort cohort = new DbCohort();
     cohort.setCohortId(COHORT__COHORT_ID);
@@ -225,54 +180,6 @@ public class ReportingTestUtils {
     cohort.setName(COHORT__NAME);
     cohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
     return cohort;
-  }
-
-  public static final Instant SNAPSHOT_INSTANT = Instant.parse("2020-01-01T00:00:00.00Z");
-
-  public static ReportingSnapshot EMPTY_SNAPSHOT =
-      createEmptySnapshot().captureTimestamp(SNAPSHOT_INSTANT.toEpochMilli());
-
-  public static ReportingInstitution createReportingInstitution() {
-    return new ReportingInstitution()
-        .displayName(INSTITUTION__DISPLAY_NAME)
-        .institutionId(INSTITUTION__INSTITUTION_ID)
-        .organizationTypeEnum(INSTITUTION__ORGANIZATION_TYPE_ENUM)
-        .organizationTypeOtherText(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT)
-        .shortName(INSTITUTION__SHORT_NAME)
-        .registeredTierRequirement(INSTITUTION__REGISTERED_TIER_REQUIREMENT);
-  }
-
-  public static void assertInstitutionFields(ReportingInstitution institution) {
-    assertThat(institution.getDisplayName()).isEqualTo(INSTITUTION__DISPLAY_NAME);
-    assertThat(institution.getInstitutionId()).isEqualTo(INSTITUTION__INSTITUTION_ID);
-    assertThat(institution.getOrganizationTypeEnum())
-        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_ENUM);
-    assertThat(institution.getOrganizationTypeOtherText())
-        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
-    assertThat(institution.getShortName()).isEqualTo(INSTITUTION__SHORT_NAME);
-  }
-
-  public static ReportingDataset createReportingDataset() {
-    return new ReportingDataset()
-        .creationTime(offsetDateTimeUtc(DATASET__CREATION_TIME))
-        .creatorId(DATASET__CREATOR_ID)
-        .datasetId(DATASET__DATASET_ID)
-        .description(DATASET__DESCRIPTION)
-        .includesAllParticipants(DATASET__INCLUDES_ALL_PARTICIPANTS)
-        .lastModifiedTime(offsetDateTimeUtc(DATASET__LAST_MODIFIED_TIME))
-        .name(DATASET__NAME)
-        .workspaceId(DATASET__WORKSPACE_ID);
-  }
-
-  public static void assertDatasetFields(ReportingDataset dataset) {
-    assertTimeApprox(dataset.getCreationTime(), DATASET__CREATION_TIME);
-    assertThat(dataset.getCreatorId()).isEqualTo(DATASET__CREATOR_ID);
-    assertThat(dataset.getDatasetId()).isEqualTo(DATASET__DATASET_ID);
-    assertThat(dataset.getDescription()).isEqualTo(DATASET__DESCRIPTION);
-    assertThat(dataset.isIncludesAllParticipants()).isEqualTo(DATASET__INCLUDES_ALL_PARTICIPANTS);
-    assertTimeApprox(dataset.getLastModifiedTime(), DATASET__LAST_MODIFIED_TIME);
-    assertThat(dataset.getName()).isEqualTo(DATASET__NAME);
-    assertThat(dataset.getWorkspaceId()).isEqualTo(DATASET__WORKSPACE_ID);
   }
 
   public static DbDataset createDbDataset(long workspaceId) {
@@ -303,9 +210,5 @@ public class ReportingTestUtils {
         .setUser(user)
         .setSatisfaction(Satisfaction.SATISFIED)
         .setAdditionalInfo("Love it!");
-  }
-
-  public static ReportingSnapshot createEmptySnapshot() {
-    return new ReportingSnapshot();
   }
 }

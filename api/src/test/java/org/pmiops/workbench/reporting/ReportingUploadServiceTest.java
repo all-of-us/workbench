@@ -5,11 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.EMPTY_SNAPSHOT;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingNewUserSatisfactionSurvey;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
@@ -36,7 +33,6 @@ import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
@@ -67,8 +63,6 @@ public class ReportingUploadServiceTest {
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
   private static final OffsetDateTime THEN = OffsetDateTime.ofInstant(THEN_INSTANT, ZoneOffset.UTC);
 
-  private ReportingSnapshot reportingSnapshot;
-  private ReportingSnapshot snapshotWithNulls;
   private List<ReportingWorkspace> reportingWorkspaces;
 
   @MockBean private BigQueryService mockBigQueryService;
@@ -90,10 +84,6 @@ public class ReportingUploadServiceTest {
 
   @BeforeEach
   public void setup() {
-    reportingSnapshot = createEmptySnapshot().captureTimestamp(NOW.toEpochMilli());
-
-    snapshotWithNulls = createEmptySnapshot().captureTimestamp(NOW.toEpochMilli());
-
     reportingWorkspaces =
         List.of(
             new ReportingWorkspace()
@@ -125,12 +115,6 @@ public class ReportingUploadServiceTest {
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
-  }
-
-  @Test
-  public void testUploadSnapshot_streaming_empty() {
-    reportingUploadService.uploadSnapshot(EMPTY_SNAPSHOT);
-    verify(mockBigQueryService, never()).insertAll(any());
   }
 
   @Test

@@ -15,7 +15,6 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import jakarta.persistence.EntityManager;
 import java.io.ByteArrayOutputStream;
@@ -60,7 +59,7 @@ public class ReportingVerificationServiceTest {
 
   private static final Long ACTUAL_COUNT = (long) 2;
   private static final List<FieldValueList> ACTUAL_COUNT_QUERY_RESULT =
-      ImmutableList.of(
+      List.of(
           FieldValues.buildFieldValueList(
               FieldList.of(Field.of("actual_count", LegacySQLTypeName.INTEGER)),
               Arrays.asList(new Object[] {Long.toString(ACTUAL_COUNT)})));

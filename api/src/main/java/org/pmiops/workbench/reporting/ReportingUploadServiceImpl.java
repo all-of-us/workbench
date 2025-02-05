@@ -25,7 +25,6 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
@@ -91,30 +90,16 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final String VERIFIED_SNAPSHOT_TABLE_NAME = "verified_snapshot";
 
   private final BigQueryService bigQueryService;
-  private final ReportingVerificationService reportingVerificationService;
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<Stopwatch> stopwatchProvider;
 
   public ReportingUploadServiceImpl(
       BigQueryService bigQueryService,
-      ReportingVerificationService reportingVerificationService,
       Provider<WorkbenchConfig> configProvider,
       Provider<Stopwatch> stopwatchProvider) {
     this.bigQueryService = bigQueryService;
-    this.reportingVerificationService = reportingVerificationService;
     this.configProvider = configProvider;
     this.stopwatchProvider = stopwatchProvider;
-  }
-
-  /**
-   * @deprecated Retrieve data using stream approach then upload as batch.
-   *     <p>Uploads {@link ReportingSnapshot} to bigquery and log&verify the performance. Returns
-   *     {@code true} if upload success and snapshot count is verified.
-   */
-  @Deprecated
-  @Override
-  public boolean uploadSnapshot(ReportingSnapshot reportingSnapshot) {
-    return checkResponseAndRowCounts(reportingSnapshot, ImmutableMultimap.of());
   }
 
   /** Batch uploads {@link ReportingWorkspace}. */
@@ -323,14 +308,6 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
                 "rows"))
         .append("\n");
     stopwatch.reset();
-  }
-
-  private boolean checkResponseAndRowCounts(
-      ReportingSnapshot reportingSnapshot,
-      ImmutableMultimap<TableId, InsertAllResponse> responseMap) {
-    checkResponse(responseMap);
-
-    return reportingVerificationService.verifyAndLog(reportingSnapshot);
   }
 
   private TableId getTableId(String tableName) {

@@ -2,10 +2,10 @@ package org.pmiops.workbench.reporting;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import java.time.Clock;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
-import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
@@ -20,8 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Calls the ReportingSnapshotService to obtain the application data from MySQL, Terra (soon), and
- * possibly other sources, then calls the uploadSnapshot() method on the configured
+ * Calls the ReportingQueryService to obtain the application data from MySQL, Terra (soon), and
+ * possibly other sources, then calls the upload*Batch() method on the configured
  * ReportingUploadService to upload to various tables in the BigQuery dataset.
  *
  * <p>For large tables (the majority; TODO: all?) we obtain them in batches.
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportingServiceImpl implements ReportingService {
   private static final Logger logger = Logger.getLogger(ReportingServiceImpl.class.getName());
 
-  private final ReportingSnapshotService reportingSnapshotService;
+  private final Clock clock;
   private final ReportingQueryService reportingQueryService;
   private final ReportingUploadService reportingUploadService;
   private final ReportingVerificationService reportingVerificationService;
@@ -50,26 +50,24 @@ public class ReportingServiceImpl implements ReportingService {
           UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME);
 
   public ReportingServiceImpl(
+      Clock clock,
       ReportingQueryService reportingQueryService,
       ReportingUploadService reportingUploadService,
-      ReportingSnapshotService reportingSnapshotService,
       ReportingVerificationService reportingVerificationService) {
+    this.clock = clock;
     this.reportingQueryService = reportingQueryService;
     this.reportingUploadService = reportingUploadService;
-    this.reportingSnapshotService = reportingSnapshotService;
     this.reportingVerificationService = reportingVerificationService;
   }
 
-  /** Loads data from data source (MySql only for now), then uploads them. */
+  // upload data in batches, verify the counts, and mark this snapshot valid.
   @Transactional
   @Override
   public void collectRecordsAndUpload() {
-    // First: Obtain the snapshot data.
-    final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
-    final long captureTimestamp = snapshot.getCaptureTimestamp();
-    boolean snapshotUploadSuccess = reportingUploadService.uploadSnapshot(snapshot);
+    final long captureTimestamp = clock.millis();
 
-    // Second: Obtain data on smaller batches for larger data.
+    // First: Upload the data in batches.
+
     reportingQueryService
         .getBatchedWorkspaceStream()
         .forEach(b -> reportingUploadService.uploadWorkspaceBatch(b, captureTimestamp));
@@ -114,18 +112,15 @@ public class ReportingServiceImpl implements ReportingService {
         .getBatchedInstitutionStream()
         .forEach(b -> reportingUploadService.uploadInstitutionBatch(b, captureTimestamp));
 
-    // Third: Verify the count.
+    // Second: Verify the counts.
     boolean batchUploadSuccess =
         reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, captureTimestamp);
 
     // Finally: Mark this snapshot valid by inserting one record into verified_snapshot table.
-    if (snapshotUploadSuccess && batchUploadSuccess) {
+    if (batchUploadSuccess) {
       reportingUploadService.uploadVerifiedSnapshot(captureTimestamp);
     } else {
-      logger.warning(
-          String.format(
-              "Failed to verify upload result, snapshotUploadSuccess: %s, batchUploadSuccess :%s",
-              snapshotUploadSuccess, batchUploadSuccess));
+      logger.warning("Failed to verify batch upload result");
     }
   }
 }
