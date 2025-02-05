@@ -2889,7 +2889,8 @@ public class WorkspacesControllerTest {
         workspace.getTerraName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
-    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getTerraName());
+    DbWorkspace dbWorkspace =
+        workspaceDao.getRequired(workspace.getNamespace(), workspace.getTerraName());
     workspaceService.updateRecentWorkspaces(dbWorkspace);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();

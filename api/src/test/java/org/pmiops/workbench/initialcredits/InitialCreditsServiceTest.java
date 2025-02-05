@@ -614,7 +614,6 @@ public class InitialCreditsServiceTest {
 
     // Simulate the user attaching their own billing account to the previously free tier workspace.
     TestTransaction.start();
-    workspace = workspaceDao.findDbWorkspaceByWorkspaceId(workspace.getWorkspaceId());
     workspaceDao.save(workspace.setBillingAccountName(fullBillingAccountName("byo-account")));
 
     commitTransaction();

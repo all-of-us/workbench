@@ -1,6 +1,5 @@
 package org.pmiops.workbench.workspaces.resources;
 
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +49,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
       WorkspaceAccessLevel workspaceAccessLevel,
       List<ResourceType> resourceTypes) {
     List<ResourceType> supportedTypes =
-        ImmutableList.of(
+        List.of(
             ResourceType.COHORT,
             ResourceType.COHORT_REVIEW,
             ResourceType.CONCEPT_SET,

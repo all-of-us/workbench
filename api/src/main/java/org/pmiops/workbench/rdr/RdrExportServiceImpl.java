@@ -6,11 +6,11 @@ import jakarta.inject.Provider;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
@@ -138,7 +138,8 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public void exportUsers(List<Long> userIds, boolean backfill) {
-    List<RdrResearcher> rdrResearchersList = userIds.stream().map(this::toRdrResearcher).toList();
+    List<RdrResearcher> rdrResearchersList =
+        userDao.findUsersByUserIdIn(userIds).stream().map(this::toRdrResearcher).toList();
 
     try {
       rdrApiProvider.get().exportResearchers(rdrResearchersList, backfill);
@@ -165,23 +166,21 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public void exportWorkspaces(List<Long> workspaceIds, boolean backfill) {
-    List<RdrWorkspace> rdrWorkspacesList;
     try {
       // toRdrWorkspace may fail and will return null, skip failures and continue.
-      rdrWorkspacesList =
-          workspaceIds.stream()
-              .map(
-                  workspaceId ->
-                      toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
-              .filter(Objects::nonNull)
+      List<RdrWorkspace> rdrWorkspacesList =
+          workspaceDao.findAllByWorkspaceIdIn(workspaceIds).stream()
+              .flatMap(w -> Stream.ofNullable(toRdrWorkspace(w)))
               .toList();
+
       if (!rdrWorkspacesList.isEmpty()) {
         rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList, backfill);
 
         List<Long> workspaceIdsToUpload =
             rdrWorkspacesList.stream()
-                .map(r -> Long.valueOf(r.getWorkspaceId()))
-                .collect(Collectors.toList());
+                .map(RdrWorkspace::getWorkspaceId)
+                .map(Long::valueOf)
+                .toList();
 
         // Skip the RDR export table updates on backfills. A normal export may trigger manual review
         // from the RDR, where-as a backfill does not. Therefore, even if the RDR has the latest
@@ -207,8 +206,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     }
   }
 
-  private RdrResearcher toRdrResearcher(long userId) {
-    DbUser dbUser = userDao.findUserByUserId(userId);
+  private RdrResearcher toRdrResearcher(DbUser dbUser) {
     var tiers = accessTierService.getAccessTiersForUser(dbUser);
     var maybeAffiliation = verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser);
     return rdrMapper.toRdrResearcher(dbUser, tiers, maybeAffiliation.orElse(null));
@@ -216,27 +214,31 @@ public class RdrExportServiceImpl implements RdrExportService {
 
   @Nullable
   private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
-    RdrWorkspace rdrWorkspace = rdrMapper.toRdrWorkspace(dbWorkspace);
+    RdrWorkspace rdrWorkspace =
+        rdrMapper.toRdrWorkspace(dbWorkspace).workspaceUsers(Collections.emptyList());
     setExcludeFromPublicDirectory(dbWorkspace.getCreator(), rdrWorkspace);
 
-    rdrWorkspace.setWorkspaceUsers(new ArrayList<>());
     if (WorkspaceActiveStatus.ACTIVE.equals(dbWorkspace.getWorkspaceActiveStatusEnum())) {
       try {
         // Call Firecloud to get a list of Collaborators
         List<UserRole> collaborators =
             workspaceService.getFirecloudUserRoles(
                 dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+
+        var userMap =
+            userDao.getUsersMappedByUsernames(
+                collaborators.stream().map(UserRole::getEmail).toList());
+
         rdrWorkspace.setWorkspaceUsers(
             collaborators.stream()
                 .map(
-                    (userRole) ->
+                    userRole ->
                         new RdrWorkspaceUser()
-                            .userId(
-                                (int) userDao.findUserByUsername(userRole.getEmail()).getUserId())
+                            .userId((int) userMap.get(userRole.getEmail()).getUserId())
                             .role(
                                 RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()))
                             .status(RdrWorkspaceUser.StatusEnum.ACTIVE))
-                .collect(Collectors.toList()));
+                .toList());
       } catch (Exception ex) {
         log.warning(
             String.format(
@@ -246,6 +248,7 @@ public class RdrExportServiceImpl implements RdrExportService {
         return null;
       }
     }
+
     return rdrWorkspace;
   }
 

@@ -22,6 +22,7 @@ import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessSyncServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -89,6 +90,7 @@ public class ComplianceTrainingServiceTest {
   })
   @MockBean({
     FireCloudService.class,
+    VwbAccessService.class,
     InstitutionService.class,
     UserServiceAuditor.class,
     InitialCreditsService.class

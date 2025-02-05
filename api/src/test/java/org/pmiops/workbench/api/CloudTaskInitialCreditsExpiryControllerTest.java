@@ -567,7 +567,6 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     // Simulate the user attaching their own billing account to the previously free tier workspace.
-    workspace = workspaceDao.findDbWorkspaceByWorkspaceId(workspace.getWorkspaceId());
     workspaceDao.save(workspace.setBillingAccountName(fullBillingAccountName("byo-account")));
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(

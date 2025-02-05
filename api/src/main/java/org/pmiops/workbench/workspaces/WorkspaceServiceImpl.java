@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -352,20 +354,25 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     Map<String, RawlsWorkspaceAccessEntry> emailToRole =
         workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, firecloudName);
 
-    List<UserRole> userRoles = new ArrayList<>();
-    for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
-      // Filter out groups
-      DbUser user = userDao.findUserByUsername(entry.getKey());
-      if (user == null) {
-        log.log(Level.WARNING, "No user found for " + entry.getKey());
-      } else {
-        userRoles.add(userMapper.toApiUserRole(user, entry.getValue()));
-      }
-    }
-    return userRoles.stream()
+    var userMap = userDao.getUsersMappedByUsernames(emailToRole.keySet());
+
+    return emailToRole.entrySet().stream()
+        .flatMap(
+            entry -> {
+              String email = entry.getKey();
+              RawlsWorkspaceAccessEntry acl = entry.getValue();
+              DbUser user = userMap.get(entry.getKey());
+              // Filter out groups
+              if (user == null) {
+                log.log(Level.WARNING, "No user found for " + email);
+                return Stream.empty();
+              } else {
+                return Stream.of(userMapper.toApiUserRole(user, acl));
+              }
+            })
         .sorted(
             Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override
@@ -514,6 +521,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  public List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces) {
+    return workspaceDao.getByWorkspaceNamespaceIn(workspaceNamespaces);
+  }
+
+  @Override
   public void createTanagraStudy(String workspaceNamespace, String workspaceName) {
     try {
       StudyCreateInfo studyCreateInfo =
@@ -634,13 +646,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
-    return getFirecloudUserRoles(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-        .stream()
-        .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
-        .map(UserRole::getEmail)
-        .map(userService::getByUsernameOrThrow)
-        .toList();
+    return userDao.findUsersByUsernameIn(
+        getFirecloudUserRoles(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+            .stream()
+            .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
+            .map(UserRole::getEmail)
+            .toList());
   }
 
   @Override
@@ -648,10 +659,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     DbAccessTier accessTier = cdrVersion.getAccessTier();
     String billingProject = createTerraBillingProject(accessTier);
     String firecloudName = FireCloudService.toFirecloudName(workspace.getName());
-    RawlsWorkspaceDetails fcWorkspace =
-        fireCloudService.createWorkspace(
-            billingProject, firecloudName, accessTier.getAuthDomainName());
-    return fcWorkspace;
+
+    return fireCloudService.createWorkspace(
+        billingProject, firecloudName, accessTier.getAuthDomainName());
   }
 
   @Override
@@ -664,14 +674,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     DbAccessTier accessTier = cdrVersion.getAccessTier();
     String billingProject = createTerraBillingProject(accessTier);
     String firecloudName = FireCloudService.toFirecloudName(toWorkspace.getName());
-    RawlsWorkspaceDetails toFcWorkspace =
-        fireCloudService.cloneWorkspace(
-            fromWorkspaceNamespace,
-            fromWorkspaceId,
-            billingProject,
-            firecloudName,
-            accessTier.getAuthDomainName());
-    return toFcWorkspace;
+
+    return fireCloudService.cloneWorkspace(
+        fromWorkspaceNamespace,
+        fromWorkspaceId,
+        billingProject,
+        firecloudName,
+        accessTier.getAuthDomainName());
   }
 
   /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */

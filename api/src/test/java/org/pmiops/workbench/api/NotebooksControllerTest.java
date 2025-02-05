@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
@@ -76,7 +77,12 @@ public class NotebooksControllerTest {
     FakeClockConfiguration.class,
     NotebooksController.class,
   })
-  @MockBean({CloudStorageClient.class, FireCloudService.class, UserRecentResourceService.class})
+  @MockBean({
+    CloudStorageClient.class,
+    FireCloudService.class,
+    UserRecentResourceService.class,
+    VwbAccessService.class
+  })
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

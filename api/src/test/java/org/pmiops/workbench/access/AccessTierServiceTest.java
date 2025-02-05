@@ -48,6 +48,7 @@ public class AccessTierServiceTest {
   })
   @MockBean({
     FireCloudService.class,
+    VwbAccessService.class,
   })
   @TestConfiguration
   static class Configuration {

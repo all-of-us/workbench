@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="eric" id="db.changelog-252-remove-initial-credits-expired.xml">
+  <changeSet author="eric" id="db.changelog-253-remove-initial-credits-expired.xml">
     <dropColumn tableName="workspace" columnName="initial_credits_expired"/>
   </changeSet>
 </databaseChangeLog>

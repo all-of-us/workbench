@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +71,8 @@ public interface WorkspaceService {
   Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet);
 
   DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace);
+
+  List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces);
 
   /**
    * This call will create a Study in the Tanagra application. A Tanagra Study is equivalent to a

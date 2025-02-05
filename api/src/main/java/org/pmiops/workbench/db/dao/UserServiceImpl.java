@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -199,10 +200,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public DbUser createServiceAccountUser(String username) {
-    DbUser user = new DbUser();
-    user.setUsername(username);
-    user.setContactEmail(username);
-    user.setDisabled(false);
+    DbUser user = new DbUser().setUsername(username).setContactEmail(username).setDisabled(false);
     try {
       user = userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -486,12 +484,7 @@ public class UserServiceImpl implements UserService {
   public DbUser setDisabledStatus(Long userId, boolean disabled) {
     DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
-        (u) -> {
-          u.setDisabled(disabled);
-          return u;
-        },
-        user,
-        Agent.asAdmin(userProvider.get()));
+        u -> u.setDisabled(disabled), user, Agent.asAdmin(userProvider.get()));
   }
 
   @Override
@@ -530,17 +523,17 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public List<DbUser> findUsersByUsernames(List<String> usernames) {
-    return userDao.findUserByUsernameIn(usernames);
+    return userDao.findUsersByUsernameIn(usernames);
   }
 
   @Override
   public Set<DbUser> findActiveUsersByUsernames(List<String> usernames) {
-    return userDao.findUserByUsernameInAndDisabledFalse(usernames);
+    return userDao.findUsersByUsernameInAndDisabledFalse(usernames);
   }
 
   @Override
   public List<DbUser> findUsersById(List<Long> ids) {
-    return userDao.findUserByUserIdIn(ids);
+    return userDao.findUsersByUserIdIn(ids);
   }
 
   /**
@@ -673,6 +666,11 @@ public class UserServiceImpl implements UserService {
   public DbUser getByUsernameOrThrow(String username) {
     return getByUsername(username)
         .orElseThrow(() -> new NotFoundException("User '" + username + "' not found"));
+  }
+
+  @Override
+  public Map<String, DbUser> getUsersMappedByUsernames(Collection<String> usernames) {
+    return userDao.getUsersMappedByUsernames(usernames);
   }
 
   @Override
@@ -840,17 +838,12 @@ public class UserServiceImpl implements UserService {
 
   // Send an Access Renewal Expiration or Warning email to the user, if appropriate
   private void maybeSendAccessTierExpirationEmail(DbUser user, String tierShortName) {
-    final Collection<DbAccessModuleName> moduleNames;
-    switch (tierShortName) {
-      case REGISTERED_TIER_SHORT_NAME:
-        moduleNames = getRequiredModulesForRegisteredTierRenewal();
-        break;
-      case CONTROLLED_TIER_SHORT_NAME:
-        moduleNames = getRequiredModulesForControlledTierRenewal();
-        break;
-      default:
-        moduleNames = Collections.emptyList();
-    }
+    final Collection<DbAccessModuleName> moduleNames =
+        switch (tierShortName) {
+          case REGISTERED_TIER_SHORT_NAME -> getRequiredModulesForRegisteredTierRenewal();
+          case CONTROLLED_TIER_SHORT_NAME -> getRequiredModulesForControlledTierRenewal();
+          default -> Collections.emptyList();
+        };
 
     getTierExpirationForEmails(user, moduleNames)
         .ifPresent(
