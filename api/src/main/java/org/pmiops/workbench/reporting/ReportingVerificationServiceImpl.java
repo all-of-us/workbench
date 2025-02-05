@@ -13,12 +13,18 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.LeonardoAppUsageColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.stereotype.Service;
 
@@ -47,18 +53,31 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
 
+    // TODO: enforce that this is the same list as in ReportingServiceImpl.collectRecordsAndUpload()
     // alt: this could be a Map, but we don't need to reference it in that way
     List<Map.Entry<String, Integer>> tableCounters =
         List.of(
             Map.entry(
-                WorkspaceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getActiveWorkspaceCount()),
-            Map.entry(
-                UserColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(UserColumnValueExtractor.TABLE_NAME)),
-            Map.entry(
                 CohortColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(CohortColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                DatasetCohortColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    DatasetCohortColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                DatasetColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(DatasetColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                DatasetConceptSetColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    DatasetConceptSetColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                DatasetDomainColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    DatasetDomainColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                InstitutionColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(InstitutionColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 LeonardoAppUsageColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getAppUsageRowCount(
@@ -70,13 +89,23 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                 reportingQueryService.getTableRowCount(
                     NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
             Map.entry(
+                UserColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(UserColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
                 UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
                     UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
-                    UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME)));
+                    UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                WorkspaceColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getActiveWorkspaceCount()),
+            Map.entry(
+                WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME)));
 
     // fails-fast due to allMatch() so logs may be incomplete on failure
     boolean verified =
