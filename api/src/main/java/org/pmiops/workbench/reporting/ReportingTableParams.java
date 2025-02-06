@@ -1,0 +1,12 @@
+package org.pmiops.workbench.reporting;
+
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.IntSupplier;
+import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
+
+public record ReportingTableParams<T>(
+    String bqTableName,
+    InsertAllRequestPayloadTransformer<T> bqInsertionBuilder,
+    BiFunction<Long, Long, List<T>> rwbBatchQueryFn,
+    IntSupplier getRwbTableCountFn) {}

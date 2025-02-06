@@ -26,87 +26,32 @@ public interface ReportingQueryService {
 
   List<ReportingDataset> getDatasetBatch(long limit, long offset);
 
-  default Stream<List<ReportingDataset>> getBatchedDatasetStream() {
-    return getBatchedStream(this::getDatasetBatch);
-  }
-
   List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset);
-
-  default Stream<List<ReportingDatasetCohort>> getBatchedDatasetCohortStream() {
-    return getBatchedStream(this::getDatasetCohortBatch);
-  }
 
   List<ReportingDatasetConceptSet> getDatasetConceptSetBatch(long limit, long offset);
 
-  default Stream<List<ReportingDatasetConceptSet>> getBatchedDatasetConceptSetStream() {
-    return getBatchedStream(this::getDatasetConceptSetBatch);
-  }
-
   List<ReportingDatasetDomainIdValue> getDatasetDomainIdValueBatch(long limit, long offset);
-
-  default Stream<List<ReportingDatasetDomainIdValue>> getBatchedDatasetDomainIdValueStream() {
-    return getBatchedStream(this::getDatasetDomainIdValueBatch);
-  }
 
   List<ReportingInstitution> getInstitutionBatch(long limit, long offset);
 
-  default Stream<List<ReportingInstitution>> getBatchedInstitutionStream() {
-    return getBatchedStream(this::getInstitutionBatch);
-  }
-
   List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsageBatch(long limit, long offset);
-
-  default Stream<List<ReportingWorkspaceFreeTierUsage>> getBatchedWorkspaceFreeTierUsageStream() {
-    return getBatchedStream(this::getWorkspaceFreeTierUsageBatch);
-  }
 
   List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset);
 
-  default Stream<List<ReportingWorkspace>> getBatchedWorkspaceStream() {
-    return getBatchedStream(this::getWorkspaceBatch);
-  }
-
   List<ReportingUser> getUserBatch(long limit, long offset);
 
-  default Stream<List<ReportingUser>> getBatchedUserStream() {
-    return getBatchedStream(this::getUserBatch);
-  }
-
   List<ReportingCohort> getCohortBatch(long limit, long offset);
-
-  default Stream<List<ReportingCohort>> getBatchedCohortStream() {
-    return getBatchedStream(this::getCohortBatch);
-  }
 
   List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveyBatch(
       long limit, long offset);
 
-  default Stream<List<ReportingNewUserSatisfactionSurvey>>
-      getBatchedNewUserSatisfactionSurveyStream() {
-    return getBatchedStream(this::getNewUserSatisfactionSurveyBatch);
-  }
-
   List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySourceBatch(
       long limit, long offset);
-
-  default Stream<List<ReportingUserGeneralDiscoverySource>>
-      getBatchedUserGeneralDiscoverySourceStream() {
-    return getBatchedStream(this::getUserGeneralDiscoverySourceBatch);
-  }
 
   List<ReportingUserPartnerDiscoverySource> getUserPartnerDiscoverySourceBatch(
       long limit, long offset);
 
-  default Stream<List<ReportingUserPartnerDiscoverySource>>
-      getBatchedUserPartnerDiscoverySourceStream() {
-    return getBatchedStream(this::getUserPartnerDiscoverySourceBatch);
-  }
-
   List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset);
-
-  default Stream<List<ReportingLeonardoAppUsage>> getBatchedLeonardoAppUsageStream() {
-    return getBatchedStream(this::getLeonardoAppUsageBatch);
-  }
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
     final long offset = getQueryBatchSize() * batchIndex;
@@ -118,7 +63,6 @@ public interface ReportingQueryService {
    *
    * @param getter - method to retrieve a batch, typically a method reference against this interface
    * @param <T> - DTO type
-   * @return
    */
   default <T> Iterator<List<T>> getBatchIterator(BiFunction<Long, Long, List<T>> getter) {
     return new Iterator<>() {
@@ -137,9 +81,6 @@ public interface ReportingQueryService {
         }
       }
 
-      /**
-       * @return
-       */
       @Override
       public boolean hasNext() {
         if (lastResultSetSize < 0) {
@@ -166,7 +107,6 @@ public interface ReportingQueryService {
    *
    * @param getter - limit & offset version of query method (currently just getWorkspaces())
    * @param <T> - DTO type
-   * @return
    */
   default <T> Stream<List<T>> getBatchedStream(BiFunction<Long, Long, List<T>> getter) {
     final Iterator<List<T>> batchIterator = getBatchIterator(getter);

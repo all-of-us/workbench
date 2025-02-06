@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.pmiops.workbench.reporting.ReportingServiceImpl.BATCH_UPLOADED_TABLES;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbConceptSet;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbDataset;
@@ -96,9 +95,10 @@ public class ReportingVerificationServiceTest {
 
   @TestConfiguration
   @Import({
-    ReportingVerificationServiceImpl.class,
+    ReportingQueryServiceImpl.class,
+    ReportingTableService.class,
     ReportingTestConfig.class,
-    ReportingQueryServiceImpl.class
+    ReportingVerificationServiceImpl.class,
   })
   public static class config {
     @Bean
@@ -124,10 +124,7 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifyBatch_verified() {
     createTableEntries(ACTUAL_COUNT);
-    assertThat(
-            reportingVerificationService.verifyBatchesAndLog(
-                BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
-        .isTrue();
+    assertThat(reportingVerificationService.verifyBatchesAndLog(NOW.toEpochMilli())).isTrue();
 
     String logs = getTestCapturedLog();
     // 2 entities in database, and we uploaded 2.
@@ -151,10 +148,7 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifyBatch_fail() {
     createTableEntries(ACTUAL_COUNT * 2);
-    assertThat(
-            reportingVerificationService.verifyBatchesAndLog(
-                BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
-        .isFalse();
+    assertThat(reportingVerificationService.verifyBatchesAndLog(NOW.toEpochMilli())).isFalse();
 
     String logs = getTestCapturedLog();
     // 4 cohort entities, instead of the expected 2.
@@ -171,7 +165,6 @@ public class ReportingVerificationServiceTest {
   }
 
   /** This creates equal amount of table entries for all batch-uploaded tables. */
-  // TODO: enforce that this is the same list as in ReportingServiceImpl.collectRecordsAndUpload()
   private void createTableEntries(long count) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("foo");

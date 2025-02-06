@@ -16,8 +16,6 @@ public enum DatasetColumnValueExtractor implements ColumnValueExtractor<Reportin
   NAME("name", ReportingDataset::getName),
   WORKSPACE_ID("workspace_id", ReportingDataset::getWorkspaceId);
 
-  public static final String TABLE_NAME = "dataset";
-
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
   private final String parameterName;

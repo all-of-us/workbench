@@ -15,8 +15,6 @@ public enum CohortColumnValueExtractor implements ColumnValueExtractor<Reporting
   NAME("name", ReportingCohort::getName),
   WORKSPACE_ID("workspace_id", ReportingCohort::getWorkspaceId);
 
-  public static final String TABLE_NAME = "cohort";
-
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
   private final String parameterName;
