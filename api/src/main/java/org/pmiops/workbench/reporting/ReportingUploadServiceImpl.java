@@ -8,7 +8,6 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.TableId;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -26,7 +25,6 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
@@ -59,7 +57,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final InsertAllRequestPayloadTransformer<ReportingDatasetConceptSet>
       datasetConceptSetRequestBuilder = DatasetConceptSetColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingDatasetDomainIdValue>
-      datasetDomainIIdValueRequestBuilder = DatasetDomainColumnValueExtractor::values;
+      datasetDomainIdValueRequestBuilder = DatasetDomainColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingInstitution>
       institutionRequestBuilder = InstitutionColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingUser> userRequestBuilder =
@@ -92,39 +90,16 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final String VERIFIED_SNAPSHOT_TABLE_NAME = "verified_snapshot";
 
   private final BigQueryService bigQueryService;
-  private final ReportingVerificationService reportingVerificationService;
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<Stopwatch> stopwatchProvider;
 
   public ReportingUploadServiceImpl(
       BigQueryService bigQueryService,
-      ReportingVerificationService reportingVerificationService,
       Provider<WorkbenchConfig> configProvider,
       Provider<Stopwatch> stopwatchProvider) {
     this.bigQueryService = bigQueryService;
-    this.reportingVerificationService = reportingVerificationService;
     this.configProvider = configProvider;
     this.stopwatchProvider = stopwatchProvider;
-  }
-
-  /**
-   * @deprecated Retrieve data using stream approach then upload as batch.
-   *     <p>Uploads {@link ReportingSnapshot} to bigquery and log&verify the performance. Returns
-   *     {@code true} if upload success and snapshot count is verified.
-   */
-  @Deprecated
-  @Override
-  public boolean uploadSnapshot(ReportingSnapshot reportingSnapshot) {
-    final Stopwatch stopwatch = stopwatchProvider.get();
-    final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
-        ImmutableMultimap.builder();
-    final List<InsertAllRequest> insertAllRequests = getInsertAllRequests(reportingSnapshot);
-    final StringBuilder performanceStringBuilder = new StringBuilder();
-    for (InsertAllRequest request : insertAllRequests) {
-      issueInsertAllRequest(stopwatch, responseMapBuilder, performanceStringBuilder, request);
-    }
-    log.info(performanceStringBuilder.toString());
-    return checkResponseAndRowCounts(reportingSnapshot, responseMapBuilder.build());
   }
 
   /** Batch uploads {@link ReportingWorkspace}. */
@@ -157,6 +132,56 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     uploadBatchTable(
         cohortRequestBuilder.build(
             getTableId(CohortColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  /** Batch uploads {@link ReportingDataset}. */
+  @Override
+  public void uploadDatasetBatch(List<ReportingDataset> batch, long captureTimestamp) {
+    uploadBatchTable(
+        datasetRequestBuilder.build(
+            getTableId(DatasetColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  /** Batch uploads {@link ReportingDatasetCohort}. */
+  @Override
+  public void uploadDatasetCohortBatch(List<ReportingDatasetCohort> batch, long captureTimestamp) {
+    uploadBatchTable(
+        datasetCohortRequestBuilder.build(
+            getTableId(DatasetCohortColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  /** Batch uploads {@link ReportingDatasetConceptSet}. */
+  @Override
+  public void uploadDatasetConceptSetBatch(
+      List<ReportingDatasetConceptSet> batch, long captureTimestamp) {
+    uploadBatchTable(
+        datasetConceptSetRequestBuilder.build(
+            getTableId(DatasetConceptSetColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  /** Batch uploads {@link ReportingDatasetDomainIdValue}. */
+  @Override
+  public void uploadDatasetDomainIdValueBatch(
+      List<ReportingDatasetDomainIdValue> batch, long captureTimestamp) {
+    uploadBatchTable(
+        datasetDomainIdValueRequestBuilder.build(
+            getTableId(DatasetDomainColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
     // This is a test to prove if these batched list are being cleaned up by garbage collection.
@@ -213,6 +238,29 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     batch = null;
   }
 
+  @Override
+  public void uploadWorkspaceFreeTierUsageBatch(
+      List<ReportingWorkspaceFreeTierUsage> batch, long captureTimestamp) {
+    uploadBatchTable(
+        workspaceFreeTierUsageRequestBuilder.build(
+            getTableId(WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
+  @Override
+  public void uploadInstitutionBatch(List<ReportingInstitution> batch, long captureTimestamp) {
+    uploadBatchTable(
+        institutionRequestBuilder.build(
+            getTableId(InstitutionColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+    // This is a test to prove if these batched list are being cleaned up by garbage collection.
+    batch = null;
+  }
+
   /** Batch uploads a reporting table. */
   private void uploadBatchTable(InsertAllRequest insertAllRequest) {
     final Stopwatch stopwatch = stopwatchProvider.get();
@@ -262,66 +310,11 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     stopwatch.reset();
   }
 
-  private boolean checkResponseAndRowCounts(
-      ReportingSnapshot reportingSnapshot,
-      ImmutableMultimap<TableId, InsertAllResponse> responseMap) {
-    checkResponse(responseMap);
-
-    return reportingVerificationService.verifyAndLog(reportingSnapshot);
-  }
-
   private TableId getTableId(String tableName) {
     final String projectId = configProvider.get().server.projectId;
     final String dataset = configProvider.get().reporting.dataset;
 
     return TableId.of(projectId, dataset, tableName);
-  }
-
-  private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {
-    final Map<String, Object> fixedValues = getFixedValues(reportingSnapshot.getCaptureTimestamp());
-    final int batchSize = configProvider.get().reporting.maxRowsPerInsert;
-    final ImmutableList.Builder<InsertAllRequest> resultBuilder = ImmutableList.builder();
-
-    resultBuilder.addAll(
-        datasetRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getDatasets(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        datasetCohortRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetCohortColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getDatasetCohorts(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        datasetConceptSetRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetConceptSetColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getDatasetConceptSets(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        datasetDomainIIdValueRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetDomainColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getDatasetDomainIdValues(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        institutionRequestBuilder.buildBatchedRequests(
-            getTableId(InstitutionColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getInstitutions(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
-        workspaceFreeTierUsageRequestBuilder.buildBatchedRequests(
-            getTableId(WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getWorkspaceFreeTierUsage(),
-            fixedValues,
-            batchSize));
-
-    return resultBuilder.build().stream()
-        .filter(r -> !r.getRows().isEmpty())
-        .collect(ImmutableList.toImmutableList());
   }
 
   private Map<String, Object> getFixedValues(long snapshotTimestamp) {

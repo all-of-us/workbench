@@ -1,7 +1,6 @@
 package org.pmiops.workbench.institution;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.institution.InstitutionServiceImpl.OPERATIONAL_USER_INSTITUTION_SHORT_NAME;

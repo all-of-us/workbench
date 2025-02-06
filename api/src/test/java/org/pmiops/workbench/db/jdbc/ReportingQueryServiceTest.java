@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
@@ -113,8 +112,8 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Test the unique ReportingNativeQueryService, which bypasses Spring in favor of low-level JDBC
- * queries. This means we need real DAOs.
+ * Test the unique ReportingQueryService, which bypasses Spring in favor of low-level JDBC queries.
+ * This means we need real DAOs.
  */
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -128,26 +127,25 @@ public class ReportingQueryServiceTest {
 
   // It's necessary to bring in several Dao classes, since we aim to populate join tables
   // that have neither entities of their own nor stand-alone DAOs.
-  @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessModuleDao accessModuleDao;
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private InstitutionDao institutionDao;
-  @Autowired InstitutionTierRequirementDao institutionTierRequirementDao;
-  @Autowired private UserAccessTierDao userAccessTierDao;
-  @Autowired private UserAccessModuleDao userAccessModuleDao;
-  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private InstitutionTierRequirementDao institutionTierRequirementDao;
   @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private UserAccessTierDao userAccessTierDao;
+  @Autowired private UserDao userDao;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private WorkspaceDao workspaceDao;
 
   @Autowired private EntityManager entityManager;
 
   @Autowired
   @Qualifier("REPORTING_USER_TEST_FIXTURE")
   ReportingTestFixture<DbUser, ReportingUser> userFixture;
-
-  @Autowired private UserDao userDao;
-  @Autowired private WorkspaceDao workspaceDao;
 
   @MockBean private BigQueryService bigQueryService;
 
@@ -193,7 +191,7 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
-  public void testGetReportingDatasetCohorts() {
+  public void testGetReportingDatasetCohorts_oneEntry() {
     final DbUser user1 = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion1 = createCdrVersion(registeredTier);
     final DbWorkspace workspace1 = createDbWorkspace(user1, cdrVersion1);
@@ -201,10 +199,15 @@ public class ReportingQueryServiceTest {
     final DbDataset dataset1 = createDataset(workspace1, cohort1);
     entityManager.flush();
 
-    final List<ReportingDatasetCohort> datasetCohorts = reportingQueryService.getDatasetCohorts();
-    assertThat(datasetCohorts).hasSize(1);
-    assertThat(datasetCohorts.get(0).getCohortId()).isEqualTo(cohort1.getCohortId());
-    assertThat(datasetCohorts.get(0).getDatasetId()).isEqualTo(dataset1.getDataSetId());
+    final Iterator<List<ReportingDatasetCohort>> iterator = getDatasetCohortsBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    List<ReportingDatasetCohort> firstBatch = iterator.next();
+    assertThat(firstBatch).hasSize(1);
+
+    ReportingDatasetCohort first = firstBatch.get(0);
+    assertThat(first.getCohortId()).isEqualTo(cohort1.getCohortId());
+    assertThat(first.getDatasetId()).isEqualTo(dataset1.getDataSetId());
   }
 
   @NotNull
@@ -332,7 +335,7 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
-  public void testWorkspaceIIterator_twoAndAHalfBatches() {
+  public void testWorkspaceIterator_twoAndAHalfBatches() {
     createWorkspaces(5);
 
     final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
@@ -413,7 +416,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testWorkspaceCount() {
     createWorkspaces(5);
-    assertThat(reportingQueryService.getWorkspaceCount()).isEqualTo(5);
+    assertThat(reportingQueryService.getActiveWorkspaceCount()).isEqualTo(5);
   }
 
   @Test
@@ -422,7 +425,7 @@ public class ReportingQueryServiceTest {
     workspaceDao.save(
         workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
     entityManager.flush();
-    assertThat(reportingQueryService.getWorkspaceCount()).isEqualTo(4);
+    assertThat(reportingQueryService.getActiveWorkspaceCount()).isEqualTo(4);
   }
 
   @Test
@@ -513,7 +516,7 @@ public class ReportingQueryServiceTest {
   public void testQueryInstitution() {
     // A simple test to make sure the query works.
     createInstitutionTierRequirement(dbInstitution);
-    final List<ReportingInstitution> institutions = reportingQueryService.getInstitutions();
+    final List<ReportingInstitution> institutions = reportingQueryService.getInstitutionBatch(1, 0);
     assertThat(institutions.size()).isEqualTo(1);
     assertThat(institutions.get(0).getRegisteredTierRequirement())
         .isEqualTo(InstitutionMembershipRequirement.ADDRESSES);
@@ -760,7 +763,7 @@ public class ReportingQueryServiceTest {
 
     TableResult tableResult = BigQueryUtils.newTableResult(s, tableRows);
     when(bigQueryService.executeQuery(any(QueryJobConfiguration.class))).thenReturn(tableResult);
-    assertThat(reportingQueryService.getLeonardoAppUsage(10, 0))
+    assertThat(reportingQueryService.getLeonardoAppUsageBatch(10, 0))
         .containsExactly(
             new ReportingLeonardoAppUsage()
                 .appId(123l)
@@ -785,6 +788,10 @@ public class ReportingQueryServiceTest {
 
   private Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
     return reportingQueryService.getBatchIterator(reportingQueryService::getCohortBatch);
+  }
+
+  private Iterator<List<ReportingDatasetCohort>> getDatasetCohortsBatchIterator() {
+    return reportingQueryService.getBatchIterator(reportingQueryService::getDatasetCohortBatch);
   }
 
   private Iterator<List<ReportingNewUserSatisfactionSurvey>>

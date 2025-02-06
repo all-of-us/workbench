@@ -1,7 +1,6 @@
 package org.pmiops.workbench.google;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 
 import java.time.Clock;
 import java.util.Map;
