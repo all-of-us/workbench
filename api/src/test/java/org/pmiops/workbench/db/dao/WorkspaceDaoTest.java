@@ -9,7 +9,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -26,12 +25,10 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceDaoTest {
 
-  @Autowired CohortDao cohortDao;
   @Autowired UserDao userDao;
   @Autowired ReportingTestFixture<DbUser, ReportingUser> userFixture;
   @Autowired WorkspaceDao workspaceDao;
 
-  private DbCohort dbCohort;
   private DbUser dbUser;
   private DbWorkspace dbWorkspace;
 
@@ -48,7 +45,7 @@ public class WorkspaceDaoTest {
     dbWorkspace.setFirecloudName("name");
     dbWorkspace.setCreationTime(timestamp);
     dbWorkspace.setLastModifiedTime(timestamp);
-    dbWorkspace =workspaceDao.save(dbWorkspace);
+    dbWorkspace = workspaceDao.save(dbWorkspace);
 
     dbUser = userDao.save(new DbUser());
   }
@@ -79,7 +76,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void findCreatorsByActiveInitialCredits_valid_missingInitialCreditsRecord() {
+  public void findCreatorsByActiveInitialCredits_missingInitialCreditsRecord() {
     dbWorkspace.setBillingAccountName("initialCreditsAccount");
     dbWorkspace.setCreator(dbUser);
     workspaceDao.save(dbWorkspace);
@@ -91,7 +88,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void findCreatorsByActiveInitialCredits_valid_existingInitialCreditsRecord() {
+  public void findCreatorsByActiveInitialCredits_withUnexpiredCredits() {
     dbWorkspace.setBillingAccountName("initialCreditsAccount");
     dbWorkspace.setCreator(dbUser);
     workspaceDao.save(dbWorkspace);
@@ -109,21 +106,23 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void findCreatorsByActiveInitialCredits_valid_existingInitialCreditsRecordB() {
+  public void findCreatorsByActiveInitialCredits_withExpiredCredits() {
+    long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
+    DbUserInitialCreditsExpiration dbUserInitialCreditsExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setCreditStartTime(new Timestamp(System.currentTimeMillis()))
+            .setExpirationTime(new Timestamp(System.currentTimeMillis() - MILLIS_IN_A_DAY))
+            .setUser(dbUser);
+    dbUser = dbUser.setUserInitialCreditsExpiration(dbUserInitialCreditsExpiration);
+    dbUser = userDao.save(dbUser);
     dbWorkspace.setBillingAccountName("initialCreditsAccount");
     dbWorkspace.setCreator(dbUser);
-    dbWorkspace =workspaceDao.save(dbWorkspace);
-    long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
-    dbUser.setUserInitialCreditsExpiration(new DbUserInitialCreditsExpiration()
-        .setCreditStartTime(new Timestamp(System.currentTimeMillis()))
-        .setExpirationTime(new Timestamp(System.currentTimeMillis() - (100 * MILLIS_IN_A_DAY))));
-    dbUser = userDao.save(dbUser);
+    dbWorkspace = workspaceDao.save(dbWorkspace);
 
     var y = workspaceDao.findCreatorsByActiveInitialCredits(
         List.of("initialCreditsAccount"), Set.of(dbUser));
 
-    assertThat(y)
-        .isEqualTo(Collections.emptySet());
+    assertThat(y).isEqualTo(Collections.emptySet());
   }
 
   @Test
