@@ -26,8 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Calls the ReportingQueryService to obtain the application data from MySQL, Terra (soon), and
  * possibly other sources, then calls the upload*Batch() method on the configured
  * ReportingUploadService to upload to various tables in the BigQuery dataset.
- *
- * <p>For large tables (the majority; TODO: all?) we obtain them in batches.
  */
 @Service
 public class ReportingServiceImpl implements ReportingService {
@@ -74,6 +72,8 @@ public class ReportingServiceImpl implements ReportingService {
     final long captureTimestamp = clock.millis();
 
     // First: Upload the data in batches.
+
+    // TODO: ensure that this list matches BATCH_UPLOADED_TABLES
 
     reportingQueryService
         .getBatchedWorkspaceStream()

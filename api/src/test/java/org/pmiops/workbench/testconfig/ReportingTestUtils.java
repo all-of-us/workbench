@@ -9,6 +9,7 @@ import java.time.Instant;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
@@ -83,6 +84,13 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-05-10T00:00:00.00Z"));
   public static final String DATASET__NAME = "foo_6";
   public static final Short DATASET__PRE_PACKAGED_CONCEPT_SET = 7;
+
+  public static final Timestamp CONCEPT_SET__CREATION_TIME =
+      Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
+  public static final String CONCEPT_SET__DESCRIPTION = "foo_9";
+  public static final Timestamp CONCEPT_SET__LAST_MODIFIED_TIME =
+      Timestamp.from(Instant.parse("2015-06-10T00:00:00.00Z"));
+  public static final String CONCEPT_SET__NAME = "foo_11";
 
   public static final Long NEW_USER_SATISFACTION_SURVEY__ID = 1L;
   public static final Long NEW_USER_SATISFACTION_SURVEY__USER_ID = 2L;
@@ -193,6 +201,16 @@ public class ReportingTestUtils {
     dataset.setPrePackagedConceptSet(ImmutableList.of(DATASET__PRE_PACKAGED_CONCEPT_SET));
     dataset.setWorkspaceId(workspaceId);
     return dataset;
+  }
+
+  public static DbConceptSet createDbConceptSet(long workspaceId) {
+    final DbConceptSet conceptSet = new DbConceptSet();
+    conceptSet.setCreationTime(CONCEPT_SET__CREATION_TIME);
+    conceptSet.setDescription(CONCEPT_SET__DESCRIPTION);
+    conceptSet.setLastModifiedTime(CONCEPT_SET__LAST_MODIFIED_TIME);
+    conceptSet.setName(CONCEPT_SET__NAME);
+    conceptSet.setWorkspaceId(workspaceId);
+    return conceptSet;
   }
 
   public static ReportingNewUserSatisfactionSurvey createReportingNewUserSatisfactionSurvey() {

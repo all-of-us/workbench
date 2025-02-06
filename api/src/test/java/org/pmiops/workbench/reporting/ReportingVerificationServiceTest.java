@@ -6,6 +6,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.reporting.ReportingServiceImpl.BATCH_UPLOADED_TABLES;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbCohort;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbConceptSet;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbDataset;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbNewUserSatisfactionSurvey;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbWorkspace;
 
@@ -31,15 +33,22 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryServiceImpl;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbDatasetValue;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.utils.FieldValues;
@@ -57,7 +66,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 public class ReportingVerificationServiceTest {
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
 
-  private static final Long ACTUAL_COUNT = (long) 2;
+  private static final long ACTUAL_COUNT = 2L;
   private static final List<FieldValueList> ACTUAL_COUNT_QUERY_RESULT =
       List.of(
           FieldValues.buildFieldValueList(
@@ -73,11 +82,16 @@ public class ReportingVerificationServiceTest {
 
   @Autowired private ReportingVerificationService reportingVerificationService;
   @Autowired private EntityManager entityManager;
+
   @Autowired private CdrVersionDao cdrVersionDao;
-  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private CohortDao cohortDao;
+  @Autowired private DataSetDao dataSetDao;
+  @Autowired private InstitutionDao institutionDao;
   @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
   @Autowired private UserDao userDao;
-  @Autowired private CohortDao cohortDao;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+
   @MockBean private BigQueryService mockBigQueryService;
 
   @TestConfiguration
@@ -114,22 +128,24 @@ public class ReportingVerificationServiceTest {
             reportingVerificationService.verifyBatchesAndLog(
                 BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
         .isTrue();
+
+    String logs = getTestCapturedLog();
     // 2 entities in database, and we uploaded 2.
     String expectedWorkspaceLogPart = "workspace\t2\t2\t0 (0.000%)";
-    assertThat(getTestCapturedLog().contains(expectedWorkspaceLogPart)).isTrue();
+    assertThat(logs.contains(expectedWorkspaceLogPart)).isTrue();
     String expectedUserLogPart = "user\t2\t2\t0 (0.000%)";
-    assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
+    assertThat(logs.contains(expectedUserLogPart)).isTrue();
     String expectedCohortLogPart = "cohort\t2\t2\t0 (0.000%)";
-    assertThat(getTestCapturedLog().contains(expectedCohortLogPart)).isTrue();
+    assertThat(logs.contains(expectedCohortLogPart)).isTrue();
     String expectedNewUserSatisfactionSurveyLogPart =
         "new_user_satisfaction_survey\t2\t2\t0 (0.000%)";
-    assertThat(getTestCapturedLog().contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
+    assertThat(logs.contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
     String expectedUserGeneralDiscoverySourceLogPart =
         "user_general_discovery_source\t2\t2\t0 (0.000%)";
-    assertThat(getTestCapturedLog().contains(expectedUserGeneralDiscoverySourceLogPart)).isTrue();
+    assertThat(logs.contains(expectedUserGeneralDiscoverySourceLogPart)).isTrue();
     String expectedUserPartnerDiscoverySourceLogPart =
         "user_partner_discovery_source\t2\t2\t0 (0.000%)";
-    assertThat(getTestCapturedLog().contains(expectedUserPartnerDiscoverySourceLogPart)).isTrue();
+    assertThat(logs.contains(expectedUserPartnerDiscoverySourceLogPart)).isTrue();
   }
 
   @Test
@@ -139,35 +155,58 @@ public class ReportingVerificationServiceTest {
             reportingVerificationService.verifyBatchesAndLog(
                 BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
         .isFalse();
-    // 4 workspace entities, instead of the expected 2.
-    String expectedWorkspaceLogPart = "workspace\t4\t2\t-2";
-    assertThat(getTestCapturedLog().contains(expectedWorkspaceLogPart)).isTrue();
 
-    // other tables do not appear in the log because we fail-fast after workspace
+    String logs = getTestCapturedLog();
+    // 4 cohort entities, instead of the expected 2.
+    String expectedWorkspaceLogPart = "cohort\t4\t2\t-2";
+    assertThat(logs.contains(expectedWorkspaceLogPart)).isTrue();
+
+    // other tables do not appear in the log because we fail-fast after cohort
     String unexpectedUserLogPart = "user\t4\t2\t-2";
-    assertThat(getTestCapturedLog().contains(unexpectedUserLogPart)).isFalse();
-    String unexpectedCohortLogPart = "cohort\t4\t2\t-2";
-    assertThat(getTestCapturedLog().contains(unexpectedCohortLogPart)).isFalse();
+    assertThat(logs.contains(unexpectedUserLogPart)).isFalse();
+    String unexpectedCohortLogPart = "workspace\t4\t2\t-2";
+    assertThat(logs.contains(unexpectedCohortLogPart)).isFalse();
     String unexpectedSurveyLogPart = "new_user_satisfaction_survey\t4\t2\t-2";
-    assertThat(getTestCapturedLog().contains(unexpectedSurveyLogPart)).isFalse();
+    assertThat(logs.contains(unexpectedSurveyLogPart)).isFalse();
   }
 
   /** This creates equal amount of table entries for all batch-uploaded tables. */
+  // TODO: enforce that this is the same list as in ReportingServiceImpl.collectRecordsAndUpload()
   private void createTableEntries(long count) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("foo");
     cdrVersionDao.save(cdrVersion);
 
     for (int i = 0; i < count; ++i) {
-      DbUser user = new DbUser();
-      user.setGeneralDiscoverySources(ImmutableSet.of(DbGeneralDiscoverySource.OTHER_WEBSITE));
-      user.setPartnerDiscoverySources(
-          ImmutableSet.of(
-              DbPartnerDiscoverySource.ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM));
-      userDao.save(user);
-      DbWorkspace dbworkspace = workspaceDao.save(createDbWorkspace(user, cdrVersion));
-      cohortDao.save(createDbCohort(user, dbworkspace));
+      institutionDao.save(
+          new DbInstitution().setShortName("Inst" + i).setDisplayName("Institute #" + i));
+
+      DbUser user =
+          userDao.save(
+              new DbUser()
+                  .setGeneralDiscoverySources(
+                      ImmutableSet.of(DbGeneralDiscoverySource.OTHER_WEBSITE))
+                  .setPartnerDiscoverySources(
+                      ImmutableSet.of(
+                          DbPartnerDiscoverySource
+                              .ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM)));
+
       newUserSatisfactionSurveyDao.save(createDbNewUserSatisfactionSurvey(user));
+
+      DbWorkspace dbworkspace = workspaceDao.save(createDbWorkspace(user, cdrVersion));
+
+      workspaceFreeTierUsageDao.save(
+          new DbWorkspaceFreeTierUsage().setUser(user).setWorkspace(dbworkspace).setCost(i));
+
+      DbCohort cohort = cohortDao.save(createDbCohort(user, dbworkspace));
+
+      dataSetDao.save(
+          createDbDataset(dbworkspace.getWorkspaceId())
+              .setCohortIds(List.of(cohort.getCohortId()))
+              .setConceptSetIds(
+                  List.of(createDbConceptSet(dbworkspace.getWorkspaceId()).getConceptSetId()))
+              .setValues(
+                  List.of(new DbDatasetValue().setDomainId("Domain " + i).setValue("Value " + i))));
     }
     entityManager.flush();
   }
