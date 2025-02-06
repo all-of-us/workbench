@@ -149,18 +149,17 @@ const mapJobToTableRow = (
     dateStarted: job.submissionDate,
     dateStartedDisplay: formatDatetime(job.submissionDate),
     duration: durationMoment?.asSeconds(),
-    durationDisplay: !!durationMoment ? (
+    durationDisplay: durationMoment ? (
       formatDuration(durationMoment)
     ) : (
       <MissingCell />
     ),
     size: job.vcfSizeMb,
-    sizeDisplay:
-      job.vcfSizeMb === null ? (
-        <MissingCell />
-      ) : (
-        (job.vcfSizeMb / 1000).toFixed(1) + 'GB'
-      ),
+    sizeDisplay: job.vcfSizeMb ? (
+      (job.vcfSizeMb / 1000).toFixed(1) + 'GB'
+    ) : (
+      <MissingCell />
+    ),
     menuJsx: <GenomicsExtractionMenu {...{ job, workspace, onMutate }} />,
   };
 };
