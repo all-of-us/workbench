@@ -310,11 +310,7 @@ public class ReportingQueryServiceTest {
     workspace.setBillingAccountName("userProvidedBillingAccount");
     workspaceDao.save(workspace);
 
-    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
-    assertThat(iterator.hasNext()).isTrue();
-
-    List<ReportingWorkspace> firstBatch = iterator.next();
-    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
@@ -328,11 +324,7 @@ public class ReportingQueryServiceTest {
                 String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
-    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
-    assertThat(iterator.hasNext()).isTrue();
-
-    List<ReportingWorkspace> firstBatch = iterator.next();
-    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+    assertIteratorBillingStatus(BillingStatus.INACTIVE);
   }
 
   @Test
@@ -346,11 +338,7 @@ public class ReportingQueryServiceTest {
                 String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
-    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
-    assertThat(iterator.hasNext()).isTrue();
-
-    List<ReportingWorkspace> firstBatch = iterator.next();
-    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
@@ -373,11 +361,7 @@ public class ReportingQueryServiceTest {
                 String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
-    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
-    assertThat(iterator.hasNext()).isTrue();
-
-    List<ReportingWorkspace> firstBatch = iterator.next();
-    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
@@ -400,11 +384,7 @@ public class ReportingQueryServiceTest {
                 String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
-    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
-    assertThat(iterator.hasNext()).isTrue();
-
-    List<ReportingWorkspace> firstBatch = iterator.next();
-    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+    assertIteratorBillingStatus(BillingStatus.INACTIVE);
   }
 
   @Test
@@ -428,11 +408,7 @@ public class ReportingQueryServiceTest {
                 String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
-    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
-    assertThat(iterator.hasNext()).isTrue();
-
-    List<ReportingWorkspace> firstBatch = iterator.next();
-    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
@@ -459,11 +435,7 @@ public class ReportingQueryServiceTest {
                 String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
-    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
-    assertThat(iterator.hasNext()).isTrue();
-
-    List<ReportingWorkspace> firstBatch = iterator.next();
-    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Transactional
@@ -1042,5 +1014,13 @@ public class ReportingQueryServiceTest {
             .setAccessTier(controlledTier)
             .setInstitution(institution)
             .setMembershipRequirement(MembershipRequirement.DOMAINS));
+  }
+
+  private void assertIteratorBillingStatus(BillingStatus billingStatus) {
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    List<ReportingWorkspace> firstBatch = iterator.next();
+    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(billingStatus);
   }
 }
