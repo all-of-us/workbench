@@ -111,7 +111,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "AND (uice.bypassed = true "
           + " OR i.bypassInitialCreditsExpiration = true "
           + " OR uice.expirationTime IS NULL "
-          + "  OR uice.expirationTime > CURRENT_TIMESTAMP)")
+          + " OR uice.expirationTime > CURRENT_TIMESTAMP)")
   Set<DbUser> findCreatorsByActiveInitialCredits(
       @Param("initialCreditAccountNames") List<String> initialCreditAccountNames,
       @Param("creators") Set<DbUser> creators);
