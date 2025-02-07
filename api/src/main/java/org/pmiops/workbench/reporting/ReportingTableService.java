@@ -68,7 +68,6 @@ public class ReportingTableService {
 
   public List<ReportingTableParams<? extends ReportingBase>> getAll() {
     return List.of(
-        //        conceptSetConcept(),
         cohort(),
         dataset(),
         datasetCohort(),
