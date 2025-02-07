@@ -128,7 +128,8 @@
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": true,
     "enableVWBEgressMonitor": true,
-    "enableVWBUserAccessManagement": false
+    "enableVWBUserAccessManagement": false,
+    "enableVWBUserCreation": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
@@ -191,11 +192,11 @@
     "enableLoginIssueBanner": false
   },
   "vwb": {
-    "wsmBaseUrl": "https:\/\/terra-devel-wsm.api.verily.com",
+    "wsmBaseUrl": "https:\/\/workbench-dev.verily.com\/api\/wsm",
     "exfilManagerBaseUrl": "https:\/\/workbench-dev.verily.com\/api\/exfil",
     "vwbSamBaseUrl": "https:\/\/workbench-dev.verily.com\/api\/sam",
-    "organizationId": "79775c0a-3bf7-436a-8ab8-eab316998115",
-    "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b",
+    "organizationId": "00a62244-0497-460f-8d55-dd1eee3ce975",
+    "defaultPodId": "b9e49b23-72e4-4b41-8c2d-cb4c9f976019",
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-d-1v-ucd.iam.gserviceaccount.com",
     "userManagerBaseUrl": "https:\/\/workbench-dev.verily.com\/api\/user"
   }

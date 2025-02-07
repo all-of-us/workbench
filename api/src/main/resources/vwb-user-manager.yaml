@@ -2164,14 +2164,12 @@ components:
         createdDate:
           description: Timestamp of creation
           type: string
-          format: date-time
         lastUpdatedBy:
           description: User email of last update
           type: string
         lastUpdatedDate:
           description: Timestamp of last update
           type: string
-          format: date-time
 
     UserFacingId:
       type: string

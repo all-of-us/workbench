@@ -331,6 +331,9 @@ public class WorkbenchConfig {
     public boolean enableVWBEgressMonitor;
     // If true, AoU will call SAM and VWB to add/remove user from VWB tier group.
     public boolean enableVWBUserAccessManagement;
+    // If true, AoU will create the VWB user when the user first signs in, similar to Terra
+    // experience
+    public boolean enableVWBUserCreation;
   }
 
   public static class ActionAuditConfig {

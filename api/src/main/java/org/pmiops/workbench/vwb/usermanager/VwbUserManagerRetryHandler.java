@@ -14,9 +14,9 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserManagerRetryHandler extends TerraServiceRetryHandler<ApiException> {
+public class VwbUserManagerRetryHandler extends TerraServiceRetryHandler<ApiException> {
 
-  private static final Logger logger = Logger.getLogger(UserManagerRetryHandler.class.getName());
+  private static final Logger logger = Logger.getLogger(VwbUserManagerRetryHandler.class.getName());
 
   private static class UserManagerRetryPolicy extends ResponseCodeRetryPolicy {
 
@@ -50,7 +50,7 @@ public class UserManagerRetryHandler extends TerraServiceRetryHandler<ApiExcepti
     }
   }
 
-  public UserManagerRetryHandler(
+  public VwbUserManagerRetryHandler(
       BackOffPolicy backOffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     super(
         backOffPolicy,

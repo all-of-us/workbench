@@ -156,7 +156,7 @@
       "hasSurveyConductData": true,
       "accessTier": "registered",
       "tanagraEnabled": true,
-      "vwbTemplateId": "03e0a1e6-ddbc-499f-bdaa-6c0c91dc295a",
+      "vwbTemplateId": "7193e626-4547-40d8-ac8c-1204fc84ead1",
       "publicReleaseNumber": 4
     },
     {
@@ -180,7 +180,7 @@
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
       "tanagraEnabled": true,
-      "vwbTemplateId": "03e0a1e6-ddbc-499f-bdaa-6c0c91dc295a",
+      "vwbTemplateId": "c843d45c-8030-4db8-9bf1-7a50545af6cf",
       "publicReleaseNumber": 8
     }
   ]

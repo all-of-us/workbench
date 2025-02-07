@@ -17,7 +17,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
-public class UserManagerConfig {
+public class VwbUserManagerConfig {
 
   public static final String VWB_SERVICE_ACCOUNT_USER_API_CLIENT =
       "VWB_SERVICE_ACCOUNT_USER_API_CLIENT";
@@ -27,6 +27,7 @@ public class UserManagerConfig {
 
   public static final List<String> SCOPES =
       ImmutableList.<String>builder().addAll(RawlsApiClientFactory.SCOPES).build();
+  public static final int TIMEOUT = 30 * 1000;
 
   /**
    * Creates a User Manager API client, unauthenticated. Most clients should use an authenticated,
@@ -35,6 +36,9 @@ public class UserManagerConfig {
   private ApiClient newApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.vwb.userManagerBaseUrl);
+    apiClient.setReadTimeout(TIMEOUT);
+    apiClient.setConnectTimeout(TIMEOUT);
+    apiClient.setWriteTimeout(TIMEOUT);
     return apiClient;
   }
 
