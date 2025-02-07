@@ -153,8 +153,7 @@ public class ReportingQueryServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
 
   @MockBean private BigQueryService bigQueryService;
-  @MockBean
-  Provider<WorkbenchConfig> workbenchConfigProvider;
+  @MockBean Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Import({
     FakeClockConfiguration.class,
@@ -237,7 +236,8 @@ public class ReportingQueryServiceTest {
     final long initialWorkspaceCount = workspaceDao.count();
     DbWorkspace workspace1 =
         workspaceDao.save(
-            ReportingTestUtils.createDbWorkspace(user1, cdrVersion1).setBillingAccountName("horse")); // save cdr version too
+            ReportingTestUtils.createDbWorkspace(user1, cdrVersion1)
+                .setBillingAccountName("horse")); // save cdr version too
     assertThat(workspaceDao.count()).isEqualTo(initialWorkspaceCount + 1);
     return workspace1;
   }
@@ -319,9 +319,11 @@ public class ReportingQueryServiceTest {
   public void testWorkspaceIterator_inactive_exhausted() {
     final DbUser user = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(createDbWorkspace(user, cdrVersion)
-        .setInitialCreditsExhausted(true)
-        .setBillingAccountName(String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(true)
+            .setBillingAccountName(
+                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
     final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
@@ -335,9 +337,11 @@ public class ReportingQueryServiceTest {
   public void testWorkspaceIterator_active_missingInitialCredits() {
     final DbUser user = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(createDbWorkspace(user, cdrVersion)
-        .setInitialCreditsExhausted(false)
-        .setBillingAccountName(String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(false)
+            .setBillingAccountName(
+                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
     final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
@@ -360,9 +364,11 @@ public class ReportingQueryServiceTest {
     userDao.save(user);
 
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(createDbWorkspace(user, cdrVersion)
-        .setInitialCreditsExhausted(false)
-        .setBillingAccountName(String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(false)
+            .setBillingAccountName(
+                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
     final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
@@ -385,9 +391,11 @@ public class ReportingQueryServiceTest {
     userDao.save(user);
 
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(createDbWorkspace(user, cdrVersion)
-        .setInitialCreditsExhausted(false)
-        .setBillingAccountName(String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(false)
+            .setBillingAccountName(
+                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
     final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
@@ -411,9 +419,11 @@ public class ReportingQueryServiceTest {
     userDao.save(user);
 
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(createDbWorkspace(user, cdrVersion)
-        .setInitialCreditsExhausted(false)
-        .setBillingAccountName(String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(false)
+            .setBillingAccountName(
+                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
     final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
@@ -440,9 +450,11 @@ public class ReportingQueryServiceTest {
     institutionDao.save(dbInstitution);
 
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(createDbWorkspace(user, cdrVersion)
-        .setInitialCreditsExhausted(false)
-        .setBillingAccountName(String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(false)
+            .setBillingAccountName(
+                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
 
     final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
