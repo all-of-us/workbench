@@ -28,6 +28,8 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceDaoTest {
 
+  private final long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
+
   @Autowired UserDao userDao;
   @Autowired ReportingTestFixture<DbUser, ReportingUser> userFixture;
   @Autowired WorkspaceDao workspaceDao;
@@ -37,11 +39,10 @@ public class WorkspaceDaoTest {
   private DbUser dbUser;
   private DbWorkspace dbWorkspace;
   private DbInstitution dbInstitution;
-  private DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, ReportingTestConfig.class})
-  public static class conifg {}
+  public static class config {}
 
   @BeforeEach
   public void setUp() {
@@ -62,19 +63,18 @@ public class WorkspaceDaoTest {
             .setDisplayName("Test Institution")
             .setBypassInitialCreditsExpiration(false);
     dbInstitution = institutionDao.save(dbInstitution);
-    dbVerifiedInstitutionalAffiliation =
-        verifiedInstitutionalAffiliationDao.save(
-            new DbVerifiedInstitutionalAffiliation()
-                .setInstitution(dbInstitution)
-                .setUser(dbUser)
-                .setInstitutionalRoleEnum(InstitutionalRole.HIGH_SCHOOL_STUDENT));
+    verifiedInstitutionalAffiliationDao.save(
+        new DbVerifiedInstitutionalAffiliation()
+            .setInstitution(dbInstitution)
+            .setUser(dbUser)
+            .setInstitutionalRoleEnum(InstitutionalRole.HIGH_SCHOOL_STUDENT));
   }
 
   @Test
   public void findCreatorsByActiveInitialCredits_notCreator() {
-    DbUser dbUser2 = userDao.save(userFixture.createEntity());
+    DbUser differentUser = userDao.save(userFixture.createEntity());
     dbWorkspace.setBillingAccountName("initialCreditsAccount");
-    dbWorkspace.setCreator(dbUser2);
+    dbWorkspace.setCreator(differentUser);
     workspaceDao.save(dbWorkspace);
 
     assertThat(
@@ -112,10 +112,9 @@ public class WorkspaceDaoTest {
     dbWorkspace.setBillingAccountName("initialCreditsAccount");
     dbWorkspace.setCreator(dbUser);
     workspaceDao.save(dbWorkspace);
-    long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
+
     dbUser.setUserInitialCreditsExpiration(
         new DbUserInitialCreditsExpiration()
-            .setCreditStartTime(new Timestamp(System.currentTimeMillis()))
             .setExpirationTime(new Timestamp(System.currentTimeMillis() + MILLIS_IN_A_DAY)));
     userDao.save(dbUser);
 
@@ -127,10 +126,8 @@ public class WorkspaceDaoTest {
 
   @Test
   public void findCreatorsByActiveInitialCredits_withExpiredCredits() {
-    long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
     DbUserInitialCreditsExpiration dbUserInitialCreditsExpiration =
         new DbUserInitialCreditsExpiration()
-            .setCreditStartTime(new Timestamp(System.currentTimeMillis()))
             .setExpirationTime(new Timestamp(System.currentTimeMillis() - MILLIS_IN_A_DAY))
             .setUser(dbUser);
     dbUser = dbUser.setUserInitialCreditsExpiration(dbUserInitialCreditsExpiration);
@@ -139,19 +136,16 @@ public class WorkspaceDaoTest {
     dbWorkspace.setCreator(dbUser);
     dbWorkspace = workspaceDao.save(dbWorkspace);
 
-    var y =
-        workspaceDao.findCreatorsByActiveInitialCredits(
-            List.of("initialCreditsAccount"), Set.of(dbUser));
-
-    assertThat(y).isEqualTo(Collections.emptySet());
+    assertThat(
+            workspaceDao.findCreatorsByActiveInitialCredits(
+                List.of("initialCreditsAccount"), Set.of(dbUser)))
+        .isEqualTo(Collections.emptySet());
   }
 
   @Test
   public void findCreatorsByActiveInitialCredits_withExpiredCreditsButIndividuallyBypassed() {
-    long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
     DbUserInitialCreditsExpiration dbUserInitialCreditsExpiration =
         new DbUserInitialCreditsExpiration()
-            .setCreditStartTime(new Timestamp(System.currentTimeMillis()))
             .setExpirationTime(new Timestamp(System.currentTimeMillis() - MILLIS_IN_A_DAY))
             .setBypassed(true)
             .setUser(dbUser);
@@ -161,19 +155,16 @@ public class WorkspaceDaoTest {
     dbWorkspace.setCreator(dbUser);
     dbWorkspace = workspaceDao.save(dbWorkspace);
 
-    var y =
-        workspaceDao.findCreatorsByActiveInitialCredits(
-            List.of("initialCreditsAccount"), Set.of(dbUser));
-
-    assertThat(y).isEqualTo(Set.of(dbUser));
+    assertThat(
+            workspaceDao.findCreatorsByActiveInitialCredits(
+                List.of("initialCreditsAccount"), Set.of(dbUser)))
+        .isEqualTo(Set.of(dbUser));
   }
 
   @Test
   public void findCreatorsByActiveInitialCredits_withExpiredCreditsButInstitutionallyBypassed() {
-    long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
     DbUserInitialCreditsExpiration dbUserInitialCreditsExpiration =
         new DbUserInitialCreditsExpiration()
-            .setCreditStartTime(new Timestamp(System.currentTimeMillis()))
             .setExpirationTime(new Timestamp(System.currentTimeMillis() - MILLIS_IN_A_DAY))
             .setUser(dbUser);
     dbUser = dbUser.setUserInitialCreditsExpiration(dbUserInitialCreditsExpiration);
@@ -184,11 +175,10 @@ public class WorkspaceDaoTest {
 
     institutionDao.save(dbInstitution.setBypassInitialCreditsExpiration(true));
 
-    var y =
-        workspaceDao.findCreatorsByActiveInitialCredits(
-            List.of("initialCreditsAccount"), Set.of(dbUser));
-
-    assertThat(y).isEqualTo(Set.of(dbUser));
+    assertThat(
+            workspaceDao.findCreatorsByActiveInitialCredits(
+                List.of("initialCreditsAccount"), Set.of(dbUser)))
+        .isEqualTo(Set.of(dbUser));
   }
 
   @Test
@@ -201,19 +191,6 @@ public class WorkspaceDaoTest {
     assertThat(
             workspaceDao.findCreatorsByActiveInitialCredits(
                 List.of("initialCreditsAccount"), Set.of(dbUser)))
-        .isEqualTo(Collections.emptySet());
-  }
-
-  @Test
-  public void findCreatorsByActiveInitialCredits_differentUser() {
-    dbWorkspace.setBillingAccountName("initialCreditsAccount");
-    dbWorkspace.setCreator(dbUser);
-    workspaceDao.save(dbWorkspace);
-    DbUser dbUser2 = userDao.save(userFixture.createEntity());
-
-    assertThat(
-            workspaceDao.findCreatorsByActiveInitialCredits(
-                List.of("personalAccount"), Set.of(dbUser2)))
         .isEqualTo(Collections.emptySet());
   }
 }
