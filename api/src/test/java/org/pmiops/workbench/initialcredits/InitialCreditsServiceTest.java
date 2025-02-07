@@ -1134,7 +1134,7 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void test_checkInitialCreditsExtensionEligibility_noRemainingCredits() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     user.setUserInitialCreditsExpiration(
@@ -1151,7 +1151,7 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void test_checkInitialCreditsExtensionEligibility_hasRemainingCredits() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     user.setUserInitialCreditsExpiration(

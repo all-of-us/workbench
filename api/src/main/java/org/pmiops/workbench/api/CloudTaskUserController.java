@@ -57,7 +57,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
 
   private final AccessModuleService accessModuleService;
   private final CloudResourceManagerService cloudResourceManagerService;
-  private final InitialCreditsBatchUpdateService freeTierBillingUpdateService;
+  private final InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   private final InitialCreditsService initialCreditsService;
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserService userService;
@@ -65,13 +65,13 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   CloudTaskUserController(
       AccessModuleService accessModuleService,
       CloudResourceManagerService cloudResourceManagerService,
-      InitialCreditsBatchUpdateService freeTierBillingUpdateService,
+      InitialCreditsBatchUpdateService initialCreditsBatchUpdateService,
       InitialCreditsService initialCreditsService,
       Provider<Stopwatch> stopwatchProvider,
       UserService userService) {
     this.accessModuleService = accessModuleService;
     this.cloudResourceManagerService = cloudResourceManagerService;
-    this.freeTierBillingUpdateService = freeTierBillingUpdateService;
+    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.initialCreditsService = initialCreditsService;
     this.stopwatchProvider = stopwatchProvider;
     this.userService = userService;

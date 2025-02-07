@@ -124,22 +124,22 @@ public class CloudTaskUserControllerTest {
 
   @Test
   public void testCheckCreditsExhaustionForUserIDs() {
-    List<Long> userIdList = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
-    controller.checkCreditsExhaustionForUserIDs(userIdList);
+    List<Long> userIdList = List.of(1L, 2L, 3L);
+    controller.checkCreditsExhaustionForUserIDsBatch(userIdList);
     verify(mockFreeTierBillingUpdateService).checkCreditsExhaustionForUserIDs(userIdList);
   }
 
   @Test
   public void testCheckCreditsExhaustionForUserIDs_noUserListPassedFromTask() {
-    List<Long> userIdList = new ArrayList<>();
-    controller.checkCreditsExhaustionForUserIDs(userIdList);
+    List<Long> userIdList = List.of();
+    controller.checkCreditsExhaustionForUserIDsBatch(userIdList);
     verify(mockFreeTierBillingUpdateService, never()).checkCreditsExhaustionForUserIDs(userIdList);
   }
 
   @Test
   public void testCheckAndAlertFreeTierBillingUsage_nullPassedFromTask() {
-    controller.checkAndAlertFreeTierBillingUsageBatch(null);
-    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+    controller.checkCreditsExhaustionForUserIDsBatch(null);
+    verify(mockFreeTierBillingUpdateService, never()).checkCreditsExhaustionForUserIDs(any());
   }
 
   @Test

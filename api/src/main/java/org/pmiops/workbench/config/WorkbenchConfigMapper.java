@@ -24,7 +24,7 @@ public interface WorkbenchConfigMapper {
       source = "config.server.publicApiKeyForErrorReports")
   @Mapping(
       target = "defaultFreeCreditsDollarLimit",
-      source = "config.billing.defaultFreeCreditsDollarLimit")
+      source = "config.billing.defaultInitialCreditDollarLimit")
   @Mapping(
       target = "defaultInitialCreditDollarLimit",
       source = "config.billing.defaultInitialCreditDollarLimit")
