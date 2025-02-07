@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -15,34 +14,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineBillingController implements OfflineBillingApiDelegate {
 
-  private final InitialCreditsBatchUpdateService freeTierBillingService;
   private final GoogleProjectPerCostDao googleProjectPerCostDao;
+  private final InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   private final TaskQueueService taskQueueService;
-
   private final UserService userService;
 
   @Autowired
   OfflineBillingController(
-      InitialCreditsBatchUpdateService freeTierBillingService,
       GoogleProjectPerCostDao googleProjectPerCostDao,
-      UserService userService,
-      TaskQueueService taskQueueService) {
-    this.freeTierBillingService = freeTierBillingService;
+      InitialCreditsBatchUpdateService initialCreditsBatchUpdateService,
+      TaskQueueService taskQueueService,
+      UserService userService) {
+    this.googleProjectPerCostDao = googleProjectPerCostDao;
+    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.taskQueueService = taskQueueService;
     this.userService = userService;
-    this.googleProjectPerCostDao = googleProjectPerCostDao;
   }
 
   @Override
   public ResponseEntity<Void> checkFreeTierBillingUsage() {
     // Get cost for all workspace from BQ
-    Map<String, Double> freeTierForAllWorkspace =
-        freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();
+    Map<String, Double> workspaceCostsFromBQ =
+        initialCreditsBatchUpdateService.getWorkspaceCostsFromBQ();
 
     List<DbGoogleProjectPerCost> googleProjectCostList =
-        freeTierForAllWorkspace.entrySet().stream()
-            .map(DbGoogleProjectPerCost::new)
-            .collect(Collectors.toList());
+        workspaceCostsFromBQ.entrySet().stream().map(DbGoogleProjectPerCost::new).toList();
 
     // Clear table googleproject_cost and then insert all entries from BQ
     googleProjectPerCostDao.deleteAll();
@@ -51,8 +47,8 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
     List<Long> allUserIds = userService.getAllUserIds();
 
-    taskQueueService.groupAndPushFreeTierBilling(allUserIds);
-    log.info("Pushed all users to Cloud Task for Free Tier Billing");
+    taskQueueService.groupAndPushInitialCreditsUsage(allUserIds);
+    log.info("Pushed all users to the Initial Credits Usage Cloud Task");
 
     return ResponseEntity.noContent().build();
   }

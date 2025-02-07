@@ -410,7 +410,7 @@ public class OfflineEnvironmentsControllerTest {
     stubDisks(List.of(idleDisk(Duration.ofDays(14L))));
 
     workspace.setBillingAccountName(config.billing.initialCreditsBillingAccountName());
-    when(mockInitialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(workspace))
+    when(mockInitialCreditsService.getWorkspaceCreatorInitialCreditsRemaining(workspace))
         .thenReturn(123.0);
 
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);

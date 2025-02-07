@@ -61,7 +61,7 @@ public class TaskQueueService {
   private static final String DELETE_TEST_WORKSPACES_QUEUE_NAME = "deleteTestUserWorkspacesQueue";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
       "deleteTestUserRawlsWorkspacesQueue";
-  private static final String FREE_TIER_BILLING_QUEUE = "freeTierBillingQueue";
+  private static final String INITIAL_CREDITS_USAGE_QUEUE = "initialCreditsUsageQueue";
   private static final String INITIAL_CREDITS_EXHAUSTION_QUEUE = "initialCreditsExhaustionQueue";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
       "checkCreditsExpirationForUserIDsQueue";
@@ -121,14 +121,14 @@ public class TaskQueueService {
         .forEach(batch -> createAndPushTask(AUDIT_PROJECTS_QUEUE_NAME, AUDIT_PROJECTS_PATH, batch));
   }
 
-  public void groupAndPushFreeTierBilling(List<Long> userIds) {
+  public void groupAndPushInitialCreditsUsage(List<Long> userIds) {
     Integer freeTierCronUserBatchSize =
         workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
     CloudTasksUtils.partitionList(userIds, freeTierCronUserBatchSize)
         .forEach(
             batch ->
                 createAndPushTask(
-                    FREE_TIER_BILLING_QUEUE, CHECK_AND_ALERT_FREE_TIER_USAGE_PATH, batch));
+                    INITIAL_CREDITS_USAGE_QUEUE, CHECK_AND_ALERT_FREE_TIER_USAGE_PATH, batch));
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
