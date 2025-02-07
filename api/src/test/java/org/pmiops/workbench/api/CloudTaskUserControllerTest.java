@@ -123,22 +123,23 @@ public class CloudTaskUserControllerTest {
   }
 
   @Test
-  public void testCheckAndAlertFreeTierBillingUsage() {
+  public void testCheckCreditsExhaustionForUserIDs() {
     List<Long> userIdList = List.of(1L, 2L, 3L);
-    controller.checkAndAlertFreeTierBillingUsageBatch(userIdList);
-    verify(mockFreeTierBillingUpdateService).checkAndAlertFreeTierBillingUsage(userIdList);
+    controller.checkCreditsExhaustionForUserIDsBatch(userIdList);
+    verify(mockFreeTierBillingUpdateService).checkCreditsExhaustionForUserIDs(userIdList);
   }
 
   @Test
-  public void testCheckAndAlertFreeTierBillingUsage_noUserListPassedFromTask() {
-    controller.checkAndAlertFreeTierBillingUsageBatch(Collections.emptyList());
-    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+  public void testCheckCreditsExhaustionForUserIDs_noUserListPassedFromTask() {
+    List<Long> userIdList = List.of();
+    controller.checkCreditsExhaustionForUserIDsBatch(userIdList);
+    verify(mockFreeTierBillingUpdateService, never()).checkCreditsExhaustionForUserIDs(userIdList);
   }
 
   @Test
   public void testCheckAndAlertFreeTierBillingUsage_nullPassedFromTask() {
-    controller.checkAndAlertFreeTierBillingUsageBatch(null);
-    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+    controller.checkCreditsExhaustionForUserIDsBatch(null);
+    verify(mockFreeTierBillingUpdateService, never()).checkCreditsExhaustionForUserIDs(any());
   }
 
   @Test

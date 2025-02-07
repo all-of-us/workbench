@@ -22,8 +22,8 @@
     "accountId": "013713-75CFF6-1751E5",
     "projectNamePrefix": "aou-rw-local1-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
-    "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [
+    "defaultInitialCreditDollarLimit": 300.0,
+    "initialCreditCostAlertThresholds": [
       0.5,
       0.75
     ],
@@ -31,9 +31,9 @@
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
-    "freeTierCronUserBatchSize": 100,
-    "minutesBeforeLastFreeTierJob": 60,
-    "numberOfDaysToConsiderForFreeTierUsageUpdate": 2
+    "initialCreditCronUserBatchSize": 100,
+    "minutesBeforeLastInitialCreditJob": 60,
+    "numberOfDaysToConsiderForInitialCreditUsageUpdate": 2
   },
   "auth": {
     "serviceAccountApiUsers": [

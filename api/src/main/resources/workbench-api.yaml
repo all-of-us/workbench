@@ -2449,14 +2449,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/checkFreeTierBillingUsage:
+  /v1/cron/checkForInitialCreditUsage:
     get:
       tags:
         - offlineBilling
         - cron
-      description: Find and alert users that have exceeded their free tier billing
-        usage
-      operationId: checkFreeTierBillingUsage
+      description: Find and alert users that have exhausted their allocated initial credits
+      operationId: checkForInitialCreditUsage
       security: [ ]
       responses:
         204:
@@ -4348,15 +4347,14 @@ paths:
           description: Workspaces deleted
           content: {}
       x-codegen-request-body-name: request
-  /v1/cloudTask/checkAndAlertFreeTierBillingUsage:
+  /v1/cloudTask/checkCreditsExhaustionForUserIDs:
     post:
       tags:
         - cloudTaskUser
         - cloudTask
       description: |
-        Check whether users have incurred sufficient cost in their workspaces to trigger alerts 
-        due to passing thresholds or exceeding limits
-      operationId: checkAndAlertFreeTierBillingUsageBatch
+        Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to passing thresholds or exceeding limits
+      operationId: checkCreditsExhaustionForUserIDsBatch
       security: [ ]
       requestBody:
         description: A batch of users needs to be checked, and alerts need to be sent regarding 
@@ -4374,11 +4372,11 @@ paths:
   /v1/cloudTask/handleInitialCreditsExpiry:
     post:
       tags:
-        - cloudTaskInitialCreditExpiry
+        - cloudTaskInitialCreditExhaustion
         - cloudTask
       description: |
         Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
-      operationId: handleInitialCreditsExpiryBatch
+      operationId: handleInitialCreditsExhaustionBatch
       security: [ ]
       requestBody:
         description: Users that should be alerted about their free credits use.
@@ -7038,6 +7036,11 @@ components:
             environments.
           default: false
         defaultFreeCreditsDollarLimit:
+          type: number
+          description: DEPRECATED. The default dollar amount of free credits allotted to each
+            user
+          format: double
+        defaultInitialCreditDollarLimit:
           type: number
           description: The default dollar amount of free credits allotted to each
             user

@@ -62,13 +62,13 @@ public class InitialCreditsBatchUpdateServiceTest {
 
   @Test
   public void testFreeTierBillingBatchUpdateService() {
-    initialCreditsBatchUpdateService.checkAndAlertFreeTierBillingUsage(Arrays.asList(1L, 2L, 3L));
+    initialCreditsBatchUpdateService.checkCreditsExhaustionForUserIDs(Arrays.asList(1L, 2L, 3L));
 
     verify(mockWorkspaceDao, times(1)).getGoogleProjectForUserList(Arrays.asList(1L, 2L, 3L));
     verify(mockGoogleProjectPerCostDao, times(1)).findAllByGoogleProjectId(googleProjectIdsSet);
 
     verify(mockInitialCreditsService)
-        .checkFreeTierBillingUsageForUsers(mockDbuserSet, getUserCostMap());
+        .checkInitialCreditUsageForUsers(mockDbuserSet, getUserCostMap());
   }
 
   private void mockDbUser() {

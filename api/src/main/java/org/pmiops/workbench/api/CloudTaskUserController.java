@@ -57,7 +57,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
 
   private final AccessModuleService accessModuleService;
   private final CloudResourceManagerService cloudResourceManagerService;
-  private final InitialCreditsBatchUpdateService freeTierBillingUpdateService;
+  private final InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   private final InitialCreditsService initialCreditsService;
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserService userService;
@@ -65,13 +65,13 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   CloudTaskUserController(
       AccessModuleService accessModuleService,
       CloudResourceManagerService cloudResourceManagerService,
-      InitialCreditsBatchUpdateService freeTierBillingUpdateService,
+      InitialCreditsBatchUpdateService initialCreditsBatchUpdateService,
       InitialCreditsService initialCreditsService,
       Provider<Stopwatch> stopwatchProvider,
       UserService userService) {
     this.accessModuleService = accessModuleService;
     this.cloudResourceManagerService = cloudResourceManagerService;
-    this.freeTierBillingUpdateService = freeTierBillingUpdateService;
+    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.initialCreditsService = initialCreditsService;
     this.stopwatchProvider = stopwatchProvider;
     this.userService = userService;
@@ -125,25 +125,6 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       return 1; // error
     }
     return 0; // no error
-  }
-
-  /**
-   * Takes in batch of user Ids check whether users have incurred sufficient cost in their
-   * workspaces to trigger alerts due to passing thresholds or exceeding limits
-   *
-   * @param userIds : Batch of user IDs from cloud task queue: freeTierBillingQueue
-   * @return
-   */
-  @Override
-  public ResponseEntity<Void> checkAndAlertFreeTierBillingUsageBatch(List<Long> userIds) {
-    if (userIds == null || userIds.isEmpty()) {
-      return ResponseEntity.noContent().build();
-    }
-
-    return processUserIdBatch(
-        userIds,
-        "alerting for initial credits usage",
-        freeTierBillingUpdateService::checkAndAlertFreeTierBillingUsage);
   }
 
   @Override
@@ -214,6 +195,21 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
           return 0;
         });
 
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Takes in batch of user Ids check whether users have incurred sufficient cost in their
+   * workspaces to trigger alerts due to passing thresholds or exceeding limits
+   *
+   * @param body : Batch of user IDs from cloud task queue: freeTierBillingQueue
+   * @return
+   */
+  @Override
+  public ResponseEntity<Void> checkCreditsExhaustionForUserIDsBatch(List<Long> userIdsList) {
+    if (userIdsList != null && userIdsList.size() > 0) {
+      initialCreditsBatchUpdateService.checkCreditsExhaustionForUserIDs(userIdsList);
+    }
     return ResponseEntity.noContent().build();
   }
 

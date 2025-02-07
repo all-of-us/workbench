@@ -93,28 +93,32 @@ public class WorkbenchConfig {
       return fullBillingAccountName(accountId);
     }
 
-    // The full table name for the BigQuery billing export, which is read from by the free-tier
+    // The full table name for the BigQuery billing export, which is read from by the initial credit
+    // usage
     // usage tracking cron endpoint.
     public String exportBigQueryTable;
-    // The default dollar limit to apply to free-credit usage in this environment.
-    public Double defaultFreeCreditsDollarLimit;
-    // Thresholds for email alerting based on free tier usage, by cost
-    public List<Double> freeTierCostAlertThresholds;
+
+    // The default dollar limit to apply to initial credit usage in this environment.
+    public Double defaultInitialCreditDollarLimit;
+
+    // Thresholds for email alerting based on initial credit usage, by cost
+    public List<Double> initialCreditCostAlertThresholds;
     // The contact email from Carahsoft for billing account setup
     public String carahsoftEmail;
 
     // The batch size used by the cron job to process users
-    public Integer freeTierCronUserBatchSize;
+    public Integer initialCreditCronUserBatchSize;
 
-    // The number of minutes elapsed after the last cron run to update the free tier billing
+    // The number of minutes elapsed after the last cron run to update the initial credit billing
     // information
-    public Integer minutesBeforeLastFreeTierJob;
+    public Integer minutesBeforeLastInitialCreditJob;
 
-    // A value that defines the number of days to consider between the last update of the Free tier
+    // A value that defines the number of days to consider between the last update of the initial
+    // credit
     // usage in the database and the last workspace update when calculating the eligibility of a
-    // workspace free tier usage to be updated. To account for charges that may occur after the
+    // workspace initial credit usage to be updated. To account for charges that may occur after the
     // workspace gets deleted and after the last cron had run
-    public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
+    public Long numberOfDaysToConsiderForInitialCreditUsageUpdate;
 
     // The number of days that initial credits are valid for.
     public Long initialCreditsValidityPeriodDays;
