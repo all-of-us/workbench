@@ -2,22 +2,16 @@ package org.pmiops.workbench.reporting;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
 import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
-import org.pmiops.workbench.model.ReportingSnapshot;
-import org.pmiops.workbench.model.ReportingUploadDetails;
-import org.pmiops.workbench.model.ReportingUploadResult;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
@@ -32,7 +26,6 @@ import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumn
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.pmiops.workbench.utils.FieldValues;
-import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,43 +35,15 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final Provider<Stopwatch> stopwatchProvider;
   private final ReportingQueryService reportingQueryService;
 
   public ReportingVerificationServiceImpl(
       BigQueryService bigQueryService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      Provider<Stopwatch> stopwatchProvider,
       ReportingQueryService reportingQueryService) {
     this.bigQueryService = bigQueryService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.stopwatchProvider = stopwatchProvider;
     this.reportingQueryService = reportingQueryService;
-  }
-
-  @Override
-  public boolean verifyAndLog(ReportingSnapshot reportingSnapshot) {
-    // check each table. Note that for streaming inputs, not all rows may be immediately available.
-    final ReportingUploadDetails uploadDetails = getUploadDetails(reportingSnapshot);
-    final StringBuilder sb =
-        new StringBuilder(
-            String.format("Verifying Snapshot %d:\n", reportingSnapshot.getCaptureTimestamp()));
-
-    sb.append("Table\tSource\tDestination\tDifference(%)\n");
-
-    // fails-fast due to allMatch() so logs may be incomplete on failure
-    boolean verified =
-        uploadDetails.getUploads().stream()
-            .allMatch(
-                result ->
-                    verifyCount(
-                        result.getTableName(),
-                        result.getSourceRowCount(),
-                        result.getDestinationRowCount(),
-                        sb));
-
-    logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
-    return verified;
   }
 
   @Override
@@ -88,18 +53,36 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
 
+    // TODO: enforce that this is the same list as in ReportingServiceImpl.collectRecordsAndUpload()
     // alt: this could be a Map, but we don't need to reference it in that way
     List<Map.Entry<String, Integer>> tableCounters =
         List.of(
             Map.entry(
-                WorkspaceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getWorkspaceCount()),
-            Map.entry(
-                UserColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(UserColumnValueExtractor.TABLE_NAME)),
-            Map.entry(
                 CohortColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(CohortColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                DatasetCohortColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    /* TODO: differs from expected dataset_cohort */
+                    "data_set_cohort")),
+            Map.entry(
+                DatasetColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    /* TODO: differs from expected dataset */
+                    "data_set")),
+            Map.entry(
+                DatasetConceptSetColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    /* TODO: differs from expected dataset_concept_set */
+                    "data_set_concept_set")),
+            Map.entry(
+                DatasetDomainColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    /* TODO: differs from expected dataset_domain_value */
+                    "data_set_values")),
+            Map.entry(
+                InstitutionColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(InstitutionColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 LeonardoAppUsageColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getAppUsageRowCount(
@@ -111,13 +94,23 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                 reportingQueryService.getTableRowCount(
                     NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
             Map.entry(
+                UserColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(UserColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
                 UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
                     UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
-                    UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME)));
+                    UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                WorkspaceColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getActiveWorkspaceCount()),
+            Map.entry(
+                WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME)));
 
     // fails-fast due to allMatch() so logs may be incomplete on failure
     boolean verified =
@@ -132,45 +125,6 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
     logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
     return verified;
-  }
-
-  private ReportingUploadDetails getUploadDetails(ReportingSnapshot snapshot) {
-    final Stopwatch verifyStopwatch = stopwatchProvider.get();
-    verifyStopwatch.reset().start();
-    final ReportingUploadDetails result =
-        new ReportingUploadDetails()
-            .snapshotTimestamp(snapshot.getCaptureTimestamp())
-            .projectId(getProjectId())
-            .dataset(getDataset())
-            .uploads(
-                ImmutableList.of(
-                    getUploadResult(
-                        snapshot,
-                        WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getWorkspaceFreeTierUsage),
-                    getUploadResult(
-                        snapshot,
-                        InstitutionColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getInstitutions),
-                    getUploadResult(
-                        snapshot,
-                        DatasetColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getDatasets),
-                    getUploadResult(
-                        snapshot,
-                        DatasetCohortColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getDatasetCohorts),
-                    getUploadResult(
-                        snapshot,
-                        DatasetDomainColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getDatasetDomainIdValues),
-                    getUploadResult(
-                        snapshot,
-                        DatasetConceptSetColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getDatasetConceptSets)));
-    verifyStopwatch.stop();
-    logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
-    return result;
   }
 
   /** Verifies source count equals to destination count. Returns {@code true} of match. */
@@ -189,23 +143,12 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     return destinationCount.equals(sourceCount);
   }
 
-  public String getDataset() {
+  public String getBigqueryDataset() {
     return workbenchConfigProvider.get().reporting.dataset;
   }
 
   public String getProjectId() {
     return workbenchConfigProvider.get().server.projectId;
-  }
-
-  private <T> ReportingUploadResult getUploadResult(
-      ReportingSnapshot snapshot,
-      String tableName,
-      Function<ReportingSnapshot, List<T>> collectionExtractor) {
-
-    return new ReportingUploadResult()
-        .tableName(tableName)
-        .sourceRowCount((long) collectionExtractor.apply(snapshot).size())
-        .destinationRowCount(getActualRowCount(tableName, snapshot.getCaptureTimestamp()));
   }
 
   private Long getActualRowCount(String tableName, long snapshotTimestamp) {
@@ -236,6 +179,6 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             + "  `%s.%s.%s` \n"
             + "WHERE\n"
             + "  snapshot_timestamp =  @snapshot_timestamp;";
-    return String.format(queryTemplate, getProjectId(), getDataset(), tableName);
+    return String.format(queryTemplate, getProjectId(), getBigqueryDataset(), tableName);
   }
 }

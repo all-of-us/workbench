@@ -24,17 +24,41 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 public interface ReportingQueryService {
   long getQueryBatchSize();
 
-  List<ReportingDataset> getDatasets();
+  List<ReportingDataset> getDatasetBatch(long limit, long offset);
 
-  List<ReportingDatasetCohort> getDatasetCohorts();
+  default Stream<List<ReportingDataset>> getBatchedDatasetStream() {
+    return getBatchedStream(this::getDatasetBatch);
+  }
 
-  List<ReportingDatasetConceptSet> getDatasetConceptSets();
+  List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset);
 
-  List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues();
+  default Stream<List<ReportingDatasetCohort>> getBatchedDatasetCohortStream() {
+    return getBatchedStream(this::getDatasetCohortBatch);
+  }
 
-  List<ReportingInstitution> getInstitutions();
+  List<ReportingDatasetConceptSet> getDatasetConceptSetBatch(long limit, long offset);
 
-  List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsage();
+  default Stream<List<ReportingDatasetConceptSet>> getBatchedDatasetConceptSetStream() {
+    return getBatchedStream(this::getDatasetConceptSetBatch);
+  }
+
+  List<ReportingDatasetDomainIdValue> getDatasetDomainIdValueBatch(long limit, long offset);
+
+  default Stream<List<ReportingDatasetDomainIdValue>> getBatchedDatasetDomainIdValueStream() {
+    return getBatchedStream(this::getDatasetDomainIdValueBatch);
+  }
+
+  List<ReportingInstitution> getInstitutionBatch(long limit, long offset);
+
+  default Stream<List<ReportingInstitution>> getBatchedInstitutionStream() {
+    return getBatchedStream(this::getInstitutionBatch);
+  }
+
+  List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsageBatch(long limit, long offset);
+
+  default Stream<List<ReportingWorkspaceFreeTierUsage>> getBatchedWorkspaceFreeTierUsageStream() {
+    return getBatchedStream(this::getWorkspaceFreeTierUsageBatch);
+  }
 
   List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset);
 
@@ -76,6 +100,12 @@ public interface ReportingQueryService {
   default Stream<List<ReportingUserPartnerDiscoverySource>>
       getBatchedUserPartnerDiscoverySourceStream() {
     return getBatchedStream(this::getUserPartnerDiscoverySourceBatch);
+  }
+
+  List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset);
+
+  default Stream<List<ReportingLeonardoAppUsage>> getBatchedLeonardoAppUsageStream() {
+    return getBatchedStream(this::getLeonardoAppUsageBatch);
   }
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
@@ -148,11 +178,5 @@ public interface ReportingQueryService {
 
   int getAppUsageRowCount(String tableName);
 
-  int getWorkspaceCount();
-
-  List<ReportingLeonardoAppUsage> getLeonardoAppUsage(long limit, long offset);
-
-  default Stream<List<ReportingLeonardoAppUsage>> getBatchedLeonardoAppUsageStream() {
-    return getBatchedStream(this::getLeonardoAppUsage);
-  }
+  int getActiveWorkspaceCount();
 }

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.reporting.insertion;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__CDR_VERSION_ID;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__NAME;
