@@ -630,9 +630,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testCohortStream_twoAndAHalfBatches() {
     createCohorts(5);
-
-    final List<List<ReportingCohort>> stream = Streams.stream(getCohortsBatchIterator()).toList();
-    assertThat(stream.size()).isEqualTo(3);
+    assertThat(Streams.stream(getCohortsBatchIterator()).count()).isEqualTo(3);
   }
 
   @Test
