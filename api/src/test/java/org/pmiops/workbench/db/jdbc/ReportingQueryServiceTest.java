@@ -449,9 +449,9 @@ public class ReportingQueryServiceTest {
   public void testQueryUser() {
     createUsers(1);
 
-    final List<List<ReportingUser>> stream = getUserBatches();
-    assertThat(stream.size()).isEqualTo(1);
-    userFixture.assertDTOFieldsMatchConstants(stream.stream().findFirst().get().get(0));
+    final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
+    assertThat(batches.size()).isEqualTo(1);
+    userFixture.assertDTOFieldsMatchConstants(batches.stream().findFirst().get().get(0));
   }
 
   @Test
@@ -461,10 +461,10 @@ public class ReportingQueryServiceTest {
     removeUserFromExistingTier(user, registeredTier);
     entityManager.flush();
 
-    final List<List<ReportingUser>> stream = getUserBatches();
-    assertThat(stream.size()).isEqualTo(1);
+    final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
+    assertThat(batches.size()).isEqualTo(1);
 
-    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
+    ReportingUser reportingUser = batches.stream().findFirst().get().get(0);
     assertThat(reportingUser.getAccessTierShortNames()).isNull();
   }
 
@@ -486,12 +486,12 @@ public class ReportingQueryServiceTest {
 
     entityManager.flush();
 
-    final List<List<ReportingUser>> stream = getUserBatches();
+    final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
 
     // regression test against one row per user/tier pair (i.e. we don't want 2 here)
-    assertThat(stream.size()).isEqualTo(1);
+    assertThat(batches.size()).isEqualTo(1);
 
-    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
+    ReportingUser reportingUser = batches.stream().findFirst().get().get(0);
     assertThat(reportingUser.getAccessTierShortNames()).contains(registeredTier.getShortName());
     assertThat(reportingUser.getAccessTierShortNames()).contains(tier2.getShortName());
   }
@@ -499,9 +499,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testUserStream_twoAndAHalfBatches() {
     createUsers(5);
-
-    final List<List<ReportingUser>> stream = getUserBatches();
-    assertThat(stream.size()).isEqualTo(3);
+    assertThat(getBatchedUserStream().count()).isEqualTo(3);
   }
 
   @Test
@@ -785,8 +783,8 @@ public class ReportingQueryServiceTest {
         reportingQueryService::getNewUserSatisfactionSurveyBatch);
   }
 
-  private List<List<ReportingUser>> getUserBatches() {
-    return reportingQueryService.getBatchedStream(reportingQueryService::getUserBatch).toList();
+  private Stream<List<ReportingUser>> getBatchedUserStream() {
+    return reportingQueryService.getBatchedStream(reportingQueryService::getUserBatch);
   }
 
   private Stream<List<ReportingNewUserSatisfactionSurvey>>
