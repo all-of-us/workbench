@@ -35,6 +35,9 @@ public class VwbUserManagerConfig {
   private ApiClient newApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.vwb.userManagerBaseUrl);
+    apiClient.setReadTimeout(30000);
+    apiClient.setConnectTimeout(30000);
+    apiClient.setWriteTimeout(30000);
     return apiClient;
   }
 

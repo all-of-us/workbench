@@ -145,7 +145,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private DbUser maybeInitializeUserWithTerraAndVwb() {
+  private DbUser maybeInitializeUserWithTerra() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
     DbUser dbUser = userAuthentication.getUser();
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
@@ -173,15 +173,20 @@ public class ProfileController implements ProfileApiDelegate {
         // to be replaced as part of RW-11416
         userService.acceptTerraTermsOfServiceDeprecated(dbUser);
       }
-
-      // Register the user in VWB
-      vwbUserService.createUser(dbUser.getUsername());
-
-      dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
-      return saveUserWithConflictHandling(dbUser);
     }
 
     return dbUser;
+  }
+
+  private void maybeInitializeUserWithVwb(DbUser dbUser) {
+    if (dbUser.getFirstSignInTime() == null) {
+      vwbUserService.createUser(dbUser.getUsername());
+    }
+  }
+
+  private DbUser saveUserFirstSignIn(DbUser dbUser) {
+    dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+    return saveUserWithConflictHandling(dbUser);
   }
 
   private ResponseEntity<Profile> getProfileResponse(DbUser user) {
@@ -193,7 +198,9 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> getMe() {
     // Record that the user signed in and run Terra initialization as needed.
-    DbUser dbUser = maybeInitializeUserWithTerraAndVwb();
+    DbUser dbUser = maybeInitializeUserWithTerra();
+    maybeInitializeUserWithVwb(dbUser);
+    dbUser = saveUserFirstSignIn(dbUser);
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);
   }
