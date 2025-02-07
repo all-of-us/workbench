@@ -194,7 +194,6 @@ public class ReportingQueryServiceTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.reporting.maxRowsPerInsert = BATCH_SIZE;
     workbenchConfig.billing.accountId = "initial-credits";
-    when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
   }
 
   @Test
@@ -240,8 +239,7 @@ public class ReportingQueryServiceTest {
     final long initialWorkspaceCount = workspaceDao.count();
     DbWorkspace workspace1 =
         workspaceDao.save(
-            ReportingTestUtils.createDbWorkspace(user1, cdrVersion1)
-                .setBillingAccountName("horse")); // save cdr version too
+            ReportingTestUtils.createDbWorkspace(user1, cdrVersion1));
     assertThat(workspaceDao.count()).isEqualTo(initialWorkspaceCount + 1);
     return workspace1;
   }
