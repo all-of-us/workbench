@@ -25,6 +25,7 @@ public class WsmConfig {
   public static final String WSM_SERVICE_ACCOUNT_API_CLIENT = "WSM_SERVICE_ACCOUNT_API_CLIENT";
   public static final String WSM_SERVICE_ACCOUNT_WORKSPACE_API =
       "WSM_SERVICE_ACCOUNT_WORKSPACE_API";
+  public static final int TIMEOUT = 60 * 1000;
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -61,9 +62,9 @@ public class WsmConfig {
   private ApiClient newApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.vwb.wsmBaseUrl);
-    apiClient.setReadTimeout(60 * 1000);
-    apiClient.setConnectTimeout(60 * 1000);
-    apiClient.setWriteTimeout(60 * 1000);
+    apiClient.setReadTimeout(TIMEOUT);
+    apiClient.setConnectTimeout(TIMEOUT);
+    apiClient.setWriteTimeout(TIMEOUT);
     return apiClient;
   }
 
