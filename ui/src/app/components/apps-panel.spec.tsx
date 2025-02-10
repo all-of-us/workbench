@@ -42,11 +42,16 @@ const component = async () =>
     />
   );
 
-const mockInitialCredits = (
-  exhausted: boolean,
-  expired: boolean,
-  expirationBypassed: boolean
-) => {
+interface InitialCreditsProps {
+  exhausted: boolean;
+  expired: boolean;
+  expirationBypassed: boolean;
+}
+const mockInitialCredits = ({
+  exhausted,
+  expired,
+  expirationBypassed,
+}: InitialCreditsProps) => {
   workspaceStub.initialCredits = {
     exhausted,
     expirationEpochMillis: nowPlusDays(expired ? -1 : 1),
@@ -169,7 +174,11 @@ describe(AppsPanel.name, () => {
   });
 
   it('should allow a user to expand Jupyter', async () => {
-    mockInitialCredits(false, false, false);
+    mockInitialCredits({
+      exhausted: false,
+      expired: false,
+      expirationBypassed: false,
+    });
     await component();
 
     await expectExpandableApp(user, 'Jupyter');
@@ -182,7 +191,11 @@ describe(AppsPanel.name, () => {
         enableInitialCreditsExpiration: true,
       },
     });
-    mockInitialCredits(true, false, false);
+    mockInitialCredits({
+      exhausted: true,
+      expired: false,
+      expirationBypassed: false,
+    });
 
     const { container } = await component();
     expect(container).toBeInTheDocument();
@@ -223,7 +236,12 @@ describe(AppsPanel.name, () => {
         enableInitialCreditsExpiration: true,
       },
     });
-    mockInitialCredits(false, true, false);
+
+    mockInitialCredits({
+      exhausted: false,
+      expired: true,
+      expirationBypassed: false,
+    });
 
     await component();
     await expectAppsInAppsPanelToBeDisabled(user);
@@ -236,7 +254,12 @@ describe(AppsPanel.name, () => {
         enableInitialCreditsExpiration: true,
       },
     });
-    mockInitialCredits(false, true, true);
+
+    mockInitialCredits({
+      exhausted: false,
+      expired: true,
+      expirationBypassed: true,
+    });
 
     await component();
 
