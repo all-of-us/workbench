@@ -324,6 +324,7 @@ Common.register_command({
 
 def deploy_tanagra(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.update_jira = true
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
@@ -358,12 +359,56 @@ def deploy_tanagra(cmd_name, args)
     ->(opts, v) { opts.auth_token = v},
     "Github token"
   )
+  op.add_option(
+    "--no-update-jira",
+    ->(opts, _) { opts.update_jira = false},
+    "Don't update or create a ticket in JIRA"
+  )
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
   op.add_validator ->(opts) { raise ArgumentError.new("Missing flag: Must include either --promote or --no-promote") if opts.promote.nil?}
 
   op.parse.validate
-
+  
   common = Common.new
+  
+  versions = common.capture_stdout %W{
+    gcloud app
+    --format json(id,service,traffic_split)
+    --project #{op.opts.project}
+    versions list
+  }
+  if versions.empty?
+    common.error "Failed to get live GAE version for project '#{op.opts.project}'"
+    exit 1
+  end
+  actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
+  versions = actives.map { |v| v["id"] }.to_set
+      
+  filtered_version = versions.map do |version|
+    if version.start_with?("tanagra-")
+      version.sub("tanagra-", "").gsub("-", ".") 
+    end
+  end.compact
+  
+  prior_version = filtered_version.first
+      
+  puts "Prior Version: " + prior_version.to_s
+      
+  env_project = ENVIRONMENTS[op.opts.project]
+  current_version = env_project.fetch(:tanagra_tag)
+      
+  puts "Current Version: " + current_version.to_s
+  
+  if op.opts.update_jira and op.opts.project == STAGING_PROJECT and current_version == prior_version
+    puts "Creating a Jira ticket for this release"
+    require_relative 'jirarelease'
+    jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
+    jira_client.create_tanagra_ticket(op.opts.project, prior_version, current_version)
+    exit 1
+  end
+  
+  exit 1
+
   common.run_inline %W{
     ../api/project.rb deploy-tanagra
       --project #{op.opts.project}

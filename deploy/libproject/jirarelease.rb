@@ -126,6 +126,66 @@ class JiraReleaseClient
 
     Common.new.status "Created [#{issue.key}] with release notes for #{to_tag}"
   end
+  
+  def create_tanagra_ticket(project, from_tag, to_tag)
+    # Adds release notes to a new or existing JIRA issue.
+    commits = ""
+    summary = "Data Apps 2.0 Release Tracker #{to_tag}"
+    description = "Release Notes for #{to_tag} 
+    deploying to all-of-us-rw-preprod, listing changes since #{from_tag}:
+    Change Management Description
+    System: All of Us DRC, Workbench
+    Developers: Brian Freeman, Will Dolbeer, Mariko Medlock, Tim Jennison, Dex Amundsen
+    Needed By Date/Event: 
+    Priority: Medium
+    Configuration/Change Manager: TBD
+    
+    Anticipated Impact:
+    Software Impact: Improvements to the Data Apps
+    Training Impact: None
+    Data Impact: Improved data quality
+    Security Impact: low
+    Related Changes: N/A
+    Site(s) Affected: None
+    Notes: Normal weekly release
+    
+    Security Impact Analysis:
+    Does this release impact participant data? 
+    Does this release introduce new data types? 
+    Will this release cause scheduled downtime? 
+    If a new tool or use case is being introduced, and a CONOPs with a SIA has been completed, what is the highest impact level on the SIA? 
+    
+    Testing
+    Testers: Brian Freeman, Will Dolbeer, Mariko Medlock, Tim Jennison, Dex Amundsen
+    Date Test Was Completed: 
+    Implementation/Deployment Date: Ongoing
+    FYI: TBD
+    
+    Github Test Cases
+    https://github.com/DataBiosphere/tanagra/blob/main/README.md#codebase-test-status
+    
+    Changes since #{from_tag}: #{commits}
+    
+    Snyk Security Review
+    [upload screenshot here]"
+  
+    jira_project = @client.Project.find(JIRA_PROJECT_NAME).id
+    issue = @client.Issue.build
+    begin
+      issue.save!({"fields" => {
+                     "project" => {"id" => jira_project},
+                     "summary" => summary,
+                     "description" => description,
+                     "issuetype" => {
+                       "name" => "Release"                      }
+                     }
+                  })
+    rescue JIRA::HTTPError => e
+      raise RuntimeError.new format_jira_error(e)
+    end
+  
+    Common.new.status "Created [#{issue.key}] with release notes for #{to_tag}"
+  end
 
   def comment_ticket(tag, msg)
     common = Common.new
