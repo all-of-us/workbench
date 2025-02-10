@@ -69,11 +69,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     this.bigQueryService = bigQueryService;
   }
 
-  public long getQueryBatchSize() {
-    return Math.min(
-        MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
-  }
-
   @Override
   public List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsageBatch(
       long limit, long offset) {

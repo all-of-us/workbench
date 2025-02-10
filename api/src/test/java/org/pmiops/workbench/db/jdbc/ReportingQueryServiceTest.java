@@ -760,39 +760,43 @@ public class ReportingQueryServiceTest {
   }
 
   private Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
-    return reportingQueryService.getBatchIterator(reportingQueryService::getWorkspaceBatch);
+    return reportingQueryService.getBatchIterator(
+        reportingQueryService::getWorkspaceBatch, BATCH_SIZE);
   }
 
   private Iterator<List<ReportingUser>> getUserBatchIterator() {
-    return reportingQueryService.getBatchIterator(reportingQueryService::getUserBatch);
+    return reportingQueryService.getBatchIterator(reportingQueryService::getUserBatch, BATCH_SIZE);
   }
 
   private Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
-    return reportingQueryService.getBatchIterator(reportingQueryService::getCohortBatch);
+    return reportingQueryService.getBatchIterator(
+        reportingQueryService::getCohortBatch, BATCH_SIZE);
   }
 
   private Iterator<List<ReportingDatasetCohort>> getDatasetCohortsBatchIterator() {
-    return reportingQueryService.getBatchIterator(reportingQueryService::getDatasetCohortBatch);
+    return reportingQueryService.getBatchIterator(
+        reportingQueryService::getDatasetCohortBatch, BATCH_SIZE);
   }
 
   private Iterator<List<ReportingNewUserSatisfactionSurvey>>
       getNewUserSatisfactionSurveyBatchIterator() {
     return reportingQueryService.getBatchIterator(
-        reportingQueryService::getNewUserSatisfactionSurveyBatch);
+        reportingQueryService::getNewUserSatisfactionSurveyBatch, BATCH_SIZE);
   }
 
   private Stream<List<ReportingUser>> getBatchedUserStream() {
-    return reportingQueryService.getBatchedStream(reportingQueryService::getUserBatch);
+    return reportingQueryService.getBatchedStream(reportingQueryService::getUserBatch, BATCH_SIZE);
   }
 
   private Stream<List<ReportingNewUserSatisfactionSurvey>>
       getBatchedNewUserSatisfactionSurveyStream() {
     return reportingQueryService.getBatchedStream(
-        reportingQueryService::getNewUserSatisfactionSurveyBatch);
+        reportingQueryService::getNewUserSatisfactionSurveyBatch, BATCH_SIZE);
   }
 
   private Stream<List<ReportingWorkspace>> getBatchedWorkspaceStream() {
-    return reportingQueryService.getBatchedStream(reportingQueryService::getWorkspaceBatch);
+    return reportingQueryService.getBatchedStream(
+        reportingQueryService::getWorkspaceBatch, BATCH_SIZE);
   }
 
   private List<DbWorkspace> createWorkspaces(int count) {

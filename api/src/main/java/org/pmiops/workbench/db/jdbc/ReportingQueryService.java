@@ -22,8 +22,6 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 /** Expose handy, performant queries that don't require Dao, Entity, or Projection classes. */
 public interface ReportingQueryService {
-  long getQueryBatchSize();
-
   List<ReportingDataset> getDatasetBatch(long limit, long offset);
 
   List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset);
@@ -53,9 +51,10 @@ public interface ReportingQueryService {
 
   List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset);
 
-  default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
-    final long offset = getQueryBatchSize() * batchIndex;
-    return getter.apply(getQueryBatchSize(), offset);
+  default <T> List<T> getBatchByIndex(
+      BiFunction<Long, Long, List<T>> getter, long batchSize, long batchIndex) {
+    final long offset = batchSize * batchIndex;
+    return getter.apply(batchSize, offset);
   }
 
   /**
@@ -64,7 +63,8 @@ public interface ReportingQueryService {
    * @param getter - method to retrieve a batch, typically a method reference against this interface
    * @param <T> - DTO type
    */
-  default <T> Iterator<List<T>> getBatchIterator(BiFunction<Long, Long, List<T>> getter) {
+  default <T> Iterator<List<T>> getBatchIterator(
+      BiFunction<Long, Long, List<T>> getter, long batchSize) {
     return new Iterator<>() {
       private long batchIndex = 0;
       private long lastResultSetSize = -1; // first call to hasNext() should return true
@@ -89,13 +89,13 @@ public interface ReportingQueryService {
           final List<T> upToOneRow = getter.apply(1L, 0L);
           return !upToOneRow.isEmpty();
         } else {
-          return lastResultSetSize == getQueryBatchSize();
+          return lastResultSetSize == batchSize;
         }
       }
 
       @Override
       public List<T> next() {
-        final List<T> result = getBatchByIndex(getter, batchIndex++);
+        final List<T> result = getBatchByIndex(getter, batchSize, batchIndex++);
         lastResultSetSize = result.size();
         return result;
       }
@@ -108,8 +108,9 @@ public interface ReportingQueryService {
    * @param getter - limit & offset version of query method (currently just getWorkspaces())
    * @param <T> - DTO type
    */
-  default <T> Stream<List<T>> getBatchedStream(BiFunction<Long, Long, List<T>> getter) {
-    final Iterator<List<T>> batchIterator = getBatchIterator(getter);
+  default <T> Stream<List<T>> getBatchedStream(
+      BiFunction<Long, Long, List<T>> getter, long batchSize) {
+    final Iterator<List<T>> batchIterator = getBatchIterator(getter, batchSize);
     final Iterable<List<T>> iterable = () -> batchIterator;
     return StreamSupport.stream(iterable.spliterator(), false);
   }

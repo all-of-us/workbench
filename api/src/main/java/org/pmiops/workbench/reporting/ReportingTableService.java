@@ -1,7 +1,11 @@
 package org.pmiops.workbench.reporting;
 
+import static org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer.MAX_ROWS_PER_INSERT_ALL_REQUEST;
+
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.function.BiFunction;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingBase;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -50,7 +54,12 @@ public class ReportingTableService {
 
   private final ReportingQueryService reportingQueryService;
 
-  public ReportingTableService(ReportingQueryService reportingQueryService) {
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  public ReportingTableService(
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      ReportingQueryService reportingQueryService) {
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.reportingQueryService = reportingQueryService;
   }
 
@@ -69,6 +78,11 @@ public class ReportingTableService {
         workspaceFreeTierUsage());
   }
 
+  private long defaultBatchSize() {
+    return Math.min(
+        MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
+  }
+
   // by default, use the same table name for the BQ and RWB tables and
   public final <T extends ReportingBase> ReportingTableParams<T> defaultParams(
       String tableName,
@@ -76,6 +90,7 @@ public class ReportingTableService {
       BiFunction<Long, Long, List<T>> rwbBatchQueryFn) {
     return new ReportingTableParams<>(
         tableName,
+        defaultBatchSize(),
         bqInsertionBuilder,
         rwbBatchQueryFn,
         () -> reportingQueryService.getTableRowCount(tableName));
@@ -136,6 +151,7 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingDataset> dataset() {
     return new ReportingTableParams<>(
         DATASET_BQ_TABLE_NAME,
+        defaultBatchSize(),
         DatasetColumnValueExtractor::values,
         reportingQueryService::getDatasetBatch,
         () -> reportingQueryService.getTableRowCount(DATASET_RWB_TABLE_NAME));
@@ -144,6 +160,7 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingDatasetDomainIdValue> datasetDomainIdValue() {
     return new ReportingTableParams<>(
         DATASET_DOMAIN_ID_VALUE_BQ_TABLE_NAME,
+        defaultBatchSize(),
         DatasetDomainColumnValueExtractor::values,
         reportingQueryService::getDatasetDomainIdValueBatch,
         () -> reportingQueryService.getTableRowCount(DATASET_DOMAIN_ID_VALUE_RWB_TABLE_NAME));
@@ -154,6 +171,7 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingLeonardoAppUsage> leoAppUsage() {
     return new ReportingTableParams<>(
         LEO_APP_USAGE_TABLE_NAME,
+        defaultBatchSize(),
         LeonardoAppUsageColumnValueExtractor::values,
         reportingQueryService::getLeonardoAppUsageBatch,
         reportingQueryService::getAppUsageRowCount);
@@ -164,6 +182,7 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingWorkspace> workspace() {
     return new ReportingTableParams<>(
         WORKSPACE_TABLE_NAME,
+        defaultBatchSize(),
         WorkspaceColumnValueExtractor::values,
         reportingQueryService::getWorkspaceBatch,
         reportingQueryService::getActiveWorkspaceCount);

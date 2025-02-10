@@ -38,7 +38,7 @@ public class ReportingServiceImpl implements ReportingService {
   private <T extends ReportingBase> void uploadBatchesForTable(
       ReportingTableParams<T> tableParams, long captureTimestamp) {
     reportingQueryService
-        .getBatchedStream(tableParams.rwbBatchQueryFn())
+        .getBatchedStream(tableParams.rwbBatchQueryFn(), tableParams.batchSize())
         .forEach(batch -> reportingUploadService.uploadBatch(tableParams, batch, captureTimestamp));
   }
 

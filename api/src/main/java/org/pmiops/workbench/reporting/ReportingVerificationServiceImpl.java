@@ -42,7 +42,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             .allMatch(
                 table -> {
                   final String bqTableName = table.bqTableName();
-                  long sourceCount = table.getRwbTableCountFn().getAsInt();
+                  long sourceCount = table.rwbTableCountFn().getAsInt();
                   long destCount = getBigQueryRowCount(bqTableName, captureSnapshotTime);
                   return verifyCount(bqTableName, sourceCount, destCount, sb);
                 });
