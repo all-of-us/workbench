@@ -13,8 +13,6 @@ public enum UserPartnerDiscoverySourceColumnValueExtractor
   ANSWER("answer", ReportingUserPartnerDiscoverySource::getAnswer),
   OTHER_TEXT("other_text", ReportingUserPartnerDiscoverySource::getOtherText);
 
-  public static final String TABLE_NAME = "user_partner_discovery_source";
-
   private final String parameterName;
   private final Function<ReportingUserPartnerDiscoverySource, Object> rowToInsertValueFunction;
 

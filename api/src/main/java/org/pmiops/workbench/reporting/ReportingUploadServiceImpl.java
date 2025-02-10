@@ -17,70 +17,13 @@ import java.util.Map;
 import java.util.logging.Logger;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.ReportingCohort;
-import org.pmiops.workbench.model.ReportingDataset;
-import org.pmiops.workbench.model.ReportingDatasetCohort;
-import org.pmiops.workbench.model.ReportingDatasetConceptSet;
-import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
-import org.pmiops.workbench.model.ReportingInstitution;
-import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
-import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingUser;
-import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
-import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
-import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
-import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
-import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.LeonardoAppUsageColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
+import org.pmiops.workbench.model.ReportingBase;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final Logger log = Logger.getLogger(ReportingUploadServiceImpl.class.getName());
-  private static final InsertAllRequestPayloadTransformer<ReportingCohort> cohortRequestBuilder =
-      CohortColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingDatasetCohort>
-      datasetCohortRequestBuilder = DatasetCohortColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingDatasetConceptSet>
-      datasetConceptSetRequestBuilder = DatasetConceptSetColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingDatasetDomainIdValue>
-      datasetDomainIdValueRequestBuilder = DatasetDomainColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingInstitution>
-      institutionRequestBuilder = InstitutionColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingUser> userRequestBuilder =
-      UserColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingWorkspace>
-      workspaceRequestBuilder = WorkspaceColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingWorkspaceFreeTierUsage>
-      workspaceFreeTierUsageRequestBuilder = WorkspaceFreeTierUsageColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingDataset> datasetRequestBuilder =
-      DatasetColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingNewUserSatisfactionSurvey>
-      newUserSatisfactionSurveyRequestBuilder =
-          NewUserSatisfactionSurveyColumnValueExtractor::values;
-
-  private static final InsertAllRequestPayloadTransformer<ReportingUserGeneralDiscoverySource>
-      userGeneralDiscoverySourceRequestBuilder =
-          UserGeneralDiscoverySourceColumnValueExtractor::values;
-
-  private static final InsertAllRequestPayloadTransformer<ReportingUserPartnerDiscoverySource>
-      userPartnerDiscoverySourceRequestBuilder =
-          UserPartnerDiscoverySourceColumnValueExtractor::values;
-  private static final InsertAllRequestPayloadTransformer<ReportingLeonardoAppUsage>
-      leonardoAppUsageInsertAllRequestBuilder = LeonardoAppUsageColumnValueExtractor::values;
 
   /**
    * The verified–snapshot BigQuery name. It has no row other than the default snapshot_timestamp,
@@ -102,161 +45,16 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     this.stopwatchProvider = stopwatchProvider;
   }
 
-  /** Batch uploads {@link ReportingWorkspace}. */
   @Override
-  public void uploadWorkspaceBatch(List<ReportingWorkspace> batch, long captureTimestamp) {
+  public <T extends ReportingBase> void uploadBatch(
+      ReportingTableParams<T> uploadBatchParams, List<T> batch, long captureTimestamp) {
     uploadBatchTable(
-        workspaceRequestBuilder.build(
-            getTableId(WorkspaceColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  /** Batch uploads {@link ReportingUser}. */
-  @Override
-  public void uploadUserBatch(List<ReportingUser> batch, long captureTimestamp) {
-    uploadBatchTable(
-        userRequestBuilder.build(
-            getTableId(UserColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  /** Batch uploads {@link ReportingCohort}. */
-  @Override
-  public void uploadCohortBatch(List<ReportingCohort> batch, long captureTimestamp) {
-    uploadBatchTable(
-        cohortRequestBuilder.build(
-            getTableId(CohortColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  /** Batch uploads {@link ReportingDataset}. */
-  @Override
-  public void uploadDatasetBatch(List<ReportingDataset> batch, long captureTimestamp) {
-    uploadBatchTable(
-        datasetRequestBuilder.build(
-            getTableId(DatasetColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  /** Batch uploads {@link ReportingDatasetCohort}. */
-  @Override
-  public void uploadDatasetCohortBatch(List<ReportingDatasetCohort> batch, long captureTimestamp) {
-    uploadBatchTable(
-        datasetCohortRequestBuilder.build(
-            getTableId(DatasetCohortColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  /** Batch uploads {@link ReportingDatasetConceptSet}. */
-  @Override
-  public void uploadDatasetConceptSetBatch(
-      List<ReportingDatasetConceptSet> batch, long captureTimestamp) {
-    uploadBatchTable(
-        datasetConceptSetRequestBuilder.build(
-            getTableId(DatasetConceptSetColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  /** Batch uploads {@link ReportingDatasetDomainIdValue}. */
-  @Override
-  public void uploadDatasetDomainIdValueBatch(
-      List<ReportingDatasetDomainIdValue> batch, long captureTimestamp) {
-    uploadBatchTable(
-        datasetDomainIdValueRequestBuilder.build(
-            getTableId(DatasetDomainColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  /** Batch uploads {@link ReportingLeonardoAppUsage}. */
-  @Override
-  public void uploadLeonardoAppUsageBatch(
-      List<ReportingLeonardoAppUsage> batch, long captureTimestamp) {
-    uploadBatchTable(
-        leonardoAppUsageInsertAllRequestBuilder.build(
-            getTableId(LeonardoAppUsageColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  /** Batch uploads {@link ReportingNewUserSatisfactionSurvey}. */
-  @Override
-  public void uploadNewUserSatisfactionSurveyBatch(
-      List<ReportingNewUserSatisfactionSurvey> batch, long captureTimestamp) {
-    uploadBatchTable(
-        newUserSatisfactionSurveyRequestBuilder.build(
-            getTableId(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  @Override
-  public void uploadUserGeneralDiscoverySourceBatch(
-      List<ReportingUserGeneralDiscoverySource> batch, long captureTimestamp) {
-    uploadBatchTable(
-        userGeneralDiscoverySourceRequestBuilder.build(
-            getTableId(UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  @Override
-  public void uploadUserPartnerDiscoverySourceBatch(
-      List<ReportingUserPartnerDiscoverySource> batch, long captureTimestamp) {
-    uploadBatchTable(
-        userPartnerDiscoverySourceRequestBuilder.build(
-            getTableId(UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  @Override
-  public void uploadWorkspaceFreeTierUsageBatch(
-      List<ReportingWorkspaceFreeTierUsage> batch, long captureTimestamp) {
-    uploadBatchTable(
-        workspaceFreeTierUsageRequestBuilder.build(
-            getTableId(WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
-    // This is a test to prove if these batched list are being cleaned up by garbage collection.
-    batch = null;
-  }
-
-  @Override
-  public void uploadInstitutionBatch(List<ReportingInstitution> batch, long captureTimestamp) {
-    uploadBatchTable(
-        institutionRequestBuilder.build(
-            getTableId(InstitutionColumnValueExtractor.TABLE_NAME),
-            batch,
-            getFixedValues(captureTimestamp)));
+        uploadBatchParams
+            .bqInsertionBuilder()
+            .build(
+                getTableId(uploadBatchParams.bqTableName()),
+                batch,
+                getFixedValues(captureTimestamp)));
     // This is a test to prove if these batched list are being cleaned up by garbage collection.
     batch = null;
   }

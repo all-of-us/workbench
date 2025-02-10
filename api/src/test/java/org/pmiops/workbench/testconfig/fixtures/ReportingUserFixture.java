@@ -4,10 +4,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
-import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -97,7 +97,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static BigDecimal USER__YEAR_OF_BIRTH = BigDecimal.valueOf(2021);
   public static String USER__LGBTQ_IDENTITY = "foo_28";
   public static boolean USER__IDENTIFIES_AS_LGBTQ = false;
-  public static ImmutableList<Degree> USER__DEGREES = ImmutableList.of(Degree.BA, Degree.ME);
+  public static List<Degree> USER__DEGREES = List.of(Degree.BA, Degree.ME);
   public static String USER__INITIALS = "foo_29";
   public static final Timestamp DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-31T00:00:00.00Z"));
@@ -227,10 +227,10 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     demographicSurvey.setDisability(DbStorageEnums.disabilityToStorage(USER__DISABILITY));
     demographicSurvey.setEthnicity(DbStorageEnums.ethnicityToStorage(USER__ETHNICITY));
     demographicSurvey.setGenderIdentityList(
-        ImmutableList.of(DbStorageEnums.genderIdentityToStorage(USER__GENDER_IDENTITY)));
-    demographicSurvey.setRace(ImmutableList.of(DbStorageEnums.raceToStorage(USER__RACE)));
+        List.of(DbStorageEnums.genderIdentityToStorage(USER__GENDER_IDENTITY)));
+    demographicSurvey.setRace(List.of(DbStorageEnums.raceToStorage(USER__RACE)));
     demographicSurvey.setSexAtBirth(
-        ImmutableList.of(DbStorageEnums.sexAtBirthToStorage(USER__SEX_AT_BIRTH)));
+        List.of(DbStorageEnums.sexAtBirthToStorage(USER__SEX_AT_BIRTH)));
     demographicSurvey.setYearOfBirth(USER__YEAR_OF_BIRTH.intValue());
     demographicSurvey.setIdentifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
     demographicSurvey.setLgbtqIdentity(USER__LGBTQ_IDENTITY);

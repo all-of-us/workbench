@@ -50,8 +50,6 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId),
   WORKSPACE_NAMESPACE("workspace_namespace", ReportingWorkspace::getWorkspaceNamespace);
 
-  public static final String TABLE_NAME = "workspace";
-
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;
 

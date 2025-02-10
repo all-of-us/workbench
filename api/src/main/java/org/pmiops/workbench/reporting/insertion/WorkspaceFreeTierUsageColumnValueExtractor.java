@@ -13,8 +13,6 @@ public enum WorkspaceFreeTierUsageColumnValueExtractor
   USER_ID("user_id", ReportingWorkspaceFreeTierUsage::getUserId),
   WORKSPACE_ID("workspace_id", ReportingWorkspaceFreeTierUsage::getWorkspaceId);
 
-  public static final String TABLE_NAME = "workspace_free_tier_usage";
-
   private final String parameterName;
   private final Function<ReportingWorkspaceFreeTierUsage, Object> rowToInsertValueFunction;
 

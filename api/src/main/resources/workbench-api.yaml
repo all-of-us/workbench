@@ -12169,7 +12169,12 @@ components:
           type: string
         newName:
           type: string
+    ReportingBase:
+      type: object
+      description: Base class for all reporting objects, to enable generics.
     ReportingUser:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         accessTierShortNames:
@@ -12348,6 +12353,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingWorkspace:
+      allOf:
+      - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         accessTierShortName:
@@ -12516,6 +12523,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingWorkspaceFreeTierUsage:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         cost:
@@ -12535,6 +12544,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingCohort:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         cohortId:
@@ -12577,6 +12588,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingInstitution:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         displayName:
@@ -12607,6 +12620,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingNewUserSatisfactionSurvey:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         id:
@@ -12631,6 +12646,8 @@ components:
           type: string
           description: Additional information regarding the satisfaction score.
     ReportingUserGeneralDiscoverySource:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         userId:
@@ -12643,8 +12660,9 @@ components:
         otherText:
           type: string
           description: User input when choosing Other
-
     ReportingUserPartnerDiscoverySource:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         userId:
@@ -12657,8 +12675,9 @@ components:
         otherText:
           type: string
           description: User input when choosing Other
-
     ReportingDataset:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         creationTime:
@@ -12698,6 +12717,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingDatasetCohort:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         cohortId:
@@ -12713,6 +12734,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingDatasetConceptSet:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         conceptSetId:
@@ -12728,6 +12751,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingDatasetDomainIdValue:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         datasetId:
@@ -12745,6 +12770,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingConceptSetConcept:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         conceptId:
@@ -12760,6 +12787,8 @@ components:
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
     ReportingLeonardoAppUsage:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
         appId:
