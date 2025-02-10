@@ -152,7 +152,7 @@
   },
   "reporting": {
     "dataset": "reporting_local",
-    "maxRowsPerInsert": 500,
+    "maxRowsPerInsert": 10000,
     "exportTerraDataWarehouse": false
   },
   "ras": {
