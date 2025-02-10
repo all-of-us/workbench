@@ -157,10 +157,12 @@ public class ReportingTableService {
         () -> reportingQueryService.getTableRowCount(DATASET_RWB_TABLE_NAME));
   }
 
+  // dataset-domain is also very large with small rows, so it needs a larger batch size
+
   public final ReportingTableParams<ReportingDatasetDomainIdValue> datasetDomainIdValue() {
     return new ReportingTableParams<>(
         DATASET_DOMAIN_ID_VALUE_BQ_TABLE_NAME,
-        defaultBatchSize(),
+        MAX_ROWS_PER_INSERT_ALL_REQUEST,
         DatasetDomainColumnValueExtractor::values,
         reportingQueryService::getDatasetDomainIdValueBatch,
         () -> reportingQueryService.getTableRowCount(DATASET_DOMAIN_ID_VALUE_RWB_TABLE_NAME));
