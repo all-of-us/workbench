@@ -83,17 +83,20 @@ public class ReportingTableService {
         MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
   }
 
-  // by default, use the same table name for the BQ and RWB tables and
+  // by default:
+  // * use the same table name for the BQ and RWB tables
+  // * use the default batch size
+  // * use the default row count query
   public final <T extends ReportingBase> ReportingTableParams<T> defaultParams(
-      String tableName,
+      String matchingTableName,
       InsertAllRequestPayloadTransformer<T> bqInsertionBuilder,
       BiFunction<Long, Long, List<T>> rwbBatchQueryFn) {
     return new ReportingTableParams<>(
-        tableName,
+        matchingTableName,
         defaultBatchSize(),
         bqInsertionBuilder,
         rwbBatchQueryFn,
-        () -> reportingQueryService.getTableRowCount(tableName));
+        () -> reportingQueryService.getTableRowCount(matchingTableName));
   }
 
   public final ReportingTableParams<ReportingCohort> cohort() {
