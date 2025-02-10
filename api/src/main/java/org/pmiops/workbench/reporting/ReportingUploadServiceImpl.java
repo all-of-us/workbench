@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.ReportingBase;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +46,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   }
 
   @Override
-  public <T> void uploadBatch(
+  public <T extends ReportingBase> void uploadBatch(
       ReportingTableParams<T> uploadBatchParams, List<T> batch, long captureTimestamp) {
     uploadBatchTable(
         uploadBatchParams
