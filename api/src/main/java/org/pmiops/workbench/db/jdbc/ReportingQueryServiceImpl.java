@@ -623,12 +623,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getTableRowCount(String tableName) {
-    return jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName, Integer.class);
+  public int getTableRowCount(String rwbTableName) {
+    return jdbcTemplate.queryForObject("SELECT count(*) FROM " + rwbTableName, Integer.class);
   }
 
   @Override
-  public int getAppUsageRowCount(String tableName) {
+  public int getAppUsageRowCount() {
     if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
       return 0;
     }

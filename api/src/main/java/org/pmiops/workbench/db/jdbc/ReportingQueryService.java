@@ -114,9 +114,9 @@ public interface ReportingQueryService {
     return StreamSupport.stream(iterable.spliterator(), false);
   }
 
-  int getTableRowCount(String tableName);
+  int getTableRowCount(String rwbTableName);
 
-  int getAppUsageRowCount(String tableName);
+  int getAppUsageRowCount();
 
   int getActiveWorkspaceCount();
 }
