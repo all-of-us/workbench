@@ -37,8 +37,6 @@ import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
-import org.pmiops.workbench.model.ReportingDatasetCohort;
-import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
@@ -55,7 +53,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingQueryServiceImpl implements ReportingQueryService {
-  private static final long MAX_ROWS_PER_INSERT_ALL_REQUEST = 10_000;
   private final JdbcTemplate jdbcTemplate;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
@@ -222,36 +219,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
                 .name(rs.getString("name"))
                 .workspaceId(rs.getLong("workspace_id")));
-  }
-
-  @Override
-  public List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset) {
-    return jdbcTemplate.query(
-        String.format(
-            "SELECT data_set_id, cohort_id\n"
-                + "FROM data_set_cohort\n"
-                + "  LIMIT %d\n"
-                + "  OFFSET %d",
-            limit, offset),
-        (rs, unused) ->
-            new ReportingDatasetCohort()
-                .cohortId(rs.getLong("cohort_id"))
-                .datasetId(rs.getLong("data_set_id")));
-  }
-
-  @Override
-  public List<ReportingDatasetConceptSet> getDatasetConceptSetBatch(long limit, long offset) {
-    return jdbcTemplate.query(
-        String.format(
-            "SELECT data_set_id, concept_set_id\n"
-                + "FROM data_set_concept_set\n"
-                + "  LIMIT %d\n"
-                + "  OFFSET %d",
-            limit, offset),
-        (rs, unused) ->
-            new ReportingDatasetConceptSet()
-                .datasetId(rs.getLong("data_set_id"))
-                .conceptSetId(rs.getLong("concept_set_id")));
   }
 
   @Override
