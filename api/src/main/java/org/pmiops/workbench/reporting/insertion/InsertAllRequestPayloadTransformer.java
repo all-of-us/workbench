@@ -27,8 +27,8 @@ import org.pmiops.workbench.utils.RandomUtils;
  *     UserColumnValueExtractor::values; }
  */
 @FunctionalInterface
-public interface InsertAllRequestPayloadTransformer<MODEL_T extends ReportingBase>
-    extends BigQueryInsertionPayloadTransformer<MODEL_T> {
+public interface InsertAllRequestPayloadTransformer<T extends ReportingBase>
+    extends BigQueryInsertionPayloadTransformer<T> {
   String INSERT_ID_CHARS = "abcdefghijklmnopqrstuvwxyz";
   int INSERT_ID_LENGTH = 16;
   // Maximum rows per request from https://cloud.google.com/bigquery/quotas#streaming_inserts
@@ -39,8 +39,7 @@ public interface InsertAllRequestPayloadTransformer<MODEL_T extends ReportingBas
    * fixedValues argument is to allow a value (like snapshot_timestamp) to span all rows in its
    * column.
    */
-  default InsertAllRequest build(
-      TableId tableId, List<MODEL_T> models, Map<String, Object> fixedValues) {
+  default InsertAllRequest build(TableId tableId, List<T> models, Map<String, Object> fixedValues) {
     return InsertAllRequest.newBuilder(tableId)
         .setIgnoreUnknownValues(false) // consider non-schema-conforming values bad rows.
         .setRows(modelsToRowsToInsert(models, fixedValues))
@@ -49,7 +48,7 @@ public interface InsertAllRequestPayloadTransformer<MODEL_T extends ReportingBas
 
   // Wrap modelToRowToInsert() and apply to the whole input list of models.
   default List<RowToInsert> modelsToRowsToInsert(
-      Collection<MODEL_T> models, Map<String, Object> fixedValues) {
+      Collection<T> models, Map<String, Object> fixedValues) {
     return models.stream()
         .map(m -> modelToRowToInsert(m, fixedValues))
         .collect(ImmutableList.toImmutableList());
@@ -59,7 +58,7 @@ public interface InsertAllRequestPayloadTransformer<MODEL_T extends ReportingBas
    * Build a RowToInsert object for each model instance, which is basically a poorly typed Map.
    * Null values are supposed to be omitted from the map (or have @Value or @NullValue annotations).
    */
-  default RowToInsert modelToRowToInsert(MODEL_T model, Map<String, Object> fixedValues) {
+  default RowToInsert modelToRowToInsert(T model, Map<String, Object> fixedValues) {
     final ImmutableMap.Builder<String, Object> columnToValueBuilder = ImmutableMap.builder();
     columnToValueBuilder.putAll(fixedValues); // assumed to have non-null values
     Arrays.stream(getQueryParameterColumns())
