@@ -8,6 +8,7 @@ import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransform
 
 public record ReportingTableParams<T extends ReportingBase>(
     String bqTableName,
+    long batchSize,
     InsertAllRequestPayloadTransformer<T> bqInsertionBuilder,
     BiFunction<Long, Long, List<T>> rwbBatchQueryFn,
-    IntSupplier getRwbTableCountFn) {}
+    IntSupplier rwbTableCountFn) {}

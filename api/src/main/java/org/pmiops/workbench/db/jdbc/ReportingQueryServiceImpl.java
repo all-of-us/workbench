@@ -69,11 +69,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     this.bigQueryService = bigQueryService;
   }
 
-  public long getQueryBatchSize() {
-    return Math.min(
-        MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
-  }
-
   @Override
   public List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsageBatch(
       long limit, long offset) {
@@ -623,12 +618,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getTableRowCount(String tableName) {
-    return jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName, Integer.class);
+  public int getTableRowCount(String rwbTableName) {
+    return jdbcTemplate.queryForObject("SELECT count(*) FROM " + rwbTableName, Integer.class);
   }
 
   @Override
-  public int getAppUsageRowCount(String tableName) {
+  public int getAppUsageRowCount() {
     if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
       return 0;
     }
