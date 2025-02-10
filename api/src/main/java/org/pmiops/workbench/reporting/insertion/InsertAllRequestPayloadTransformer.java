@@ -31,7 +31,8 @@ public interface InsertAllRequestPayloadTransformer<MODEL_T extends ReportingBas
     extends BigQueryInsertionPayloadTransformer<MODEL_T> {
   String INSERT_ID_CHARS = "abcdefghijklmnopqrstuvwxyz";
   int INSERT_ID_LENGTH = 16;
-  int MAX_ROWS_PER_INSERT_ALL_REQUEST = 1000;
+  // Maximum rows per request from https://cloud.google.com/bigquery/quotas#streaming_inserts
+  int MAX_ROWS_PER_INSERT_ALL_REQUEST = 50_000;
 
   /**
    * Construct an InsertAllRequest from all of the provided models, one row per model. The
