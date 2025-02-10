@@ -25,8 +25,6 @@ public enum LeonardoAppUsageColumnValueExtractor
   ENVIRONMENT_VARIABLES(
       "environment_variables", ReportingLeonardoAppUsage::getEnvironmentVariables);
 
-  public static final String TABLE_NAME = "leonardo_app_usage";
-
   private final String parameterName;
   private final Function<ReportingLeonardoAppUsage, Object> rowToInsertValueFunction;
 

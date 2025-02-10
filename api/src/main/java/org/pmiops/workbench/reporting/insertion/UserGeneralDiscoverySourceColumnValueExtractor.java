@@ -13,8 +13,6 @@ public enum UserGeneralDiscoverySourceColumnValueExtractor
   ANSWER("answer", ReportingUserGeneralDiscoverySource::getAnswer),
   OTHER_TEXT("other_text", ReportingUserGeneralDiscoverySource::getOtherText);
 
-  public static final String TABLE_NAME = "user_general_discovery_source";
-
   private final String parameterName;
   private final Function<ReportingUserGeneralDiscoverySource, Object> rowToInsertValueFunction;
 

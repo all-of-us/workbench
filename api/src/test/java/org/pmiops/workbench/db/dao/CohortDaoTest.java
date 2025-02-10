@@ -10,9 +10,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
-import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -25,7 +23,6 @@ public class CohortDaoTest {
 
   @Autowired CohortDao cohortDao;
   @Autowired UserDao userDao;
-  @Autowired ReportingTestFixture<DbUser, ReportingUser> userFixture;
   @Autowired WorkspaceDao workspaceDao;
 
   private DbCohort dbCohort;
@@ -47,7 +44,7 @@ public class CohortDaoTest {
     dbWorkspace.setLastModifiedTime(timestamp);
     workspaceDao.save(dbWorkspace);
 
-    dbUser = userDao.save(userFixture.createEntity());
+    dbUser = userDao.save(new DbUser());
 
     String cohortJson =
         "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":"

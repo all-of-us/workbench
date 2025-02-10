@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
@@ -69,6 +70,8 @@ public class ReportingUploadServiceTest {
 
   @Autowired private ReportingUploadService reportingUploadService;
 
+  @Autowired private ReportingTableService reportingTableService;
+
   @Autowired private ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
@@ -76,10 +79,11 @@ public class ReportingUploadServiceTest {
   @TestConfiguration
   @Import({
     FakeClockConfiguration.class,
+    ReportingTableService.class,
+    ReportingTestConfig.class,
     ReportingUploadServiceImpl.class,
-    ReportingTestConfig.class
   })
-  @MockBean({ReportingVerificationService.class})
+  @MockBean({ReportingQueryService.class, ReportingVerificationService.class})
   public static class Config {}
 
   @BeforeEach
@@ -126,7 +130,8 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadWorkspaceBatch(reportingWorkspaces, NOW.toEpochMilli());
+    reportingUploadService.uploadBatch(
+        reportingTableService.workspace(), reportingWorkspaces, NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -163,7 +168,8 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadUserBatch(reportingUsers, NOW.toEpochMilli());
+    reportingUploadService.uploadBatch(
+        reportingTableService.user(), reportingUsers, NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -188,7 +194,8 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadCohortBatch(reportingCohorts, NOW.toEpochMilli());
+    reportingUploadService.uploadBatch(
+        reportingTableService.cohort(), reportingCohorts, NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -213,8 +220,10 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadNewUserSatisfactionSurveyBatch(
-        reportingNewUserSatisfactionSurveys, NOW.toEpochMilli());
+    reportingUploadService.uploadBatch(
+        reportingTableService.newUserSatisfactionSurvey(),
+        reportingNewUserSatisfactionSurveys,
+        NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -247,8 +256,10 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadUserGeneralDiscoverySourceBatch(
-        userGeneralDiscoverySources, NOW.toEpochMilli());
+    reportingUploadService.uploadBatch(
+        reportingTableService.userGeneralDiscoverySource(),
+        userGeneralDiscoverySources,
+        NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -281,8 +292,10 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadUserPartnerDiscoverySourceBatch(
-        userPartnerDiscoverySources, NOW.toEpochMilli());
+    reportingUploadService.uploadBatch(
+        reportingTableService.userPartnerDiscoverySource(),
+        userPartnerDiscoverySources,
+        NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -304,7 +317,8 @@ public class ReportingUploadServiceTest {
     cohort.setWorkspaceId(101L);
     cohort.setCreatorId(null);
 
-    reportingUploadService.uploadCohortBatch(Collections.singletonList(cohort), NOW.toEpochMilli());
+    reportingUploadService.uploadBatch(
+        reportingTableService.cohort(), Collections.singletonList(cohort), NOW.toEpochMilli());
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
 
     final InsertAllRequest insertAllRequest = insertAllRequestCaptor.getValue();
