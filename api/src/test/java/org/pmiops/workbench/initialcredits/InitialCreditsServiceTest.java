@@ -122,7 +122,12 @@ public class InitialCreditsServiceTest {
 
   @TestConfiguration
   @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
-  @MockBean({BigQueryService.class, TaskQueueService.class, WorkspaceMapper.class, FireCloudService.class})
+  @MockBean({
+    BigQueryService.class,
+    TaskQueueService.class,
+    WorkspaceMapper.class,
+    FireCloudService.class
+  })
   static class Configuration {
     @Bean
     public Clock clock() {

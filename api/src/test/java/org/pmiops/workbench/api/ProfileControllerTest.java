@@ -224,7 +224,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     LeonardoApiClient.class,
     VwbAccessService.class,
     VwbUserService.class,
-      WorkspaceMapper.class
+    WorkspaceMapper.class
   })
   static class Configuration {
     @Bean
