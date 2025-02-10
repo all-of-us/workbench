@@ -238,8 +238,7 @@ public class ReportingQueryServiceTest {
   public DbWorkspace createDbWorkspace(DbUser user1, DbCdrVersion cdrVersion1) {
     final long initialWorkspaceCount = workspaceDao.count();
     DbWorkspace workspace1 =
-        workspaceDao.save(
-            ReportingTestUtils.createDbWorkspace(user1, cdrVersion1));
+        workspaceDao.save(ReportingTestUtils.createDbWorkspace(user1, cdrVersion1));
     assertThat(workspaceDao.count()).isEqualTo(initialWorkspaceCount + 1);
     return workspace1;
   }
@@ -304,25 +303,13 @@ public class ReportingQueryServiceTest {
 
   @Test
   public void testWorkspaceIterator_active_billingAccount() {
-    final DbUser user = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
-    workspace.setBillingAccountName("userProvidedBillingAccount");
-    workspaceDao.save(workspace);
-
+    setupInitialCreditTest(false, false, false, false, false);
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_inactive_exhausted() {
-    final DbUser user = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(
-        createDbWorkspace(user, cdrVersion)
-            .setInitialCreditsExhausted(true)
-            .setBillingAccountName(
-                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
-    entityManager.flush();
+    setupInitialCreditTest(true, false, true, false, false);
 
     assertIteratorBillingStatus(BillingStatus.INACTIVE);
   }
@@ -337,103 +324,33 @@ public class ReportingQueryServiceTest {
             .setBillingAccountName(
                 String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
     entityManager.flush();
-
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_active_unexpiredInitialCredits() {
-    DbUser user = new DbUser();
-    user = userDao.save(user.setContactEmail("a@b.com"));
-    createDbVerifiedInstitutionalAffiliation(user);
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        new DbUserInitialCreditsExpiration()
-            .setExpirationTime(new Timestamp(System.currentTimeMillis() + MILLIS_IN_A_DAY))
-            .setUser(user);
-    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
-    userDao.save(user);
-
-    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(
-        createDbWorkspace(user, cdrVersion)
-            .setInitialCreditsExhausted(false)
-            .setBillingAccountName(
-                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
-    entityManager.flush();
-
+    setupInitialCreditTest(true, false, false, false, false);
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_inactive_expiredInitialCredits() {
-    DbUser user = new DbUser();
-    user = userDao.save(user.setContactEmail("a@b.com"));
-    createDbVerifiedInstitutionalAffiliation(user);
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        new DbUserInitialCreditsExpiration()
-            .setExpirationTime(new Timestamp(System.currentTimeMillis() - MILLIS_IN_A_DAY))
-            .setUser(user);
-    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
-    userDao.save(user);
 
-    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(
-        createDbWorkspace(user, cdrVersion)
-            .setInitialCreditsExhausted(false)
-            .setBillingAccountName(
-                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
-    entityManager.flush();
+    setupInitialCreditTest(true, true, false, false, false);
 
     assertIteratorBillingStatus(BillingStatus.INACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_inactive_expiredInitialCreditsIndividuallyBypassed() {
-    DbUser user = new DbUser();
-    user = userDao.save(user.setContactEmail("a@b.com"));
-    createDbVerifiedInstitutionalAffiliation(user);
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        new DbUserInitialCreditsExpiration()
-            .setExpirationTime(new Timestamp(System.currentTimeMillis() - MILLIS_IN_A_DAY))
-            .setBypassed(true)
-            .setUser(user);
-    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
-    userDao.save(user);
-
-    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(
-        createDbWorkspace(user, cdrVersion)
-            .setInitialCreditsExhausted(false)
-            .setBillingAccountName(
-                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
-    entityManager.flush();
+    setupInitialCreditTest(true, true, false, true, false);
 
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_inactive_expiredInitialCreditsInstitutionallyBypassed() {
-    DbUser user = new DbUser();
-    user = userDao.save(user.setContactEmail("a@b.com"));
-    createDbVerifiedInstitutionalAffiliation(user);
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        new DbUserInitialCreditsExpiration()
-            .setExpirationTime(new Timestamp(System.currentTimeMillis() - MILLIS_IN_A_DAY))
-            .setBypassed(false)
-            .setUser(user);
-    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
-    userDao.save(user);
-
-    dbInstitution.setBypassInitialCreditsExpiration(true);
-    institutionDao.save(dbInstitution);
-
-    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
-    workspaceDao.save(
-        createDbWorkspace(user, cdrVersion)
-            .setInitialCreditsExhausted(false)
-            .setBillingAccountName(
-                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
-    entityManager.flush();
+    setupInitialCreditTest(true, true, false, false, true);
 
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
@@ -1022,5 +939,37 @@ public class ReportingQueryServiceTest {
 
     List<ReportingWorkspace> firstBatch = iterator.next();
     assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(billingStatus);
+  }
+
+  private void setupInitialCreditTest(
+      boolean usingInitialCredits,
+      boolean expired,
+      boolean exhausted,
+      boolean individuallyBypassed,
+      boolean institutionallyBypassed) {
+    DbUser user = new DbUser();
+    user = userDao.save(user.setContactEmail("a@b.com"));
+    createDbVerifiedInstitutionalAffiliation(user);
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setExpirationTime(
+                new Timestamp(System.currentTimeMillis() + (MILLIS_IN_A_DAY * (expired ? -1 : 1))))
+            .setBypassed(individuallyBypassed)
+            .setUser(user);
+    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
+    userDao.save(user);
+
+    dbInstitution.setBypassInitialCreditsExpiration(institutionallyBypassed);
+    institutionDao.save(dbInstitution);
+
+    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(exhausted)
+            .setBillingAccountName(
+                usingInitialCredits
+                    ? String.format("billingAccounts/%s", workbenchConfig.billing.accountId)
+                    : "userProvidedBillingAccount"));
+    entityManager.flush();
   }
 }
