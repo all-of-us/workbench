@@ -13,6 +13,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { nowPlusDays } from 'app/utils/dates';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { AppsApi as LeoAppsApi } from 'notebooks-generated/fetch';
@@ -27,7 +28,6 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { AppsPanel } from './apps-panel';
 
 const stubFunction = () => ({});
-const NOW = new Date('2020-01-01');
 
 let workspaceStub: WorkspaceData;
 
@@ -49,7 +49,7 @@ const mockInitialCredits = (
 ) => {
   workspaceStub.initialCredits = {
     exhausted,
-    expirationEpochMillis: NOW.getTime() + (expired ? -1 : 1),
+    expirationEpochMillis: nowPlusDays(expired ? -1 : 1),
     expirationBypassed,
   };
 };
@@ -164,15 +164,8 @@ describe(AppsPanel.name, () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, freeTierBillingAccountId },
     });
-    jest.useFakeTimers().setSystemTime(NOW);
-    // AdvanceTimersByTime in order to allow fake timers and RTL queries to work together
-    // https://testing-library.com/docs/user-event/options/#advancetimers
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-  });
 
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    user = userEvent.setup();
   });
 
   it('should allow a user to expand Jupyter', async () => {
