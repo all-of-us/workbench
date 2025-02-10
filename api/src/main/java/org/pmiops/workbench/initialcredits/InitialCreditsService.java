@@ -712,6 +712,7 @@ public class InitialCreditsService {
         .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspacesAsService(), this)
         .stream()
         .map(WorkspaceResponse::getWorkspace)
+        .filter(ws -> ws.getCreatorUser().getUserName().equals(user.getUsername()))
         .collect(Collectors.toList());
   }
 }
