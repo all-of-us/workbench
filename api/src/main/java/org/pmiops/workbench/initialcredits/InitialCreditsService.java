@@ -33,11 +33,15 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +62,8 @@ public class InitialCreditsService {
   private final LeonardoApiClient leonardoApiClient;
   private final InstitutionService institutionService;
   private final MailService mailService;
+  private final WorkspaceMapper workspaceMapper;
+  private final FireCloudService fireCloudService;
 
   private static final Logger logger = LoggerFactory.getLogger(InitialCreditsService.class);
 
@@ -73,18 +79,22 @@ public class InitialCreditsService {
       WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService,
       LeonardoApiClient leonardoApiClient,
       InstitutionService institutionService,
-      MailService mailService) {
+      MailService mailService,
+      WorkspaceMapper workspaceMapper,
+      FireCloudService fireCloudService) {
+    this.clock = clock;
+    this.fireCloudService = fireCloudService;
+    this.institutionService = institutionService;
+    this.leonardoApiClient = leonardoApiClient;
+    this.mailService = mailService;
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
-    this.clock = clock;
     this.userServiceAuditor = userServiceAuditor;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceInitialCreditUsageService = workspaceInitialCreditUsageService;
-    this.leonardoApiClient = leonardoApiClient;
-    this.institutionService = institutionService;
-    this.mailService = mailService;
+    this.workspaceMapper = workspaceMapper;
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -450,12 +460,11 @@ public class InitialCreditsService {
         user.getUsername(),
         userInitialCreditsExpiration.getExpirationTime());
 
-    workspaceDao.findAllByCreator(user).stream()
+    getWorkspacesForUser(user).stream()
         .filter(
             ws ->
                 BillingUtils.isInitialCredits(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .filter(DbWorkspace::isActive)
         .forEach(this::deleteAppsAndRuntimesInWorkspace);
 
     userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
@@ -479,9 +488,9 @@ public class InitialCreditsService {
     }
   }
 
-  private void deleteAppsAndRuntimesInWorkspace(DbWorkspace workspace) {
+  private void deleteAppsAndRuntimesInWorkspace(Workspace workspace) {
 
-    String namespace = workspace.getWorkspaceNamespace();
+    String namespace = workspace.getNamespace();
     try {
       leonardoApiClient.deleteAllResources(workspace.getGoogleProject(), false);
       logger.info("Deleted apps and runtimes for workspace {}", namespace);
@@ -696,5 +705,13 @@ public class InitialCreditsService {
                     Collectors.summingDouble(
                         v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0))));
     return dbCostByCreator;
+  }
+
+  private List<Workspace> getWorkspacesForUser(DbUser user) {
+    return workspaceMapper
+        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspacesAsService(), this)
+        .stream()
+        .map(WorkspaceResponse::getWorkspace)
+        .collect(Collectors.toList());
   }
 }

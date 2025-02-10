@@ -52,12 +52,14 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpiryTaskMatchers.UserListMatcher;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -120,7 +122,7 @@ public class InitialCreditsServiceTest {
 
   @TestConfiguration
   @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
-  @MockBean({BigQueryService.class, TaskQueueService.class})
+  @MockBean({BigQueryService.class, TaskQueueService.class, WorkspaceMapper.class, FireCloudService.class})
   static class Configuration {
     @Bean
     public Clock clock() {
