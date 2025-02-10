@@ -119,6 +119,7 @@ import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -222,7 +223,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     TaskQueueService.class,
     LeonardoApiClient.class,
     VwbAccessService.class,
-    VwbUserService.class
+    VwbUserService.class,
+      WorkspaceMapper.class
   })
   static class Configuration {
     @Bean
