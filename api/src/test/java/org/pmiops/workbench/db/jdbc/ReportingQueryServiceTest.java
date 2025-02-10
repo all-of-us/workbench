@@ -38,6 +38,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -303,13 +304,14 @@ public class ReportingQueryServiceTest {
 
   @Test
   public void testWorkspaceIterator_active_billingAccount() {
-    setupInitialCreditTest(false, false, false, false, false);
+    setupInitialCreditTest(EnumSet.noneOf(InitialCreditState.class));
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_inactive_exhausted() {
-    setupInitialCreditTest(true, false, true, false, false);
+    setupInitialCreditTest(
+        EnumSet.of(InitialCreditState.USING_INITIAL_CREDITS, InitialCreditState.EXHAUSTED));
 
     assertIteratorBillingStatus(BillingStatus.INACTIVE);
   }
@@ -329,28 +331,37 @@ public class ReportingQueryServiceTest {
 
   @Test
   public void testWorkspaceIterator_active_unexpiredInitialCredits() {
-    setupInitialCreditTest(true, false, false, false, false);
+    setupInitialCreditTest(EnumSet.of(InitialCreditState.USING_INITIAL_CREDITS));
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_inactive_expiredInitialCredits() {
 
-    setupInitialCreditTest(true, true, false, false, false);
+    setupInitialCreditTest(
+        EnumSet.of(InitialCreditState.USING_INITIAL_CREDITS, InitialCreditState.EXPIRED));
 
     assertIteratorBillingStatus(BillingStatus.INACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_inactive_expiredInitialCreditsIndividuallyBypassed() {
-    setupInitialCreditTest(true, true, false, true, false);
+    setupInitialCreditTest(
+        EnumSet.of(
+            InitialCreditState.USING_INITIAL_CREDITS,
+            InitialCreditState.EXPIRED,
+            InitialCreditState.INDIVIDUALLY_BYPASSED));
 
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
 
   @Test
   public void testWorkspaceIterator_inactive_expiredInitialCreditsInstitutionallyBypassed() {
-    setupInitialCreditTest(true, true, false, false, true);
+    setupInitialCreditTest(
+        EnumSet.of(
+            InitialCreditState.USING_INITIAL_CREDITS,
+            InitialCreditState.EXPIRED,
+            InitialCreditState.INSTITUTIONALLY_BYPASSED));
 
     assertIteratorBillingStatus(BillingStatus.ACTIVE);
   }
@@ -941,12 +952,21 @@ public class ReportingQueryServiceTest {
     assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(billingStatus);
   }
 
-  private void setupInitialCreditTest(
-      boolean usingInitialCredits,
-      boolean expired,
-      boolean exhausted,
-      boolean individuallyBypassed,
-      boolean institutionallyBypassed) {
+  private enum InitialCreditState {
+    USING_INITIAL_CREDITS,
+    EXPIRED,
+    EXHAUSTED,
+    INDIVIDUALLY_BYPASSED,
+    INSTITUTIONALLY_BYPASSED
+  }
+
+  private void setupInitialCreditTest(Set<InitialCreditState> states) {
+    boolean usingInitialCredits = states.contains(InitialCreditState.USING_INITIAL_CREDITS);
+    boolean expired = states.contains(InitialCreditState.EXPIRED);
+    boolean exhausted = states.contains(InitialCreditState.EXHAUSTED);
+    boolean individuallyBypassed = states.contains(InitialCreditState.INDIVIDUALLY_BYPASSED);
+    boolean institutionallyBypassed = states.contains(InitialCreditState.INSTITUTIONALLY_BYPASSED);
+
     DbUser user = new DbUser();
     user = userDao.save(user.setContactEmail("a@b.com"));
     createDbVerifiedInstitutionalAffiliation(user);
