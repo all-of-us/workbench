@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.pmiops.workbench.model.ReportingBase;
 import org.pmiops.workbench.utils.RandomUtils;
 
 /**
@@ -27,7 +28,7 @@ import org.pmiops.workbench.utils.RandomUtils;
  *     UserColumnValueExtractor::values; }
  */
 @FunctionalInterface
-public interface InsertAllRequestPayloadTransformer<MODEL_T>
+public interface InsertAllRequestPayloadTransformer<MODEL_T extends ReportingBase>
     extends BigQueryInsertionPayloadTransformer<MODEL_T> {
   String INSERT_ID_CHARS = "abcdefghijklmnopqrstuvwxyz";
   int INSERT_ID_LENGTH = 16;

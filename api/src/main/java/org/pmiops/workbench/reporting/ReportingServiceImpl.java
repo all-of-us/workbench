@@ -1,7 +1,6 @@
 package org.pmiops.workbench.reporting;
 
 import java.time.Clock;
-import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingBase;
@@ -36,8 +35,14 @@ public class ReportingServiceImpl implements ReportingService {
     this.reportingVerificationService = reportingVerificationService;
   }
 
+  private <T extends ReportingBase> void uploadBatchesForTable(
+      ReportingTableParams<T> tableParams, long captureTimestamp) {
+    reportingQueryService
+        .getBatchedStream(tableParams.rwbBatchQueryFn())
+        .forEach(batch -> reportingUploadService.uploadBatch(tableParams, batch, captureTimestamp));
+  }
+
   // upload data in batches, verify the counts, and mark this snapshot valid.
-  @SuppressWarnings({"unchecked"})
   @Transactional
   @Override
   public void collectRecordsAndUpload() {
@@ -47,19 +52,7 @@ public class ReportingServiceImpl implements ReportingService {
 
     reportingTableService
         .getAll()
-        .forEach(
-            tableParams ->
-                reportingQueryService
-                    .getBatchedStream(tableParams.rwbBatchQueryFn())
-                    .forEach(
-                        b ->
-                            // if I don't cast these params, I see the error
-                            // Incompatible equality constraint: capture of ? extends ReportingBase
-                            // and capture of ? extends ReportingBase
-                            reportingUploadService.uploadBatch(
-                                (ReportingTableParams<ReportingBase>) tableParams,
-                                (List<ReportingBase>) b,
-                                captureTimestamp)));
+        .forEach(tableParams -> uploadBatchesForTable(tableParams, captureTimestamp));
 
     // Second: Verify the counts.
     boolean batchUploadSuccess = reportingVerificationService.verifyBatchesAndLog(captureTimestamp);

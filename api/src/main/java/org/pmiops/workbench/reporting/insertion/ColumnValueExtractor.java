@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import org.pmiops.workbench.model.ReportingBase;
 
 /*
  * Implementers of this interface provide details about a particular BigQuery table column
@@ -14,7 +15,7 @@ import java.util.stream.Stream;
  * Since tables usually have multiple columns needing this type of extractor, the first use case
  * of this interface is as a contract for enum classes, one per table.
  */
-public interface ColumnValueExtractor<MODEL_T> {
+public interface ColumnValueExtractor<MODEL_T extends ReportingBase> {
 
   // Parameter name (without any @ sign). The convention is snake_case. This value is used in
   // creating named parameter keys (with a numerical suffix) for DML statements and map keys for
