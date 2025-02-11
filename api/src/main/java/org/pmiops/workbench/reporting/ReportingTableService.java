@@ -90,11 +90,11 @@ public class ReportingTableService {
         workspaceFreeTierUsage());
   }
 
-  private int batchSize(String rwbTableName) {
+  private int batchSize(String bqTableName) {
     ReportingConfig config = workbenchConfigProvider.get().reporting;
     int wantedSize =
         Optional.ofNullable(config.batchSizeOverrides)
-            .flatMap(overrides -> Optional.ofNullable(overrides.get(rwbTableName)))
+            .flatMap(overrides -> Optional.ofNullable(overrides.get(bqTableName)))
             .orElse(config.maxRowsPerInsert);
 
     // don't exceed the max rows allowed by the BQ API
