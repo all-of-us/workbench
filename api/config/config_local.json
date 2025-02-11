@@ -153,7 +153,11 @@
   "reporting": {
     "dataset": "reporting_local",
     "maxRowsPerInsert": 1000,
-    "exportTerraDataWarehouse": false
+    "exportTerraDataWarehouse": false,
+    "batchSizeOverrides": {
+      "cohort": 10000,
+      "user": 500
+    }
   },
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",
