@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 public enum AccountTargetProperty implements SimpleTargetProperty {
   IS_ENABLED("is_enabled"),
   ACKNOWLEDGED_TOS_VERSION("acknowledged_tos_version"),
-  FREE_TIER_DOLLAR_QUOTA("free_tier_dollar_quota"),
+  INITIAL_CREDITS_OVERRIDE("initial_credits_override"),
   ACCESS_TIERS("access_tiers");
 
   private final String propertyName;

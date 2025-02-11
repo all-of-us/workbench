@@ -1,4 +1,4 @@
-package org.pmiops.workbench.initialcredits;
+package org.pmiops.workbench.utils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 import org.mockito.ArgumentMatcher;
 
-public class InitialCreditsExpiryTaskMatchers {
+public class ArgumentMatchers {
 
-  static class UserListMatcher implements ArgumentMatcher<List<Long>> {
+  public static class UserListMatcher implements ArgumentMatcher<List<Long>> {
     private final List<Long> expectedUserIds;
 
     public UserListMatcher(List<Long> expectedUserIds) {
@@ -23,7 +23,7 @@ public class InitialCreditsExpiryTaskMatchers {
     }
   }
 
-  static class MapMatcher implements ArgumentMatcher<Map<Long, Double>> {
+  public static class MapMatcher implements ArgumentMatcher<Map<Long, Double>> {
 
     private final Map<Long, Double> expectedMap;
 

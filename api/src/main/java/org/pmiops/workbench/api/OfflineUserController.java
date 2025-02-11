@@ -1,7 +1,5 @@
 package org.pmiops.workbench.api;
 
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -12,8 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 /** Handles offline / cron-based API requests related to user management. */
 @RestController
 public class OfflineUserController implements OfflineUserApiDelegate {
-  private static final Logger log = Logger.getLogger(OfflineUserController.class.getName());
-
   private final UserService userService;
   private final TaskQueueService taskQueueService;
 
@@ -48,9 +44,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   public ResponseEntity<Void> checkInitialCreditsExpiration() {
     taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(
-        userService.getAllUsersWithActiveInitialCredits().stream()
-            .map(DbUser::getUserId)
-            .collect(Collectors.toList()));
+        userService.getAllUsersWithActiveInitialCredits().stream().map(DbUser::getUserId).toList());
     return ResponseEntity.noContent().build();
   }
 }

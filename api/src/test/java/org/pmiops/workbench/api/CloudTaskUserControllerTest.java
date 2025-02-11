@@ -44,7 +44,7 @@ public class CloudTaskUserControllerTest {
   @Autowired private CloudTaskUserController controller;
 
   @MockBean private AccessModuleService mockAccessModuleService;
-  @MockBean private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
+  @MockBean private InitialCreditsBatchUpdateService mockInitialCreditsBatchUpdateService;
   @MockBean private InitialCreditsService mockInitialCreditsService;
   @MockBean private UserService mockUserService;
 
@@ -126,19 +126,19 @@ public class CloudTaskUserControllerTest {
   public void testCheckAndAlertFreeTierBillingUsage() {
     List<Long> userIdList = List.of(1L, 2L, 3L);
     controller.checkAndAlertFreeTierBillingUsageBatch(userIdList);
-    verify(mockFreeTierBillingUpdateService).checkAndAlertFreeTierBillingUsage(userIdList);
+    verify(mockInitialCreditsBatchUpdateService).checkAndAlertInitialCreditsUsage(userIdList);
   }
 
   @Test
   public void testCheckAndAlertFreeTierBillingUsage_noUserListPassedFromTask() {
     controller.checkAndAlertFreeTierBillingUsageBatch(Collections.emptyList());
-    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+    verify(mockInitialCreditsBatchUpdateService, never()).checkAndAlertInitialCreditsUsage(any());
   }
 
   @Test
   public void testCheckAndAlertFreeTierBillingUsage_nullPassedFromTask() {
     controller.checkAndAlertFreeTierBillingUsageBatch(null);
-    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+    verify(mockInitialCreditsBatchUpdateService, never()).checkAndAlertInitialCreditsUsage(any());
   }
 
   @Test
