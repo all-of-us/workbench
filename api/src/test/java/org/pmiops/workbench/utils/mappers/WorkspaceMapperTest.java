@@ -39,6 +39,7 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -107,28 +108,29 @@ public class WorkspaceMapperTest {
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
     InitialCreditsService.class,
     WorkspaceMapperImpl.class,
   })
   @MockBean({
-    UserDao.class,
-    WorkspaceDao.class,
-    ConceptSetService.class,
+    FireCloudService.class,
     CohortService.class,
-    MailService.class,
-    LeonardoApiClient.class,
+    ConceptSetService.class,
     InstitutionService.class,
+    LeonardoApiClient.class,
+    MailService.class,
     TaskQueueService.class,
+    UserDao.class,
     UserServiceAuditor.class,
+    WorkspaceDao.class,
     WorkspaceFreeTierUsageDao.class,
-    WorkspaceInitialCreditUsageService.class
+    WorkspaceInitialCreditUsageService.class,
   })
   static class Configuration {
 
