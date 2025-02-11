@@ -178,6 +178,9 @@ public class WorkbenchConfig {
     public String operationalTerraWorkspaceBucket;
     public String extractionDestinationDataset;
     public boolean enableJiraTicketingOnFailure;
+    // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
+    public int minExtractionScatterTasks;
+    public float extractionScatterTasksPerSample;
 
     public abstract static class VersionedConfig {
       // 'method' values refer to both the stored Method and the generated Method Configuration
@@ -196,15 +199,10 @@ public class WorkbenchConfig {
     // for extraction workflows compatible with CDR v7 and earlier
     public static class LegacyWorkflowConfig extends VersionedConfig {
       public String gatkJarUri;
-      // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
-      public int minExtractionScatterTasks;
-      public float extractionScatterTasksPerSample;
     }
 
     // for extraction workflows compatible with CDR v8 and later
-    public static class CDRv8PlusConfig extends VersionedConfig {
-      // TODO: do we need any specific config for v8?
-    }
+    public static class CDRv8PlusConfig extends VersionedConfig {}
 
     public LegacyWorkflowConfig legacyVersions;
     public CDRv8PlusConfig cdrv8plus;
@@ -331,6 +329,11 @@ public class WorkbenchConfig {
     public boolean enableVWBWorkspaceCreation;
     // If true, AoU API will start accepting egress notification coming from VWB Service
     public boolean enableVWBEgressMonitor;
+    // If true, AoU will call SAM and VWB to add/remove user from VWB tier group.
+    public boolean enableVWBUserAccessManagement;
+    // If true, AoU will create the VWB user when the user first signs in, similar to Terra
+    // experience
+    public boolean enableVWBUserCreation;
   }
 
   public static class ActionAuditConfig {
@@ -410,6 +413,10 @@ public class WorkbenchConfig {
     public Integer usersPerSynchronizeAccessTask;
     // Number of users to process within a single check initial credits expiration task.
     public Integer usersPerCheckInitialCreditsExpirationTask;
+    // Number of users to process within a single access expiration email task.
+    public Integer usersPerAccessExpirationEmailTask;
+    // Number of workspaces to process within a single delete workspace environments task.
+    public Integer workspacesPerDeleteWorkspaceEnvironmentsTask;
   }
 
   /**
@@ -476,11 +483,14 @@ public class WorkbenchConfig {
 
   public static class VwbConfig {
     public String wsmBaseUrl;
+    public String vwbSamBaseUrl;
+    public String exfilManagerBaseUrl;
     public String organizationId;
     // This will only be used for preview release, later on, each user will have their own pod.
     public String defaultPodId;
     // The service account that will be calling AoU API to notify egress alerts. It will be used in
     // later authZ check.
     public String exfilManagerServiceAccount;
+    public String userManagerBaseUrl;
   }
 }

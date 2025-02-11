@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet author="eric" id="db.changelog-255-backfill-user-initial-credits-expiration">
+        <sql>
+            INSERT INTO user_initial_credits_expiration (user_id, credit_start_time, expiration_time)
+                SELECT uam.user_id, '2025-02-18 00:00:00', '2025-06-18 00:00:00'
+                    FROM user_access_module AS uam
+                INNER JOIN access_module AS am
+                    ON uam.access_module_id = am.access_module_id
+                WHERE am.name ="DATA_USER_CODE_OF_CONDUCT"
+                    AND (completion_time IS NOT NULL OR bypass_time IS NOT NULL)
+                    AND uam.user_id NOT IN (SELECT user_id FROM user_initial_credits_expiration);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

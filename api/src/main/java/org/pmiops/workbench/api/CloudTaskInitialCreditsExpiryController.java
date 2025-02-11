@@ -62,7 +62,8 @@ public class CloudTaskInitialCreditsExpiryController
   }
 
   @SuppressWarnings("unchecked")
-  public ResponseEntity<Void> handleInitialCreditsExpiry(
+  @Override
+  public ResponseEntity<Void> handleInitialCreditsExpiryBatch(
       ExpiredInitialCreditsEventRequest request) {
 
     if (request.getUsers().isEmpty()) {

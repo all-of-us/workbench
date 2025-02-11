@@ -127,7 +127,8 @@ public class WorkspaceOperationMapperTest {
                 workspaceDao,
                 mockFirecloudService,
                 mockInitialCreditsService,
-                workspaceMapper))
+                workspaceMapper,
+                null))
         .isEqualTo(expectedOperation);
   }
 
@@ -153,7 +154,8 @@ public class WorkspaceOperationMapperTest {
                 workspaceDao,
                 mockFirecloudService,
                 mockInitialCreditsService,
-                workspaceMapper))
+                workspaceMapper,
+                null))
         .isEqualTo(expectedOperation);
   }
 
@@ -180,7 +182,8 @@ public class WorkspaceOperationMapperTest {
                 workspaceDao,
                 mockFirecloudService,
                 mockInitialCreditsService,
-                workspaceMapper))
+                workspaceMapper,
+                null))
         .isEqualTo(expectedOperation);
   }
 
@@ -197,7 +200,8 @@ public class WorkspaceOperationMapperTest {
             workspaceDao,
             mockFirecloudService,
             mockInitialCreditsService,
-            workspaceMapper);
+            workspaceMapper,
+            null);
 
     assertThat(maybeWorkspace).hasValue(expectedWorkspace);
   }
@@ -210,7 +214,8 @@ public class WorkspaceOperationMapperTest {
                 workspaceDao,
                 mockFirecloudService,
                 mockInitialCreditsService,
-                workspaceMapper))
+                workspaceMapper,
+                null))
         .isEmpty();
   }
 

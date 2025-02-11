@@ -19,11 +19,12 @@ import {
   WorkspaceOperationStatus,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { InfoIcon, WarningIcon } from 'app/components/icons';
+import { InfoIcon, NewWindowIcon, WarningIcon } from 'app/components/icons';
 import {
   CheckBox,
   RadioButton,
@@ -45,16 +46,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CreateBillingAccountModal } from 'app/pages/workspace/create-billing-account-modal';
 import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
 import {
-  disseminateFindings,
-  PrimaryPurposeItems,
   RequestForReviewFooter,
-  researchOutcomes,
-  ResearchPurposeDescription,
-  ResearchPurposeItem,
-  ResearchPurposeItems,
-  researchPurposeQuestions,
-  SpecificPopulationItem,
-  SpecificPopulationItems,
   toolTipText,
   tooltipTextBillingWarning,
   toolTipTextDemographic,
@@ -96,10 +88,23 @@ import {
   getBillingAccountInfo,
   GoogleBillingAccountInfo,
 } from 'app/utils/project-billing-info';
+import {
+  aianResearchTypeMap,
+  disseminateFindings,
+  PrimaryPurposeItems,
+  researchOutcomes,
+  ResearchPurposeDescription,
+  ResearchPurposeItem,
+  ResearchPurposeItems,
+  researchPurposeQuestions,
+  SpecificPopulationItem,
+  SpecificPopulationItems,
+} from 'app/utils/research-purpose-text';
 import { serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
 
 import { OldCdrVersionModal } from './old-cdr-version-modal';
@@ -232,6 +237,9 @@ export const styles = reactStyles({
   dataAppsVersionSpacing: {
     width: '23em',
   },
+  labEnvironmentSpacing: {
+    width: '20em',
+  },
 });
 
 // default to creating workspaces in the Registered Tier
@@ -339,6 +347,8 @@ export interface WorkspaceEditState {
   workspaceCreationErrorMessage: string;
   dataAppsVersion: DataAppsVersions;
   unavailableTier?: string;
+  showWorkspaceCreatedModal?: boolean;
+  vwbWorkspaceId?: string;
 }
 
 export const WorkspaceEdit = fp.flow(
@@ -375,6 +385,7 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
         dataAppsVersion: this.initializeDataAppsVersion(props),
+        showWorkspaceCreatedModal: false,
       };
     }
 
@@ -615,6 +626,8 @@ export const WorkspaceEdit = fp.flow(
         accessTierShortName: DEFAULT_ACCESS_TIER,
         cdrVersionId: '',
         researchPurpose: {
+          aianResearchType: null,
+          aianResearchDetails: '',
           ancestry: false,
           anticipatedFindings: '',
           commercialPurpose: false,
@@ -1123,6 +1136,31 @@ export const WorkspaceEdit = fp.flow(
       this.saveWorkspace();
     }
 
+    getAskAboutAIAN() {
+      const publicCDRVersionNumber: number = getCdrVersion(
+        this.state.workspace,
+        this.props.cdrVersionTiersResponse
+      ).publicReleaseNumber;
+
+      return showAIANResearchPurpose(publicCDRVersionNumber);
+    }
+
+    /* Deeply clones relevant sections of the provided workspace and makes any adjustments
+     *necessary without adjusting local state. */
+    preProcessWorkspace(workspace: Workspace) {
+      if (this.getAskAboutAIAN()) {
+        return workspace;
+      }
+      return {
+        ...workspace,
+        researchPurpose: {
+          ...workspace.researchPurpose,
+          aianResearchType: null,
+          aianResearchDetails: null,
+        },
+      };
+    }
+
     private async pollForAsyncWorkspaceOperation(
       operation: () => Promise<WorkspaceOperation>,
       errorText: string
@@ -1151,14 +1189,16 @@ export const WorkspaceEdit = fp.flow(
     }
 
     private async apiCreateWorkspaceAsync(): Promise<Workspace> {
+      const adjustedWorkspace = this.preProcessWorkspace(this.state.workspace);
       return this.pollForAsyncWorkspaceOperation(
         async () =>
-          await workspacesApi().createWorkspaceAsync(this.state.workspace),
+          await workspacesApi().createWorkspaceAsync(adjustedWorkspace),
         'Workspace creation failed'
       );
     }
 
     private async apiDuplicateWorkspaceAsync(): Promise<Workspace> {
+      const adjustedWorkspace = this.preProcessWorkspace(this.state.workspace);
       return this.pollForAsyncWorkspaceOperation(
         async () =>
           await workspacesApi().duplicateWorkspaceAsync(
@@ -1166,7 +1206,7 @@ export const WorkspaceEdit = fp.flow(
             this.props.workspace.terraName,
             {
               includeUserRoles: this.state.cloneUserRole,
-              workspace: this.state.workspace,
+              workspace: adjustedWorkspace,
             }
           ),
         'Workspace duplication failed'
@@ -1217,6 +1257,16 @@ export const WorkspaceEdit = fp.flow(
             workspace.namespace,
             workspace.terraName
           );
+
+        if (workspace.vwbWorkspace) {
+          this.setState({
+            showWorkspaceCreatedModal: true,
+            showConfirmationModal: false,
+            loading: false,
+            vwbWorkspaceId: updatedWorkspace.namespace,
+          });
+          return;
+        }
 
         const navigateToWorkspace = () => {
           this.props.navigate([
@@ -1304,6 +1354,8 @@ export const WorkspaceEdit = fp.flow(
           name,
           billingAccountName,
           researchPurpose: {
+            aianResearchDetails,
+            aianResearchType,
             anticipatedFindings,
             diseaseFocusedResearch,
             diseaseOfFocus,
@@ -1321,6 +1373,8 @@ export const WorkspaceEdit = fp.flow(
         },
       } = this.state;
       const values: object = {
+        aianResearchDetails,
+        aianResearchType,
         name,
         billingAccountName,
         anticipatedFindings,
@@ -1396,6 +1450,14 @@ export const WorkspaceEdit = fp.flow(
                 'Other methods of disseminating research findings'
               )
             : {},
+        aianResearchType: this.getAskAboutAIAN()
+          ? {
+              presence: true,
+            }
+          : {},
+        aianResearchDetails: this.getAskAboutAIAN()
+          ? requiredStringWithMaxLength(1000)
+          : {},
       };
 
       return validate(values, constraints, { fullMessages: false });
@@ -1474,6 +1536,8 @@ export const WorkspaceEdit = fp.flow(
           cdrVersionId,
           accessTierShortName,
           researchPurpose: {
+            aianResearchDetails,
+            aianResearchType,
             anticipatedFindings,
             intendedStudy,
             scientificApproach,
@@ -1494,11 +1558,14 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationError,
         workspaceCreationErrorMessage,
         unavailableTier,
+        showWorkspaceCreatedModal,
       } = this.state;
       const {
         cdrVersionTiersResponse,
         profileState: { profile },
       } = this.props;
+
+      const askAboutAIAN: boolean = this.getAskAboutAIAN();
 
       const errors = this.validate();
       return (
@@ -1508,6 +1575,41 @@ export const WorkspaceEdit = fp.flow(
           <div style={{ width: '1120px' }}>
             {loading && (
               <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
+            )}
+            {showWorkspaceCreatedModal && (
+              <Modal>
+                <ModalTitle>Open in Verily Workbench</ModalTitle>
+                <ModalBody>
+                  Your workspace <strong>{this.state.workspace.name}</strong> is
+                  ready. Open it in Verily Workbench to get started.
+                </ModalBody>
+
+                <ModalFooter>
+                  <Button
+                    type='secondary'
+                    onClick={() => {
+                      this.setState({ showWorkspaceCreatedModal: false });
+                      this.props.navigate(['/workspaces']);
+                    }}
+                    style={{ marginRight: '10px', height: '40px' }}
+                  >
+                    Back to List
+                  </Button>
+                  <Button
+                    type='primary'
+                    onClick={() =>
+                      window.open(
+                        `${environment.vwbUiUrl}/workspaces/${this.state.vwbWorkspaceId}`,
+                        '_blank',
+                        'noopener noreferrer'
+                      )
+                    }
+                    style={{ height: '40px' }}
+                  >
+                    Open <NewWindowIcon style={{ marginLeft: '5px' }} />
+                  </Button>
+                </ModalFooter>
+              </Modal>
             )}
             {!hasDefaultCdrVersion(
               this.state.workspace,
@@ -1675,9 +1777,12 @@ export const WorkspaceEdit = fp.flow(
                   <FlexColumn>
                     <div style={styles.fieldHeader}>
                       Data Apps version
-                      <TooltipTrigger content={toolTipText.dataAppsSelect}>
-                        <InfoIcon style={styles.infoIcon} />
-                      </TooltipTrigger>
+                      {/* Only show tooltip for non-prod envs */}
+                      {environment.shouldShowDisplayTag && (
+                        <TooltipTrigger content={toolTipText.dataAppsSelect}>
+                          <InfoIcon style={styles.infoIcon} />
+                        </TooltipTrigger>
+                      )}
                     </div>
                     <TooltipTrigger
                       content='To use a different version of Data Apps, create a new workspace.'
@@ -1714,6 +1819,38 @@ export const WorkspaceEdit = fp.flow(
                 )}
               </FlexRow>
             </WorkspaceEditSection>
+            {this.isMode(WorkspaceEditMode.Create) &&
+              serverConfigStore.get().config.enableVWBWorkspaceCreation && (
+                <WorkspaceEditSection
+                  header='Research Environment'
+                  description='All of Us is now on Verily Workbench. Securely analyze data with intuitive tools and enhanced privacy.'
+                  descriptionStyle={{ marginLeft: '0rem' }}
+                >
+                  <select
+                    style={{
+                      ...styles.selectInput,
+                      ...styles.labEnvironmentSpacing,
+                    }}
+                    value={this.state.workspace.vwbWorkspace ? 'VWB' : 'AOU'}
+                    onChange={(v: React.FormEvent<HTMLSelectElement>) => {
+                      const selectedLab = v.currentTarget.value;
+                      this.setState(
+                        fp.set(
+                          ['workspace', 'vwbWorkspace'],
+                          selectedLab === 'VWB'
+                        )
+                      );
+                    }}
+                  >
+                    <option key='aou' value='AOU'>
+                      Researcher Workbench (legacy)
+                    </option>
+                    <option key='wb' value='VWB'>
+                      Verily Workbench
+                    </option>
+                  </select>
+                </WorkspaceEditSection>
+              )}
             {this.isMode(WorkspaceEditMode.Duplicate) && (
               <WorkspaceEditSection header='Options for duplicate workspace'>
                 <CheckBox
@@ -2117,10 +2254,81 @@ export const WorkspaceEdit = fp.flow(
               </FlexRow>
             </WorkspaceEditSection>
 
+            {/* AIAN section*/}
+            {askAboutAIAN && (
+              <WorkspaceEditSection
+                header={researchPurposeQuestions[9].header}
+                index='6.'
+                indent={true}
+                description={researchPurposeQuestions[9].description}
+                style={{ width: '72rem' }}
+              >
+                {/* RadioGroup: AIAN Research Type */}
+                <FlexColumn>
+                  <FlexRow>
+                    <div style={{ ...styles.header, marginRight: '0.6rem' }}>
+                      6.1
+                    </div>
+                    <div style={styles.header}>
+                      {researchPurposeQuestions[10].header}
+                    </div>
+                  </FlexRow>
+                  <div style={{ marginLeft: '1.35rem' }}>
+                    {Array.from(aianResearchTypeMap.keys()).map(
+                      (aianResearchTypeOption) => (
+                        <FlexRow
+                          key={aianResearchTypeOption}
+                          style={{ paddingBottom: '0.9rem' }}
+                        >
+                          <RadioButton
+                            id={`Option-${aianResearchTypeOption}`}
+                            name={`Option-${aianResearchTypeOption}`}
+                            style={{ marginRight: '0.75rem' }}
+                            onChange={() => {
+                              this.setState(
+                                fp.set(
+                                  [
+                                    'workspace',
+                                    'researchPurpose',
+                                    'aianResearchType',
+                                  ],
+                                  aianResearchTypeOption
+                                )
+                              );
+                            }}
+                            checked={
+                              aianResearchTypeOption === aianResearchType
+                            }
+                          />
+                          <label
+                            htmlFor={`Option-${aianResearchTypeOption}`}
+                            style={styles.text}
+                          >
+                            {aianResearchTypeMap.get(aianResearchTypeOption)}
+                          </label>
+                        </FlexRow>
+                      )
+                    )}
+                  </div>
+                </FlexColumn>
+                {/* TextBox: AIAN Research Description*/}
+                <WorkspaceResearchSummary
+                  researchPurpose={researchPurposeQuestions[11]}
+                  researchValue={aianResearchDetails}
+                  onChange={(v) =>
+                    this.updateResearchPurpose('aianResearchDetails', v.trim())
+                  }
+                  index='6.2'
+                  id='aianResearchDetails'
+                  ariaLabel='AIAN Research Description text field'
+                />
+              </WorkspaceEditSection>
+            )}
+
             {/* Request for review section*/}
             <WorkspaceEditSection
               header={researchPurposeQuestions[8].header}
-              index='6.'
+              index={askAboutAIAN ? '7.' : '6.'}
               indent={true}
             >
               <FlexRow style={styles.text}>
@@ -2311,10 +2519,27 @@ export const WorkspaceEdit = fp.flow(
                         {errors.otherPopulationDetails && (
                           <li>{errors.otherPopulationDetails}</li>
                         )}
+                        {errors.aianResearchType && (
+                          <li>
+                            You must select the type of AIAN research you are
+                            conducting (Question 6.1)
+                          </li>
+                        )}
+                        {errors.aianResearchDetails && (
+                          <li data-test-id='aianResearchDetailsError'>
+                            {' '}
+                            Answer for{' '}
+                            <i>
+                              Please explain your response by sharing specific
+                              details about your study design. (Question 6.2)
+                            </i>
+                            {errors.aianResearchDetails}
+                          </li>
+                        )}
                         {errors.reviewRequested && (
                           <li>
-                            You must pick an answer for review of stigmatizing
-                            research (Question 6)
+                            {`You must pick an answer for review of stigmatizing
+                            research (Question ${askAboutAIAN ? 7 : 6})`}
                           </li>
                         )}
                       </BulletAlignedUnorderedList>
@@ -2439,6 +2664,11 @@ export const WorkspaceEdit = fp.flow(
                       Population of interest
                     </span>{' '}
                     (Question 5)
+                    <br />
+                    <span style={{ fontWeight: 600 }}>
+                      Approach to handling AI/AN data
+                    </span>{' '}
+                    (Question 6)
                     <br />
                   </div>
                   <div style={{ marginBottom: '1.5rem' }}>

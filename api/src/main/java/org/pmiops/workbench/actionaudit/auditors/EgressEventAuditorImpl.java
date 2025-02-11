@@ -78,9 +78,13 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     // differently.
     // Apps use a shared GKE cluster and nodes, and therefore it's not possible to find the App
     // owner.
-    var userRoles =
-        workspaceService.getFirecloudUserRoles(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    var usernames =
+        workspaceService
+            .getFirecloudUserRoles(
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+            .stream()
+            .map(UserRole::getEmail)
+            .toList();
 
     // The user's runtime name is used as a common VM prefix across all Leo machine types, and
     // covers the following situations:
@@ -88,9 +92,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     // 2. Dataproc master nodes: all-of-us-<user_id>-m
     // 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
     var vmOwner =
-        userRoles.stream()
-            .map(UserRole::getEmail)
-            .map(userDao::findUserByUsername)
+        userDao.findUsersByUsernameIn(usernames).stream()
             .filter(user -> user.getRuntimeName().equals(event.getVmPrefix()))
             .findFirst()
             .orElse(null);
@@ -167,24 +169,26 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
 
   private DbWorkspace getDbWorkspace(SumologicEgressEvent event) {
     // Load the workspace via the GCP project name
-    var dbWorkspaceMaybe = workspaceDao.getByGoogleProject(event.getProjectName());
-    if (dbWorkspaceMaybe.isEmpty()) {
-      // Failing to find a workspace is odd enough that we want to return a non-success
-      // response at the API level. But it's also worth storing a permanent record of the
-      // high-egress event by logging it without a workspace target.
-      fireFailedToFindWorkspace(event);
-      throw new BadRequestException(
-          String.format(
-              "The workspace (Google Project Id '%s') referred to by the given event is no longer active or never existed.",
-              event.getProjectName()));
-    }
-    return dbWorkspaceMaybe.get();
+    return workspaceDao
+        .getByGoogleProject(event.getProjectName())
+        .orElseThrow(
+            () -> {
+              // Failing to find a workspace is odd enough that we want to return a non-success
+              // response at the API level. But it's also worth storing a permanent record of the
+              // high-egress event by logging it without a workspace target.
+              fireFailedToFindWorkspace(event);
+              return new BadRequestException(
+                  String.format(
+                      "The workspace (Google Project Id '%s') referred to by the given event is no longer active or never existed.",
+                      event.getProjectName()));
+            });
   }
 
   @Override
   public void fireRemediateEgressEvent(
       DbEgressEvent dbEvent, WorkbenchConfig.EgressAlertRemediationPolicy.Escalation escalation) {
-    var dbWorkspaceMaybe = Optional.ofNullable(dbEvent.getWorkspace());
+    Long dbIdMaybe =
+        Optional.ofNullable(dbEvent.getWorkspace()).map(DbWorkspace::getWorkspaceId).orElse(null);
     var actionId = actionIdProvider.get();
     Builder baseEventBuilder =
         ActionAuditEvent.builder()
@@ -193,7 +197,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
             .actionType(ActionType.REMEDIATE_HIGH_EGRESS_EVENT)
             .agentType(AgentType.SYSTEM)
             .targetType(TargetType.WORKSPACE)
-            .targetIdMaybe(dbWorkspaceMaybe.map(DbWorkspace::getWorkspaceId).orElse(null));
+            .targetIdMaybe(dbIdMaybe);
     fireRemediationEventSet(baseEventBuilder, dbEvent, escalation);
   }
 
@@ -202,7 +206,10 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     var changesByProperty =
         ModelBackedTargetProperty.getChangedValuesByName(
             DbEgressEventTargetProperty.values(), previousEvent, updatedEvent);
-    var dbWorkspaceMaybe = Optional.ofNullable(updatedEvent.getWorkspace());
+    Long dbIdMaybe =
+        Optional.ofNullable(updatedEvent.getWorkspace())
+            .map(DbWorkspace::getWorkspaceId)
+            .orElse(null);
     var actionId = actionIdProvider.get();
     var admin = userProvider.get();
     actionAuditService.send(
@@ -217,8 +224,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
                         .agentIdMaybe(admin.getUserId())
                         .agentEmailMaybe(admin.getUsername())
                         .targetType(TargetType.WORKSPACE)
-                        .targetIdMaybe(
-                            dbWorkspaceMaybe.map(DbWorkspace::getWorkspaceId).orElse(null))
+                        .targetIdMaybe(dbIdMaybe)
                         .targetPropertyMaybe(entry.getKey())
                         .previousValueMaybe(entry.getValue().previousValue())
                         .newValueMaybe(entry.getValue().newValue())

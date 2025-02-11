@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -120,6 +121,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
   @MockBean private FireCloudService mockFirecloudService;
+  @MockBean private VwbAccessService mockVwbAccessService;
   @MockBean private LeonardoApiClient mockLeonardoApiClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private MailService mailService;
@@ -407,7 +409,8 @@ public class WorkspaceAdminServiceTest {
     workspaceAdminService.deleteRuntime(WORKSPACE_NAMESPACE, testLeoRuntime.getRuntimeName());
 
     verify(mockLeonardoApiClient)
-        .deleteRuntimeAsService(GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName());
+        .deleteRuntimeAsService(
+            GOOGLE_PROJECT_ID, testLeoRuntime.getRuntimeName(), /* deleteDisk */ false);
     verify(mockLeonardoRuntimeAuditor)
         .fireDeleteRuntime(GOOGLE_PROJECT_ID, testLeoListRuntimeResponse.getRuntimeName());
   }
@@ -592,10 +595,6 @@ public class WorkspaceAdminServiceTest {
         .setWorkspaceNamespace(namespace)
         .setName(name)
         .setFirecloudName("fc-" + name);
-  }
-
-  private DbWorkspace mustGetDbWorkspace(DbWorkspace w) {
-    return workspaceDao.findDbWorkspaceByWorkspaceId(w.getWorkspaceId());
   }
 
   private void setupPublishWorkspaceMocks() {

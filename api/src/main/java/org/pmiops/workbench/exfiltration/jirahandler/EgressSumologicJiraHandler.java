@@ -22,7 +22,7 @@ import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEvent;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
+import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,13 +32,14 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
   private static final Logger log = Logger.getLogger(EgressSumologicJiraHandler.class.getName());
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final EgressEventMapper egressEventMapper;
+  private final SumologicEgressEventMapper sumologicEgressEventMapper;
 
   @Autowired
   public EgressSumologicJiraHandler(
-      Provider<WorkbenchConfig> workbenchConfigProvider, EgressEventMapper egressEventMapper) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      SumologicEgressEventMapper sumologicEgressEventMapper) {
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.egressEventMapper = egressEventMapper;
+    this.sumologicEgressEventMapper = sumologicEgressEventMapper;
   }
 
   /**
@@ -64,7 +65,7 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
       DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbUser> user = Optional.ofNullable(event.getUser());
     WorkbenchConfig config = workbenchConfigProvider.get();
-    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
+    SumologicEgressEvent originalEvent = sumologicEgressEventMapper.toSumoLogicEvent(event);
     String serviceName = originalEvent.getSrcGkeServiceName();
     String jiraDescription =
         StringUtils.isNotEmpty(serviceName)
@@ -107,8 +108,8 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
   private Stream<AtlassianContent> jiraEventDescriptionShort(
       DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbWorkspace> workspace = Optional.ofNullable(event.getWorkspace());
-    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    EgressEvent apiEvent = egressEventMapper.toApiEvent(event);
+    SumologicEgressEvent originalEvent = sumologicEgressEventMapper.toSumoLogicEvent(event);
+    EgressEvent apiEvent = sumologicEgressEventMapper.toApiEvent(event);
     return Stream.of(
         JiraContent.text(String.format("Egress event details (as RW admin): ", action)),
         JiraContent.link(

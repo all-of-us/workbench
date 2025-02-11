@@ -524,6 +524,8 @@ const CompletionBanner = ({
   initialCreditsValidityPeriodDays,
   initialCreditsExtensionPeriodDays,
 }: CompletionBannerProps) => {
+  const enableInitialCreditsExpiration =
+    serverConfigStore.get().config.enableInitialCreditsExpiration;
   return (
     <FlexRow data-test-id='dar-completed' style={styles.completed}>
       <FlexColumn style={{ flex: 0.5 }}>
@@ -533,28 +535,37 @@ const CompletionBanner = ({
         <div style={styles.completedText}>
           Researcher Workbench data access is complete.
         </div>
-        <div style={styles.completedText}>
-          Your credits expire on{' '}
-          {displayDateWithoutHours(profile.initialCreditsExpirationEpochMillis)}
-          .
-        </div>
-        <div style={styles.completedText}>
-          (You have {initialCreditsValidityPeriodDays} days to use credit after
-          gaining data access. You may request an extension when it gets closer
-          to your credit expiration date, which will extend your credit
-          expiration date to a total of {initialCreditsExtensionPeriodDays} days
-          from the day you gained data access.)
-        </div>
-        <div style={styles.completedText}>
-          Learn more{' '}
-          <LinkButton
-            style={{ display: 'inline' }}
-            onClick={() => window.open(supportUrls.initialCredits, '_blank')}
-          >
-            here
-          </LinkButton>
-          .
-        </div>
+        {enableInitialCreditsExpiration && (
+          <>
+            <div style={styles.completedText}>
+              Your credits expire on{' '}
+              {displayDateWithoutHours(
+                profile.initialCreditsExpirationEpochMillis
+              )}
+              .
+            </div>
+            <div style={styles.completedText}>
+              (You have {initialCreditsValidityPeriodDays} days to use credit
+              after gaining data access. You may request an extension when it
+              gets closer to your credit expiration date, which will extend your
+              credit expiration date to a total of{' '}
+              {initialCreditsExtensionPeriodDays} days from the day you gained
+              data access.)
+            </div>
+            <div style={styles.completedText}>
+              Learn more{' '}
+              <LinkButton
+                style={{ display: 'inline' }}
+                onClick={() =>
+                  window.open(supportUrls.initialCredits, '_blank')
+                }
+              >
+                here
+              </LinkButton>
+              .
+            </div>
+          </>
+        )}
       </FlexColumn>
       <GetStartedButton style={{ marginLeft: 'auto' }} />
     </FlexRow>

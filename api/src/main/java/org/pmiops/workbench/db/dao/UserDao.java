@@ -1,8 +1,12 @@
 package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -20,9 +24,16 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
    */
   DbUser findUserByUsername(String username);
 
-  List<DbUser> findUserByUsernameIn(List<String> username);
+  List<DbUser> findUsersByUsernameIn(Collection<String> username);
+
+  default Map<String, DbUser> getUsersMappedByUsernames(Collection<String> usernames) {
+    return findUsersByUsernameIn(usernames).stream()
+        .collect(Collectors.toMap(DbUser::getUsername, Function.identity()));
+  }
 
   DbUser findUserByUserId(long userId);
+
+  List<DbUser> findUsersByUserIdIn(List<Long> userIds);
 
   @Query("SELECT user.id FROM DbUser user")
   List<Long> findUserIds();
@@ -59,7 +70,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   List<DbUser> findUsersBySearchStringAndTier(
       @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
-  Set<DbUser> findUserByUsernameInAndDisabledFalse(List<String> usernames);
+  Set<DbUser> findUsersByUsernameInAndDisabledFalse(List<String> usernames);
 
   @Query(
       "SELECT u FROM DbUser u "

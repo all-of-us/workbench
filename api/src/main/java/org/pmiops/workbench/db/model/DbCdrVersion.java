@@ -61,9 +61,9 @@ public class DbCdrVersion {
   private String wgsLongReadsJointVcfGRCh38;
   private String wgsLongReadsJointVcfT2T;
 
-  private Boolean needsV8GenomicExtractionWorkflow;
+  private String vwbTemplateId;
 
-  private String vwbTemplateID;
+  private int publicReleaseNumber;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -208,7 +208,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_data")
   public Boolean getHasFitbitData() {
-    return hasFitbitData == null ? false : hasFitbitData;
+    return Boolean.TRUE.equals(hasFitbitData);
   }
 
   public DbCdrVersion setHasFitbitData(Boolean hasFitbitData) {
@@ -218,7 +218,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_copesurvey_data")
   public Boolean getHasCopeSurveyData() {
-    return hasCopeSurveyData == null ? false : hasCopeSurveyData;
+    return Boolean.TRUE.equals(hasCopeSurveyData);
   }
 
   public DbCdrVersion setHasCopeSurveyData(Boolean hasCopeSurveyData) {
@@ -228,7 +228,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_sleep_data")
   public Boolean getHasFitbitSleepData() {
-    return hasFitbitSleepData == null ? false : hasFitbitSleepData;
+    return Boolean.TRUE.equals(hasFitbitSleepData);
   }
 
   public DbCdrVersion setHasFitbitSleepData(Boolean hasFitbitSleepData) {
@@ -238,7 +238,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_fitbit_device_data")
   public Boolean getHasFitbitDeviceData() {
-    return hasFitbitDeviceData == null ? false : hasFitbitDeviceData;
+    return Boolean.TRUE.equals(hasFitbitDeviceData);
   }
 
   public DbCdrVersion setHasFitbitDeviceData(Boolean hasFitbitDeviceData) {
@@ -248,7 +248,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_survey_conduct_data")
   public Boolean getHasSurveyConductData() {
-    return hasSurveyConductData == null ? false : hasSurveyConductData;
+    return Boolean.TRUE.equals(hasSurveyConductData);
   }
 
   public DbCdrVersion setHasSurveyConductData(Boolean hasSurveyConductData) {
@@ -258,7 +258,7 @@ public class DbCdrVersion {
 
   @Column(name = "tanagra_enabled")
   public Boolean getTanagraEnabled() {
-    return tanagraEnabled == null ? false : tanagraEnabled;
+    return Boolean.TRUE.equals(tanagraEnabled);
   }
 
   public DbCdrVersion setTanagraEnabled(Boolean tanagraEnabled) {
@@ -497,24 +497,23 @@ public class DbCdrVersion {
     return this;
   }
 
-  @Column(name = "needs_v8_genomic_extraction_workflow")
-  public Boolean getNeedsV8GenomicExtractionWorkflow() {
-    return needsV8GenomicExtractionWorkflow;
+  @Column(name = "vwb_template_id")
+  public String getVwbTemplateId() {
+    return vwbTemplateId;
   }
 
-  public DbCdrVersion setNeedsV8GenomicExtractionWorkflow(
-      Boolean needsV8GenomicExtractionWorkflow) {
-    this.needsV8GenomicExtractionWorkflow = needsV8GenomicExtractionWorkflow;
+  public DbCdrVersion setVwbTemplateId(String vwbTemplateId) {
+    this.vwbTemplateId = vwbTemplateId;
     return this;
   }
 
-  @Column(name = "vwb_template_id")
-  public String getVwbTemplateID() {
-    return vwbTemplateID;
+  @Column(name = "public_release_number")
+  public int getPublicReleaseNumber() {
+    return publicReleaseNumber;
   }
 
-  public DbCdrVersion setVwbTemplateID(String vwbTemplateID) {
-    this.vwbTemplateID = vwbTemplateID;
+  public DbCdrVersion setPublicReleaseNumber(int publicReleaseNumber) {
+    this.publicReleaseNumber = publicReleaseNumber;
     return this;
   }
 
@@ -562,8 +561,8 @@ public class DbCdrVersion {
         wgsLongReadsHailT2T,
         wgsLongReadsJointVcfGRCh38,
         wgsLongReadsJointVcfT2T,
-        needsV8GenomicExtractionWorkflow,
-        vwbTemplateID);
+        publicReleaseNumber,
+        vwbTemplateId);
   }
 
   @Override
@@ -571,13 +570,13 @@ public class DbCdrVersion {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof DbCdrVersion)) {
+    if (!(o instanceof DbCdrVersion that)) {
       return false;
     }
-    DbCdrVersion that = (DbCdrVersion) o;
     return cdrVersionId == that.cdrVersionId
         && archivalStatus == that.archivalStatus
         && numParticipants == that.numParticipants
+        && publicReleaseNumber == that.publicReleaseNumber
         && Objects.equals(isDefault, that.isDefault)
         && Objects.equals(name, that.name)
         && Objects.equals(accessTier, that.accessTier)
@@ -617,7 +616,6 @@ public class DbCdrVersion {
         && Objects.equals(wgsLongReadsHailT2T, that.wgsLongReadsHailT2T)
         && Objects.equals(wgsLongReadsJointVcfGRCh38, that.wgsLongReadsJointVcfGRCh38)
         && Objects.equals(wgsLongReadsJointVcfT2T, that.wgsLongReadsJointVcfT2T)
-        && Objects.equals(needsV8GenomicExtractionWorkflow, that.needsV8GenomicExtractionWorkflow)
-        && Objects.equals(vwbTemplateID, that.vwbTemplateID);
+        && Objects.equals(vwbTemplateId, that.vwbTemplateId);
   }
 }

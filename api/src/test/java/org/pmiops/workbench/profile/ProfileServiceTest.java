@@ -143,7 +143,6 @@ public class ProfileServiceTest {
     AccessModuleService.class,
     AccessTierService.class,
     InitialCreditsService.class,
-    InitialCreditsService.class,
     NewUserSatisfactionSurveyService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,

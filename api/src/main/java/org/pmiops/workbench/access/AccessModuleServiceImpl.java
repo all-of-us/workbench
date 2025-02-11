@@ -63,7 +63,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public void updateAllBypassTimes(long userId) {
-    dbAccessModulesProvider.get().stream()
+    dbAccessModulesProvider
+        .get()
         .forEach(module -> updateBypassTime(userId, module.getName(), true));
   }
 
@@ -93,8 +94,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
             "Setting %s(uid: %d) for module %s bypass status to %s",
             user.getUsername(), userId, accessModule.getName(), isBypassed));
 
-    userAccessModuleToUpdate.setBypassTime(newBypassTime);
-    userAccessModuleDao.save(userAccessModuleToUpdate);
+    userAccessModuleDao.save(userAccessModuleToUpdate.setBypassTime(newBypassTime));
     userServiceAuditor.fireAdministrativeBypassTime(
         user.getUserId(),
         accessModuleNameMapper.bypassAuditPropertyFromStorage(accessModule.getName()),
@@ -112,9 +112,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModuleToUpdate =
-        retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
-    userAccessModuleToUpdate =
-        userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
+        userAccessModuleDao.save(
+            retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule).setCompletionTime(timestamp));
     if (accessModuleName.equals(DbAccessModuleName.RAS_ID_ME)
         || accessModuleName.equals(DbAccessModuleName.RAS_LOGIN_GOV)) {
       updateCompletionTime(dbUser, DbAccessModuleName.IDENTITY, timestamp);
@@ -136,8 +135,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       DbUser user, DbAccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
-    DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(user, dbAccessModule);
-    return maybeReturnAccessModule(userAccessModule);
+    return maybeReturnAccessModule(retrieveUserAccessModuleOrCreate(user, dbAccessModule));
   }
 
   private Optional<AccessModuleStatus> maybeReturnAccessModule(

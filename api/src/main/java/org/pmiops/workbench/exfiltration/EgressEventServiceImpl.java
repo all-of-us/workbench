@@ -5,7 +5,6 @@ import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.gkeServiceName
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
-import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -67,42 +66,45 @@ public class EgressEventServiceImpl implements EgressEventService {
     // Lookup workspace by googleProject name, and set the workspaceNamespace in EgressEvent.
     Optional<DbWorkspace> dbWorkspaceMaybe =
         workspaceDao.getByGoogleProject(event.getProjectName());
-    String workspaceNamespace;
-    if (dbWorkspaceMaybe.isEmpty()) {
-      logger.warning(
-          String.format(
-              "Workspace not found by given Google Project Id: %s", event.getProjectName()));
-      workspaceNamespace = NOT_FOUND_WORKSPACE_NAMESPACE;
-    } else {
-      workspaceNamespace = dbWorkspaceMaybe.get().getWorkspaceNamespace();
-    }
 
-    Optional<DbUser> egressUser = findEgressUsers(event);
+    String workspaceNamespace =
+        dbWorkspaceMaybe
+            .map(DbWorkspace::getWorkspaceNamespace)
+            .orElseGet(
+                () -> {
+                  logger.warning(
+                      String.format(
+                          "Workspace not found by given Google Project Id: %s",
+                          event.getProjectName()));
+                  return NOT_FOUND_WORKSPACE_NAMESPACE;
+                });
 
-    // This would happen if we receive a second GKE Egress for the same event when the app is being
-    // STOPPED,
-    // we just audit in this case since we can't know the user
-    if (egressUser.isEmpty()) {
-      logger.warning(
-          String.format(
-              "An egress event happened for workspace: %s, but we're unable to find a user for it. "
-                  + "This could be because it was triggered by a GKE up that is currently not running.",
-              workspaceNamespace));
-      this.egressEventAuditor.fireEgressEvent(event);
-    }
+    Optional<DbUser> egressUserMaybe = findEgressUser(event);
 
-    logger.warning(
-        String.format(
-            "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, username %s)",
-            workspaceNamespace,
-            event.getProjectName(),
-            event.getEgressMib(),
-            egressUser.get().getUsername()));
-    this.egressEventAuditor.fireEgressEventForUser(event, egressUser.get());
+    egressUserMaybe.ifPresentOrElse(
+        user -> {
+          logger.warning(
+              String.format(
+                  "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, username %s)",
+                  workspaceNamespace,
+                  event.getProjectName(),
+                  event.getEgressMib(),
+                  user.getUsername()));
+          egressEventAuditor.fireEgressEventForUser(event, user);
+        },
+        () -> {
+          // This would happen if we receive a second GKE Egress for the same event when the app is
+          // being STOPPED,  we just audit in this case since we can't know the user
+          logger.warning(
+              String.format(
+                  "An egress event happened for workspace: %s, but we're unable to find a user for it. "
+                      + "This could be because it was triggered by a GKE app that is currently not running.",
+                  workspaceNamespace));
+          egressEventAuditor.fireEgressEvent(event);
+        });
 
-    Optional<DbEgressEvent> maybeEvent =
-        this.maybePersistSumoEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
-    maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId(), false));
+    maybePersistSumoEgressEvent(event, egressUserMaybe, dbWorkspaceMaybe)
+        .ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId(), false));
   }
 
   @Override
@@ -114,7 +116,7 @@ public class EgressEventServiceImpl implements EgressEventService {
               "An egress event happened for workspace: %s, but we're unable to find a user %s.",
               egressEvent.getVwbWorkspaceId(), egressEvent.getUserEmail()));
     }
-    this.egressEventAuditor.fireVwbEgressEvent(egressEvent, egressUser.get());
+    egressEventAuditor.fireVwbEgressEvent(egressEvent, egressUser.get());
     DbEgressEvent event =
         egressEventDao.save(
             new DbEgressEvent()
@@ -122,6 +124,7 @@ public class EgressEventServiceImpl implements EgressEventService {
                 .setVwbEgressEventId(egressEvent.getVwbEgressEventId())
                 .setVwbWorkspaceId(egressEvent.getVwbWorkspaceId())
                 .setVwbVmName(egressEvent.getVmName())
+                .setTimeWindowStart(new Timestamp(egressEvent.getTimeWindowStart()))
                 .setGcpProjectId(egressEvent.getGcpProjectId())
                 .setVwbIncidentCount(egressEvent.getIncidentCount().intValue())
                 .setEgressMegabytes(
@@ -129,14 +132,12 @@ public class EgressEventServiceImpl implements EgressEventService {
                         // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
                         .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
                         .orElse(null))
-                .setEgressWindowSeconds(
-                    Optional.ofNullable(egressEvent.getTimeWindowDuration()).orElse(null))
+                .setEgressWindowSeconds(egressEvent.getTimeWindowDuration())
                 .setStatus(DbEgressEventStatus.PENDING));
     taskQueueService.pushEgressEventTask(event.getEgressEventId(), true);
   }
 
-  @NotNull
-  private Optional<DbUser> findEgressUsers(SumologicEgressEvent event) {
+  private Optional<DbUser> findEgressUser(SumologicEgressEvent event) {
 
     // This case is when the Egress is from a GCE cluster.
     if (StringUtils.isNotEmpty(event.getVmPrefix())

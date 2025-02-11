@@ -43,7 +43,7 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
@@ -473,7 +473,7 @@ export const WorkspaceAbout = fp.flow(
               </div>
               {workspace &&
                 WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
-                isUsingFreeTierBillingAccount(workspace) && (
+                isUsingInitialCredits(workspace) && (
                   <>
                     <div style={{ ...styles.infoBox, height: '3.75rem' }}>
                       <div style={styles.infoBoxHeader}>
@@ -491,35 +491,36 @@ export const WorkspaceAbout = fp.flow(
                     </div>
 
                     {serverConfigStore.get().config
-                      .enableInitialCreditsExpiration && (
-                      <div style={{ ...styles.infoBox }}>
-                        <div style={styles.infoBoxHeader}>
-                          Workspace Initial Credit Expiration
-                        </div>
-                        <div style={{ fontSize: '0.75rem' }}>
-                          {this.workspaceInitialCreditsExpirationTime}
-                        </div>
-                        <TooltipTrigger
-                          content={initialCreditsExtensionTooltipContent}
-                          disabled={
-                            isWorkspaceCreator &&
-                            profile.eligibleForInitialCreditsExtension
-                          }
-                        >
-                          <LinkButton
+                      .enableInitialCreditsExpiration &&
+                      !workspace.initialCredits.expirationBypassed && (
+                        <div style={{ ...styles.infoBox }}>
+                          <div style={styles.infoBoxHeader}>
+                            Workspace Initial Credit Expiration
+                          </div>
+                          <div style={{ fontSize: '0.75rem' }}>
+                            {this.workspaceInitialCreditsExpirationTime}
+                          </div>
+                          <TooltipTrigger
+                            content={initialCreditsExtensionTooltipContent}
                             disabled={
-                              !isWorkspaceCreator ||
-                              !profile.eligibleForInitialCreditsExtension
-                            }
-                            onClick={() =>
-                              this.setState({ showExtensionModal: true })
+                              isWorkspaceCreator &&
+                              profile.eligibleForInitialCreditsExtension
                             }
                           >
-                            Request Extension
-                          </LinkButton>
-                        </TooltipTrigger>
-                      </div>
-                    )}
+                            <LinkButton
+                              disabled={
+                                !isWorkspaceCreator ||
+                                !profile.eligibleForInitialCreditsExtension
+                              }
+                              onClick={() =>
+                                this.setState({ showExtensionModal: true })
+                              }
+                            >
+                              Request Extension
+                            </LinkButton>
+                          </TooltipTrigger>
+                        </div>
+                      )}
                   </>
                 )}
             </div>

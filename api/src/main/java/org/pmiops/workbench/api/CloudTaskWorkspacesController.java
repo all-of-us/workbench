@@ -26,7 +26,7 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   }
 
   @Override
-  public ResponseEntity<Void> deleteTestUserWorkspaces(List<TestUserWorkspace> request) {
+  public ResponseEntity<Void> deleteTestUserWorkspacesBatch(List<TestUserWorkspace> request) {
     LOGGER.info(String.format("Deleting a batch of %d workspaces...", request.size()));
     request.stream()
         .collect(Collectors.groupingBy(TestUserWorkspace::getUsername, Collectors.counting()))
@@ -53,7 +53,7 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   }
 
   @Override
-  public ResponseEntity<Void> deleteTestUserWorkspacesInRawls(
+  public ResponseEntity<Void> deleteTestUserWorkspacesInRawlsBatch(
       List<TestUserRawlsWorkspace> request) {
     LOGGER.info(String.format("Deleting a batch of %d workspaces in Rawls...", request.size()));
     request.stream()

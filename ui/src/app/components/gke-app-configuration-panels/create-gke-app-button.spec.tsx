@@ -4,7 +4,6 @@ import {
   AppsApi,
   AppStatus,
   AppType,
-  BillingStatus,
   CreateAppRequest,
   Disk,
   DisksApi,
@@ -22,7 +21,10 @@ import {
   disksApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { nowPlusDays } from 'app/utils/dates';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
@@ -34,6 +36,7 @@ import {
 } from 'testing/stubs/apps-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import {
@@ -43,14 +46,7 @@ import {
 
 describe(CreateGkeAppButton.name, () => {
   const workspaceNamespace = 'aou-rw-test-1';
-  const defaultProps: CreateGKEAppButtonProps = {
-    createAppRequest: defaultCromwellCreateRequest,
-    existingApp: null,
-    workspaceNamespace,
-    onDismiss: () => {},
-    username: ProfileStubVariables.PROFILE_STUB.username,
-    billingStatus: BillingStatus.ACTIVE,
-  };
+  let defaultProps: CreateGKEAppButtonProps;
 
   let user;
 
@@ -85,6 +81,28 @@ describe(CreateGkeAppButton.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve());
 
   beforeEach(() => {
+    const freeTierBillingAccountId = 'FreeTierBillingAccountId';
+    const workspaceStub = buildWorkspaceStub();
+    const oneMinute = 60 * 1000;
+    defaultProps = {
+      createAppRequest: defaultCromwellCreateRequest,
+      existingApp: null,
+      workspace: {
+        ...workspaceStub,
+        billingAccountName: `billingAccounts/${freeTierBillingAccountId}`,
+        namespace: workspaceNamespace,
+        initialCredits: {
+          ...workspaceStub.initialCredits,
+          expirationEpochMillis: new Date().getTime() + 2 * oneMinute,
+        },
+      },
+      onDismiss: () => {},
+      username: ProfileStubVariables.PROFILE_STUB.username,
+    };
+
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, freeTierBillingAccountId },
+    });
     registerApiClient(AppsApi, new AppsApiStub());
     registerApiClient(DisksApi, new DisksApiStub());
     user = userEvent.setup();
@@ -141,10 +159,17 @@ describe(CreateGkeAppButton.name, () => {
     });
   });
 
-  it('should not allow creating a GKE app when billing status is not active.', async () => {
+  it('should not allow creating a GKE app when initial credits are expired', async () => {
     await component({
       createAppRequest: defaultCromwellCreateRequest,
-      billingStatus: BillingStatus.INACTIVE,
+      workspace: {
+        ...defaultProps.workspace,
+        initialCredits: {
+          exhausted: false,
+          expirationEpochMillis: new Date().getTime() - 1, // Expired in past
+          expirationBypassed: false,
+        },
+      },
     });
 
     const button = await waitFor(() => {
@@ -158,6 +183,70 @@ describe(CreateGkeAppButton.name, () => {
       'You have either run out of initial credits or have an inactive billing account.',
       user
     );
+  });
+
+  it('should allow creating a GKE app when initial credits are expired and bypassed', async () => {
+    await component({
+      createAppRequest: defaultCromwellCreateRequest,
+      workspace: {
+        ...defaultProps.workspace,
+        initialCredits: {
+          exhausted: false,
+          expirationEpochMillis: new Date().getTime() - 1, // Expired in past
+          expirationBypassed: true,
+        },
+      },
+    });
+
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementEnabled(createButton);
+      return createButton;
+    });
+    expect(button).toBeInTheDocument();
+  });
+
+  it('should not allow creating a GKE app when initial credits are exhausted', async () => {
+    await component({
+      createAppRequest: defaultCromwellCreateRequest,
+      workspace: {
+        ...defaultProps.workspace,
+        initialCredits: {
+          exhausted: true,
+          expirationEpochMillis: nowPlusDays(1),
+          expirationBypassed: false,
+        },
+      },
+    });
+
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementDisabled(createButton);
+      return createButton;
+    });
+
+    await expectTooltip(
+      button,
+      'You have either run out of initial credits or have an inactive billing account.',
+      user
+    );
+  });
+
+  it('should allow creating a GKE app when user is not using initial credits', async () => {
+    await component({
+      createAppRequest: defaultCromwellCreateRequest,
+      workspace: {
+        ...defaultProps.workspace,
+        billingAccountName: 'userProvidedBillingAccount',
+      },
+    });
+
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementEnabled(createButton);
+      return createButton;
+    });
+    expect(button).toBeInTheDocument();
   });
 
   it('should not allow creating a GKE app with a disk that is too small.', async () => {

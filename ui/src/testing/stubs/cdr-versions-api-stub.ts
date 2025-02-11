@@ -8,6 +8,7 @@ import {
   AccessTierDisplayNames,
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
+import { EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN } from 'app/utils/workspace-utils';
 
 export class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
@@ -38,6 +39,8 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: true,
           creationTime: 0,
           bigqueryDataset: '',
+          publicReleaseNumber:
+            EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN,
         },
         {
           name: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
@@ -49,6 +52,8 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: false,
           creationTime: 0,
           bigqueryDataset: '',
+          publicReleaseNumber:
+            EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN - 1,
         },
       ],
     },
@@ -69,6 +74,8 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasWgsData: true,
           creationTime: 0,
           bigqueryDataset: '',
+          publicReleaseNumber:
+            EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN,
         },
       ],
     },

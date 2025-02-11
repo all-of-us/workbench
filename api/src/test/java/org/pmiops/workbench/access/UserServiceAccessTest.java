@@ -124,7 +124,8 @@ public class UserServiceAccessTest {
     FireCloudService.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsService.class
+    InitialCreditsService.class,
+    VwbAccessService.class,
   })
   @TestConfiguration
   static class Configuration {

@@ -23,7 +23,7 @@ FROM cimg/openjdk:17.0-browsers
 USER circleci
 
 # keep in sync with deploy/Dockerfile and api/gradle.build
-ENV CLOUD_SDK_VERSION 471.0.0
+ENV CLOUD_SDK_VERSION 503.0.0
 
 RUN cd && \
   wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
@@ -45,13 +45,13 @@ RUN sudo pip install --upgrade pip pylint
 
 ENV PATH=/home/circleci/node/bin:/home/circleci/google-cloud-sdk/bin:$PATH
 
-RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 > /tmp/cloud_sql_proxy \
+RUN curl -o /tmp/cloud_sql_proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.2/cloud-sql-proxy.linux.amd64 \
   && sudo mv /tmp/cloud_sql_proxy /usr/local/bin && sudo chmod +x /usr/local/bin/cloud_sql_proxy
 
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
-ENV GRADLE_VERSION 7.6.1
+ENV GRADLE_VERSION 7.6.4
 
 RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip \
   && sudo unzip /tmp/gradle.zip -d /opt/gradle

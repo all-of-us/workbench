@@ -479,6 +479,15 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
+  public List<RawlsWorkspaceListResponse> getWorkspacesAsService() {
+    return rawlsRetryHandler.run(
+        (context) ->
+            serviceAccountWorkspaceApiProvider
+                .get()
+                .listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
+  }
+
+  @Override
   public void deleteWorkspace(String workspaceNamespace, String firecloudName) {
     retryHandler.run(
         (context) -> {

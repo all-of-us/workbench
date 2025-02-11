@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
@@ -21,7 +20,6 @@ import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValue.Attribute;
@@ -32,6 +30,8 @@ import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
+import jakarta.inject.Provider;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
@@ -39,12 +39,13 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -79,8 +80,10 @@ import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -98,6 +101,7 @@ import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -113,14 +117,15 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Test the unique ReportingNativeQueryService, which bypasses Spring in favor of low-level JDBC
- * queries. This means we need real DAOs.
+ * Test the unique ReportingQueryService, which bypasses Spring in favor of low-level JDBC queries.
+ * This means we need real DAOs.
  */
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingQueryServiceTest {
 
   public static final int BATCH_SIZE = 2;
+  private final long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -128,17 +133,19 @@ public class ReportingQueryServiceTest {
 
   // It's necessary to bring in several Dao classes, since we aim to populate join tables
   // that have neither entities of their own nor stand-alone DAOs.
-  @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessModuleDao accessModuleDao;
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private InstitutionDao institutionDao;
-  @Autowired InstitutionTierRequirementDao institutionTierRequirementDao;
-  @Autowired private UserAccessTierDao userAccessTierDao;
-  @Autowired private UserAccessModuleDao userAccessModuleDao;
-  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private InstitutionTierRequirementDao institutionTierRequirementDao;
   @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private UserAccessTierDao userAccessTierDao;
+  @Autowired private UserDao userDao;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private WorkspaceDao workspaceDao;
 
   @Autowired private EntityManager entityManager;
 
@@ -146,10 +153,8 @@ public class ReportingQueryServiceTest {
   @Qualifier("REPORTING_USER_TEST_FIXTURE")
   ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
-  @Autowired private UserDao userDao;
-  @Autowired private WorkspaceDao workspaceDao;
-
   @MockBean private BigQueryService bigQueryService;
+  @MockBean Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Import({
     FakeClockConfiguration.class,
@@ -190,10 +195,11 @@ public class ReportingQueryServiceTest {
     duccModule = accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.reporting.maxRowsPerInsert = BATCH_SIZE;
+    workbenchConfig.billing.accountId = "initial-credits";
   }
 
   @Test
-  public void testGetReportingDatasetCohorts() {
+  public void testGetReportingDatasetCohorts_oneEntry() {
     final DbUser user1 = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion1 = createCdrVersion(registeredTier);
     final DbWorkspace workspace1 = createDbWorkspace(user1, cdrVersion1);
@@ -201,10 +207,15 @@ public class ReportingQueryServiceTest {
     final DbDataset dataset1 = createDataset(workspace1, cohort1);
     entityManager.flush();
 
-    final List<ReportingDatasetCohort> datasetCohorts = reportingQueryService.getDatasetCohorts();
-    assertThat(datasetCohorts).hasSize(1);
-    assertThat(datasetCohorts.get(0).getCohortId()).isEqualTo(cohort1.getCohortId());
-    assertThat(datasetCohorts.get(0).getDatasetId()).isEqualTo(dataset1.getDataSetId());
+    final Iterator<List<ReportingDatasetCohort>> iterator = getDatasetCohortsBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    List<ReportingDatasetCohort> firstBatch = iterator.next();
+    assertThat(firstBatch).hasSize(1);
+
+    ReportingDatasetCohort first = firstBatch.get(0);
+    assertThat(first.getCohortId()).isEqualTo(cohort1.getCohortId());
+    assertThat(first.getDatasetId()).isEqualTo(dataset1.getDataSetId());
   }
 
   @NotNull
@@ -228,9 +239,8 @@ public class ReportingQueryServiceTest {
   @Transactional
   public DbWorkspace createDbWorkspace(DbUser user1, DbCdrVersion cdrVersion1) {
     final long initialWorkspaceCount = workspaceDao.count();
-    final DbWorkspace workspace1 =
-        workspaceDao.save(
-            ReportingTestUtils.createDbWorkspace(user1, cdrVersion1)); // save cdr version too
+    DbWorkspace workspace1 =
+        workspaceDao.save(ReportingTestUtils.createDbWorkspace(user1, cdrVersion1));
     assertThat(workspaceDao.count()).isEqualTo(initialWorkspaceCount + 1);
     return workspace1;
   }
@@ -248,7 +258,7 @@ public class ReportingQueryServiceTest {
   @Transactional
   public DbUser createDbUserWithInstitute() {
     int currentSize = userDao.findUsers().size();
-    final DbUser user = userDao.save(userFixture.createEntity());
+    DbUser user = userDao.save(userFixture.createEntity());
     assertThat(userDao.count()).isEqualTo(currentSize + 1);
     createDbVerifiedInstitutionalAffiliation(user);
     return user;
@@ -293,6 +303,70 @@ public class ReportingQueryServiceTest {
     assertThat(iterator.hasNext()).isFalse();
   }
 
+  @Test
+  public void testWorkspaceIterator_active_billingAccount() {
+    setupInitialCreditTest(EnumSet.noneOf(InitialCreditState.class));
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
+  }
+
+  @Test
+  public void testWorkspaceIterator_inactive_exhausted() {
+    setupInitialCreditTest(
+        EnumSet.of(InitialCreditState.USING_INITIAL_CREDITS, InitialCreditState.EXHAUSTED));
+
+    assertIteratorBillingStatus(BillingStatus.INACTIVE);
+  }
+
+  @Test
+  public void testWorkspaceIterator_active_missingInitialCredits() {
+    final DbUser user = createDbUserWithInstitute();
+    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(false)
+            .setBillingAccountName(
+                String.format("billingAccounts/%s", workbenchConfig.billing.accountId)));
+    entityManager.flush();
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
+  }
+
+  @Test
+  public void testWorkspaceIterator_active_unexpiredInitialCredits() {
+    setupInitialCreditTest(EnumSet.of(InitialCreditState.USING_INITIAL_CREDITS));
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
+  }
+
+  @Test
+  public void testWorkspaceIterator_inactive_expiredInitialCredits() {
+
+    setupInitialCreditTest(
+        EnumSet.of(InitialCreditState.USING_INITIAL_CREDITS, InitialCreditState.EXPIRED));
+
+    assertIteratorBillingStatus(BillingStatus.INACTIVE);
+  }
+
+  @Test
+  public void testWorkspaceIterator_inactive_expiredInitialCreditsIndividuallyBypassed() {
+    setupInitialCreditTest(
+        EnumSet.of(
+            InitialCreditState.USING_INITIAL_CREDITS,
+            InitialCreditState.EXPIRED,
+            InitialCreditState.INDIVIDUALLY_BYPASSED));
+
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
+  }
+
+  @Test
+  public void testWorkspaceIterator_inactive_expiredInitialCreditsInstitutionallyBypassed() {
+    setupInitialCreditTest(
+        EnumSet.of(
+            InitialCreditState.USING_INITIAL_CREDITS,
+            InitialCreditState.EXPIRED,
+            InitialCreditState.INSTITUTIONALLY_BYPASSED));
+
+    assertIteratorBillingStatus(BillingStatus.ACTIVE);
+  }
+
   @Transactional
   public DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
     return userAccessTierDao.save(
@@ -332,7 +406,7 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
-  public void testWorkspaceIIterator_twoAndAHalfBatches() {
+  public void testWorkspaceIterator_twoAndAHalfBatches() {
     createWorkspaces(5);
 
     final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
@@ -357,17 +431,15 @@ public class ReportingQueryServiceTest {
     final int numWorkspaces = 5;
     createWorkspaces(numWorkspaces);
 
-    final int totalRows =
-        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
+    final int totalRows = getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(numWorkspaces);
 
-    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
+    final long totalBatches = getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
-        reportingQueryService
-            .getBatchedWorkspaceStream()
+        getBatchedWorkspaceStream()
             .flatMap(List::stream)
             .map(ReportingWorkspace::getWorkspaceId)
             .collect(ImmutableSet.toImmutableSet());
@@ -382,17 +454,15 @@ public class ReportingQueryServiceTest {
         workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
     entityManager.flush();
 
-    final int totalRows =
-        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
+    final int totalRows = getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(numWorkspaces - 1);
 
-    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
+    final long totalBatches = getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
-        reportingQueryService
-            .getBatchedWorkspaceStream()
+        getBatchedWorkspaceStream()
             .flatMap(List::stream)
             .map(ReportingWorkspace::getWorkspaceId)
             .collect(ImmutableSet.toImmutableSet());
@@ -402,18 +472,17 @@ public class ReportingQueryServiceTest {
   @Test
   public void testEmptyStream() {
     workspaceDao.deleteAll();
-    final int totalRows =
-        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
+    final int totalRows = getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(0);
 
-    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
+    final long totalBatches = getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo(0);
   }
 
   @Test
   public void testWorkspaceCount() {
     createWorkspaces(5);
-    assertThat(reportingQueryService.getWorkspaceCount()).isEqualTo(5);
+    assertThat(reportingQueryService.getActiveWorkspaceCount()).isEqualTo(5);
   }
 
   @Test
@@ -422,7 +491,7 @@ public class ReportingQueryServiceTest {
     workspaceDao.save(
         workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
     entityManager.flush();
-    assertThat(reportingQueryService.getWorkspaceCount()).isEqualTo(4);
+    assertThat(reportingQueryService.getActiveWorkspaceCount()).isEqualTo(4);
   }
 
   @Test
@@ -450,10 +519,9 @@ public class ReportingQueryServiceTest {
   public void testQueryUser() {
     createUsers(1);
 
-    final List<List<ReportingUser>> stream =
-        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
-    assertThat(stream.size()).isEqualTo(1);
-    userFixture.assertDTOFieldsMatchConstants(stream.stream().findFirst().get().get(0));
+    final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
+    assertThat(batches.size()).isEqualTo(1);
+    userFixture.assertDTOFieldsMatchConstants(batches.stream().findFirst().get().get(0));
   }
 
   @Test
@@ -463,11 +531,10 @@ public class ReportingQueryServiceTest {
     removeUserFromExistingTier(user, registeredTier);
     entityManager.flush();
 
-    final List<List<ReportingUser>> stream =
-        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
-    assertThat(stream.size()).isEqualTo(1);
+    final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
+    assertThat(batches.size()).isEqualTo(1);
 
-    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
+    ReportingUser reportingUser = batches.stream().findFirst().get().get(0);
     assertThat(reportingUser.getAccessTierShortNames()).isNull();
   }
 
@@ -489,13 +556,12 @@ public class ReportingQueryServiceTest {
 
     entityManager.flush();
 
-    final List<List<ReportingUser>> stream =
-        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
+    final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
 
     // regression test against one row per user/tier pair (i.e. we don't want 2 here)
-    assertThat(stream.size()).isEqualTo(1);
+    assertThat(batches.size()).isEqualTo(1);
 
-    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
+    ReportingUser reportingUser = batches.stream().findFirst().get().get(0);
     assertThat(reportingUser.getAccessTierShortNames()).contains(registeredTier.getShortName());
     assertThat(reportingUser.getAccessTierShortNames()).contains(tier2.getShortName());
   }
@@ -503,17 +569,14 @@ public class ReportingQueryServiceTest {
   @Test
   public void testUserStream_twoAndAHalfBatches() {
     createUsers(5);
-
-    final List<List<ReportingUser>> stream =
-        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
-    assertThat(stream.size()).isEqualTo(3);
+    assertThat(getBatchedUserStream().count()).isEqualTo(3);
   }
 
   @Test
   public void testQueryInstitution() {
     // A simple test to make sure the query works.
     createInstitutionTierRequirement(dbInstitution);
-    final List<ReportingInstitution> institutions = reportingQueryService.getInstitutions();
+    final List<ReportingInstitution> institutions = reportingQueryService.getInstitutionBatch(1, 0);
     assertThat(institutions.size()).isEqualTo(1);
     assertThat(institutions.get(0).getRegisteredTierRequirement())
         .isEqualTo(InstitutionMembershipRequirement.ADDRESSES);
@@ -637,10 +700,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testCohortStream_twoAndAHalfBatches() {
     createCohorts(5);
-
-    final List<List<ReportingCohort>> stream =
-        reportingQueryService.getBatchedCohortStream().collect(Collectors.toList());
-    assertThat(stream.size()).isEqualTo(3);
+    assertThat(Streams.stream(getCohortsBatchIterator()).count()).isEqualTo(3);
   }
 
   @Test
@@ -670,22 +730,16 @@ public class ReportingQueryServiceTest {
     final int numNewUserSatisfactionSurveys = 5;
     createNewUserSatisfactionSurveys(numNewUserSatisfactionSurveys);
 
-    final int totalRows =
-        reportingQueryService
-            .getBatchedNewUserSatisfactionSurveyStream()
-            .mapToInt(List::size)
-            .sum();
+    final int totalRows = getBatchedNewUserSatisfactionSurveyStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(numNewUserSatisfactionSurveys);
 
-    final long totalBatches =
-        reportingQueryService.getBatchedNewUserSatisfactionSurveyStream().count();
+    final long totalBatches = getBatchedNewUserSatisfactionSurveyStream().count();
     assertThat(totalBatches)
         .isEqualTo((long) Math.ceil(1.0 * numNewUserSatisfactionSurveys / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
-        reportingQueryService
-            .getBatchedNewUserSatisfactionSurveyStream()
+        getBatchedNewUserSatisfactionSurveyStream()
             .flatMap(List::stream)
             .map(ReportingNewUserSatisfactionSurvey::getId)
             .collect(ImmutableSet.toImmutableSet());
@@ -758,13 +812,12 @@ public class ReportingQueryServiceTest {
                     startTimeValue,
                     stopTimeValue)));
 
-    TableResult tableResult =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult tableResult = BigQueryUtils.newTableResult(s, tableRows);
     when(bigQueryService.executeQuery(any(QueryJobConfiguration.class))).thenReturn(tableResult);
-    assertThat(reportingQueryService.getLeonardoAppUsage(10, 0))
+    assertThat(reportingQueryService.getLeonardoAppUsageBatch(10, 0))
         .containsExactly(
             new ReportingLeonardoAppUsage()
-                .appId(123l)
+                .appId(123L)
                 .appName("all-of-us-123-sas-esdw")
                 .appType("SAS")
                 .creator("user@email.com")
@@ -777,21 +830,43 @@ public class ReportingQueryServiceTest {
   }
 
   private Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
-    return reportingQueryService.getBatchIterator(reportingQueryService::getWorkspaceBatch);
+    return reportingQueryService.getBatchIterator(
+        reportingQueryService::getWorkspaceBatch, BATCH_SIZE);
   }
 
   private Iterator<List<ReportingUser>> getUserBatchIterator() {
-    return reportingQueryService.getBatchIterator(reportingQueryService::getUserBatch);
+    return reportingQueryService.getBatchIterator(reportingQueryService::getUserBatch, BATCH_SIZE);
   }
 
   private Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
-    return reportingQueryService.getBatchIterator(reportingQueryService::getCohortBatch);
+    return reportingQueryService.getBatchIterator(
+        reportingQueryService::getCohortBatch, BATCH_SIZE);
+  }
+
+  private Iterator<List<ReportingDatasetCohort>> getDatasetCohortsBatchIterator() {
+    return reportingQueryService.getBatchIterator(
+        reportingQueryService::getDatasetCohortBatch, BATCH_SIZE);
   }
 
   private Iterator<List<ReportingNewUserSatisfactionSurvey>>
       getNewUserSatisfactionSurveyBatchIterator() {
     return reportingQueryService.getBatchIterator(
-        reportingQueryService::getNewUserSatisfactionSurveyBatch);
+        reportingQueryService::getNewUserSatisfactionSurveyBatch, BATCH_SIZE);
+  }
+
+  private Stream<List<ReportingUser>> getBatchedUserStream() {
+    return reportingQueryService.getBatchedStream(reportingQueryService::getUserBatch, BATCH_SIZE);
+  }
+
+  private Stream<List<ReportingNewUserSatisfactionSurvey>>
+      getBatchedNewUserSatisfactionSurveyStream() {
+    return reportingQueryService.getBatchedStream(
+        reportingQueryService::getNewUserSatisfactionSurveyBatch, BATCH_SIZE);
+  }
+
+  private Stream<List<ReportingWorkspace>> getBatchedWorkspaceStream() {
+    return reportingQueryService.getBatchedStream(
+        reportingQueryService::getWorkspaceBatch, BATCH_SIZE);
   }
 
   private List<DbWorkspace> createWorkspaces(int count) {
@@ -866,5 +941,54 @@ public class ReportingQueryServiceTest {
             .setAccessTier(controlledTier)
             .setInstitution(institution)
             .setMembershipRequirement(MembershipRequirement.DOMAINS));
+  }
+
+  private void assertIteratorBillingStatus(BillingStatus billingStatus) {
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    List<ReportingWorkspace> firstBatch = iterator.next();
+    assertThat(firstBatch.get(0).getBillingStatus()).isEqualTo(billingStatus);
+  }
+
+  private enum InitialCreditState {
+    USING_INITIAL_CREDITS,
+    EXPIRED,
+    EXHAUSTED,
+    INDIVIDUALLY_BYPASSED,
+    INSTITUTIONALLY_BYPASSED
+  }
+
+  private void setupInitialCreditTest(Set<InitialCreditState> states) {
+    boolean usingInitialCredits = states.contains(InitialCreditState.USING_INITIAL_CREDITS);
+    boolean expired = states.contains(InitialCreditState.EXPIRED);
+    boolean exhausted = states.contains(InitialCreditState.EXHAUSTED);
+    boolean individuallyBypassed = states.contains(InitialCreditState.INDIVIDUALLY_BYPASSED);
+    boolean institutionallyBypassed = states.contains(InitialCreditState.INSTITUTIONALLY_BYPASSED);
+
+    DbUser user = new DbUser();
+    user = userDao.save(user.setContactEmail("a@b.com"));
+    createDbVerifiedInstitutionalAffiliation(user);
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setExpirationTime(
+                new Timestamp(System.currentTimeMillis() + (MILLIS_IN_A_DAY * (expired ? -1 : 1))))
+            .setBypassed(individuallyBypassed)
+            .setUser(user);
+    user.setUserInitialCreditsExpiration(userInitialCreditsExpiration);
+    userDao.save(user);
+
+    dbInstitution.setBypassInitialCreditsExpiration(institutionallyBypassed);
+    institutionDao.save(dbInstitution);
+
+    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
+    workspaceDao.save(
+        createDbWorkspace(user, cdrVersion)
+            .setInitialCreditsExhausted(exhausted)
+            .setBillingAccountName(
+                usingInitialCredits
+                    ? String.format("billingAccounts/%s", workbenchConfig.billing.accountId)
+                    : "userProvidedBillingAccount"));
+    entityManager.flush();
   }
 }

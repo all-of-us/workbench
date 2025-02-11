@@ -195,7 +195,7 @@ public interface RdrMapper {
 
   default boolean toModelFocusOnUnderrepresentedPopulation(
       Set<SpecificPopulationEnum> dbSpecificPopulationSet) {
-    return dbSpecificPopulationSet != null && dbSpecificPopulationSet.size() > 0;
+    return dbSpecificPopulationSet != null && !dbSpecificPopulationSet.isEmpty();
   }
 
   default RdrWorkspaceDemographic toModelWorkspaceDemographic(

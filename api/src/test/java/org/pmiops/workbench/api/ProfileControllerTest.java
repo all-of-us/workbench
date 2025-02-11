@@ -41,6 +41,7 @@ import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -114,9 +115,11 @@ import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -154,6 +157,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private UserDao userDao;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private FakeClock fakeClock;
+  @Autowired private VwbUserService vwbUserService;
 
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
@@ -217,7 +221,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     BigQueryService.class,
     NewUserSatisfactionSurveyService.class,
     TaskQueueService.class,
-    LeonardoApiClient.class
+    LeonardoApiClient.class,
+    VwbAccessService.class,
+    VwbUserService.class,
+    WorkspaceMapper.class
   })
   static class Configuration {
     @Bean

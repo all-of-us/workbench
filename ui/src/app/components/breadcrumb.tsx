@@ -334,6 +334,9 @@ export const Breadcrumb = fp.flow(
       if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
         setShowInvalidBillingBanner(newShowInvalidBillingBanner);
       }
+    } else {
+      // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
+      setShowInvalidBillingBanner(true);
     }
   }, [props?.workspace]);
 

@@ -24,6 +24,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -85,7 +86,8 @@ public class UserControllerTest {
     InitialCreditsService.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsService.class
+    InitialCreditsService.class,
+    VwbAccessService.class
   })
   static class Configuration {
 

@@ -217,7 +217,7 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
-  @Mapping(target = "appType", source = "labels", qualifiedByName = "mapAppType")
+  @Mapping(target = "appType", source = "app", qualifiedByName = "mapAppType")
   @Mapping(target = "autopauseThreshold", ignore = true)
   UserAppEnvironment toApiApp(ListAppResponse app);
 
@@ -243,18 +243,26 @@ public interface LeonardoMapper {
   DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
   @Named("mapAppType")
-  default AppType mapAppType(@Nullable Object appLabels) {
+  default AppType mapAppType(ListAppResponse app) {
+    final Map<String, String> appLabels = LeonardoLabelHelper.toLabelMap(app.getLabels());
+    if (appLabels == null || appLabels.isEmpty()) {
+      throw new ServerErrorException(
+          String.format(
+              "App %s in Google Project %s has no labels",
+              app.getAppName(), toGoogleProject(app.getCloudContext())));
+    }
     return LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(appLabels)
         .orElseThrow(
             () ->
                 new ServerErrorException(
-                    String.format("Missing app type labels for app with labels %s", appLabels)));
+                    String.format(
+                        "Missing app type labels for app %s in Google Project %s with labels %s",
+                        app.getAppName(), toGoogleProject(app.getCloudContext()), appLabels)));
   }
 
   @Named("mapRuntimeConfigurationLabels")
   default RuntimeConfigurationType mapRuntimeConfigurationLabels(Object runtimeLabelsObj) {
-    @SuppressWarnings("unchecked")
-    final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
+    final Map<String, String> runtimeLabels = LeonardoLabelHelper.toLabelMap(runtimeLabelsObj);
     if (runtimeLabels == null
         || runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG) == null) {
       // If there's no label, fall back onto the old behavior where every Runtime was created with a

@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import { mockNavigate } from 'setupTests';
 
 import {
+  AIANResearchType,
   DisseminateResearchEnum,
   ProfileApi,
   ResearchOutcomeEnum,
@@ -31,6 +32,7 @@ import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import * as Authentication from 'app/utils/authentication';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { aianResearchTypeMap } from 'app/utils/research-purpose-text';
 import {
   cdrVersionStore,
   profileStore,
@@ -125,6 +127,8 @@ describe(WorkspaceEdit.name, () => {
       // fields in the workspace form.
       researchPurpose: {
         ...workspaceStubs[0].researchPurpose,
+        aianResearchType: AIANResearchType.FINDINGS_BY_AI_AN,
+        aianResearchDetails: 'Plan to study AI/AN populations',
         intendedStudy: 'intendedStudy ',
         anticipatedFindings: 'anticipatedFindings ',
         scientificApproach: 'scientificApproach ',
@@ -327,6 +331,8 @@ describe(WorkspaceEdit.name, () => {
     await user.click(screen.getByTestId('specific-population-no'));
 
     const saveButton = screen.getByRole('button', { name: 'Update Workspace' });
+
+    await user.hover(saveButton);
 
     await waitFor(() => {
       expectButtonElementEnabled(saveButton);
@@ -1128,5 +1134,175 @@ describe(WorkspaceEdit.name, () => {
     expect(screen.getByTestId('billing-dropdown')).toHaveStyle(
       `background-color: ${colors.highlight}`
     );
+  });
+
+  it('should only display AIAN research questions when CDR >= v8', async () => {
+    workspaceEditMode = WorkspaceEditMode.Create;
+    renderComponent();
+
+    /* Select AIAN Research Plan */
+    const selectedAIANResearchType = aianResearchTypeMap.get(
+      AIANResearchType.CASE_CONTROL_AI_AN
+    );
+    const selectedAIANResearchTypeRadioElement = screen.getByRole('radio', {
+      name: selectedAIANResearchType,
+    });
+    expect(selectedAIANResearchTypeRadioElement).toBeInTheDocument();
+    await user.click(selectedAIANResearchTypeRadioElement);
+
+    /* Describe AIAN Research Plan */
+    const aianResearchDescription = screen.getByRole('textbox', {
+      name: /text area describing the aian research description text field/i,
+    });
+    expect(aianResearchDescription).toBeInTheDocument();
+    await user.clear(aianResearchDescription);
+    await user.paste('Example AIAN Research Description');
+
+    /* Switch to CDR Version < 8 */
+    const cdrVersionSelect = screen.getByRole('combobox', {
+      name: /cdr version dropdown/i,
+    }) as HTMLSelectElement;
+    await userEvent.selectOptions(cdrVersionSelect, [
+      CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
+    ]);
+
+    /* Dismiss old study warning */
+    await user.click(
+      screen.getByRole('checkbox', {
+        name: /i will use this workspace to complete an existing study or replicate a previous study\./i,
+      })
+    );
+    await user.click(
+      screen.getByRole('checkbox', {
+        name: /in the workspace description below, i will identify which study i am continuing or replicating\./i,
+      })
+    );
+    await user.click(
+      screen.getByRole('button', {
+        name: /continue/i,
+      })
+    );
+
+    /* Confirm AIAN Research Plan is not visible */
+    expect(
+      screen.queryByRole('radio', {
+        name: selectedAIANResearchType,
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('textbox', {
+        name: /text area describing the aian research description text field/i,
+      })
+    ).not.toBeInTheDocument();
+
+    /* Switch back to CDR >= 8 */
+    await userEvent.selectOptions(cdrVersionSelect, [
+      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
+    ]);
+
+    /* Confirm AIAN Research Plan fields persisted */
+    const selectedAIANResearchTypeRadioElementAfterReturn = screen.queryByRole(
+      'radio',
+      {
+        name: selectedAIANResearchType,
+      }
+    );
+    expect(selectedAIANResearchTypeRadioElementAfterReturn).toBeInTheDocument();
+    expect(selectedAIANResearchTypeRadioElementAfterReturn).toBeChecked();
+    const aianResearchDescriptionElementAfterReturn = screen.getByRole(
+      'textbox',
+      {
+        name: /text area describing the aian research description text field/i,
+      }
+    );
+    expect(aianResearchDescriptionElementAfterReturn).toBeInTheDocument();
+    const aianResearchDescriptionTextAfterReturn = within(
+      aianResearchDescriptionElementAfterReturn
+    ).getByText('Example AIAN Research Description');
+    expect(aianResearchDescriptionTextAfterReturn).toBeInTheDocument();
+  });
+
+  it('should show AIAN validation when CDR >=8', async () => {
+    workspaceEditMode = WorkspaceEditMode.Create;
+    renderComponent();
+    const saveButton = screen.getByRole('button', {
+      name: /create workspace/i,
+    });
+    await user.hover(saveButton);
+    // Testing to see if validation appears
+    expect(
+      screen.getByText(
+        /you must select the type of AIAN research you are conducting \(question 6\.1\)/i
+      )
+    ).toBeInTheDocument();
+
+    /* The text of this error message is broken up by tags inside the text,
+     * so it necessitates a different approach. */
+    const aianResearchDetailsError = screen.getByTestId(
+      'aianResearchDetailsError'
+    );
+    expect(aianResearchDetailsError.textContent).toContain(
+      'Answer for Please explain your response by sharing specific details about your ' +
+        'study design. (Question 6.2) cannot be blank'
+    );
+
+    // Select appropriate AIAN Research Values
+    const selectedAIANResearchTypeRadioElement = screen.getByRole('radio', {
+      name: aianResearchTypeMap.get(AIANResearchType.CASE_CONTROL_AI_AN),
+    });
+    expect(selectedAIANResearchTypeRadioElement).toBeInTheDocument();
+    await user.click(selectedAIANResearchTypeRadioElement);
+    const aianResearchDescription = screen.getByRole('textbox', {
+      name: /text area describing the aian research description text field/i,
+    });
+    expect(aianResearchDescription).toBeInTheDocument();
+    await user.clear(aianResearchDescription);
+    await user.paste('Example AIAN Research Description');
+
+    // Ensuring validation disappears when values are valid
+    await user.hover(saveButton);
+    expect(
+      screen.queryByText(
+        /you must select the type of AIAN research you are conducting \(question 6\.1\)/i
+      )
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText(
+        /you must provide details about your study design \(question 6\.2\)/i
+      )
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not show AIAN validation when CDR <8', async () => {
+    workspaceEditMode = WorkspaceEditMode.Create;
+    renderComponent();
+
+    /* Switch to CDR Version < 8 */
+    const cdrVersionSelect = screen.getByRole('combobox', {
+      name: /cdr version dropdown/i,
+    }) as HTMLSelectElement;
+    await userEvent.selectOptions(cdrVersionSelect, [
+      CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
+    ]);
+
+    // Hover over save button to trigger validation
+    const saveButton = screen.getByRole('button', {
+      name: /create workspace/i,
+    });
+    await user.hover(saveButton);
+
+    // Ensuring that inappropriate validation message does not appear
+    expect(
+      screen.queryByText(
+        /you must select the type of AIAN research you are conducting \(question 6\.1\)/i
+      )
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText(
+        /you must provide details about your study design \(question 6\.2\)/i
+      )
+    ).not.toBeInTheDocument();
   });
 });

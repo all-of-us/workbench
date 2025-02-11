@@ -1,13 +1,11 @@
 package org.pmiops.workbench.leonardo;
 
-import com.google.common.collect.ImmutableSet;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -16,7 +14,6 @@ import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
 
 public final class PersistentDiskUtils {
   private static final Logger log = Logger.getLogger(PersistentDiskUtils.class.getName());
@@ -24,10 +21,6 @@ public final class PersistentDiskUtils {
   // See https://cloud.google.com/compute/pricing
   private static final Map<DiskType, Double> DISK_PRICE_PER_GB_MONTH =
       Map.of(DiskType.STANDARD, .04, DiskType.SSD, .17);
-
-  // https://github.com/DataBiosphere/leonardo/blob/3774547f2018e056e9af42142a10ac004cfe1ee8/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/diskModels.scala#L60
-  private static final Set<DiskStatus> ACTIVE_DISK_STATUSES =
-      ImmutableSet.of(DiskStatus.READY, DiskStatus.CREATING, DiskStatus.RESTORING);
 
   private PersistentDiskUtils() {}
 
@@ -55,9 +48,7 @@ public final class PersistentDiskUtils {
     // Disk maybe in incorrect state if having additional active state disks.
 
     List<Disk> activeDisks =
-        disksToValidate.stream()
-            .filter(d -> ACTIVE_DISK_STATUSES.contains(d.getStatus()))
-            .collect(Collectors.toList());
+        disksToValidate.stream().filter(LeonardoStatusUtils::isActiveDisk).toList();
     if (activeDisks.size() > (AppType.values().length + 1)) {
       String diskNameList =
           activeDisks.stream().map(Disk::getName).collect(Collectors.joining(","));

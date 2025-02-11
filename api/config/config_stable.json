@@ -48,14 +48,14 @@
     "operationalTerraWorkspaceBucket": "fc-b7045821-7a05-497e-844d-8889625ed10e",
     "extractionDestinationDataset": "fc-aou-cdr-stable-ct.wgs_extraction_destination",
     "enableJiraTicketingOnFailure": true,
+    "minExtractionScatterTasks": 20,
+    "extractionScatterTasksPerSample": 4,
     "legacyVersions": {
       "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-stable",
       "methodName": "GvsExtractCohortFromSampleNames",
       "methodRepoVersion": 5,
-      "methodLogicalVersion": 3,
-      "minExtractionScatterTasks": 20,
-      "extractionScatterTasksPerSample": 4
+      "methodLogicalVersion": 3
     }
   },
   "cdr": {
@@ -120,8 +120,10 @@
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": false,
     "blockComplianceTraining": false,
-    "enableVWBWorkspaceCreation": false,
-    "enableVWBEgressMonitor": false
+    "enableVWBWorkspaceCreation": true,
+    "enableVWBEgressMonitor": false,
+    "enableVWBUserAccessManagement": false,
+    "enableVWBUserCreation": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
@@ -144,7 +146,7 @@
   },
   "reporting": {
     "dataset": "reporting_stable",
-    "maxRowsPerInsert": 500,
+    "maxRowsPerInsert": 10000,
     "exportTerraDataWarehouse": false
   },
   "ras": {
@@ -155,7 +157,9 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
-    "usersPerCheckInitialCreditsExpirationTask": 50
+    "usersPerCheckInitialCreditsExpirationTask": 50,
+    "usersPerAccessExpirationEmailTask": 500,
+    "workspacesPerDeleteWorkspaceEnvironmentsTask": 50
   },
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": false,
@@ -179,5 +183,10 @@
   },
   "banner": {
     "enableLoginIssueBanner": false
+  },
+  "vwb": {
+    "wsmBaseUrl": "https:\/\/terra-wsm.api.verily.com",
+    "organizationId": "965947ad-83d2-4f09-8a86-9896116704d1",
+    "defaultPodId": "204caa47-e3fe-4745-bee6-dc443375b116"
   }
 }

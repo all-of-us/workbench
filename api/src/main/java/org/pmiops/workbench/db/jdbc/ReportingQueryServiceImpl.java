@@ -69,19 +69,19 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     this.bigQueryService = bigQueryService;
   }
 
-  public long getQueryBatchSize() {
-    return Math.min(
-        MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
-  }
-
   @Override
-  public List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsage() {
+  public List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsageBatch(
+      long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT\n"
-            + "  cost,\n"
-            + "  user_id,\n"
-            + "  workspace_id\n"
-            + "FROM workspace_free_tier_usage",
+        String.format(
+            "SELECT\n"
+                + "  cost,\n"
+                + "  user_id,\n"
+                + "  workspace_id\n"
+                + "FROM workspace_free_tier_usage\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingWorkspaceFreeTierUsage()
                 .cost(rs.getDouble("cost"))
@@ -196,18 +196,22 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingDataset> getDatasets() {
+  public List<ReportingDataset> getDatasetBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT \n"
-            + "  creation_time,\n"
-            + "  creator_id,\n"
-            + "  data_set_id,\n"
-            + "  description,\n"
-            + "  includes_all_participants,\n"
-            + "  last_modified_time,\n"
-            + "  name,\n"
-            + "  workspace_id\n"
-            + "FROM data_set",
+        String.format(
+            "SELECT \n"
+                + "  creation_time,\n"
+                + "  creator_id,\n"
+                + "  data_set_id,\n"
+                + "  description,\n"
+                + "  includes_all_participants,\n"
+                + "  last_modified_time,\n"
+                + "  name,\n"
+                + "  workspace_id\n"
+                + "FROM data_set\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingDataset()
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
@@ -221,9 +225,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingDatasetCohort> getDatasetCohorts() {
+  public List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT data_set_id, cohort_id\n" + "FROM data_set_cohort",
+        String.format(
+            "SELECT data_set_id, cohort_id\n"
+                + "FROM data_set_cohort\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingDatasetCohort()
                 .cohortId(rs.getLong("cohort_id"))
@@ -231,9 +240,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingDatasetConceptSet> getDatasetConceptSets() {
+  public List<ReportingDatasetConceptSet> getDatasetConceptSetBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT data_set_id, concept_set_id\n" + "FROM data_set_concept_set",
+        String.format(
+            "SELECT data_set_id, concept_set_id\n"
+                + "FROM data_set_concept_set\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingDatasetConceptSet()
                 .datasetId(rs.getLong("data_set_id"))
@@ -241,9 +255,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues() {
+  public List<ReportingDatasetDomainIdValue> getDatasetDomainIdValueBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT data_set_id, domain_id, value\n" + "FROM data_set_values",
+        String.format(
+            "SELECT data_set_id, domain_id, value\n"
+                + "FROM data_set_values\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingDatasetDomainIdValue()
                 .datasetId(rs.getLong("data_set_id"))
@@ -252,23 +271,28 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingInstitution> getInstitutions() {
+  public List<ReportingInstitution> getInstitutionBatch(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT \n"
-            + "  i.display_name,\n"
-            + "  i.institution_id,\n"
-            + "  i.organization_type_enum,\n"
-            + "  i.organization_type_other_text,\n"
-            + "  i.short_name,\n"
-            + "  itr.requirement_enum\n"
-            + "FROM institution i\n"
-            + "JOIN institution_tier_requirement itr\n"
-            + "   ON i.institution_id=itr.institution_id\n"
-            + "JOIN access_tier at\n"
-            + "   ON itr.access_tier_id=at.access_tier_id\n"
-            + "WHERE at.short_name='"
-            + AccessTierService.REGISTERED_TIER_SHORT_NAME
-            + "'",
+        String.format(
+            "SELECT \n"
+                + "  i.display_name,\n"
+                + "  i.institution_id,\n"
+                + "  i.organization_type_enum,\n"
+                + "  i.organization_type_other_text,\n"
+                + "  i.short_name,\n"
+                + "  itr.requirement_enum\n"
+                + "FROM institution i\n"
+                + "JOIN institution_tier_requirement itr\n"
+                + "   ON i.institution_id=itr.institution_id\n"
+                + "JOIN access_tier at\n"
+                + "   ON itr.access_tier_id=at.access_tier_id\n"
+                + "WHERE at.short_name='"
+                + AccessTierService.REGISTERED_TIER_SHORT_NAME
+                + "'\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit,
+            offset),
         (rs, unused) ->
             new ReportingInstitution()
                 .displayName(rs.getString("display_name"))
@@ -501,7 +525,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  a.short_name AS access_tier_short_name,\n"
             + "  billing_account_name,\n"
             + "  CASE \n"
-            + "    WHEN (w.billing_account_name = ? AND (w.initial_credits_exhausted = 1 OR w.initial_credits_expired = 1)) THEN ? \n"
+            + "    WHEN (w.billing_account_name = ? AND\n"
+            + "      (uvia.institution_id IS NULL OR\n"
+            + "      w.initial_credits_exhausted = 1 OR\n"
+            + "      (uice.expiration_time IS NOT NULL AND\n"
+            + "        uice.expiration_time <= CURRENT_TIMESTAMP AND\n"
+            + "        uice.bypassed = 0 AND\n"
+            + "        i.bypass_initial_credits_expiration = 0))) \n"
+            + "    THEN ? \n"
             + "    ELSE ? \n"
             + "  END AS billing_status,\n"
             + "  w.cdr_version_id AS cdr_version_id,\n"
@@ -539,6 +570,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
             + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
             + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
+            + "  LEFT OUTER JOIN user_initial_credits_expiration uice ON uice.user_id = creator_id\n"
+            + "LEFT JOIN user_verified_institutional_affiliation uvia ON w.creator_id = uvia.user_id\n"
+            + "JOIN institution i ON uvia.institution_id = i.institution_id\n"
             + "WHERE active_status = ? \n"
             + "ORDER BY w.workspace_id\n"
             + "LIMIT ? \n"
@@ -594,12 +628,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getTableRowCount(String tableName) {
-    return jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName, Integer.class);
+  public int getTableRowCount(String rwbTableName) {
+    return jdbcTemplate.queryForObject("SELECT count(*) FROM " + rwbTableName, Integer.class);
   }
 
   @Override
-  public int getAppUsageRowCount(String tableName) {
+  public int getAppUsageRowCount() {
     if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
       return 0;
     }
@@ -621,7 +655,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getWorkspaceCount() {
+  public int getActiveWorkspaceCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM workspace WHERE active_status = "
             + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
@@ -629,7 +663,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingLeonardoAppUsage> getLeonardoAppUsage(long limit, long offset) {
+  public List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset) {
     if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
       // Skip querying data if not enabled, and just return empty list instead.
       return new ArrayList<>();

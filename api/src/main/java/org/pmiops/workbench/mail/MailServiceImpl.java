@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
@@ -55,13 +56,12 @@ import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 @Service
 public class MailServiceImpl implements MailService {
   private static final String AOU_ITALICS = "<i>All of Us</i>";
   private static final String EGRESS_FORM_LINK =
-      "<a href=\"https://redcap.pmi-ops.org/surveys/?s=YJ8FJXRJD7JY4NK7\">Researcher Account Activity Confirmation</a>";
+      "<a href=\"https://redcap.pmi-ops.org/surveys/?s=K4PA9H8E979AHJEP\">Researcher Account Activity Confirmation</a>";
   private static final String DOWNLOAD_FORM_LINK =
       "<a href=\"https://redcap.pmi-ops.org/surveys/?s=YRXMJFJ97J3WMWLE\">Large Data Download Request</a>";
 
@@ -97,7 +97,7 @@ public class MailServiceImpl implements MailService {
               EGRESS_FORM_LINK, AOU_ITALICS));
 
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
-
+  private static final String EGRESS_SOURCE = " when using the <b>%s</b> application";
   private static final String EGRESS_REMEDIATION_RESOURCE =
       "emails/egress_remediation/content.html";
   private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE =
@@ -409,13 +409,33 @@ public class MailServiceImpl implements MailService {
   public void sendEgressRemediationEmail(
       DbUser dbUser, EgressRemediationAction action, @Nullable String gkeServiceName)
       throws MessagingException {
-    String remediation = EGRESS_REMEDIATION_ACTION_MAP.get(action);
-    String environmentType =
-        appServiceNameToAppType(Strings.nullToEmpty(gkeServiceName))
-            .map(LeonardoAppUtils::appDisplayName)
-            .orElse("Jupyter");
+    sendEgressRemediationEmailCommon(dbUser, action, gkeServiceName, false);
+  }
 
+  @Override
+  public void sendEgressRemediationEmailForVwb(DbUser dbUser, EgressRemediationAction action)
+      throws MessagingException {
+    sendEgressRemediationEmailCommon(dbUser, action, null, true);
+  }
+
+  private void sendEgressRemediationEmailCommon(
+      DbUser dbUser,
+      EgressRemediationAction action,
+      @Nullable String gkeServiceName,
+      boolean isVwbEgress)
+      throws MessagingException {
+    String remediation = EGRESS_REMEDIATION_ACTION_MAP.get(action);
     String givenName = Optional.ofNullable(dbUser.getGivenName()).orElse("Researcher");
+
+    String egressSource = "";
+
+    if (!isVwbEgress) {
+      String environmentType =
+          appServiceNameToAppType(Strings.nullToEmpty(gkeServiceName))
+              .map(LeonardoAppUtils::appDisplayName)
+              .orElse("Jupyter");
+      egressSource = String.format(EGRESS_SOURCE, environmentType);
+    }
 
     var substitutionMap =
         Map.of(
@@ -424,7 +444,7 @@ public class MailServiceImpl implements MailService {
             EmailSubstitutionField.ALL_OF_US, AOU_ITALICS,
             EmailSubstitutionField.USERNAME, dbUser.getUsername(),
             EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediation,
-            EmailSubstitutionField.ENVIRONMENT_TYPE, environmentType);
+            EmailSubstitutionField.EGRESS_SOURCE, egressSource);
 
     String htmlMessage = buildHtml(EGRESS_REMEDIATION_RESOURCE, substitutionMap);
 

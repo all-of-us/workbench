@@ -254,7 +254,15 @@
   <include file="changelog/db.changelog-244-add-is-vwb-workspace-column.xml"/>
   <include file="changelog/db.changelog-245-add-vwb-template-id-cdr-version.xml"/>
   <include file="changelog/db.changelog-246-add-vwb-egress-event-columns.xml"/>
-  <include file="changelog/db.changelog-247-backfill-user-initial-credits-expiration.xml"/>
+  <include file="changelog/db.changelog-247-drop-nonnull-sumologic-column-egress-event.xml"/>
+  <include file="changelog/db.changelog-248-add-public-release-number-column.xml"/>
+  <include file="changelog/db.changelog-249-add-time-window-start-egress-event.xml"/>
+  <include file="changelog/db.changelog-250-add-aian-research-columns.xml"/>
+  <include file="changelog/db.changelog-251-remove-billing-status.xml"/>
+  <include file="changelog/db.changelog-252-add-vwb-tier-group-access-tier-table.xml"/>
+  <include file="changelog/db.changelog-253-rm-needs-v8-genomic-extraction-workflow.xml"/>
+  <include file="changelog/db.changelog-254-remove-initial-credits-expired.xml"/>
+  <include file="changelog/db.changelog-255-backfill-user-initial-credits-expiration.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

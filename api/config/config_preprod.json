@@ -48,14 +48,14 @@
     "operationalTerraWorkspaceBucket": "fc-5d8e6afe-9429-44ae-a22a-67b09705d1b4",
     "extractionDestinationDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_destination",
     "enableJiraTicketingOnFailure": true,
+    "minExtractionScatterTasks": 350,
+    "extractionScatterTasksPerSample": 4,
     "legacyVersions": {
       "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-preprod",
       "methodName": "GvsExtractCohortFromSampleNames",
       "methodRepoVersion": 5,
-      "methodLogicalVersion": 3,
-      "minExtractionScatterTasks": 350,
-      "extractionScatterTasksPerSample": 4
+      "methodLogicalVersion": 3
     },
     "cdrv8plus": {
       "methodNamespace": "aouwgscohortextraction-preprod",
@@ -127,7 +127,9 @@
     "enableInitialCreditsExpiration": false,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
-    "enableVWBEgressMonitor": false
+    "enableVWBEgressMonitor": false,
+    "enableVWBUserAccessManagement": false,
+    "enableVWBUserCreation": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
@@ -146,7 +148,7 @@
   },
   "reporting": {
     "dataset": "reporting_preprod",
-    "maxRowsPerInsert": 500,
+    "maxRowsPerInsert": 10000,
     "exportTerraDataWarehouse": false
   },
   "ras": {
@@ -157,7 +159,9 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
-    "usersPerCheckInitialCreditsExpirationTask": 50
+    "usersPerCheckInitialCreditsExpirationTask": 50,
+    "usersPerAccessExpirationEmailTask": 500,
+    "workspacesPerDeleteWorkspaceEnvironmentsTask": 50
   },
   "termsOfService": {
     "minimumAcceptedAouVersion": 2

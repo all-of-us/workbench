@@ -14,6 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { nowPlusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { SpecificPopulationItems } from 'app/utils/research-purpose-text';
 import {
   cdrVersionStore,
   profileStore,
@@ -45,7 +46,6 @@ import {
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { WorkspaceAbout } from './workspace-about';
-import { SpecificPopulationItems } from './workspace-edit-text';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
@@ -309,7 +309,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: false,
         expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
       },
     });
@@ -332,7 +331,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: false,
         expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
       },
     });
@@ -360,7 +358,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: true,
         expirationEpochMillis: nowPlusDays(-1),
       },
     });
@@ -406,7 +403,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: true,
         expirationEpochMillis: nowPlusDays(-1),
       },
     });
@@ -448,7 +444,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: true,
         expirationEpochMillis: nowPlusDays(-1),
       },
     });
@@ -481,5 +476,32 @@ describe('WorkspaceAbout', () => {
       user
     );
     expectButtonElementDisabled(requestExtensionButton);
+  });
+
+  it('should not see initial credit expiration section when bypassed', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      creatorUser: {
+        userName: 'not-the-user@aou-rwb.com',
+        givenName: 'Bob',
+        familyName: 'Pop',
+      },
+      billingAccountName: 'billingAccounts/free',
+      initialCredits: {
+        exhausted: false,
+        expirationEpochMillis: nowPlusDays(-1),
+        expirationBypassed: true,
+      },
+    });
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        freeTierBillingAccountId: 'free',
+      },
+    });
+    component();
+    expect(
+      screen.queryByText(/workspace initial credit expiration/i)
+    ).not.toBeInTheDocument();
   });
 });

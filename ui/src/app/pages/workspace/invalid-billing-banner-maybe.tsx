@@ -92,6 +92,7 @@ interface WhatHappenedProps {
   isExpiringSoon: boolean;
   isEligibleForExtension: boolean;
   isCreator: boolean;
+  expirationEpochMillis: number;
 }
 const WhatHappened = ({
   isExhausted,
@@ -99,6 +100,7 @@ const WhatHappened = ({
   isExpiringSoon,
   isEligibleForExtension,
   isCreator,
+  expirationEpochMillis,
 }: WhatHappenedProps) => {
   const whose = whoseCredits(isCreator);
   let whatIsHappening: string;
@@ -107,7 +109,9 @@ const WhatHappened = ({
   } else if (isExpired && isEligibleForExtension) {
     whatIsHappening = 'have expired.';
   } else if (isExpiringSoon && isEligibleForExtension) {
-    whatIsHappening = `are expiring soon, which may affect ${
+    whatIsHappening = `will expire on ${new Date(
+      expirationEpochMillis
+    ).toDateString()}, which may affect ${
       isCreator ? 'your' : 'the'
     } data and analyses${isCreator ? ' in your workspace' : ''}.`;
   }
@@ -236,6 +240,14 @@ export const InvalidBillingBannerMaybe = fp.flow(
     isEligibleForExtension
   );
 
+  const showBanner =
+    !showExtensionModal &&
+    creatorUser?.givenName &&
+    creatorUser?.familyName &&
+    (isExhausted ||
+      (!workspace.initialCredits.expirationBypassed &&
+        ((isExpiringSoon && isEligibleForExtension) || isExpired)));
+
   const message = (
     <>
       <WhatHappened
@@ -245,6 +257,8 @@ export const InvalidBillingBannerMaybe = fp.flow(
           isExpiringSoon,
           isEligibleForExtension,
           isCreator,
+          expirationEpochMillis:
+            workspace?.initialCredits.expirationEpochMillis,
         }}
       />{' '}
       {workspaceCreatorInformation(isCreator, creatorUser)}
@@ -274,18 +288,13 @@ export const InvalidBillingBannerMaybe = fp.flow(
 
   return (
     <>
-      {!showExtensionModal &&
-        creatorUser?.givenName &&
-        creatorUser?.familyName &&
-        ((isExpiringSoon && isEligibleForExtension) ||
-          isExpired ||
-          isExhausted) && (
-          <ToastBanner
-            {...{ message, title, footer, onClose }}
-            toastType={ToastType.WARNING}
-            zIndex={500}
-          />
-        )}
+      {showBanner && (
+        <ToastBanner
+          {...{ message, title, footer, onClose }}
+          toastType={ToastType.WARNING}
+          zIndex={500}
+        />
+      )}
       {showExtensionModal && (
         <ExtendInitialCreditsModal
           onClose={(updatedProfile: Profile) => {

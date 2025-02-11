@@ -33,7 +33,16 @@ export async function waitForSecuritySuspendedStatus(
   const pollPeriod = 20 * 1000;
 
   while (true) {
-    await page.reload({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 60 * 1000 });
+    // temp for debugging
+    const reloadStart = Date.now();
+    const reloadResult = await page.reload({
+      waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
+      timeout: 60 * 1000
+    });
+    const reloadEnd = Date.now();
+    logger.info(
+      `Reload ${reloadResult.ok() ? 'succeeded' : 'failed'} after ${(reloadEnd - reloadStart) / 1000} seconds`
+    );
 
     if ((await isSecuritySuspended(page)) === suspended) {
       // Success
@@ -42,6 +51,8 @@ export async function waitForSecuritySuspendedStatus(
 
     const waited = Date.now() - startTime;
     if (waited > timeOut - pollPeriod) {
+      // temp for debugging
+      logger.info(`Waited ${waited / 1000} seconds, longer than timeout of ${timeOut / 1000} seconds`);
       throw new Error(`Timed out waiting for egress security suspension status = ${suspended}`);
     }
     logger.info(`Waited for ${(waited / 1000 / 60).toFixed(2)} minutes`);

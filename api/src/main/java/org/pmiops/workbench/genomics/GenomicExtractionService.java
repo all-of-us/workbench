@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.VersionedConfig;
-import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.dataset.GenomicDatasetService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
@@ -71,12 +71,12 @@ public class GenomicExtractionService {
 
   // Scatter count maximum for extraction for CDR v7 and earlier.
   // Affects number of workers and numbers of shards.
-  private static final int LEGACY_MAX_EXTRACTION_SCATTER = 2_000;
+  private static final int MAX_EXTRACTION_SCATTER = 2_000;
 
   private static final int EARLIEST_SUPPORTED_LEGACY_METHOD_VERSION = 3;
 
-  private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
+  private final GenomicDatasetService genomicDatasetService;
   private final JiraService jiraService;
   private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
@@ -90,8 +90,8 @@ public class GenomicExtractionService {
 
   @Autowired
   public GenomicExtractionService(
-      DataSetService dataSetService,
       FireCloudService fireCloudService,
+      GenomicDatasetService genomicDatasetService,
       JiraService jiraService,
       @Qualifier(StorageConfig.GENOMIC_EXTRACTION_STORAGE_CLIENT)
           Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
@@ -103,8 +103,8 @@ public class GenomicExtractionService {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuthService workspaceAuthService,
       Clock clock) {
-    this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.genomicDatasetService = genomicDatasetService;
     this.jiraService = jiraService;
     this.submissionApiProvider = submissionsApiProvider;
     this.extractionServiceAccountCloudStorageClientProvider =
@@ -186,7 +186,7 @@ public class GenomicExtractionService {
                 throw new ServerErrorException("Could not fetch submission status from Terra", e);
               }
             })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private Long getWorkflowSize(FirecloudSubmission firecloudSubmission) throws ApiException {
@@ -201,23 +201,13 @@ public class GenomicExtractionService {
                 firecloudSubmission.getSubmissionId(),
                 firecloudSubmission.getWorkflows().get(0).getWorkflowId());
 
-    final Optional<FirecloudWorkflowOutputs> workflowOutputs =
-        Optional.ofNullable(outputsResponse.getTasks().get(EXTRACT_WORKFLOW_NAME));
-
-    if (workflowOutputs.isPresent()) {
-      final Optional<Object> vcfSizeMbOutput =
-          Optional.ofNullable(
-              workflowOutputs
-                  .get()
-                  .getOutputs()
-                  .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
-
-      if (vcfSizeMbOutput.isPresent() && vcfSizeMbOutput.get() instanceof Double) {
-        return Math.round((Double) vcfSizeMbOutput.get());
-      }
-    }
-
-    return null;
+    return Optional.ofNullable(outputsResponse.getTasks().get(EXTRACT_WORKFLOW_NAME))
+        .map(FirecloudWorkflowOutputs::getOutputs)
+        .flatMap(m -> Optional.ofNullable(m.get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb")))
+        .filter(Double.class::isInstance)
+        .map(o -> (Double) o)
+        .map(Math::round)
+        .orElse(null);
   }
 
   private void maybeNotifyOnJobFailure(
@@ -315,13 +305,16 @@ public class GenomicExtractionService {
   }
 
   private Map<String, String> getWorkflowInputs(
-      DbWorkspace workspace,
       WgsCohortExtractionConfig cohortExtractionConfig,
       String extractionUuid,
       List<String> personIds,
       String extractionFolder,
       String outputDir,
-      boolean useLegacyWorkflow) {
+      boolean useLegacyWorkflow,
+      String filterSetName,
+      String bigQueryProject,
+      String wgsBigqueryDataset,
+      String workspaceGoogleProject) {
 
     String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
     if (destinationParts.length != 2) {
@@ -331,9 +324,16 @@ public class GenomicExtractionService {
       throw new ServerErrorException();
     }
 
+    // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
+    // keeping overhead low and limiting footprint on shared extraction quota.
+    int minScatter =
+        Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
+    int desiredScatter =
+        Math.round(personIds.size() * cohortExtractionConfig.extractionScatterTasksPerSample);
+    int scatterCount = Ints.constrainToRange(desiredScatter, minScatter, MAX_EXTRACTION_SCATTER);
+
     Map<String, String> maybeInputs = new HashMap<>();
 
-    String filterSetName = workspace.getCdrVersion().getWgsFilterSetName();
     if (!Strings.isNullOrEmpty(filterSetName)) {
       // If set, apply a joint callset filter during the extraction. There may be multiple such
       // filters defined within a GVS BigQuery dataset (see the filter_set table to view options).
@@ -342,31 +342,21 @@ public class GenomicExtractionService {
     }
 
     if (useLegacyWorkflow) {
-      // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
-      // keeping overhead low and limiting footprint on shared extraction quota.
-      int minScatter =
-          Math.min(
-              cohortExtractionConfig.legacyVersions.minExtractionScatterTasks,
-              LEGACY_MAX_EXTRACTION_SCATTER);
-      int desiredScatter =
-          Math.round(
-              personIds.size()
-                  * cohortExtractionConfig.legacyVersions.extractionScatterTasksPerSample);
-      int scatterCount =
-          Ints.constrainToRange(desiredScatter, minScatter, LEGACY_MAX_EXTRACTION_SCATTER);
-
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
-
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"");
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
       maybeInputs.put(
           EXTRACT_WORKFLOW_NAME + ".gatk_override",
           "\"" + cohortExtractionConfig.legacyVersions.gatkJarUri + "\"");
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
     } else {
-      // Added Nov 2024
+      // Added Nov 2024 for v8
       // replaces extraction_uuid and cohort_table_prefix which are now set to this value
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".call_set_identifier", "\"" + extractionUuid + "\"");
+      // added Jan 2025: new parameter name for scatter count override in v8
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".extract_scatter_count_override",
+          Integer.toString(scatterCount));
     }
 
     Blob personIdsFile =
@@ -390,13 +380,9 @@ public class GenomicExtractionService {
                 + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"")
         .put(EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"")
-        .put(
-            EXTRACT_WORKFLOW_NAME + ".gvs_project",
-            "\"" + workspace.getCdrVersion().getBigqueryProject() + "\"")
-        .put(
-            EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
-            "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
-        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspace.getGoogleProject() + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".gvs_project", "\"" + bigQueryProject + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".gvs_dataset", "\"" + wgsBigqueryDataset + "\"")
+        .put(EXTRACT_WORKFLOW_NAME + ".query_project", "\"" + workspaceGoogleProject + "\"")
         // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
         // etc
         .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
@@ -408,14 +394,17 @@ public class GenomicExtractionService {
   public GenomicExtractionJob submitGenomicExtractionJob(
       DbWorkspace workspace, DbDataset dataSet, TanagraGenomicDataRequest tanagraGenomicDataRequest)
       throws ApiException {
+    var cdrVersion = workspace.getCdrVersion();
 
-    boolean isTanagraEnabled = workspace.isCDRAndWorkspaceTanagraEnabled();
+    // we use different workflows based on the CDR version:
+    // one version for v7 or earlier, and one for v8 or later
+    boolean useLegacyWorkflow = cdrVersion.getPublicReleaseNumber() <= 7;
 
     List<String> personIds =
-        isTanagraEnabled
-            ? dataSetService.getTanagraPersonIdsWithWholeGenome(
+        workspace.isCDRAndWorkspaceTanagraEnabled()
+            ? genomicDatasetService.getTanagraPersonIdsWithWholeGenome(
                 workspace, tanagraGenomicDataRequest)
-            : dataSetService.getPersonIdsWithWholeGenome(dataSet);
+            : genomicDatasetService.getPersonIdsWithWholeGenome(dataSet);
     if (personIds.isEmpty()) {
       throw new FailedPreconditionException(
           "provided cohort contains no participants with whole genome data");
@@ -428,10 +417,25 @@ public class GenomicExtractionService {
               personIds.size(), MAX_EXTRACTION_SAMPLE_COUNT));
     }
 
-    // we use different workflows based on the CDR version:
-    // one version for v7 or earlier, and one for v8 or later
-    boolean useLegacyWorkflow =
-        !Boolean.TRUE.equals(workspace.getCdrVersion().getNeedsV8GenomicExtractionWorkflow());
+    return submitGenomicExtractionJob(
+        workspace,
+        dataSet,
+        personIds,
+        useLegacyWorkflow,
+        cdrVersion.getWgsFilterSetName(),
+        cdrVersion.getBigqueryProject(),
+        cdrVersion.getWgsBigqueryDataset());
+  }
+
+  public GenomicExtractionJob submitGenomicExtractionJob(
+      DbWorkspace workspace,
+      DbDataset dataSet,
+      List<String> personIds,
+      boolean useLegacyWorkflow,
+      String filterSetName,
+      String bigQueryProject,
+      String wgsBigQueryDataset)
+      throws ApiException {
 
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
@@ -465,13 +469,16 @@ public class GenomicExtractionService {
                 new FirecloudMethodConfiguration()
                     .inputs(
                         getWorkflowInputs(
-                            workspace,
                             cohortExtractionConfig,
                             extractionUuid,
                             personIds,
                             extractionFolder,
                             outputDir,
-                            useLegacyWorkflow))
+                            useLegacyWorkflow,
+                            filterSetName,
+                            bigQueryProject,
+                            wgsBigQueryDataset,
+                            workspace.getGoogleProject()))
                     .methodConfigVersion(versionedConfig.methodRepoVersion)
                     .methodRepoMethod(createRepoMethodParameter(versionedConfig))
                     .name(extractionUuid)

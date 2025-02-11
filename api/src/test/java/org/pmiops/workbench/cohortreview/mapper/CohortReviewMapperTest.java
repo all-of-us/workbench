@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortreview.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -14,6 +13,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -93,8 +93,7 @@ public class CohortReviewMapperTest {
                     ageAtEventValue,
                     rankValue)));
 
-    TableResult result =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(s, tableRows);
 
     ParticipantChartData participantChartData =
         new ParticipantChartData()
@@ -201,8 +200,7 @@ public class CohortReviewMapperTest {
                     strengthValue,
                     routeValue,
                     refRangeValue)));
-    TableResult result =
-        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(schema, tableRows);
 
     ParticipantData participantData =
         new ParticipantData()
@@ -245,8 +243,7 @@ public class CohortReviewMapperTest {
         Collections.singletonList(
             FieldValueList.of(Arrays.asList(domainValue, typeValue, vocabularyValue)));
 
-    TableResult result =
-        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    TableResult result = BigQueryUtils.newTableResult(s, tableRows);
 
     Vocabulary vocabulary = new Vocabulary().domain("domain").type("type").vocabulary("vocabulary");
     assertThat(cohortReviewMapper.tableResultToVocabulary(result))

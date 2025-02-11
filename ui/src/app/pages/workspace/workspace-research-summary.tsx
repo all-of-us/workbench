@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
+import { ResearchPurposeQuestion } from 'app/utils/research-purpose-text';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 
 import { WorkspaceEditSection } from './workspace-edit-section';
-import { ResearchPurposeQuestion } from './workspace-edit-text';
 
 interface Props {
   id: string;

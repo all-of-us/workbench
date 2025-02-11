@@ -22,65 +22,39 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 /** Expose handy, performant queries that don't require Dao, Entity, or Projection classes. */
 public interface ReportingQueryService {
-  long getQueryBatchSize();
+  List<ReportingDataset> getDatasetBatch(long limit, long offset);
 
-  List<ReportingDataset> getDatasets();
+  List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset);
 
-  List<ReportingDatasetCohort> getDatasetCohorts();
+  List<ReportingDatasetConceptSet> getDatasetConceptSetBatch(long limit, long offset);
 
-  List<ReportingDatasetConceptSet> getDatasetConceptSets();
+  List<ReportingDatasetDomainIdValue> getDatasetDomainIdValueBatch(long limit, long offset);
 
-  List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues();
+  List<ReportingInstitution> getInstitutionBatch(long limit, long offset);
 
-  List<ReportingInstitution> getInstitutions();
-
-  List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsage();
+  List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsageBatch(long limit, long offset);
 
   List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset);
 
-  default Stream<List<ReportingWorkspace>> getBatchedWorkspaceStream() {
-    return getBatchedStream(this::getWorkspaceBatch);
-  }
-
   List<ReportingUser> getUserBatch(long limit, long offset);
 
-  default Stream<List<ReportingUser>> getBatchedUserStream() {
-    return getBatchedStream(this::getUserBatch);
-  }
-
   List<ReportingCohort> getCohortBatch(long limit, long offset);
-
-  default Stream<List<ReportingCohort>> getBatchedCohortStream() {
-    return getBatchedStream(this::getCohortBatch);
-  }
 
   List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveyBatch(
       long limit, long offset);
 
-  default Stream<List<ReportingNewUserSatisfactionSurvey>>
-      getBatchedNewUserSatisfactionSurveyStream() {
-    return getBatchedStream(this::getNewUserSatisfactionSurveyBatch);
-  }
-
   List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySourceBatch(
       long limit, long offset);
-
-  default Stream<List<ReportingUserGeneralDiscoverySource>>
-      getBatchedUserGeneralDiscoverySourceStream() {
-    return getBatchedStream(this::getUserGeneralDiscoverySourceBatch);
-  }
 
   List<ReportingUserPartnerDiscoverySource> getUserPartnerDiscoverySourceBatch(
       long limit, long offset);
 
-  default Stream<List<ReportingUserPartnerDiscoverySource>>
-      getBatchedUserPartnerDiscoverySourceStream() {
-    return getBatchedStream(this::getUserPartnerDiscoverySourceBatch);
-  }
+  List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset);
 
-  default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
-    final long offset = getQueryBatchSize() * batchIndex;
-    return getter.apply(getQueryBatchSize(), offset);
+  default <T> List<T> getBatchByIndex(
+      BiFunction<Long, Long, List<T>> getter, long batchSize, long batchIndex) {
+    final long offset = batchSize * batchIndex;
+    return getter.apply(batchSize, offset);
   }
 
   /**
@@ -88,9 +62,9 @@ public interface ReportingQueryService {
    *
    * @param getter - method to retrieve a batch, typically a method reference against this interface
    * @param <T> - DTO type
-   * @return
    */
-  default <T> Iterator<List<T>> getBatchIterator(BiFunction<Long, Long, List<T>> getter) {
+  default <T> Iterator<List<T>> getBatchIterator(
+      BiFunction<Long, Long, List<T>> getter, long batchSize) {
     return new Iterator<>() {
       private long batchIndex = 0;
       private long lastResultSetSize = -1; // first call to hasNext() should return true
@@ -107,9 +81,6 @@ public interface ReportingQueryService {
         }
       }
 
-      /**
-       * @return
-       */
       @Override
       public boolean hasNext() {
         if (lastResultSetSize < 0) {
@@ -118,13 +89,13 @@ public interface ReportingQueryService {
           final List<T> upToOneRow = getter.apply(1L, 0L);
           return !upToOneRow.isEmpty();
         } else {
-          return lastResultSetSize == getQueryBatchSize();
+          return lastResultSetSize == batchSize;
         }
       }
 
       @Override
       public List<T> next() {
-        final List<T> result = getBatchByIndex(getter, batchIndex++);
+        final List<T> result = getBatchByIndex(getter, batchSize, batchIndex++);
         lastResultSetSize = result.size();
         return result;
       }
@@ -136,23 +107,17 @@ public interface ReportingQueryService {
    *
    * @param getter - limit & offset version of query method (currently just getWorkspaces())
    * @param <T> - DTO type
-   * @return
    */
-  default <T> Stream<List<T>> getBatchedStream(BiFunction<Long, Long, List<T>> getter) {
-    final Iterator<List<T>> batchIterator = getBatchIterator(getter);
+  default <T> Stream<List<T>> getBatchedStream(
+      BiFunction<Long, Long, List<T>> getter, long batchSize) {
+    final Iterator<List<T>> batchIterator = getBatchIterator(getter, batchSize);
     final Iterable<List<T>> iterable = () -> batchIterator;
     return StreamSupport.stream(iterable.spliterator(), false);
   }
 
-  int getTableRowCount(String tableName);
+  int getTableRowCount(String rwbTableName);
 
-  int getAppUsageRowCount(String tableName);
+  int getAppUsageRowCount();
 
-  int getWorkspaceCount();
-
-  List<ReportingLeonardoAppUsage> getLeonardoAppUsage(long limit, long offset);
-
-  default Stream<List<ReportingLeonardoAppUsage>> getBatchedLeonardoAppUsageStream() {
-    return getBatchedStream(this::getLeonardoAppUsage);
-  }
+  int getActiveWorkspaceCount();
 }

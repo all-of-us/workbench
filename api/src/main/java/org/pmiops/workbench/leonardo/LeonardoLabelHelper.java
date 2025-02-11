@@ -37,19 +37,21 @@ public class LeonardoLabelHelper {
   // a limitation in the Leo Swagger client code generation means that the labels come in as Object
   // rather than their true type of Map<String, String>
   @SuppressWarnings("unchecked")
-  public static Optional<AppType> maybeMapLeonardoLabelsToGkeApp(@Nullable Object diskLabels) {
-    return Optional.ofNullable((Map<String, String>) diskLabels)
+  public static Map<String, String> toLabelMap(Object rawLabelObject) {
+    return (Map<String, String>) rawLabelObject;
+  }
+
+  public static Optional<AppType> maybeMapLeonardoLabelsToGkeApp(@Nullable Object rawLabelObject) {
+    return Optional.ofNullable(toLabelMap(rawLabelObject))
         .map(m -> m.get(LEONARDO_LABEL_APP_TYPE))
         .map(LeonardoLabelHelper::labelValueToAppType);
   }
 
   /** Insert or update disk labels. */
-  @SuppressWarnings("unchecked")
   public static Map<String, String> upsertLeonardoLabel(
       @Nullable Object rawLabelObject, String labelKey, String labelValue) {
     Map<String, String> labels =
-        (Map<String, String>)
-            Optional.ofNullable(rawLabelObject).orElse(new HashMap<String, String>());
+        Optional.ofNullable(toLabelMap(rawLabelObject)).orElse(new HashMap<>());
     labels.put(labelKey, labelValue);
     return labels;
   }

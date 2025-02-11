@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cdr;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -79,9 +79,7 @@ public class CdrVersionServiceTest {
     CdrVersionMapperImpl.class,
     FakeClockConfiguration.class
   })
-  @MockBean({
-    FireCloudService.class,
-  })
+  @MockBean({FireCloudService.class, VwbAccessService.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

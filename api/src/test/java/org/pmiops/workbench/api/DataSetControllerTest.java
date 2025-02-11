@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -51,6 +52,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -144,9 +146,8 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
@@ -210,6 +211,9 @@ public class DataSetControllerTest {
 
   @Autowired private FirecloudMapper firecloudMapper;
 
+  @Autowired private WorkspaceService workspaceService;
+  @Autowired private WorkspaceServiceFactory workspaceServiceFactory;
+
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private CdrVersionService mockCdrVersionService;
@@ -269,7 +273,6 @@ public class DataSetControllerTest {
     ConceptBigQueryService.class,
     DirectoryService.class,
     FeaturedWorkspaceMapper.class,
-    InitialCreditsService.class,
     IamService.class,
     InitialCreditsService.class,
     MailService.class,
@@ -282,6 +285,9 @@ public class DataSetControllerTest {
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
     WorkspaceOperationMapper.class,
+    WorkspaceServiceFactory.class,
+    WsmClient.class,
+    VwbAccessService.class
   })
   static class Configuration {
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
@@ -350,6 +356,8 @@ public class DataSetControllerTest {
             .researchPurpose(new ResearchPurpose())
             .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
             .billingAccountName("billing-account");
+
+    when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);

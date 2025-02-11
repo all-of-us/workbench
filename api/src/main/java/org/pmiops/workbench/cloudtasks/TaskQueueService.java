@@ -13,18 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
-import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
@@ -42,17 +39,22 @@ public class TaskQueueService {
   private static final String CREATE_WORKSPACE_PATH = BASE_PATH + "/createWorkspace";
   private static final String DUPLICATE_WORKSPACE_PATH = BASE_PATH + "/duplicateWorkspace";
   private static final String DELETE_TEST_WORKSPACES_PATH = BASE_PATH + "/deleteTestUserWorkspaces";
+  private static final String ACCESS_EXPIRATION_EMAIL_PATH =
+      BASE_PATH + "/sendAccessExpirationEmails";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_PATH =
       BASE_PATH + "/deleteTestUserWorkspacesInRawls";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH =
       BASE_PATH + "/checkCreditsExpirationForUserIDs";
-  private static final String CHECK_AND_ALERT_FREE_TIER_USAGE =
+  private static final String CHECK_AND_ALERT_FREE_TIER_USAGE_PATH =
       BASE_PATH + "/checkAndAlertFreeTierBillingUsage";
+  private static final String DELETE_WORKSPACE_ENVIRONMENTS_PATH =
+      BASE_PATH + "/deleteUnsharedWorkspaceEnvironments";
 
   private static final String INITIAL_CREDITS_EXPIRY_PATH =
       BASE_PATH + "/handleInitialCreditsExpiry";
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
+  private static final String ACCESS_EXPIRATION_EMAIL_QUEUE_NAME = "accessExpirationEmailQueue";
   private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
   private static final String CREATE_WORKSPACE_QUEUE_NAME = "createWorkspaceQueue";
   private static final String DUPLICATE_WORKSPACE_QUEUE_NAME = "duplicateWorkspaceQueue";
@@ -63,6 +65,8 @@ public class TaskQueueService {
   private static final String EXPIRED_FREE_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
       "checkCreditsExpirationForUserIDsQueue";
+  private static final String DELETE_WORKSPACE_ENVIRONMENTS_QUEUE_NAME =
+      "deleteUnsharedWorkspaceEnvironmentsQueue";
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
@@ -114,12 +118,7 @@ public class TaskQueueService {
   public void groupAndPushAuditProjectsTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerAuditTask)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    AUDIT_PROJECTS_QUEUE_NAME,
-                    AUDIT_PROJECTS_PATH,
-                    new AuditProjectAccessRequest().userIds(batch)));
+        .forEach(batch -> createAndPushTask(AUDIT_PROJECTS_QUEUE_NAME, AUDIT_PROJECTS_PATH, batch));
   }
 
   public void groupAndPushFreeTierBilling(List<Long> userIds) {
@@ -128,7 +127,8 @@ public class TaskQueueService {
     CloudTasksUtils.partitionList(userIds, freeTierCronUserBatchSize)
         .forEach(
             batch ->
-                createAndPushTask(FREE_TIER_BILLING_QUEUE, CHECK_AND_ALERT_FREE_TIER_USAGE, batch));
+                createAndPushTask(
+                    FREE_TIER_BILLING_QUEUE, CHECK_AND_ALERT_FREE_TIER_USAGE_PATH, batch));
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
@@ -138,11 +138,20 @@ public class TaskQueueService {
         .stream()
         .map(
             batch ->
+                createAndPushTask(SYNCHRONIZE_ACCESS_QUEUE_NAME, SYNCHRONIZE_ACCESS_PATH, batch))
+        .toList();
+  }
+
+  public List<String> groupAndPushAccessExpirationEmailTasks(List<Long> userIds) {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    return CloudTasksUtils.partitionList(
+            userIds, workbenchConfig.offlineBatch.usersPerAccessExpirationEmailTask)
+        .stream()
+        .map(
+            batch ->
                 createAndPushTask(
-                    SYNCHRONIZE_ACCESS_QUEUE_NAME,
-                    SYNCHRONIZE_ACCESS_PATH,
-                    new SynchronizeUserAccessRequest().userIds(batch)))
-        .collect(Collectors.toList());
+                    ACCESS_EXPIRATION_EMAIL_QUEUE_NAME, ACCESS_EXPIRATION_EMAIL_PATH, batch))
+        .toList();
   }
 
   public void groupAndPushDeleteTestWorkspaceTasks(List<TestUserWorkspace> workspacesToDelete) {
@@ -173,6 +182,19 @@ public class TaskQueueService {
                     new BadRequestException(
                         "Deletion of e2e test user workspaces is not enabled in this environment"));
     return CloudTasksUtils.partitionList(workspacesToDelete, batchSize);
+  }
+
+  public void groupAndPushDeleteWorkspaceEnvironmentTasks(List<String> workspaceNamespaces) {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    CloudTasksUtils.partitionList(
+            workspaceNamespaces,
+            workbenchConfig.offlineBatch.workspacesPerDeleteWorkspaceEnvironmentsTask)
+        .forEach(
+            batch ->
+                createAndPushTask(
+                    DELETE_WORKSPACE_ENVIRONMENTS_QUEUE_NAME,
+                    DELETE_WORKSPACE_ENVIRONMENTS_PATH,
+                    batch));
   }
 
   public void pushEgressEventTask(Long eventId, boolean isVwbEgressEvent) {

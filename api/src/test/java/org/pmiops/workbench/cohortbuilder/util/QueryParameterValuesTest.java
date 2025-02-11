@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.util;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.buildParameter;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.decorateParameterName;

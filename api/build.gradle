@@ -21,10 +21,11 @@ buildscript {
     // outside of the buildscript block aren't usable here.
     ext {
         GAE_VERSION = '2.0.31'
-        GSON_VERSION = '2.10'
+        GOOGLE_AUTH_LIBRARY_VERSION = '1.30.1'
+        GSON_VERSION = '2.11.0'
         HIBERNATE_VERSION = '6.5.2.Final'
-        JACKSON_VERSION = '2.17.2'
-        LIQUIBASE_VERSION = '4.29.2'
+        JACKSON_VERSION = '2.18.2'
+        LIQUIBASE_VERSION = '4.31.0'
         // 1.5.7+ results in a runtime error:
         // Logging system failed to initialize using configuration from 'null'
         //  java.lang.NoSuchMethodError: 'java.lang.Object ch.qos.logback.classic.LoggerContext.getConfigurationLock()'
@@ -35,10 +36,10 @@ buildscript {
         OPENTELEMETRY_JAVA_VERSION = '2.8.0'
         OPENTELEMETRY_GOOGLE_VERSION = '0.31.0'
         SPRINGFOX_VERSION = '3.0.0'
-        SPRING_BOOT_VERSION = '3.3.2'
-        SPRING_FRAMEWORK_VERSION = '6.1.13'
-        SPRING_SECURITY_VERSION = '6.3.3'
-        SWAGGER_VERSION = '2.2.25'
+        SPRING_BOOT_VERSION = '3.4.1'
+        SPRING_FRAMEWORK_VERSION = '6.2.1'
+        SPRING_SECURITY_VERSION = '6.4.2'
+        SWAGGER_VERSION = '2.2.28'
     }
 
     repositories {
@@ -58,7 +59,7 @@ plugins {
     id 'com.google.cloud.tools.jib' version '3.4.2'
 
     // required even though we have removed our own Kotlin code - transitive dependency?
-    id 'org.jetbrains.kotlin.jvm' version '1.9.23'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.25'
 
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
@@ -97,9 +98,6 @@ if (System.getenv("ADD_XLINT_UNCHECKED")) {
 configurations {
     __bigQueryTest__Compile.extendsFrom testImplementation
     __bigQueryTest__Runtime.extendsFrom testRuntime
-
-    __contractTest__Compile.extendsFrom testImplementation
-    __contractTest__Runtime.extendsFrom testRuntime
 
     __integration__Compile.extendsFrom testImplementation
     __integration__Runtime.extendsFrom testRuntime
@@ -197,6 +195,9 @@ swaggerSources {
     tanagra swagger3JavaClient("tanagra.yaml", "tanagra")
 
     wsmanager swagger3JavaClient("ws-manager.yaml", "wsmanager")
+    vwbum swagger3JavaClient("vwb-user-manager.yaml", "vwb.user")
+    vwbexfil swagger3JavaClient("vwb-exfil-manager.yaml", "vwb.exfil")
+    vwbsam swagger3JavaClient("vwb-sam.yaml", "vwb.sam")
 
     // Workbench needs a special configuration style, as we generate Spring server
     // bindings in this case.
@@ -328,18 +329,6 @@ sourceSets {
         }
     }
 
-    // contract testing sources
-    __contractTest__ {
-        resources {
-            srcDir "contracttest/**"
-        }
-        java {
-            compileClasspath += main.output + generated.output
-            runtimeClasspath += main.output + generated.output
-            srcDir file('src/contracttest/java')
-        }
-    }
-
     // Integration testing sources
     __integration__ {
         resources {
@@ -415,9 +404,7 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
     implementation "com.github.java-json-tools:json-patch:1.13"
-    implementation "com.github.rholder:guava-retrying:2.0.0"
-    // 6.0.0+ causes a failure in ProfileServiceTest
-    implementation 'org.javers:javers-core:5.15.0'
+    implementation 'org.javers:javers-core:7.7.0'
     implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     implementation "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
 
@@ -442,47 +429,55 @@ dependencies {
     implementation "com.google.cloud.opentelemetry:exporter-auto:$project.ext.OPENTELEMETRY_GOOGLE_VERSION-alpha"
 
     implementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
-    implementation 'com.mysql:mysql-connector-j:9.0.0'
-    implementation "org.apache.commons:commons-collections4:4.4"
+    implementation 'com.mysql:mysql-connector-j:9.2.0'
+    implementation "org.apache.commons:commons-collections4:4.5.0-M3"
     implementation 'org.apache.commons:commons-lang3:3.15.0'
-    implementation 'org.apache.commons:commons-text:1.11.0'
+    implementation 'org.apache.commons:commons-text:1.13.0'
     // 5.4+ results in a runtime error:
     // java.lang.NoSuchMethodError: 'void org.apache.hc.core5.http.impl.io.DefaultHttpRequestWriterFactory.<init>(org.apache.hc.core5.http.config.Http1Config)'
     implementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
     implementation "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
     implementation 'commons-codec:commons-codec:1.17.0'
     implementation 'com.auth0:java-jwt:4.4.0'
-    implementation 'io.netty:netty-common:4.1.112.Final'
-    implementation 'org.json:json:20231013'
+    implementation 'io.netty:netty-common:4.1.117.Final'
+    implementation 'org.json:json:20250107'
 
-    // TODO: consider switching google deps to the BOM.  https://cloud.google.com/java/docs/bom
+
+    // Assure compatible dependencies by using Bills of Materials (BOMs)
+    // https://cloud.google.com/java/docs/bom
+
+    implementation platform('com.google.cloud:google-cloud-bom:0.233.0')
+    implementation platform('com.google.cloud:libraries-bom:26.52.0')
+
+    // do not specify versions for these dependencies, because they are set by the BOM
+
+    implementation 'com.google.cloud:google-cloud-bigquery'
+    implementation 'com.google.cloud:google-cloud-iamcredentials'
+    implementation 'com.google.cloud:google-cloud-logging'
+    implementation 'com.google.cloud:google-cloud-monitoring'
+    implementation 'com.google.cloud:google-cloud-trace'
+    implementation 'com.google.cloud:google-cloud-storage'
+    implementation 'com.google.cloud:google-cloud-tasks'
 
     implementation("com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION") {
         exclude group: 'com.google.api-client', module: 'google-api-client-servlet'
     }
-    implementation 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20220919-2.0.0'
-    implementation 'com.google.apis:google-api-services-cloudbilling:v1-rev20220908-2.0.0'
-    implementation 'com.google.apis:google-api-services-cloudresourcemanager:v3-rev20220925-2.0.0'
+    implementation 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20241210-2.0.0'
+    implementation 'com.google.apis:google-api-services-cloudbilling:v1-rev20241011-2.0.0'
+    implementation 'com.google.apis:google-api-services-cloudresourcemanager:v3-rev20240310-2.0.0'
     implementation 'com.google.apis:google-api-services-oauth2:v2-rev20200213-2.0.0'
-    implementation 'com.google.apis:google-api-services-iam:v1-rev20220825-2.0.0'
-    implementation 'com.google.api-client:google-api-client-appengine:2.5.0'
-    implementation 'com.google.auth:google-auth-library-appengine:1.23.0'
-    implementation 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
+    implementation 'com.google.apis:google-api-services-iam:v1-rev20241114-2.0.0'
+    implementation 'com.google.api-client:google-api-client-appengine:2.7.1'
+    implementation "com.google.auth:google-auth-library-appengine:$project.ext.GOOGLE_AUTH_LIBRARY_VERSION"
+    implementation "com.google.auth:google-auth-library-oauth2-http:$project.ext.GOOGLE_AUTH_LIBRARY_VERSION"
     // 1.11.2+ results in a compilation error:
     //    > Could not find com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.11.1-SNAPSHOT.
     //     Required by:
     //         project : > com.google.cloud.sql:mysql-socket-factory:1.11.2
     implementation 'com.google.cloud.sql:mysql-socket-factory:1.11.1'
-    implementation 'com.google.cloud:google-cloud-bigquery:2.25.0'
-    implementation 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
-    implementation 'com.google.cloud:google-cloud-logging:3.11.5'
-    implementation 'com.google.cloud:google-cloud-monitoring:3.40.0'
-    implementation 'com.google.cloud:google-cloud-trace:2.39.0'
-    implementation 'com.google.cloud:google-cloud-storage:2.13.0'
-    implementation 'com.google.cloud:google-cloud-tasks:2.3.11'
     implementation "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    implementation 'com.google.guava:guava:32.0.1-jre'
-    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
+    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.37.0'
+
     implementation 'com.google.protobuf:protobuf-java:3.25.5'
     implementation 'com.google.protobuf:protobuf-java-util:3.25.5'
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
@@ -506,7 +501,7 @@ dependencies {
         exclude group: 'org.slf4j', module: 'jul-to-slf4j'
     }
 
-    implementation "org.springframework.retry:spring-retry"
+    implementation "org.springframework.retry:spring-retry:2.0.11"
     implementation "org.springframework.security:spring-security-core:$project.ext.SPRING_SECURITY_VERSION"
     implementation "org.springframework.security:spring-security-crypto:$project.ext.SPRING_SECURITY_VERSION"
     implementation "org.springframework.security:spring-security-web:$project.ext.SPRING_SECURITY_VERSION"
@@ -516,7 +511,11 @@ dependencies {
     // https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-6612984
     // https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-6613076
     // https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-6613079
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.78'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
+
+    // https://www.cve.org/CVERecord?id=CVE-2023-2976
+    implementation 'com.google.guava:guava:33.4.0-jre'
+
     // https://spring.io/blog/2022/03/31/spring-framework-rce-early-announcement
     implementation "org.springframework:spring-aop:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-aspects:$project.ext.SPRING_FRAMEWORK_VERSION"
@@ -535,7 +534,6 @@ dependencies {
     implementation "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
 
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
-    implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
     // updated 13 Dec 2023 to most recent passing Sam on 13 Dec
@@ -551,33 +549,40 @@ dependencies {
 
     // transitive dependencies called out by libyears
 
-    implementation "org.jetbrains:annotations:26.0.1"
+    implementation "org.jetbrains:annotations:26.0.2"
     implementation "commons-logging:commons-logging:1.3.4"
 
     // jakarta
-    implementation "jakarta.servlet:jakarta.servlet-api:6.0.0"
-    implementation "jakarta.inject:jakarta.inject-api:2.0.1"
-    implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
     implementation 'jakarta.activation:jakarta.activation-api:2.1.3'
     implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
+    implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
+    // upgrading to 3.2.0 causes an error
+    // Error creating bean with name 'entityManagerFactory' defined in class path resource
+    // [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: EntityManagerFactory
+    // interface [interface org.hibernate.SessionFactory] seems to conflict with Spring's EntityManagerFactoryInfo
+    // mixin - consider resetting the 'entityManagerFactoryInterface' property to plain
+    // [jakarta.persistence.EntityManagerFactory]
+    // https://github.com/spring-projects/spring-boot/issues/39753
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+    implementation 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+    implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
 
-    generatedCompile "jakarta.xml.bind:jakarta.xml.bind-api:4.0.1"
-    generatedCompile "jakarta.inject:jakarta.inject-api:2.0.1"
-    generatedCompile 'jakarta.mail:jakarta.mail-api:2.1.3'
     generatedCompile 'jakarta.annotation:jakarta.annotation-api:3.0.0'
+    generatedCompile 'jakarta.inject:jakarta.inject-api:2.0.1'
+    generatedCompile 'jakarta.mail:jakarta.mail-api:2.1.3'
     generatedCompile 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-    generatedCompile 'jakarta.validation:jakarta.validation-api:3.0.2'
-    generatedCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+    generatedCompile 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+    generatedCompile 'jakarta.validation:jakarta.validation-api:3.1.0'
+    generatedCompile 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
 
     // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
     // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
     // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
     generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
-    generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
     generatedCompile "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
+    generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
     generatedCompile "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
@@ -597,7 +602,7 @@ dependencies {
     generatedCompile 'io.gsonfire:gson-fire:1.9.0'
 
     // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
-    providedCompile group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
+    providedCompile group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.1.0'
 
     __tools__Implementation 'commons-cli:commons-cli:1.9.0'
     __tools__Implementation 'com.opencsv:opencsv:5.9'
@@ -637,22 +642,9 @@ task integrationTest(type: Test) {
     // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
 
-task contractTest(type: Test) {
-    group = LifecycleBasePlugin.VERIFICATION_GROUP
-    description = 'Run contract test suite.'
-    testClassesDirs = sourceSets.__contractTest__.output.classesDirs
-    classpath = sourceSets.__contractTest__.runtimeClasspath
-    outputs.upToDateWhen { false }
-
-    useJUnitPlatform()
-
-    // Option to control size of stack trace:
-    // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
-}
-
 task bigQueryTest(type: Test) {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
-    description = 'Runs BigQery test suite.'
+    description = 'Runs BigQuery test suite.'
     testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs
     classpath = sourceSets.__bigQueryTest__.runtimeClasspath
 
@@ -943,6 +935,7 @@ task listDisks(type: JavaExec) {
     }
 }
 
+// ./project.rb send-email
 task sendEmail(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
     mainClass = "org.pmiops.workbench.tools.SendEmail"
@@ -951,9 +944,16 @@ task sendEmail(type: JavaExec) {
     }
 }
 
+// ./project.rb run-extraction
+task runGenomicExtraction(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    mainClass = "org.pmiops.workbench.tools.RunGenomicExtractionWorkflow"
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
 dependencies {
-    testImplementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
-    testImplementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
     modules {
     module("org.aspectj:aspectjrt") { replacedBy("org.aspectj:aspectjweaver") }
     module("org.springframework:spring-jcl") { replacedBy("commons-logging:commons-logging") }

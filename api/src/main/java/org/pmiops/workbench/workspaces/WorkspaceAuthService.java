@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
@@ -38,17 +40,23 @@ public class WorkspaceAuthService {
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
+  private final AccessTierService accessTierService;
+  private final InitialCreditsService initialCreditsService;
 
   @Autowired
   public WorkspaceAuthService(
+      AccessTierService accessTierService,
       FireCloudService fireCloudService,
+      InitialCreditsService initialCreditsService,
       Provider<DbUser> userProvider,
-      WorkspaceDao workspaceDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceDao workspaceDao) {
+    this.accessTierService = accessTierService;
     this.fireCloudService = fireCloudService;
+    this.initialCreditsService = initialCreditsService;
     this.userProvider = userProvider;
-    this.workspaceDao = workspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceDao = workspaceDao;
   }
 
   /*
@@ -59,8 +67,10 @@ public class WorkspaceAuthService {
   public void validateInitialCreditUsage(String workspaceNamespace, String workspaceTerraName)
       throws ForbiddenException {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
+    DbUser creator = workspace.getCreator();
     if (isInitialCredits(workspace.getBillingAccountName(), workbenchConfigProvider.get())
-        && (workspace.isInitialCreditsExhausted() || workspace.isInitialCreditsExpired())) {
+        && (workspace.isInitialCreditsExhausted()
+            || initialCreditsService.areUserCreditsExpired(creator))) {
       throw new ForbiddenException(
           String.format(
               "Workspace (%s) is using initial credits that have either expired or have been exhausted.",
@@ -188,5 +198,25 @@ public class WorkspaceAuthService {
         getFirecloudWorkspaceAcl(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
     return workspaceDao.saveWithLastModified(workspace, userProvider.get());
+  }
+
+  /**
+   * Throw ForbiddenException if logged in user doesn't have the same Tier Access as that of
+   * workspace
+   *
+   * @param dbWorkspace
+   */
+  public void validateWorkspaceTierAccess(DbWorkspace dbWorkspace) {
+    String workspaceAccessTier = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
+
+    List<String> accessTiers = accessTierService.getAccessTierShortNamesForUser(userProvider.get());
+
+    if (!accessTiers.contains(workspaceAccessTier)) {
+      throw new ForbiddenException(
+          String.format(
+              "User with username %s does not have access to the '%s' access tier required by "
+                  + "workspace '%s'",
+              userProvider.get().getUsername(), workspaceAccessTier, dbWorkspace.getName()));
+    }
   }
 }

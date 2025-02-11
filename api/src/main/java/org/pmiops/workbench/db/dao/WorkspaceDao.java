@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -26,15 +25,15 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   Logger log = Logger.getLogger(WorkspaceDao.class.getName());
 
-  default DbWorkspace get(String ns, String firecloudName) {
-    return findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-        ns,
-        firecloudName,
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-  }
+  DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+      String workspaceNamespace, String firecloudName, short activeStatus);
 
   default DbWorkspace getRequired(String ns, String firecloudName) {
-    DbWorkspace workspace = get(ns, firecloudName);
+    DbWorkspace workspace =
+        findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            ns,
+            firecloudName,
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     if (workspace == null) {
       throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
     }
@@ -59,13 +58,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
         DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
+  List<DbWorkspace> getByWorkspaceNamespaceIn(Collection<String> workspaceNamespaces);
+
   default Optional<DbWorkspace> getByGoogleProject(String googleProject) {
     return findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
         googleProject, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
-
-  DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-      String workspaceNamespace, String firecloudName, short activeStatus);
 
   @Query(
       "SELECT w FROM DbWorkspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews"
@@ -79,9 +77,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   List<DbWorkspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
 
   default List<DbWorkspace> findActiveByFirecloudUuidIn(Collection<String> firecloudUuids) {
-    return findAllByFirecloudUuidIn(firecloudUuids).stream()
-        .filter(DbWorkspace::isActive)
-        .collect(Collectors.toList());
+    return findAllByFirecloudUuidIn(firecloudUuids).stream().filter(DbWorkspace::isActive).toList();
   }
 
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
@@ -89,11 +85,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   List<DbWorkspace> findAllByGoogleProjectIn(Collection<String> googleProjects);
 
   default Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    DbWorkspace workspace = findById(workspaceId).orElse(null);
-    if (workspace == null || !workspace.isActive()) {
-      return Optional.empty();
-    }
-    return Optional.of(workspace);
+    return findById(workspaceId).filter(DbWorkspace::isActive);
   }
 
   List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);
@@ -107,13 +99,19 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   Optional<DbWorkspace> findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
       String googleProject, short activeStatus);
 
-  DbWorkspace findDbWorkspaceByWorkspaceId(long workspaceId);
-
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
   @Query(
       "SELECT w.creator FROM DbWorkspace w "
-          + "WHERE w.billingAccountName in (:initialCreditAccountNames) AND w.creator in (:creators) AND w.initialCreditsExhausted = false AND w.initialCreditsExpired = false")
+          + "LEFT JOIN DbUserInitialCreditsExpiration uice ON w.creator = uice.user "
+          + "JOIN DbVerifiedInstitutionalAffiliation via ON w.creator = via.user "
+          + "JOIN DbInstitution i ON via.institution = i "
+          + "WHERE w.billingAccountName in (:initialCreditAccountNames) AND w.creator in (:creators) "
+          + "AND w.initialCreditsExhausted = false "
+          + "AND (uice.bypassed = true "
+          + " OR i.bypassInitialCreditsExpiration = true "
+          + " OR uice.expirationTime IS NULL "
+          + " OR uice.expirationTime > CURRENT_TIMESTAMP)")
   Set<DbUser> findCreatorsByActiveInitialCredits(
       @Param("initialCreditAccountNames") List<String> initialCreditAccountNames,
       @Param("creators") Set<DbUser> creators);

@@ -63,9 +63,11 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -95,6 +97,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
 
+  private final WorkspaceServiceFactory workspaceServiceFactory;
+
+  private final WsmClient wsmClient;
+
   @Autowired
   public WorkspacesController(
       CdrVersionDao cdrVersionDao,
@@ -113,7 +119,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceOperationDao workspaceOperationDao,
       WorkspaceOperationMapper workspaceOperationMapper,
       WorkspaceResourcesService workspaceResourcesService,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      WorkspaceServiceFactory workspaceServiceFactory,
+      WsmClient wsmClient) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -131,6 +139,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceOperationMapper = workspaceOperationMapper;
     this.workspaceResourcesService = workspaceResourcesService;
     this.workspaceService = workspaceService;
+    this.workspaceServiceFactory = workspaceServiceFactory;
+    this.wsmClient = wsmClient;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -162,17 +172,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
     validateWorkspaceApiModel(workspace);
 
+    WorkspaceService workspaceService =
+        workspaceServiceFactory.getWorkspaceService(workspace.isVwbWorkspace());
+
     DbCdrVersion cdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
-    DbAccessTier accessTier = cdrVersion.getAccessTier();
     DbUser user = userProvider.get();
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
-    String billingProject = createTerraBillingProject(accessTier);
-    String firecloudName = FireCloudService.toFirecloudName(workspace.getName());
+    workspace.setCreator(user.getUsername());
+    RawlsWorkspaceDetails fcWorkspace = workspaceService.createWorkspace(workspace, cdrVersion);
 
-    RawlsWorkspaceDetails fcWorkspace =
-        fireCloudService.createWorkspace(
-            billingProject, firecloudName, accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);
@@ -275,7 +284,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                             workspaceDao,
                             fireCloudService,
                             initialCreditsService,
-                            workspaceMapper)))
+                            workspaceMapper,
+                            wsmClient)))
         .orElse(ResponseEntity.notFound().build());
   }
 
@@ -387,6 +397,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCdrVersion(cdrVersion);
     dbWorkspace.setGoogleProject(fcWorkspace.getGoogleProject());
     dbWorkspace.setUsesTanagra(workspace.isUsesTanagra());
+    dbWorkspace.setVwbWorkspace(workspace.isVwbWorkspace());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
@@ -455,6 +466,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceTerraName) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
+    WorkspaceService workspaceService =
+        workspaceServiceFactory.getWorkspaceService(dbWorkspace.isVwbWorkspace());
     return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceTerraName));
   }
 
@@ -601,15 +615,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
-    String billingProject = createTerraBillingProject(accessTier);
-    String firecloudName = FireCloudService.toFirecloudName(toWorkspace.getName());
     RawlsWorkspaceDetails toFcWorkspace =
-        fireCloudService.cloneWorkspace(
-            fromWorkspaceNamespace,
-            fromWorkspaceTerraName,
-            billingProject,
-            firecloudName,
-            accessTier.getAuthDomainName());
+        workspaceService.cloneWorkspace(
+            fromWorkspaceNamespace, fromWorkspaceTerraName, toWorkspace, toCdrVersion);
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
 
     try {
@@ -655,19 +663,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
 
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
-  }
-
-  /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */
-  private String createTerraBillingProject(DbAccessTier accessTier) {
-    DbUser user = userProvider.get();
-    String billingProject = fireCloudService.createBillingProjectName();
-    fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
-
-    // We use the AoU Application Service Account to create the billing account, then add the user
-    // as an additional owner.  In this way, we can make sure that the AoU App SA is an owner on
-    // all billing projects.
-    fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
-    return billingProject;
   }
 
   @Override
@@ -866,15 +861,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesV2(
-      String ns, String id, List<String> rtStrings) {
-    return getWorkspaceResourcesImpl(
-        ns, id, rtStrings.stream().map(ResourceType::fromValue).collect(Collectors.toList()));
-  }
-
-  ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesImpl(
-      String workspaceNamespace,
-      String workspaceTerraName,
-      List<ResourceType> resourceTypesToFetch) {
+      String workspaceNamespace, String workspaceTerraName, List<String> resourceTypeStrings) {
     WorkspaceAccessLevel workspaceAccessLevel =
         workspaceAuthService.enforceWorkspaceAccessLevel(
             workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.READER);
@@ -886,10 +873,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
     workspaceResourceResponse.addAll(
         workspaceResourcesService.getWorkspaceResources(
-            dbWorkspace, workspaceAccessLevel, resourceTypesToFetch));
+            dbWorkspace,
+            workspaceAccessLevel,
+            resourceTypeStrings.stream().map(ResourceType::fromValue).toList()));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 
+  @Override
   public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse>
       getWorkspaceCreatorFreeCreditsRemaining(
           String workspaceNamespace, String workspaceTerraName) {

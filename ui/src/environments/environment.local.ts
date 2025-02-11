@@ -21,4 +21,5 @@ export const environment: Environment = {
   inactivityTimeoutSecondsCt: 99999999999,
   allowTestAccessTokenOverride: true,
   tanagraLocalAuth: true,
+  vwbUiUrl: 'https://workbench-dev.verily.com',
 };

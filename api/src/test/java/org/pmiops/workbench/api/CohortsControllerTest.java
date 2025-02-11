@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
@@ -23,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -94,10 +96,8 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
@@ -164,6 +164,8 @@ public class CohortsControllerTest {
 
   @Autowired FirecloudMapper firecloudMapper;
 
+  @Autowired WorkspaceServiceFactory workspaceServiceFactory;
+
   @TestConfiguration
   @Import({
     FakeClockConfiguration.class,
@@ -209,7 +211,6 @@ public class CohortsControllerTest {
     DirectoryService.class,
     FeaturedWorkspaceMapper.class,
     FireCloudService.class,
-    InitialCreditsService.class,
     LeonardoApiClient.class,
     IamService.class,
     InitialCreditsService.class,
@@ -223,6 +224,9 @@ public class CohortsControllerTest {
     WorkspaceAuditor.class,
     WorkspaceOperationMapper.class,
     EgressObjectLengthsRemediationService.class,
+    WorkspaceServiceFactory.class,
+    WsmClient.class,
+    VwbAccessService.class
   })
   static class Configuration {
     @Bean
@@ -332,6 +336,8 @@ public class CohortsControllerTest {
     cohort.setDescription("demo");
     cohort.setType("demo");
     cohort.setCriteria(createDemoCriteria().toString());
+
+    when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspace2 = workspacesController.createWorkspace(workspace2).getBody();
@@ -792,7 +798,7 @@ public class CohortsControllerTest {
                     cohort.getId(),
                     new Cohort().name("updated-name").etag(eTag)));
     String errMsg = "missing required update field 'etag'";
-    if (eTag != null && eTag.length() > 0) {
+    if (eTag != null && !eTag.isEmpty()) {
       errMsg = String.format("Invalid etag provided: %s", eTag);
     }
     assertThat(exception).hasMessageThat().isEqualTo(errMsg);

@@ -4,7 +4,6 @@ import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
@@ -125,7 +124,7 @@ public class UserAdminController implements UserAdminApiDelegate {
                 taskQueueService.groupAndPushSynchronizeAccessTasks(
                     userService.findUsersByUsernames(request.getUsernames()).stream()
                         .map(DbUser::getUserId)
-                        .collect(Collectors.toList()))));
+                        .toList())));
   }
 
   @Override

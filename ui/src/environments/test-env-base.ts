@@ -23,4 +23,5 @@ export const testEnvironmentBase: EnvironmentBase = {
   inactivityTimeoutSecondsCt: 24 * 60 * 60, // 24 hours
   allowTestAccessTokenOverride: true,
   tanagraLocalAuth: false,
+  vwbUiUrl: 'https://workbench-dev.verily.com',
 };

@@ -30,12 +30,19 @@ public class OfflineEgressController implements OfflineEgressApiDelegate {
     List<DbEgressEvent> oldPendingEvents =
         egressEventDao.findAllByStatusAndLastModifiedTimeLessThan(
             DbEgressEventStatus.PENDING, latestModifiedTime);
+
+    if (oldPendingEvents.isEmpty()) {
+      log.info("No pending egress events to check.");
+    } else {
+      log.warning(String.format("checking %d old PENDING events", oldPendingEvents.size()));
+    }
+
     for (DbEgressEvent event : oldPendingEvents) {
       taskQueueService.pushEgressEventTask(
           event.getEgressEventId(), ExfiltrationUtils.isVwbEgressEvent(event));
     }
 
-    if (oldPendingEvents.size() > 0) {
+    if (!oldPendingEvents.isEmpty()) {
       log.warning(
           String.format("found and re-enqueued %d old PENDING events", oldPendingEvents.size()));
     }

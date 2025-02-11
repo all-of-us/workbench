@@ -33,12 +33,15 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +62,8 @@ public class InitialCreditsService {
   private final LeonardoApiClient leonardoApiClient;
   private final InstitutionService institutionService;
   private final MailService mailService;
+  private final WorkspaceMapper workspaceMapper;
+  private final FireCloudService fireCloudService;
 
   private static final Logger logger = LoggerFactory.getLogger(InitialCreditsService.class);
 
@@ -74,18 +79,22 @@ public class InitialCreditsService {
       WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService,
       LeonardoApiClient leonardoApiClient,
       InstitutionService institutionService,
-      MailService mailService) {
+      MailService mailService,
+      WorkspaceMapper workspaceMapper,
+      FireCloudService fireCloudService) {
+    this.clock = clock;
+    this.fireCloudService = fireCloudService;
+    this.institutionService = institutionService;
+    this.leonardoApiClient = leonardoApiClient;
+    this.mailService = mailService;
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
-    this.clock = clock;
     this.userServiceAuditor = userServiceAuditor;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceInitialCreditUsageService = workspaceInitialCreditUsageService;
-    this.leonardoApiClient = leonardoApiClient;
-    this.institutionService = institutionService;
-    this.mailService = mailService;
+    this.workspaceMapper = workspaceMapper;
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -105,9 +114,11 @@ public class InitialCreditsService {
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
     String userIdsAsString =
         users.stream()
-            .map(user -> Long.toString(user.getUserId()))
+            .map(DbUser::getUserId)
+            .sorted()
+            .map(l -> Long.toString(l))
             .collect(Collectors.joining(","));
-    logger.info(String.format("Checking billing usage for Users ids: %s ", userIdsAsString));
+    logger.info(String.format("Checking billing usage for user IDs: %s ", userIdsAsString));
     // Current cost in DB
     List<WorkspaceCostView> allCostsInDbForUsers = getAllCostsInDbForUsers(users);
 
@@ -283,10 +294,12 @@ public class InitialCreditsService {
    *     institutionally.
    */
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
-    return Optional.ofNullable(user.getUserInitialCreditsExpiration())
-        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
-        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
-        .map(DbUserInitialCreditsExpiration::getExpirationTime);
+    return workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration
+        ? Optional.ofNullable(user.getUserInitialCreditsExpiration())
+            .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+            .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
+            .map(DbUserInitialCreditsExpiration::getExpirationTime)
+        : Optional.empty();
   }
 
   /**
@@ -355,7 +368,21 @@ public class InitialCreditsService {
     userInitialCreditsExpiration.setBypassed(isBypassed);
   }
 
+  public boolean isExpirationBypassed(DbUser user) {
+    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+
+    // After initial credit expiration is live,  userInitialCreditsExpiration should never be null
+    // except for users who have not yet finished training. Could we safely remove this?
+    return userInitialCreditsExpiration != null
+        && (userInitialCreditsExpiration.isBypassed()
+            || institutionService.shouldBypassForCreditsExpiration(user));
+  }
+
   public DbUser extendInitialCreditsExpiration(DbUser user) {
+    if (!workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration) {
+      throw new BadRequestException("Initial credits extension is disabled.");
+    }
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     // This handles the case existing users that have not yet been migrated but also those who have
@@ -433,20 +460,12 @@ public class InitialCreditsService {
         user.getUsername(),
         userInitialCreditsExpiration.getExpirationTime());
 
-    workspaceDao.findAllByCreator(user).stream()
+    getWorkspacesForUser(user).stream()
         .filter(
             ws ->
                 BillingUtils.isInitialCredits(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .filter(DbWorkspace::isActive)
-        .filter(ws -> !ws.isInitialCreditsExpired())
-        .forEach(
-            ws -> {
-              ws.setInitialCreditsExpired(true);
-              ws.setBillingStatus(BillingStatus.INACTIVE);
-              workspaceDao.save(ws);
-              deleteAppsAndRuntimesInWorkspace(ws);
-            });
+        .forEach(this::deleteAppsAndRuntimesInWorkspace);
 
     userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
     userDao.save(user);
@@ -469,9 +488,9 @@ public class InitialCreditsService {
     }
   }
 
-  private void deleteAppsAndRuntimesInWorkspace(DbWorkspace workspace) {
+  private void deleteAppsAndRuntimesInWorkspace(Workspace workspace) {
 
-    String namespace = workspace.getWorkspaceNamespace();
+    String namespace = workspace.getNamespace();
     try {
       leonardoApiClient.deleteAllResources(workspace.getGoogleProject(), false);
       logger.info("Deleted apps and runtimes for workspace {}", namespace);
@@ -502,7 +521,6 @@ public class InitialCreditsService {
         .forEach(
             ws -> {
               ws.setInitialCreditsExhausted(false);
-              ws.setBillingStatus(BillingStatus.ACTIVE);
               workspaceDao.save(ws);
             });
   }
@@ -560,10 +578,10 @@ public class InitialCreditsService {
                                                     .billing
                                                     .numberOfDaysToConsiderForFreeTierUsageUpdate)
                                             .toMillis()))))
-            .collect(Collectors.toList());
+            .toList();
 
     logger.info(
-        String.format("Workspaces that require update %d", workspacesThatRequireUpdate.size()));
+        String.format("Workspaces that require updates: %d", workspacesThatRequireUpdate.size()));
 
     return workspacesThatRequireUpdate.stream()
         .collect(
@@ -634,7 +652,6 @@ public class InitialCreditsService {
         .orElse(120);
   }
 
-  @Nullable
   private Map<String, Long> getWorkspaceByProjectCache(
       List<WorkspaceCostView> allCostsInDbForUsers) {
     // No need to proceed since there's nothing to update anyway
@@ -647,8 +664,9 @@ public class InitialCreditsService {
 
     logger.info(
         String.format(
-            "FreeTierBillingUsage: Workspace ids that require updates: %s",
+            "FreeTierBillingUsage: Workspace IDs that require updates: %s",
             workspaceByProject.values().stream()
+                .sorted()
                 .map(workspaceId -> Long.toString(workspaceId))
                 .collect(Collectors.joining(","))));
 
@@ -687,5 +705,14 @@ public class InitialCreditsService {
                     Collectors.summingDouble(
                         v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0))));
     return dbCostByCreator;
+  }
+
+  private List<Workspace> getWorkspacesForUser(DbUser user) {
+    return workspaceMapper
+        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspacesAsService(), this)
+        .stream()
+        .map(WorkspaceResponse::getWorkspace)
+        .filter(ws -> ws.getCreatorUser().getUserName().equals(user.getUsername()))
+        .collect(Collectors.toList());
   }
 }

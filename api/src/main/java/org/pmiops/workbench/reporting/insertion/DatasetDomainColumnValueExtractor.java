@@ -9,8 +9,6 @@ public enum DatasetDomainColumnValueExtractor
   DOMAIN_ID("domain_id", ReportingDatasetDomainIdValue::getDomainId),
   VALUE("value", ReportingDatasetDomainIdValue::getValue);
 
-  public static final String TABLE_NAME = "dataset_domain_value";
-
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
   private final String parameterName;

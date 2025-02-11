@@ -1,7 +1,6 @@
 package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
@@ -48,6 +47,7 @@ public class AccessTierServiceTest {
   })
   @MockBean({
     FireCloudService.class,
+    VwbAccessService.class,
   })
   @TestConfiguration
   static class Configuration {

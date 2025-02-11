@@ -873,11 +873,17 @@ describe('RuntimeConfigurationPanel', () => {
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
+    const workspace = workspaceStubs[0];
+    const oneMinute = 60 * 1000;
 
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({ config: defaultServerConfig });
     currentWorkspaceStore.next({
-      ...workspaceStubs[0],
+      ...workspace,
+      initialCredits: {
+        ...workspace.initialCredits,
+        expirationEpochMillis: new Date().getTime() + 2 * oneMinute,
+      },
       accessLevel: WorkspaceAccessLevel.WRITER,
       billingAccountName:
         'billingAccounts/' + defaultServerConfig.freeTierBillingAccountId,
@@ -887,12 +893,12 @@ describe('RuntimeConfigurationPanel', () => {
 
     runtimeStore.set({
       runtime: runtimeApiStub.runtime,
-      workspaceNamespace: workspaceStubs[0].namespace,
+      workspaceNamespace: workspace.namespace,
       runtimeLoaded: true,
     });
 
     runtimeDiskStore.set({
-      workspaceNamespace: workspaceStubs[0].namespace,
+      workspaceNamespace: workspace.namespace,
       gcePersistentDisk: null,
     });
 

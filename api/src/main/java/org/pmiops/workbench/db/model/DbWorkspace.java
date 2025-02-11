@@ -28,7 +28,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
 @SecondaryTable(
@@ -36,6 +39,14 @@ import org.pmiops.workbench.model.*;
     pkJoinColumns = @PrimaryKeyJoinColumn(name = "workspace_id"))
 @Table(name = "workspace")
 public class DbWorkspace {
+
+  public enum AIANResearchType {
+    EXCLUSIVE_AI_AN_POPULATION,
+    CASE_CONTROL_AI_AN,
+    FINDINGS_BY_AI_AN,
+    NO_AI_AN_ANALYSIS
+  }
+
   private String firecloudUuid;
 
   private long workspaceId;
@@ -81,7 +92,6 @@ public class DbWorkspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
-  private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
   private String billingAccountName;
   private String googleProject;
   private boolean adminLocked;
@@ -94,6 +104,9 @@ public class DbWorkspace {
   private boolean usesTanagra;
 
   private Boolean isVwbWorkspace;
+
+  private AIANResearchType aianResearchType;
+  private String aianResearchDetails;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -637,19 +650,6 @@ public class DbWorkspace {
     return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
   }
 
-  @Deprecated(since = "September 2024", forRemoval = true)
-  @Column(name = "billing_status")
-  public BillingStatus getBillingStatus() {
-    return (initialCreditsExhausted || initialCreditsExpired
-        ? BillingStatus.INACTIVE
-        : BillingStatus.ACTIVE);
-  }
-
-  public DbWorkspace setBillingStatus(BillingStatus billingStatus) {
-    this.billingStatus = DbStorageEnums.billingStatusToStorage(billingStatus);
-    return this;
-  }
-
   @Column(name = "billing_account_name")
   public String getBillingAccountName() {
     return billingAccountName;
@@ -773,16 +773,6 @@ public class DbWorkspace {
     return this;
   }
 
-  @Column(name = "initial_credits_expired")
-  public boolean isInitialCreditsExpired() {
-    return initialCreditsExpired;
-  }
-
-  public DbWorkspace setInitialCreditsExpired(boolean initialCreditsExpired) {
-    this.initialCreditsExpired = initialCreditsExpired;
-    return this;
-  }
-
   @Column(name = "uses_tanagra")
   public boolean isUsesTanagra() {
     return usesTanagra;
@@ -790,6 +780,27 @@ public class DbWorkspace {
 
   public DbWorkspace setUsesTanagra(boolean usesTanagra) {
     this.usesTanagra = usesTanagra;
+    return this;
+  }
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "rp_aian_research_type")
+  public AIANResearchType getAianResearchType() {
+    return aianResearchType;
+  }
+
+  public DbWorkspace setAianResearchType(AIANResearchType aianResearchType) {
+    this.aianResearchType = aianResearchType;
+    return this;
+  }
+
+  @Column(name = "rp_aian_research_details")
+  public String getAianResearchDetails() {
+    return aianResearchDetails;
+  }
+
+  public DbWorkspace setAianResearchDetails(String aianResearchDetails) {
+    this.aianResearchDetails = aianResearchDetails;
     return this;
   }
 

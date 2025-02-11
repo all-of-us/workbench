@@ -48,14 +48,20 @@
     "operationalTerraWorkspaceBucket": "fc-43443354-728d-4523-a31d-acdff4a271b8",
     "extractionDestinationDataset": "fc-aou-cdr-prod-ct.wgs_extraction_destination",
     "enableJiraTicketingOnFailure": true,
+    "minExtractionScatterTasks": 350,
+    "extractionScatterTasksPerSample": 4,
     "legacyVersions": {
       "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-prod",
       "methodName": "GvsExtractCohortFromSampleNames",
       "methodRepoVersion": 4,
-      "methodLogicalVersion": 3,
-      "minExtractionScatterTasks": 350,
-      "extractionScatterTasksPerSample": 4
+      "methodLogicalVersion": 3
+    },
+    "cdrv8plus": {
+      "methodNamespace": "aouwgscohortextraction-prod",
+      "methodName": "GvsExtractCohortFromSampleNamesV8",
+      "methodRepoVersion": 1,
+      "methodLogicalVersion": 1
     }
   },
   "cdr": {
@@ -121,7 +127,9 @@
     "enableInitialCreditsExpiration": false,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
-    "enableVWBEgressMonitor": false
+    "enableVWBEgressMonitor": false,
+    "enableVWBUserAccessManagement": false,
+    "enableVWBUserCreation": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
@@ -144,7 +152,7 @@
   },
   "reporting": {
     "dataset": "reporting_prod",
-    "maxRowsPerInsert": 500,
+    "maxRowsPerInsert": 10000,
     "exportTerraDataWarehouse": true,
     "terraWarehouseLeoAppTableId": "broad-dsde-prod-analytics-dev.warehouse.leonardo_app",
     "terraWarehouseLeoAppUsageTableId": "broad-dsde-prod-analytics-dev.warehouse.leonardo_app_usage"
@@ -157,7 +165,9 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
-    "usersPerCheckInitialCreditsExpirationTask": 50
+    "usersPerCheckInitialCreditsExpirationTask": 50,
+    "usersPerAccessExpirationEmailTask": 500,
+    "workspacesPerDeleteWorkspaceEnvironmentsTask": 50
   },
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": true,

@@ -27,6 +27,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
+import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @Mapper(
     config = MapStructConfig.class,
@@ -64,11 +65,14 @@ public interface WorkspaceMapper {
       target = "initialCredits.extensionEpochMillis",
       source = "dbWorkspace.creator",
       qualifiedByName = "getInitialCreditsExtension")
+  @Mapping(
+      target = "initialCredits.expirationBypassed",
+      source = "dbWorkspace.creator",
+      qualifiedByName = "isInitialCreditExpirationBypassed")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
   @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
-  @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
   @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
   @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
@@ -140,7 +144,6 @@ public interface WorkspaceMapper {
       target = "creatorUser.email",
       ignore = true) // need to work with security before exposing
   @Mapping(target = "initialCredits.eligibleForExtension", ignore = true)
-  @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
       source = "creator",
@@ -200,7 +203,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "adminLockedReason", ignore = true)
   @Mapping(target = "approved", ignore = true)
   @Mapping(target = "billingAccountName", ignore = true)
-  @Mapping(target = "billingStatus", ignore = true)
   @Mapping(target = "cdrVersion", ignore = true)
   @Mapping(target = "cohorts", ignore = true)
   @Mapping(target = "conceptSets", ignore = true)
@@ -222,7 +224,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
   @Mapping(target = "featuredCategory", ignore = true)
-  @Mapping(target = "initialCreditsExpired", ignore = true)
   @Mapping(target = "initialCreditsExhausted", ignore = true)
   @Mapping(target = "usesTanagra", ignore = true)
   @Mapping(target = "vwbWorkspace", ignore = true)
@@ -237,4 +238,24 @@ public interface WorkspaceMapper {
 
   @Mapping(target = "terraName", source = "workspace.name")
   TestUserRawlsWorkspace toTestUserRawlsWorkspace(RawlsWorkspaceDetails workspace, String username);
+
+  @Mapping(target = "workspaceId", source = "workspace.id")
+  @Mapping(target = "namespace", source = "workspace.id")
+  @Mapping(target = "createdBy", source = "workspace.createdBy")
+  @Mapping(target = "name", source = "workspace.displayName")
+  @Mapping(target = "attributes", ignore = true)
+  @Mapping(target = "authorizationDomain", ignore = true)
+  @Mapping(target = "bucketName", ignore = true)
+  @Mapping(target = "isLocked", ignore = true)
+  @Mapping(target = "lastModified", source = "lastUpdatedDate")
+  @Mapping(target = "workflowCollectionName", ignore = true)
+  @Mapping(target = "googleProject", source = "gcpContext.projectId")
+  @Mapping(target = "googleProjectNumber", ignore = true)
+  @Mapping(target = "workspaceVersion", ignore = true)
+  @Mapping(target = "billingAccount", ignore = true)
+  @Mapping(target = "errorMessage", ignore = true)
+  @Mapping(target = "billingAccountErrorMessage", ignore = true)
+  @Mapping(target = "completedCloneWorkspaceFileTransfer", ignore = true)
+  @Mapping(target = "cloudPlatform", ignore = true)
+  RawlsWorkspaceDetails toWorkspaceDetails(WorkspaceDescription workspace);
 }
