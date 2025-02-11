@@ -85,11 +85,12 @@ public class CloudTaskInitialCreditsExhaustionController
     Map<String, Double> stringKeyLiveCostMap = (Map<String, Double>) request.getLiveCostByCreator();
     Map<Long, Double> liveCostByCreator = convertMapKeysToLong(stringKeyLiveCostMap);
 
-    var newlyExpiredUsers = getNewlyExpiredUsers(usersSet, dbCostByCreator, liveCostByCreator);
+    var newlyExhaustedUsers = getNewlyExhaustedUsers(usersSet, dbCostByCreator, liveCostByCreator);
 
-    handleExpiredUsers(newlyExpiredUsers);
+    handleExhaustedUsers(newlyExhaustedUsers);
 
-    alertUsersBasedOnTheThreshold(usersSet, dbCostByCreator, liveCostByCreator, newlyExpiredUsers);
+    alertUsersBasedOnTheThreshold(
+        usersSet, dbCostByCreator, liveCostByCreator, newlyExhaustedUsers);
 
     logger.info(
         "handleInitialCreditsExhaustionBatch: Finished processing request for users: {}",
@@ -98,19 +99,18 @@ public class CloudTaskInitialCreditsExhaustionController
     return ResponseEntity.noContent().build();
   }
 
-  private void handleExpiredUsers(Set<DbUser> newlyExpiredUsers) {
-    newlyExpiredUsers.forEach(
+  private void handleExhaustedUsers(Set<DbUser> newlyExhaustedUsers) {
+    newlyExhaustedUsers.forEach(
         user -> {
           logger.info(
-              "Free tier Billing Service: handling user with expired credits {}",
-              user.getUsername());
+              "handleExhaustedUsers: handling user with exhausted credits {}", user.getUsername());
           workspaceService.updateInitialCreditsExhaustion(user, true);
           // delete apps and runtimes
           deleteAppsAndRuntimesInFreeTierWorkspaces(user);
           try {
             mailService.alertUserInitialCreditsExhausted(user);
           } catch (MessagingException e) {
-            logger.warn("failed to send free tier expiration email to {}", user.getUsername(), e);
+            logger.warn("failed to send free tier exhaustion email to {}", user.getUsername(), e);
           }
         });
   }
@@ -119,7 +119,7 @@ public class CloudTaskInitialCreditsExhaustionController
       Set<DbUser> users,
       Map<Long, Double> dbCostByCreator,
       Map<Long, Double> liveCostByCreator,
-      Set<DbUser> newlyExpiredUsers) {
+      Set<DbUser> newlyExhaustedUsers) {
     final List<Double> costThresholdsInDescOrder =
         workbenchConfig.get().billing.freeTierCostAlertThresholds;
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
@@ -129,10 +129,10 @@ public class CloudTaskInitialCreditsExhaustionController
             .filter(u -> liveCostByCreator.containsKey(u.getUserId()))
             .collect(Collectors.toMap(DbUser::getUserId, Function.identity()));
 
-    // Filter out the users who have recently expired because we already alerted them
+    // Filter out the users who have recently exhausted because we already alerted them
     Map<Long, Double> filteredLiveCostByCreator =
         liveCostByCreator.entrySet().stream()
-            .filter(entry -> !newlyExpiredUsers.contains(usersCache.get(entry.getKey())))
+            .filter(entry -> !newlyExhaustedUsers.contains(usersCache.get(entry.getKey())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     logger.info("Handling cost alerts for users: {}", usersCache.keySet());
@@ -153,15 +153,15 @@ public class CloudTaskInitialCreditsExhaustionController
   }
 
   /**
-   * Get the list of newly expired users (who exceeded their free tier limit) and mark all their
+   * Get the list of newly exhausted users (who exceeded their free tier limit) and mark all their
    * workspaces as inactive
    *
    * @param allUsers set of all users to filter them whether they have active free tier workspace
    * @param dbCostByCreator Map of userId->dbCost
    * @param liveCostByCreator Map of userId->liveCost
-   * @return a {@link Set} of newly expired users
+   * @return a {@link Set} of newly exhausted users
    */
-  private Set<DbUser> getNewlyExpiredUsers(
+  private Set<DbUser> getNewlyExhaustedUsers(
       final Set<DbUser> allUsers,
       Map<Long, Double> dbCostByCreator,
       Map<Long, Double> liveCostByCreator) {
@@ -175,7 +175,7 @@ public class CloudTaskInitialCreditsExhaustionController
     // recently deleted workspaces in previous steps.
     // However, dbCostByCreator will contain the up-to-date costs for all the
     // other workspaces. This is why Math.max is used
-    final Set<DbUser> expiredUsers =
+    final Set<DbUser> exhaustedUsers =
         dbUsersWithChangedCosts.entrySet().stream()
             .filter(
                 e ->
@@ -187,14 +187,15 @@ public class CloudTaskInitialCreditsExhaustionController
             .map(Map.Entry::getValue)
             .collect(Collectors.toSet());
 
-    final Set<DbUser> newlyExpiredFreeTierUsers = Sets.intersection(expiredUsers, freeTierUsers);
+    final Set<DbUser> newlyExhaustedFreeTierUsers =
+        Sets.intersection(exhaustedUsers, freeTierUsers);
 
     logger.info(
         String.format(
             "Found %d users exceeding their free tier limit, out of which, %d are new",
-            expiredUsers.size(), newlyExpiredFreeTierUsers.size()));
+            exhaustedUsers.size(), newlyExhaustedFreeTierUsers.size()));
 
-    return newlyExpiredFreeTierUsers;
+    return newlyExhaustedFreeTierUsers;
   }
 
   /**
