@@ -37,14 +37,24 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingTableService {
-  // for most entities, tables share a name between the RWB source DB and the BQ destination DB
-  private static final String COHORT_TABLE_NAME = "cohort";
+
+  // these entities have different names for their RWB source MySQL DB tables and their
+  // destination BigQuery tables
+
   private static final String DATASET_DOMAIN_ID_VALUE_BQ_TABLE_NAME = "dataset_domain_value";
   private static final String DATASET_DOMAIN_ID_VALUE_RWB_TABLE_NAME = "data_set_values";
   private static final String DATASET_BQ_TABLE_NAME = "dataset";
   private static final String DATASET_RWB_TABLE_NAME = "data_set";
+
+  // The source for Leonardo app usage is the Terra Data Warehouse, which uses BigQuery.
+  // The destination table (also in BQ) has the same name, but in a different dataset.
+  private static final String LEO_APP_USAGE_BQ_TABLE_NAME = "leonardo_app_usage";
+
+  // all of these entities share a common name between their RWB source MySQL DB tables and their
+  // destination BigQuery tables
+
   private static final String INSTITUTION_TABLE_NAME = "institution";
-  private static final String LEO_APP_USAGE_TABLE_NAME = "leonardo_app_usage";
+  private static final String COHORT_TABLE_NAME = "cohort";
   private static final String NEW_USER_SATISFACTION_SURVEY_TABLE_NAME =
       "new_user_satisfaction_survey";
   private static final String USER_GENERAL_DISCOVERY_SOURCE_TABLE_NAME =
@@ -80,11 +90,15 @@ public class ReportingTableService {
         workspaceFreeTierUsage());
   }
 
-  private long batchSize(String rwbTableName) {
+  private int batchSize(String rwbTableName) {
     ReportingConfig config = workbenchConfigProvider.get().reporting;
-    return Optional.ofNullable(config.batchSizeOverrides)
-        .flatMap(overrides -> Optional.ofNullable(overrides.get(rwbTableName)))
-        .orElse(Math.min(MAX_ROWS_PER_INSERT_ALL_REQUEST, config.maxRowsPerInsert));
+    int wantedSize =
+        Optional.ofNullable(config.batchSizeOverrides)
+            .flatMap(overrides -> Optional.ofNullable(overrides.get(rwbTableName)))
+            .orElse(config.maxRowsPerInsert);
+
+    // don't exceed the max rows allowed by the BQ API
+    return Math.min(MAX_ROWS_PER_INSERT_ALL_REQUEST, wantedSize);
   }
 
   // by default:
@@ -177,8 +191,8 @@ public class ReportingTableService {
 
   public final ReportingTableParams<ReportingLeonardoAppUsage> leoAppUsage() {
     return new ReportingTableParams<>(
-        LEO_APP_USAGE_TABLE_NAME,
-        batchSize(LEO_APP_USAGE_TABLE_NAME),
+        LEO_APP_USAGE_BQ_TABLE_NAME,
+        batchSize(LEO_APP_USAGE_BQ_TABLE_NAME),
         LeonardoAppUsageColumnValueExtractor::values,
         reportingQueryService::getLeonardoAppUsageBatch,
         reportingQueryService::getAppUsageRowCount);
