@@ -33,11 +33,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CloudTaskInitialCreditsExpiryController
-    implements CloudTaskInitialCreditExpiryApiDelegate {
+public class CloudTaskInitialCreditsExhaustionController
+    implements CloudTaskInitialCreditExhaustionApiDelegate {
 
   private static final Logger logger =
-      LoggerFactory.getLogger(CloudTaskInitialCreditsExpiryController.class);
+      LoggerFactory.getLogger(CloudTaskInitialCreditsExhaustionController.class);
 
   private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
@@ -46,7 +46,7 @@ public class CloudTaskInitialCreditsExpiryController
   private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
 
-  CloudTaskInitialCreditsExpiryController(
+  CloudTaskInitialCreditsExhaustionController(
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       UserDao userDao,
@@ -63,7 +63,7 @@ public class CloudTaskInitialCreditsExpiryController
 
   @SuppressWarnings("unchecked")
   @Override
-  public ResponseEntity<Void> handleInitialCreditsExpiryBatch(
+  public ResponseEntity<Void> handleInitialCreditsExhaustionBatch(
       ExpiredInitialCreditsEventRequest request) {
 
     if (request.getUsers().isEmpty()) {

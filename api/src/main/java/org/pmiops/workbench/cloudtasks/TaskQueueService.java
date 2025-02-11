@@ -50,8 +50,8 @@ public class TaskQueueService {
   private static final String DELETE_WORKSPACE_ENVIRONMENTS_PATH =
       BASE_PATH + "/deleteUnsharedWorkspaceEnvironments";
 
-  private static final String INITIAL_CREDITS_EXPIRY_PATH =
-      BASE_PATH + "/handleInitialCreditsExpiry";
+  private static final String INITIAL_CREDITS_EXHAUSTION_PATH =
+      BASE_PATH + "/handleInitialCreditsExhaustion";
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
   private static final String ACCESS_EXPIRATION_EMAIL_QUEUE_NAME = "accessExpirationEmailQueue";
@@ -236,7 +236,7 @@ public class TaskQueueService {
       List<Long> users, Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
     createAndPushTask(
         EXPIRED_FREE_CREDITS_QUEUE_NAME,
-        INITIAL_CREDITS_EXPIRY_PATH,
+        INITIAL_CREDITS_EXHAUSTION_PATH,
         new ExpiredInitialCreditsEventRequest()
             .users(users)
             .dbCostByCreator(dbCostByCreator)

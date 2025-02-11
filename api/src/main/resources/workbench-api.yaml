@@ -4371,14 +4371,14 @@ paths:
           description: Users alerted
           content: { }
       x-codegen-request-body-name: request
-  /v1/cloudTask/handleInitialCreditsExpiry:
+  /v1/cloudTask/handleInitialCreditsExhaustion:
     post:
       tags:
-        - cloudTaskInitialCreditExpiry
+        - cloudTaskInitialCreditExhaustion
         - cloudTask
       description: |
         Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
-      operationId: handleInitialCreditsExpiryBatch
+      operationId: handleInitialCreditsExhaustionBatch
       security: [ ]
       requestBody:
         description: Users that should be alerted about their free credits use.
@@ -4389,7 +4389,7 @@ paths:
         required: true
       responses:
         200:
-          description: Handle Free Credits Expiry Task Ran Successfully
+          description: Handle Free Credits Exhaustion Task Ran Successfully
           content: { }
       x-codegen-request-body-name: request
   /v1/cloudTask/checkCreditsExpirationForUserIDs:
