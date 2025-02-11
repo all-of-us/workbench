@@ -73,12 +73,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-class CloudTaskInitialCreditsExpiryControllerTest {
+class CloudTaskInitialCreditsExhaustionControllerTest {
 
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
-
-  @Autowired MailService mailService;
 
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
@@ -86,8 +84,9 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   @Autowired VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Autowired InitialCreditsService initialCreditsService;
+  @Autowired MailService mailService;
 
-  @Autowired CloudTaskInitialCreditsExpiryController cloudTaskInitialCreditsExpiryController;
+  @Autowired CloudTaskInitialCreditsExhaustionController controller;
 
   private DbInstitution dbInstitution;
 
@@ -99,31 +98,31 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
   @TestConfiguration
   @Import({
-    CloudTaskInitialCreditsExpiryController.class,
+    CloudTaskInitialCreditsExhaustionController.class,
+    InitialCreditsService.class,
     WorkspaceServiceImpl.class,
-    InitialCreditsService.class
   })
   @MockBean({
     AccessTierService.class,
     BillingProjectAuditor.class,
+    CloudBillingClient.class,
     CohortCloningService.class,
     ConceptSetService.class,
-    CloudBillingClient.class,
     DataSetService.class,
     FeaturedWorkspaceMapper.class,
-    FirecloudMapper.class,
     FireCloudService.class,
+    FirecloudMapper.class,
     ImpersonatedWorkspaceService.class,
     InstitutionService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,
     UserMapper.class,
+    UserService.class,
     UserServiceAuditor.class,
+    WorkspaceAuthService.class,
     WorkspaceInitialCreditUsageService.class,
     WorkspaceMapper.class,
-    WorkspaceAuthService.class,
-    UserService.class
   })
   static class Configuration {
     @Bean
@@ -183,20 +182,20 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     // check that we have not alerted before the threshold
     ExpiredInitialCreditsEventRequest request =
         buildExpiredInitialCreditsEventRequest(List.of(user), allBQCosts, allDbCosts);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
 
     // check that we alert for the 50% threshold
     allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     request.setLiveCostByCreator(allBQCosts);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 50% threshold
     allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
 
     // check that we alert for the 75% threshold
@@ -206,14 +205,14 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     request.setLiveCostByCreator(allBQCosts);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 75% threshold
     allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
@@ -222,12 +221,12 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
     request.setLiveCostByCreator(allBQCosts);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     // check that we do not alert twice for 100%
     allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
   }
 
@@ -261,13 +260,13 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     ExpiredInitialCreditsEventRequest request =
         buildExpiredInitialCreditsEventRequest(List.of(user), allBQCosts, allDbCosts);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
 
     // check that we alert for the 30% threshold
     allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     allDbCosts.put(String.valueOf(user.getUserId()), costUnderThreshold);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
@@ -275,7 +274,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     // check that we do not alert twice for the 30% threshold
     allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
 
     // check that we alert for the 65% threshold
@@ -285,7 +284,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     remaining = limit - costOverThreshold;
 
     allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
@@ -294,7 +293,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
@@ -302,14 +301,14 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     final double costToTriggerExpiration = 100.01;
     allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     // check that we do not alert twice for 100%
 
     allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
     allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
   }
 
@@ -331,7 +330,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d));
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
 
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
@@ -354,7 +353,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d));
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
 
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
@@ -375,7 +374,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d));
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
   }
@@ -395,7 +394,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d));
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
   }
@@ -411,7 +410,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(String.valueOf(user.getUserId()), 150.0);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
@@ -422,7 +421,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 150.0)));
 
@@ -445,7 +444,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(String.valueOf(user.getUserId()), 300.0);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
@@ -454,7 +453,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 300.0)));
     verifyNoMoreInteractions(mailService);
@@ -479,12 +478,12 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(String.valueOf(user.getUserId()), sum);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
-    // confirm DB updates after handleInitialCreditsExpiryBatch()
+    // confirm DB updates after handleInitialCreditsExhaustionBatch()
 
     for (DbWorkspace ws : Arrays.asList(ws1, ws2)) {
       // retrieve from DB again to reflect update after cron
@@ -512,7 +511,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     allBQCosts.put(String.valueOf(user1.getUserId()), cost1);
     allBQCosts.put(String.valueOf(user2.getUserId()), cost2);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user1, user2),
             allBQCosts,
@@ -538,7 +537,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(String.valueOf(user.getUserId()), 100.01);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
@@ -550,7 +549,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     allBQCosts.put(String.valueOf(user.getUserId()), newTotalCost);
 
     // we do not alert again
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 100.01)));
     verify(mailService, times(1)).alertUserInitialCreditsExhausted(eq(user));
@@ -571,7 +570,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(String.valueOf(user.getUserId()), 100.01);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
@@ -579,7 +578,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     // Simulate the user attaching their own billing account to the previously free tier workspace.
     workspaceDao.save(workspace.setBillingAccountName(fullBillingAccountName("byo-account")));
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 100.01)));
     verifyNoMoreInteractions(mailService);
@@ -603,7 +602,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     workspaceDao.save(userAccountWorkspace);
 
     Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 100.01);
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
@@ -629,14 +628,14 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     workspace.setLastModifiedTime(Timestamp.valueOf(LocalDateTime.now()));
     workspaceDao.save(workspace);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verifyNoInteractions(mailService);
 
     allBQCosts = Map.of(String.valueOf(user.getUserId()), 100.1);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
@@ -657,7 +656,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     workspace.setLastModifiedTime(Timestamp.valueOf(LocalDateTime.now()));
     workspaceDao.save(workspace);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verifyNoInteractions(mailService);
@@ -667,7 +666,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     allBQCosts.put(String.valueOf(user.getUserId()), 100.1);
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(
+    controller.handleInitialCreditsExhaustionBatch(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
@@ -704,7 +703,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
             String.valueOf(user2.getUserId()), 0d,
             String.valueOf(user3.getUserId()), 0d));
 
-    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiryBatch(request);
+    controller.handleInitialCreditsExhaustionBatch(request);
 
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(eq(user3), eq(0.5d), eq(151.0d), eq(149.0d));

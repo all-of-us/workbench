@@ -33,11 +33,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CloudTaskInitialCreditsExpiryController
-    implements CloudTaskInitialCreditExpiryApiDelegate {
+public class CloudTaskInitialCreditsExhaustionController
+    implements CloudTaskInitialCreditExhaustionApiDelegate {
 
   private static final Logger logger =
-      LoggerFactory.getLogger(CloudTaskInitialCreditsExpiryController.class);
+      LoggerFactory.getLogger(CloudTaskInitialCreditsExhaustionController.class);
 
   private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
@@ -46,7 +46,7 @@ public class CloudTaskInitialCreditsExpiryController
   private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
 
-  CloudTaskInitialCreditsExpiryController(
+  CloudTaskInitialCreditsExhaustionController(
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       UserDao userDao,
@@ -63,7 +63,7 @@ public class CloudTaskInitialCreditsExpiryController
 
   @SuppressWarnings("unchecked")
   @Override
-  public ResponseEntity<Void> handleInitialCreditsExpiryBatch(
+  public ResponseEntity<Void> handleInitialCreditsExhaustionBatch(
       ExpiredInitialCreditsEventRequest request) {
 
     if (request.getUsers().isEmpty()) {
@@ -72,7 +72,7 @@ public class CloudTaskInitialCreditsExpiryController
     }
 
     logger.info(
-        "Free tier Billing Service: Handling initial credits expiry event for users: {}",
+        "handleInitialCreditsExhaustionBatch: Processing request for users: {}",
         request.getUsers().toString());
 
     Iterable<DbUser> users = userDao.findAllById(request.getUsers());
@@ -92,7 +92,7 @@ public class CloudTaskInitialCreditsExpiryController
     alertUsersBasedOnTheThreshold(usersSet, dbCostByCreator, liveCostByCreator, newlyExpiredUsers);
 
     logger.info(
-        "Free tier Billing Service: Finished handling initial credits expiry event for users: {}",
+        "handleInitialCreditsExhaustionBatch: Finished processing request for users: {}",
         request.getUsers().toString());
 
     return ResponseEntity.noContent().build();

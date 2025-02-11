@@ -142,7 +142,7 @@ public class InitialCreditsService {
       return;
     }
 
-    taskQueueService.pushInitialCreditsExpiryTask(
+    taskQueueService.pushInitialCreditsExhaustionTask(
         filteredUsers.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
   }
 
