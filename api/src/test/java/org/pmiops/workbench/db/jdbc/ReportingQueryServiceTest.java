@@ -28,12 +28,10 @@ import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableResult;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import jakarta.inject.Provider;
 import jakarta.persistence.EntityManager;
-import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -55,7 +53,6 @@ import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionTierRequirementDao;
 import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
@@ -69,7 +66,6 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
@@ -87,7 +83,6 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
-import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -137,7 +132,6 @@ public class ReportingQueryServiceTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortDao cohortDao;
-  @Autowired private DataSetDao dataSetDao;
   @Autowired private InstitutionDao institutionDao;
   @Autowired private InstitutionTierRequirementDao institutionTierRequirementDao;
   @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
@@ -196,38 +190,6 @@ public class ReportingQueryServiceTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.reporting.maxRowsPerInsert = BATCH_SIZE;
     workbenchConfig.billing.accountId = "initial-credits";
-  }
-
-  @Test
-  public void testGetReportingDatasetCohorts_oneEntry() {
-    final DbUser user1 = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion1 = createCdrVersion(registeredTier);
-    final DbWorkspace workspace1 = createDbWorkspace(user1, cdrVersion1);
-    final DbCohort cohort1 = createCohort(user1, workspace1);
-    final DbDataset dataset1 = createDataset(workspace1, cohort1);
-    entityManager.flush();
-
-    final Iterator<List<ReportingDatasetCohort>> iterator = getDatasetCohortsBatchIterator();
-    assertThat(iterator.hasNext()).isTrue();
-
-    List<ReportingDatasetCohort> firstBatch = iterator.next();
-    assertThat(firstBatch).hasSize(1);
-
-    ReportingDatasetCohort first = firstBatch.get(0);
-    assertThat(first.getCohortId()).isEqualTo(cohort1.getCohortId());
-    assertThat(first.getDatasetId()).isEqualTo(dataset1.getDataSetId());
-  }
-
-  @NotNull
-  @Transactional
-  public DbDataset createDataset(DbWorkspace workspace1, DbCohort cohort1) {
-    DbDataset dataset1 = ReportingTestUtils.createDbDataset(workspace1.getWorkspaceId());
-    dataset1.setCohortIds(ImmutableList.of(cohort1.getCohortId()));
-    dataset1 = dataSetDao.save(dataset1);
-    assertThat(dataSetDao.count()).isEqualTo(1);
-    assertThat(dataset1.getCohortIds()).containsExactly(cohort1.getCohortId());
-    cohortDao.save(cohort1);
-    return dataset1;
   }
 
   @Transactional
@@ -841,11 +803,6 @@ public class ReportingQueryServiceTest {
   private Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
     return reportingQueryService.getBatchIterator(
         reportingQueryService::getCohortBatch, BATCH_SIZE);
-  }
-
-  private Iterator<List<ReportingDatasetCohort>> getDatasetCohortsBatchIterator() {
-    return reportingQueryService.getBatchIterator(
-        reportingQueryService::getDatasetCohortBatch, BATCH_SIZE);
   }
 
   private Iterator<List<ReportingNewUserSatisfactionSurvey>>

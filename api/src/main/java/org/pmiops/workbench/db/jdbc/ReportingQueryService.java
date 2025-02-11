@@ -8,8 +8,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
-import org.pmiops.workbench.model.ReportingDatasetCohort;
-import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
@@ -23,10 +21,6 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 /** Expose handy, performant queries that don't require Dao, Entity, or Projection classes. */
 public interface ReportingQueryService {
   List<ReportingDataset> getDatasetBatch(long limit, long offset);
-
-  List<ReportingDatasetCohort> getDatasetCohortBatch(long limit, long offset);
-
-  List<ReportingDatasetConceptSet> getDatasetConceptSetBatch(long limit, long offset);
 
   List<ReportingDatasetDomainIdValue> getDatasetDomainIdValueBatch(long limit, long offset);
 

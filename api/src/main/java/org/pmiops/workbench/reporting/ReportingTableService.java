@@ -4,8 +4,10 @@ import static org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTr
 
 import jakarta.inject.Provider;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.ReportingConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingBase;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -35,14 +37,24 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingTableService {
-  // for most entities, tables share a name between the RWB source DB and the BQ destination DB
-  private static final String COHORT_TABLE_NAME = "cohort";
+
+  // these entities have different names for their RWB source MySQL DB tables and their
+  // destination BigQuery tables
+
   private static final String DATASET_DOMAIN_ID_VALUE_BQ_TABLE_NAME = "dataset_domain_value";
   private static final String DATASET_DOMAIN_ID_VALUE_RWB_TABLE_NAME = "data_set_values";
   private static final String DATASET_BQ_TABLE_NAME = "dataset";
   private static final String DATASET_RWB_TABLE_NAME = "data_set";
+
+  // The source for Leonardo app usage is the Terra Data Warehouse, which uses BigQuery.
+  // The destination table (also in BQ) has the same name, but in a different dataset.
+  private static final String LEO_APP_USAGE_BQ_TABLE_NAME = "leonardo_app_usage";
+
+  // all of these entities share a common name between their RWB source MySQL DB tables and their
+  // destination BigQuery tables
+
   private static final String INSTITUTION_TABLE_NAME = "institution";
-  private static final String LEO_APP_USAGE_TABLE_NAME = "leonardo_app_usage";
+  private static final String COHORT_TABLE_NAME = "cohort";
   private static final String NEW_USER_SATISFACTION_SURVEY_TABLE_NAME =
       "new_user_satisfaction_survey";
   private static final String USER_GENERAL_DISCOVERY_SOURCE_TABLE_NAME =
@@ -78,9 +90,15 @@ public class ReportingTableService {
         workspaceFreeTierUsage());
   }
 
-  private long defaultBatchSize() {
-    return Math.min(
-        MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
+  private int batchSize(String bqTableName) {
+    ReportingConfig config = workbenchConfigProvider.get().reporting;
+    int wantedSize =
+        Optional.ofNullable(config.batchSizeOverrides)
+            .flatMap(overrides -> Optional.ofNullable(overrides.get(bqTableName)))
+            .orElse(config.maxRowsPerInsert);
+
+    // don't exceed the max rows allowed by the BQ API
+    return Math.min(MAX_ROWS_PER_INSERT_ALL_REQUEST, wantedSize);
   }
 
   // by default:
@@ -93,7 +111,7 @@ public class ReportingTableService {
       BiFunction<Long, Long, List<T>> rwbBatchQueryFn) {
     return new ReportingTableParams<>(
         matchingTableName,
-        defaultBatchSize(),
+        batchSize(matchingTableName),
         bqInsertionBuilder,
         rwbBatchQueryFn,
         () -> reportingQueryService.getTableRowCount(matchingTableName));
@@ -154,18 +172,16 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingDataset> dataset() {
     return new ReportingTableParams<>(
         DATASET_BQ_TABLE_NAME,
-        defaultBatchSize(),
+        batchSize(DATASET_BQ_TABLE_NAME),
         DatasetColumnValueExtractor::values,
         reportingQueryService::getDatasetBatch,
         () -> reportingQueryService.getTableRowCount(DATASET_RWB_TABLE_NAME));
   }
 
-  // dataset-domain is also very large with small rows, so it needs a larger batch size
-
   public final ReportingTableParams<ReportingDatasetDomainIdValue> datasetDomainIdValue() {
     return new ReportingTableParams<>(
         DATASET_DOMAIN_ID_VALUE_BQ_TABLE_NAME,
-        MAX_ROWS_PER_INSERT_ALL_REQUEST,
+        batchSize(DATASET_DOMAIN_ID_VALUE_BQ_TABLE_NAME),
         DatasetDomainColumnValueExtractor::values,
         reportingQueryService::getDatasetDomainIdValueBatch,
         () -> reportingQueryService.getTableRowCount(DATASET_DOMAIN_ID_VALUE_RWB_TABLE_NAME));
@@ -175,8 +191,8 @@ public class ReportingTableService {
 
   public final ReportingTableParams<ReportingLeonardoAppUsage> leoAppUsage() {
     return new ReportingTableParams<>(
-        LEO_APP_USAGE_TABLE_NAME,
-        defaultBatchSize(),
+        LEO_APP_USAGE_BQ_TABLE_NAME,
+        batchSize(LEO_APP_USAGE_BQ_TABLE_NAME),
         LeonardoAppUsageColumnValueExtractor::values,
         reportingQueryService::getLeonardoAppUsageBatch,
         reportingQueryService::getAppUsageRowCount);
@@ -187,7 +203,7 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingWorkspace> workspace() {
     return new ReportingTableParams<>(
         WORKSPACE_TABLE_NAME,
-        defaultBatchSize(),
+        batchSize(WORKSPACE_TABLE_NAME),
         WorkspaceColumnValueExtractor::values,
         reportingQueryService::getWorkspaceBatch,
         reportingQueryService::getActiveWorkspaceCount);

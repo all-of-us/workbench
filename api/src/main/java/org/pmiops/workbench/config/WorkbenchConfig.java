@@ -4,6 +4,7 @@ import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.CDRv8PlusConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.LegacyWorkflowConfig;
 
@@ -389,6 +390,10 @@ public class WorkbenchConfig {
     public String terraWarehouseLeoAppTableId;
     // Terra Data Warehouse leonardo_app_usage BQ table id.
     public String terraWarehouseLeoAppUsageTableId;
+
+    // OPTIONAL: overrides for batch sizes for specific tables
+    // uses the BQ table name when it differs from the RWB table name (or none exists)
+    public Map<String, Integer> batchSizeOverrides;
   }
 
   /** RAS(Researcher Auth Service) configurations. */
