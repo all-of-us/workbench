@@ -399,15 +399,12 @@ def deploy_tanagra(cmd_name, args)
       
   puts "Current Version: " + current_version.to_s
   
-  if op.opts.update_jira and op.opts.project == STAGING_PROJECT and current_version == prior_version
+  if op.opts.update_jira and op.opts.project == STAGING_PROJECT and current_version != prior_version
     puts "Creating a Jira ticket for this release"
     require_relative 'jirarelease'
     jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
     jira_client.create_tanagra_ticket(op.opts.project, prior_version, current_version)
-    exit 1
   end
-  
-  exit 1
 
   common.run_inline %W{
     ../api/project.rb deploy-tanagra
