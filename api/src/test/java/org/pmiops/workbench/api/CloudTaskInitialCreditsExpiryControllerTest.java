@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
+import static org.pmiops.workbench.utils.PresetData.createDbInstitution;
+import static org.pmiops.workbench.utils.PresetData.createDbVerifiedInstitutionalAffiliation;
 
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Doubles;
@@ -33,11 +35,15 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -56,7 +62,6 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -78,17 +83,19 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+  @Autowired VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Autowired InitialCreditsService initialCreditsService;
 
-  @Autowired WorkspaceService workspaceService;
-
   @Autowired CloudTaskInitialCreditsExpiryController cloudTaskInitialCreditsExpiryController;
+
+  private DbInstitution dbInstitution;
 
   private static WorkbenchConfig workbenchConfig;
 
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
+  @Autowired private InstitutionDao institutionDao;
 
   @TestConfiguration
   @Import({
@@ -133,6 +140,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
   @BeforeEach
   public void setUp() {
+    dbInstitution = institutionDao.save(createDbInstitution());
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
     workbenchConfig.billing.accountId = "free-tier";
@@ -147,6 +155,8 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     workspaceFreeTierUsageDao.deleteAll();
     workspaceDao.deleteAll();
     userDao.deleteAll();
+    institutionDao.deleteAll();
+    verifiedInstitutionalAffiliationDao.deleteAll();
   }
 
   @Test
@@ -705,7 +715,12 @@ class CloudTaskInitialCreditsExpiryControllerTest {
   }
 
   private DbUser createUser(String email) {
-    return userDao.save(new DbUser().setUsername(email));
+    DbUser user = userDao.save(new DbUser().setUsername(email));
+
+    DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createDbVerifiedInstitutionalAffiliation(dbInstitution, user);
+    verifiedInstitutionalAffiliationDao.save(verifiedInstitutionalAffiliation);
+    return user;
   }
 
   private DbWorkspace createWorkspace(DbUser creator, String project) {

@@ -504,7 +504,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       boolean hasInitialCreditsRemaining =
           initialCreditsService.userHasRemainingFreeTierCredits(creator);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
-      workspace.setInitialCreditsExpired(initialCreditsService.areUserCreditsExpired(creator));
     }
   }
 

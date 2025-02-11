@@ -21,6 +21,7 @@ import {
   disksApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { nowPlusDays } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -191,7 +192,7 @@ describe(CreateGkeAppButton.name, () => {
         ...defaultProps.workspace,
         initialCredits: {
           exhausted: false,
-          expired: true,
+          expirationEpochMillis: new Date().getTime() - 1, // Expired in past
           expirationBypassed: true,
         },
       },
@@ -212,7 +213,7 @@ describe(CreateGkeAppButton.name, () => {
         ...defaultProps.workspace,
         initialCredits: {
           exhausted: true,
-          expired: false,
+          expirationEpochMillis: nowPlusDays(1),
           expirationBypassed: false,
         },
       },

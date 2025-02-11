@@ -309,7 +309,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: false,
         expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
       },
     });
@@ -332,7 +331,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: false,
         expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
       },
     });
@@ -360,7 +358,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: true,
         expirationEpochMillis: nowPlusDays(-1),
       },
     });
@@ -406,7 +403,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: true,
         expirationEpochMillis: nowPlusDays(-1),
       },
     });
@@ -448,7 +444,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: true,
         expirationEpochMillis: nowPlusDays(-1),
       },
     });
@@ -494,7 +489,6 @@ describe('WorkspaceAbout', () => {
       billingAccountName: 'billingAccounts/free',
       initialCredits: {
         exhausted: false,
-        expired: true,
         expirationEpochMillis: nowPlusDays(-1),
         expirationBypassed: true,
       },

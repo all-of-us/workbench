@@ -63,7 +63,6 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
     adminLocked: false,
     initialCredits: {
       exhausted: false,
-      expired: false,
       expirationEpochMillis: new Date().getTime(),
     },
     creatorUser: {},

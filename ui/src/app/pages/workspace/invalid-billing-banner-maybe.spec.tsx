@@ -93,7 +93,6 @@ describe('InvalidBillingBanner', () => {
       ...workspaceDataStub,
       initialCredits: {
         exhausted,
-        expired,
         expirationEpochMillis: plusDays(Date.now(), daysUntilExpiration),
         eligibleForExtension,
       },

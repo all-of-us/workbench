@@ -73,7 +73,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
   @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
-  @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
   @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
   @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
@@ -145,7 +144,6 @@ public interface WorkspaceMapper {
       target = "creatorUser.email",
       ignore = true) // need to work with security before exposing
   @Mapping(target = "initialCredits.eligibleForExtension", ignore = true)
-  @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
       target = "initialCredits.expirationEpochMillis",
       source = "creator",
@@ -226,7 +224,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
   @Mapping(target = "featuredCategory", ignore = true)
-  @Mapping(target = "initialCreditsExpired", ignore = true)
   @Mapping(target = "initialCreditsExhausted", ignore = true)
   @Mapping(target = "usesTanagra", ignore = true)
   @Mapping(target = "vwbWorkspace", ignore = true)
