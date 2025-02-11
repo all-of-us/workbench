@@ -4,6 +4,7 @@ import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.CDRv8PlusConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.LegacyWorkflowConfig;
 
@@ -375,23 +376,25 @@ public class WorkbenchConfig {
     public boolean useTestCaptcha;
   }
 
-  // temporary (?) kluge while we work on a better solution for reporting
-  // need to keep this up to date with the RWB table names in ReportingTableService
-  // (this is either the "matchingTableName" or the table denoted specifically as RWB when it
-  // differs from BQ)
-  // sizes limited to less than InsertAllRequestPayloadTransformer.MAX_ROWS_PER_INSERT_ALL_REQUEST
-  public static class BatchSizeOverrides {
-    public Integer cohort;
-    public Integer data_set_values;
-    public Integer data_set;
-    public Integer institution;
-    public Integer new_user_satisfaction_survey;
-    public Integer user_general_discovery_source;
-    public Integer user_partner_discovery_source;
-    public Integer user;
-    public Integer workspace_free_tier_usage;
-    public Integer workspace;
-  }
+  //
+  //  // temporary (?) kluge while we work on a better solution for reporting
+  //  // need to keep this up to date with the RWB table names in ReportingTableService
+  //  // (this is either the "matchingTableName" or the table denoted specifically as RWB when it
+  //  // differs from BQ)
+  //  // sizes limited to less than
+  // InsertAllRequestPayloadTransformer.MAX_ROWS_PER_INSERT_ALL_REQUEST
+  //  public static class BatchSizeOverrides {
+  //    public Integer cohort;
+  //    public Integer data_set_values;
+  //    public Integer data_set;
+  //    public Integer institution;
+  //    public Integer new_user_satisfaction_survey;
+  //    public Integer user_general_discovery_source;
+  //    public Integer user_partner_discovery_source;
+  //    public Integer user;
+  //    public Integer workspace_free_tier_usage;
+  //    public Integer workspace;
+  //  }
 
   public static class ReportingConfig {
     public String dataset;
@@ -409,7 +412,8 @@ public class WorkbenchConfig {
     public String terraWarehouseLeoAppUsageTableId;
 
     // OPTIONAL: overrides for batch sizes for specific tables
-    public BatchSizeOverrides batchSizeOverrides;
+    // uses the BQ table name when it differs from the RWB table name (or none exists)
+    public Map<String, Integer> batchSizeOverrides;
   }
 
   /** RAS(Researcher Auth Service) configurations. */

@@ -4,8 +4,10 @@ import static org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTr
 
 import jakarta.inject.Provider;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.ReportingConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingBase;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -78,9 +80,11 @@ public class ReportingTableService {
         workspaceFreeTierUsage());
   }
 
-  private long defaultBatchSize() {
-    return Math.min(
-        MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
+  private long batchSize(String rwbTableName) {
+    ReportingConfig config = workbenchConfigProvider.get().reporting;
+    return Optional.ofNullable(config.batchSizeOverrides)
+        .flatMap(overrides -> Optional.ofNullable(overrides.get(rwbTableName)))
+        .orElse(Math.min(MAX_ROWS_PER_INSERT_ALL_REQUEST, config.maxRowsPerInsert));
   }
 
   // by default:
@@ -93,7 +97,7 @@ public class ReportingTableService {
       BiFunction<Long, Long, List<T>> rwbBatchQueryFn) {
     return new ReportingTableParams<>(
         matchingTableName,
-        defaultBatchSize(),
+        batchSize(matchingTableName),
         bqInsertionBuilder,
         rwbBatchQueryFn,
         () -> reportingQueryService.getTableRowCount(matchingTableName));
@@ -154,18 +158,16 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingDataset> dataset() {
     return new ReportingTableParams<>(
         DATASET_BQ_TABLE_NAME,
-        defaultBatchSize(),
+        batchSize(DATASET_BQ_TABLE_NAME),
         DatasetColumnValueExtractor::values,
         reportingQueryService::getDatasetBatch,
         () -> reportingQueryService.getTableRowCount(DATASET_RWB_TABLE_NAME));
   }
 
-  // dataset-domain is also very large with small rows, so it needs a larger batch size
-
   public final ReportingTableParams<ReportingDatasetDomainIdValue> datasetDomainIdValue() {
     return new ReportingTableParams<>(
         DATASET_DOMAIN_ID_VALUE_BQ_TABLE_NAME,
-        MAX_ROWS_PER_INSERT_ALL_REQUEST,
+        batchSize(DATASET_DOMAIN_ID_VALUE_BQ_TABLE_NAME),
         DatasetDomainColumnValueExtractor::values,
         reportingQueryService::getDatasetDomainIdValueBatch,
         () -> reportingQueryService.getTableRowCount(DATASET_DOMAIN_ID_VALUE_RWB_TABLE_NAME));
@@ -176,7 +178,7 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingLeonardoAppUsage> leoAppUsage() {
     return new ReportingTableParams<>(
         LEO_APP_USAGE_TABLE_NAME,
-        defaultBatchSize(),
+        batchSize(LEO_APP_USAGE_TABLE_NAME),
         LeonardoAppUsageColumnValueExtractor::values,
         reportingQueryService::getLeonardoAppUsageBatch,
         reportingQueryService::getAppUsageRowCount);
@@ -187,7 +189,7 @@ public class ReportingTableService {
   public final ReportingTableParams<ReportingWorkspace> workspace() {
     return new ReportingTableParams<>(
         WORKSPACE_TABLE_NAME,
-        defaultBatchSize(),
+        batchSize(WORKSPACE_TABLE_NAME),
         WorkspaceColumnValueExtractor::values,
         reportingQueryService::getWorkspaceBatch,
         reportingQueryService::getActiveWorkspaceCount);
