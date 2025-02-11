@@ -232,7 +232,7 @@ public class TaskQueueService {
             "Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
   }
 
-  public void pushInitialCreditsExpiryTask(
+  public void pushInitialCreditsExhaustionTask(
       List<Long> users, Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
     createAndPushTask(
         EXPIRED_FREE_CREDITS_QUEUE_NAME,

@@ -72,7 +72,7 @@ public class CloudTaskInitialCreditsExhaustionController
     }
 
     logger.info(
-        "Free tier Billing Service: Handling initial credits expiry event for users: {}",
+        "handleInitialCreditsExhaustionBatch: Processing request for users: {}",
         request.getUsers().toString());
 
     Iterable<DbUser> users = userDao.findAllById(request.getUsers());
@@ -92,7 +92,7 @@ public class CloudTaskInitialCreditsExhaustionController
     alertUsersBasedOnTheThreshold(usersSet, dbCostByCreator, liveCostByCreator, newlyExpiredUsers);
 
     logger.info(
-        "Free tier Billing Service: Finished handling initial credits expiry event for users: {}",
+        "handleInitialCreditsExhaustionBatch: Finished processing request for users: {}",
         request.getUsers().toString());
 
     return ResponseEntity.noContent().build();
