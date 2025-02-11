@@ -376,26 +376,6 @@ public class WorkbenchConfig {
     public boolean useTestCaptcha;
   }
 
-  //
-  //  // temporary (?) kluge while we work on a better solution for reporting
-  //  // need to keep this up to date with the RWB table names in ReportingTableService
-  //  // (this is either the "matchingTableName" or the table denoted specifically as RWB when it
-  //  // differs from BQ)
-  //  // sizes limited to less than
-  // InsertAllRequestPayloadTransformer.MAX_ROWS_PER_INSERT_ALL_REQUEST
-  //  public static class BatchSizeOverrides {
-  //    public Integer cohort;
-  //    public Integer data_set_values;
-  //    public Integer data_set;
-  //    public Integer institution;
-  //    public Integer new_user_satisfaction_survey;
-  //    public Integer user_general_discovery_source;
-  //    public Integer user_partner_discovery_source;
-  //    public Integer user;
-  //    public Integer workspace_free_tier_usage;
-  //    public Integer workspace;
-  //  }
-
   public static class ReportingConfig {
     public String dataset;
     // Max rows per batch queried in MySQL, and also the upload batch size for BigQuery. Max

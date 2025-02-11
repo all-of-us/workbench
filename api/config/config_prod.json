@@ -154,7 +154,7 @@
     "dataset": "reporting_prod",
     "maxRowsPerInsert": 500,
     "batchSizeOverrides": {
-      "dataset_domain_value": 5000
+      "dataset_domain_value": 50000
     },
     "exportTerraDataWarehouse": true,
     "terraWarehouseLeoAppTableId": "broad-dsde-prod-analytics-dev.warehouse.leonardo_app",
