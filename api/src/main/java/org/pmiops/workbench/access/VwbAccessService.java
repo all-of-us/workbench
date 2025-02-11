@@ -32,7 +32,7 @@ public class VwbAccessService {
   public void addUserIntoVwbTier(String userName, String vwbGroupName) {
     if (workbenchConfigProvider.get().featureFlags.enableVWBUserAccessManagement) {
       try {
-        vwbSamClient.addUserToGroup(userName, vwbGroupName);
+        vwbSamClient.addUserToGroup(vwbGroupName, userName);
       } catch (Exception e) {
         log.log(Level.WARNING, "Failed to add user to Vwb tier group: " + e.getMessage(), e);
       }
@@ -49,7 +49,7 @@ public class VwbAccessService {
   public void removeUserFromVwbTier(String userName, String vwbGroupName) {
     if (workbenchConfigProvider.get().featureFlags.enableVWBUserAccessManagement) {
       try {
-        vwbSamClient.removeUserFromGroup(userName, vwbGroupName);
+        vwbSamClient.removeUserFromGroup(vwbGroupName, userName);
       } catch (Exception e) {
         log.log(Level.WARNING, "Failed to remove user from Vwb tier group: " + e.getMessage(), e);
       }
