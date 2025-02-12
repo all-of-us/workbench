@@ -52,10 +52,11 @@ public class WsmClient {
    *
    * @param sourceWorkspaceUUID UUID of the source workspace
    * @param targetWorkspace Target workspace object
+   * @param podId
    * @return WorkspaceDescription of the cloned workspace
    */
   public WorkspaceDescription cloneWorkspaceAsService(
-      String sourceWorkspaceUUID, Workspace targetWorkspace) {
+      String sourceWorkspaceUUID, Workspace targetWorkspace, String podId) {
 
     return wsmRetryHandler.run(
         context -> {
@@ -69,7 +70,7 @@ public class WsmClient {
                               "terra-workspace-short-description",
                               targetWorkspace.getResearchPurpose().getOtherPurposeDetails())))
                   .description(formatWorkspaceDescription(targetWorkspace))
-                  .cloudResourceGroupId(workbenchConfigProvider.get().vwb.defaultPodId)
+                  .cloudResourceGroupId(podId)
                   .organizationId(workbenchConfigProvider.get().vwb.organizationId)
                   .jobControl(new JobControl().id(UUID.randomUUID().toString()));
 

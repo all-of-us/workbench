@@ -1,10 +1,9 @@
 package org.pmiops.workbench.workspaces;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import jakarta.inject.Provider;
+import java.util.*;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -45,6 +44,8 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   private final InitialCreditsService expirationService;
 
   private final WorkspaceAuthService workspaceAuthService;
+  private final UserDao userDao;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   public VwbWorkspaceServiceImpl(
       WsmClient wsmClient,
@@ -52,13 +53,17 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
       FirecloudMapper firecloudMapper,
       WorkspaceDao workspaceDao,
       InitialCreditsService expirationService,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      UserDao userDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.wsmClient = wsmClient;
     this.workspaceMapper = workspaceMapper;
     this.firecloudMapper = firecloudMapper;
     this.workspaceDao = workspaceDao;
     this.expirationService = expirationService;
     this.workspaceAuthService = workspaceAuthService;
+    this.userDao = userDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -213,8 +218,15 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   @Override
   public RawlsWorkspaceDetails createWorkspace(Workspace workspace, DbCdrVersion cdrVersion) {
     String workspaceToClone = cdrVersion.getVwbTemplateId();
+
+    // Get the user's pod id
+    String podId =
+        Optional.ofNullable(userDao.findVwbPodIdByUsername(workspace.getCreator()))
+            .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
+
     WorkspaceDescription workspaceDescription =
-        wsmClient.cloneWorkspaceAsService(workspaceToClone, workspace);
+        wsmClient.cloneWorkspaceAsService(workspaceToClone, workspace, podId);
+
     // Need to wait until workspace has been created
     // before sharing it with the user
     String workspaceId = workspaceDescription.getId().toString();
