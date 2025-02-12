@@ -136,6 +136,16 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     );
   };
 
+  const renderContent = () => {
+    if (shouldRedirectToDemographicSurveyPage()) {
+      return (
+        <DemographicSurveyPage routeData={{ title: 'Demographic Survey' }} />
+      );
+    } else {
+      return <SignedInRoutes />;
+    }
+  };
+
   return (
     <FlexColumn
       style={{
@@ -161,13 +171,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              {shouldRedirectToDemographicSurveyPage() ? (
-                <DemographicSurveyPage
-                  routeData={{ title: 'Demographic Survey' }}
-                />
-              ) : (
-                <SignedInRoutes />
-              )}
+              {renderContent()}
             </div>
           )}
       </FlexRow>
