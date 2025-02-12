@@ -534,12 +534,16 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  w.workspace_id,\n"
             + "  workspace_namespace\n"
             + "FROM workspace w\n"
-            + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
-            + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+            // some Tanagra workspaces don't have CDR version IDs
+            + "  LEFT JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
+            + "  LEFT JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+            // most workspaces are not Featured
             + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
+            // not all users have initial credits expiration entries
             + "  LEFT OUTER JOIN user_initial_credits_expiration uice ON uice.user_id = creator_id\n"
-            + "LEFT JOIN user_verified_institutional_affiliation uvia ON w.creator_id = uvia.user_id\n"
-            + "LEFT JOIN institution i ON uvia.institution_id = i.institution_id\n"
+            // some users don't have institutional affiliations
+            + "  LEFT JOIN user_verified_institutional_affiliation uvia ON w.creator_id = uvia.user_id\n"
+            + "  LEFT JOIN institution i ON uvia.institution_id = i.institution_id\n"
             + "WHERE active_status = ? \n"
             + "ORDER BY w.workspace_id\n"
             + "LIMIT ? \n"
