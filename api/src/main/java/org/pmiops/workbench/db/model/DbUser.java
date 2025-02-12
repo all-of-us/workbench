@@ -108,6 +108,8 @@ public class DbUser {
   private String rasLinkUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
 
+  private String vwbPodId;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id")
@@ -538,6 +540,16 @@ public class DbUser {
 
   public DbUser setPartnerDiscoverySourceOtherText(String partnerDiscoverySourceOtherText) {
     this.partnerDiscoverySourceOtherText = partnerDiscoverySourceOtherText;
+    return this;
+  }
+
+  @Column(name = "vwb_pod_id")
+  public String getVwbPodId() {
+    return vwbPodId;
+  }
+
+  public DbUser setVwbPodId(String vwbPodId) {
+    this.vwbPodId = vwbPodId;
     return this;
   }
 

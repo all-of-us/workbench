@@ -1,8 +1,10 @@
 package org.pmiops.workbench.vwb.usermanager;
 
 import jakarta.inject.Provider;
+import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
+import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
 import org.pmiops.workbench.vwb.user.api.WorkbenchGroupApi;
 import org.pmiops.workbench.vwb.user.model.GroupRole;
@@ -31,18 +33,22 @@ public class VwbUserManagerClient {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  private final Provider<PodApi> podApiProvider;
+
   public VwbUserManagerClient(
       @Qualifier(VwbUserManagerConfig.VWB_SERVICE_ACCOUNT_USER_API)
           Provider<UserV2Api> userV2ApiProvider,
       Provider<OrganizationV2Api> organizationV2ApiProvider,
       Provider<WorkbenchGroupApi> groupApiProvider,
       VwbUserManagerRetryHandler vwbUserManagerRetryHandler,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      Provider<PodApi> podApiProvider) {
     this.userV2ApiProvider = userV2ApiProvider;
     this.organizationV2ApiProvider = organizationV2ApiProvider;
     this.groupApiProvider = groupApiProvider;
     this.vwbUserManagerRetryHandler = vwbUserManagerRetryHandler;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.podApiProvider = podApiProvider;
   }
 
   public OrganizationMember getOrganizationMember(String userName) {
@@ -84,6 +90,37 @@ public class VwbUserManagerClient {
     vwbUserManagerRetryHandler.run(
         context -> {
           groupApiProvider.get().setGroupAccess(setAccessRequest, groupName, organizationId);
+          return null;
+        });
+  }
+
+  public PodDescription createInitialCreditsPodForUser(String email) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    String initialCreditBillingAccount = workbenchConfigProvider.get().billing.accountId;
+    logger.info("Creating pod for user in VWB with email {}", email);
+    return vwbUserManagerRetryHandler.run(
+        context ->
+            podApiProvider
+                .get()
+                .createPod(
+                    new PodCreateRequest()
+                        .userFacingId("user-pod-" + email.substring(0, email.indexOf('@')))
+                        .description("Pod for " + email)
+                        .environment(
+                            new PodEnvironment()
+                                .environmentType(PodEnvironmentType.GCP)
+                                .environmentDataGcp(
+                                    new PodEnvironmentDataGcp()
+                                        .billingAccountId(initialCreditBillingAccount))),
+                    organizationId));
+  }
+
+  public void sharePodWithUserWithRole(UUID podId, String email, PodRole podRole) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.info("Sharing pod {} with user {} with role {}", podId, email, podRole);
+    vwbUserManagerRetryHandler.run(
+        context -> {
+          podApiProvider.get().grantMemberPodRole(organizationId, podId.toString(), email, podRole);
           return null;
         });
   }
