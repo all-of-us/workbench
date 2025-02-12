@@ -20,7 +20,7 @@ import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
+import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
@@ -62,7 +62,7 @@ public class TaskQueueService {
   private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
       "deleteTestUserRawlsWorkspacesQueue";
   private static final String FREE_TIER_BILLING_QUEUE = "freeTierBillingQueue";
-  private static final String EXPIRED_FREE_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
+  private static final String INITIAL_CREDITS_EXHAUSTION_QUEUE = "initialCreditsExhaustionQueue";
   private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
       "checkCreditsExpirationForUserIDsQueue";
   private static final String DELETE_WORKSPACE_ENVIRONMENTS_QUEUE_NAME =
@@ -235,9 +235,9 @@ public class TaskQueueService {
   public void pushInitialCreditsExhaustionTask(
       List<Long> users, Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
     createAndPushTask(
-        EXPIRED_FREE_CREDITS_QUEUE_NAME,
+        INITIAL_CREDITS_EXHAUSTION_QUEUE,
         INITIAL_CREDITS_EXHAUSTION_PATH,
-        new ExpiredInitialCreditsEventRequest()
+        new ExhaustedInitialCreditsEventRequest()
             .users(users)
             .dbCostByCreator(dbCostByCreator)
             .liveCostByCreator(liveCostByCreator));

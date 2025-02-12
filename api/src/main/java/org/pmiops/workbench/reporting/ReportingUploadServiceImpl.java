@@ -3,6 +3,7 @@ package org.pmiops.workbench.reporting;
 import static org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer.generateInsertId;
 
 import com.google.cloud.bigquery.BigQueryError;
+import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
@@ -48,13 +49,25 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   @Override
   public <T extends ReportingBase> void uploadBatch(
       ReportingTableParams<T> uploadBatchParams, List<T> batch, long captureTimestamp) {
-    uploadBatchTable(
+    InsertAllRequest request =
         uploadBatchParams
             .bqInsertionBuilder()
             .build(
                 getTableId(uploadBatchParams.bqTableName()),
                 batch,
-                getFixedValues(captureTimestamp)));
+                getFixedValues(captureTimestamp));
+
+    try {
+      uploadBatchTable(request);
+    } catch (BigQueryException e) {
+      // log and continue to determine which tables failed to upload.
+      // the overall snapshot will fail at the verification step.
+      log.severe(
+          String.format(
+              "BigQueryException for table %s: %s, %s",
+              uploadBatchParams.bqTableName(), e.getReason(), e.getMessage()));
+    }
+
     // This is a test to prove if these batched list are being cleaned up by garbage collection.
     batch = null;
   }

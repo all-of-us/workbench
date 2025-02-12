@@ -36,8 +36,8 @@ public class VwbAccessServiceTest {
   @Test
   public void testAddUserIntoVwbTier_vwbUm() {
     vwbAccessService.addUserIntoVwbTier("test-user", "test-group");
-    verify(mockVwbUserManagerClient).addUserToGroup("test-user", "test-group");
-    verify(mockVwbSamClient, never()).removeUserFromGroup(anyString(), anyString());
+    verify(mockVwbUserManagerClient).addUserToGroup("test-group", "test-user");
+    verify(mockVwbSamClient, never()).addUserToGroup(anyString(), anyString());
   }
 
   @Test
@@ -46,14 +46,14 @@ public class VwbAccessServiceTest {
         .when(mockVwbUserManagerClient)
         .addUserToGroup(anyString(), anyString());
     vwbAccessService.addUserIntoVwbTier("test-user", "test-group");
-    verify(mockVwbUserManagerClient).addUserToGroup("test-user", "test-group");
-    verify(mockVwbSamClient).addUserToGroup("test-user", "test-group");
+    verify(mockVwbUserManagerClient).addUserToGroup("test-group", "test-user");
+    verify(mockVwbSamClient).addUserToGroup("test-group", "test-user");
   }
 
   @Test
   public void testRemoveUserFromVwbTier_vwbUm() {
     vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
-    verify(mockVwbUserManagerClient).removeUserFromGroup("test-user", "test-group");
+    verify(mockVwbUserManagerClient).removeUserFromGroup("test-group", "test-user");
     verify(mockVwbSamClient, never()).removeUserFromGroup(anyString(), anyString());
   }
 
@@ -62,9 +62,9 @@ public class VwbAccessServiceTest {
     doThrow(new RuntimeException("UM API failure"))
         .when(mockVwbUserManagerClient)
         .removeUserFromGroup(anyString(), anyString());
-    vwbAccessService.addUserIntoVwbTier("test-user", "test-group");
-    verify(mockVwbUserManagerClient).removeUserFromGroup("test-user", "test-group");
-    verify(mockVwbSamClient).removeUserFromGroup("test-user", "test-group");
+    vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
+    verify(mockVwbUserManagerClient).removeUserFromGroup("test-group", "test-user");
+    verify(mockVwbSamClient).removeUserFromGroup("test-group", "test-user");
   }
 
   @Test

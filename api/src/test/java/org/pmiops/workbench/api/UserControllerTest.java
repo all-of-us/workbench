@@ -349,7 +349,7 @@ public class UserControllerTest {
   }
 
   // Combinatorial tests for listBillingAccounts:
-  // free tier available vs. expired
+  // free tier available vs. exhausted
   // cloud accounts available vs. none
 
   static final String INITIAL_CREDITS_ID = "free-tier";
@@ -423,7 +423,7 @@ public class UserControllerTest {
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // billing upgrade is true, free tier is expired, cloud accounts exist
+  // billing upgrade is true, free tier is exhausted, cloud accounts exist
 
   @Test
   public void listBillingAccounts_upgradeYES_freeNO_cloudYES() throws IOException {
@@ -441,7 +441,7 @@ public class UserControllerTest {
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // billing upgrade is true, free tier is expired, no cloud accounts
+  // billing upgrade is true, free tier is exhausted, no cloud accounts
 
   @Test
   public void listBillingAccounts_upgradeYES_freeNO_cloudNO() throws IOException {

@@ -539,7 +539,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
             + "  LEFT OUTER JOIN user_initial_credits_expiration uice ON uice.user_id = creator_id\n"
             + "LEFT JOIN user_verified_institutional_affiliation uvia ON w.creator_id = uvia.user_id\n"
-            + "JOIN institution i ON uvia.institution_id = i.institution_id\n"
+            + "LEFT JOIN institution i ON uvia.institution_id = i.institution_id\n"
             + "WHERE active_status = ? \n"
             + "ORDER BY w.workspace_id\n"
             + "LIMIT ? \n"

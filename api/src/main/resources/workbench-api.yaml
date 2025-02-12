@@ -4377,19 +4377,20 @@ paths:
         - cloudTaskInitialCreditExhaustion
         - cloudTask
       description: |
-        Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
+        Run the business logic to handle users who have consumed or about to consume their
+        initial credits, including disabling their workspaces and sending them notifications.
       operationId: handleInitialCreditsExhaustionBatch
       security: [ ]
       requestBody:
-        description: Users that should be alerted about their free credits use.
+        description: Users that should be alerted about their initial credits use.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExpiredInitialCreditsEventRequest'
+              $ref: '#/components/schemas/ExhaustedInitialCreditsEventRequest'
         required: true
       responses:
         200:
-          description: Handle Free Credits Exhaustion Task Ran Successfully
+          description: Handle Initial Credits Exhaustion Task Ran Successfully
           content: { }
       x-codegen-request-body-name: request
   /v1/cloudTask/checkCreditsExpirationForUserIDs:
@@ -4398,7 +4399,8 @@ paths:
       - cloudTaskUser
       - cloudTask
       description: |
-        Run the business logic to handle users whose free credits have expired. Including disabling compute, deleting cloud environments, and sending them notifications.
+        Run the business logic to handle users whose free credits have expired, including disabling compute, deleting
+        cloud environments, and sending them notifications.
       operationId: checkCreditsExpirationForUserIDsBatch
       security: [ ]
       requestBody:
@@ -9969,14 +9971,14 @@ components:
           items:
             type: string
       description: Institution-specific access tier membership requirement and configs.
-    ExpiredInitialCreditsEventRequest:
+    ExhaustedInitialCreditsEventRequest:
       required:
         - users
       type: object
       properties:
         users:
           type: array
-          description: List of User IDs to check for free credits
+          description: List of User IDs to check for initial credits
           items:
             type: integer
             format: int64
