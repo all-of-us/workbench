@@ -30,7 +30,7 @@ public interface CdrConfigMapper {
 
   @Mapping(source = "archivalStatus", target = "archivalStatusEnum")
   @Mapping(source = "accessTier", target = "accessTier", qualifiedByName = "toDbTierByShortName")
-  DbCdrVersion toDbVersion(CdrVersionVO localVersion, @Context AccessTierDao accessTierDao);
+  DbCdrVersion toDbVersion(CdrVersionConfig localVersion, @Context AccessTierDao accessTierDao);
 
   @Named("toDbTierByShortName")
   default DbAccessTier toDbTierByShortName(
@@ -39,7 +39,7 @@ public interface CdrConfigMapper {
   }
 
   List<DbCdrVersion> toDbVersions(
-      List<CdrVersionVO> localVersions, @Context AccessTierDao accessTierDao);
+      List<CdrVersionConfig> localVersions, @Context AccessTierDao accessTierDao);
 
   default List<DbCdrVersion> cdrVersions(CdrConfigRecord cdrConfig, AccessTierDao accessTierDao) {
     return toDbVersions(cdrConfig.cdrVersions(), accessTierDao);

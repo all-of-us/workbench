@@ -27,7 +27,7 @@ public class CdrConfigMapperTest {
   @Autowired AccessTierDao accessTierDao;
 
   private AccessTierConfig testTierJson;
-  private CdrVersionVO testVersionJson;
+  private CdrVersionConfig testVersionJson;
 
   @BeforeEach
   public void setup() {
@@ -44,34 +44,61 @@ public class CdrConfigMapperTest {
             enableUserWorkflows,
             "vwb-tier-5-group");
 
-    testVersionJson = new CdrVersionVO();
-    testVersionJson.cdrVersionId = 20;
-    testVersionJson.isDefault = true;
-    testVersionJson.name = "CDR Version 20";
-    testVersionJson.accessTier = testTierJson.shortName();
-    testVersionJson.archivalStatus = DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE);
-    testVersionJson.bigqueryProject = "a big one";
-    testVersionJson.bigqueryDataset = "also a big one";
-    testVersionJson.creationTime = Timestamp.from(Instant.now());
-    testVersionJson.numParticipants = 100;
-    testVersionJson.cdrDbName = "data";
-    testVersionJson.wgsBigqueryDataset = "wgs1";
-    testVersionJson.hasFitbitData = false;
-    testVersionJson.hasFitbitSleepData = false;
-    testVersionJson.hasSurveyConductData = false;
-    testVersionJson.hasCopeSurveyData = true;
-    testVersionJson.tanagraEnabled = true;
-    testVersionJson.wgsFilterSetName = "my_filter";
-    testVersionJson.storageBasePath = "20";
-    testVersionJson.microarrayHailStoragePath = "hail/mt";
-    testVersionJson.wgsVcfMergedStoragePath = "wgs/vcf/merged";
-    testVersionJson.wgsHailStoragePath = "wgs/vcf/hail.mt";
-    testVersionJson.wgsCramManifestPath = "wgs/cram/manifest.csv";
-    testVersionJson.microarrayVcfManifestPath = "microarray/vcf/manifest.csv";
-    testVersionJson.microarrayIdatManifestPath = "microarray/idat/manifest.csv";
+    boolean isDefault = true;
+    boolean hasFitbitData = false;
+    boolean hasFitbitSleepData = false;
+    boolean hasSurveyConductData = false;
+    boolean hasCopeSurveyData = true;
+    boolean tanagraEnabled = true;
+
+    testVersionJson =
+        new CdrVersionConfig(
+            20,
+            isDefault,
+            "CDR Version 20",
+            testTierJson.shortName(),
+            DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE),
+            "a big one",
+            "also a big one",
+            Timestamp.from(Instant.now()),
+            100,
+            "data",
+            "wgs1",
+            "my_filter",
+            hasFitbitData,
+            hasCopeSurveyData,
+            hasFitbitSleepData,
+            null,
+            hasSurveyConductData,
+            tanagraEnabled,
+            "20",
+            "wgs/vcf/merged",
+            "wgs/vcf/hail.mt",
+            "wgs/cram/manifest.csv",
+            "hail/mt",
+            null,
+            "microarray/vcf/manifest.csv",
+            "microarray/idat/manifest.csv",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            20);
   }
 
-  private DbAccessTier getExpected() {
+  private DbAccessTier getExpectedTier() {
     return new DbAccessTier()
         .setAccessTierId(testTierJson.accessTierId())
         .setShortName(testTierJson.shortName())
@@ -86,7 +113,7 @@ public class CdrConfigMapperTest {
 
   @Test
   public void test_toDbTier() {
-    assertThat(mapper.toDbTier(testTierJson)).isEqualTo(getExpected());
+    assertThat(mapper.toDbTier(testTierJson)).isEqualTo(getExpectedTier());
   }
 
   @Test
@@ -110,7 +137,7 @@ public class CdrConfigMapperTest {
             .setEnableUserWorkflows(true));
 
     assertThat(mapper.toDbTiers(Collections.singletonList(testTierJson)))
-        .containsExactly(getExpected());
+        .containsExactly(getExpectedTier());
   }
 
   @Test
@@ -126,38 +153,43 @@ public class CdrConfigMapperTest {
     assertThat(mapper.toDbTierByShortName("a tier which doesn't exist", accessTierDao)).isNull();
   }
 
+  private DbCdrVersion getExpectedVersion(DbAccessTier tier, Timestamp creationTime) {
+    return new DbCdrVersion()
+        .setAccessTier(tier)
+        .setCreationTime(creationTime)
+        .setCdrVersionId(testVersionJson.cdrVersionId())
+        .setIsDefault(testVersionJson.isDefault())
+        .setName(testVersionJson.name())
+        .setArchivalStatus(testVersionJson.archivalStatus())
+        .setBigqueryProject(testVersionJson.bigqueryProject())
+        .setBigqueryDataset(testVersionJson.bigqueryDataset())
+        .setNumParticipants(testVersionJson.numParticipants())
+        .setCdrDbName(testVersionJson.cdrDbName())
+        .setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset())
+        .setHasFitbitData(testVersionJson.hasFitbitData())
+        .setHasFitbitSleepData(testVersionJson.hasFitbitSleepData())
+        .setHasSurveyConductData(testVersionJson.hasSurveyConductData())
+        .setTanagraEnabled(testVersionJson.tanagraEnabled())
+        .setHasCopeSurveyData(testVersionJson.hasCopeSurveyData())
+        .setWgsFilterSetName(testVersionJson.wgsFilterSetName())
+        .setWgsVcfMergedStoragePath(testVersionJson.wgsVcfMergedStoragePath())
+        .setWgsHailStoragePath(testVersionJson.wgsHailStoragePath())
+        .setWgsCramManifestPath(testVersionJson.wgsCramManifestPath())
+        .setStorageBasePath(testVersionJson.storageBasePath())
+        .setMicroarrayHailStoragePath(testVersionJson.microarrayHailStoragePath())
+        .setMicroarrayVcfManifestPath(testVersionJson.microarrayVcfManifestPath())
+        .setMicroarrayIdatManifestPath(testVersionJson.microarrayIdatManifestPath())
+        .setPublicReleaseNumber(testVersionJson.publicReleaseNumber());
+  }
+
   @Test
   public void test_toDbVersion() {
+    Timestamp commonCreationTime = Timestamp.from(Instant.now());
     DbAccessTier testTierInDb = accessTierDao.save(mapper.toDbTier(testTierJson));
-
-    DbCdrVersion expected =
-        new DbCdrVersion()
-            .setAccessTier(testTierInDb)
-            .setCdrVersionId(testVersionJson.cdrVersionId)
-            .setIsDefault(testVersionJson.isDefault)
-            .setName(testVersionJson.name)
-            .setArchivalStatus(testVersionJson.archivalStatus)
-            .setBigqueryProject(testVersionJson.bigqueryProject)
-            .setBigqueryDataset(testVersionJson.bigqueryDataset)
-            .setCreationTime(testVersionJson.creationTime)
-            .setNumParticipants(testVersionJson.numParticipants)
-            .setCdrDbName(testVersionJson.cdrDbName)
-            .setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset)
-            .setHasFitbitData(testVersionJson.hasFitbitData)
-            .setHasFitbitSleepData(testVersionJson.hasFitbitSleepData)
-            .setHasSurveyConductData(testVersionJson.hasSurveyConductData)
-            .setTanagraEnabled(testVersionJson.tanagraEnabled)
-            .setHasCopeSurveyData(testVersionJson.hasCopeSurveyData)
-            .setWgsFilterSetName(testVersionJson.wgsFilterSetName)
-            .setWgsVcfMergedStoragePath(testVersionJson.wgsVcfMergedStoragePath)
-            .setWgsHailStoragePath(testVersionJson.wgsHailStoragePath)
-            .setWgsCramManifestPath(testVersionJson.wgsCramManifestPath)
-            .setStorageBasePath(testVersionJson.storageBasePath)
-            .setMicroarrayHailStoragePath(testVersionJson.microarrayHailStoragePath)
-            .setMicroarrayVcfManifestPath(testVersionJson.microarrayVcfManifestPath)
-            .setMicroarrayIdatManifestPath(testVersionJson.microarrayIdatManifestPath);
-
-    assertThat(mapper.toDbVersion(testVersionJson, accessTierDao)).isEqualTo(expected);
+    DbCdrVersion mapped =
+        mapper.toDbVersion(testVersionJson, accessTierDao).setCreationTime(commonCreationTime);
+    DbCdrVersion expected = getExpectedVersion(testTierInDb, commonCreationTime);
+    assertThat(mapped).isEqualTo(expected);
   }
 
   @Test

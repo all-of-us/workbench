@@ -127,18 +127,18 @@ public class UpdateCdrConfig extends Tool {
     Set<Long> cdrVersionIds = new HashSet<>();
     Map<String, Set<Long>> cdrVersionsPerTier = new HashMap<>();
     Map<String, Long> cdrDefaultVersionPerTier = new HashMap<>();
-    for (CdrVersionVO v : cdrConfig.cdrVersions()) {
-      long id = v.cdrVersionId;
+    for (CdrVersionConfig v : cdrConfig.cdrVersions()) {
+      long id = v.cdrVersionId();
       if (id == 0) {
         throw new IllegalArgumentException(
-            String.format("Input JSON CDR Version '%s' is missing an ID", v.name));
+            String.format("Input JSON CDR Version '%s' is missing an ID", v.name()));
       }
       if (!cdrVersionIds.add(id)) {
         throw new IllegalArgumentException(
             String.format("Input JSON contains duplicated CDR Version ID %d", id));
       }
 
-      String accessTier = v.accessTier;
+      String accessTier = v.accessTier();
       if (StringUtils.isBlank(accessTier)) {
         throw new IllegalArgumentException(
             String.format("CDR version %d is missing an Access Tier", id));
@@ -151,29 +151,30 @@ public class UpdateCdrConfig extends Tool {
                 id, accessTier));
       }
 
-      cdrVersionsPerTier.merge(v.accessTier, Collections.singleton(v.cdrVersionId), Sets::union);
-      if (v.isDefault != null && v.isDefault) {
-        if (v.archivalStatus != DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE)) {
+      cdrVersionsPerTier.merge(
+          v.accessTier(), Collections.singleton(v.cdrVersionId()), Sets::union);
+      if (v.isDefault() != null && v.isDefault()) {
+        if (v.archivalStatus() != DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE)) {
           throw new IllegalArgumentException(
               String.format("Archived CDR Version %d cannot be the default", id));
         }
 
-        if (cdrDefaultVersionPerTier.containsKey(v.accessTier)) {
+        if (cdrDefaultVersionPerTier.containsKey(v.accessTier())) {
           throw new IllegalArgumentException(
               String.format(
                   "Must be exactly one default CDR version for Access Tier '%s'. Attempted to set both %d and %d as default versions.",
-                  v.accessTier, cdrDefaultVersionPerTier.get(v.accessTier), v.cdrVersionId));
+                  v.accessTier(), cdrDefaultVersionPerTier.get(v.accessTier()), v.cdrVersionId()));
         } else {
-          cdrDefaultVersionPerTier.put(v.accessTier, v.cdrVersionId);
+          cdrDefaultVersionPerTier.put(v.accessTier(), v.cdrVersionId());
         }
       }
 
-      if (!StringUtils.isAllEmpty(v.wgsFilterSetName, v.wgsBigqueryDataset)
-          && StringUtils.isAnyEmpty(v.wgsFilterSetName, v.wgsBigqueryDataset)) {
+      if (!StringUtils.isAllEmpty(v.wgsFilterSetName(), v.wgsBigqueryDataset())
+          && StringUtils.isAnyEmpty(v.wgsFilterSetName(), v.wgsBigqueryDataset())) {
         throw new IllegalArgumentException(
             String.format(
                 "If either of wgsBigqueryDataset and wgsFilterSetName is defined, the other has to be defined too. Current values are: wgsBigqueryDataset: %s / wgsFilterSetName: %s",
-                v.wgsBigqueryDataset, v.wgsFilterSetName));
+                v.wgsBigqueryDataset(), v.wgsFilterSetName()));
       }
     }
 
