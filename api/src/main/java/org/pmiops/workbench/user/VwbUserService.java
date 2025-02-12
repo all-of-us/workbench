@@ -2,7 +2,6 @@ package org.pmiops.workbench.user;
 
 import jakarta.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.PodDescription;
@@ -19,15 +18,12 @@ public class VwbUserService {
 
   private final VwbUserManagerClient vwbUserManagerClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserDao userDao;
 
   public VwbUserService(
       VwbUserManagerClient vwbUserManagerClient,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      UserDao userDao) {
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.vwbUserManagerClient = vwbUserManagerClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.userDao = userDao;
   }
 
   public void createUser(String email) {
