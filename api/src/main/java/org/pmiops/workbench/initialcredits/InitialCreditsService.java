@@ -149,9 +149,10 @@ public class InitialCreditsService {
   /**
    * Filter the users to get only the users that have costs higher than the lowest threshold. This
    * means we'll be pushing cloud tasks for these users to notify them about their costs but the
-   * decision to notify or not is left to the FreeCreditExpiry cloud task. Another way to think
-   * about this is to have the logic to decide whether to include the user to be notified here. This
-   * is done to avoid pushing cloud tasks for users that have costs lower than the lowest threshold.
+   * decision to notify or not is left to the handleInitialCreditsExhaustion cloud task. Another way
+   * to think about this is to have the logic to decide whether to include the user to be notified
+   * here. This is done to avoid pushing cloud tasks for users that have costs lower than the lowest
+   * threshold.
    *
    * @param users the users to filter
    * @param liveCostByCreator the live cost by creator
