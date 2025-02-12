@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.vwb.sam.VwbSamClient;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +14,16 @@ public class VwbAccessService {
   private static final Logger log = Logger.getLogger(VwbAccessService.class.getName());
 
   private final VwbSamClient vwbSamClient;
+  private final VwbUserManagerClient vwbUserManagerClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public VwbAccessService(
-      VwbSamClient vwbSamClient, Provider<WorkbenchConfig> workbenchConfigProvider) {
+      VwbSamClient vwbSamClient,
+      VwbUserManagerClient vwbUserManagerClient,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.vwbSamClient = vwbSamClient;
+    this.vwbUserManagerClient = vwbUserManagerClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -31,10 +36,20 @@ public class VwbAccessService {
    */
   public void addUserIntoVwbTier(String userName, String vwbGroupName) {
     if (workbenchConfigProvider.get().featureFlags.enableVWBUserAccessManagement) {
+      // First, try with VWB UM API first.
       try {
-        vwbSamClient.addUserToGroup(vwbGroupName, userName);
+        vwbUserManagerClient.addUserToGroup(vwbGroupName, userName);
       } catch (Exception e) {
-        log.log(Level.WARNING, "Failed to add user to Vwb tier group: " + e.getMessage(), e);
+        log.log(Level.WARNING, "Failed to add user to Vwb tier group using UM" + e.getMessage(), e);
+        // If failed, fall off to SAM API
+        try {
+          vwbSamClient.addUserToGroup(vwbGroupName, userName);
+        } catch (Exception samException) {
+          log.log(
+              Level.WARNING,
+              "Failed to add user to Vwb tier group using SAM: " + e.getMessage(),
+              e);
+        }
       }
     }
   }
@@ -48,10 +63,20 @@ public class VwbAccessService {
    */
   public void removeUserFromVwbTier(String userName, String vwbGroupName) {
     if (workbenchConfigProvider.get().featureFlags.enableVWBUserAccessManagement) {
+      // First, try with VWB UM API first.
       try {
-        vwbSamClient.removeUserFromGroup(vwbGroupName, userName);
+        vwbUserManagerClient.removeUserFromGroup(vwbGroupName, userName);
       } catch (Exception e) {
-        log.log(Level.WARNING, "Failed to remove user from Vwb tier group: " + e.getMessage(), e);
+        log.log(Level.WARNING, "Failed to add user to Vwb tier group using UM" + e.getMessage(), e);
+        // If failed, fall off to SAM API
+        try {
+          vwbSamClient.removeUserFromGroup(vwbGroupName, userName);
+        } catch (Exception samException) {
+          log.log(
+              Level.WARNING,
+              "Failed to remove user from Vwb tier group using SAM: " + e.getMessage(),
+              e);
+        }
       }
     }
   }
