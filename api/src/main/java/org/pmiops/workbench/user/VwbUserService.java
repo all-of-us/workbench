@@ -2,7 +2,10 @@ package org.pmiops.workbench.user;
 
 import jakarta.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
+import org.pmiops.workbench.vwb.user.model.PodDescription;
+import org.pmiops.workbench.vwb.user.model.PodRole;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,5 +36,18 @@ public class VwbUserService {
       return;
     }
     vwbUserManagerClient.createUser(email);
+  }
+
+  public String createInitialCreditsPodForUser(DbUser dbUser) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBUserCreation) {
+      return null;
+    }
+    String email = dbUser.getUsername();
+    PodDescription initialCreditsPodForUser =
+        vwbUserManagerClient.createInitialCreditsPodForUser(email);
+    vwbUserManagerClient.sharePodWithUserWithRole(
+        initialCreditsPodForUser.getPodId(), email, PodRole.ADMIN);
+
+    return initialCreditsPodForUser.getPodId().toString();
   }
 }

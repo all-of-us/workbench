@@ -178,10 +178,13 @@ public class ProfileController implements ProfileApiDelegate {
     return dbUser;
   }
 
-  private void maybeInitializeUserWithVwb(DbUser dbUser) {
-    if (dbUser.getFirstSignInTime() == null) {
-      vwbUserService.createUser(dbUser.getUsername());
+  private String maybeInitializeUserWithVwb(DbUser dbUser) {
+    if (dbUser.getFirstSignInTime() != null) {
+      return dbUser.getVwbPodId();
     }
+    String username = dbUser.getUsername();
+    vwbUserService.createUser(username);
+    return vwbUserService.createInitialCreditsPodForUser(dbUser);
   }
 
   private DbUser saveUserFirstSignIn(DbUser dbUser) {
@@ -199,7 +202,8 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> getMe() {
     // Record that the user signed in and run Terra initialization as needed.
     DbUser dbUser = maybeInitializeUserWithTerra();
-    maybeInitializeUserWithVwb(dbUser);
+    String podId = maybeInitializeUserWithVwb(dbUser);
+    dbUser.setVwbPodId(podId);
     dbUser = saveUserFirstSignIn(dbUser);
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);

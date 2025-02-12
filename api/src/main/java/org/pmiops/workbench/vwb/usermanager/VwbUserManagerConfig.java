@@ -1,5 +1,7 @@
 package org.pmiops.workbench.vwb.usermanager;
 
+import static org.pmiops.workbench.rawls.RawlsConfig.BILLING_SCOPES;
+
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -9,6 +11,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rawls.RawlsApiClientFactory;
 import org.pmiops.workbench.vwb.user.ApiClient;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
+import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +24,8 @@ public class VwbUserManagerConfig {
 
   public static final String VWB_SERVICE_ACCOUNT_USER_API_CLIENT =
       "VWB_SERVICE_ACCOUNT_USER_API_CLIENT";
+  public static final String VWB_SERVICE_ACCOUNT_USER_API_CLIENT_BILLING =
+      "VWB_SERVICE_ACCOUNT_USER_API_CLIENT_BILLING";
   public static final String VWB_SERVICE_ACCOUNT_USER_API = "VWB_SERVICE_ACCOUNT_USER_API";
   public static final String VWB_SERVICE_ACCOUNT_ORGANIZATION_API =
       "VWB_SERVICE_ACCOUNT_ORGANIZATION_API";
@@ -54,6 +59,18 @@ public class VwbUserManagerConfig {
     return apiClient;
   }
 
+  @Bean(name = VWB_SERVICE_ACCOUNT_USER_API_CLIENT_BILLING)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ApiClient serviceAccountApiClientWithBillingScope(WorkbenchConfig workbenchConfig) {
+    ApiClient apiClient = newApiClient(workbenchConfig);
+    try {
+      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(BILLING_SCOPES));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+    return apiClient;
+  }
+
   @Bean(name = VWB_SERVICE_ACCOUNT_ORGANIZATION_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public OrganizationV2Api serviceAccountOrganizationV2Api(
@@ -66,5 +83,12 @@ public class VwbUserManagerConfig {
   public UserV2Api serviceAccountUserV2Api(
       @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT) ApiClient apiClient) {
     return new UserV2Api(apiClient);
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public PodApi podApi(
+      @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT_BILLING) ApiClient apiClient) {
+    return new PodApi(apiClient);
   }
 }
