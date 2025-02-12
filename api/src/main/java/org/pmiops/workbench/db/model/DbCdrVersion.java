@@ -562,7 +562,8 @@ public class DbCdrVersion {
         wgsLongReadsJointVcfGRCh38,
         wgsLongReadsJointVcfT2T,
         publicReleaseNumber,
-        vwbTemplateId);
+        vwbTemplateId,
+        publicReleaseNumber);
   }
 
   @Override
@@ -587,10 +588,10 @@ public class DbCdrVersion {
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(wgsFilterSetName, that.wgsFilterSetName)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
+        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
         && Objects.equals(hasFitbitSleepData, that.hasFitbitSleepData)
         && Objects.equals(hasFitbitDeviceData, that.hasFitbitDeviceData)
         && Objects.equals(hasSurveyConductData, that.hasSurveyConductData)
-        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
         && Objects.equals(tanagraEnabled, that.tanagraEnabled)
         && Objects.equals(storageBasePath, that.storageBasePath)
         && Objects.equals(wgsVcfMergedStoragePath, that.wgsVcfMergedStoragePath)
