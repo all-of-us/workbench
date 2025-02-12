@@ -32,13 +32,13 @@ public class VwbAccessServiceTest {
   @Test
   public void testAddUserIntoVwbTier_featureEnabled() {
     vwbAccessService.addUserIntoVwbTier("test-user", "test-group");
-    verify(mockVwbSamClient).addUserToGroup("test-user", "test-group");
+    verify(mockVwbSamClient).addUserToGroup("test-group", "test-user");
   }
 
   @Test
   public void testAddUserIntoVwbTier_featureDisabled() {
     vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
-    verify(mockVwbSamClient).removeUserFromGroup("test-user", "test-group");
+    verify(mockVwbSamClient).removeUserFromGroup("test-group", "test-user");
   }
 
   @Test
