@@ -114,32 +114,16 @@ public class CdrConfigMapperTest {
   }
 
   @Test
-  public void test_populateAccessTier() {
+  public void test_toDbTierByShortName() {
     DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
-
-    CdrVersionVO cdrVersionVO = new CdrVersionVO();
-    cdrVersionVO.accessTier = registeredTier.getShortName();
-
-    DbCdrVersion dbCdrVersion = new DbCdrVersion();
-    dbCdrVersion.setCdrVersionId(3);
-
-    assertThat(dbCdrVersion.getAccessTier()).isNull();
-    mapper.populateAccessTier(cdrVersionVO, dbCdrVersion, accessTierDao);
-    assertThat(dbCdrVersion.getAccessTier()).isEqualTo(registeredTier);
+    assertThat(mapper.toDbTierByShortName(registeredTier.getShortName(), accessTierDao))
+        .isEqualTo(registeredTier);
   }
 
   @Test
-  public void test_populateAccessTier_missing() {
-    DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
-
-    CdrVersionVO cdrVersionVO = new CdrVersionVO();
-    cdrVersionVO.accessTier = "a tier which doesn't exist";
-
-    DbCdrVersion dbCdrVersion = new DbCdrVersion().setCdrVersionId(3);
-
-    assertThat(dbCdrVersion.getAccessTier()).isNull();
-    mapper.populateAccessTier(cdrVersionVO, dbCdrVersion, accessTierDao);
-    assertThat(dbCdrVersion.getAccessTier()).isNull();
+  public void test_toDbTierByShortName_missing() {
+    accessTierDao.save(createRegisteredTier());
+    assertThat(mapper.toDbTierByShortName("a tier which doesn't exist", accessTierDao)).isNull();
   }
 
   @Test

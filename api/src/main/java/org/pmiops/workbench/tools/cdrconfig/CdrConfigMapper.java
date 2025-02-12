@@ -1,11 +1,10 @@
 package org.pmiops.workbench.tools.cdrconfig;
 
 import java.util.List;
-import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -29,20 +28,14 @@ public interface CdrConfigMapper {
     return toDbTiers(cdrConfig.accessTiers());
   }
 
-  // MapStruct gets the accessTier mapping wrong, by choosing the wrong AccessTierDao method
-  // (TODO: why?) but we can specify it explicitly using the AfterMapping below
-  @Mapping(target = "accessTier", ignore = true)
   @Mapping(source = "archivalStatus", target = "archivalStatusEnum")
+  @Mapping(source = "accessTier", target = "accessTier", qualifiedByName = "toDbTierByShortName")
   DbCdrVersion toDbVersion(CdrVersionVO localVersion, @Context AccessTierDao accessTierDao);
 
-  @AfterMapping
-  default void populateAccessTier(
-      CdrVersionVO localVersion,
-      @MappingTarget DbCdrVersion dbCdrVersion,
-      @Context AccessTierDao accessTierDao) {
-    accessTierDao
-        .findOneByShortName(localVersion.accessTier)
-        .ifPresent(dbCdrVersion::setAccessTier);
+  @Named("toDbTierByShortName")
+  default DbAccessTier toDbTierByShortName(
+      String accessTierShortName, @Context AccessTierDao accessTierDao) {
+    return accessTierDao.findOneByShortName(accessTierShortName).orElse(null);
   }
 
   List<DbCdrVersion> toDbVersions(
