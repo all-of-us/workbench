@@ -19,14 +19,14 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 @Mapper(
     config = MapStructConfig.class,
     uses = {CommonMappers.class, DbStorageEnums.class})
-public interface CdrConfigVOMapper {
+public interface CdrConfigMapper {
 
-  DbAccessTier toDbTier(AccessTierVO localTier);
+  DbAccessTier toDbTier(AccessTierConfig localTier);
 
-  List<DbAccessTier> toDbTiers(List<AccessTierVO> localTiers);
+  List<DbAccessTier> toDbTiers(List<AccessTierConfig> localTiers);
 
-  default List<DbAccessTier> accessTiers(CdrConfigVO cdrConfig) {
-    return toDbTiers(cdrConfig.accessTiers);
+  default List<DbAccessTier> accessTiers(CdrConfigRecord cdrConfig) {
+    return toDbTiers(cdrConfig.accessTiers());
   }
 
   // MapStruct gets the accessTier mapping wrong, by choosing the wrong AccessTierDao method
@@ -48,7 +48,7 @@ public interface CdrConfigVOMapper {
   List<DbCdrVersion> toDbVersions(
       List<CdrVersionVO> localVersions, @Context AccessTierDao accessTierDao);
 
-  default List<DbCdrVersion> cdrVersions(CdrConfigVO cdrConfig, AccessTierDao accessTierDao) {
-    return toDbVersions(cdrConfig.cdrVersions, accessTierDao);
+  default List<DbCdrVersion> cdrVersions(CdrConfigRecord cdrConfig, AccessTierDao accessTierDao) {
+    return toDbVersions(cdrConfig.cdrVersions(), accessTierDao);
   }
 }
