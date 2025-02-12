@@ -3,6 +3,7 @@ package org.pmiops.workbench.reporting;
 import java.time.Clock;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.ReportingBase;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +62,8 @@ public class ReportingServiceImpl implements ReportingService {
     if (batchUploadSuccess) {
       reportingUploadService.uploadVerifiedSnapshot(captureTimestamp);
     } else {
-      logger.warning("Failed to verify batch upload result");
+      logger.severe("Failed to verify batch upload result");
+      throw new ServerErrorException("Failed to verify batch upload result");
     }
   }
 }
