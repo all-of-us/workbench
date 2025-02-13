@@ -108,7 +108,7 @@ public class DbUser {
   private String rasLinkUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
 
-  private String vwbPodId;
+  private DbVwbUserPod vwbUserPod;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -518,6 +518,19 @@ public class DbUser {
     return this;
   }
 
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DbVwbUserPod getVwbUserPod() {
+    return vwbUserPod;
+  }
+
+  public void setVwbUserPod(DbVwbUserPod vwbUserPod) {
+    this.vwbUserPod = vwbUserPod;
+  }
+
   @ElementCollection(fetch = FetchType.LAZY)
   @Enumerated(EnumType.STRING)
   @CollectionTable(
@@ -540,16 +553,6 @@ public class DbUser {
 
   public DbUser setPartnerDiscoverySourceOtherText(String partnerDiscoverySourceOtherText) {
     this.partnerDiscoverySourceOtherText = partnerDiscoverySourceOtherText;
-    return this;
-  }
-
-  @Column(name = "vwb_pod_id")
-  public String getVwbPodId() {
-    return vwbPodId;
-  }
-
-  public DbUser setVwbPodId(String vwbPodId) {
-    this.vwbPodId = vwbPodId;
     return this;
   }
 
