@@ -4,11 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="tarekahmed" id="db.changelog-255-drop-vwb-pod-id-column">
-    <dropColumn tableName="user" columnName="vwb_pod_id"/>
-  </changeSet>
-
-  <changeSet author="tarekahmed" id="db.changelog-256-create-vwb-user-pod-table">
+  <changeSet author="tarekahmed" id="db.changelog-255-create-vwb-user-pod-table">
     <createTable tableName="vwb_user_pod">
       <column name="vwb_user_pod_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
