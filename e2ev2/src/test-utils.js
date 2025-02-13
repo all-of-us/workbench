@@ -100,6 +100,8 @@ const fakeSignIn = async page => {
   await page.evaluate(() => localStorage['test-access-token-override'] = 'fake-bearer-token')
   await page.reload()
   await expect(page.waitForSelector('[data-test-id="signed-in"]')).resolves.toBeDefined()
+  // Acknowledge the privacy warning
+  await page.click('[role="button"][aria-label="Confirm"]')
 }
 export_({fakeSignIn})
 
