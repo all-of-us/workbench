@@ -80,7 +80,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       @Param("minCreationTime") Timestamp minCreationTime,
       @Param("maxCreationTime") Timestamp maxCreationTime);
 
-  @Query("SELECT u.vwbPodId FROM DbUser u WHERE u.username = :email")
+  @Query("SELECT v.vwbPodId FROM DbVwbUserPod v JOIN DbUser u ON v.user = u WHERE u.username = :email")
   String findVwbPodIdByUsername(@Param("email") String email);
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
