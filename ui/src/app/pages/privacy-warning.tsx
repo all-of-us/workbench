@@ -39,6 +39,7 @@ export const PrivacyWarning = ({ onAcknowledge }: PrivacyWarningProps) => {
       </Card>
       <FlexRow style={{ marginTop: '0.5rem', gap: '0.5rem' }}>
         <Button
+          aria-label='Acknowledge'
           style={{ margin: '0rem' }}
           onClick={() => {
             sessionStorage.setItem(
