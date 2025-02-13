@@ -168,7 +168,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
       }}
       data-test-id='signed-in'
     >
-      <NavBar />
+      <NavBar minimal={!hasAcknowledgedPrivacyWarning} />
       <FlexRow style={{ position: 'relative', flex: '1 0 auto' }}>
         <div style={styles.backgroundImage} />
         {/* We still want people to be able to access the homepage, etc. even if they shouldn't */}
