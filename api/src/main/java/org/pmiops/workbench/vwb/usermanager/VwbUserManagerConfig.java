@@ -10,6 +10,7 @@ import org.pmiops.workbench.rawls.RawlsApiClientFactory;
 import org.pmiops.workbench.vwb.user.ApiClient;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
+import org.pmiops.workbench.vwb.user.api.WorkbenchGroupApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ public class VwbUserManagerConfig {
   public static final String VWB_SERVICE_ACCOUNT_USER_API_CLIENT =
       "VWB_SERVICE_ACCOUNT_USER_API_CLIENT";
   public static final String VWB_SERVICE_ACCOUNT_USER_API = "VWB_SERVICE_ACCOUNT_USER_API";
+  public static final String VWB_SERVICE_ACCOUNT_GROUP_API = "VWB_SERVICE_ACCOUNT_GROUP_API";
   public static final String VWB_SERVICE_ACCOUNT_ORGANIZATION_API =
       "VWB_SERVICE_ACCOUNT_ORGANIZATION_API";
 
@@ -66,5 +68,12 @@ public class VwbUserManagerConfig {
   public UserV2Api serviceAccountUserV2Api(
       @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT) ApiClient apiClient) {
     return new UserV2Api(apiClient);
+  }
+
+  @Bean(name = VWB_SERVICE_ACCOUNT_GROUP_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkbenchGroupApi serviceAccountGroupApi(
+      @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT) ApiClient apiClient) {
+    return new WorkbenchGroupApi(apiClient);
   }
 }
