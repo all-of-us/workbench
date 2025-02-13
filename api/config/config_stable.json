@@ -146,7 +146,7 @@
   },
   "reporting": {
     "dataset": "reporting_stable",
-    "maxRowsPerInsert": 500,
+    "maxRowsPerInsert": 50000,
     "exportTerraDataWarehouse": false
   },
   "ras": {

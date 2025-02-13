@@ -143,7 +143,7 @@
   },
   "reporting": {
     "dataset": "reporting_staging",
-    "maxRowsPerInsert": 500,
+    "maxRowsPerInsert": 50000,
     "exportTerraDataWarehouse": false
   },
   "ras": {
