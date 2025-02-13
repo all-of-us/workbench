@@ -5,7 +5,7 @@ import AuthenticatedPage from 'app/page/authenticated-page';
 import Button from 'app/element/button';
 
 export const ButtonAlias = {
-  Acknowledge: 'Acknowledge',
+  Acknowledge: 'Acknowledge'
 };
 
 export default class PrivacyPage extends AuthenticatedPage {
