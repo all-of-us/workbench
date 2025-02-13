@@ -1,6 +1,5 @@
 import { Page } from 'puppeteer';
 import { PageUrl } from 'app/text-labels';
-import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import Button from 'app/element/button';
 
@@ -26,11 +25,11 @@ export default class PrivacyPage extends AuthenticatedPage {
     return this;
   }
 
-  geAcknowledgeButtonLink(): Link {
+  getAcknowledgeButtonLink(): Button {
     return Button.findByName(this.page, { name: ButtonAlias.Acknowledge });
   }
 
   async acknowledgePrivacyWarning(): Promise<void> {
-    this.geAcknowledgeButtonLink().clickAndWait();
+    await this.getAcknowledgeButtonLink().clickAndWait();
   }
 }
