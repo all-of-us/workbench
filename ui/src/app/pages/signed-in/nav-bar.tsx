@@ -113,9 +113,9 @@ export const NavBar = ({ minimal }: NavBarProps) => {
           }
         ></ClrIcon>
       </div>
+      <SignedInAouHeaderWithDisplayTag />
       {!minimal && (
         <>
-          <SignedInAouHeaderWithDisplayTag />
           <Breadcrumb />
           <AccessRenewalNotificationMaybe
             accessTier={AccessTierShortNames.Registered}
