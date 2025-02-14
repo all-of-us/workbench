@@ -113,7 +113,8 @@
     "node-fetch": "^2",
     "nth-check": "^2.0.1",
     "postcss": "^8",
-    "rollup": "^3.29.5"
+    "rollup": "^3.29.5",
+    "serialize-javascript": "^6.0.2"
   },
   "jest": {
     "collectCoverage": true,
