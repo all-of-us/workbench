@@ -103,7 +103,7 @@ const fakeSignIn = async page => {
   });
   await page.reload()
   await expect(page.waitForSelector('[data-test-id="signed-in"]')).resolves.toBeDefined()
-  await jsClick(page, "//*[@role='button' and contains(text(), 'Acknowledge')]");
+  await jsClick(page, "[role='button']");
 }
 export_({fakeSignIn})
 
