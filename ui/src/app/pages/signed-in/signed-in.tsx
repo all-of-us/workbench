@@ -142,21 +142,22 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     );
   };
 
-  const renderContent = () => {
+  const renderContent = (): JSX.Element => {
+    let content: JSX.Element;
     if (!hasAcknowledgedPrivacyWarning) {
-      return (
+      content = (
         <PrivacyWarning
           onAcknowledge={() => setHasAcknowledgedPrivacyWarning(true)}
         />
       );
-    }
-    if (shouldRedirectToDemographicSurveyPage()) {
-      return (
+    } else if (shouldRedirectToDemographicSurveyPage()) {
+      content = (
         <DemographicSurveyPage routeData={{ title: 'Demographic Survey' }} />
       );
     } else {
-      return <SignedInRoutes />;
+      content = <SignedInRoutes />;
     }
+    return content;
   };
 
   return (
