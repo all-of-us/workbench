@@ -113,18 +113,22 @@ export const NavBar = ({ minimal }: NavBarProps) => {
           }
         ></ClrIcon>
       </div>
-      <SignedInAouHeaderWithDisplayTag />
-      <Breadcrumb />
-      <AccessRenewalNotificationMaybe
-        accessTier={AccessTierShortNames.Registered}
-      />
-      <AccessRenewalNotificationMaybe
-        accessTier={AccessTierShortNames.Controlled}
-      />
-      <StatusAlertBannerMaybe />
-      <TakeDemographicSurveyV2BannerMaybe />
-      <NewUserSatisfactionSurveyBannerMaybe />
-      <CTAvailableBannerMaybe />
+      {!minimal && (
+        <>
+          <SignedInAouHeaderWithDisplayTag />
+          <Breadcrumb />
+          <AccessRenewalNotificationMaybe
+            accessTier={AccessTierShortNames.Registered}
+          />
+          <AccessRenewalNotificationMaybe
+            accessTier={AccessTierShortNames.Controlled}
+          />
+          <StatusAlertBannerMaybe />
+          <TakeDemographicSurveyV2BannerMaybe />
+          <NewUserSatisfactionSurveyBannerMaybe />
+          <CTAvailableBannerMaybe />
+        </>
+      )}
       {showSideNav && (
         <SideNav
           {...{ minimal, profile }}
