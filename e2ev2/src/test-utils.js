@@ -98,9 +98,6 @@ export_({useApiProxy})
 
 const fakeSignIn = async page => {
   await page.evaluate(() => localStorage['test-access-token-override'] = 'fake-bearer-token')
-  await page.evaluate(() => {
-    sessionStorage.setItem('privacy-warning-acknowledged', '01/01/2030');
-  });
   await page.reload()
   await expect(page.waitForSelector('[data-test-id="signed-in"]')).resolves.toBeDefined()
 }
