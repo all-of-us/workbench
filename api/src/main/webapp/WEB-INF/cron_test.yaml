@@ -3,15 +3,3 @@ cron:
   schedule: every 24 hours
 - url: /v1/cron/checkFreeTierBillingUsage
   schedule: every 24 hours
-- description: Find and alert users whose initial credits have expired using cloud tasks
-  url: /v1/cron/checkInitialCreditsExpiration
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
-- description: >
-    Check the Runtimes, Apps, and Disks of all active Workspaces and delete those created by users
-    who no longer have access to the Workspaces.
-  url: /v1/cron/deleteUnsharedWorkspaceEnvironments
-  schedule: every day 19:30
-  timezone: America/Chicago
-  target: api
