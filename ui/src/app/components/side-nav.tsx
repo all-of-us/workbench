@@ -251,9 +251,9 @@ export interface SideNavProps {
 
 export const SideNav = (props: SideNavProps) => {
   const [showAdminOptions, setShowAdminOptions] = useState(false);
-  const [showUserOptions, setShowUserOptions] = useState(
-    props.minimal || false
-  );
+  // In the case that minimal is provided, we want to show the user options by default, because
+  // the only option will be to sign out. It would be confising to have to expand a menu to see a single option.
+  const [showUserOptions, setShowUserOptions] = useState(!!props.minimal);
 
   const onToggleAdmin = () => setShowAdminOptions(!showAdminOptions);
 
