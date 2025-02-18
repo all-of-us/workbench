@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * updates the database to match.
  */
 @Configuration
-@Import(CdrConfigVOMapperImpl.class)
+@Import(CdrConfigMapperImpl.class)
 public class UpdateCdrConfig extends Tool {
 
   private static final Logger logger = Logger.getLogger(UpdateCdrConfig.class.getName());
@@ -43,7 +43,7 @@ public class UpdateCdrConfig extends Tool {
   @Bean
   @Transactional
   public CommandLineRunner run(
-      AccessTierDao accessTierDao, CdrVersionDao cdrVersionDao, CdrConfigVOMapper cdrConfigMapper)
+      AccessTierDao accessTierDao, CdrVersionDao cdrVersionDao, CdrConfigMapper cdrConfigMapper)
       throws IOException {
     return (args) -> {
       if (args.length != 2) {
@@ -55,9 +55,9 @@ public class UpdateCdrConfig extends Tool {
           new GsonBuilder()
               .registerTypeAdapter(Timestamp.class, new TimestampGsonAdapter())
               .create();
-      final CdrConfigVO cdrConfig;
+      final CdrConfigRecord cdrConfig;
       try (final FileReader cdrConfigReader = new FileReader(args[0])) {
-        cdrConfig = gson.fromJson(cdrConfigReader, CdrConfigVO.class);
+        cdrConfig = gson.fromJson(cdrConfigReader, CdrConfigRecord.class);
       }
       boolean dryRun = Boolean.parseBoolean(args[1]);
 
@@ -90,12 +90,12 @@ public class UpdateCdrConfig extends Tool {
    *
    * CDR Versions must also have at least one version per tier
    */
-  private void preCheck(CdrConfigVO cdrConfig) {
+  private void preCheck(CdrConfigRecord cdrConfig) {
     Set<Long> accessTierIds = new HashSet<>();
     Set<String> accessTierShortNames = new HashSet<>();
     Set<String> accessTierDisplayNames = new HashSet<>();
-    for (AccessTierVO t : cdrConfig.accessTiers) {
-      final long id = t.accessTierId;
+    for (AccessTierConfig t : cdrConfig.accessTiers()) {
+      final long id = t.accessTierId();
       if (id == 0) {
         throw new IllegalArgumentException("Input JSON contains Access Tier without an ID");
       }
@@ -104,7 +104,7 @@ public class UpdateCdrConfig extends Tool {
             String.format("Input JSON contains duplicated Access Tier ID %d", id));
       }
 
-      final String shortName = t.shortName;
+      final String shortName = t.shortName();
       if (StringUtils.isBlank(shortName)) {
         throw new IllegalArgumentException("Input JSON contains Access Tier without a shortName");
       }
@@ -113,7 +113,7 @@ public class UpdateCdrConfig extends Tool {
             String.format("Input JSON contains duplicated Access Tier shortName '%s'", shortName));
       }
 
-      final String displayName = t.displayName;
+      final String displayName = t.displayName();
       if (StringUtils.isBlank(displayName)) {
         throw new IllegalArgumentException("Input JSON contains Access Tier without a displayName");
       }
@@ -127,18 +127,18 @@ public class UpdateCdrConfig extends Tool {
     Set<Long> cdrVersionIds = new HashSet<>();
     Map<String, Set<Long>> cdrVersionsPerTier = new HashMap<>();
     Map<String, Long> cdrDefaultVersionPerTier = new HashMap<>();
-    for (CdrVersionVO v : cdrConfig.cdrVersions) {
-      long id = v.cdrVersionId;
+    for (CdrVersionConfig v : cdrConfig.cdrVersions()) {
+      long id = v.cdrVersionId();
       if (id == 0) {
         throw new IllegalArgumentException(
-            String.format("Input JSON CDR Version '%s' is missing an ID", v.name));
+            String.format("Input JSON CDR Version '%s' is missing an ID", v.name()));
       }
       if (!cdrVersionIds.add(id)) {
         throw new IllegalArgumentException(
             String.format("Input JSON contains duplicated CDR Version ID %d", id));
       }
 
-      String accessTier = v.accessTier;
+      String accessTier = v.accessTier();
       if (StringUtils.isBlank(accessTier)) {
         throw new IllegalArgumentException(
             String.format("CDR version %d is missing an Access Tier", id));
@@ -151,29 +151,30 @@ public class UpdateCdrConfig extends Tool {
                 id, accessTier));
       }
 
-      cdrVersionsPerTier.merge(v.accessTier, Collections.singleton(v.cdrVersionId), Sets::union);
-      if (v.isDefault != null && v.isDefault) {
-        if (v.archivalStatus != DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE)) {
+      cdrVersionsPerTier.merge(
+          v.accessTier(), Collections.singleton(v.cdrVersionId()), Sets::union);
+      if (v.isDefault() != null && v.isDefault()) {
+        if (v.archivalStatus() != DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE)) {
           throw new IllegalArgumentException(
               String.format("Archived CDR Version %d cannot be the default", id));
         }
 
-        if (cdrDefaultVersionPerTier.containsKey(v.accessTier)) {
+        if (cdrDefaultVersionPerTier.containsKey(v.accessTier())) {
           throw new IllegalArgumentException(
               String.format(
                   "Must be exactly one default CDR version for Access Tier '%s'. Attempted to set both %d and %d as default versions.",
-                  v.accessTier, cdrDefaultVersionPerTier.get(v.accessTier), v.cdrVersionId));
+                  v.accessTier(), cdrDefaultVersionPerTier.get(v.accessTier()), v.cdrVersionId()));
         } else {
-          cdrDefaultVersionPerTier.put(v.accessTier, v.cdrVersionId);
+          cdrDefaultVersionPerTier.put(v.accessTier(), v.cdrVersionId());
         }
       }
 
-      if (!StringUtils.isAllEmpty(v.wgsFilterSetName, v.wgsBigqueryDataset)
-          && StringUtils.isAnyEmpty(v.wgsFilterSetName, v.wgsBigqueryDataset)) {
+      if (!StringUtils.isAllEmpty(v.wgsFilterSetName(), v.wgsBigqueryDataset())
+          && StringUtils.isAnyEmpty(v.wgsFilterSetName(), v.wgsBigqueryDataset())) {
         throw new IllegalArgumentException(
             String.format(
                 "If either of wgsBigqueryDataset and wgsFilterSetName is defined, the other has to be defined too. Current values are: wgsBigqueryDataset: %s / wgsFilterSetName: %s",
-                v.wgsBigqueryDataset, v.wgsFilterSetName));
+                v.wgsBigqueryDataset(), v.wgsFilterSetName()));
       }
     }
 
@@ -207,11 +208,11 @@ public class UpdateCdrConfig extends Tool {
    */
   private void updateDB(
       boolean dryRun,
-      CdrConfigVO cdrConfig,
+      CdrConfigRecord cdrConfig,
       Gson gson,
       AccessTierDao accessTierDao,
       CdrVersionDao cdrVersionDao,
-      CdrConfigVOMapper cdrConfigMapper) {
+      CdrConfigMapper cdrConfigMapper) {
     String dryRunSuffix = dryRun ? " (dry run)" : "";
 
     List<DbAccessTier> accessTiers = cdrConfigMapper.accessTiers(cdrConfig);
