@@ -124,7 +124,7 @@
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
-    "enableInitialCreditsExpiration": false,
+    "enableInitialCreditsExpiration": true,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": false,
