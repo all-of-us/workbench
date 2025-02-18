@@ -439,7 +439,6 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
     implementation 'commons-codec:commons-codec:1.17.0'
     implementation 'com.auth0:java-jwt:4.4.0'
-    implementation 'io.netty:netty-common:4.1.117.Final'
     implementation 'org.json:json:20250107'
 
 
@@ -516,7 +515,9 @@ dependencies {
     // https://www.cve.org/CVERecord?id=CVE-2023-2976
     implementation 'com.google.guava:guava:33.4.0-jre'
 
-    // https://spring.io/blog/2022/03/31/spring-framework-rce-early-announcement
+    // https://security.snyk.io/vuln/SNYK-JAVA-IONETTY-8707740
+    implementation 'io.netty:netty-common:4.1.118.Final'
+
     implementation "org.springframework:spring-aop:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-aspects:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-beans:$project.ext.SPRING_FRAMEWORK_VERSION"
