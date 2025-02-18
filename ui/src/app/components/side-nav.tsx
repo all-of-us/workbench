@@ -261,6 +261,10 @@ export const SideNav = (props: SideNavProps) => {
 
   const { minimal, profile, onToggleSideNav } = props;
 
+  const showAdminMenu =
+    !minimal &&
+    hasAuthorityForAction(profile, AuthorityGuardedAction.SHOW_ADMIN_MENU);
+
   const openContactWidget = () => {
     openZendeskWidget(
       profile.givenName,
@@ -362,109 +366,91 @@ export const SideNav = (props: SideNavProps) => {
         onToggleSideNav={() => onToggleSideNav()}
         parentOnClick={() => openContactWidget()}
       />
-      {!minimal && (
-        <>
-          {hasAuthorityForAction(
-            profile,
-            AuthorityGuardedAction.SHOW_ADMIN_MENU
-          ) && (
-            <SideNavItem
-              icon='user'
-              content='Admin'
-              parentOnClick={() => onToggleAdmin()}
-              onToggleSideNav={() => onToggleSideNav()}
-              containsSubItems={true}
-            />
-          )}
-          {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
-            showAdminOptions && (
-              <SideNavItem
-                content='User Admin'
-                onToggleSideNav={() => onToggleSideNav()}
-                href='/admin/user'
-                active={userAdminActive()}
-              />
-            )}
-          {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
-            showAdminOptions && (
-              <SideNavItem
-                content='Bulk Sync of User Access'
-                onToggleSideNav={() => onToggleSideNav()}
-                href='/admin/bulk-sync-user-access'
-                active={userAccessActive()}
-              />
-            )}
-          {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) &&
-            showAdminOptions && (
-              <SideNavItem
-                content='User Audit'
-                onToggleSideNav={() => onToggleSideNav()}
-                href='/admin/user-audit/'
-                active={userAuditActive()}
-              />
-            )}
-          {hasAuthorityForAction(
-            profile,
-            AuthorityGuardedAction.SERVICE_BANNER
-          ) &&
-            showAdminOptions && (
-              <SideNavItem
-                content='Service Banners'
-                onToggleSideNav={() => onToggleSideNav()}
-                href='/admin/banner'
-                active={bannerAdminActive()}
-              />
-            )}
-          {hasAuthorityForAction(
-            profile,
-            AuthorityGuardedAction.WORKSPACE_ADMIN
-          ) &&
-            showAdminOptions && (
-              <SideNavItem
-                content='Workspaces'
-                onToggleSideNav={() => onToggleSideNav()}
-                href='/admin/workspaces'
-                active={workspaceAdminActive()}
-              />
-            )}
-          {hasAuthorityForAction(
-            profile,
-            AuthorityGuardedAction.WORKSPACE_AUDIT
-          ) &&
-            showAdminOptions && (
-              <SideNavItem
-                content='Workspace Audit'
-                onToggleSideNav={() => onToggleSideNav()}
-                href='/admin/workspace-audit/'
-                active={workspaceAuditActive()}
-              />
-            )}
-          {hasAuthorityForAction(
-            profile,
-            AuthorityGuardedAction.INSTITUTION_ADMIN
-          ) &&
-            showAdminOptions && (
-              <SideNavItem
-                content='Institution Admin'
-                onToggleSideNav={() => onToggleSideNav()}
-                href='admin/institution'
-                active={institutionAdminActive()}
-              />
-            )}
-          {hasAuthorityForAction(
-            profile,
-            AuthorityGuardedAction.EGRESS_EVENTS
-          ) &&
-            showAdminOptions && (
-              <SideNavItem
-                content='Egress Events'
-                onToggleSideNav={() => onToggleSideNav()}
-                href='/admin/egress-events'
-                active={egressAdminActive()}
-              />
-            )}
-        </>
+
+      {showAdminMenu && (
+        <SideNavItem
+          icon='user'
+          content='Admin'
+          parentOnClick={() => onToggleAdmin()}
+          onToggleSideNav={() => onToggleSideNav()}
+          containsSubItems={true}
+        />
       )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='User Admin'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/user'
+            active={userAdminActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='Bulk Sync of User Access'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/bulk-sync-user-access'
+            active={userAccessActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='User Audit'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/user-audit/'
+            active={userAuditActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='Service Banners'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/banner'
+            active={bannerAdminActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='Workspaces'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/workspaces'
+            active={workspaceAdminActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='Workspace Audit'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/workspace-audit/'
+            active={workspaceAuditActive()}
+          />
+        )}
+      {hasAuthorityForAction(
+        profile,
+        AuthorityGuardedAction.INSTITUTION_ADMIN
+      ) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='Institution Admin'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='admin/institution'
+            active={institutionAdminActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.EGRESS_EVENTS) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='Egress Events'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/egress-events'
+            active={egressAdminActive()}
+          />
+        )}
     </div>
   );
 };
