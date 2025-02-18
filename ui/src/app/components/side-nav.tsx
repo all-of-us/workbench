@@ -244,7 +244,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
 };
 
 export interface SideNavProps {
-  minimal?: boolean;
+  minimal?: boolean; // If true, hides all but branding ,sign out, support desk, and contact elements.
   profile: Profile;
   onToggleSideNav: Function;
 }
