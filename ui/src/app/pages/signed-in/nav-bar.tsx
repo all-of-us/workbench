@@ -53,7 +53,7 @@ const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
 
 interface NavBarProps {
-  minimal?: boolean;
+  minimal?: boolean; // If true, hides everything but branding and essential menu links
 }
 export const NavBar = ({ minimal }: NavBarProps) => {
   const [showSideNav, setShowSideNav] = useState(false);
