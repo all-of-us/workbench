@@ -150,24 +150,24 @@ public class TaskQueueService {
         ACCESS_EXPIRATION_EMAIL);
   }
 
+  private int getDeleteWorkspacesBatchSize() throws BadRequestException {
+    return Optional.ofNullable(workbenchConfigProvider.get().e2eTestUsers)
+        .map(conf -> conf.workspaceDeletionBatchSize)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    "Deletion of e2e test user workspaces is not enabled in this environment"));
+  }
+
   public void groupAndPushDeleteTestWorkspaceTasks(List<TestUserWorkspace> workspacesToDelete) {
-    createAndPushAll(groupDeleteWorkspaceTasks(workspacesToDelete), DELETE_TEST_WORKSPACES);
+    int batchSize = getDeleteWorkspacesBatchSize();
+    createAndPushAll(workspacesToDelete, batchSize, DELETE_TEST_WORKSPACES);
   }
 
   public void groupAndPushDeleteTestWorkspaceInRawlsTasks(
       List<TestUserRawlsWorkspace> workspacesToDelete) {
-    createAndPushAll(groupDeleteWorkspaceTasks(workspacesToDelete), DELETE_RAWLS_TEST_WORKSPACES);
-  }
-
-  private <T> List<List<T>> groupDeleteWorkspaceTasks(List<T> workspacesToDelete) {
-    int batchSize =
-        Optional.ofNullable(workbenchConfigProvider.get().e2eTestUsers)
-            .map(conf -> conf.workspaceDeletionBatchSize)
-            .orElseThrow(
-                () ->
-                    new BadRequestException(
-                        "Deletion of e2e test user workspaces is not enabled in this environment"));
-    return CloudTasksUtils.partitionList(workspacesToDelete, batchSize);
+    int batchSize = getDeleteWorkspacesBatchSize();
+    createAndPushAll(workspacesToDelete, batchSize, DELETE_RAWLS_TEST_WORKSPACES);
   }
 
   public void groupAndPushDeleteWorkspaceEnvironmentTasks(List<String> workspaceNamespaces) {
