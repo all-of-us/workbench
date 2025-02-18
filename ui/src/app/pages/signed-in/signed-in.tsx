@@ -142,7 +142,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     );
   };
 
-  const renderContent = (): JSX.Element => {
+  const SignedInContent = () => {
     let content: JSX.Element;
     if (!hasAcknowledgedPrivacyWarning) {
       content = (
@@ -185,7 +185,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              {renderContent()}
+              <SignedInContent />
             </div>
           )}
       </FlexRow>
