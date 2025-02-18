@@ -32,7 +32,7 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 import { Ethnicity, GenderIdentity } from 'app/page/cohort-participants-group';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import PrivacyPage from '../app/page/privacy-page';
+import PrivacyPage from 'app/page/privacy-page';
 
 // Resolve typescript error: TS2339: Property 'setTestAccessTokenOverride' does not exist on type 'Window & typeof globalThis'.
 declare const window: Window &
