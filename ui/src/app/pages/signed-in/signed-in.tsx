@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
+import { cond, DEFAULT } from '@terra-ui-packages/core-utils';
 import { withRouteData } from 'app/components/app-router';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
@@ -142,23 +143,24 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     );
   };
 
-  const SignedInContent = () => {
-    let content: JSX.Element;
-    if (!hasAcknowledgedPrivacyWarning) {
-      content = (
-        <PrivacyWarning
-          onAcknowledge={() => setHasAcknowledgedPrivacyWarning(true)}
-        />
-      );
-    } else if (shouldRedirectToDemographicSurveyPage()) {
-      content = (
-        <DemographicSurveyPage routeData={{ title: 'Demographic Survey' }} />
-      );
-    } else {
-      content = <SignedInRoutes />;
-    }
-    return content;
-  };
+  const SignedInContent = () =>
+    cond<JSX.Element>(
+      [
+        !hasAcknowledgedPrivacyWarning,
+        () => (
+          <PrivacyWarning
+            onAcknowledge={() => setHasAcknowledgedPrivacyWarning(true)}
+          />
+        ),
+      ],
+      [
+        shouldRedirectToDemographicSurveyPage(),
+        () => (
+          <DemographicSurveyPage routeData={{ title: 'Demographic Survey' }} />
+        ),
+      ],
+      [DEFAULT, () => <SignedInRoutes />]
+    );
 
   return (
     <FlexColumn
