@@ -4,7 +4,6 @@ import { Button, StyledExternalLink } from 'app/components/buttons';
 import { CookieBanner } from 'app/components/cookie-banner';
 import { GoogleSignInButton } from 'app/components/google-sign-in';
 import { Header, SmallHeader } from 'app/components/headers';
-import { AouTitle } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { serverConfigStore } from 'app/utils/stores';
@@ -85,30 +84,6 @@ export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
           >
             Create Account
           </Button>
-        </div>
-        <div style={{ width: '400px' }}>
-          <h4 style={{ ...styles.fismaCommon, ...styles.fismaHeader }}>
-            Warning Notice
-          </h4>
-          <div style={{ ...styles.fismaCommon, ...styles.fismaSection }}>
-            You are accessing a web site created by the <AouTitle />, funded by
-            the National Institutes of Health.
-          </div>
-          <div style={{ ...styles.fismaCommon, ...styles.fismaSection }}>
-            Unauthorized attempts to upload information, change information, or
-            use of this web site may result in disciplinary action, civil,
-            and/or criminal penalties. Unauthorized users of this website should
-            have no expectation of privacy regarding any communications or data
-            processed by this website.
-          </div>
-          <div style={{ ...styles.fismaCommon, ...styles.fismaSection }}>
-            By continuing to log in, anyone accessing this website expressly
-            consents to monitoring of their actions and all communications or
-            data transiting or stored on related to this website and is advised
-            that if such monitoring reveals possible evidence of criminal
-            activity, NIH may provide that evidence to law enforcement
-            officials.
-          </div>
         </div>
       </div>
       <CookieBanner />

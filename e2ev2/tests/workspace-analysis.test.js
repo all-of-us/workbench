@@ -11,6 +11,7 @@ const navigateToAnalysisTab = async (browser) => {
   await utils.dismissLeoAuthErrorModal(page);
   await page.goto(config.urlRoot()+'/workspaces/aou-rw-test-53ff4756/mohstest/data')
   await utils.dismissLeoAuthErrorModal(page);
+  await utils.dismissPrivacyWarning(page);
   const analysisTab = await page.waitForSelector('div[role="button"][aria-label="Analysis"]')
   await analysisTab.click()
   return page

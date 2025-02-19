@@ -20,6 +20,7 @@ browserTest('take the new user satisfaction survey via the relevant notification
   await tu.fakeSignIn(page)
   await page.goto(config.urlRoot())
   await utils.dismissLeoAuthErrorModal(page);
+  await utils.dismissPrivacyWarning(page);
 
   const surveyNotification = await page.waitForSelector('[data-test-id="new-user-satisfaction-survey-notification"]');
   await surveyNotification.waitForSelector('[aria-label="take satisfaction survey"]').then(b => b.click());
