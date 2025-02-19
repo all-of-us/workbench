@@ -16,6 +16,7 @@ import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.CloudTaskRdrExportApi;
 import org.pmiops.workbench.api.WorkspacesApi;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
@@ -62,7 +63,7 @@ public class CloudTaskInterceptorTest {
             CloudTaskRdrExportApi.class.getMethod(
                 CLOUD_TASK_METHOD_NAME, List.class, Boolean.class));
     when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER))
-        .thenReturn("rdrExportQueue");
+        .thenReturn(TaskQueueService.RDR_EXPORT_QUEUE_NAME);
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }
 

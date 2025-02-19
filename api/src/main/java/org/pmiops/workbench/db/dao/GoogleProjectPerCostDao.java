@@ -22,7 +22,7 @@ public class GoogleProjectPerCostDao {
   }
 
   // We use native SQL here as there may be a large number of rows within a
-  // given cohort review; this avoids loading them into memory.
+  // given batch; this avoids loading them into memory.
   public void batchInsertProjectPerCost(List<DbGoogleProjectPerCost> dbGoogleProjectPerCosts) {
     String sqlStatement =
         "INSERT INTO googleproject_cost (google_project_id, cost) VALUES "

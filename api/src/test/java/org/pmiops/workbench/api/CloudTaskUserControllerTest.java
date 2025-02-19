@@ -123,22 +123,22 @@ public class CloudTaskUserControllerTest {
   }
 
   @Test
-  public void testCheckAndAlertFreeTierBillingUsage() {
+  public void testCheckInitialCreditsUsage() {
     List<Long> userIdList = List.of(1L, 2L, 3L);
-    controller.checkAndAlertFreeTierBillingUsageBatch(userIdList);
-    verify(mockFreeTierBillingUpdateService).checkAndAlertFreeTierBillingUsage(userIdList);
+    controller.checkInitialCreditsUsageBatch(userIdList);
+    verify(mockFreeTierBillingUpdateService).checkInitialCreditsUsage(userIdList);
   }
 
   @Test
-  public void testCheckAndAlertFreeTierBillingUsage_noUserListPassedFromTask() {
-    controller.checkAndAlertFreeTierBillingUsageBatch(Collections.emptyList());
-    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+  public void testCheckInitialCreditsUsage_noUserListPassedFromTask() {
+    controller.checkInitialCreditsUsageBatch(Collections.emptyList());
+    verify(mockFreeTierBillingUpdateService, never()).checkInitialCreditsUsage(any());
   }
 
   @Test
-  public void testCheckAndAlertFreeTierBillingUsage_nullPassedFromTask() {
-    controller.checkAndAlertFreeTierBillingUsageBatch(null);
-    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(any());
+  public void testCheckInitialCreditsUsage_nullPassedFromTask() {
+    controller.checkInitialCreditsUsageBatch(null);
+    verify(mockFreeTierBillingUpdateService, never()).checkInitialCreditsUsage(any());
   }
 
   @Test

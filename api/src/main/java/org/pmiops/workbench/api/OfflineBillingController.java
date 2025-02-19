@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -40,9 +39,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
         freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();
 
     List<DbGoogleProjectPerCost> googleProjectCostList =
-        freeTierForAllWorkspace.entrySet().stream()
-            .map(DbGoogleProjectPerCost::new)
-            .collect(Collectors.toList());
+        freeTierForAllWorkspace.entrySet().stream().map(DbGoogleProjectPerCost::new).toList();
 
     // Clear table googleproject_cost and then insert all entries from BQ
     googleProjectPerCostDao.deleteAll();

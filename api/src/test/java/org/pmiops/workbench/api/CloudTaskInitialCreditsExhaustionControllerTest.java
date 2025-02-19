@@ -158,8 +158,9 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_alertsAndDeletesResources_whenDollarThresholdIsExceeded()
-      throws MessagingException {
+  public void
+      handleInitialCreditsExhaustion_alertsAndDeletesResources_whenDollarThresholdIsExceeded()
+          throws MessagingException {
     final double limit = 100.0;
     final double costUnderThreshold = 49.5;
 
@@ -231,7 +232,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   @Test
   public void
-      handleInitialCreditsExpiry_alertsAndDeletesResources_whenAltDollarThresholdIsExceeded()
+      handleInitialCreditsExhaustion_alertsAndDeletesResources_whenAltDollarThresholdIsExceeded()
           throws MessagingException {
 
     // set alert thresholds at 30% and 65% instead
@@ -312,7 +313,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_alertsAndDeletesResources_evenWhenUserIsDisabled()
+  public void handleInitialCreditsExhaustion_alertsAndDeletesResources_evenWhenUserIsDisabled()
       throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
@@ -336,7 +337,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_alertsAndDeletesResources_evenWhenWorkspaceIsDeleted()
+  public void handleInitialCreditsExhaustion_alertsAndDeletesResources_evenWhenWorkspaceIsDeleted()
       throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
@@ -360,7 +361,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_noAlert_ifCostIsBelowLowestThreshold() {
+  public void handleInitialCreditsExhaustion_noAlert_ifCostIsBelowLowestThreshold() {
     // set limit so usage is just under the 50% threshold
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
@@ -379,7 +380,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_doesntThrowNPE_whenWorkspaceIsMissingCreator() {
+  public void handleInitialCreditsExhaustion_doesntThrowNPE_whenWorkspaceIsMissingCreator() {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
@@ -399,7 +400,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_doesntaAlert_ifDollarLimitWasOverriddenToOverUse()
+  public void handleInitialCreditsExhaustion_doesntaAlert_ifDollarLimitWasOverriddenToOverUse()
       throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
@@ -431,7 +432,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   // do not reactivate workspaces if the new dollar limit is still below the usage
 
   @Test
-  public void handleInitialCreditsExpiry_doesntaAlert_ifDollarLimitWasOverriddenToUnderUse()
+  public void handleInitialCreditsExhaustion_doesntaAlert_ifDollarLimitWasOverriddenToUnderUse()
       throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
@@ -460,7 +461,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_disabledAllWorkspaces_ifTheCombinedCostExceedsLimit()
+  public void handleInitialCreditsExhaustion_disabledAllWorkspaces_ifTheCombinedCostExceedsLimit()
       throws MessagingException {
     final String proj1 = "proj-1";
     final String proj2 = "proj-2";
@@ -492,7 +493,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_alertsAllUsers_ifTheyExceedFreeTierLimit()
+  public void handleInitialCreditsExhaustion_alertsAllUsers_ifTheyExceedFreeTierLimit()
       throws MessagingException {
     final String proj1 = "proj-1";
     final String proj2 = "proj-2";
@@ -526,7 +527,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_alertsOnlyOnce_ifCostKeepIncreasingAboveThreshold()
+  public void handleInitialCreditsExhaustion_alertsOnlyOnce_ifCostKeepIncreasingAboveThreshold()
       throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
@@ -560,7 +561,8 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   // Regression test coverage for RW-8328.
   @Test
-  public void handleInitialCreditsExpiry_singleAlert_forExhaustedAndByoBilling() throws Exception {
+  public void handleInitialCreditsExhaustion_singleAlert_forExhaustedAndByoBilling()
+      throws Exception {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
@@ -585,7 +587,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   @Test
   public void
-      handleInitialCreditsExpiry_disableFreeTierWorkspacesOnly_whenUserHasMultipleWorkspaces()
+      handleInitialCreditsExhaustion_disableFreeTierWorkspacesOnly_whenUserHasMultipleWorkspaces()
           throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
 
@@ -615,7 +617,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   @Test
   public void
-      handleInitialCreditsExpiry_deletedWorkspaceUsageIsConsidered_whenChargeIsPostedAfterCron()
+      handleInitialCreditsExhaustion_deletedWorkspaceUsageIsConsidered_whenChargeIsPostedAfterCron()
           throws MessagingException {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -642,7 +644,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   @Test
   public void
-      handleInitialCreditsExpiry_deletedWorkspaceUsageIsConsidered_whenAnotherWorkspaceExceedsLimitAfterCron()
+      handleInitialCreditsExhaustion_deletedWorkspaceUsageIsConsidered_whenAnotherWorkspaceExceedsLimitAfterCron()
           throws MessagingException {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -675,7 +677,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   }
 
   @Test
-  public void handleInitialCreditsExpiry_withMissingUsersInRequest_NoNPE() throws Exception {
+  public void handleInitialCreditsExhaustion_withMissingUsersInRequest_NoNPE() throws Exception {
 
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 300.0;
 

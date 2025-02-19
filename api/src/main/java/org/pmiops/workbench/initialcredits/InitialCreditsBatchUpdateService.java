@@ -70,7 +70,7 @@ public class InitialCreditsBatchUpdateService {
    *
    * @param userIdList
    */
-  public void checkAndAlertFreeTierBillingUsage(List<Long> userIdList) {
+  public void checkInitialCreditsUsage(List<Long> userIdList) {
     Set<String> googleProjectsForUserSet = workspaceDao.getGoogleProjectForUserList(userIdList);
 
     List<DbGoogleProjectPerCost> googleProjectPerCostList =
