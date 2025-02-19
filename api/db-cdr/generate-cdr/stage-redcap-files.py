@@ -18,7 +18,9 @@ surveys = ['ENGLISHBasics_DataDictionary',
            'ENGLISHHealthCareAccessUtiliza_DataDictionary',
            'ENGLISHNewYearMinuteSurveyOnCO_DataDictionary',
            'ENGLISHSocialDeterminantsOfHea_DataDictionary',
-           'ENGLISHPersonalAndFamilyHealth_DataDictionary']
+           'ENGLISHPersonalAndFamilyHealth_DataDictionary',
+           'ENGLISHBehavioralHealthAndPers_DataDictionary',
+           'ENGLISHEmotionalHealthHistoryA_DataDictionary']
 
 # these are the column names for the controlled and registered output files
 headers = ['concept_code', 'survey_name', 'topic', 'answers']
