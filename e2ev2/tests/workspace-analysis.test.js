@@ -19,8 +19,7 @@ const navigateToAnalysisTab = async (browser) => {
 browserTest('create an application', async browser => {
   const page = await navigateToAnalysisTab(browser)
 
-  const startButton = await page.waitForSelector('div[role="button"][aria-label="start"]')
-  await startButton.click()
+  await tu.jsClick(page,'div[role="button"][aria-label="start"]')
 
   await page.waitForSelector('div[aria-label="Select Applications Modal"]')
 
@@ -29,8 +28,7 @@ browserTest('create an application', async browser => {
 
   await page.waitForSelector('#application-list-dropdown').then(eh => eh.evaluate(e => e.click()))
 
-  const jupyterOption = await page.waitForSelector('li[role="option"][aria-label="Jupyter"]')
-  await jupyterOption.click()
+  await tu.jsClick(page,'li[role="option"][aria-label="Jupyter"]')
   await nextButton.click()
 
   await page.waitForFunction(() => !document.querySelector('div[aria-label="Select Applications Modal"]'));
@@ -41,11 +39,8 @@ browserTest('create an application', async browser => {
 browserTest('Cancel the creation of an application', async browser => {
   const page = await navigateToAnalysisTab(browser)
 
-  const startButton = await page.waitForSelector('div[role="button"][aria-label="start"]')
-  await startButton.click()
-
-  const closeButton = await page.waitForSelector('div[role="button"][aria-label="close"]')
-  await closeButton.click()
+  await tu.jsClick(page,'div[role="button"][aria-label="start"]')
+  await tu.jsClick(page,'div[role="button"][aria-label="close"]')
 
   await page.waitForFunction(() => !document.querySelector('div[aria-label="Select Applications Modal"]'));
 
