@@ -4,7 +4,6 @@ import { Button, StyledExternalLink } from 'app/components/buttons';
 import { CookieBanner } from 'app/components/cookie-banner';
 import { GoogleSignInButton } from 'app/components/google-sign-in';
 import { Header, SmallHeader } from 'app/components/headers';
-import { AouTitle } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { serverConfigStore } from 'app/utils/stores';
