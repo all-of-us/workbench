@@ -77,7 +77,7 @@ public class TaskQueueService {
       new TaskQueuePair(
           "checkCreditsExpirationForUserIDsQueue", "checkCreditsExpirationForUserIDs");
   public static final TaskQueuePair INITIAL_CREDITS_USAGE =
-      new TaskQueuePair("initialCreditsUsageQueue", "checkAndAlertFreeTierBillingUsage");
+      new TaskQueuePair("initialCreditsUsageQueue", "checkInitialCreditsUsage");
   public static final TaskQueuePair INITIAL_CREDITS_EXHAUSTION =
       new TaskQueuePair("initialCreditsExhaustionQueue", "handleInitialCreditsExhaustion");
 
