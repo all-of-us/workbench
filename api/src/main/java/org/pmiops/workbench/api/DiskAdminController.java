@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DiskAdminController implements DiskAdminApiDelegate {
 
+  // TODO: switch to DiskAdminService?
   private final DiskService diskService;
 
   @Autowired
