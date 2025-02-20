@@ -14,12 +14,7 @@ import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +35,8 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
+import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -76,7 +73,7 @@ public class MailServiceImplTest {
 
   @Captor private ArgumentCaptor<MandrillApiKeyAndMessage> mandrillCaptor;
 
-  @Autowired private CloudStorageClient mockcCloudStorageClient;
+  @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private MandrillApi mockMandrillApi;
 
   @Autowired private MailService mailService;
@@ -88,8 +85,8 @@ public class MailServiceImplTest {
     MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
     msgStatuses.add(new MandrillMessageStatus());
     when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
-    when(mockcCloudStorageClient.readMandrillApiKey()).thenReturn(API_KEY);
-    when(mockcCloudStorageClient.getImageUrl(any())).thenReturn("test_img");
+    when(mockCloudStorageClient.readMandrillApiKey()).thenReturn(API_KEY);
+    when(mockCloudStorageClient.getImageUrl(any())).thenReturn("test_img");
   }
 
   @Test
@@ -293,23 +290,16 @@ public class MailServiceImplTest {
   @Test
   public void testAlertUsersUnusedDiskWarning_attached() throws Exception {
     DbUser user = createDbUser();
-    Map<String, String> labelsMap = new HashMap<String, String>();
-    labelsMap.put("is-runtime", "true");
     mailService.alertUsersUnusedDiskWarningThreshold(
         Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new ListPersistentDiskResponse()
+        new Disk()
             .diskType(DiskType.SSD)
-            .labels(labelsMap)
+            .gceRuntime(true)
             .size(123)
-            .auditInfo(
-                new AuditInfo()
-                    .createdDate(
-                        FakeClockConfiguration.NOW
-                            .toInstant()
-                            .minus(Duration.ofDays(20))
-                            .toString())
-                    .creator(user.getUsername())),
+            .createdDate(
+                FakeClockConfiguration.NOW.toInstant().minus(Duration.ofDays(20)).toString())
+            .creator(user.getUsername()),
         true,
         14,
         20.0);
@@ -335,23 +325,16 @@ public class MailServiceImplTest {
   @Test
   public void testAlertUsersUnusedDiskWarning_detached() throws Exception {
     DbUser user = createDbUser();
-    Map<String, String> labelsMap = new HashMap<String, String>();
-    labelsMap.put("is-runtime", "true");
     mailService.alertUsersUnusedDiskWarningThreshold(
         Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new ListPersistentDiskResponse()
+        new Disk()
             .diskType(DiskType.SSD)
-            .labels(labelsMap)
+            .gceRuntime(true)
             .size(123)
-            .auditInfo(
-                new AuditInfo()
-                    .createdDate(
-                        FakeClockConfiguration.NOW
-                            .toInstant()
-                            .minus(Duration.ofDays(20))
-                            .toString())
-                    .creator(user.getUsername())),
+            .createdDate(
+                FakeClockConfiguration.NOW.toInstant().minus(Duration.ofDays(20)).toString())
+            .creator(user.getUsername()),
         false,
         14,
         20.0);

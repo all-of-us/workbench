@@ -105,6 +105,11 @@ public interface LeonardoMapper {
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(
+      target = "googleProject",
+      source = "cloudContext",
+      qualifiedByName = "cloudContextToGoogleProject")
+  @Mapping(target = "persistentDiskId", source = "id")
   // these 2 values are set by listDisksAfterMapper()
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "gceRuntime", ignore = true)

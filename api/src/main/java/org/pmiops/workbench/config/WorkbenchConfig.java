@@ -422,6 +422,8 @@ public class WorkbenchConfig {
     public Integer usersPerAccessExpirationEmailTask;
     // Number of workspaces to process within a single delete workspace environments task.
     public Integer workspacesPerDeleteWorkspaceEnvironmentsTask;
+    // Number of persistent disks to process within a single check persistent disks task.
+    public Integer disksPerCheckPersistentDiskTask;
   }
 
   /**

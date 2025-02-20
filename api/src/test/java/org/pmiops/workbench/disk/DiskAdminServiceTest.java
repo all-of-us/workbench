@@ -13,8 +13,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import jakarta.mail.MessagingException;
@@ -22,14 +20,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +44,9 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.C
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -136,33 +130,31 @@ public class DiskAdminServiceTest {
 
   @Test
   public void testCheckPersistentDisksNoDisks() {
-    stubDisks(Collections.emptyList());
-
-    assertDoesNotThrow(() -> service.checkPersistentDisks());
+    assertDoesNotThrow(() -> service.checkPersistentDisks(Collections.emptyList()));
 
     verifyNoInteractions(mockMailService);
   }
 
   @Test
   public void testCheckPersistentDisksNoMatchingNotifications() {
-    stubDisks(
-        List.of(
-            idleDisk(Duration.ofDays(0L)),
-            idleDisk(Duration.ofDays(1L)),
-            idleDisk(Duration.ofDays(13L)),
-            idleDisk(Duration.ofDays(31L)),
-            idleDisk(Duration.ofDays(119L))));
-
-    assertDoesNotThrow(() -> service.checkPersistentDisks());
+    assertDoesNotThrow(
+        () ->
+            service.checkPersistentDisks(
+                List.of(
+                    idleDisk(Duration.ofDays(0L)),
+                    idleDisk(Duration.ofDays(1L)),
+                    idleDisk(Duration.ofDays(13L)),
+                    idleDisk(Duration.ofDays(31L)),
+                    idleDisk(Duration.ofDays(119L)))));
 
     verifyNoInteractions(mockMailService);
   }
 
   @Test
   public void testCheckPersistentDisksSkipsNonReady() {
-    stubDisks(List.of(idleDisk(Duration.ofDays(14L)).status(DiskStatus.FAILED)));
+    var disks = List.of(idleDisk(Duration.ofDays(14L)).status(DiskStatus.FAILED));
 
-    assertDoesNotThrow(() -> service.checkPersistentDisks());
+    assertDoesNotThrow(() -> service.checkPersistentDisks(disks));
 
     verifyNoInteractions(mockMailService);
   }
@@ -170,9 +162,8 @@ public class DiskAdminServiceTest {
   @Test
   public void testCheckPersistentDisksInitialThresholdNotification() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
-    stubDisks(List.of(idleDisk(Duration.ofDays(14L))));
 
-    assertDoesNotThrow(() -> service.checkPersistentDisks());
+    assertDoesNotThrow(() -> service.checkPersistentDisks(List.of(idleDisk(Duration.ofDays(14L)))));
 
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
@@ -182,13 +173,14 @@ public class DiskAdminServiceTest {
   @Test
   public void testCheckPersistentDisksPeriodicThresholdNotification() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
-    stubDisks(
-        List.of(
-            idleDisk(Duration.ofDays(30L)),
-            idleDisk(Duration.ofDays(60L)),
-            idleDisk(Duration.ofDays(90L))));
 
-    assertDoesNotThrow(() -> service.checkPersistentDisks());
+    assertDoesNotThrow(
+        () ->
+            service.checkPersistentDisks(
+                List.of(
+                    idleDisk(Duration.ofDays(30L)),
+                    idleDisk(Duration.ofDays(60L)),
+                    idleDisk(Duration.ofDays(90L)))));
 
     verify(mockMailService, times(3))
         .alertUsersUnusedDiskWarningThreshold(
@@ -198,9 +190,8 @@ public class DiskAdminServiceTest {
   @Test
   public void testCheckPersistentDisksMultipleOwners() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1, user2));
-    stubDisks(List.of(idleDisk(Duration.ofDays(30L))));
 
-    assertDoesNotThrow(() -> service.checkPersistentDisks());
+    assertDoesNotThrow(() -> service.checkPersistentDisks(List.of(idleDisk(Duration.ofDays(30L)))));
 
     verify(mockMailService, times(1))
         .alertUsersUnusedDiskWarningThreshold(
@@ -211,11 +202,10 @@ public class DiskAdminServiceTest {
   public void testCheckPersistentDisksSkipsUnknownUser() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
 
-    ListPersistentDiskResponse mysteryDisk = idleDisk(Duration.ofDays(14L));
-    mysteryDisk.getAuditInfo().setCreator("404@aou.org");
-    stubDisks(List.of(mysteryDisk, idleDisk(Duration.ofDays(30L))));
+    Disk mysteryDisk = idleDisk(Duration.ofDays(14L)).creator("404@aou.org");
+    var disks = List.of(mysteryDisk, idleDisk(Duration.ofDays(30L)));
 
-    assertDoesNotThrow(() -> service.checkPersistentDisks());
+    assertDoesNotThrow(() -> service.checkPersistentDisks(disks));
 
     // Skips the unknown user, but still sends the rest.
     verify(mockMailService)
@@ -226,11 +216,6 @@ public class DiskAdminServiceTest {
   @Test
   public void testCheckPersistentDisksContinuesOnMailFailure() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
-    stubDisks(
-        List.of(
-            idleDisk(Duration.ofDays(14L)),
-            idleDisk(Duration.ofDays(14L)),
-            idleDisk(Duration.ofDays(14L))));
 
     doThrow(MessagingException.class)
         // Throw on the first call only.
@@ -238,7 +223,14 @@ public class DiskAdminServiceTest {
         .when(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(any(), any(), any(), anyBoolean(), anyInt(), any());
 
-    assertThrows(ServerErrorException.class, () -> service.checkPersistentDisks());
+    assertThrows(
+        ServerErrorException.class,
+        () ->
+            service.checkPersistentDisks(
+                List.of(
+                    idleDisk(Duration.ofDays(14L)),
+                    idleDisk(Duration.ofDays(14L)),
+                    idleDisk(Duration.ofDays(14L)))));
 
     // 3 calls, including the initial throwing call.
     verify(mockMailService, times(3))
@@ -248,13 +240,12 @@ public class DiskAdminServiceTest {
   @Test
   public void testCheckPersistentDisksFreeTier() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
-    stubDisks(List.of(idleDisk(Duration.ofDays(14L))));
 
     workspace.setBillingAccountName(config.billing.initialCreditsBillingAccountName());
     when(mockInitialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(workspace))
         .thenReturn(123.0);
 
-    assertDoesNotThrow(() -> service.checkPersistentDisks());
+    assertDoesNotThrow(() -> service.checkPersistentDisks(List.of(idleDisk(Duration.ofDays(14L)))));
 
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
@@ -264,7 +255,7 @@ public class DiskAdminServiceTest {
   @Test
   public void testIsDiskAttached_Gce_attached() throws ApiException {
     int diskId = 1;
-    ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
+    Disk disk = new Disk().persistentDiskId(diskId).gceRuntime(true).googleProject("test-project");
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(diskId);
     // need to use a separate call because this returns a LeonardoRuntimeConfig object instead
@@ -274,14 +265,14 @@ public class DiskAdminServiceTest {
         .thenReturn(
             List.of(new LeonardoListRuntimeResponse().runtimeConfig(runtimeConfigResponse)));
 
-    assertThat(service.isDiskAttached(diskResponse, "test-project")).isTrue();
+    assertThat(service.isDiskAttached(disk)).isTrue();
   }
 
   @Test
   public void testIsDiskAttached_Gce_multiple() throws ApiException {
     int diskId = 1;
     int otherDiskId = 2;
-    ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
+    Disk disk = new Disk().persistentDiskId(diskId).gceRuntime(true).googleProject("test-project");
 
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse1 =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(diskId);
@@ -299,14 +290,14 @@ public class DiskAdminServiceTest {
                 new LeonardoListRuntimeResponse().runtimeConfig(runtimeConfigResponse1),
                 new LeonardoListRuntimeResponse().runtimeConfig(runtimeConfigResponse2)));
 
-    assertThat(service.isDiskAttached(diskResponse, "test-project")).isTrue();
+    assertThat(service.isDiskAttached(disk)).isTrue();
   }
 
   @Test
   public void testIsDiskAttached_Gce_mismatch() throws ApiException {
     int diskId = 1;
     int otherDiskId = 2;
-    ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
+    Disk disk = new Disk().persistentDiskId(diskId).gceRuntime(true).googleProject("test-project");
 
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse2 =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(otherDiskId);
@@ -317,42 +308,38 @@ public class DiskAdminServiceTest {
         .thenReturn(
             List.of(new LeonardoListRuntimeResponse().runtimeConfig(runtimeConfigResponse2)));
 
-    assertThat(service.isDiskAttached(diskResponse, "test-project")).isFalse();
+    assertThat(service.isDiskAttached(disk)).isFalse();
   }
 
   @Test
   public void testIsDiskAttached_Gce_no_runtimes() throws ApiException {
     int diskId = 1;
-    ListPersistentDiskResponse diskResponse = new ListPersistentDiskResponse().id(diskId);
+    Disk disk = new Disk().persistentDiskId(diskId).googleProject("test-project");
 
     when(mockLeonardoApiClient.listRuntimesByProjectAsService(anyString()))
         .thenReturn(Collections.emptyList());
 
-    assertThat(service.isDiskAttached(diskResponse, "test-project")).isFalse();
+    assertThat(service.isDiskAttached(disk)).isFalse();
   }
 
   @Test
   public void testIsDiskAttached_GKE_App_attached() throws ApiException {
     String diskName = "my-disk-name";
-    ListPersistentDiskResponse diskResponse =
-        new ListPersistentDiskResponse()
-            .name(diskName)
-            .labels(Map.of(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(AppType.RSTUDIO)));
+
+    Disk disk = new Disk().googleProject("test-project").name(diskName).appType(AppType.RSTUDIO);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(List.of(new UserAppEnvironment().diskName(diskName)));
 
-    assertThat(service.isDiskAttached(diskResponse, "test-project")).isTrue();
+    assertThat(service.isDiskAttached(disk)).isTrue();
   }
 
   @Test
   public void testIsDiskAttached_GKE_App_multiple() throws ApiException {
     String diskName = "my-disk-name";
     String otherDiskName = "other-disk-name";
-    ListPersistentDiskResponse diskResponse =
-        new ListPersistentDiskResponse()
-            .name(diskName)
-            .labels(Map.of(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(AppType.RSTUDIO)));
+
+    Disk disk = new Disk().googleProject("test-project").name(diskName).appType(AppType.RSTUDIO);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(
@@ -360,61 +347,50 @@ public class DiskAdminServiceTest {
                 new UserAppEnvironment().diskName(diskName),
                 new UserAppEnvironment().diskName(otherDiskName)));
 
-    assertThat(service.isDiskAttached(diskResponse, "test-project")).isTrue();
+    assertThat(service.isDiskAttached(disk)).isTrue();
   }
 
   @Test
   public void testIsDiskAttached_GKE_App_mismatch() throws ApiException {
     String diskName = "my-disk-name";
     String otherDiskName = "other-disk-name";
-    ListPersistentDiskResponse diskResponse =
-        new ListPersistentDiskResponse()
-            .name(diskName)
-            .labels(Map.of(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(AppType.RSTUDIO)));
+
+    Disk disk = new Disk().googleProject("test-project").name(diskName).appType(AppType.RSTUDIO);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(List.of(new UserAppEnvironment().diskName(otherDiskName)));
 
-    assertThat(service.isDiskAttached(diskResponse, "test-project")).isFalse();
+    assertThat(service.isDiskAttached(disk)).isFalse();
   }
 
   @Test
   public void testIsDiskAttached_GKE_App_no_apps() throws ApiException {
     String diskName = "my-disk-name";
-    ListPersistentDiskResponse diskResponse =
-        new ListPersistentDiskResponse()
-            .name(diskName)
-            .labels(Map.of(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(AppType.RSTUDIO)));
+
+    Disk disk = new Disk().googleProject("test-project").name(diskName).appType(AppType.RSTUDIO);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(Collections.emptyList());
 
-    assertThat(service.isDiskAttached(diskResponse, "test-project")).isFalse();
+    assertThat(service.isDiskAttached(disk)).isFalse();
   }
 
-  private ListPersistentDiskResponse idleDisk(Duration idleTime) {
+  private Disk idleDisk(Duration idleTime) {
     return idleDiskForProjectAndCreator(
         workspace.getGoogleProject(), user1.getUsername(), idleTime);
   }
 
-  private ListPersistentDiskResponse idleDiskForProjectAndCreator(
+  private Disk idleDiskForProjectAndCreator(
       String googleProject, String creatorEmail, Duration idleTime) {
-    return new ListPersistentDiskResponse()
+    return new Disk()
         .diskType(DiskType.STANDARD)
         .status(DiskStatus.READY)
-        .cloudContext(
-            new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(googleProject))
         .name("my-disk")
         .size(200)
-        .auditInfo(
-            new AuditInfo()
-                .creator(creatorEmail)
-                .createdDate(NOW.minus(idleTime.plus(Duration.ofDays(1L))).toString())
-                .dateAccessed(NOW.minus(idleTime).toString()));
-  }
-
-  private void stubDisks(List<ListPersistentDiskResponse> disks) {
-    when(mockLeonardoApiClient.listDisksAsService()).thenReturn(disks);
+        .creator(creatorEmail)
+        .createdDate(NOW.minus(idleTime.plus(Duration.ofDays(1L))).toString())
+        .dateAccessed(NOW.minus(idleTime).toString())
+        .googleProject(googleProject);
   }
 
   private void stubWorkspaceOwners(DbWorkspace w, List<DbUser> users) {

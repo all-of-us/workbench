@@ -2398,7 +2398,7 @@ paths:
       security: []
       responses:
         204:
-          description: Disks were checked and handled successfully.
+          description: Disks were queued for idleness checking.
           content: {}
   /v1/cron/deleteUnsharedWorkspaceEnvironments:
     get:
@@ -4457,6 +4457,29 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WorkspaceNamespaceList'
+        required: true
+      responses:
+        200:
+          description: Check Credits Expiration For User IDs Task Ran Successfully
+          content: { }
+      x-codegen-request-body-name: request
+  /v1/cloudTask/checkPersistentDisks:
+    post:
+      tags:
+        - cloudTaskEnvironments
+        - cloudTask
+      description: 'Checks a batch of persistent disks to determine if they are old / detached. 
+        Notifies workspace owners at configurable intervals about old disks.'
+      operationId: checkPersistentDisksBatch
+      security: [ ]
+      requestBody:
+        description: Persistent disks to check for idleness.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Disk'
         required: true
       responses:
         200:
@@ -7259,6 +7282,7 @@ components:
       - pd-standard
       - pd-ssd
     Disk:
+      description: The configuration of a persistent disk, returned in disk responses
       required:
       - blockSize
       - diskType
@@ -7300,7 +7324,12 @@ components:
         zone:
           type: string
           description: The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
-      description: The configuration of a persistent disk, returned in disk responses
+        googleProject:
+          type: string
+          description: The Google Project the disk was created in.
+        persistentDiskId:
+          type: integer
+          description: The ID of this persistent disk.
     WorkspaceListResponse:
       required:
       - items

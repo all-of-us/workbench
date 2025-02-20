@@ -18,6 +18,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
@@ -50,6 +51,8 @@ public class TaskQueueService {
       new TaskQueuePair("duplicateWorkspaceQueue", "duplicateWorkspace");
   public static final TaskQueuePair EGRESS_EVENT =
       new TaskQueuePair("egressEventQueue", "processEgressEvent");
+  public static final TaskQueuePair PERSISTENT_DISKS =
+      new TaskQueuePair("checkPersistentDiskQueue", "checkPersistentDisks");
   public static final TaskQueuePair SYNCHRONIZE_ACCESS =
       new TaskQueuePair("synchronizeAccessQueue", "synchronizeUserAccess");
 
@@ -223,6 +226,12 @@ public class TaskQueueService {
         userIds,
         workbenchConfig.offlineBatch.usersPerCheckInitialCreditsExpirationTask,
         INITIAL_CREDITS_EXPIRATION);
+  }
+
+  public void groupAndPushCheckPersistentDiskTasks(List<Disk> disks) {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    createAndPushAll(
+        disks, workbenchConfig.offlineBatch.disksPerCheckPersistentDiskTask, PERSISTENT_DISKS);
   }
 
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {

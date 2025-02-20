@@ -4,10 +4,10 @@ import jakarta.annotation.Nullable;
 import jakarta.mail.MessagingException;
 import java.time.Instant;
 import java.util.List;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
@@ -43,7 +43,7 @@ public interface MailService {
   void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
       DbWorkspace diskWorkspace,
-      ListPersistentDiskResponse disk,
+      Disk disk,
       boolean isDiskAttached,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)

@@ -18,8 +18,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -35,11 +33,12 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.utils.BillingUtils;
-import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +55,6 @@ public class DiskAdminService {
   private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
   private final LeonardoApiClient leonardoApiClient;
-  private final LeonardoMapper leonardoMapper;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> configProvider;
   private final UserDao userDao;
@@ -68,7 +66,6 @@ public class DiskAdminService {
       FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
       LeonardoApiClient leonardoApiClient,
-      LeonardoMapper leonardoMapper,
       MailService mailService,
       Provider<WorkbenchConfig> configProvider,
       UserDao userDao,
@@ -78,27 +75,23 @@ public class DiskAdminService {
     this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
     this.leonardoApiClient = leonardoApiClient;
-    this.leonardoMapper = leonardoMapper;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
   }
 
-  public void checkPersistentDisks() {
-    // Fetch disks as the service, which gets all disks for all workspaces.
-    final List<ListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
-
+  public void checkPersistentDisks(List<Disk> disks) {
     log.info(String.format("Checking %d persistent disks for idleness...", disks.size()));
 
     // Bucket disks by days since last access.
     final Instant now = clock.instant();
-    Map<Integer, List<ListPersistentDiskResponse>> disksByDaysUnused =
+    Map<Integer, List<Disk>> disksByDaysUnused =
         disks.stream()
             .filter(disk -> DiskStatus.READY.equals(disk.getStatus()))
             .collect(
                 Collectors.groupingBy(
                     disk -> {
-                      Instant lastAccessed = Instant.parse(disk.getAuditInfo().getDateAccessed());
+                      Instant lastAccessed = Instant.parse(disk.getDateAccessed());
                       return (int) Duration.between(lastAccessed, now).toDays();
                     }));
 
@@ -107,7 +100,9 @@ public class DiskAdminService {
     int notifySkip = 0;
     int notifyFail = 0;
     Exception lastException = null;
-    for (int daysUnused : disksByDaysUnused.keySet()) {
+    for (var entry : disksByDaysUnused.entrySet()) {
+      int daysUnused = entry.getKey();
+      List<Disk> disksForDay = entry.getValue();
       if (daysUnused <= 0) {
         // Our periodic notifications should not trigger on day 0.
         continue;
@@ -118,7 +113,7 @@ public class DiskAdminService {
         continue;
       }
 
-      for (ListPersistentDiskResponse disk : disksByDaysUnused.get(daysUnused)) {
+      for (Disk disk : disksForDay) {
         try {
           if (notifyForUnusedDisk(disk, daysUnused)) {
             notifySuccess++;
@@ -130,7 +125,7 @@ public class DiskAdminService {
               Level.WARNING,
               String.format(
                   "checkPersistentDisks: failed to send notification for disk '%s/%s'",
-                  leonardoMapper.toGoogleProject(disk.getCloudContext()), disk.getName()),
+                  disk.getGoogleProject(), disk.getName()),
               e);
           lastException = e;
           notifyFail++;
@@ -152,25 +147,24 @@ public class DiskAdminService {
   }
 
   // Returns true if an email is sent.
-  private boolean notifyForUnusedDisk(ListPersistentDiskResponse disk, int daysUnused)
-      throws MessagingException {
-    String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
+  private boolean notifyForUnusedDisk(Disk disk, int daysUnused) throws MessagingException {
     final boolean attached;
     try {
-      attached = isDiskAttached(disk, googleProject);
+      attached = isDiskAttached(disk);
     } catch (ApiException | NullPointerException ex) {
       log.warning(
           String.format(
-              "skipping disk '%s' error while getting disk status", disk.getName(), googleProject));
+              "skipping disk '%s/%s' error while getting disk status",
+              disk.getName(), disk.getGoogleProject()));
       return false;
     }
 
-    Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(googleProject);
+    Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(disk.getGoogleProject());
     if (workspace.isEmpty()) {
       log.warning(
           String.format(
               "skipping disk '%s' associated with unknown Google project '%s'",
-              disk.getName(), googleProject));
+              disk.getName(), disk.getGoogleProject()));
       return false;
     }
 
@@ -184,9 +178,9 @@ public class DiskAdminService {
             .filter(
                 entry ->
                     WorkspaceAccessLevel.OWNER.toString().equals(entry.getValue().getAccessLevel())
-                        || entry.getKey().equals(disk.getAuditInfo().getCreator()))
+                        || entry.getKey().equals(disk.getCreator()))
             .map(Entry::getKey)
-            .collect(Collectors.toList());
+            .toList();
 
     // Lookup these users in the database, so we can get their contact email, etc.
     List<DbUser> dbUsers = userDao.findUsersByUsernameIn(notifyUsernames);
@@ -217,12 +211,11 @@ public class DiskAdminService {
   }
 
   @VisibleForTesting
-  public boolean isDiskAttached(ListPersistentDiskResponse diskResponse, String googleProject)
-      throws ApiException {
-    final String diskName = diskResponse.getName();
+  public boolean isDiskAttached(Disk disk) throws ApiException {
+    final String diskName = disk.getName();
 
-    if (leonardoMapper.toApiListDisksResponse(diskResponse).isGceRuntime()) {
-      return leonardoApiClient.listRuntimesByProjectAsService(googleProject).stream()
+    if (disk.isGceRuntime()) {
+      return leonardoApiClient.listRuntimesByProjectAsService(disk.getGoogleProject()).stream()
           // this filter/map follows the discriminator logic in the source Leonardo Swagger
           // for OneOfRuntimeConfigInResponse
           .filter(
@@ -242,9 +235,9 @@ public class DiskAdminService {
                           LeonardoGceWithPdConfigInResponse.class))
           .anyMatch(
               gceWithPdConfig ->
-                  diskResponse.getId().equals(gceWithPdConfig.getPersistentDiskId()));
+                  disk.getPersistentDiskId().equals(gceWithPdConfig.getPersistentDiskId()));
     } else {
-      return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()
+      return leonardoApiClient.listAppsInProjectAsService(disk.getGoogleProject()).stream()
           .anyMatch(userAppEnvironment -> diskName.equals(userAppEnvironment.getDiskName()));
     }
   }

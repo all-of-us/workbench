@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.disks.DiskAdminService;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoStatusUtils;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +24,18 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
   private static final Logger LOGGER =
       Logger.getLogger(CloudTaskEnvironmentsController.class.getName());
 
+  private final DiskAdminService diskAdminService;
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<Stopwatch> stopwatchProvider;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public CloudTaskEnvironmentsController(
+      DiskAdminService diskAdminService,
       LeonardoApiClient leonardoApiClient,
       Provider<Stopwatch> stopwatchProvider,
       WorkspaceService workspaceService) {
+    this.diskAdminService = diskAdminService;
     this.leonardoApiClient = leonardoApiClient;
     this.stopwatchProvider = stopwatchProvider;
     this.workspaceService = workspaceService;
@@ -57,6 +62,21 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
         String.format(
             "Attempted to delete unshared environments for %d workspaces (%d failures) in %s.",
             workspaceNamespaces.size(), failedUserRoles, formatDurationPretty(elapsed)));
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> checkPersistentDisksBatch(List<Disk> persistentDiskBatch) {
+    LOGGER.info(String.format("Checking %s persistent disks.", persistentDiskBatch.size()));
+
+    var stopwatch = stopwatchProvider.get().start();
+    diskAdminService.checkPersistentDisks(persistentDiskBatch);
+    var elapsed = stopwatch.stop().elapsed();
+    LOGGER.info(
+        String.format(
+            "Completed checking %s persistent disks in %s.",
+            persistentDiskBatch.size(), formatDurationPretty(elapsed)));
 
     return ResponseEntity.ok().build();
   }
