@@ -798,11 +798,7 @@ public class RuntimeControllerTest {
             testLeoRuntime
                 .runtimeConfig(leoGceConfig)
                 .diskConfig(
-                    new LeonardoDiskConfig()
-                        .diskType(LeonardoDiskType.SSD)
-                        .name("pd")
-                        .blockSize(100)
-                        .size(200)));
+                    new LeonardoDiskConfig().diskType(LeonardoDiskType.SSD).name("pd").size(200)));
 
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 

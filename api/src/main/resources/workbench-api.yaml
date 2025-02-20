@@ -7284,7 +7284,6 @@ components:
     Disk:
       description: The configuration of a persistent disk, returned in disk responses
       required:
-      - blockSize
       - diskType
       - name
       - size
@@ -7301,9 +7300,6 @@ components:
           description: Size of persistent disk in GB
         diskType:
           $ref: '#/components/schemas/DiskType'
-        blockSize:
-          type: integer
-          description: Block size of persistent disk in bytes
         appType:
           $ref: '#/components/schemas/AppType'
         gceRuntime:
@@ -9039,10 +9035,6 @@ components:
           description: The size in GB that the persistent disk is to be updated to.
         diskType:
           $ref: '#/components/schemas/DiskType'
-        blockSize:
-          type: integer
-          description: The block size in bytes that the persistent disk is to be updated
-            to.
       description: Updates an existing persistent disk
     KubernetesRuntimeConfig:
       required:
