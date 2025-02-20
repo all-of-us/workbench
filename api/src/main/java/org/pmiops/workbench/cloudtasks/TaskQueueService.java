@@ -30,8 +30,9 @@ import org.springframework.stereotype.Service;
 public class TaskQueueService {
 
   // when adding or updating a queue, it's important to also update:
-  // queue.yaml (the deployment process uses this file to actually create the queue)
-  // workbench-terraform-modules/modules/workbench/modules/monitoring/modules/alert_policies/assets/alert_policies
+  // - queue.yaml (the deployment process uses this file to actually create the queue)
+  // - the alerting policies in the workbench-terraform-modules repo, at:
+  // /modules/workbench/modules/monitoring/modules/alert_policies/assets/alert_policies
   public static final TaskQueuePair ACCESS_EXPIRATION_EMAIL =
       new TaskQueuePair("accessExpirationEmailQueue", "sendAccessExpirationEmails");
   public static final TaskQueuePair AUDIT_PROJECTS =

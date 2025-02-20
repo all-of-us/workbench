@@ -4147,7 +4147,7 @@ paths:
       tags:
       - cloudTaskRdrExport
       - cloudTask
-      description: Task handler which handle request from cloud task queue rdrQueueTest
+      description: Task handler which handles the request from cloud task queue rdrExportQueue
         to send Researcher data
       operationId: exportResearcherDataBatch
       security: []
@@ -4183,7 +4183,7 @@ paths:
       tags:
       - cloudTaskRdrExport
       - cloudTask
-      description: Task handler which handle request from cloud task queue rdrQueueTest
+      description: Task handler which handles the request from cloud task queue rdrExportQueue
         to send Workspace data
       operationId: exportWorkspaceDataBatch
       security: []
