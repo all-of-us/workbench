@@ -11,16 +11,17 @@ const navigateToAnalysisTab = async (browser) => {
   await utils.dismissLeoAuthErrorModal(page);
   await page.goto(config.urlRoot()+'/workspaces/aou-rw-test-53ff4756/mohstest/data')
   await utils.dismissLeoAuthErrorModal(page);
-  const analysisTab = await page.waitForSelector('div[role="button"][aria-label="Analysis"]')
-  await analysisTab.click()
+  await utils.dismissPrivacyWarning(page);
+  await tu.jsClick(page,'div[role="button"][aria-label="Analysis"]')
+  await tu.jsClick(page,'div[role="button"][aria-label="Analysis"]')
+  await page.waitForSelector('h3[aria-label="Your Analyses"]')
   return page
 }
 
 browserTest('create an application', async browser => {
   const page = await navigateToAnalysisTab(browser)
 
-  const startButton = await page.waitForSelector('div[role="button"][aria-label="start"]')
-  await startButton.click()
+  await tu.jsClick(page,'div[role="button"][aria-label="start"]')
 
   await page.waitForSelector('div[aria-label="Select Applications Modal"]')
 
@@ -29,9 +30,8 @@ browserTest('create an application', async browser => {
 
   await page.waitForSelector('#application-list-dropdown').then(eh => eh.evaluate(e => e.click()))
 
-  const jupyterOption = await page.waitForSelector('li[role="option"][aria-label="Jupyter"]')
-  await jupyterOption.click()
-  await nextButton.click()
+  await tu.jsClick(page,'li[role="option"][aria-label="Jupyter"]')
+  await tu.jsClick(page,'div[role="button"][aria-label="next"]')
 
   await page.waitForFunction(() => !document.querySelector('div[aria-label="Select Applications Modal"]'));
   await page.waitForSelector('div[aria-label="New Notebook Modal"]')
@@ -41,11 +41,8 @@ browserTest('create an application', async browser => {
 browserTest('Cancel the creation of an application', async browser => {
   const page = await navigateToAnalysisTab(browser)
 
-  const startButton = await page.waitForSelector('div[role="button"][aria-label="start"]')
-  await startButton.click()
-
-  const closeButton = await page.waitForSelector('div[role="button"][aria-label="close"]')
-  await closeButton.click()
+  await tu.jsClick(page,'div[role="button"][aria-label="start"]')
+  await tu.jsClick(page,'div[role="button"][aria-label="close"]')
 
   await page.waitForFunction(() => !document.querySelector('div[aria-label="Select Applications Modal"]'));
 

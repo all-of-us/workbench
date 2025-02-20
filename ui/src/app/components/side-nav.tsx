@@ -244,19 +244,26 @@ export const SideNavItem = (props: SideNavItemProps) => {
 };
 
 export interface SideNavProps {
+  minimal?: boolean; // If true, hides everything but branding and essential menu links
   profile: Profile;
   onToggleSideNav: Function;
 }
 
 export const SideNav = (props: SideNavProps) => {
   const [showAdminOptions, setShowAdminOptions] = useState(false);
-  const [showUserOptions, setShowUserOptions] = useState(false);
+  // In the case that minimal is provided, we want to show the user options by default, because
+  // the only option will be to sign out. It would be confising to have to expand a menu to see a single option.
+  const [showUserOptions, setShowUserOptions] = useState(!!props.minimal);
 
   const onToggleAdmin = () => setShowAdminOptions(!showAdminOptions);
 
   const onToggleUser = () => setShowUserOptions(!showUserOptions);
 
-  const { profile, onToggleSideNav } = props;
+  const { minimal, profile, onToggleSideNav } = props;
+
+  const showAdminMenu =
+    !minimal &&
+    hasAuthorityForAction(profile, AuthorityGuardedAction.SHOW_ADMIN_MENU);
 
   const openContactWidget = () => {
     openZendeskWidget(
@@ -294,6 +301,7 @@ export const SideNav = (props: SideNavProps) => {
         containsSubItems={true}
       />
       {showUserOptions &&
+        !minimal &&
         userOptionsSubMenu.map((menu) => {
           return (
             <SideNavItem
@@ -318,29 +326,33 @@ export const SideNav = (props: SideNavProps) => {
           )}
         />
       )}
-      <SideNavItem
-        icon='home'
-        content='Home'
-        onToggleSideNav={() => onToggleSideNav()}
-        href='/'
-        active={homeActive()}
-      />
-      <SideNavItem
-        icon='applications'
-        content='Your Workspaces'
-        onToggleSideNav={() => onToggleSideNav()}
-        href='/workspaces'
-        active={workspacesActive()}
-        disabled={!hasRegisteredTierAccess(profile)}
-      />
-      <SideNavItem
-        icon='star'
-        content='Featured Workspaces'
-        onToggleSideNav={() => onToggleSideNav()}
-        href='/library'
-        active={libraryActive()}
-        disabled={!hasRegisteredTierAccess(profile)}
-      />
+      {!minimal && (
+        <>
+          <SideNavItem
+            icon='home'
+            content='Home'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/'
+            active={homeActive()}
+          />
+          <SideNavItem
+            icon='applications'
+            content='Your Workspaces'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/workspaces'
+            active={workspacesActive()}
+            disabled={!hasRegisteredTierAccess(profile)}
+          />
+          <SideNavItem
+            icon='star'
+            content='Featured Workspaces'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/library'
+            active={libraryActive()}
+            disabled={!hasRegisteredTierAccess(profile)}
+          />
+        </>
+      )}
       <SideNavItem
         icon='help'
         content='User Support Hub'
@@ -354,10 +366,8 @@ export const SideNav = (props: SideNavProps) => {
         onToggleSideNav={() => onToggleSideNav()}
         parentOnClick={() => openContactWidget()}
       />
-      {hasAuthorityForAction(
-        profile,
-        AuthorityGuardedAction.SHOW_ADMIN_MENU
-      ) && (
+
+      {showAdminMenu && (
         <SideNavItem
           icon='user'
           content='Admin'

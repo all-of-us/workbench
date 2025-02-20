@@ -52,7 +52,10 @@ const styles = reactStyles({
 const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
 
-export const NavBar = () => {
+interface NavBarProps {
+  minimal?: boolean; // If true, hides everything but branding and essential menu links
+}
+export const NavBar = ({ minimal }: NavBarProps) => {
   const [showSideNav, setShowSideNav] = useState(false);
   const [barsTransform, setBarsTransform] = useState(barsTransformNotRotated);
   const [hovering, setHovering] = useState(false);
@@ -111,20 +114,24 @@ export const NavBar = () => {
         ></ClrIcon>
       </div>
       <SignedInAouHeaderWithDisplayTag />
-      <Breadcrumb />
-      <AccessRenewalNotificationMaybe
-        accessTier={AccessTierShortNames.Registered}
-      />
-      <AccessRenewalNotificationMaybe
-        accessTier={AccessTierShortNames.Controlled}
-      />
-      <StatusAlertBannerMaybe />
-      <TakeDemographicSurveyV2BannerMaybe />
-      <NewUserSatisfactionSurveyBannerMaybe />
-      <CTAvailableBannerMaybe />
+      {!minimal && (
+        <>
+          <Breadcrumb />
+          <AccessRenewalNotificationMaybe
+            accessTier={AccessTierShortNames.Registered}
+          />
+          <AccessRenewalNotificationMaybe
+            accessTier={AccessTierShortNames.Controlled}
+          />
+          <StatusAlertBannerMaybe />
+          <TakeDemographicSurveyV2BannerMaybe />
+          <NewUserSatisfactionSurveyBannerMaybe />
+          <CTAvailableBannerMaybe />
+        </>
+      )}
       {showSideNav && (
         <SideNav
-          profile={profile}
+          {...{ minimal, profile }}
           // Passing the function itself deliberately, we want to be able to
           // toggle the nav whenever we click anything in it
           onToggleSideNav={onToggleSideNav}

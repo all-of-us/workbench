@@ -203,6 +203,7 @@ export const AppFilesList = withCurrentWorkspace()(
           <FlexColumn>
             <FlexRow style={styles.spacing}>
               <ListPageHeader
+                aria-label='Your Analyses'
                 style={{
                   paddingTop: '1rem',
                   paddingRight: '2.25rem',
