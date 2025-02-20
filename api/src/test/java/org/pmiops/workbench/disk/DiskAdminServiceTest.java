@@ -255,7 +255,7 @@ public class DiskAdminServiceTest {
   @Test
   public void testIsDiskAttached_Gce_attached() throws ApiException {
     int diskId = 1;
-    Disk disk = new Disk().persistentDiskId(diskId).gceRuntime(true).googleProject("test-project");
+    Disk disk = gceDisk(diskId);
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(diskId);
     // need to use a separate call because this returns a LeonardoRuntimeConfig object instead
@@ -272,7 +272,7 @@ public class DiskAdminServiceTest {
   public void testIsDiskAttached_Gce_multiple() throws ApiException {
     int diskId = 1;
     int otherDiskId = 2;
-    Disk disk = new Disk().persistentDiskId(diskId).gceRuntime(true).googleProject("test-project");
+    Disk disk = gceDisk(diskId);
 
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse1 =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(diskId);
@@ -297,7 +297,7 @@ public class DiskAdminServiceTest {
   public void testIsDiskAttached_Gce_mismatch() throws ApiException {
     int diskId = 1;
     int otherDiskId = 2;
-    Disk disk = new Disk().persistentDiskId(diskId).gceRuntime(true).googleProject("test-project");
+    Disk disk = gceDisk(diskId);
 
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse2 =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(otherDiskId);
@@ -314,7 +314,7 @@ public class DiskAdminServiceTest {
   @Test
   public void testIsDiskAttached_Gce_no_runtimes() throws ApiException {
     int diskId = 1;
-    Disk disk = new Disk().persistentDiskId(diskId).gceRuntime(true).googleProject("test-project");
+    Disk disk = gceDisk(diskId);
 
     when(mockLeonardoApiClient.listRuntimesByProjectAsService(anyString()))
         .thenReturn(Collections.emptyList());
@@ -326,7 +326,7 @@ public class DiskAdminServiceTest {
   public void testIsDiskAttached_GKE_App_attached() throws ApiException {
     String diskName = "my-disk-name";
 
-    Disk disk = new Disk().googleProject("test-project").name(diskName).appType(AppType.RSTUDIO);
+    Disk disk = rStudioDisk(diskName);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(List.of(new UserAppEnvironment().diskName(diskName)));
@@ -339,7 +339,7 @@ public class DiskAdminServiceTest {
     String diskName = "my-disk-name";
     String otherDiskName = "other-disk-name";
 
-    Disk disk = new Disk().googleProject("test-project").name(diskName).appType(AppType.RSTUDIO);
+    Disk disk = rStudioDisk(diskName);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(
@@ -355,7 +355,7 @@ public class DiskAdminServiceTest {
     String diskName = "my-disk-name";
     String otherDiskName = "other-disk-name";
 
-    Disk disk = new Disk().googleProject("test-project").name(diskName).appType(AppType.RSTUDIO);
+    Disk disk = rStudioDisk(diskName);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(List.of(new UserAppEnvironment().diskName(otherDiskName)));
@@ -367,12 +367,20 @@ public class DiskAdminServiceTest {
   public void testIsDiskAttached_GKE_App_no_apps() throws ApiException {
     String diskName = "my-disk-name";
 
-    Disk disk = new Disk().googleProject("test-project").name(diskName).appType(AppType.RSTUDIO);
+    Disk disk = rStudioDisk(diskName);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(Collections.emptyList());
 
     assertThat(service.isDiskAttached(disk)).isFalse();
+  }
+
+  private Disk gceDisk(int diskId) {
+    return new Disk().persistentDiskId(diskId).googleProject("test-project").gceRuntime(true);
+  }
+
+  private Disk rStudioDisk(String diskName) {
+    return new Disk().name(diskName).googleProject("test-project").appType(AppType.RSTUDIO);
   }
 
   private Disk idleDisk(Duration idleTime) {
