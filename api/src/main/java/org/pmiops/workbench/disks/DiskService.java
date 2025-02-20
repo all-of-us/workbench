@@ -12,17 +12,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DiskService {
-  private final LeonardoMapper leonardoMapper;
   private final LeonardoApiClient leonardoApiClient;
+  private final LeonardoMapper leonardoMapper;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public DiskService(
-      LeonardoMapper leonardoMapper,
       LeonardoApiClient leonardoApiClient,
+      LeonardoMapper leonardoMapper,
       WorkspaceService workspaceService) {
-    this.leonardoMapper = leonardoMapper;
     this.leonardoApiClient = leonardoApiClient;
+    this.leonardoMapper = leonardoMapper;
     this.workspaceService = workspaceService;
   }
 
