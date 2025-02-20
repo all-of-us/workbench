@@ -13,6 +13,8 @@ const navigateToAnalysisTab = async (browser) => {
   await utils.dismissLeoAuthErrorModal(page);
   await utils.dismissPrivacyWarning(page);
   await tu.jsClick(page,'div[role="button"][aria-label="Analysis"]')
+  await tu.jsClick(page,'div[role="button"][aria-label="Analysis"]')
+  await page.waitForSelector('h3[aria-label="Your Analyses"]')
   return page
 }
 
@@ -29,7 +31,7 @@ browserTest('create an application', async browser => {
   await page.waitForSelector('#application-list-dropdown').then(eh => eh.evaluate(e => e.click()))
 
   await tu.jsClick(page,'li[role="option"][aria-label="Jupyter"]')
-  await nextButton.click()
+  await tu.jsClick(page,'div[role="button"][aria-label="next"]')
 
   await page.waitForFunction(() => !document.querySelector('div[aria-label="Select Applications Modal"]'));
   await page.waitForSelector('div[aria-label="New Notebook Modal"]')
