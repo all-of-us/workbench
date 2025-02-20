@@ -5,7 +5,6 @@ import com.google.cloud.tasks.v2.CloudTasksClient;
 import com.google.cloud.tasks.v2.HttpMethod;
 import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import jakarta.inject.Provider;
@@ -29,44 +28,59 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TaskQueueService {
-  private static final String BASE_PATH = "/v1/cloudTask";
-  private static final String RDR_EXPORT_QUEUE_NAME = "rdrExportQueue";
-  private static final String RDR_EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
-  private static final String RDR_EXPORT_WORKSPACE_PATH = BASE_PATH + "/exportWorkspaceData";
-  private static final String AUDIT_PROJECTS_PATH = BASE_PATH + "/auditProjectAccess";
-  private static final String SYNCHRONIZE_ACCESS_PATH = BASE_PATH + "/synchronizeUserAccess";
-  private static final String EGRESS_EVENT_PATH = BASE_PATH + "/processEgressEvent";
-  private static final String CREATE_WORKSPACE_PATH = BASE_PATH + "/createWorkspace";
-  private static final String DUPLICATE_WORKSPACE_PATH = BASE_PATH + "/duplicateWorkspace";
-  private static final String DELETE_TEST_WORKSPACES_PATH = BASE_PATH + "/deleteTestUserWorkspaces";
-  private static final String ACCESS_EXPIRATION_EMAIL_PATH =
-      BASE_PATH + "/sendAccessExpirationEmails";
-  private static final String DELETE_RAWLS_TEST_WORKSPACES_PATH =
-      BASE_PATH + "/deleteTestUserWorkspacesInRawls";
-  private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH =
-      BASE_PATH + "/checkCreditsExpirationForUserIDs";
-  private static final String CHECK_AND_ALERT_FREE_TIER_USAGE_PATH =
-      BASE_PATH + "/checkAndAlertFreeTierBillingUsage";
-  private static final String DELETE_WORKSPACE_ENVIRONMENTS_PATH =
-      BASE_PATH + "/deleteUnsharedWorkspaceEnvironments";
 
-  private static final String INITIAL_CREDITS_EXHAUSTION_PATH =
-      BASE_PATH + "/handleInitialCreditsExhaustion";
-  private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
-  private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
-  private static final String ACCESS_EXPIRATION_EMAIL_QUEUE_NAME = "accessExpirationEmailQueue";
-  private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
-  private static final String CREATE_WORKSPACE_QUEUE_NAME = "createWorkspaceQueue";
-  private static final String DUPLICATE_WORKSPACE_QUEUE_NAME = "duplicateWorkspaceQueue";
-  private static final String DELETE_TEST_WORKSPACES_QUEUE_NAME = "deleteTestUserWorkspacesQueue";
-  private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
-      "deleteTestUserRawlsWorkspacesQueue";
-  private static final String FREE_TIER_BILLING_QUEUE = "freeTierBillingQueue";
-  private static final String INITIAL_CREDITS_EXHAUSTION_QUEUE = "initialCreditsExhaustionQueue";
-  private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
-      "checkCreditsExpirationForUserIDsQueue";
-  private static final String DELETE_WORKSPACE_ENVIRONMENTS_QUEUE_NAME =
-      "deleteUnsharedWorkspaceEnvironmentsQueue";
+  // when adding or updating a queue, it's important to also update:
+  // - queue.yaml (the deployment process uses this file to actually create the queue)
+  // - the alerting policies in the workbench-terraform-modules repo, at:
+  // /modules/workbench/modules/monitoring/modules/alert_policies/assets/alert_policies
+  public static final TaskQueuePair ACCESS_EXPIRATION_EMAIL =
+      new TaskQueuePair("accessExpirationEmailQueue", "sendAccessExpirationEmails");
+  public static final TaskQueuePair AUDIT_PROJECTS =
+      new TaskQueuePair("auditProjectQueue", "auditProjectAccess");
+  public static final TaskQueuePair CREATE_WORKSPACE =
+      new TaskQueuePair("createWorkspaceQueue", "createWorkspace");
+  public static final TaskQueuePair DELETE_RAWLS_TEST_WORKSPACES =
+      new TaskQueuePair("deleteTestUserRawlsWorkspacesQueue", "deleteTestUserWorkspacesInRawls");
+  public static final TaskQueuePair DELETE_TEST_WORKSPACES =
+      new TaskQueuePair("deleteTestUserWorkspacesQueue", "deleteTestUserWorkspaces");
+  public static final TaskQueuePair DELETE_UNSHARED_WORKSPACE_ENVIRONMENTS =
+      new TaskQueuePair(
+          "deleteUnsharedWorkspaceEnvironmentsQueue", "deleteUnsharedWorkspaceEnvironments");
+  public static final TaskQueuePair DUPLICATE_WORKSPACE =
+      new TaskQueuePair("duplicateWorkspaceQueue", "duplicateWorkspace");
+  public static final TaskQueuePair EGRESS_EVENT =
+      new TaskQueuePair("egressEventQueue", "processEgressEvent");
+  public static final TaskQueuePair SYNCHRONIZE_ACCESS =
+      new TaskQueuePair("synchronizeAccessQueue", "synchronizeUserAccess");
+
+  // RDR exporting uniquely uses the same queue for two endpoints
+
+  public static final String RDR_EXPORT_QUEUE_NAME = "rdrExportQueue";
+  public static final TaskQueuePair RDR_RESEARCHER =
+      new TaskQueuePair(RDR_EXPORT_QUEUE_NAME, "exportResearcherData");
+  public static final TaskQueuePair RDR_WORKSPACE =
+      new TaskQueuePair(RDR_EXPORT_QUEUE_NAME, "exportWorkspaceData");
+
+  // initial credits queues and cloud tasks:
+  //
+  // INITIAL_CREDITS_EXPIRATION - run as part of the cron checkInitialCreditsExpiration to check
+  // whether users have passed their initial credits expiration time and execute the consequences of
+  // user initial credit expiration (DB update, deletion of runtimes)
+  //
+  // INITIAL_CREDITS_USAGE - run as part of the cron checkFreeTierBillingUsage after retrieving
+  // per-workspace usage, to check all users' initial credits usage. All credit-exhausted users are
+  // then pushed to the INITIAL_CREDITS_EXHAUSTION task queue.
+  //
+  // INITIAL_CREDITS_EXHAUSTION - run as a sub-task of checkFreeTierBillingUsage, this executes the
+  // consequences of user initial credit exhaustion (DB update, deletion of runtimes, sending email)
+
+  public static final TaskQueuePair INITIAL_CREDITS_EXPIRATION =
+      new TaskQueuePair(
+          "checkCreditsExpirationForUserIDsQueue", "checkCreditsExpirationForUserIDs");
+  public static final TaskQueuePair INITIAL_CREDITS_USAGE =
+      new TaskQueuePair("initialCreditsUsageQueue", "checkInitialCreditsUsage");
+  public static final TaskQueuePair INITIAL_CREDITS_EXHAUSTION =
+      new TaskQueuePair("initialCreditsExhaustionQueue", "handleInitialCreditsExhaustion");
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
@@ -87,130 +101,94 @@ public class TaskQueueService {
   }
 
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds) {
-    groupAndPushRdrTasks(workspaceIds, RDR_EXPORT_WORKSPACE_PATH, false);
+    groupAndPushRdrTasks(workspaceIds, RDR_WORKSPACE);
   }
 
-  public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds, boolean backfill) {
-    groupAndPushRdrTasks(workspaceIds, RDR_EXPORT_WORKSPACE_PATH, backfill);
+  public void groupAndPushRdrWorkspaceBackfillTasks(List<Long> workspaceIds) {
+    groupAndPushRdrTasks(workspaceIds, withRdrBackfill(RDR_WORKSPACE));
   }
 
   public void groupAndPushRdrResearcherTasks(List<Long> userIds) {
-    groupAndPushRdrTasks(userIds, RDR_EXPORT_RESEARCHER_PATH, false);
+    groupAndPushRdrTasks(userIds, RDR_RESEARCHER);
   }
 
-  public void groupAndPushRdrResearcherTasks(List<Long> userIds, boolean backfill) {
-    groupAndPushRdrTasks(userIds, RDR_EXPORT_RESEARCHER_PATH, backfill);
+  public void groupAndPushRdrResearcherBackfillTasks(List<Long> userIds) {
+    groupAndPushRdrTasks(userIds, withRdrBackfill(RDR_RESEARCHER));
   }
 
-  public void groupAndPushRdrTasks(List<Long> ids, String pathBase, boolean backfill) {
+  public void groupAndPushRdrTasks(List<Long> ids, TaskQueuePair pair) {
     RdrExportConfig rdrConfig = workbenchConfigProvider.get().rdrExport;
     if (rdrConfig == null) {
       LOGGER.info("RDR export is not configured for this environment.  Exiting.");
       return;
     }
 
-    String path = backfill ? pathBase + "?backfill=true" : pathBase;
-
-    CloudTasksUtils.partitionList(ids, rdrConfig.exportObjectsPerTask)
-        .forEach(batch -> createAndPushTask(RDR_EXPORT_QUEUE_NAME, path, batch));
+    createAndPushAll(ids, rdrConfig.exportObjectsPerTask, pair);
   }
 
   public void groupAndPushAuditProjectsTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerAuditTask)
-        .forEach(batch -> createAndPushTask(AUDIT_PROJECTS_QUEUE_NAME, AUDIT_PROJECTS_PATH, batch));
+    createAndPushAll(userIds, workbenchConfig.offlineBatch.usersPerAuditTask, AUDIT_PROJECTS);
   }
 
   public void groupAndPushFreeTierBilling(List<Long> userIds) {
-    Integer freeTierCronUserBatchSize =
-        workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
-    CloudTasksUtils.partitionList(userIds, freeTierCronUserBatchSize)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    FREE_TIER_BILLING_QUEUE, CHECK_AND_ALERT_FREE_TIER_USAGE_PATH, batch));
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    createAndPushAll(
+        userIds, workbenchConfig.billing.freeTierCronUserBatchSize, INITIAL_CREDITS_USAGE);
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    return CloudTasksUtils.partitionList(
-            userIds, workbenchConfig.offlineBatch.usersPerSynchronizeAccessTask)
-        .stream()
-        .map(
-            batch ->
-                createAndPushTask(SYNCHRONIZE_ACCESS_QUEUE_NAME, SYNCHRONIZE_ACCESS_PATH, batch))
-        .toList();
+    return createAndPushAll(
+        userIds, workbenchConfig.offlineBatch.usersPerSynchronizeAccessTask, SYNCHRONIZE_ACCESS);
   }
 
-  public List<String> groupAndPushAccessExpirationEmailTasks(List<Long> userIds) {
+  public void groupAndPushAccessExpirationEmailTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    return CloudTasksUtils.partitionList(
-            userIds, workbenchConfig.offlineBatch.usersPerAccessExpirationEmailTask)
-        .stream()
-        .map(
-            batch ->
-                createAndPushTask(
-                    ACCESS_EXPIRATION_EMAIL_QUEUE_NAME, ACCESS_EXPIRATION_EMAIL_PATH, batch))
-        .toList();
+    createAndPushAll(
+        userIds,
+        workbenchConfig.offlineBatch.usersPerAccessExpirationEmailTask,
+        ACCESS_EXPIRATION_EMAIL);
+  }
+
+  private int getDeleteWorkspacesBatchSize() throws BadRequestException {
+    return Optional.ofNullable(workbenchConfigProvider.get().e2eTestUsers)
+        .map(conf -> conf.workspaceDeletionBatchSize)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    "Deletion of e2e test user workspaces is not enabled in this environment"));
   }
 
   public void groupAndPushDeleteTestWorkspaceTasks(List<TestUserWorkspace> workspacesToDelete) {
-    groupDeleteWorkspaceTasks(workspacesToDelete)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    DELETE_TEST_WORKSPACES_QUEUE_NAME, DELETE_TEST_WORKSPACES_PATH, batch));
+    int batchSize = getDeleteWorkspacesBatchSize();
+    createAndPushAll(workspacesToDelete, batchSize, DELETE_TEST_WORKSPACES);
   }
 
   public void groupAndPushDeleteTestWorkspaceInRawlsTasks(
       List<TestUserRawlsWorkspace> workspacesToDelete) {
-    groupDeleteWorkspaceTasks(workspacesToDelete)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME,
-                    DELETE_RAWLS_TEST_WORKSPACES_PATH,
-                    batch));
-  }
-
-  private <T> List<List<T>> groupDeleteWorkspaceTasks(List<T> workspacesToDelete) {
-    int batchSize =
-        Optional.ofNullable(workbenchConfigProvider.get().e2eTestUsers)
-            .map(conf -> conf.workspaceDeletionBatchSize)
-            .orElseThrow(
-                () ->
-                    new BadRequestException(
-                        "Deletion of e2e test user workspaces is not enabled in this environment"));
-    return CloudTasksUtils.partitionList(workspacesToDelete, batchSize);
+    int batchSize = getDeleteWorkspacesBatchSize();
+    createAndPushAll(workspacesToDelete, batchSize, DELETE_RAWLS_TEST_WORKSPACES);
   }
 
   public void groupAndPushDeleteWorkspaceEnvironmentTasks(List<String> workspaceNamespaces) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    CloudTasksUtils.partitionList(
-            workspaceNamespaces,
-            workbenchConfig.offlineBatch.workspacesPerDeleteWorkspaceEnvironmentsTask)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    DELETE_WORKSPACE_ENVIRONMENTS_QUEUE_NAME,
-                    DELETE_WORKSPACE_ENVIRONMENTS_PATH,
-                    batch));
+    createAndPushAll(
+        workspaceNamespaces,
+        workbenchConfig.offlineBatch.workspacesPerDeleteWorkspaceEnvironmentsTask,
+        DELETE_UNSHARED_WORKSPACE_ENVIRONMENTS);
   }
 
   public void pushEgressEventTask(Long eventId, boolean isVwbEgressEvent) {
     createAndPushTask(
-        EGRESS_EVENT_QUEUE_NAME,
-        EGRESS_EVENT_PATH,
+        EGRESS_EVENT,
         new ProcessEgressEventRequest().eventId(eventId).isVwbEgressEvent(isVwbEgressEvent));
   }
 
   public void pushCreateWorkspaceTask(long operationId, Workspace workspace) {
-    createAndPushTask(
-        CREATE_WORKSPACE_QUEUE_NAME,
-        CREATE_WORKSPACE_PATH,
-        new CreateWorkspaceTaskRequest().operationId(operationId).workspace(workspace),
-        ImmutableMap.of(
-            "Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
+    createAndPushTaskWithBearerToken(
+        CREATE_WORKSPACE,
+        new CreateWorkspaceTaskRequest().operationId(operationId).workspace(workspace));
   }
 
   public void pushDuplicateWorkspaceTask(
@@ -219,24 +197,20 @@ public class TaskQueueService {
       String fromWorkspaceFirecloudName,
       Boolean shouldDuplicateRoles,
       Workspace workspace) {
-    createAndPushTask(
-        DUPLICATE_WORKSPACE_QUEUE_NAME,
-        DUPLICATE_WORKSPACE_PATH,
+    createAndPushTaskWithBearerToken(
+        DUPLICATE_WORKSPACE,
         new DuplicateWorkspaceTaskRequest()
             .operationId(operationId)
             .fromWorkspaceNamespace(fromWorkspaceNamespace)
             .fromWorkspaceFirecloudName(fromWorkspaceFirecloudName)
             .shouldDuplicateRoles(shouldDuplicateRoles)
-            .workspace(workspace),
-        ImmutableMap.of(
-            "Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
+            .workspace(workspace));
   }
 
   public void pushInitialCreditsExhaustionTask(
       List<Long> users, Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
     createAndPushTask(
-        INITIAL_CREDITS_EXHAUSTION_QUEUE,
-        INITIAL_CREDITS_EXHAUSTION_PATH,
+        INITIAL_CREDITS_EXHAUSTION,
         new ExhaustedInitialCreditsEventRequest()
             .users(users)
             .dbCostByCreator(dbCostByCreator)
@@ -245,28 +219,43 @@ public class TaskQueueService {
 
   public void groupAndPushCheckInitialCreditExpirationTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    CloudTasksUtils.partitionList(
-            userIds, workbenchConfig.offlineBatch.usersPerCheckInitialCreditsExpirationTask)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME,
-                    CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH,
-                    batch));
+    createAndPushAll(
+        userIds,
+        workbenchConfig.offlineBatch.usersPerCheckInitialCreditsExpirationTask,
+        INITIAL_CREDITS_EXPIRATION);
   }
 
-  private String createAndPushTask(String queueName, String taskUri, Object jsonBody) {
-    return createAndPushTask(queueName, taskUri, jsonBody, ImmutableMap.of());
+  private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {
+    return new TaskQueuePair(pair.queueName(), pair.endpoint() + "?backfill=true");
+  }
+
+  private <T> List<String> createAndPushAll(List<List<T>> batches, TaskQueuePair pair) {
+    return batches.stream().map(batch -> createAndPushTask(pair, batch)).toList();
+  }
+
+  private <T> List<String> createAndPushAll(List<T> fullList, int batchSize, TaskQueuePair pair) {
+    return createAndPushAll(CloudTasksUtils.partitionList(fullList, batchSize), pair);
+  }
+
+  private String createAndPushTask(TaskQueuePair pair, Object jsonBody) {
+    return createAndPushTask(pair, jsonBody, Map.of());
+  }
+
+  private String createAndPushTaskWithBearerToken(TaskQueuePair pair, Object jsonBody) {
+    return createAndPushTask(
+        pair,
+        jsonBody,
+        Map.of("Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
   }
 
   private String createAndPushTask(
-      String queueName, String taskUri, Object jsonBody, Map<String, String> extraHeaders) {
+      TaskQueuePair pair, Object jsonBody, Map<String, String> extraHeaders) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     String queuePath =
         QueueName.of(
                 workbenchConfig.server.projectId,
                 locationConfigService.getCloudTaskLocationId(),
-                queueName)
+                pair.queueName())
             .toString();
     String body = new Gson().toJson(jsonBody);
     return cloudTasksClientProvider
@@ -276,7 +265,7 @@ public class TaskQueueService {
             Task.newBuilder()
                 .setAppEngineHttpRequest(
                     AppEngineHttpRequest.newBuilder()
-                        .setRelativeUri(taskUri)
+                        .setRelativeUri(pair.fullPath())
                         .setBody(ByteString.copyFromUtf8(body))
                         .setHttpMethod(HttpMethod.POST)
                         .putHeaders("Content-type", "application/json")

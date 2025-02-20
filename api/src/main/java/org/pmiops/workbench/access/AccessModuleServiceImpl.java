@@ -235,8 +235,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   /**
-   * Extracts module expiration time from completionTime and expiry days: completionTime plus
-   * expiryDays in millseconds.
+   * Extracts module expiration time from completionTime and expiryDays: completionTime plus
+   * expiryDays in milliseconds.
    */
   public static Timestamp deriveExpirationTimestamp(Timestamp completionTime, Long expiryDays) {
     Preconditions.checkNotNull(

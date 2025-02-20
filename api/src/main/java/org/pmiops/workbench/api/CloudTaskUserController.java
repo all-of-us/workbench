@@ -135,7 +135,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
    * @return
    */
   @Override
-  public ResponseEntity<Void> checkAndAlertFreeTierBillingUsageBatch(List<Long> userIds) {
+  public ResponseEntity<Void> checkInitialCreditsUsageBatch(List<Long> userIds) {
     if (userIds == null || userIds.isEmpty()) {
       return ResponseEntity.noContent().build();
     }
@@ -143,7 +143,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
     return processUserIdBatch(
         userIds,
         "alerting for initial credits usage",
-        freeTierBillingUpdateService::checkAndAlertFreeTierBillingUsage);
+        freeTierBillingUpdateService::checkInitialCreditsUsage);
   }
 
   @Override

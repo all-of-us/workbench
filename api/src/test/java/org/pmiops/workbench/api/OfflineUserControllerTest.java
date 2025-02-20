@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.cloudtasks.TaskQueueService.AUDIT_PROJECTS;
 
 import com.google.cloud.tasks.v2.CloudTasksClient;
 import com.google.cloud.tasks.v2.Task;
@@ -17,7 +18,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,7 +117,7 @@ public class OfflineUserControllerTest {
     for (List<Long> expected : List.of(List.of(1L, 2L, 3L), List.of(4L))) {
       verify(mockCloudTasksClient)
           .createTask(
-              matches(Pattern.compile(".*/synchronizeAccessQueue$")),
+              matches(TaskQueueService.SYNCHRONIZE_ACCESS.queueName()),
               argThat(taskRequest -> expected.equals(cloudTaskToUserIdList(taskRequest))));
     }
     verifyNoMoreInteractions(mockCloudTasksClient);
@@ -131,7 +131,7 @@ public class OfflineUserControllerTest {
     for (List<Long> expected : List.of(List.of(1L, 2L), List.of(3L, 4L))) {
       verify(mockCloudTasksClient)
           .createTask(
-              matches(Pattern.compile(".*/auditProjectQueue$")),
+              matches(AUDIT_PROJECTS.queueName()),
               argThat(taskRequest -> expected.equals(cloudTaskToUserIdList(taskRequest))));
     }
     verifyNoMoreInteractions(mockCloudTasksClient);
@@ -145,7 +145,7 @@ public class OfflineUserControllerTest {
     for (List<Long> expected : List.of(List.of(1L, 2L), List.of(3L, 4L))) {
       verify(mockCloudTasksClient)
           .createTask(
-              matches(Pattern.compile(".*/checkCreditsExpirationForUserIDsQueue$")),
+              matches(TaskQueueService.INITIAL_CREDITS_EXPIRATION.queueName()),
               argThat(taskRequest -> expected.equals(cloudTaskToUserIdList(taskRequest))));
     }
     verifyNoMoreInteractions(mockCloudTasksClient);
