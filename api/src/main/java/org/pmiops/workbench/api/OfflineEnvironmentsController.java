@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.logging.Logger;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -14,6 +13,7 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeRespo
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,10 +167,12 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   @Override
   public ResponseEntity<Void> checkPersistentDisks() {
     // Fetch disks as the service, which gets all disks for all workspaces.
-    final List<ListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
+    final List<Disk> disks =
+        leonardoApiClient.listDisksAsService().stream()
+            .map(leonardoMapper::toApiListDisksResponse)
+            .toList();
     log.info(String.format("Queueing %d persistent disks for idleness check.", disks.size()));
-    taskQueueService.groupAndPushCheckPersistentDiskTasks(
-        disks.stream().map(leonardoMapper::toApiListDisksResponse).toList());
+    taskQueueService.groupAndPushCheckPersistentDiskTasks(disks);
     return ResponseEntity.noContent().build();
   }
 

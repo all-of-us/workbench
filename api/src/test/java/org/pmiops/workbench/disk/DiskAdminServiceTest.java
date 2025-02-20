@@ -314,7 +314,7 @@ public class DiskAdminServiceTest {
   @Test
   public void testIsDiskAttached_Gce_no_runtimes() throws ApiException {
     int diskId = 1;
-    Disk disk = new Disk().persistentDiskId(diskId).googleProject("test-project");
+    Disk disk = new Disk().persistentDiskId(diskId).gceRuntime(true).googleProject("test-project");
 
     when(mockLeonardoApiClient.listRuntimesByProjectAsService(anyString()))
         .thenReturn(Collections.emptyList());

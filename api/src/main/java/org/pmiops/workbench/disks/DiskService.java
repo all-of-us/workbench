@@ -49,11 +49,11 @@ public class DiskService {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
-    List<Disk> responseList =
+    List<Disk> disks =
         leonardoApiClient.listPersistentDiskByProjectCreatedByCreator(googleProject).stream()
             .map(leonardoMapper::toApiListDisksResponse)
             .toList();
-    return PersistentDiskUtils.findTheMostRecentActiveDisks(responseList);
+    return PersistentDiskUtils.findTheMostRecentActiveDisks(disks);
   }
 
   public void updateDisk(String workspaceNamespace, String diskName, Integer diskSize) {

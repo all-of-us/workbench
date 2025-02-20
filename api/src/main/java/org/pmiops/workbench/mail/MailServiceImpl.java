@@ -363,7 +363,7 @@ public class MailServiceImpl implements MailService {
                     isDiskAttached ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS)
                 .put(
                     EmailSubstitutionField.ENVIRONMENT_TYPE,
-                    disk.getAppType() == null
+                    disk.isGceRuntime()
                         ? "Jupyter"
                         : LeonardoAppUtils.appDisplayName(disk.getAppType()))
                 .put(
