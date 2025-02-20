@@ -14,7 +14,6 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
-import com.google.common.collect.ImmutableList;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -26,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
@@ -93,7 +91,7 @@ public class TestMockFactory {
    * <p>RAS_LOGIN_GOV is non-expirable for this reason.
    */
   public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
-      ImmutableList.of(
+      List.of(
           new DbAccessModule().setName(DbAccessModuleName.TWO_FACTOR_AUTH).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.ERA_COMMONS).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.RAS_ID_ME).setExpirable(false),
@@ -446,34 +444,39 @@ public class TestMockFactory {
         pdName, status, date, googleProjectId, user, /*appType*/ null);
   }
 
-  private static Disk createDisk(String pdName, DiskStatus status, String date, DbUser user) {
+  private static Disk createDisk(
+      String pdName, DiskStatus status, String date, DbUser user, String googleProject) {
     return new Disk()
         .name(pdName)
         .size(300)
         .diskType(DiskType.STANDARD)
         .status(status)
         .createdDate(date)
-        .creator(user.getUsername());
+        .creator(user.getUsername())
+        .googleProject(googleProject);
   }
 
   public static Disk createAppDisk(
-      String pdName, DiskStatus status, String date, DbUser user, AppType appType) {
-    return createDisk(pdName, status, date, user).appType(appType);
+      String pdName,
+      DiskStatus status,
+      String date,
+      DbUser user,
+      AppType appType,
+      String googleProject) {
+    return createDisk(pdName, status, date, user, googleProject).appType(appType);
   }
 
-  public static Disk createRuntimeDisk(String pdName, DiskStatus status, String date, DbUser user) {
-    return createDisk(pdName, status, date, user).gceRuntime(true);
+  public static Disk createRuntimeDisk(
+      String pdName, DiskStatus status, String date, DbUser user, String googleProject) {
+    return createDisk(pdName, status, date, user, googleProject).gceRuntime(true);
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2
   // so let's normalize them for comparison
   private static DemographicSurveyV2 normalizeLists(DemographicSurveyV2 rawSurvey) {
     return rawSurvey
-        .ethnicCategories(
-            rawSurvey.getEthnicCategories().stream().sorted().collect(Collectors.toList()))
-        .genderIdentities(
-            rawSurvey.getGenderIdentities().stream().sorted().collect(Collectors.toList()))
-        .sexualOrientations(
-            rawSurvey.getSexualOrientations().stream().sorted().collect(Collectors.toList()));
+        .ethnicCategories(rawSurvey.getEthnicCategories().stream().sorted().toList())
+        .genderIdentities(rawSurvey.getGenderIdentities().stream().sorted().toList())
+        .sexualOrientations(rawSurvey.getSexualOrientations().stream().sorted().toList());
   }
 }

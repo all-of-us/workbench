@@ -31,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 public class DiskAdminControllerTest {
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
+  private static final String GOOGLE_PROJECT = "my-project";
   private static final Instant NOW = Instant.now();
 
   private static DbUser user = new DbUser();
@@ -54,7 +55,8 @@ public class DiskAdminControllerTest {
             DiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
             user,
-            AppType.RSTUDIO);
+            AppType.RSTUDIO,
+            GOOGLE_PROJECT);
 
     Disk cromwellDisk =
         createAppDisk(
@@ -62,10 +64,12 @@ public class DiskAdminControllerTest {
             DiskStatus.READY,
             NOW.toString(),
             user,
-            AppType.CROMWELL);
+            AppType.CROMWELL,
+            GOOGLE_PROJECT);
 
     Disk jupyterDisk =
-        createRuntimeDisk(user.generatePDName(), DiskStatus.READY, NOW.toString(), user);
+        createRuntimeDisk(
+            user.generatePDName(), DiskStatus.READY, NOW.toString(), user, GOOGLE_PROJECT);
 
     List<Disk> serviceResponse =
         new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyterDisk));
@@ -94,7 +98,8 @@ public class DiskAdminControllerTest {
             DiskStatus.READY,
             NOW.toString(),
             user,
-            AppType.CROMWELL);
+            AppType.CROMWELL,
+            GOOGLE_PROJECT);
     ResponseEntity<EmptyResponse> response =
         diskAdminController.adminDeleteDisk(WORKSPACE_NS, diskToDelete.getName());
     assertThat(response.getStatusCodeValue()).isEqualTo(200);

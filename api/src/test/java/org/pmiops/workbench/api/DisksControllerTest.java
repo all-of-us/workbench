@@ -135,7 +135,8 @@ public class DisksControllerTest {
             DiskStatus.READY,
             newestRstudioDisk.getAuditInfo().getCreatedDate(),
             user,
-            AppType.RSTUDIO);
+            AppType.RSTUDIO,
+            GOOGLE_PROJECT_ID);
 
     // GCE Disk: 3 disks in total, 2 are active, newer one is inactive, returns the most recent
     // active ones.
@@ -165,7 +166,8 @@ public class DisksControllerTest {
             oldGceDisk.getName(),
             DiskStatus.READY,
             oldGceDisk.getAuditInfo().getCreatedDate(),
-            user);
+            user,
+            GOOGLE_PROJECT_ID);
 
     // Cromwell Disk: both are inactive, nothing to return.
     ListPersistentDiskResponse oldInactiveCromwellDisk =
