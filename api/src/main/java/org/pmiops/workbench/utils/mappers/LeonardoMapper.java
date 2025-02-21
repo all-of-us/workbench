@@ -119,6 +119,11 @@ public interface LeonardoMapper {
   default void listDisksAfterMapper(
       @MappingTarget Disk disk, ListPersistentDiskResponse listDisksResponse) {
     setDiskEnvironmentType(disk, listDisksResponse.getLabels());
+
+    // sometimes the disk type is not available
+    if (disk.getDiskType() == null) {
+      disk.setDiskType(DiskType.STANDARD);
+    }
   }
 
   default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
