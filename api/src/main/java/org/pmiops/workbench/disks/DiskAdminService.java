@@ -33,8 +33,8 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.TQSafeDiskStatus;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -80,14 +80,14 @@ public class DiskAdminService {
     this.workspaceDao = workspaceDao;
   }
 
-  public void checkPersistentDisks(List<Disk> disks) {
+  public void checkPersistentDisks(List<TaskQueueDisk> disks) {
     log.info(String.format("Checking %d persistent disks for idleness...", disks.size()));
 
     // Bucket disks by days since last access.
     final Instant now = clock.instant();
-    Map<Integer, List<Disk>> disksByDaysUnused =
+    Map<Integer, List<TaskQueueDisk>> disksByDaysUnused =
         disks.stream()
-            .filter(disk -> DiskStatus.READY.equals(disk.getStatus()))
+            .filter(disk -> TQSafeDiskStatus.READY.equals(disk.getStatus()))
             .collect(
                 Collectors.groupingBy(
                     disk -> {
@@ -102,7 +102,7 @@ public class DiskAdminService {
     Exception lastException = null;
     for (var entry : disksByDaysUnused.entrySet()) {
       int daysUnused = entry.getKey();
-      List<Disk> disksForDay = entry.getValue();
+      List<TaskQueueDisk> disksForDay = entry.getValue();
       if (daysUnused <= 0) {
         // Our periodic notifications should not trigger on day 0.
         continue;
@@ -113,7 +113,7 @@ public class DiskAdminService {
         continue;
       }
 
-      for (Disk disk : disksForDay) {
+      for (TaskQueueDisk disk : disksForDay) {
         try {
           if (notifyForUnusedDisk(disk, daysUnused)) {
             notifySuccess++;
@@ -147,7 +147,8 @@ public class DiskAdminService {
   }
 
   // Returns true if an email is sent.
-  private boolean notifyForUnusedDisk(Disk disk, int daysUnused) throws MessagingException {
+  private boolean notifyForUnusedDisk(TaskQueueDisk disk, int daysUnused)
+      throws MessagingException {
     final boolean attached;
     try {
       attached = isDiskAttached(disk);
@@ -211,7 +212,7 @@ public class DiskAdminService {
   }
 
   @VisibleForTesting
-  public boolean isDiskAttached(Disk disk) throws ApiException {
+  public boolean isDiskAttached(TaskQueueDisk disk) throws ApiException {
     final String diskName = disk.getName();
 
     if (disk.isGceRuntime()) {

@@ -50,7 +50,9 @@ import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.model.TQSafeDiskStatus;
 import org.pmiops.workbench.model.TQSafeDiskType;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.model.UserAppEnvironment;
 
 @Mapper(config = MapStructConfig.class)
@@ -115,6 +117,19 @@ public interface LeonardoMapper {
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "gceRuntime", ignore = true)
   Disk toApiListDisksResponse(ListPersistentDiskResponse disk);
+
+  @Mapping(target = "creator", source = "auditInfo.creator")
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(
+      target = "googleProject",
+      source = "cloudContext",
+      qualifiedByName = "cloudContextToGoogleProject")
+  @Mapping(target = "persistentDiskId", source = "id")
+  // these 2 values are set by listDisksAfterMapper()
+  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "gceRuntime", ignore = true)
+  TaskQueueDisk toTaskQueueDisk(ListPersistentDiskResponse disk);
 
   @AfterMapping
   default void listDisksAfterMapper(
@@ -249,7 +264,7 @@ public interface LeonardoMapper {
   DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
   @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
-  TQSafeDiskType toTQDiskType(
+  TQSafeDiskType toTaskQueueDiskType(
       org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
   @Named("mapAppType")
@@ -321,6 +336,10 @@ public interface LeonardoMapper {
 
   @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
   DiskStatus toApiDiskStatus(
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus);
+
+  @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
+  TQSafeDiskStatus toTaskQueueDiskStatus(
       org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus);
 
   @Nullable

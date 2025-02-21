@@ -12,22 +12,23 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskType;
+import org.pmiops.workbench.model.TQSafeDiskType;
+import org.pmiops.workbench.model.TaskQueueDisk;
 
 public final class PersistentDiskUtils {
   private static final Logger log = Logger.getLogger(PersistentDiskUtils.class.getName());
 
   // See https://cloud.google.com/compute/pricing
-  private static final Map<DiskType, Double> DISK_PRICE_PER_GB_MONTH =
-      Map.of(DiskType.STANDARD, .04, DiskType.SSD, .17);
+  private static final Map<TQSafeDiskType, Double> DISK_PRICE_PER_GB_MONTH =
+      Map.of(TQSafeDiskType.STANDARD, .04, TQSafeDiskType.SSD, .17);
 
   private PersistentDiskUtils() {}
 
   // Keep in sync with ui/src/app/utils/machines.ts
-  public static double costPerMonth(Disk disk) {
+  public static double costPerMonth(TaskQueueDisk disk) {
     Double pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(disk.getDiskType());
     if (pricePerGbMonth == null) {
-      pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(DiskType.STANDARD);
+      pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(TQSafeDiskType.STANDARD);
       log.warning(
           String.format(
               "unknown disk type %s for disk %s/%s, defaulting to standard",
@@ -59,7 +60,7 @@ public final class PersistentDiskUtils {
     Optional<Disk> runtimeDisk =
         activeDisks.stream()
             .filter(Disk::isGceRuntime)
-            .max(Comparator.comparing((r) -> Instant.parse(r.getCreatedDate())));
+            .max(Comparator.comparing(r -> Instant.parse(r.getCreatedDate())));
     runtimeDisk.ifPresent(recentDisks::add);
 
     // For each app type, find the disk with maximum creation time.
@@ -71,7 +72,7 @@ public final class PersistentDiskUtils {
                     Disk::getAppType,
                     Function.identity(),
                     BinaryOperator.maxBy(
-                        Comparator.comparing((r) -> Instant.parse(r.getCreatedDate())))));
+                        Comparator.comparing(r -> Instant.parse(r.getCreatedDate())))));
     recentDisks.addAll(appDisks.values());
     return recentDisks;
   }

@@ -13,7 +13,7 @@ import org.pmiops.workbench.disks.DiskAdminService;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoStatusUtils;
-import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +68,7 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
   }
 
   @Override
-  public ResponseEntity<Void> checkPersistentDisksBatch(List<Disk> persistentDiskBatch) {
+  public ResponseEntity<Void> checkPersistentDisksBatch(List<TaskQueueDisk> persistentDiskBatch) {
     LOGGER.info(String.format("Checking %s persistent disks.", persistentDiskBatch.size()));
 
     tmpDiskCheck(persistentDiskBatch);

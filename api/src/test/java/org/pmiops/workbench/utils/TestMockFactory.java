@@ -50,6 +50,8 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
 import org.pmiops.workbench.model.EthnicCategory;
@@ -58,8 +60,6 @@ import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SexAtBirthV2;
 import org.pmiops.workbench.model.SexualOrientationV2;
-import org.pmiops.workbench.model.TQSafeDiskStatus;
-import org.pmiops.workbench.model.TQSafeDiskType;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.YesNoPreferNot;
@@ -445,11 +445,11 @@ public class TestMockFactory {
   }
 
   private static Disk createDisk(
-      String pdName, TQSafeDiskStatus status, String date, DbUser user, String googleProject) {
+      String pdName, DiskStatus status, String date, DbUser user, String googleProject) {
     return new Disk()
         .name(pdName)
         .size(300)
-        .diskType(TQSafeDiskType.STANDARD)
+        .diskType(DiskType.STANDARD)
         .status(status)
         .createdDate(date)
         .creator(user.getUsername())
@@ -458,7 +458,7 @@ public class TestMockFactory {
 
   public static Disk createAppDisk(
       String pdName,
-      TQSafeDiskStatus status,
+      DiskStatus status,
       String date,
       DbUser user,
       AppType appType,
@@ -467,7 +467,7 @@ public class TestMockFactory {
   }
 
   public static Disk createRuntimeDisk(
-      String pdName, TQSafeDiskStatus status, String date, DbUser user, String googleProject) {
+      String pdName, DiskStatus status, String date, DbUser user, String googleProject) {
     return createDisk(pdName, status, date, user, googleProject).gceRuntime(true);
   }
 

@@ -19,10 +19,10 @@ import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
@@ -229,7 +229,7 @@ public class TaskQueueService {
         INITIAL_CREDITS_EXPIRATION);
   }
 
-  public static void tmpDiskCheck(List<Disk> disks) {
+  public static void tmpDiskCheck(List<TaskQueueDisk> disks) {
     LOGGER.info(String.format("Queueing %d persistent disks for idleness check.", disks.size()));
 
     // group by diskType and log counts
@@ -255,7 +255,7 @@ public class TaskQueueService {
     // group by appType and log counts
     disks.stream()
         .filter(disk -> disk.getAppType() != null)
-        .collect(Collectors.groupingBy(Disk::getAppType, Collectors.counting()))
+        .collect(Collectors.groupingBy(TaskQueueDisk::getAppType, Collectors.counting()))
         .forEach(
             (appType, count) ->
                 LOGGER.info(
@@ -266,10 +266,11 @@ public class TaskQueueService {
 
     LOGGER.info(
         String.format(
-            "Disk gceRuntime: %d disks", disks.stream().filter(Disk::isGceRuntime).count()));
+            "Disk gceRuntime: %d disks",
+            disks.stream().filter(TaskQueueDisk::isGceRuntime).count()));
   }
 
-  public void groupAndPushCheckPersistentDiskTasks(List<Disk> disks) {
+  public void groupAndPushCheckPersistentDiskTasks(List<TaskQueueDisk> disks) {
     tmpDiskCheck(disks);
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     createAndPushAll(

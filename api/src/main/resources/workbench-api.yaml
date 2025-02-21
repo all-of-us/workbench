@@ -4479,7 +4479,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Disk'
+                $ref: '#/components/schemas/TaskQueueDisk'
         required: true
       responses:
         200:
@@ -7298,6 +7298,52 @@ components:
           type: string
           description: Name of the persistent disk
         status:
+          $ref: '#/components/schemas/DiskStatus'
+        size:
+          type: integer
+          description: Size of persistent disk in GB
+        diskType:
+          $ref: '#/components/schemas/DiskType'
+        appType:
+          $ref: '#/components/schemas/AppType'
+        gceRuntime:
+          type: boolean
+          description: True if disk is used by Runtime or being used by GCE runtime
+          default: false
+        creator:
+          type: string
+          description: The email for the user that created this runtime
+        createdDate:
+          type: string
+          description: timestamp for the date this runtime was created in ISO 8601
+            format
+        dateAccessed:
+          type: string
+          description: timestamp for the date this runtime was last accessed in ISO
+            8601 format. This is null if it has not been deleted yet.
+        zone:
+          type: string
+          description: The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
+        googleProject:
+          type: string
+          description: The Google Project the disk was created in.
+        persistentDiskId:
+          type: integer
+          description: The ID of this persistent disk.
+    TaskQueueDisk:
+      description: The configuration of a persistent disk, suitable for use in Task Queues.
+        The standard Disk is not possible because it contains two enums whose values differ from
+        the enum constants.  (seen by Joel Thibault, Feb 2025, have not found documentation to confirm)
+      required:
+        - name
+        - size
+        - zone
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the persistent disk
+        status:
           $ref: '#/components/schemas/TQSafeDiskStatus'
         size:
           type: integer
@@ -7321,9 +7367,9 @@ components:
           type: string
           description: timestamp for the date this runtime was last accessed in ISO
             8601 format. This is null if it has not been deleted yet.
-        zone:
-          type: string
-          description: The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
+#        zone:
+#          type: string
+#          description: The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
         googleProject:
           type: string
           description: The Google Project the disk was created in.

@@ -13,7 +13,7 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeRespo
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,9 +167,9 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   @Override
   public ResponseEntity<Void> checkPersistentDisks() {
     // Fetch disks as the service, which gets all disks for all workspaces.
-    final List<Disk> disks =
+    final List<TaskQueueDisk> disks =
         leonardoApiClient.listDisksAsService().stream()
-            .map(leonardoMapper::toApiListDisksResponse)
+            .map(leonardoMapper::toTaskQueueDisk)
             // rm
             .limit(5)
             .toList();

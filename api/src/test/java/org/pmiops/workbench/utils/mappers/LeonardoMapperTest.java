@@ -23,12 +23,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesError;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
-import org.pmiops.workbench.model.TQSafeDiskStatus;
-import org.pmiops.workbench.model.TQSafeDiskType;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -193,12 +192,12 @@ public class LeonardoMapperTest {
 
     Disk disk =
         new Disk()
-            .diskType(TQSafeDiskType.SSD)
+            .diskType(DiskType.SSD)
             .gceRuntime(true)
             .creator(leonardoAuditInfo.getCreator())
             .dateAccessed(leonardoAuditInfo.getDateAccessed())
             .createdDate(leonardoAuditInfo.getCreatedDate())
-            .status(TQSafeDiskStatus.READY)
+            .status(DiskStatus.READY)
             .persistentDiskId(123)
             .googleProject(GOOGLE_PROJECT);
     assertThat(mapper.toApiListDisksResponse(listPersistentDiskResponse)).isEqualTo(disk);
