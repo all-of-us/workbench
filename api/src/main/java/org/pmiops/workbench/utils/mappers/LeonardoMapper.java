@@ -118,6 +118,13 @@ public interface LeonardoMapper {
   @Mapping(target = "gceRuntime", ignore = true)
   Disk toApiListDisksResponse(ListPersistentDiskResponse disk);
 
+  @AfterMapping
+  default void listDisksAfterMapper(
+      @MappingTarget Disk disk, ListPersistentDiskResponse listDisksResponse) {
+    LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(listDisksResponse.getLabels())
+        .ifPresentOrElse(disk::setAppType, () -> disk.gceRuntime(true));
+  }
+
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
@@ -126,19 +133,15 @@ public interface LeonardoMapper {
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
   @Mapping(target = "persistentDiskId", source = "id")
-  // these 2 values are set by listDisksAfterMapper()
+  // these 2 values are set by taskQueueListDisksAfterMapper()
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "gceRuntime", ignore = true)
   TaskQueueDisk toTaskQueueDisk(ListPersistentDiskResponse disk);
 
   @AfterMapping
-  default void listDisksAfterMapper(
-      @MappingTarget Disk disk, ListPersistentDiskResponse listDisksResponse) {
-    setDiskEnvironmentType(disk, listDisksResponse.getLabels());
-  }
-
-  default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
-    LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(diskLabels)
+  default void taskQueueListDisksAfterMapper(
+      @MappingTarget TaskQueueDisk disk, ListPersistentDiskResponse listDisksResponse) {
+    LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(listDisksResponse.getLabels())
         .ifPresentOrElse(disk::setAppType, () -> disk.gceRuntime(true));
   }
 

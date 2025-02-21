@@ -28,6 +28,9 @@ import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesError;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
+import org.pmiops.workbench.model.TQSafeDiskStatus;
+import org.pmiops.workbench.model.TQSafeDiskType;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -210,33 +213,131 @@ public class LeonardoMapperTest {
   }
 
   @Test
+  public void testToTaskQueueDiskFromListDiskResponse() {
+    ListPersistentDiskResponse listPersistentDiskResponse =
+        new ListPersistentDiskResponse()
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.SSD)
+            .auditInfo(leonardoAuditInfo)
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY)
+            .cloudContext(
+                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT))
+            .id(123);
+
+    TaskQueueDisk disk =
+        new TaskQueueDisk()
+            .diskType(TQSafeDiskType.SSD)
+            .gceRuntime(true)
+            .creator(leonardoAuditInfo.getCreator())
+            .dateAccessed(leonardoAuditInfo.getDateAccessed())
+            .createdDate(leonardoAuditInfo.getCreatedDate())
+            .status(TQSafeDiskStatus.READY)
+            .persistentDiskId(123)
+            .googleProject(GOOGLE_PROJECT);
+    assertThat(mapper.toTaskQueueDisk(listPersistentDiskResponse)).isEqualTo(disk);
+
+    // RSTUDIO
+    Map<String, String> rstudioLabel = new HashMap<>();
+    rstudioLabel.put(LEONARDO_LABEL_APP_TYPE, "rstudio");
+    assertThat(mapper.toTaskQueueDisk(listPersistentDiskResponse.labels(rstudioLabel)))
+        .isEqualTo(disk.appType(AppType.RSTUDIO).gceRuntime(false));
+  }
+
+  @Test
+  void test_diskType() {
+    assertThat(mapper.toDiskType(null)).isNull();
+    assertThat(
+            mapper.toDiskType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.BALANCED))
+        .isNull();
+
+    assertThat(
+            mapper.toDiskType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD))
+        .isEqualTo(DiskType.STANDARD);
+    ;
+    assertThat(
+            mapper.toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.SSD))
+        .isEqualTo(DiskType.SSD);
+    ;
+  }
+
+  @Test
+  void test_taskQueueDiskType() {
+    assertThat(mapper.toTaskQueueDiskType(null)).isNull();
+    assertThat(
+            mapper.toTaskQueueDiskType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.BALANCED))
+        .isNull();
+
+    assertThat(
+            mapper.toTaskQueueDiskType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD))
+        .isEqualTo(TQSafeDiskType.STANDARD);
+    ;
+    assertThat(
+            mapper.toTaskQueueDiskType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.SSD))
+        .isEqualTo(TQSafeDiskType.SSD);
+    ;
+  }
+
+  @Test
   void test_diskStatus() {
-    assertThat(mapper.toApiDiskStatus(null))
-        .isEqualTo(org.pmiops.workbench.model.DiskStatus.UNKNOWN);
+    assertThat(mapper.toApiDiskStatus(null)).isEqualTo(DiskStatus.UNKNOWN);
 
     assertThat(
             mapper.toApiDiskStatus(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.CREATING))
-        .isEqualTo(org.pmiops.workbench.model.DiskStatus.CREATING);
+        .isEqualTo(DiskStatus.CREATING);
     assertThat(
             mapper.toApiDiskStatus(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.RESTORING))
-        .isEqualTo(org.pmiops.workbench.model.DiskStatus.RESTORING);
+        .isEqualTo(DiskStatus.RESTORING);
     assertThat(
             mapper.toApiDiskStatus(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.FAILED))
-        .isEqualTo(org.pmiops.workbench.model.DiskStatus.FAILED);
+        .isEqualTo(DiskStatus.FAILED);
     assertThat(
             mapper.toApiDiskStatus(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY))
-        .isEqualTo(org.pmiops.workbench.model.DiskStatus.READY);
+        .isEqualTo(DiskStatus.READY);
     assertThat(
             mapper.toApiDiskStatus(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETING))
-        .isEqualTo(org.pmiops.workbench.model.DiskStatus.DELETING);
+        .isEqualTo(DiskStatus.DELETING);
     assertThat(
             mapper.toApiDiskStatus(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETED))
-        .isEqualTo(org.pmiops.workbench.model.DiskStatus.DELETED);
+        .isEqualTo(DiskStatus.DELETED);
+  }
+
+  @Test
+  void test_taskQueueDiskStatus() {
+    assertThat(mapper.toTaskQueueDiskStatus(null)).isEqualTo(TQSafeDiskStatus.UNKNOWN);
+
+    assertThat(
+            mapper.toTaskQueueDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.CREATING))
+        .isEqualTo(TQSafeDiskStatus.CREATING);
+    assertThat(
+            mapper.toTaskQueueDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.RESTORING))
+        .isEqualTo(TQSafeDiskStatus.RESTORING);
+    assertThat(
+            mapper.toTaskQueueDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.FAILED))
+        .isEqualTo(TQSafeDiskStatus.FAILED);
+    assertThat(
+            mapper.toTaskQueueDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY))
+        .isEqualTo(TQSafeDiskStatus.READY);
+    assertThat(
+            mapper.toTaskQueueDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETING))
+        .isEqualTo(TQSafeDiskStatus.DELETING);
+    assertThat(
+            mapper.toTaskQueueDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETED))
+        .isEqualTo(TQSafeDiskStatus.DELETED);
   }
 }
