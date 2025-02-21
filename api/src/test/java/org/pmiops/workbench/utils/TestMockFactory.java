@@ -444,31 +444,23 @@ public class TestMockFactory {
         pdName, status, date, googleProjectId, user, /*appType*/ null);
   }
 
-  private static Disk createDisk(
-      String pdName, DiskStatus status, String date, DbUser user, String googleProject) {
+  private static Disk createDisk(String pdName, DiskStatus status, String date, DbUser user) {
     return new Disk()
         .name(pdName)
         .size(300)
         .diskType(DiskType.STANDARD)
         .status(status)
         .createdDate(date)
-        .creator(user.getUsername())
-        .googleProject(googleProject);
+        .creator(user.getUsername());
   }
 
   public static Disk createAppDisk(
-      String pdName,
-      DiskStatus status,
-      String date,
-      DbUser user,
-      AppType appType,
-      String googleProject) {
-    return createDisk(pdName, status, date, user, googleProject).appType(appType);
+      String pdName, DiskStatus status, String date, DbUser user, AppType appType) {
+    return createDisk(pdName, status, date, user).appType(appType);
   }
 
-  public static Disk createRuntimeDisk(
-      String pdName, DiskStatus status, String date, DbUser user, String googleProject) {
-    return createDisk(pdName, status, date, user, googleProject).gceRuntime(true);
+  public static Disk createRuntimeDisk(String pdName, DiskStatus status, String date, DbUser user) {
+    return createDisk(pdName, status, date, user).gceRuntime(true);
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2

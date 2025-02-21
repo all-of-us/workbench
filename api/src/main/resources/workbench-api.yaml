@@ -7324,12 +7324,6 @@ components:
         zone:
           type: string
           description: The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
-        googleProject:
-          type: string
-          description: The Google Project the disk was created in.
-        persistentDiskId:
-          type: integer
-          description: The ID of this persistent disk.
     TaskQueueDisk:
       description: The configuration of a persistent disk, suitable for use in Task Queues.
         The standard Disk is not possible because it contains two enums whose values differ from

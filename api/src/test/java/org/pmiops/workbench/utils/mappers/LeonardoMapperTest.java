@@ -188,10 +188,7 @@ public class LeonardoMapperTest {
         new ListPersistentDiskResponse()
             .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.SSD)
             .auditInfo(leonardoAuditInfo)
-            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY)
-            .cloudContext(
-                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT))
-            .id(123);
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY);
 
     Disk disk =
         new Disk()
@@ -200,9 +197,7 @@ public class LeonardoMapperTest {
             .creator(leonardoAuditInfo.getCreator())
             .dateAccessed(leonardoAuditInfo.getDateAccessed())
             .createdDate(leonardoAuditInfo.getCreatedDate())
-            .status(DiskStatus.READY)
-            .persistentDiskId(123)
-            .googleProject(GOOGLE_PROJECT);
+            .status(DiskStatus.READY);
     assertThat(mapper.toApiListDisksResponse(listPersistentDiskResponse)).isEqualTo(disk);
 
     // RSTUDIO

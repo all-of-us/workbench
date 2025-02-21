@@ -55,8 +55,7 @@ public class DiskAdminControllerTest {
             DiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
             user,
-            AppType.RSTUDIO,
-            GOOGLE_PROJECT);
+            AppType.RSTUDIO);
 
     Disk cromwellDisk =
         createAppDisk(
@@ -64,12 +63,10 @@ public class DiskAdminControllerTest {
             DiskStatus.READY,
             NOW.toString(),
             user,
-            AppType.CROMWELL,
-            GOOGLE_PROJECT);
+            AppType.CROMWELL);
 
     Disk jupyterDisk =
-        createRuntimeDisk(
-            user.generatePDName(), DiskStatus.READY, NOW.toString(), user, GOOGLE_PROJECT);
+        createRuntimeDisk(user.generatePDName(), DiskStatus.READY, NOW.toString(), user);
 
     List<Disk> serviceResponse =
         new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyterDisk));
@@ -98,8 +95,7 @@ public class DiskAdminControllerTest {
             DiskStatus.READY,
             NOW.toString(),
             user,
-            AppType.CROMWELL,
-            GOOGLE_PROJECT);
+            AppType.CROMWELL);
     ResponseEntity<EmptyResponse> response =
         diskAdminController.adminDeleteDisk(WORKSPACE_NS, diskToDelete.getName());
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
