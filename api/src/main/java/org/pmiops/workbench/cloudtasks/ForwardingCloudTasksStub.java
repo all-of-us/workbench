@@ -54,7 +54,7 @@ public class ForwardingCloudTasksStub extends CloudTasksStub {
         final AppEngineHttpRequest gaeReq = request.getTask().getAppEngineHttpRequest();
 
         String gaeReqBody = gaeReq.getBody().toStringUtf8();
-        log.info( "gaeReqBody " + gaeReqBody);
+        log.info("gaeReqBody " + gaeReqBody);
 
         RequestBody apiReqBody =
             RequestBody.create(MediaType.parse("application/json; charset=utf-8"), gaeReqBody);
@@ -66,7 +66,7 @@ public class ForwardingCloudTasksStub extends CloudTasksStub {
           throw new RuntimeException(e);
         }
 
-        log.info( "apiReqBody " + buffer.readUtf8());
+        log.info("apiReqBody " + buffer.readUtf8());
 
         final Request apiReq =
             new Request.Builder()

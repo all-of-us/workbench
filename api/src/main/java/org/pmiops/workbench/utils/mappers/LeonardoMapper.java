@@ -316,20 +316,12 @@ public interface LeonardoMapper {
     }
   }
 
-  default RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus) {
-    if (leonardoRuntimeStatus == null) {
-      return RuntimeStatus.UNKNOWN;
-    }
-    return RuntimeStatus.fromValue(leonardoRuntimeStatus.toString());
-  }
+  @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
+ RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus);
 
-  default DiskStatus toApiDiskStatus(
-      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus) {
-    if (leonardoDiskStatus == null) {
-      return DiskStatus.UNKNOWN;
-    }
-    return DiskStatus.fromValue(leonardoDiskStatus.toString());
-  }
+  @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
+  DiskStatus toApiDiskStatus(
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus);
 
   @Nullable
   default String getJupyterImage(@Nullable List<LeonardoRuntimeImage> images) {
