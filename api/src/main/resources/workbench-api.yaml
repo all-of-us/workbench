@@ -7289,6 +7289,7 @@ components:
     Disk:
       description: The configuration of a persistent disk, returned in disk responses
       required:
+      - diskType
       - name
       - size
       - zone

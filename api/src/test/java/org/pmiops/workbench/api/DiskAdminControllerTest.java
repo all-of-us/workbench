@@ -31,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 public class DiskAdminControllerTest {
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
-  private static final String GOOGLE_PROJECT = "my-project";
   private static final Instant NOW = Instant.now();
 
   private static DbUser user = new DbUser();
