@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.cloudtasks.TaskQueueService.tmpDiskCheck;
 import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
 
 import com.google.common.base.Stopwatch;
@@ -70,8 +69,6 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
   @Override
   public ResponseEntity<Void> checkPersistentDisksBatch(List<TaskQueueDisk> persistentDiskBatch) {
     LOGGER.info(String.format("Checking %s persistent disks.", persistentDiskBatch.size()));
-
-    tmpDiskCheck(persistentDiskBatch);
 
     var stopwatch = stopwatchProvider.get().start();
     diskAdminService.checkPersistentDisks(persistentDiskBatch);

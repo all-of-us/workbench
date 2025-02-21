@@ -170,8 +170,6 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     final List<TaskQueueDisk> disks =
         leonardoApiClient.listDisksAsService().stream()
             .map(leonardoMapper::toTaskQueueDisk)
-            // rm
-            .limit(5)
             .toList();
     log.info(String.format("Queueing %d persistent disks for idleness check.", disks.size()));
     taskQueueService.groupAndPushCheckPersistentDiskTasks(disks);

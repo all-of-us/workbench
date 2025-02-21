@@ -7336,8 +7336,14 @@ components:
         the enum constants.  (seen by Joel Thibault, Feb 2025, have not found documentation to confirm)
       required:
         - name
+        - status
         - size
-        - zone
+        - diskType
+        - creator
+        - createdDate
+        - dateAccessed
+        - googleProject
+        - persistentDiskId
       type: object
       properties:
         name:
@@ -7367,9 +7373,6 @@ components:
           type: string
           description: timestamp for the date this runtime was last accessed in ISO
             8601 format. This is null if it has not been deleted yet.
-#        zone:
-#          type: string
-#          description: The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
         googleProject:
           type: string
           description: The Google Project the disk was created in.
