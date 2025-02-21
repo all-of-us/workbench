@@ -156,7 +156,7 @@ public class DiskAdminService {
       log.warning(
           String.format(
               "skipping disk '%s/%s' error while getting disk status",
-              disk.getName(), disk.getGoogleProject()));
+              disk.getGoogleProject(), disk.getName()));
       return false;
     }
 
