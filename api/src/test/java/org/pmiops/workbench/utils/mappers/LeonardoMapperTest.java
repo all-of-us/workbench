@@ -23,11 +23,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesError;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
+import org.pmiops.workbench.model.TQSafeDiskStatus;
+import org.pmiops.workbench.model.TQSafeDiskType;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -192,12 +193,12 @@ public class LeonardoMapperTest {
 
     Disk disk =
         new Disk()
-            .diskType(DiskType.SSD)
+            .diskType(TQSafeDiskType.SSD)
             .gceRuntime(true)
             .creator(leonardoAuditInfo.getCreator())
             .dateAccessed(leonardoAuditInfo.getDateAccessed())
             .createdDate(leonardoAuditInfo.getCreatedDate())
-            .status(DiskStatus.READY)
+            .status(TQSafeDiskStatus.READY)
             .persistentDiskId(123)
             .googleProject(GOOGLE_PROJECT);
     assertThat(mapper.toApiListDisksResponse(listPersistentDiskResponse)).isEqualTo(disk);
@@ -207,5 +208,36 @@ public class LeonardoMapperTest {
     rstudioLabel.put(LEONARDO_LABEL_APP_TYPE, "rstudio");
     assertThat(mapper.toApiListDisksResponse(listPersistentDiskResponse.labels(rstudioLabel)))
         .isEqualTo(disk.appType(AppType.RSTUDIO).gceRuntime(false));
+  }
+
+  @Test
+  void test_diskStatus() {
+    assertThat(mapper.toApiDiskStatus(null))
+        .isEqualTo(org.pmiops.workbench.model.DiskStatus.UNKNOWN);
+
+    assertThat(
+            mapper.toApiDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.CREATING))
+        .isEqualTo(org.pmiops.workbench.model.DiskStatus.CREATING);
+    assertThat(
+            mapper.toApiDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.RESTORING))
+        .isEqualTo(org.pmiops.workbench.model.DiskStatus.RESTORING);
+    assertThat(
+            mapper.toApiDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.FAILED))
+        .isEqualTo(org.pmiops.workbench.model.DiskStatus.FAILED);
+    assertThat(
+            mapper.toApiDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY))
+        .isEqualTo(org.pmiops.workbench.model.DiskStatus.READY);
+    assertThat(
+            mapper.toApiDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETING))
+        .isEqualTo(org.pmiops.workbench.model.DiskStatus.DELETING);
+    assertThat(
+            mapper.toApiDiskStatus(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETED))
+        .isEqualTo(org.pmiops.workbench.model.DiskStatus.DELETED);
   }
 }

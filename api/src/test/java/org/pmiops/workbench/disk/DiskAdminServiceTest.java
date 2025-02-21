@@ -45,8 +45,8 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
-import org.pmiops.workbench.model.DiskType;
+import org.pmiops.workbench.model.TQSafeDiskStatus;
+import org.pmiops.workbench.model.TQSafeDiskType;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -152,7 +152,7 @@ public class DiskAdminServiceTest {
 
   @Test
   public void testCheckPersistentDisksSkipsNonReady() {
-    var disks = List.of(idleDisk(Duration.ofDays(14L)).status(DiskStatus.FAILED));
+    var disks = List.of(idleDisk(Duration.ofDays(14L)).status(TQSafeDiskStatus.FAILED));
 
     assertDoesNotThrow(() -> service.checkPersistentDisks(disks));
 
@@ -391,8 +391,8 @@ public class DiskAdminServiceTest {
   private Disk idleDiskForProjectAndCreator(
       String googleProject, String creatorEmail, Duration idleTime) {
     return new Disk()
-        .diskType(DiskType.STANDARD)
-        .status(DiskStatus.READY)
+        .diskType(TQSafeDiskType.STANDARD)
+        .status(TQSafeDiskStatus.READY)
         .name("my-disk")
         .size(200)
         .creator(creatorEmail)

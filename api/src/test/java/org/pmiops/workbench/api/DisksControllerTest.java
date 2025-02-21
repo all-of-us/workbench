@@ -30,7 +30,7 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.TQSafeDiskStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,7 +132,7 @@ public class DisksControllerTest {
     Disk expectedRStudioDisk =
         createAppDisk(
             newestRstudioDisk.getName(),
-            DiskStatus.READY,
+            TQSafeDiskStatus.READY,
             newestRstudioDisk.getAuditInfo().getCreatedDate(),
             user,
             AppType.RSTUDIO,
@@ -164,7 +164,7 @@ public class DisksControllerTest {
     Disk expectedGceDisk =
         createRuntimeDisk(
             oldGceDisk.getName(),
-            DiskStatus.READY,
+            TQSafeDiskStatus.READY,
             oldGceDisk.getAuditInfo().getCreatedDate(),
             user,
             GOOGLE_PROJECT_ID);

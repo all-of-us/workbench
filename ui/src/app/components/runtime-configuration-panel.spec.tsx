@@ -1168,7 +1168,7 @@ describe('RuntimeConfigurationPanel', () => {
       machineType: 'n1-highmem-8',
       gpuConfig: null,
       persistentDisk: {
-        diskType: 'pd-standard',
+        diskType: DiskType.STANDARD,
         labels: {},
         name: null,
         size: MIN_DISK_SIZE_GB + 10,
@@ -1374,7 +1374,7 @@ describe('RuntimeConfigurationPanel', () => {
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .gceWithPdConfig.persistentDisk
     ).toEqual({
-      diskType: 'pd-standard',
+      diskType: DiskType.STANDARD,
       labels: {},
       name: null,
       size: MIN_DISK_SIZE_GB,

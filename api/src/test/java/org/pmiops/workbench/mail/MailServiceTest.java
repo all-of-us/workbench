@@ -36,8 +36,8 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
+import org.pmiops.workbench.model.TQSafeDiskType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -49,7 +49,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import(FakeClockConfiguration.class)
 @SpringJUnitConfig
-public class MailServiceImplTest {
+public class MailServiceTest {
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String INVALID_EMAIL = "Nota valid email";
   private static final String PASSWORD = "secretpassword";
@@ -294,7 +294,7 @@ public class MailServiceImplTest {
         Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
         new Disk()
-            .diskType(DiskType.SSD)
+            .diskType(TQSafeDiskType.SSD)
             .gceRuntime(true)
             .size(123)
             .createdDate(
@@ -329,7 +329,7 @@ public class MailServiceImplTest {
         Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
         new Disk()
-            .diskType(DiskType.SSD)
+            .diskType(TQSafeDiskType.SSD)
             .gceRuntime(true)
             .size(123)
             .createdDate(

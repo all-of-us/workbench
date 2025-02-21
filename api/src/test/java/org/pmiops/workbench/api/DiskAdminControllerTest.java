@@ -22,9 +22,9 @@ import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListDisksResponse;
+import org.pmiops.workbench.model.TQSafeDiskStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +52,7 @@ public class DiskAdminControllerTest {
     Disk rStudioDisk =
         createAppDisk(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
-            DiskStatus.DELETING,
+            TQSafeDiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
             user,
             AppType.RSTUDIO,
@@ -61,7 +61,7 @@ public class DiskAdminControllerTest {
     Disk cromwellDisk =
         createAppDisk(
             user.generatePDNameForUserApps(AppType.CROMWELL),
-            DiskStatus.READY,
+            TQSafeDiskStatus.READY,
             NOW.toString(),
             user,
             AppType.CROMWELL,
@@ -69,7 +69,7 @@ public class DiskAdminControllerTest {
 
     Disk jupyterDisk =
         createRuntimeDisk(
-            user.generatePDName(), DiskStatus.READY, NOW.toString(), user, GOOGLE_PROJECT);
+            user.generatePDName(), TQSafeDiskStatus.READY, NOW.toString(), user, GOOGLE_PROJECT);
 
     List<Disk> serviceResponse =
         new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyterDisk));
@@ -95,7 +95,7 @@ public class DiskAdminControllerTest {
     Disk diskToDelete =
         createAppDisk(
             user.generatePDNameForUserApps(AppType.CROMWELL),
-            DiskStatus.READY,
+            TQSafeDiskStatus.READY,
             NOW.toString(),
             user,
             AppType.CROMWELL,

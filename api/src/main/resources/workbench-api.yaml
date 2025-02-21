@@ -7281,6 +7281,11 @@ components:
       enum:
       - pd-standard
       - pd-ssd
+    TQSafeDiskType:
+      type: string
+      enum:
+        - STANDARD
+        - SSD
     Disk:
       description: The configuration of a persistent disk, returned in disk responses
       required:
@@ -7293,12 +7298,12 @@ components:
           type: string
           description: Name of the persistent disk
         status:
-          $ref: '#/components/schemas/DiskStatus'
+          $ref: '#/components/schemas/TQSafeDiskStatus'
         size:
           type: integer
           description: Size of persistent disk in GB
         diskType:
-          $ref: '#/components/schemas/DiskType'
+          $ref: '#/components/schemas/TQSafeDiskType'
         appType:
           $ref: '#/components/schemas/AppType'
         gceRuntime:
@@ -8857,6 +8862,16 @@ components:
       - Deleting
       - Deleted
       - Unknown
+    TQSafeDiskStatus:
+      type: string
+      enum:
+        - CREATING
+        - RESTORING
+        - FAILED
+        - READY
+        - DELETING
+        - DELETED
+        - UNKNOWN
     RuntimeConfigurationType:
       type: string
       description: |

@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.model.TQSafeDiskType;
 import org.pmiops.workbench.model.UserAppEnvironment;
 
 @Mapper(config = MapStructConfig.class)
@@ -119,11 +120,6 @@ public interface LeonardoMapper {
   default void listDisksAfterMapper(
       @MappingTarget Disk disk, ListPersistentDiskResponse listDisksResponse) {
     setDiskEnvironmentType(disk, listDisksResponse.getLabels());
-
-    // sometimes the disk type is not available
-    if (disk.getDiskType() == null) {
-      disk.setDiskType(DiskType.STANDARD);
-    }
   }
 
   default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
@@ -252,6 +248,10 @@ public interface LeonardoMapper {
   @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
   DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
+  @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
+  TQSafeDiskType toTQDiskType(
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
+
   @Named("mapAppType")
   default AppType mapAppType(ListAppResponse app) {
     final Map<String, String> appLabels = LeonardoLabelHelper.toLabelMap(app.getLabels());
@@ -317,7 +317,7 @@ public interface LeonardoMapper {
   }
 
   @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
- RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus);
+  RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus);
 
   @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
   DiskStatus toApiDiskStatus(
