@@ -134,6 +134,7 @@ public class DisksControllerTest {
             newestRstudioDisk.getName(),
             DiskStatus.READY,
             newestRstudioDisk.getAuditInfo().getCreatedDate(),
+            GOOGLE_PROJECT_ID,
             user,
             AppType.RSTUDIO);
 
@@ -165,6 +166,7 @@ public class DisksControllerTest {
             oldGceDisk.getName(),
             DiskStatus.READY,
             oldGceDisk.getAuditInfo().getCreatedDate(),
+            GOOGLE_PROJECT_ID,
             user);
 
     // Cromwell Disk: both are inactive, nothing to return.
