@@ -389,6 +389,7 @@ describe(CreateGkeAppButton.name, () => {
       size: existingDiskSize,
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
+      zone: 'us-central1-a',
     };
     const createAppRequest: CreateAppRequest = {
       ...defaultCromwellCreateRequest,

@@ -6,7 +6,6 @@ import { parseInt } from 'lodash';
 import {
   Disk,
   DisksApi,
-  DiskStatus,
   DiskType,
   GpuConfig,
   Runtime,
