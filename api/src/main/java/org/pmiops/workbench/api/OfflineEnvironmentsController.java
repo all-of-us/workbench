@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.disks.DiskAdminService;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,6 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   private final Provider<WorkbenchConfig> configProvider;
   private final Clock clock;
 
-  private final DiskAdminService diskAdminService;
   private final LeonardoApiClient leonardoApiClient;
   private final LeonardoMapper leonardoMapper;
   private final TaskQueueService taskQueueService;
@@ -46,7 +45,6 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   @Autowired
   OfflineEnvironmentsController(
       Clock clock,
-      DiskAdminService diskAdminService,
       LeonardoApiClient leonardoApiClient,
       LeonardoMapper leonardoMapper,
       Provider<WorkbenchConfig> configProvider,
@@ -54,7 +52,6 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
       WorkspaceService workspaceService) {
     this.clock = clock;
     this.configProvider = configProvider;
-    this.diskAdminService = diskAdminService;
     this.leonardoApiClient = leonardoApiClient;
     this.leonardoMapper = leonardoMapper;
     this.taskQueueService = taskQueueService;
@@ -169,7 +166,13 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
 
   @Override
   public ResponseEntity<Void> checkPersistentDisks() {
-    diskAdminService.checkPersistentDisks();
+    // Fetch disks as the service, which gets all disks for all workspaces.
+    final List<TaskQueueDisk> disks =
+        leonardoApiClient.listDisksAsService().stream()
+            .map(leonardoMapper::toTaskQueueDisk)
+            .toList();
+    log.info(String.format("Queueing %d persistent disks for idleness check.", disks.size()));
+    taskQueueService.groupAndPushCheckPersistentDiskTasks(disks);
     return ResponseEntity.noContent().build();
   }
 

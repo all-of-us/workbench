@@ -51,15 +51,18 @@ public class ForwardingCloudTasksStub extends CloudTasksStub {
       public ApiFuture<Task> futureCall(CreateTaskRequest request, ApiCallContext context) {
         final QueueName queueName = QueueName.parse(request.getParent());
         final AppEngineHttpRequest gaeReq = request.getTask().getAppEngineHttpRequest();
+
+        final RequestBody apiReqBody =
+            RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                gaeReq.getBody().toStringUtf8());
+
         final Request apiReq =
             new Request.Builder()
                 .url(baseUrl + gaeReq.getRelativeUri())
                 .headers(Headers.of(gaeReq.getHeadersMap()))
                 .addHeader("X-AppEngine-QueueName", queueName.getQueue())
-                .post(
-                    RequestBody.create(
-                        MediaType.parse("application/json; charset=utf-8"),
-                        gaeReq.getBody().toStringUtf8()))
+                .post(apiReqBody)
                 .build();
 
         log.info(

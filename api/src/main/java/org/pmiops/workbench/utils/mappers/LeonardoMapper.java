@@ -50,6 +50,9 @@ import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.model.TQSafeDiskStatus;
+import org.pmiops.workbench.model.TQSafeDiskType;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.model.UserAppEnvironment;
 
 @Mapper(config = MapStructConfig.class)
@@ -113,11 +116,27 @@ public interface LeonardoMapper {
   @AfterMapping
   default void listDisksAfterMapper(
       @MappingTarget Disk disk, ListPersistentDiskResponse listDisksResponse) {
-    setDiskEnvironmentType(disk, listDisksResponse.getLabels());
+    LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(listDisksResponse.getLabels())
+        .ifPresentOrElse(disk::setAppType, () -> disk.gceRuntime(true));
   }
 
-  default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
-    LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(diskLabels)
+  @Mapping(target = "creator", source = "auditInfo.creator")
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(
+      target = "googleProject",
+      source = "cloudContext",
+      qualifiedByName = "cloudContextToGoogleProject")
+  @Mapping(target = "persistentDiskId", source = "id")
+  // these 2 values are set by taskQueueListDisksAfterMapper()
+  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "gceRuntime", ignore = true)
+  TaskQueueDisk toTaskQueueDisk(ListPersistentDiskResponse disk);
+
+  @AfterMapping
+  default void taskQueueListDisksAfterMapper(
+      @MappingTarget TaskQueueDisk disk, ListPersistentDiskResponse listDisksResponse) {
+    LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(listDisksResponse.getLabels())
         .ifPresentOrElse(disk::setAppType, () -> disk.gceRuntime(true));
   }
 
@@ -242,6 +261,10 @@ public interface LeonardoMapper {
   @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
   DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
+  @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
+  TQSafeDiskType toTaskQueueDiskType(
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
+
   @Named("mapAppType")
   default AppType mapAppType(ListAppResponse app) {
     final Map<String, String> appLabels = LeonardoLabelHelper.toLabelMap(app.getLabels());
@@ -306,20 +329,16 @@ public interface LeonardoMapper {
     }
   }
 
-  default RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus) {
-    if (leonardoRuntimeStatus == null) {
-      return RuntimeStatus.UNKNOWN;
-    }
-    return RuntimeStatus.fromValue(leonardoRuntimeStatus.toString());
-  }
+  @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
+  RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus);
 
-  default DiskStatus toApiDiskStatus(
-      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus) {
-    if (leonardoDiskStatus == null) {
-      return DiskStatus.UNKNOWN;
-    }
-    return DiskStatus.fromValue(leonardoDiskStatus.toString());
-  }
+  @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
+  DiskStatus toApiDiskStatus(
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus);
+
+  @ValueMapping(source = MappingConstants.NULL, target = "UNKNOWN")
+  TQSafeDiskStatus toTaskQueueDiskStatus(
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus);
 
   @Nullable
   default String getJupyterImage(@Nullable List<LeonardoRuntimeImage> images) {

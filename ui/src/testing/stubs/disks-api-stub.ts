@@ -13,7 +13,6 @@ export const stubDisk = (): Disk => ({
   diskType: DiskType.STANDARD,
   gceRuntime: true,
   name: 'stub-disk',
-  blockSize: 1,
   zone: 'us-central1-a',
 });
 
@@ -22,7 +21,6 @@ export const mockJupyterDisk = (): Disk => ({
   diskType: DiskType.STANDARD,
   gceRuntime: true,
   name: 'mock-disk1',
-  blockSize: 1,
   status: DiskStatus.READY,
   appType: null,
   creator: '"evrii@fake-research-aou.org"',
@@ -35,7 +33,6 @@ export const mockCromwellDisk = (): Disk => ({
   diskType: DiskType.STANDARD,
   gceRuntime: false,
   name: 'mock-disk2',
-  blockSize: 1,
   status: DiskStatus.READY,
   appType: AppType.CROMWELL,
   creator: '"evrii@fake-research-aou.org"',
@@ -48,7 +45,6 @@ export const mockRStudioDisk = (): Disk => ({
   diskType: DiskType.STANDARD,
   gceRuntime: false,
   name: 'mock-disk3',
-  blockSize: 1,
   status: DiskStatus.READY,
   appType: AppType.RSTUDIO,
   creator: '"evrii@fake-research-aou.org"',

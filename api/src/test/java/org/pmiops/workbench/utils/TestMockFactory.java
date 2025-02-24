@@ -14,7 +14,6 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
-import com.google.common.collect.ImmutableList;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -26,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
@@ -93,7 +91,7 @@ public class TestMockFactory {
    * <p>RAS_LOGIN_GOV is non-expirable for this reason.
    */
   public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
-      ImmutableList.of(
+      List.of(
           new DbAccessModule().setName(DbAccessModuleName.TWO_FACTOR_AUTH).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.ERA_COMMONS).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.RAS_ID_ME).setExpirable(false),
@@ -469,11 +467,8 @@ public class TestMockFactory {
   // so let's normalize them for comparison
   private static DemographicSurveyV2 normalizeLists(DemographicSurveyV2 rawSurvey) {
     return rawSurvey
-        .ethnicCategories(
-            rawSurvey.getEthnicCategories().stream().sorted().collect(Collectors.toList()))
-        .genderIdentities(
-            rawSurvey.getGenderIdentities().stream().sorted().collect(Collectors.toList()))
-        .sexualOrientations(
-            rawSurvey.getSexualOrientations().stream().sorted().collect(Collectors.toList()));
+        .ethnicCategories(rawSurvey.getEthnicCategories().stream().sorted().toList())
+        .genderIdentities(rawSurvey.getGenderIdentities().stream().sorted().toList())
+        .sexualOrientations(rawSurvey.getSexualOrientations().stream().sorted().toList());
   }
 }

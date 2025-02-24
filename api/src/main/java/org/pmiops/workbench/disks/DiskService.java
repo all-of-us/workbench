@@ -1,7 +1,6 @@
 package org.pmiops.workbench.disks;
 
 import java.util.List;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.model.Disk;
@@ -41,20 +40,20 @@ public class DiskService {
   public List<Disk> getAllDisksInWorkspaceNamespace(String workspaceNamespace) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    List<ListPersistentDiskResponse> responseList =
-        leonardoApiClient.listDisksByProjectAsService(googleProject);
-    return responseList.stream().map(leonardoMapper::toApiListDisksResponse).toList();
+    return leonardoApiClient.listDisksByProjectAsService(googleProject).stream()
+        .map(leonardoMapper::toApiListDisksResponse)
+        .toList();
   }
 
   public List<Disk> getOwnedDisksInWorkspace(String workspaceNamespace) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
-    List<ListPersistentDiskResponse> responseList =
-        leonardoApiClient.listPersistentDiskByProjectCreatedByCreator(googleProject);
-
-    return PersistentDiskUtils.findTheMostRecentActiveDisks(
-        responseList.stream().map(leonardoMapper::toApiListDisksResponse).toList());
+    List<Disk> disks =
+        leonardoApiClient.listPersistentDiskByProjectCreatedByCreator(googleProject).stream()
+            .map(leonardoMapper::toApiListDisksResponse)
+            .toList();
+    return PersistentDiskUtils.findTheMostRecentActiveDisks(disks);
   }
 
   public void updateDisk(String workspaceNamespace, String diskName, Integer diskSize) {

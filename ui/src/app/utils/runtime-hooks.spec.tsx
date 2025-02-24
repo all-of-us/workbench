@@ -224,7 +224,6 @@ describe(useCustomRuntime.name, () => {
       size: 1000,
       diskType: DiskType.STANDARD,
       name: 'my-existing-disk',
-      blockSize: 1,
       gceRuntime: true,
       zone: 'us-central1-a',
     };

@@ -310,7 +310,6 @@ describe(CreateGkeAppButton.name, () => {
     const existingDisk: Disk = {
       size: existingDiskSize,
       name: diskName,
-      blockSize: 1000,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
       zone: 'us-central1-a',
     };
@@ -347,7 +346,6 @@ describe(CreateGkeAppButton.name, () => {
     const existingDisk: Disk = {
       size: existingDiskSize,
       name: diskName,
-      blockSize: 1000,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
       zone: 'us-central1-a',
     };
@@ -387,7 +385,6 @@ describe(CreateGkeAppButton.name, () => {
     const existingDisk: Disk = {
       size: existingDiskSize,
       name: diskName,
-      blockSize: 1000,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
       zone: 'us-central1-a',
     };

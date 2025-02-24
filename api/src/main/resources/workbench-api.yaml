@@ -2398,7 +2398,7 @@ paths:
       security: []
       responses:
         204:
-          description: Disks were checked and handled successfully.
+          description: Disks were queued for idleness checking.
           content: {}
   /v1/cron/deleteUnsharedWorkspaceEnvironments:
     get:
@@ -4457,6 +4457,29 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WorkspaceNamespaceList'
+        required: true
+      responses:
+        200:
+          description: Check Credits Expiration For User IDs Task Ran Successfully
+          content: { }
+      x-codegen-request-body-name: request
+  /v1/cloudTask/checkPersistentDisks:
+    post:
+      tags:
+        - cloudTaskEnvironments
+        - cloudTask
+      description: 'Checks a batch of persistent disks to determine if they are old / detached. 
+        Notifies workspace owners at configurable intervals about old disks.'
+      operationId: checkPersistentDisksBatch
+      security: [ ]
+      requestBody:
+        description: Persistent disks to check for idleness.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskQueueDisk'
         required: true
       responses:
         200:
@@ -7258,9 +7281,14 @@ components:
       enum:
       - pd-standard
       - pd-ssd
+    TQSafeDiskType:
+      type: string
+      enum:
+        - STANDARD
+        - SSD
     Disk:
+      description: The configuration of a persistent disk, returned in disk responses
       required:
-      - blockSize
       - diskType
       - name
       - size
@@ -7277,9 +7305,6 @@ components:
           description: Size of persistent disk in GB
         diskType:
           $ref: '#/components/schemas/DiskType'
-        blockSize:
-          type: integer
-          description: Block size of persistent disk in bytes
         appType:
           $ref: '#/components/schemas/AppType'
         gceRuntime:
@@ -7300,7 +7325,55 @@ components:
         zone:
           type: string
           description: The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
-      description: The configuration of a persistent disk, returned in disk responses
+    TaskQueueDisk:
+      description: The configuration of a persistent disk, suitable for use in Task Queues.
+        The standard Disk is not possible because it contains two enums whose values differ from
+        the enum constants.  (seen by Joel Thibault, Feb 2025, have not found documentation to confirm)
+      required:
+        - name
+        - status
+        - size
+        - diskType
+        - creator
+        - createdDate
+        - dateAccessed
+        - googleProject
+        - persistentDiskId
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the persistent disk
+        status:
+          $ref: '#/components/schemas/TQSafeDiskStatus'
+        size:
+          type: integer
+          description: Size of persistent disk in GB
+        diskType:
+          $ref: '#/components/schemas/TQSafeDiskType'
+        appType:
+          $ref: '#/components/schemas/AppType'
+        gceRuntime:
+          type: boolean
+          description: True if disk is used by Runtime or being used by GCE runtime
+          default: false
+        creator:
+          type: string
+          description: The email for the user that created this runtime
+        createdDate:
+          type: string
+          description: timestamp for the date this runtime was created in ISO 8601
+            format
+        dateAccessed:
+          type: string
+          description: timestamp for the date this runtime was last accessed in ISO
+            8601 format. This is null if it has not been deleted yet.
+        googleProject:
+          type: string
+          description: The Google Project the disk was created in.
+        persistentDiskId:
+          type: integer
+          description: The ID of this persistent disk.
     WorkspaceListResponse:
       required:
       - items
@@ -8833,6 +8906,16 @@ components:
       - Deleting
       - Deleted
       - Unknown
+    TQSafeDiskStatus:
+      type: string
+      enum:
+        - CREATING
+        - RESTORING
+        - FAILED
+        - READY
+        - DELETING
+        - DELETED
+        - UNKNOWN
     RuntimeConfigurationType:
       type: string
       description: |
@@ -9010,10 +9093,6 @@ components:
           description: The size in GB that the persistent disk is to be updated to.
         diskType:
           $ref: '#/components/schemas/DiskType'
-        blockSize:
-          type: integer
-          description: The block size in bytes that the persistent disk is to be updated
-            to.
       description: Updates an existing persistent disk
     KubernetesRuntimeConfig:
       required:

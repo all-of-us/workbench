@@ -118,7 +118,6 @@ const defaultAnalysisConfig: AnalysisConfig = {
     name: defaultDiskName,
     diskType: defaultDiskType,
     gceRuntime: true,
-    blockSize: 1,
     zone: 'us-central1-a',
   },
   dataprocConfig,
@@ -444,7 +443,6 @@ describe(toAnalysisConfig.name, () => {
       diskType: persistentDisk.diskType,
       size: persistentDisk.size - 1, // equal or smaller will match
       name: 'my favorite disk',
-      blockSize: undefined, // not important here, but required
       zone: 'us-central1-a',
     };
 
@@ -483,7 +481,6 @@ describe(toAnalysisConfig.name, () => {
       diskType: persistentDisk.diskType,
       size: persistentDisk.size + 1, // too big, will not match
       name: 'my favorite disk',
-      blockSize: undefined, // not important here, but required
       zone: 'us-central1-a',
     };
 
@@ -522,7 +519,6 @@ describe(toAnalysisConfig.name, () => {
       diskType: DiskType.STANDARD, // does not match persistentDisk.diskType
       size: persistentDisk.size,
       name: 'my favorite disk',
-      blockSize: undefined, // not important here, but required
       zone: 'us-central1-a',
     };
 
@@ -709,7 +705,6 @@ describe(withAnalysisConfigDefaults.name, () => {
       const inputDisk: Disk = {
         size,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
-        blockSize: 0,
         name: 'whatever',
         zone: 'us-central1-a',
       };
@@ -727,7 +722,6 @@ describe(withAnalysisConfigDefaults.name, () => {
       const inputDisk: Disk = {
         size: undefined,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
-        blockSize: 0,
         name: 'whatever',
         zone: 'us-central1-a',
       };
@@ -748,7 +742,6 @@ describe(withAnalysisConfigDefaults.name, () => {
       const inputDisk: Disk = {
         size: 1000,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
-        blockSize: 0,
         name: 'whatever',
         zone: 'us-central1-a',
       };
@@ -769,7 +762,6 @@ describe(withAnalysisConfigDefaults.name, () => {
       const inputDisk: Disk = {
         size: 1000,
         diskType: undefined,
-        blockSize: 0,
         name: 'whatever',
         zone: 'us-central1-a',
       };
@@ -892,7 +884,6 @@ describe(withAnalysisConfigDefaults.name, () => {
       const inputDisk: Disk = {
         size,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
-        blockSize: 0,
         name: 'whatever',
         zone: 'us-central1-a',
       };
@@ -912,7 +903,6 @@ describe(withAnalysisConfigDefaults.name, () => {
       const inputDisk: Disk = {
         size: undefined,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
-        blockSize: 0,
         name: 'whatever',
         zone: 'us-central1-a',
       };

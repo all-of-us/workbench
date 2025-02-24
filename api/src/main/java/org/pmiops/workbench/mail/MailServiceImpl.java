@@ -35,7 +35,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
@@ -44,7 +43,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
-import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -54,6 +52,7 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
+import org.pmiops.workbench.model.TaskQueueDisk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -337,7 +336,7 @@ public class MailServiceImpl implements MailService {
   public void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
       DbWorkspace diskWorkspace,
-      ListPersistentDiskResponse disk,
+      TaskQueueDisk disk,
       boolean isDiskAttached,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)
@@ -354,19 +353,19 @@ public class MailServiceImpl implements MailService {
                 .put(EmailSubstitutionField.DISK_UNUSED_DAYS, Integer.toString(daysUnused))
                 .put(
                     EmailSubstitutionField.DISK_COST_PER_MONTH,
-                    String.format(
-                        "$%.2f",
-                        PersistentDiskUtils.costPerMonth(disk, diskWorkspace.getGoogleProject())))
+                    String.format("$%.2f", PersistentDiskUtils.costPerMonth(disk)))
                 .put(
                     EmailSubstitutionField.DISK_CREATION_DATE,
-                    formatDateCentralTime(Instant.parse(disk.getAuditInfo().getCreatedDate())))
-                .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getAuditInfo().getCreator())
+                    formatDateCentralTime(Instant.parse(disk.getCreatedDate())))
+                .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getCreator())
                 .put(
                     EmailSubstitutionField.DISK_STATUS,
                     isDiskAttached ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS)
                 .put(
                     EmailSubstitutionField.ENVIRONMENT_TYPE,
-                    LeonardoLabelHelper.getEnvironmentType(disk.getLabels()))
+                    disk.isGceRuntime()
+                        ? "Jupyter"
+                        : LeonardoAppUtils.appDisplayName(disk.getAppType()))
                 .put(
                     EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
                     buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))
