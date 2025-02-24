@@ -7,6 +7,7 @@ import {
   CreateAppRequest,
   Disk,
   DisksApi,
+  DiskStatus,
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
@@ -312,6 +313,12 @@ describe(CreateGkeAppButton.name, () => {
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
       zone: 'us-central1-a',
+      status: DiskStatus.READY,
+      creator: 'me',
+      createdDate: new Date().toDateString(),
+      dateAccessed: new Date().toDateString(),
+      googleProject: 'my-project',
+      persistentDiskId: 12345,
     };
     const createAppRequest: CreateAppRequest = {
       ...defaultCromwellCreateRequest,
@@ -348,6 +355,12 @@ describe(CreateGkeAppButton.name, () => {
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
       zone: 'us-central1-a',
+      status: DiskStatus.READY,
+      creator: 'me',
+      createdDate: new Date().toDateString(),
+      dateAccessed: new Date().toDateString(),
+      googleProject: 'my-project',
+      persistentDiskId: 12345,
     };
     await component({
       existingDisk,
@@ -387,6 +400,12 @@ describe(CreateGkeAppButton.name, () => {
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
       zone: 'us-central1-a',
+      status: DiskStatus.READY,
+      creator: 'me',
+      createdDate: new Date().toDateString(),
+      dateAccessed: new Date().toDateString(),
+      googleProject: 'my-project',
+      persistentDiskId: 12345,
     };
     const createAppRequest: CreateAppRequest = {
       ...defaultCromwellCreateRequest,

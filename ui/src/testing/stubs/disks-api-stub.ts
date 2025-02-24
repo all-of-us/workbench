@@ -14,6 +14,12 @@ export const stubDisk = (): Disk => ({
   gceRuntime: true,
   name: 'stub-disk',
   zone: 'us-central1-a',
+  status: DiskStatus.READY,
+  creator: 'me',
+  createdDate: new Date().toDateString(),
+  dateAccessed: new Date().toDateString(),
+  googleProject: 'my-project',
+  persistentDiskId: 12345,
 });
 
 export const mockJupyterDisk = (): Disk => ({
@@ -25,7 +31,10 @@ export const mockJupyterDisk = (): Disk => ({
   appType: null,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
+  dateAccessed: '2023-05-22T18:55:10.108838Z',
   zone: 'us-central1-a',
+  googleProject: 'my-project',
+  persistentDiskId: 12345,
 });
 
 export const mockCromwellDisk = (): Disk => ({
@@ -37,7 +46,10 @@ export const mockCromwellDisk = (): Disk => ({
   appType: AppType.CROMWELL,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
+  dateAccessed: '2023-05-22T18:55:10.108838Z',
   zone: 'us-central1-a',
+  googleProject: 'my-project',
+  persistentDiskId: 12345,
 });
 
 export const mockRStudioDisk = (): Disk => ({
@@ -49,7 +61,10 @@ export const mockRStudioDisk = (): Disk => ({
   appType: AppType.RSTUDIO,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
+  dateAccessed: '2023-05-22T18:55:10.108838Z',
   zone: 'us-central1-a',
+  googleProject: 'my-project',
+  persistentDiskId: 12345,
 });
 
 export class DisksApiStub extends DisksApi {

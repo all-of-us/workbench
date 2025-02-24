@@ -15,7 +15,7 @@ import {
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
 
-import { DisksApiStub } from 'testing/stubs/disks-api-stub';
+import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataProcRuntime,
   defaultGceRuntime,
@@ -221,6 +221,7 @@ describe(useCustomRuntime.name, () => {
       runtimeLoaded: true,
     });
     const existingDisk = {
+      ...stubDisk(),
       size: 1000,
       diskType: DiskType.STANDARD,
       name: 'my-existing-disk',

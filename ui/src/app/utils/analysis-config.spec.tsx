@@ -114,6 +114,7 @@ const defaultAnalysisConfig: AnalysisConfig = {
     detachable: true,
   },
   detachedDisk: {
+    ...stubDisk(),
     size: defaultDiskSize,
     name: defaultDiskName,
     diskType: defaultDiskType,
@@ -440,6 +441,7 @@ describe(toAnalysisConfig.name, () => {
     };
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       diskType: persistentDisk.diskType,
       size: persistentDisk.size - 1, // equal or smaller will match
       name: 'my favorite disk',
@@ -478,6 +480,7 @@ describe(toAnalysisConfig.name, () => {
     };
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       diskType: persistentDisk.diskType,
       size: persistentDisk.size + 1, // too big, will not match
       name: 'my favorite disk',
@@ -516,6 +519,7 @@ describe(toAnalysisConfig.name, () => {
     };
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       diskType: DiskType.STANDARD, // does not match persistentDisk.diskType
       size: persistentDisk.size,
       name: 'my favorite disk',
@@ -703,6 +707,7 @@ describe(withAnalysisConfigDefaults.name, () => {
       };
       const size = 789;
       const inputDisk: Disk = {
+        ...stubDisk(),
         size,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         name: 'whatever',
@@ -720,6 +725,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         diskConfig: { ...defaultAnalysisConfig.diskConfig, size: undefined },
       };
       const inputDisk: Disk = {
+        ...stubDisk(),
         size: undefined,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         name: 'whatever',
@@ -740,6 +746,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         },
       };
       const inputDisk: Disk = {
+        ...stubDisk(),
         size: 1000,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         name: 'whatever',
@@ -760,6 +767,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         },
       };
       const inputDisk: Disk = {
+        ...stubDisk(),
         size: 1000,
         diskType: undefined,
         name: 'whatever',
@@ -882,6 +890,7 @@ describe(withAnalysisConfigDefaults.name, () => {
       };
       const size = 789;
       const inputDisk: Disk = {
+        ...stubDisk(),
         size,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         name: 'whatever',
@@ -901,6 +910,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         diskConfig: { ...defaultAnalysisConfig.diskConfig, size: undefined },
       };
       const inputDisk: Disk = {
+        ...stubDisk(),
         size: undefined,
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         name: 'whatever',

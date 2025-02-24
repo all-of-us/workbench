@@ -6,6 +6,7 @@ import { parseInt } from 'lodash';
 import {
   Disk,
   DisksApi,
+  DiskStatus,
   DiskType,
   GpuConfig,
   Runtime,
@@ -670,15 +671,19 @@ describe('RuntimeConfigurationPanel', () => {
     runtimeDiskStore.set(runtimeDiskStoreStub);
   };
 
-  const existingDisk = (): Disk => {
-    return {
-      size: 1000,
-      diskType: DiskType.STANDARD,
-      name: 'my-existing-disk',
-      gceRuntime: true,
-      zone: 'us-central1-a',
-    };
-  };
+  const existingDisk = (): Disk => ({
+    size: 1000,
+    diskType: DiskType.STANDARD,
+    name: 'my-existing-disk',
+    gceRuntime: true,
+    zone: 'us-central1-a',
+    status: DiskStatus.READY,
+    creator: 'me',
+    createdDate: new Date().toDateString(),
+    dateAccessed: new Date().toDateString(),
+    googleProject: 'my-project',
+    persistentDiskId: 12345,
+  });
 
   const detachableDiskRuntime = (): Runtime => {
     const { size, diskType, name } = existingDisk();
