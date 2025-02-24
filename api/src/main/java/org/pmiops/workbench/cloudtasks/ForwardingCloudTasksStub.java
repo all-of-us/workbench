@@ -21,6 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.Buffer;
 
 /**
  * Stateless Cloud Tasks stub which immediately forwards all incoming tasks for execution. Tasks are
@@ -64,6 +65,16 @@ public class ForwardingCloudTasksStub extends CloudTasksStub {
                 .addHeader("X-AppEngine-QueueName", queueName.getQueue())
                 .post(apiReqBody)
                 .build();
+
+        Buffer buffer = new Buffer();
+        try {
+          apiReqBody.writeTo(buffer);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+
+        //        log.info("gaeReqBody " + gaeReq.getBody().toStringUtf8());
+        //        log.info("apiReqBody " + buffer.readUtf8());
 
         log.info(
             String.format(

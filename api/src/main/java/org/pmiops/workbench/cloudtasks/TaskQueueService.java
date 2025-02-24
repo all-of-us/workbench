@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
@@ -228,7 +229,49 @@ public class TaskQueueService {
         INITIAL_CREDITS_EXPIRATION);
   }
 
+  public static void tmpDiskCheck(List<TaskQueueDisk> disks) {
+    LOGGER.info(String.format("Queueing %d persistent disks for idleness check.", disks.size()));
+
+    // group by diskType and log counts
+    disks.stream()
+        .collect(
+            Collectors.groupingBy(d -> Optional.ofNullable(d.getDiskType()), Collectors.counting()))
+        .forEach(
+            (diskType, count) ->
+                LOGGER.info(
+                    String.format(
+                        "Disk type %s: %d disks", diskType.toString(), count.intValue())));
+
+    // group by status and log counts
+    disks.stream()
+        .collect(
+            Collectors.groupingBy(d -> Optional.ofNullable(d.getStatus()), Collectors.counting()))
+        .forEach(
+            (status, count) ->
+                LOGGER.info(
+                    String.format(
+                        "Disk status %s: %d disks", status.toString(), count.intValue())));
+
+    // group by appType and log counts
+    disks.stream()
+        .filter(disk -> disk.getAppType() != null)
+        .collect(Collectors.groupingBy(TaskQueueDisk::getAppType, Collectors.counting()))
+        .forEach(
+            (appType, count) ->
+                LOGGER.info(
+                    String.format(
+                        "Disk appType %s: %d disks", appType.toString(), count.intValue())));
+
+    // log gceRuntime counts
+
+    LOGGER.info(
+        String.format(
+            "Disk gceRuntime: %d disks",
+            disks.stream().filter(TaskQueueDisk::isGceRuntime).count()));
+  }
+
   public void groupAndPushCheckPersistentDiskTasks(List<TaskQueueDisk> disks) {
+    tmpDiskCheck(disks);
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     createAndPushAll(
         disks, workbenchConfig.offlineBatch.disksPerCheckPersistentDiskTask, PERSISTENT_DISKS);
