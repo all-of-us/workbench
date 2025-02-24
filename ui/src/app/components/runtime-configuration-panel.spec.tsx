@@ -672,17 +672,12 @@ describe('RuntimeConfigurationPanel', () => {
   };
 
   const existingDisk = (): Disk => ({
+    ...stubDisk(),
     size: 1000,
     diskType: DiskType.STANDARD,
     name: 'my-existing-disk',
     gceRuntime: true,
     zone: 'us-central1-a',
-    status: DiskStatus.READY,
-    creator: 'me',
-    createdDate: new Date().toDateString(),
-    dateAccessed: new Date().toDateString(),
-    googleProject: 'my-project',
-    persistentDiskId: 12345,
   });
 
   const detachableDiskRuntime = (): Runtime => {

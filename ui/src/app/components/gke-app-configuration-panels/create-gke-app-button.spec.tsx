@@ -7,7 +7,6 @@ import {
   CreateAppRequest,
   Disk,
   DisksApi,
-  DiskStatus,
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
@@ -35,7 +34,7 @@ import {
   AppsApiStub,
   createListAppsCromwellResponse,
 } from 'testing/stubs/apps-api-stub';
-import { DisksApiStub } from 'testing/stubs/disks-api-stub';
+import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
@@ -309,16 +308,11 @@ describe(CreateGkeAppButton.name, () => {
     const diskName = 'arbitrary';
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       size: existingDiskSize,
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
       zone: 'us-central1-a',
-      status: DiskStatus.READY,
-      creator: 'me',
-      createdDate: new Date().toDateString(),
-      dateAccessed: new Date().toDateString(),
-      googleProject: 'my-project',
-      persistentDiskId: 12345,
     };
     const createAppRequest: CreateAppRequest = {
       ...defaultCromwellCreateRequest,
@@ -351,16 +345,11 @@ describe(CreateGkeAppButton.name, () => {
     const diskName = 'arbitrary';
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       size: existingDiskSize,
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
       zone: 'us-central1-a',
-      status: DiskStatus.READY,
-      creator: 'me',
-      createdDate: new Date().toDateString(),
-      dateAccessed: new Date().toDateString(),
-      googleProject: 'my-project',
-      persistentDiskId: 12345,
     };
     await component({
       existingDisk,
@@ -396,16 +385,10 @@ describe(CreateGkeAppButton.name, () => {
     const diskName = 'arbitrary';
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       size: existingDiskSize,
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
-      zone: 'us-central1-a',
-      status: DiskStatus.READY,
-      creator: 'me',
-      createdDate: new Date().toDateString(),
-      dateAccessed: new Date().toDateString(),
-      googleProject: 'my-project',
-      persistentDiskId: 12345,
     };
     const createAppRequest: CreateAppRequest = {
       ...defaultCromwellCreateRequest,
