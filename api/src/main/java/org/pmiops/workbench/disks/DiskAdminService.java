@@ -33,7 +33,7 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.TQSafeDiskStatus;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -87,7 +87,7 @@ public class DiskAdminService {
     final Instant now = clock.instant();
     Map<Integer, List<TaskQueueDisk>> disksByDaysUnused =
         disks.stream()
-            .filter(disk -> TQSafeDiskStatus.READY.equals(disk.getStatus()))
+            .filter(disk -> DiskStatus.READY.equals(disk.getStatus()))
             .collect(
                 Collectors.groupingBy(
                     disk -> {

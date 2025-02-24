@@ -165,7 +165,6 @@
     "logoutUrl": "https:\/\/authtest.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "offlineBatch": {
-    "unsafeCloudTasksForwardingHost": "http:\/\/localhost:8081",
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
     "usersPerCheckInitialCreditsExpirationTask": 50,

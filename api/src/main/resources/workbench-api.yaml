@@ -7330,6 +7330,8 @@ components:
         The standard Disk is not possible because it contains two enums whose values differ from
         the enum constants.  (seen by Joel Thibault, Feb 2025, have not found documentation to confirm)
       required:
+        - status
+        - diskType
         - name
         - size
         - creator
