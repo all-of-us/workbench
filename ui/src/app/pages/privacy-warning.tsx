@@ -9,7 +9,7 @@ import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { signOut } from 'app/utils/authentication';
-import { PRIVACY_WARNING_SESSION_KEY } from 'app/utils/constants';
+import { PRIVACY_WARNING_KEY } from 'app/utils/constants';
 const styles = reactStyles({
   bodyText: {
     color: colors.primary,
@@ -54,8 +54,8 @@ export const PrivacyWarning = ({ onAcknowledge }: PrivacyWarningProps) => {
           aria-label='Acknowledge'
           style={{ margin: '0rem' }}
           onClick={() => {
-            sessionStorage.setItem(
-              PRIVACY_WARNING_SESSION_KEY,
+            localStorage.setItem(
+              PRIVACY_WARNING_KEY,
               new Date().toDateString()
             );
             onAcknowledge();
