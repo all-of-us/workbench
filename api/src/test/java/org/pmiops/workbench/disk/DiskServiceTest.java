@@ -88,9 +88,9 @@ public class DiskServiceTest {
 
     when(mockWorkspaceService.lookupWorkspaceByNamespace(anyString())).thenReturn(dbWorkspace);
     when(mockLeonardoApiClient.listDisksByProjectAsService(anyString())).thenReturn(responseList);
-    when(mockLeonardoMapper.toApiListDisksResponse(firstLPDR)).thenReturn(firstDisk);
-    when(mockLeonardoMapper.toApiListDisksResponse(secondLPDR)).thenReturn(secondDisk);
-    when(mockLeonardoMapper.toApiListDisksResponse(thirdLPDR)).thenReturn(thirdDisk);
+    when(mockLeonardoMapper.toApiDisk(firstLPDR)).thenReturn(firstDisk);
+    when(mockLeonardoMapper.toApiDisk(secondLPDR)).thenReturn(secondDisk);
+    when(mockLeonardoMapper.toApiDisk(thirdLPDR)).thenReturn(thirdDisk);
     assertThat(diskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS))
         .containsExactly(firstDisk, secondDisk, thirdDisk);
   }

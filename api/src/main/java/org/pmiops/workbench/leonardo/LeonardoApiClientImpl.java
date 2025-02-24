@@ -598,7 +598,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       List<Disk> diskList =
           PersistentDiskUtils.findTheMostRecentActiveDisks(
               listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject()).stream()
-                  .map(leonardoMapper::toApiListDisksResponse)
+                  .map(leonardoMapper::toApiDisk)
                   .filter(disk -> disk.getAppType() != null)
                   .collect(Collectors.toList()));
 

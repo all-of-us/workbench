@@ -18,10 +18,10 @@ import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
-import org.pmiops.workbench.model.TaskQueueDisk;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
@@ -228,7 +228,7 @@ public class TaskQueueService {
         INITIAL_CREDITS_EXPIRATION);
   }
 
-  public void groupAndPushCheckPersistentDiskTasks(List<TaskQueueDisk> disks) {
+  public void groupAndPushCheckPersistentDiskTasks(List<Disk> disks) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     createAndPushAll(
         disks, workbenchConfig.offlineBatch.disksPerCheckPersistentDiskTask, PERSISTENT_DISKS);
