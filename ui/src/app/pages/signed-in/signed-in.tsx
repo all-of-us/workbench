@@ -20,7 +20,7 @@ import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { setInstitutionCategoryState } from 'app/utils/analytics';
 import {
   DEMOGRAPHIC_SURVEY_SESSION_KEY,
-  PRIVACY_WARNING_SESSION_KEY,
+  PRIVACY_WARNING_KEY,
 } from 'app/utils/constants';
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
 import {
@@ -72,7 +72,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const [hideFooter, setHideFooter] = useState(false);
   const [hasAcknowledgedPrivacyWarning, setHasAcknowledgedPrivacyWarning] =
-    useState(!!sessionStorage.getItem(PRIVACY_WARNING_SESSION_KEY));
+    useState(!!localStorage.getItem(PRIVACY_WARNING_KEY));
 
   const { config } = useStore(serverConfigStore);
   const { tiers } = useStore(cdrVersionStore);

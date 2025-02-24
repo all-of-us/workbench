@@ -14,7 +14,7 @@ import { User, WebStorageStateStore } from 'oidc-client-ts';
 
 import {
   DEMOGRAPHIC_SURVEY_SESSION_KEY,
-  PRIVACY_WARNING_SESSION_KEY,
+  PRIVACY_WARNING_KEY,
 } from './constants';
 
 const GOOGLE_BILLING_SCOPE = 'https://www.googleapis.com/auth/cloud-billing';
@@ -117,7 +117,7 @@ export const signOut = async (continuePath: string = '/login') => {
   await authStore.get().auth.removeUser();
 
   sessionStorage.removeItem(DEMOGRAPHIC_SURVEY_SESSION_KEY);
-  sessionStorage.removeItem(PRIVACY_WARNING_SESSION_KEY);
+  localStorage.removeItem(PRIVACY_WARNING_KEY);
 
   if (signOutApiCallSucceeded) {
     window.location.replace(continuePath);
