@@ -220,12 +220,12 @@ public class LeonardoMapperTest {
 
     TaskQueueDisk disk =
         new TaskQueueDisk()
-            .diskType(TQSafeDiskType.SSD)
+            .diskType(DiskType.SSD)
             .gceRuntime(true)
             .creator(leonardoAuditInfo.getCreator())
             .dateAccessed(leonardoAuditInfo.getDateAccessed())
             .createdDate(leonardoAuditInfo.getCreatedDate())
-            .status(TQSafeDiskStatus.READY)
+            .status(DiskStatus.READY)
             .persistentDiskId(123)
             .googleProject(GOOGLE_PROJECT);
     assertThat(mapper.toTaskQueueDisk(listPersistentDiskResponse)).isEqualTo(disk);
@@ -259,21 +259,19 @@ public class LeonardoMapperTest {
   @Test
   void test_taskQueueDiskType() {
     assertThat(mapper.toTaskQueueDiskType(null)).isNull();
+
     assertThat(
             mapper.toTaskQueueDiskType(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.BALANCED))
         .isNull();
-
     assertThat(
             mapper.toTaskQueueDiskType(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD))
         .isEqualTo(TQSafeDiskType.STANDARD);
-    ;
     assertThat(
             mapper.toTaskQueueDiskType(
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.SSD))
         .isEqualTo(TQSafeDiskType.SSD);
-    ;
   }
 
   @Test

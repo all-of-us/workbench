@@ -7331,9 +7331,7 @@ components:
         the enum constants.  (seen by Joel Thibault, Feb 2025, have not found documentation to confirm)
       required:
         - name
-        - status
         - size
-        - diskType
         - creator
         - createdDate
         - dateAccessed
@@ -7345,12 +7343,12 @@ components:
           type: string
           description: Name of the persistent disk
         status:
-          $ref: '#/components/schemas/TQSafeDiskStatus'
+          $ref: '#/components/schemas/DiskStatus'
         size:
           type: integer
           description: Size of persistent disk in GB
         diskType:
-          $ref: '#/components/schemas/TQSafeDiskType'
+          $ref: '#/components/schemas/DiskType'
         appType:
           $ref: '#/components/schemas/AppType'
         gceRuntime:
