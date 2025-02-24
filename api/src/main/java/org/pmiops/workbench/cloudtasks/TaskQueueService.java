@@ -19,6 +19,8 @@ import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
@@ -92,6 +94,18 @@ public class TaskQueueService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<UserAuthentication> userAuthenticationProvider;
 
+  private final Gson gson;
+
+  // by default, enums are serialized as the string representation of their enum constants
+  // (e.g. "SSD" for DiskType.SSD) but we need to use their values ("pd-ssd") instead.
+  private static Gson intializeGson() {
+    return new Gson()
+        .newBuilder()
+        .registerTypeAdapter(DiskStatus.class, new EnumSerializer<>())
+        .registerTypeAdapter(DiskType.class, new EnumSerializer<>())
+        .create();
+  }
+
   public TaskQueueService(
       WorkbenchLocationConfigService locationConfigService,
       Provider<CloudTasksClient> cloudTasksClientProvider,
@@ -101,6 +115,7 @@ public class TaskQueueService {
     this.cloudTasksClientProvider = cloudTasksClientProvider;
     this.workbenchConfigProvider = configProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
+    this.gson = intializeGson();
   }
 
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds) {
@@ -266,7 +281,7 @@ public class TaskQueueService {
                 locationConfigService.getCloudTaskLocationId(),
                 pair.queueName())
             .toString();
-    String body = new Gson().toJson(jsonBody);
+    String body = gson.toJson(jsonBody);
     return cloudTasksClientProvider
         .get()
         .createTask(
