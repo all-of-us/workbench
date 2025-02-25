@@ -989,6 +989,12 @@ export class AccountCreation extends React.Component<
                       PartnerDiscoverySource.NATIONAL_BAPTIST_CONVENTION_USA_INC,
                   },
                   {
+                    label:
+                      'National Latino Network (NLN) for Precision Medicine and Health Disparities',
+                    value:
+                      PartnerDiscoverySource.NATIONAL_LATINO_NETWORK_FOR_PRECISION_MEDICINE_AND_HEALTH_DISPARITIES,
+                  },
+                  {
                     label: 'Network of the National Library of Medicine (NNLM)',
                     value:
                       PartnerDiscoverySource.NETWORK_OF_THE_NATIONAL_LIBRARY_OF_MEDICINE_NNLM,
