@@ -57,7 +57,6 @@ import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -92,12 +91,9 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -117,7 +113,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
@@ -195,7 +190,6 @@ import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
-import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -288,11 +282,9 @@ public class WorkspacesControllerTest {
   @Autowired WorkspacesController workspacesController;
   @Autowired WorkspaceServiceFactory workspaceServiceFactory;
 
-  @MockBean AccessTierService accessTierService;
-  @MockBean BucketAuditQueryService bucketAuditQueryService;
+  @MockBean AccessTierService mockAccessTierService;
   @MockBean CloudBillingClient mockCloudBillingClient;
-  @MockBean CohortBuilderService cohortBuilderService;
-  @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockBean CohortBuilderService mockCohortBuilderService;
   @MockBean FireCloudService mockFireCloudService;
   @MockBean InitialCreditsService mockInitialCreditsService;
   @MockBean IamService mockIamService;
@@ -368,6 +360,7 @@ public class WorkspacesControllerTest {
     CohortBuilderService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
+    FeaturedWorkspaceMapper.class,
     FireCloudService.class,
     GenomicExtractionService.class,
     InitialCreditsService.class,
@@ -406,11 +399,11 @@ public class WorkspacesControllerTest {
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     registeredTier = accessTierDao.save(createRegisteredTier());
 
-    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
+    when(mockCohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
-    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
+    when(mockAccessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(List.of(AccessTierService.REGISTERED_TIER_SHORT_NAME));
-    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
+    when(mockAccessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
 
     cdrVersion = createDefaultCdrVersion(1);
     accessTierDao.save(cdrVersion.getAccessTier());

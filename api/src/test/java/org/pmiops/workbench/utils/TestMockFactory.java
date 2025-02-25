@@ -224,7 +224,8 @@ public class TestMockFactory {
 
               doReturn(fcResponse)
                   .when(fireCloudService)
-                  .getWorkspace(capturedWorkspace.getNamespace(), capturedWorkspace.getDisplayName());
+                  .getWorkspace(
+                      capturedWorkspace.getNamespace(), capturedWorkspace.getDisplayName());
               return fcWorkspace;
             })
         .when(workspaceService)
