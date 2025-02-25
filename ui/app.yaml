@@ -1,4 +1,4 @@
-runtime: nodejs18
+runtime: nodejs22
 default_expiration: "2m"
 
 handlers:
