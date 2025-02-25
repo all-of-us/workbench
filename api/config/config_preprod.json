@@ -129,7 +129,8 @@
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": false,
     "enableVWBUserAccessManagement": false,
-    "enableVWBUserCreation": false
+    "enableVWBUserCreation": false,
+    "enableVWBPodCreation": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",

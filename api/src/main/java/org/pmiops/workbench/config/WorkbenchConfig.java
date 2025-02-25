@@ -335,6 +335,7 @@ public class WorkbenchConfig {
     // If true, AoU will create the VWB user when the user first signs in, similar to Terra
     // experience
     public boolean enableVWBUserCreation;
+    public boolean enableVWBPodCreation;
   }
 
   public static class ActionAuditConfig {
