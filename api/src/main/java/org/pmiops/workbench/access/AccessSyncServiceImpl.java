@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.user.VwbUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final UserDao userDao;
   private final InitialCreditsService initialCreditsService;
   private final UserServiceAuditor userServiceAuditor;
+  private final VwbUserService vwbUserService;
 
   @Autowired
   public AccessSyncServiceImpl(
@@ -47,7 +49,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       InstitutionService institutionService,
       UserDao userDao,
       InitialCreditsService initialCreditsService,
-      UserServiceAuditor userServiceAuditor) {
+      UserServiceAuditor userServiceAuditor,
+      VwbUserService vwbUserService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
     this.accessModuleService = accessModuleService;
@@ -55,6 +58,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.userDao = userDao;
     this.initialCreditsService = initialCreditsService;
     this.userServiceAuditor = userServiceAuditor;
+    this.vwbUserService = vwbUserService;
   }
 
   /**
@@ -71,6 +75,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
           dbUser, previousAccessTiers, newAccessTiers, agent);
     }
 
+    createVwbUserIfNeeded(dbUser, previousAccessTiers, newAccessTiers);
+
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
@@ -82,6 +88,17 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
 
     return userDao.save(dbUser);
+  }
+
+  private void createVwbUserIfNeeded(DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
+
+    // This means that the user has been granted access to a tier for the first time. Then perform the VWB creation logic.
+    if (previousAccessTiers.isEmpty() && !newAccessTiers.isEmpty()) {
+      // This call checks if the user already exists in VWB to avoid creating the user twice.
+      vwbUserService.createUser(dbUser.getUsername());
+      vwbUserService.createInitialCreditsPodForUser(dbUser);
+
+    }
   }
 
   private void addInitialCreditsExpirationIfAppropriate(

@@ -34,7 +34,7 @@ public class VwbUserManagerConfig {
 
   public static final List<String> SCOPES =
       ImmutableList.<String>builder().addAll(RawlsApiClientFactory.SCOPES).build();
-  public static final int TIMEOUT = 30 * 1000;
+  public static final int TIMEOUT = 60 * 1000;
 
   /**
    * Creates a User Manager API client, unauthenticated. Most clients should use an authenticated,
