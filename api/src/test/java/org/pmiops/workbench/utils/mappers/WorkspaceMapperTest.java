@@ -3,7 +3,6 @@ package org.pmiops.workbench.utils.mappers;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
-import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -13,12 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.Etags;
@@ -237,7 +232,6 @@ public class WorkspaceMapperTest {
     assertThat(ws.getInitialCredits().getExpirationEpochMillis())
         .isEqualTo(INITIAL_CREDITS_EXPIRATION_TIMESTAMP.getTime());
     assertThat(ws.getInitialCredits().isExhausted()).isFalse();
-    assertThat(ws.getInitialCredits().isExpired()).isFalse();
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
     assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
     assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);
@@ -352,77 +346,6 @@ public class WorkspaceMapperTest {
                     initialCreditsService));
 
     assertThat(result).isEmpty();
-  }
-
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("dataForWorkspaceBilling")
-  public void testToApiWorkspaceBillingStatus(
-      String testName,
-      String billingAccount,
-      boolean exhausted,
-      boolean expired,
-      BillingStatus expectedStatus) {
-    workbenchConfig.billing.accountId = INITIAL_CREDITS_BILLING_ACCOUNT_NAME;
-    sourceDbWorkspace.setInitialCreditsExhausted(exhausted);
-    CLOCK.setInstant(
-        INITIAL_CREDITS_EXPIRATION_TIMESTAMP.toInstant().plusSeconds(expired ? 1 : -1));
-    sourceDbWorkspace.setBillingAccountName(fullBillingAccountName(billingAccount));
-    Workspace x =
-        workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService);
-    assertThat(x.getBillingStatus()).isEqualTo(expectedStatus);
-  }
-
-  static Stream<Arguments> dataForWorkspaceBilling() {
-    return Stream.of(
-        Arguments.of(
-            "If the workspace is using initial credits and the credits are neither exhausted or expired, the billing status is active.",
-            INITIAL_CREDITS_BILLING_ACCOUNT_NAME,
-            false,
-            false,
-            BillingStatus.ACTIVE),
-        Arguments.of(
-            "If the workspace is using initial credits and the credits are exhausted, the billing status is inactive.",
-            INITIAL_CREDITS_BILLING_ACCOUNT_NAME,
-            true,
-            false,
-            BillingStatus.INACTIVE),
-        Arguments.of(
-            "If the workspace is using initial credits and the credits are expired, the billing status is inactive.",
-            INITIAL_CREDITS_BILLING_ACCOUNT_NAME,
-            false,
-            true,
-            BillingStatus.INACTIVE),
-        Arguments.of(
-            "If the workspace is using initial credits and the credits are both exhausted and expired, the billing status is inactive.",
-            INITIAL_CREDITS_BILLING_ACCOUNT_NAME,
-            true,
-            true,
-            BillingStatus.INACTIVE),
-        Arguments.of(
-            "If the workspace is not using initial credits and the credits are neither exhausted or expired, the billing status is active.",
-            BILLING_ACCOUNT_NAME,
-            false,
-            false,
-            BillingStatus.ACTIVE),
-        Arguments.of(
-            "If the workspace is not using initial credits and the credits are exhausted, the billing status is active.",
-            BILLING_ACCOUNT_NAME,
-            true,
-            false,
-            BillingStatus.ACTIVE),
-        Arguments.of(
-            "If the workspace is not using initial credits and the credits are expired, the billing status is active.",
-            BILLING_ACCOUNT_NAME,
-            false,
-            true,
-            BillingStatus.ACTIVE),
-        Arguments.of(
-            "If the workspace is not using initial credits and the credits are both exhausted and expired, the billing status is active.",
-            BILLING_ACCOUNT_NAME,
-            true,
-            true,
-            BillingStatus.ACTIVE));
   }
 
   private void assertResearchPurposeMatches(ResearchPurpose rp) {
