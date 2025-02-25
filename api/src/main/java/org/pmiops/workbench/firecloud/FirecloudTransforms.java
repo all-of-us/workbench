@@ -25,8 +25,8 @@ public final class FirecloudTransforms {
   }
 
   public static RawlsWorkspaceACLUpdate buildAclUpdate(
-      String email, WorkspaceAccessLevel updatedAccess) {
-    RawlsWorkspaceACLUpdate update = new RawlsWorkspaceACLUpdate().email(email);
+      String username, WorkspaceAccessLevel updatedAccess) {
+    RawlsWorkspaceACLUpdate update = new RawlsWorkspaceACLUpdate().email(username);
     if (updatedAccess == WorkspaceAccessLevel.OWNER) {
       return update
           .canShare(true)
