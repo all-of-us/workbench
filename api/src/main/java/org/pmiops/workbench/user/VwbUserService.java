@@ -40,7 +40,7 @@ public class VwbUserService {
   }
 
   public DbVwbUserPod createInitialCreditsPodForUser(DbUser dbUser) {
-    if (!workbenchConfigProvider.get().featureFlags.enableVWBUserCreation) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBPodCreation) {
       return null;
     }
     String email = dbUser.getUsername();
@@ -52,6 +52,7 @@ public class VwbUserService {
     DbVwbUserPod dbVwbUserPod =
         new DbVwbUserPod()
             .setVwbPodId(initialCreditsPodForUser.getPodId().toString())
+            .setUser(dbUser)
             .setActive(true);
     dbUser.setVwbUserPod(dbVwbUserPod);
     return dbVwbUserPod;
