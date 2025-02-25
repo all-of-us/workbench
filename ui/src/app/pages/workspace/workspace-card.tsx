@@ -111,7 +111,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
     deleteWorkspace = withErrorModal(
       {
         title: 'Error Deleting Workspace',
-        message: `Could not delete workspace '${this.props.workspace.name}'.`,
+        message: `Could not delete workspace '${this.props.workspace.displayName}'.`,
         showBugReportLink: true,
         onDismiss: () => {
           this.setState({ confirmDeleting: false });
@@ -144,10 +144,10 @@ export const WorkspaceCard = fp.flow(withNavigation)(
 
     trackWorkspaceNavigation() {
       const {
-        workspace: { name, featuredCategory },
+        workspace: { displayName, featuredCategory },
       } = this.props;
       !!featuredCategory
-        ? AnalyticsTracker.Workspaces.NavigateToFeatured(name)
+        ? AnalyticsTracker.Workspaces.NavigateToFeatured(displayName)
         : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
     }
 
@@ -176,7 +176,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         onDuplicate={() => {
                           !!workspace.featuredCategory
                             ? AnalyticsTracker.Workspaces.DuplicateFeatured(
-                                workspace.name
+                                workspace.displayName
                               )
                             : AnalyticsTracker.Workspaces.OpenDuplicatePage(
                                 'Card'
@@ -262,7 +262,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           }
                           data-test-id='workspace-card-name'
                         >
-                          {workspace.name}
+                          {workspace.displayName}
                         </div>
                       </TooltipTrigger>
                     </StyledRouterLink>
@@ -354,7 +354,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 AnalyticsTracker.Workspaces.Delete();
                 this.deleteWorkspace();
               }}
-              workspaceName={workspace.name}
+              workspaceName={workspace.displayName}
             />
           )}
           {showShareModal && (

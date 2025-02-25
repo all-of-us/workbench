@@ -78,7 +78,7 @@ describe(WorkspaceShare.name, () => {
 
   const tomRiddleDiary: WorkspaceData = {
     namespace: 'Horcrux',
-    name: 'The Diary of Tom Marvolo Riddle',
+    displayName: 'The Diary of Tom Marvolo Riddle',
     terraName: 'diary',
     etag: '1',
     accessLevel: WorkspaceAccessLevel.OWNER,

@@ -11,7 +11,7 @@ describe('NewNotebookModal', () => {
     const { getByTestId } = render(
       <NewJupyterNotebookModal
         onClose={() => {}}
-        workspace={{ name: 'a' }}
+        workspace={{ displayName: 'a' }}
         existingNameList={['123.ipynb']}
       />
     );
