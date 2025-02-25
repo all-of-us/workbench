@@ -1378,8 +1378,8 @@ export const WorkspaceEdit = fp.flow(
       const values: object = {
         aianResearchDetails,
         aianResearchType,
-          name,
-          displayName,
+        name,
+        displayName,
         billingAccountName,
         anticipatedFindings,
         intendedStudy,
