@@ -6,6 +6,7 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.hasValidRuntimeC
 import com.google.gson.Gson;
 import jakarta.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
@@ -58,6 +59,7 @@ public interface LeonardoMapper {
   @ValueMapping(source = "user-override", target = "USEROVERRIDE")
   @ValueMapping(source = "preset-general-analysis", target = "GENERALANALYSIS")
   @ValueMapping(source = "preset-hail-genomic-analysis", target = "HAILGENOMICANALYSIS")
+  @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.NULL)
   RuntimeConfigurationType toConfigurationType(String runtimeConfigurationLabel);
 
   @ValueMapping(source = "USEROVERRIDE", target = "user-override")
@@ -266,15 +268,13 @@ public interface LeonardoMapper {
   }
 
   @Named("mapRuntimeConfigurationLabels")
-  default RuntimeConfigurationType mapRuntimeConfigurationLabels(Runtime runtime, Object runtimeLabelsObj) {
-    if (hasValidRuntimeConfigurationLabel(runtimeLabelsObj)) {
-      runtime.setConfigurationType(
-          toConfigurationType(getRuntimeConfigurationLabel(runtimeLabelsObj)));
-    } else {
-      // If there's no valid label, fall back onto the old behavior where every Runtime was created
-      // with a default Dataproc config
-      runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
-    }
+  default RuntimeConfigurationType mapRuntimeConfigurationLabels(Object runtimeLabelsObj) {
+    return hasValidRuntimeConfigurationLabel(runtimeLabelsObj)
+        ? toConfigurationType(getRuntimeConfigurationLabel(runtimeLabelsObj))
+        :
+        // If there's no valid label, fall back onto the old behavior where every Runtime was
+        // created with a default Dataproc config
+        RuntimeConfigurationType.HAILGENOMICANALYSIS;
   }
 
   default void mapRuntimeConfig(
