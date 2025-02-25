@@ -41,7 +41,7 @@ public class DiskService {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
     return leonardoApiClient.listDisksByProjectAsService(googleProject).stream()
-        .map(leonardoMapper::toApiListDisksResponse)
+        .map(leonardoMapper::toApiDisk)
         .toList();
   }
 
@@ -51,7 +51,7 @@ public class DiskService {
 
     List<Disk> disks =
         leonardoApiClient.listPersistentDiskByProjectCreatedByCreator(googleProject).stream()
-            .map(leonardoMapper::toApiListDisksResponse)
+            .map(leonardoMapper::toApiDisk)
             .toList();
     return PersistentDiskUtils.findTheMostRecentActiveDisks(disks);
   }

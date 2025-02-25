@@ -670,15 +670,14 @@ describe('RuntimeConfigurationPanel', () => {
     runtimeDiskStore.set(runtimeDiskStoreStub);
   };
 
-  const existingDisk = (): Disk => {
-    return {
-      size: 1000,
-      diskType: DiskType.STANDARD,
-      name: 'my-existing-disk',
-      gceRuntime: true,
-      zone: 'us-central1-a',
-    };
-  };
+  const existingDisk = (): Disk => ({
+    ...stubDisk(),
+    size: 1000,
+    diskType: DiskType.STANDARD,
+    name: 'my-existing-disk',
+    gceRuntime: true,
+    zone: 'us-central1-a',
+  });
 
   const detachableDiskRuntime = (): Runtime => {
     const { size, diskType, name } = existingDisk();

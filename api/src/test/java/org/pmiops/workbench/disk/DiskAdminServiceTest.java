@@ -44,9 +44,9 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.C
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
-import org.pmiops.workbench.model.TQSafeDiskStatus;
-import org.pmiops.workbench.model.TQSafeDiskType;
-import org.pmiops.workbench.model.TaskQueueDisk;
+import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -152,7 +152,7 @@ public class DiskAdminServiceTest {
 
   @Test
   public void testCheckPersistentDisksSkipsNonReady() {
-    var disks = List.of(idleDisk(Duration.ofDays(14L)).status(TQSafeDiskStatus.FAILED));
+    var disks = List.of(idleDisk(Duration.ofDays(14L)).status(DiskStatus.FAILED));
 
     assertDoesNotThrow(() -> service.checkPersistentDisks(disks));
 
@@ -202,7 +202,7 @@ public class DiskAdminServiceTest {
   public void testCheckPersistentDisksSkipsUnknownUser() throws MessagingException {
     stubWorkspaceOwners(workspace, List.of(user1));
 
-    TaskQueueDisk mysteryDisk = idleDisk(Duration.ofDays(14L)).creator("404@aou.org");
+    Disk mysteryDisk = idleDisk(Duration.ofDays(14L)).creator("404@aou.org");
     var disks = List.of(mysteryDisk, idleDisk(Duration.ofDays(30L)));
 
     assertDoesNotThrow(() -> service.checkPersistentDisks(disks));
@@ -255,7 +255,7 @@ public class DiskAdminServiceTest {
   @Test
   public void testIsDiskAttached_Gce_attached() throws ApiException {
     int diskId = 1;
-    TaskQueueDisk disk = gceDisk(diskId);
+    Disk disk = gceDisk(diskId);
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(diskId);
     // need to use a separate call because this returns a LeonardoRuntimeConfig object instead
@@ -272,7 +272,7 @@ public class DiskAdminServiceTest {
   public void testIsDiskAttached_Gce_multiple() throws ApiException {
     int diskId = 1;
     int otherDiskId = 2;
-    TaskQueueDisk disk = gceDisk(diskId);
+    Disk disk = gceDisk(diskId);
 
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse1 =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(diskId);
@@ -297,7 +297,7 @@ public class DiskAdminServiceTest {
   public void testIsDiskAttached_Gce_mismatch() throws ApiException {
     int diskId = 1;
     int otherDiskId = 2;
-    TaskQueueDisk disk = gceDisk(diskId);
+    Disk disk = gceDisk(diskId);
 
     LeonardoGceWithPdConfigInResponse runtimeConfigResponse2 =
         new LeonardoGceWithPdConfigInResponse().persistentDiskId(otherDiskId);
@@ -314,7 +314,7 @@ public class DiskAdminServiceTest {
   @Test
   public void testIsDiskAttached_Gce_no_runtimes() throws ApiException {
     int diskId = 1;
-    TaskQueueDisk disk = gceDisk(diskId);
+    Disk disk = gceDisk(diskId);
 
     when(mockLeonardoApiClient.listRuntimesByProjectAsService(anyString()))
         .thenReturn(Collections.emptyList());
@@ -326,7 +326,7 @@ public class DiskAdminServiceTest {
   public void testIsDiskAttached_GKE_App_attached() throws ApiException {
     String diskName = "my-disk-name";
 
-    TaskQueueDisk disk = rStudioDisk(diskName);
+    Disk disk = rStudioDisk(diskName);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(List.of(new UserAppEnvironment().diskName(diskName)));
@@ -339,7 +339,7 @@ public class DiskAdminServiceTest {
     String diskName = "my-disk-name";
     String otherDiskName = "other-disk-name";
 
-    TaskQueueDisk disk = rStudioDisk(diskName);
+    Disk disk = rStudioDisk(diskName);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(
@@ -355,7 +355,7 @@ public class DiskAdminServiceTest {
     String diskName = "my-disk-name";
     String otherDiskName = "other-disk-name";
 
-    TaskQueueDisk disk = rStudioDisk(diskName);
+    Disk disk = rStudioDisk(diskName);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(List.of(new UserAppEnvironment().diskName(otherDiskName)));
@@ -367,7 +367,7 @@ public class DiskAdminServiceTest {
   public void testIsDiskAttached_GKE_App_no_apps() throws ApiException {
     String diskName = "my-disk-name";
 
-    TaskQueueDisk disk = rStudioDisk(diskName);
+    Disk disk = rStudioDisk(diskName);
 
     when(mockLeonardoApiClient.listAppsInProjectAsService(anyString()))
         .thenReturn(Collections.emptyList());
@@ -375,30 +375,24 @@ public class DiskAdminServiceTest {
     assertThat(service.isDiskAttached(disk)).isFalse();
   }
 
-  private TaskQueueDisk gceDisk(int diskId) {
-    return new TaskQueueDisk()
-        .persistentDiskId(diskId)
-        .googleProject("test-project")
-        .gceRuntime(true);
+  private Disk gceDisk(int diskId) {
+    return new Disk().persistentDiskId(diskId).googleProject("test-project").gceRuntime(true);
   }
 
-  private TaskQueueDisk rStudioDisk(String diskName) {
-    return new TaskQueueDisk()
-        .name(diskName)
-        .googleProject("test-project")
-        .appType(AppType.RSTUDIO);
+  private Disk rStudioDisk(String diskName) {
+    return new Disk().name(diskName).googleProject("test-project").appType(AppType.RSTUDIO);
   }
 
-  private TaskQueueDisk idleDisk(Duration idleTime) {
+  private Disk idleDisk(Duration idleTime) {
     return idleDiskForProjectAndCreator(
         workspace.getGoogleProject(), user1.getUsername(), idleTime);
   }
 
-  private TaskQueueDisk idleDiskForProjectAndCreator(
+  private Disk idleDiskForProjectAndCreator(
       String googleProject, String creatorEmail, Duration idleTime) {
-    return new TaskQueueDisk()
-        .diskType(TQSafeDiskType.STANDARD)
-        .status(TQSafeDiskStatus.READY)
+    return new Disk()
+        .diskType(DiskType.STANDARD)
+        .status(DiskStatus.READY)
         .name("my-disk")
         .size(200)
         .creator(creatorEmail)

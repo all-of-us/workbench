@@ -212,7 +212,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                 leonardoNotebooksClient
                     .listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject())
                     .stream()
-                    .map(leonardoMapper::toApiListDisksResponse)
+                    .map(leonardoMapper::toApiDisk)
                     .collect(Collectors.toList()));
         List<Disk> runtimeDisks =
             diskList.stream().filter(Disk::isGceRuntime).collect(Collectors.toList());

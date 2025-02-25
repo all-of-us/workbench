@@ -34,7 +34,7 @@ import {
   AppsApiStub,
   createListAppsCromwellResponse,
 } from 'testing/stubs/apps-api-stub';
-import { DisksApiStub } from 'testing/stubs/disks-api-stub';
+import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
@@ -308,6 +308,7 @@ describe(CreateGkeAppButton.name, () => {
     const diskName = 'arbitrary';
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       size: existingDiskSize,
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
@@ -344,6 +345,7 @@ describe(CreateGkeAppButton.name, () => {
     const diskName = 'arbitrary';
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       size: existingDiskSize,
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
@@ -383,6 +385,7 @@ describe(CreateGkeAppButton.name, () => {
     const diskName = 'arbitrary';
 
     const existingDisk: Disk = {
+      ...stubDisk(),
       size: existingDiskSize,
       name: diskName,
       diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,

@@ -35,9 +35,9 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
+import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
-import org.pmiops.workbench.model.TQSafeDiskType;
-import org.pmiops.workbench.model.TaskQueueDisk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -293,8 +293,8 @@ public class MailServiceTest {
     mailService.alertUsersUnusedDiskWarningThreshold(
         Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new TaskQueueDisk()
-            .diskType(TQSafeDiskType.SSD)
+        new Disk()
+            .diskType(DiskType.SSD)
             .gceRuntime(true)
             .size(123)
             .createdDate(
@@ -328,8 +328,8 @@ public class MailServiceTest {
     mailService.alertUsersUnusedDiskWarningThreshold(
         Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new TaskQueueDisk()
-            .diskType(TQSafeDiskType.SSD)
+        new Disk()
+            .diskType(DiskType.SSD)
             .gceRuntime(true)
             .size(123)
             .createdDate(

@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 @ExtendWith(MockitoExtension.class)
 public class DiskAdminControllerTest {
   private static final String WORKSPACE_NS = "workspace-ns";
+  private static final String GOOGLE_PROJECT = "my-project";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final Instant NOW = Instant.now();
 
@@ -53,6 +54,7 @@ public class DiskAdminControllerTest {
             user.generatePDNameForUserApps(AppType.RSTUDIO),
             DiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
+            GOOGLE_PROJECT,
             user,
             AppType.RSTUDIO);
 
@@ -61,11 +63,13 @@ public class DiskAdminControllerTest {
             user.generatePDNameForUserApps(AppType.CROMWELL),
             DiskStatus.READY,
             NOW.toString(),
+            GOOGLE_PROJECT,
             user,
             AppType.CROMWELL);
 
     Disk jupyterDisk =
-        createRuntimeDisk(user.generatePDName(), DiskStatus.READY, NOW.toString(), user);
+        createRuntimeDisk(
+            user.generatePDName(), DiskStatus.READY, NOW.toString(), GOOGLE_PROJECT, user);
 
     List<Disk> serviceResponse =
         new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyterDisk));
@@ -93,6 +97,7 @@ public class DiskAdminControllerTest {
             user.generatePDNameForUserApps(AppType.CROMWELL),
             DiskStatus.READY,
             NOW.toString(),
+            GOOGLE_PROJECT,
             user,
             AppType.CROMWELL);
     ResponseEntity<EmptyResponse> response =
