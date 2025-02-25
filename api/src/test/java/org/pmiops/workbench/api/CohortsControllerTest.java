@@ -354,27 +354,27 @@ public class CohortsControllerTest {
   }
 
   private void stubGetWorkspace(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
+      String ns, String terraName, String creator, WorkspaceAccessLevel access) {
     RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
-    fcWorkspace.setName(name);
+    fcWorkspace.setName(terraName);
     fcWorkspace.setCreatedBy(creator);
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
-    when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
-    stubGetWorkspaceAcl(ns, name, creator, access);
+    when(fireCloudService.getWorkspace(ns, terraName)).thenReturn(fcResponse);
+    stubGetWorkspaceAcl(ns, terraName, creator, access);
   }
 
   private void stubGetWorkspaceAcl(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
+      String ns, String terraName, String creator, WorkspaceAccessLevel access) {
     RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
     RawlsWorkspaceAccessEntry accessLevelEntry =
         new RawlsWorkspaceAccessEntry().accessLevel(access.toString());
     Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(ns, name))
+    when(fireCloudService.getWorkspaceAclAsService(ns, terraName))
         .thenReturn(workspaceAccessLevelResponse);
   }
 
