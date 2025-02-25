@@ -665,7 +665,7 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getCdrVersionId()).isEqualTo(cdrVersionId);
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
-    assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
+    assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USERNAME);
     assertThat(retrievedWorkspace.getName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getDisplayName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getTerraName()).isEqualTo(testWorkspaceTerraName);

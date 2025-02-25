@@ -534,11 +534,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private WorkspaceUserAdminView toWorkspaceUserAdminView(
       UserRole userRole, @Nullable DbUser userMaybe) {
     return userMaybe == null
-        ?
-        // the MapStruct-generated method won't handle a partial conversion
-        new WorkspaceUserAdminView()
-            .role(userRole.getRole())
-            .userModel(userMapper.toApiUser(userRole, null))
+        ? userMapper.toPartialWorkspaceUserAdminView(userRole)
         : userMapper.toWorkspaceUserAdminView(userMaybe, userRole);
   }
 }
