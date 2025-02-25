@@ -90,8 +90,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     return userDao.save(dbUser);
   }
 
-  private void createVwbUserIfNeeded(DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
 
+  private void createVwbUserIfNeeded(DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
     // This means that the user has been granted access to a tier for the first time. Then perform the VWB creation logic.
     if (previousAccessTiers.isEmpty() && !newAccessTiers.isEmpty()) {
       // This call checks if the user already exists in VWB to avoid creating the user twice.
