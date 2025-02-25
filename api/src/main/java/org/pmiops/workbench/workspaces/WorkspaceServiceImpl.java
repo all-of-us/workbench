@@ -32,7 +32,6 @@ import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -54,10 +53,12 @@ import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.tanagra.model.Cohort;
@@ -68,7 +69,6 @@ import org.pmiops.workbench.tanagra.model.FeatureSetCloneInfo;
 import org.pmiops.workbench.tanagra.model.FeatureSetList;
 import org.pmiops.workbench.tanagra.model.StudyCreateInfo;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +99,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FireCloudService fireCloudService;
-  private final FirecloudMapper firecloudMapper;
   private final InitialCreditsService initialCreditsService;
   private final MailService mailService;
   private final Provider<DbUser> userProvider;
@@ -108,7 +107,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final UserDao userDao;
   private final UserMapper userMapper;
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
-  private final UserService userService;
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
@@ -125,7 +123,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FireCloudService fireCloudService,
-      FirecloudMapper firecloudMapper,
       InitialCreditsService initialCreditsService,
       MailService mailService,
       Provider<DbUser> userProvider,
@@ -134,7 +131,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      UserService userService,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
@@ -148,7 +144,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.fireCloudService = fireCloudService;
-    this.firecloudMapper = firecloudMapper;
     this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
     this.tanagraApiProvider = tanagraApiProvider;
@@ -156,7 +151,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.userMapper = userMapper;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
-    this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
@@ -221,7 +215,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         fireCloudService.getWorkspace(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-   return workspaceMapper.toApiWorkspaceResponse(
+    return workspaceMapper.toApiWorkspaceResponse(
         workspaceMapper.toApiWorkspace(
             dbWorkspace, fcResponse.getWorkspace(), initialCreditsService),
         fcResponse.getAccessLevel());
