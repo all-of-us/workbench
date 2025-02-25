@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { Navigate } from 'react-router-dom-v5-compat';
 import * as fp from 'lodash/fp';
 
 import { AuditAction, AuditLogEntry } from 'generated/fetch';
 
 import { AuditActionCardListView } from 'app/components/admin/audit-card-list-view';
-import { Navigate } from 'app/components/app-router';
 import {
   Button,
   StyledExternalLink,

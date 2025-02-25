@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 import { mockNavigate } from 'setupTests';
 
 import { render, screen, waitFor } from '@testing-library/react';
@@ -32,9 +33,11 @@ describe('WorkspaceNavBar', () => {
           `/${workspaceDataStub.namespace}/${workspaceDataStub.terraName}`,
         ]}
       >
-        <Route path='/:ns/:terraName'>
-          <WorkspaceNavBar {...props} />
-        </Route>
+        <CompatRouter>
+          <CompatRoute path='/:ns/:terraName'>
+            <WorkspaceNavBar {...props} />
+          </CompatRoute>
+        </CompatRouter>
       </MemoryRouter>
     );
   };

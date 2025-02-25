@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { BrowserRouter } from 'react-router-dom';
 
 import { CohortBuilderApi } from 'generated/fetch';
 
@@ -25,9 +24,7 @@ describe('VariantSearch', () => {
   });
   const component = () => {
     return renderWithRouter(
-      <BrowserRouter>
-        <VariantSearch select={() => {}} selectedIds={[]} />
-      </BrowserRouter>
+      <VariantSearch select={() => {}} selectedIds={[]} />
     );
   };
 

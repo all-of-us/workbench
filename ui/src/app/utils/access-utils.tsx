@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import * as fp from 'lodash/fp';
 
 import {
@@ -116,7 +116,7 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
     buildRasRedirectUrl() +
     '&response_type=code&scope=openid+profile+email+federated_identities';
 
-  openInNewTab ? window.open(url, '_blank') : <Redirect to={url} />;
+  openInNewTab ? window.open(url, '_blank') : <Navigate to={url} />;
 };
 
 export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
