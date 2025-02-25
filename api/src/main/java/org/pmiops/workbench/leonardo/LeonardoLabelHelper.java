@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.pmiops.workbench.model.AppType;
 
 /** Helper class for setting Leonardo labels. */
@@ -25,6 +26,17 @@ public class LeonardoLabelHelper {
 
   public static final String LEONARDO_LABEL_WORKSPACE_NAMESPACE = "saturnWorkspaceNamespace";
   public static final String LEONARDO_LABEL_WORKSPACE_NAME = "saturnWorkspaceName";
+
+  // Important: keep these string constants in sync with LeonardoMapper
+  // toConfigurationType() and toConfigurationLabel()
+
+  public static String USER_OVERRIDE = "user-override";
+  public static String GENERAL_ANALYSIS = "preset-general-analysis";
+  public static String HAIL_GENOMIC_ANALYSIS = "preset-hail-genomic-analysis";
+
+  public static boolean isValidRuntimeConfigurationLabel(String s) {
+    return Set.of(USER_OVERRIDE, GENERAL_ANALYSIS, HAIL_GENOMIC_ANALYSIS).contains(s);
+  }
 
   public static String appTypeToLabelValue(AppType appType) {
     return appType.toString().toLowerCase();

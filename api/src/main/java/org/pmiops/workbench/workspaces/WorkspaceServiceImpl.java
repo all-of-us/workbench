@@ -89,7 +89,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkspaceServiceImpl implements WorkspaceService {
 
   protected static final int RECENT_WORKSPACE_COUNT = 4;
-  private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
+  private static final Logger log = Logger.getLogger(WorkspaceServiceImpl.class.getName());
 
   private final AccessTierService accessTierService;
   private final BillingProjectAuditor billingProjectAuditor;

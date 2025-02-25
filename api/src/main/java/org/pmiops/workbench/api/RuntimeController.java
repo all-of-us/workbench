@@ -144,9 +144,8 @@ public class RuntimeController implements RuntimeApiDelegate {
         LeonardoLabelHelper.toLabelMap(mostRecentRuntime.getLabels());
 
     if (runtimeLabels != null
-        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-            .values()
-            .contains(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
+        && LeonardoLabelHelper.isValidRuntimeConfigurationLabel(
+            runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntimeWithoutDisk(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
