@@ -20,8 +20,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 RUN npm install --global yarn n
-# Upgrade to Node 18, above installs 12.
-RUN n 18
+# Upgrade to Node 22, above installs 12.
+RUN n 22
 
 # keep in sync with api/gradle.build and ci/Dockerfile.circle_build
 ENV CLOUD_SDK_VERSION 503.0.0
