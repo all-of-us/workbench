@@ -100,6 +100,7 @@ public class DbWorkspace {
   private boolean initialCreditsExhausted;
   private boolean initialCreditsExpired;
 
+  // referenced by featured_workspace table
   private DbFeaturedCategory featuredCategory;
   private boolean usesTanagra;
 

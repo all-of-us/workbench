@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -113,11 +113,13 @@ public class InstitutionTierConfigMapperTest {
     final DbInstitution dbInst = new DbInstitution();
 
     final Set<DbInstitutionEmailDomain> rtDbDomains =
-        mapper.emailDomainsToDb(
-            new HashSet<>(rtTierConfig.getEmailDomains()), dbInst, RT_ACCESS_TIER);
+        rtTierConfig.getEmailDomains().stream()
+            .map(domain -> mapper.emailDomainToDb(domain, dbInst, RT_ACCESS_TIER))
+            .collect(Collectors.toSet());
     final Set<DbInstitutionEmailDomain> ctDbDomains =
-        mapper.emailDomainsToDb(
-            new HashSet<>(ctTierConfig.getEmailDomains()), dbInst, CT_ACCESS_TIER);
+        ctTierConfig.getEmailDomains().stream()
+            .map(domain -> mapper.emailDomainToDb(domain, dbInst, CT_ACCESS_TIER))
+            .collect(Collectors.toSet());
 
     assertThat(rtDbDomains).hasSize(sortedRtDistinctDomains.size());
     assertThat(ctDbDomains).hasSize(sortedCtDistinctDomains.size());
@@ -130,15 +132,6 @@ public class InstitutionTierConfigMapperTest {
       assertThat(sortedCtDistinctDomains).contains(dbDomain.getEmailDomain());
       assertThat(dbDomain.getInstitution()).isEqualTo(dbInst);
     }
-  }
-
-  @Test
-  public void test_modelToDbEmailDomain_empty() {
-    final Set<DbInstitutionEmailDomain> dbDomains =
-        mapper.emailDomainsToDb(new HashSet<>(), new DbInstitution(), RT_ACCESS_TIER);
-
-    assertThat(dbDomains).isNotNull();
-    assertThat(dbDomains).isEmpty();
   }
 
   @Test
@@ -156,11 +149,13 @@ public class InstitutionTierConfigMapperTest {
     final DbInstitution dbInst = new DbInstitution();
 
     final Set<DbInstitutionEmailAddress> rtDbAddresses =
-        mapper.emailAddressesToDb(
-            new HashSet<>(rtTierConfig.getEmailAddresses()), dbInst, RT_ACCESS_TIER);
+        rtTierConfig.getEmailAddresses().stream()
+            .map(domain -> mapper.emailAddressToDb(domain, dbInst, RT_ACCESS_TIER))
+            .collect(Collectors.toSet());
     final Set<DbInstitutionEmailAddress> ctDbAddresses =
-        mapper.emailAddressesToDb(
-            new HashSet<>(ctTierConfig.getEmailAddresses()), dbInst, CT_ACCESS_TIER);
+        ctTierConfig.getEmailAddresses().stream()
+            .map(domain -> mapper.emailAddressToDb(domain, dbInst, CT_ACCESS_TIER))
+            .collect(Collectors.toSet());
 
     assertThat(rtDbAddresses).hasSize(sortedRtDistinctAddresses.size());
     assertThat(ctDbAddresses).hasSize(sortedCtDistinctAddresses.size());
@@ -173,15 +168,6 @@ public class InstitutionTierConfigMapperTest {
       assertThat(sortedCtDistinctAddresses).contains(dbAddress.getEmailAddress());
       assertThat(dbAddress.getInstitution()).isEqualTo(dbInst);
     }
-  }
-
-  @Test
-  public void test_modelToDbEmailAddress_empty() {
-    final Set<DbInstitutionEmailAddress> dbAddresses =
-        mapper.emailAddressesToDb(new HashSet<>(), new DbInstitution(), RT_ACCESS_TIER);
-
-    assertThat(dbAddresses).isNotNull();
-    assertThat(dbAddresses).isEmpty();
   }
 
   @Test
