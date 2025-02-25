@@ -271,7 +271,6 @@ public class WorkspaceAdminServiceTest {
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_DISPLAY_NAME);
     assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
         .isEqualTo(WORKSPACE_DISPLAY_NAME);
 
@@ -299,7 +298,6 @@ public class WorkspaceAdminServiceTest {
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_DISPLAY_NAME);
     assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
         .isEqualTo(WORKSPACE_DISPLAY_NAME);
 

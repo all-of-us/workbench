@@ -316,14 +316,16 @@ public class CohortsControllerTest {
             + "}";
 
     workspace = new Workspace();
-    workspace.setName(WORKSPACE_NAME);
+    workspace.setDisplayName(WORKSPACE_NAME);
+    workspace.setTerraName(WORKSPACE_NAME);
     workspace.setNamespace(WORKSPACE_NAMESPACE);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
     workspace.setBillingAccountName("billing-account");
 
     workspace2 = new Workspace();
-    workspace2.setName(WORKSPACE_NAME_2);
+    workspace2.setDisplayName(WORKSPACE_NAME_2);
+    workspace2.setTerraName(WORKSPACE_NAME);
     workspace2.setNamespace(WORKSPACE_NAMESPACE);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
@@ -381,9 +383,9 @@ public class CohortsControllerTest {
   private void stubWorkspaceAccessLevelWithCreatorEmail(
       Workspace workspace, WorkspaceAccessLevel workspaceAccessLevel) {
     stubGetWorkspace(
-        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, workspaceAccessLevel);
+        workspace.getNamespace(), workspace.getTerraName(), CREATOR_EMAIL, workspaceAccessLevel);
     stubGetWorkspaceAcl(
-        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, workspaceAccessLevel);
+        workspace.getNamespace(), workspace.getTerraName(), CREATOR_EMAIL, workspaceAccessLevel);
   }
 
   private Cohort createDefaultCohort() {

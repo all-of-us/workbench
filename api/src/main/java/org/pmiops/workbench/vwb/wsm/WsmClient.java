@@ -62,7 +62,7 @@ public class WsmClient {
           CloneWorkspaceV2Request cloneWorkspaceV2Request =
               new CloneWorkspaceV2Request()
                   .userFacingId(targetWorkspace.getNamespace())
-                  .displayName(targetWorkspace.getName())
+                  .displayName(targetWorkspace.getDisplayName())
                   .additionalProperties(
                       stringMapToProperties(
                           Map.of(

@@ -48,7 +48,7 @@ public class WorkspaceTargetPropertyTest {
 
     workspace1 =
         new Workspace()
-            .name("Workspace 1")
+            .displayName("Workspace 1")
             .terraName("workspace1")
             .namespace("aou-rw-local1-c4be869a")
             .creatorUser(creator)
@@ -61,7 +61,7 @@ public class WorkspaceTargetPropertyTest {
 
     workspace2 =
         new Workspace()
-            .name("Workspace 2")
+            .displayName("Workspace 2")
             .terraName("workspace2")
             .namespace("aou-rw-local1-c4be869a")
             .creatorUser(creator)

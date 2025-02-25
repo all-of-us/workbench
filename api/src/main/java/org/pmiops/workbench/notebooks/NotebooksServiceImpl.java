@@ -165,22 +165,22 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public FileDetail copyNotebook(
       String fromWorkspaceNamespace,
-      String fromWorkspaceFirecloudName,
+      String fromWorkspaceTerraName,
       String fromNotebookNameWithExtension,
       String toWorkspaceNamespace,
-      String toWorkspaceFirecloudName,
+      String toWorkspaceTerraName,
       String newNotebookNameWithExtension) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        fromWorkspaceNamespace, fromWorkspaceFirecloudName, WorkspaceAccessLevel.READER);
+        fromWorkspaceNamespace, fromWorkspaceTerraName, WorkspaceAccessLevel.READER);
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateInitialCreditUsage(toWorkspaceNamespace, toWorkspaceFirecloudName);
+        toWorkspaceNamespace, toWorkspaceTerraName, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.validateInitialCreditUsage(toWorkspaceNamespace, toWorkspaceTerraName);
 
     final DbWorkspace fromWorkspace =
-        workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName);
+        workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceTerraName);
     final DbAccessTier fromTier = fromWorkspace.getCdrVersion().getAccessTier();
     final DbWorkspace toWorkspace =
-        workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceFirecloudName);
+        workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceTerraName);
     final DbAccessTier toTier = toWorkspace.getCdrVersion().getAccessTier();
 
     if (!fromTier.equals(toTier)) {
@@ -193,10 +193,10 @@ public class NotebooksServiceImpl implements NotebooksService {
 
     GoogleCloudLocators fromNotebookLocators =
         getNotebookLocators(
-            fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookNameWithExtension);
+            fromWorkspaceNamespace, fromWorkspaceTerraName, fromNotebookNameWithExtension);
     GoogleCloudLocators newNotebookLocators =
         getNotebookLocators(
-            toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookNameWithExtension);
+            toWorkspaceNamespace, toWorkspaceTerraName, newNotebookNameWithExtension);
 
     if (!cloudStorageClient
         .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))

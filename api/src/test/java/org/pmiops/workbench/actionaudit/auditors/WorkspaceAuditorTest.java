@@ -120,7 +120,7 @@ public class WorkspaceAuditorTest {
     workspace1 =
         new Workspace()
             .etag("etag_1")
-            .name("DbWorkspace 1")
+            .displayName("DbWorkspace 1")
             .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
@@ -291,7 +291,7 @@ public class WorkspaceAuditorTest {
             // changes included above
             .researchPurpose(editedResearchPurpose)
             // changes
-            .name("a new name")
+            .displayName("a new name")
             .namespace("a new namespace")
             .creatorUser(creator);
     final int wsChanges = 3;
@@ -307,7 +307,7 @@ public class WorkspaceAuditorTest {
     return new Workspace()
         .terraName(in.getTerraName())
         .etag(in.getEtag())
-        .name(in.getName())
+        .displayName(in.getDisplayName())
         .namespace(in.getNamespace())
         .cdrVersionId(in.getCdrVersionId())
         .creatorUser(in.getCreatorUser())

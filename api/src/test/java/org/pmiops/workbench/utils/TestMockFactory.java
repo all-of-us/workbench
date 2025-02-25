@@ -127,7 +127,6 @@ public class TestMockFactory {
 
     return new Workspace()
         .etag("\"1\"")
-        .name(workspaceDisplayName)
         .displayName(workspaceDisplayName)
         .terraName(workspaceTerraName)
         .namespace(workspaceNamespace)
@@ -217,7 +216,7 @@ public class TestMockFactory {
               Workspace capturedWorkspace = (Workspace) invocation.getArguments()[0];
               RawlsWorkspaceDetails fcWorkspace =
                   createTerraWorkspace(
-                      capturedWorkspace.getNamespace(), capturedWorkspace.getName(), null);
+                      capturedWorkspace.getNamespace(), capturedWorkspace.getDisplayName(), null);
 
               RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);
@@ -225,7 +224,8 @@ public class TestMockFactory {
 
               doReturn(fcResponse)
                   .when(fireCloudService)
-                  .getWorkspace(capturedWorkspace.getNamespace(), capturedWorkspace.getName());
+                  .getWorkspace(
+                      capturedWorkspace.getNamespace(), capturedWorkspace.getDisplayName());
               return fcWorkspace;
             })
         .when(workspaceService)
@@ -280,7 +280,7 @@ public class TestMockFactory {
   public static DbWorkspace createDbWorkspaceStub(Workspace workspace, long workspaceDbId) {
     DbWorkspace dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceId(workspaceDbId);
-    dbWorkspace.setName(workspace.getName());
+    dbWorkspace.setName(workspace.getDisplayName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
     // a.k.a. RawlsWorkspaceDetails.name
     dbWorkspace.setFirecloudName(workspace.getTerraName()); // DB_WORKSPACE_FIRECLOUD_NAME

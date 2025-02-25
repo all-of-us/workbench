@@ -2741,20 +2741,20 @@ public class CohortReviewControllerTest {
 
   private void stubWorkspaceAccessLevel(
       Workspace workspace, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
-    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getTerraName(), workspaceAccessLevel);
+    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getTerraName(), workspaceAccessLevel);
   }
 
   private void stubGetWorkspace(
-      String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
+      String ns, String terraName, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
-    fcWorkspace.setName(name);
+    fcWorkspace.setName(terraName);
     fcWorkspace.setCreatedBy(USER_EMAIL);
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(workspaceAccessLevel);
-    when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
+    when(fireCloudService.getWorkspace(ns, terraName)).thenReturn(fcResponse);
   }
 
   private void stubGetWorkspaceAcl(
@@ -2772,7 +2772,8 @@ public class CohortReviewControllerTest {
   private Workspace createTestWorkspace(
       String workspaceNamespace, String workspaceName, long cdrVersionId) {
     Workspace tmpWorkspace = new Workspace();
-    tmpWorkspace.setName(workspaceName);
+    tmpWorkspace.setDisplayName(workspaceName);
+    tmpWorkspace.setTerraName(workspaceName);
     tmpWorkspace.setNamespace(workspaceNamespace);
     tmpWorkspace.setResearchPurpose(new ResearchPurpose());
     tmpWorkspace.setCdrVersionId(String.valueOf(cdrVersionId));

@@ -1630,7 +1630,6 @@ public class ConceptSetsControllerTest {
       long cdrVersionId,
       RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     Workspace tmpWorkspace = new Workspace();
-    tmpWorkspace.setName(workspaceDisplayName);
     tmpWorkspace.setDisplayName(workspaceDisplayName);
     tmpWorkspace.setTerraName(workspaceTerraName);
     tmpWorkspace.setNamespace(workspaceNamespace);
