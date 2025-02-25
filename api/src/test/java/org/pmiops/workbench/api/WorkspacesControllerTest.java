@@ -268,7 +268,6 @@ public class WorkspacesControllerTest {
   @Autowired AccessTierDao accessTierDao;
   @Autowired BigQueryService bigQueryService;
   @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewController cohortReviewController;
@@ -276,7 +275,6 @@ public class WorkspacesControllerTest {
   @Autowired CohortsController cohortsController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Autowired ConceptSetDao conceptSetDao;
-  @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
   @Autowired DataSetController dataSetController;
   @Autowired DataSetDao dataSetDao;
@@ -284,16 +282,10 @@ public class WorkspacesControllerTest {
   @Autowired FakeClock fakeClock;
   @Autowired FireCloudService fireCloudService;
   @Autowired FirecloudMapper firecloudMapper;
-  @Autowired ObjectNameLengthService objectNameLengthService;
   @Autowired UserDao userDao;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
-  @Autowired WorkspaceAdminService workspaceAdminService;
   @Autowired WorkspaceAuditor mockWorkspaceAuditor;
-  @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspacesController workspacesController;
-  @Autowired FeaturedWorkspaceDao featuredWorkspaceDao;
   @Autowired WorkspaceServiceFactory workspaceServiceFactory;
 
   @MockBean AccessTierService accessTierService;
@@ -664,7 +656,6 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
     assertThat(retrievedWorkspace.getCreatorUser().getUserName()).isEqualTo(LOGGED_IN_USER_EMAIL);
-    assertThat(retrievedWorkspace.getName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getDisplayName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getTerraName()).isEqualTo(testWorkspaceTerraName);
     assertThat(retrievedWorkspace.getResearchPurpose().isDiseaseFocusedResearch()).isTrue();
@@ -1359,7 +1350,6 @@ public class WorkspacesControllerTest {
         ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -1417,7 +1407,6 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -1454,7 +1443,6 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -1492,7 +1480,6 @@ public class WorkspacesControllerTest {
           altCdrVersion.setAccessTier(altAccessTier);
           altCdrVersion = cdrVersionDao.save(altCdrVersion);
           final Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("Cloned");
           modWorkspace.setDisplayName("Cloned");
           modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
@@ -1735,7 +1722,6 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -1918,7 +1904,6 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -2019,7 +2004,6 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -2160,7 +2144,6 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -2196,7 +2179,6 @@ public class WorkspacesControllerTest {
 
     Workspace modWorkspace =
         new Workspace()
-            .name("Cloned")
             .displayName("Cloned")
             .terraName("cloned")
             .namespace("cloned-ns")
@@ -2418,7 +2400,6 @@ public class WorkspacesControllerTest {
           workspace = workspacesController.createWorkspace(workspace).getBody();
           CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("Cloned");
           modWorkspace.setDisplayName("Cloned");
           modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
@@ -2447,7 +2428,6 @@ public class WorkspacesControllerTest {
               .thenThrow(new NotFoundException());
           CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("Cloned");
           modWorkspace.setDisplayName("Cloned");
           modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");

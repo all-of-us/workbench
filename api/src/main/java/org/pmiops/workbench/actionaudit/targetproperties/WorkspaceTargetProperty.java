@@ -10,7 +10,6 @@ import org.pmiops.workbench.model.Workspace;
 // not safe to remove, even if an IDE indicates otherwise.
 public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspace> {
   ETAG("etag", Workspace::getEtag),
-  NAME("name", Workspace::getName),
   DISPLAY_NAME("display_name", Workspace::getDisplayName),
   TERRA_NAME("terra_name", Workspace::getTerraName),
   NAMESPACE("namespace", Workspace::getNamespace),
