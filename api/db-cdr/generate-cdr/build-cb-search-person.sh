@@ -22,8 +22,13 @@ selfReportedCategoryCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_
 
 echo "Checking if device tables exists in this dataset"
 query="select count(table_id) as count from \`$BQ_PROJECT.$BQ_DATASET.__TABLES__\`
-where table_name=\"device\""
+where table_id=\"device\""
 deviceTableExist=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
+echo "Checking if EtM tables exists in this dataset"
+query="select count(table_id) as count from \`$BQ_PROJECT.$BQ_DATASET.__TABLES__\`
+where table_id=\"delaydiscounting\""
+etmTablesExist=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 ################################################
 # insert person data into cb_search_person
@@ -713,5 +718,100 @@ then
               ) ws on (p.person_id = ws.person_id)
       ) y
   WHERE x.person_id = y.person_id"
+fi
+
+if [[ $etmTablesExist > 0 ]];
+then
+  ################################################
+  # set has_etm_delaydiscounting
+  ################################################
+  echo "set has_etm_delaydiscounting flag in cb_search_person"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+     SET x.has_etm_delaydiscounting = y.has_etm_delaydiscounting
+     FROM
+         (
+             SELECT
+                   p.person_id
+                 , CASE
+                     WHEN ws.person_id is null THEN 0
+                     ELSE 1
+                   END has_etm_delaydiscounting
+             FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+             LEFT JOIN
+                 (
+                     SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.delaydiscounting\`
+                 ) ws on (p.person_id = ws.person_id)
+         ) y
+     WHERE x.person_id = y.person_id"
+
+  ################################################
+  # set has_etm_emorecog
+  ################################################
+  echo "set has_etm_emorecog flag in cb_search_person"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+     SET x.has_etm_emorecog = y.has_etm_emorecog
+     FROM
+         (
+             SELECT
+                   p.person_id
+                 , CASE
+                     WHEN ws.person_id is null THEN 0
+                     ELSE 1
+                   END has_etm_emorecog
+             FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+             LEFT JOIN
+                 (
+                     SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.emorecog\`
+                 ) ws on (p.person_id = ws.person_id)
+         ) y
+     WHERE x.person_id = y.person_id"    
+     
+  ################################################
+  # set has_etm_flanker
+  ################################################
+  echo "set has_etm_flanker flag in cb_search_person"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+     SET x.has_etm_flanker = y.has_etm_flanker
+     FROM
+         (
+             SELECT
+                   p.person_id
+                 , CASE
+                     WHEN ws.person_id is null THEN 0
+                     ELSE 1
+                   END has_etm_flanker
+             FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+             LEFT JOIN
+                 (
+                     SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.flanker\`
+                 ) ws on (p.person_id = ws.person_id)
+         ) y
+     WHERE x.person_id = y.person_id"
+     
+  ################################################
+  # set has_etm_gradcpt
+  ################################################
+  echo "set has_etm_gradcpt flag in cb_search_person"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+     SET x.has_etm_gradcpt = y.has_etm_gradcpt
+     FROM
+         (
+             SELECT
+                   p.person_id
+                 , CASE
+                     WHEN ws.person_id is null THEN 0
+                     ELSE 1
+                   END has_etm_gradcpt
+             FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+             LEFT JOIN
+                 (
+                     SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.gradcpt\`
+                 ) ws on (p.person_id = ws.person_id)
+         ) y
+     WHERE x.person_id = y.person_id"
 fi
 

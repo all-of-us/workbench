@@ -424,6 +424,10 @@ export const SearchGroup = withCurrentWorkspace()(
             Domain.ARRAY_DATA,
             Domain.STRUCTURAL_VARIANT_DATA,
             Domain.SNP_INDEL_VARIANT,
+            Domain.ETM_DELAYDISCOUNTING,
+            Domain.ETM_EMORECOG,
+            Domain.ETM_FLANKER,
+            Domain.ETM_GRADCPT,
           ].includes(it.type) ||
           it.modifiers.some(
             (mod) => mod.name === ModifierType.NUM_OF_OCCURRENCES

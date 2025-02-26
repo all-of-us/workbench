@@ -93,6 +93,10 @@ public final class SearchGroupItemQueryBuilder {
               Domain.LR_WHOLE_GENOME_VARIANT, "has_lr_whole_genome_variant"),
           new AbstractMap.SimpleEntry<>(
               Domain.STRUCTURAL_VARIANT_DATA, "has_structural_variant_data"),
+          new AbstractMap.SimpleEntry<>(Domain.ETM_DELAYDISCOUNTING, "has_etm_delaydiscounting"),
+          new AbstractMap.SimpleEntry<>(Domain.ETM_EMORECOG, "has_etm_emorecog"),
+          new AbstractMap.SimpleEntry<>(Domain.ETM_FLANKER, "has_etm_flanker"),
+          new AbstractMap.SimpleEntry<>(Domain.ETM_GRADCPT, "has_etm_gradcpt"),
           new AbstractMap.SimpleEntry<>(Domain.WEAR_CONSENT, "has_wear_consent"));
 
   // sql parts to help construct BigQuery sql statements

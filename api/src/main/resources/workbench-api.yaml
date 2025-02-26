@@ -6729,6 +6729,10 @@ components:
       - CONCEPT_SET
       - CONCEPT_QUICK_ADD
       - WEAR_CONSENT
+      - ETM_DELAYDISCOUNTING
+      - ETM_EMORECOG
+      - ETM_FLANKER
+      - ETM_GRADCPT
     Surveys:
       type: string
       description: a survey for concepts
