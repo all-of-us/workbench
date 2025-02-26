@@ -2468,14 +2468,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/groupAndPushSynchronizeAccessTasks:
+  /v1/cron/synchronizeUserAccess:
     get:
       tags:
       - offlineUser
       - cron
       description: |
         This cron job ensures that cloud tasks are created to support /v1/cloudTask/synchronizeUserAccess.
-      operationId: groupAndPushSynchronizeAccessTasks
+      operationId: synchronizeUserAccess
       security: []
       responses:
         204:

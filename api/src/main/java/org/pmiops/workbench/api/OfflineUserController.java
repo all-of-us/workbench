@@ -35,7 +35,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> groupAndPushSynchronizeAccessTasks() {
+  public ResponseEntity<Void> synchronizeUserAccess() {
     taskQueueService.groupAndPushSynchronizeAccessTasks(userService.getAllUserIds());
     return ResponseEntity.noContent().build();
   }
