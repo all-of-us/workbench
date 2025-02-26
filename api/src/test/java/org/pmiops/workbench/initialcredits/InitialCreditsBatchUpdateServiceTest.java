@@ -68,7 +68,7 @@ public class InitialCreditsBatchUpdateServiceTest {
     verify(mockGoogleProjectPerCostDao, times(1)).findAllByGoogleProjectId(googleProjectIdsSet);
 
     verify(mockInitialCreditsService)
-        .checkFreeTierBillingUsageForUsers(mockDbuserSet, getUserCostMap());
+        .checkInitialCreditsUsageForUsers(mockDbuserSet, getUserCostMap());
   }
 
   private void mockDbUser() {

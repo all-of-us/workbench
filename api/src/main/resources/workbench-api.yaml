@@ -2449,14 +2449,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/checkFreeTierBillingUsage:
+  /v1/cron/checkInitialCreditsUsage:
     get:
       tags:
         - offlineBilling
         - cron
-      description: Find and alert users that have exceeded their free tier billing
-        usage
-      operationId: checkFreeTierBillingUsage
+      description: Find and alert users that have exceeded their initial credits usage limit.
+      operationId: checkInitialCreditsUsage
       security: [ ]
       responses:
         204:
@@ -2468,14 +2467,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/groupAndPushSynchronizeAccessTasks:
+  /v1/cron/synchronizeUserAccess:
     get:
       tags:
       - offlineUser
       - cron
       description: |
         This cron job ensures that cloud tasks are created to support /v1/cloudTask/synchronizeUserAccess.
-      operationId: groupAndPushSynchronizeAccessTasks
+      operationId: synchronizeUserAccess
       security: []
       responses:
         204:

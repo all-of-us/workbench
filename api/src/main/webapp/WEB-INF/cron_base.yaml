@@ -17,7 +17,7 @@ cron:
   timezone: UTC
   target: api
 - description: Find and alert users that have exceeded their initial credit usage using cloud task
-  url: /v1/cron/checkFreeTierBillingUsage
+  url: /v1/cron/checkInitialCreditsUsage
   schedule: every 30 minutes
   timezone: UTC
   target: api
@@ -38,7 +38,7 @@ cron:
   target: api
 - description: >
     Check each user to ensure they still meet compliance guidelines. If they do not, remove them from access tiers.
-  url: /v1/cron/groupAndPushSynchronizeAccessTasks
+  url: /v1/cron/synchronizeUserAccess
   schedule: every day 23:00
   timezone: America/Chicago
   target: api

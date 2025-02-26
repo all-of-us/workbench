@@ -110,8 +110,8 @@ public class OfflineUserControllerTest {
   }
 
   @Test
-  public void testGroupAndPushSynchronizeAccessTasks() {
-    offlineUserController.groupAndPushSynchronizeAccessTasks();
+  public void testSynchronizeAccessTasks() {
+    offlineUserController.synchronizeUserAccess();
 
     // Batch size is 3, so we expect 2 groups.
     for (List<Long> expected : List.of(List.of(1L, 2L, 3L), List.of(4L))) {
