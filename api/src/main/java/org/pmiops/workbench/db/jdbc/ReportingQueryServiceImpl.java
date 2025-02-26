@@ -30,11 +30,11 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
-import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
+import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
@@ -160,7 +160,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .userId(rs.getLong("user_id"))
                 .answer(rs.getString("answer"))
                 .otherText(
-                    rs.getString("answer").equals(DbPartnerDiscoverySource.OTHER.toString())
+                    rs.getString("answer").equals(PartnerDiscoverySource.OTHER.toString())
                         ? rs.getString("other_text")
                         : null));
   }
