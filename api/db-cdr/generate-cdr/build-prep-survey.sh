@@ -19,6 +19,8 @@ ID_START_MAP["cope_staged.csv"]=24000
 ID_START_MAP["socialdeterminantsofhea_staged.csv"]=32000
 ID_START_MAP["newyearminutesurveyonco_staged.csv"]=42000
 ID_START_MAP["personalandfamilyhealth_staged.csv"]=50000
+ID_START_MAP["emotionalhealthhistorya_staged.csv"]=60000
+ID_START_MAP["behavioralhealthandpers_staged.csv"]=70000
 
 if [[ -n "${ID_START_MAP[$FILE_NAME]}" ]]; then
   ID="${ID_START_MAP[$FILE_NAME]}"
