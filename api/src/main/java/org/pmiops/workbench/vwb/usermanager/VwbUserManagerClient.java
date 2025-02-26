@@ -3,6 +3,7 @@ package org.pmiops.workbench.vwb.usermanager;
 import jakarta.inject.Provider;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.vwb.user.ApiException;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
 import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
@@ -109,12 +110,29 @@ public class VwbUserManagerClient {
                     organizationId));
   }
 
-  public void sharePodWithUserWithRole(UUID podId, String email, PodRole podRole) {
+  public void sharePodWithUserWithRole(UUID podId, String email, PodRole podRole)
+      throws ApiException {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     logger.info("Sharing pod {} with user {} with role {}", podId, email, podRole);
-    vwbUserManagerRetryHandler.run(
+    vwbUserManagerRetryHandler.runAndThrowChecked(
         context -> {
           podApiProvider.get().grantMemberPodRole(organizationId, podId.toString(), email, podRole);
+          return null;
+        });
+  }
+
+  public void deletePod(UUID podId) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.info("Deleting pod {}", podId);
+    vwbUserManagerRetryHandler.run(
+        context -> {
+          podApiProvider
+              .get()
+              .deletePod(
+                  new DeletePodRequest()
+                      .jobControl(new JobControl().id(UUID.randomUUID().toString())),
+                  organizationId,
+                  podId.toString());
           return null;
         });
   }

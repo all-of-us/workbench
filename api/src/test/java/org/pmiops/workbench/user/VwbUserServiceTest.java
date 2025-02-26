@@ -14,8 +14,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
+import org.pmiops.workbench.vwb.user.ApiException;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.PodDescription;
 import org.pmiops.workbench.vwb.user.model.PodRole;
@@ -29,6 +31,8 @@ class VwbUserServiceTest {
 
   @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  @Mock private UserDao userDao;
+
   @InjectMocks private VwbUserService vwbUserService;
 
   WorkbenchConfig.FeatureFlagsConfig featureFlags;
@@ -38,17 +42,17 @@ class VwbUserServiceTest {
     Mockito.reset(workbenchConfigProvider);
   }
 
-  void stub(boolean enableVWBUserCreation) {
+  void stub(boolean enableVWBUserCreation, boolean enableVwbPodCreation) {
     WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.featureFlags.enableVWBUserCreation = true;
-    workbenchConfig.featureFlags.enableVWBPodCreation = enableVWBUserCreation;
+    workbenchConfig.featureFlags.enableVWBUserCreation = enableVWBUserCreation;
+    workbenchConfig.featureFlags.enableVWBPodCreation = enableVwbPodCreation;
 
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
   }
 
   @Test
   void createUser_featureFlagDisabled() {
-    stub(false);
+    stub(false, false);
 
     vwbUserService.createUser("test@example.com");
 
@@ -57,7 +61,7 @@ class VwbUserServiceTest {
 
   @Test
   void createUser_userAlreadyExists() {
-    stub(true);
+    stub(true, false);
     OrganizationMember organizationMember = mock(OrganizationMember.class);
     when(vwbUserManagerClient.getOrganizationMember("test@example.com"))
         .thenReturn(organizationMember);
@@ -70,7 +74,7 @@ class VwbUserServiceTest {
 
   @Test
   void createUser_userDoesNotExist() {
-    stub(true);
+    stub(true, false);
 
     OrganizationMember organizationMember = mock(OrganizationMember.class);
     when(vwbUserManagerClient.getOrganizationMember("test@example.com"))
@@ -84,7 +88,7 @@ class VwbUserServiceTest {
 
   @Test
   void createInitialCreditsPodForUser_featureFlagDisabled() {
-    stub(false);
+    stub(false, false);
 
     DbUser dbUser = mock(DbUser.class);
 
@@ -95,8 +99,8 @@ class VwbUserServiceTest {
   }
 
   @Test
-  void createInitialCreditsPodForUser_success() {
-    stub(true);
+  void createInitialCreditsPodForUser_success() throws ApiException {
+    stub(true, true);
     UUID uuid = UUID.randomUUID();
 
     DbUser dbUser = mock(DbUser.class);
