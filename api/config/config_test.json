@@ -213,7 +213,7 @@
     "dockerRepoName": "us-central1-docker.pkg.dev/all-of-us-workbench-test/aou-rw-gar-remote-repo-docker-test"
   },
   "banner": {
-    "enableLoginIssueBanner": false
+    "enableLoginIssueBanner": true
   },
   "vwb": {
     "wsmBaseUrl": "https:\/\/terra-devel-wsm.api.verily.com",
