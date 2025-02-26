@@ -737,6 +737,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
+      console.log('What is nextFocused? ', nextFocused);
+      console.log('What is nextRequired? ', nextRequired);
       setFocusedModule(nextFocused);
       setActiveModules(
         fp.flow(
