@@ -712,9 +712,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
       syncModulesPromise
         .then(async (syncedModules) => {
-          // reloading can cause an infinite loop *sometimes* so only reload when needed
-          // (weird bug 26 Feb 2025)
-          if (syncedModules.length !== 0) {
+          // Bug 26 Feb 2025: reloading can cause an infinite loop in *some* case
+          // So we only reload when needed
+
+          console.log('syncedModules', syncedModules);
+
+          // we don't want to sync for error cases, which we know can look like [] and [undefined]
+          if (syncedModules?.filter((x) => x !== undefined).length !== 0) {
             await reload();
           }
         })
