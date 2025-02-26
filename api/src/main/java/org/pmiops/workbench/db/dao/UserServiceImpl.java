@@ -14,6 +14,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -352,15 +353,14 @@ public class UserServiceImpl implements UserService {
           "General discovery source other text must be null when the OTHER general discovery source is not provided");
     }
 
-    dbUser.setPartnerDiscoverySources(
-        discoverySourceMapper.toDbPartnerDiscoverySources(partnerDiscoverySources));
+    dbUser.setPartnerDiscoverySources(new HashSet<>(partnerDiscoverySources));
     dbUser.setPartnerDiscoverySourceOtherText(partnerDiscoverySourceOtherText);
-    if (dbUser.getPartnerDiscoverySources().contains(DbUser.DbPartnerDiscoverySource.OTHER)
+    if (dbUser.getPartnerDiscoverySources().contains(PartnerDiscoverySource.OTHER)
         && partnerDiscoverySourceOtherText == null) {
       throw new BadRequestException(
           "Partner discovery source other text is required when the OTHER partner discovery source is provided");
     }
-    if (!dbUser.getPartnerDiscoverySources().contains(DbUser.DbPartnerDiscoverySource.OTHER)
+    if (!dbUser.getPartnerDiscoverySources().contains(PartnerDiscoverySource.OTHER)
         && partnerDiscoverySourceOtherText != null) {
       throw new BadRequestException(
           "Partner discovery source other text must be null when the OTHER partner discovery source is not provided");
