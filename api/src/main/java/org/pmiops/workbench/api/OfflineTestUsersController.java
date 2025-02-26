@@ -61,7 +61,9 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     if (testUserConf == null) {
       LOGGER.info("This environment does not have a test user config block.  Exiting.");
     } else {
+      LOGGER.info("Ensuring test user TOS compliance...");
       testUserConf.testUserEmails.forEach(this::ensureTosCompliance);
+      LOGGER.info("Done ensuring test user TOS compliance.");
     }
 
     return ResponseEntity.ok().build();
@@ -82,18 +84,24 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
 
   @Override
   public ResponseEntity<Void> deleteAllTestUserWorkspaces() {
+    LOGGER.info("Deleting test user workspaces...");
+
     deleteAllWorkspaces(
         this::enumerateAoUWorkspaces, taskQueueService::groupAndPushDeleteTestWorkspaceTasks);
 
+    LOGGER.info("Done deleting test user workspaces.");
     return ResponseEntity.ok().build();
   }
 
   @Override
   public ResponseEntity<Void> deleteAllTestUserWorkspacesOrphanedInRawls() {
+    LOGGER.info("Deleting test user workspaces in Rawls (Terra)...");
+
     deleteAllWorkspaces(
         this::enumerateRawlsWorkspaces,
         taskQueueService::groupAndPushDeleteTestWorkspaceInRawlsTasks);
 
+    LOGGER.info("Done deleting test user workspaces in Rawls (Terra)...");
     return ResponseEntity.ok().build();
   }
 

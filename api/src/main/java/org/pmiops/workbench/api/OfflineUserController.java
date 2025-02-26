@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -48,9 +47,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   public ResponseEntity<Void> checkInitialCreditsExpiration() {
     taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(
-        userService.getAllUsersWithActiveInitialCredits().stream()
-            .map(DbUser::getUserId)
-            .collect(Collectors.toList()));
+        userService.getAllUsersWithActiveInitialCredits().stream().map(DbUser::getUserId).toList());
     return ResponseEntity.noContent().build();
   }
 }

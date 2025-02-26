@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class OfflineBillingController implements OfflineBillingApiDelegate {
+  private static final Logger log = Logger.getLogger(OfflineBillingController.class.getName());
 
   private final InitialCreditsBatchUpdateService freeTierBillingService;
   private final GoogleProjectPerCostDao googleProjectPerCostDao;
@@ -34,6 +36,8 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   @Override
   public ResponseEntity<Void> checkInitialCreditsUsage() {
+    log.info("Checking initial credits usage for all workspaces");
+
     // Get cost for all workspace from BQ
     Map<String, Double> freeTierForAllWorkspace =
         freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();
@@ -49,7 +53,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
     List<Long> allUserIds = userService.getAllUserIds();
 
     taskQueueService.groupAndPushFreeTierBilling(allUserIds);
-    log.info("Pushed all users to Cloud Task for Free Tier Billing");
+    log.info("Pushed all users to the Cloud Task endpoint checkInitialCreditsUsage");
 
     return ResponseEntity.noContent().build();
   }
