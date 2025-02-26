@@ -24,6 +24,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
@@ -39,6 +40,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.PresetData;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -93,7 +95,9 @@ public class ComplianceTrainingServiceTest {
     VwbAccessService.class,
     InstitutionService.class,
     UserServiceAuditor.class,
-    InitialCreditsService.class
+    InitialCreditsService.class,
+    VwbUserService.class,
+    TaskQueueService.class
   })
   @TestConfiguration
   static class Configuration {

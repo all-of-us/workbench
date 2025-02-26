@@ -38,6 +38,7 @@ import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
@@ -59,6 +60,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,7 +170,9 @@ public class RasLinkServiceTest {
     HttpTransport.class,
     MailService.class,
     UserServiceAuditor.class,
-    InitialCreditsService.class
+    InitialCreditsService.class,
+    VwbUserService.class,
+    TaskQueueService.class
   })
   static class Configuration {
     @Bean

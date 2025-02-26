@@ -4486,6 +4486,27 @@ paths:
           description: Check Credits Expiration For User IDs Task Ran Successfully
           content: { }
       x-codegen-request-body-name: request
+  /v1/cloudTask/createVwbPod:
+    post:
+      tags:
+        - cloudTaskVwb
+        - cloudTask
+      description: |
+        Asynchronously creates a Vwb billing pod.
+      operationId: processCreateVwbPodTask
+      requestBody:
+        description: Vwb Pod creation task to process.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVwbPodTaskRequest'
+
+        required: true
+      responses:
+        200:
+          description: Vwb Pod created
+          content: {}
+      x-codegen-request-body-name: request
   /v1/institutions:
     get:
       tags:
@@ -13289,6 +13310,13 @@ components:
         - CASE_CONTROL_AI_AN
         - FINDINGS_BY_AI_AN
         - NO_AI_AN_ANALYSIS
+    CreateVwbPodTaskRequest:
+      type: object
+      properties:
+        userName:
+          type: string
+          description: The user name of the user who is creating the pod
+
   parameters:
     userId:
       name: userId

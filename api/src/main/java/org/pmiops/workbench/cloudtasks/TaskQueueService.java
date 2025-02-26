@@ -17,16 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
-import org.pmiops.workbench.model.DiskType;
-import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
-import org.pmiops.workbench.model.ProcessEgressEventRequest;
-import org.pmiops.workbench.model.TestUserRawlsWorkspace;
-import org.pmiops.workbench.model.TestUserWorkspace;
-import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -86,6 +77,10 @@ public class TaskQueueService {
       new TaskQueuePair("initialCreditsUsageQueue", "checkInitialCreditsUsage");
   public static final TaskQueuePair INITIAL_CREDITS_EXHAUSTION =
       new TaskQueuePair("initialCreditsExhaustionQueue", "handleInitialCreditsExhaustion");
+
+  // VWB Pod Creation
+  public static final TaskQueuePair VWB_POD_CREATION =
+      new TaskQueuePair("vwbPodCreationQueue", "createVwbPod");
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
@@ -247,6 +242,11 @@ public class TaskQueueService {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     createAndPushAll(
         disks, workbenchConfig.offlineBatch.disksPerCheckPersistentDiskTask, PERSISTENT_DISKS);
+  }
+
+  public void pushVwbPodCreationTask(String email) {
+    createAndPushTaskWithBearerToken(
+        VWB_POD_CREATION, new CreateVwbPodTaskRequest().userName(email));
   }
 
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {
