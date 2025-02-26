@@ -330,11 +330,7 @@ export const renewalRequiredModules: AccessModule[] = [
   duccModule,
 ];
 
-const handleRasCallback = (
-  code: string,
-  spinnerProps: WithSpinnerOverlayProps,
-  reloadProfile: Function
-) => {
+const handleRasCallback = (code: string, reloadProfile: Function) => {
   const profilePromise = fetchWithErrorModal(
     () =>
       profileApi().linkRasAccount({
@@ -695,15 +691,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // Effects
     useEffect(() => {
+      const incomplete = incompleteModules(
+        getEligibleModules(allInitialModules, profile),
+        profile,
+        pageMode
+      );
+
       const syncModulesPromise = fetchWithErrorModal(
-        () =>
-          syncModulesExternal(
-            incompleteModules(
-              getEligibleModules(allInitialModules, profile),
-              profile,
-              pageMode
-            )
-          ),
+        () => syncModulesExternal(incomplete),
         {
           customErrorResponseFormatter: (apiErrorResponse) => {
             return {
@@ -716,10 +711,16 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
 
       syncModulesPromise
-        .then(async () => await reload())
+        .then(async (syncedModules) => {
+          // reloading can cause an infinite loop *sometimes* so only reload when needed
+          // (weird bug 26 Feb 2025)
+          if (syncedModules.length !== 0) {
+            await reload();
+          }
+        })
         .catch((e) => console.error(e))
         .finally(() => spinnerProps.hideSpinner());
-    }, []);
+    }, [profile.accessModules]);
 
     /*
       TODO Move these into the effect with an empty dependency array.
@@ -731,7 +732,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // handle the route /ras-callback?code=<code>
     useEffect(() => {
       if (code) {
-        handleRasCallback(code, spinnerProps, reload);
+        handleRasCallback(code, reload);
       }
     }, [code]);
 
