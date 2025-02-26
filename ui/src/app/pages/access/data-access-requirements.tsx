@@ -712,19 +712,18 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
       syncModulesPromise
         .then(async (syncedModules) => {
-          // Bug 26 Feb 2025: reloading can cause an infinite loop in *some* case
-          // So we only reload when needed
+          // Bug 26 Feb 2025: reloading can cause an infinite loop in *some* cases,
+          // so we only reload when needed
 
-          console.log('syncedModules', syncedModules);
-
-          // we don't want to sync for error cases, which we know can look like [] and [undefined]
+          // we don't want to sync for no-op cases which look like []
+          // we also don't want to sync for error cases, which we know can look like [undefined]
           if (syncedModules?.filter((x) => x !== undefined).length !== 0) {
             await reload();
           }
         })
         .catch((e) => console.error(e))
         .finally(() => spinnerProps.hideSpinner());
-    }, [profile.accessModules]);
+    }, []);
 
     /*
       TODO Move these into the effect with an empty dependency array.
