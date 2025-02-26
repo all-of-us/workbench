@@ -34,6 +34,7 @@ import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -55,6 +56,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.PresetData;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -107,7 +109,13 @@ public class UserServiceTest {
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
   })
-  @MockBean({MailService.class, InitialCreditsService.class, VwbAccessService.class})
+  @MockBean({
+    MailService.class,
+    InitialCreditsService.class,
+    VwbAccessService.class,
+    VwbUserService.class,
+    TaskQueueService.class
+  })
   @TestConfiguration
   static class Configuration {
     @Bean

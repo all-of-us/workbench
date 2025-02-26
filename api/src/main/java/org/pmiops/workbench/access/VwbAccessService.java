@@ -40,15 +40,13 @@ public class VwbAccessService {
       try {
         vwbUserManagerClient.addUserToGroup(vwbGroupName, userName);
       } catch (Exception e) {
-        log.log(Level.WARNING, "Failed to add user to Vwb tier group using UM" + e.getMessage(), e);
+        log.log(Level.WARNING, "Failed to add user to Vwb tier group using UM" + e.getMessage());
         // If failed, fall off to SAM API
         try {
           vwbSamClient.addUserToGroup(vwbGroupName, userName);
         } catch (Exception samException) {
           log.log(
-              Level.WARNING,
-              "Failed to add user to Vwb tier group using SAM: " + e.getMessage(),
-              e);
+              Level.WARNING, "Failed to add user to Vwb tier group using SAM: " + e.getMessage());
         }
       }
     }
@@ -67,15 +65,14 @@ public class VwbAccessService {
       try {
         vwbUserManagerClient.removeUserFromGroup(vwbGroupName, userName);
       } catch (Exception e) {
-        log.log(Level.WARNING, "Failed to add user to Vwb tier group using UM" + e.getMessage(), e);
+        log.log(Level.WARNING, "Failed to add user to Vwb tier group using UM" + e.getMessage());
         // If failed, fall off to SAM API
         try {
           vwbSamClient.removeUserFromGroup(vwbGroupName, userName);
         } catch (Exception samException) {
           log.log(
               Level.WARNING,
-              "Failed to remove user from Vwb tier group using SAM: " + e.getMessage(),
-              e);
+              "Failed to remove user from Vwb tier group using SAM: " + e.getMessage());
         }
       }
     }

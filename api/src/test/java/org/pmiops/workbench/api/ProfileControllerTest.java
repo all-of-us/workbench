@@ -115,6 +115,7 @@ import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -221,7 +222,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     TaskQueueService.class,
     LeonardoApiClient.class,
     VwbAccessService.class,
-    WorkspaceMapper.class
+    WorkspaceMapper.class,
+    VwbUserService.class
   })
   static class Configuration {
     @Bean

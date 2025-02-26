@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -40,6 +41,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final InitialCreditsService initialCreditsService;
   private final UserServiceAuditor userServiceAuditor;
   private final VwbUserService vwbUserService;
+  private final TaskQueueService taskQueueService;
 
   @Autowired
   public AccessSyncServiceImpl(
@@ -50,7 +52,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       UserDao userDao,
       InitialCreditsService initialCreditsService,
       UserServiceAuditor userServiceAuditor,
-      VwbUserService vwbUserService) {
+      VwbUserService vwbUserService,
+      TaskQueueService taskQueueService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
     this.accessModuleService = accessModuleService;
@@ -59,6 +62,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.initialCreditsService = initialCreditsService;
     this.userServiceAuditor = userServiceAuditor;
     this.vwbUserService = vwbUserService;
+    this.taskQueueService = taskQueueService;
   }
 
   /**
@@ -90,14 +94,17 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     return userDao.save(dbUser);
   }
 
-
-  private void createVwbUserIfNeeded(DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
-    // This means that the user has been granted access to a tier for the first time. Then perform the VWB creation logic.
+  private void createVwbUserIfNeeded(
+      DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
+    // This means that the user has been granted access to a tier for the first time. Then perform
+    // the VWB creation logic.
     if (previousAccessTiers.isEmpty() && !newAccessTiers.isEmpty()) {
       // This call checks if the user already exists in VWB to avoid creating the user twice.
+      // Creating the user here is necessary to ensure that the user is created in VWB before adding
+      // them to the groups
       vwbUserService.createUser(dbUser.getUsername());
-      vwbUserService.createInitialCreditsPodForUser(dbUser);
-
+      // Create the pod asynchronously to avoid blocking the user
+      taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
     }
   }
 
