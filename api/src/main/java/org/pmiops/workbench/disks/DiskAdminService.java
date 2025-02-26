@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -95,23 +97,23 @@ public class DiskAdminService {
                       return (int) Duration.between(lastAccessed, now).toDays();
                     }));
 
+    SortedMap<Integer, List<Disk>> sortedDisksByDaysUnused = new TreeMap<>(disksByDaysUnused);
+
     // Dispatch notifications if any disks are the right number of days old.
     int notifySuccess = 0;
     int notifySkip = 0;
     int notifyFail = 0;
     Exception lastException = null;
-    for (var entry : disksByDaysUnused.entrySet()) {
+    for (var entry : sortedDisksByDaysUnused.entrySet()) {
       int daysUnused = entry.getKey();
       List<Disk> disksForDay = entry.getValue();
-      if (daysUnused <= 0) {
-        // Our periodic notifications should not trigger on day 0.
-        continue;
-      }
 
-      if (!INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
-          && daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS != 0) {
-        continue;
-      }
+      boolean wantToNotify = shouldNotify(daysUnused);
+      String sendOrNot = wantToNotify ? "sending" : "not sending";
+      log.info(
+          String.format(
+              "checkPersistentDisks: %s notifications for %d disks which have been idle for %d days",
+              sendOrNot, disksForDay.size(), daysUnused));
 
       for (Disk disk : disksForDay) {
         try {
@@ -144,6 +146,12 @@ public class DiskAdminService {
               notifyFail, notifySuccess + notifyFail + notifySkip),
           lastException);
     }
+  }
+
+  private boolean shouldNotify(int daysUnused) {
+    return daysUnused > 0
+        && (INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
+            || daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS == 0);
   }
 
   // Returns true if an email is sent.
