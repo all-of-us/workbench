@@ -114,6 +114,10 @@ public class DiskAdminService {
               "checkPersistentDisks: %s notifications for %d disks which have been idle for %d days",
               sendOrNot, disksForDay.size(), daysUnused));
 
+      if (!wantToNotify) {
+        continue;
+      }
+
       for (Disk disk : disksForDay) {
         try {
           if (notifyForUnusedDisk(disk, daysUnused)) {
