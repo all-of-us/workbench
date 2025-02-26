@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -95,16 +94,16 @@ public class DiskAdminService {
                     disk -> {
                       Instant lastAccessed = Instant.parse(disk.getDateAccessed());
                       return (int) Duration.between(lastAccessed, now).toDays();
-                    }));
-
-    SortedMap<Integer, List<Disk>> sortedDisksByDaysUnused = new TreeMap<>(disksByDaysUnused);
+                    },
+                    TreeMap::new, // sorts the resulting map by the key (days since last access)
+                    Collectors.toList()));
 
     // Dispatch notifications if any disks are the right number of days old.
     int notifySuccess = 0;
     int notifySkip = 0;
     int notifyFail = 0;
     Exception lastException = null;
-    for (var entry : sortedDisksByDaysUnused.entrySet()) {
+    for (var entry : disksByDaysUnused.entrySet()) {
       int daysUnused = entry.getKey();
       List<Disk> disksForDay = entry.getValue();
 
