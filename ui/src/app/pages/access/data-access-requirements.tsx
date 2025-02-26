@@ -330,11 +330,7 @@ export const renewalRequiredModules: AccessModule[] = [
   duccModule,
 ];
 
-const handleRasCallback = (
-  code: string,
-  spinnerProps: WithSpinnerOverlayProps,
-  reloadProfile: Function
-) => {
+const handleRasCallback = (code: string, reloadProfile: Function) => {
   const profilePromise = fetchWithErrorModal(
     () =>
       profileApi().linkRasAccount({
@@ -695,15 +691,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // Effects
     useEffect(() => {
+      const incomplete = incompleteModules(
+        getEligibleModules(allInitialModules, profile),
+        profile,
+        pageMode
+      );
+
       const syncModulesPromise = fetchWithErrorModal(
-        () =>
-          syncModulesExternal(
-            incompleteModules(
-              getEligibleModules(allInitialModules, profile),
-              profile,
-              pageMode
-            )
-          ),
+        () => syncModulesExternal(incomplete),
         {
           customErrorResponseFormatter: (apiErrorResponse) => {
             return {
@@ -716,7 +711,16 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
 
       syncModulesPromise
-        .then(async () => await reload())
+        .then(async (syncedModules) => {
+          // Bug 26 Feb 2025: reloading can cause an infinite loop in *some* cases,
+          // so we only reload when needed
+
+          // we don't want to sync for no-op cases which look like []
+          // we also don't want to sync for error cases, which we know can look like [undefined]
+          if (syncedModules?.filter((x) => x !== undefined).length !== 0) {
+            await reload();
+          }
+        })
         .catch((e) => console.error(e))
         .finally(() => spinnerProps.hideSpinner());
     }, []);
@@ -731,7 +735,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // handle the route /ras-callback?code=<code>
     useEffect(() => {
       if (code) {
-        handleRasCallback(code, spinnerProps, reload);
+        handleRasCallback(code, reload);
       }
     }, [code]);
 
