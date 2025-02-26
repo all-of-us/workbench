@@ -695,15 +695,21 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // Effects
     useEffect(() => {
+      // Get modules that need syncing
+      const modulesToSync = incompleteModules(
+        getEligibleModules(allInitialModules, profile),
+        profile,
+        pageMode
+      );
+
+      // Only sync if there are modules that need it
+      if (modulesToSync.length === 0) {
+        spinnerProps.hideSpinner();
+        return;
+      }
+
       const syncModulesPromise = fetchWithErrorModal(
-        () =>
-          syncModulesExternal(
-            incompleteModules(
-              getEligibleModules(allInitialModules, profile),
-              profile,
-              pageMode
-            )
-          ),
+        () => syncModulesExternal(modulesToSync),
         {
           customErrorResponseFormatter: (apiErrorResponse) => {
             return {
@@ -716,9 +722,24 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
 
       syncModulesPromise
-        .then(async () => await reload())
-        .catch((e) => console.error(e))
-        .finally(() => spinnerProps.hideSpinner());
+        .then(async () => {
+          try {
+            await reload();
+          } catch (e) {
+            console.error('Failed to reload profile:', e);
+          }
+        })
+        .catch((e) => {
+          console.error('Failed to sync modules:', e);
+        })
+        .finally(() => {
+          spinnerProps.hideSpinner();
+        });
+
+      // Cleanup function to ensure spinner is hidden if component unmounts
+      return () => {
+        spinnerProps.hideSpinner();
+      };
     }, []);
 
     /*
@@ -737,13 +758,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
-      setFocusedModule(nextFocused);
-      setActiveModules(
-        fp.flow(
-          fp.filter((m) => !!m),
-          fp.uniq
-        )([nextFocused, nextRequired])
-      );
+      // console.log('What is nextFocused? ', nextFocused);
+      // console.log('What is nextRequired? ', nextRequired);
+      // setFocusedModule(nextFocused);
+      // setActiveModules(
+      //   fp.flow(
+      //     fp.filter((m) => !!m),
+      //     fp.uniq
+      //   )([nextFocused, nextRequired])
+      // );
     }, [nextFocused, nextRequired]);
 
     const daysRemaining = maybeDaysRemaining(profile);
