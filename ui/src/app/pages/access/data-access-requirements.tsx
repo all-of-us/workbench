@@ -695,21 +695,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // Effects
     useEffect(() => {
-      // Get modules that need syncing
-      const modulesToSync = incompleteModules(
-        getEligibleModules(allInitialModules, profile),
-        profile,
-        pageMode
-      );
-
-      // Only sync if there are modules that need it
-      if (modulesToSync.length === 0) {
-        spinnerProps.hideSpinner();
-        return;
-      }
-
       const syncModulesPromise = fetchWithErrorModal(
-        () => syncModulesExternal(modulesToSync),
+        () =>
+          syncModulesExternal(
+            incompleteModules(
+              getEligibleModules(allInitialModules, profile),
+              profile,
+              pageMode
+            )
+          ),
         {
           customErrorResponseFormatter: (apiErrorResponse) => {
             return {
@@ -722,33 +716,18 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
 
       syncModulesPromise
-        .then(async () => {
-          try {
-            await reload();
-          } catch (e) {
-            console.error('Failed to reload profile:', e);
-          }
-        })
-        .catch((e) => {
-          console.error('Failed to sync modules:', e);
-        })
-        .finally(() => {
-          spinnerProps.hideSpinner();
-        });
-
-      // Cleanup function to ensure spinner is hidden if component unmounts
-      return () => {
-        spinnerProps.hideSpinner();
-      };
+        .then(async () => await reload())
+        .catch((e) => console.error(e))
+        .finally(() => spinnerProps.hideSpinner());
     }, []);
 
     /*
-      TODO Move these into the effect with an empty dependency array.
-        I suspect that these are only called when the component is reloaded,
-        so the initial effect should be run again. My goal here is that effects should
-      only depend on props or local state. When this is the case, we can them above the local
-      variables.
-    */
+        TODO Move these into the effect with an empty dependency array.
+          I suspect that these are only called when the component is reloaded,
+          so the initial effect should be run again. My goal here is that effects should
+        only depend on props or local state. When this is the case, we can them above the local
+        variables.
+      */
     // handle the route /ras-callback?code=<code>
     useEffect(() => {
       if (code) {
