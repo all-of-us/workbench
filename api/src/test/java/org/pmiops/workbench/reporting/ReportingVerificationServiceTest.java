@@ -45,9 +45,9 @@ import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
-import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.utils.FieldValues;
@@ -181,7 +181,7 @@ public class ReportingVerificationServiceTest {
                       ImmutableSet.of(DbGeneralDiscoverySource.OTHER_WEBSITE))
                   .setPartnerDiscoverySources(
                       ImmutableSet.of(
-                          DbPartnerDiscoverySource
+                          PartnerDiscoverySource
                               .ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM)));
 
       newUserSatisfactionSurveyDao.save(createDbNewUserSatisfactionSurvey(user));

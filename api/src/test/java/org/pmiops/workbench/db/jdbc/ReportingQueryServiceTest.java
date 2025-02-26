@@ -73,7 +73,6 @@ import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
-import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
@@ -82,6 +81,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
+import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
@@ -608,9 +608,9 @@ public class ReportingQueryServiceTest {
     user.setPartnerDiscoverySources(
             new HashSet<>(
                 Arrays.asList(
-                    DbPartnerDiscoverySource.PYXIS_PARTNERS,
-                    DbPartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
-                    DbPartnerDiscoverySource.OTHER)))
+                    PartnerDiscoverySource.PYXIS_PARTNERS,
+                    PartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
+                    PartnerDiscoverySource.OTHER)))
         .setPartnerDiscoverySourceOtherText("other text");
     userDao.save(user);
     entityManager.flush();
@@ -622,13 +622,13 @@ public class ReportingQueryServiceTest {
         .containsExactly(
             new ReportingUserPartnerDiscoverySource()
                 .userId(user.getUserId())
-                .answer(DbPartnerDiscoverySource.PYXIS_PARTNERS.toString()),
+                .answer(PartnerDiscoverySource.PYXIS_PARTNERS.toString()),
             new ReportingUserPartnerDiscoverySource()
                 .userId(user.getUserId())
-                .answer(DbPartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF.toString()),
+                .answer(PartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF.toString()),
             new ReportingUserPartnerDiscoverySource()
                 .userId(user.getUserId())
-                .answer(DbPartnerDiscoverySource.OTHER.toString())
+                .answer(PartnerDiscoverySource.OTHER.toString())
                 .otherText("other text"));
   }
 
