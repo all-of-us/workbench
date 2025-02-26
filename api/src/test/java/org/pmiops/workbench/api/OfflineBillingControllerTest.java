@@ -41,10 +41,10 @@ public class OfflineBillingControllerTest {
   Map<String, Double> freeTierForAllWorkspace = new HashMap<>();
 
   @Test
-  public void testCheckFreeTierBillingUsage() {
+  public void testCheckInitialCreditsUsage() {
     mockUserId();
     mockFreeTierCostForGP();
-    offlineBillingController.checkFreeTierBillingUsage();
+    offlineBillingController.checkInitialCreditsUsage();
 
     // Confirm the database is cleared and saved with new value
     verify(mockGoogleProjectPerCostDao).deleteAll();

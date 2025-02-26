@@ -87,14 +87,14 @@ public class InitialCreditsBatchUpdateService {
     Set<DbUser> dbUserSet =
         userIdList.stream().map(userDao::findUserByUserId).collect(Collectors.toSet());
 
-    initialCreditsService.checkFreeTierBillingUsageForUsers(dbUserSet, userWorkspaceBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(dbUserSet, userWorkspaceBQCosts);
   }
 
   /**
    * 1- Get users who have active free tier workspaces 2- Iterate over these users in batches of X
    * and find the cost of their workspaces before/after
    */
-  public void checkFreeTierBillingUsage() {
+  public void checkInitialCreditsUsage() {
     logger.info("Checking Free Tier Billing usage - start");
 
     Iterable<DbUser> freeTierActiveWorkspaceCreators = userDao.findAll();
@@ -112,7 +112,7 @@ public class InitialCreditsBatchUpdateService {
           String.format(
               "Processing users batch of size/total: %d/%d. Current iteration is: %d",
               usersPartition.size(), numberOfUsers, count++));
-      initialCreditsService.checkFreeTierBillingUsageForUsers(
+      initialCreditsService.checkInitialCreditsUsageForUsers(
           new HashSet<>(usersPartition), allBQCosts);
     }
 

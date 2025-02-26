@@ -110,7 +110,7 @@ public class InitialCreditsService {
    * Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to
    * passing thresholds or exceeding limits.
    */
-  public void checkFreeTierBillingUsageForUsers(
+  public void checkInitialCreditsUsageForUsers(
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
     String userIdsAsString =
         users.stream()
@@ -180,7 +180,7 @@ public class InitialCreditsService {
   /**
    * Retrieve the user's total free tier usage from the DB by summing across the Workspaces they
    * have created. This is NOT live BigQuery data: it is only as recent as the last
-   * checkFreeTierBillingUsage cron job, recorded as last_update_time in the DB.
+   * checkInitialCreditsUsage cron job, recorded as last_update_time in the DB.
    *
    * <p>Note: return value may be null, to enable direct assignment to the nullable Profile field
    *
@@ -224,7 +224,7 @@ public class InitialCreditsService {
    *
    * <p>If this is greater than the user's total cost, set their workspaces to active. Note:
    * lowering the limit below total cost will NOT set the workspaces to inactive.
-   * checkFreeTierBillingUsage() will do this as part of the next cron run.
+   * checkInitialCreditsUsage() will do this as part of the next cron run.
    *
    * @param user the user as represented in our database
    * @param newDollarLimit the US dollar amount, represented as a double

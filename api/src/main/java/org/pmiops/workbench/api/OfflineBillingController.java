@@ -33,7 +33,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> checkFreeTierBillingUsage() {
+  public ResponseEntity<Void> checkInitialCreditsUsage() {
     // Get cost for all workspace from BQ
     Map<String, Double> freeTierForAllWorkspace =
         freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();
