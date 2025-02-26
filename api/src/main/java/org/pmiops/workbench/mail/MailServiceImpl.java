@@ -763,7 +763,7 @@ public class MailServiceImpl implements MailService {
       String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
-    List<RecipientAddress> toAddresses =
+    List<RecipientAddress> recipients =
         Streams.concat(
                 toRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.TO)),
                 ccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.CC)),
@@ -771,7 +771,7 @@ public class MailServiceImpl implements MailService {
             .toList();
     final MandrillMessage msg =
         new MandrillMessage()
-            .to(toAddresses)
+            .to(recipients)
             .html(htmlMessage)
             .subject(subject)
             .preserveRecipients(true)
@@ -792,23 +792,26 @@ public class MailServiceImpl implements MailService {
           log.log(
               Level.WARNING,
               String.format(
-                  "ApiException: Email '%s' not sent: %s", descriptionForLog, attempt.getRight()));
+                  "Messaging Exception API_ERROR: Email '%s' not sent: %s",
+                  descriptionForLog, attempt.getRight()));
           if (retries == 0) {
             log.log(
                 Level.SEVERE,
                 String.format(
-                    "ApiException: On Last Attempt! Email '%s' not sent: %s",
+                    "Messaging Exception API_ERROR: On Last Attempt! Email '%s' not sent: %s",
                     descriptionForLog, attempt.getRight()));
             throw new MessagingException(defaultFailureMessage);
           }
           break;
 
         case REJECTED:
+          String sentTo =
+              recipients.stream().map(RecipientAddress::getEmail).collect(Collectors.joining(", "));
           log.log(
               Level.SEVERE,
               String.format(
-                  "Messaging Exception: Email '%s' not sent: %s",
-                  descriptionForLog, attempt.getRight()));
+                  "Messaging Exception REJECTED: Email '%s' not sent to %s: %s",
+                  descriptionForLog, sentTo, attempt.getRight()));
           throw new MessagingException(defaultFailureMessage);
 
         case SUCCESSFUL:
@@ -819,7 +822,9 @@ public class MailServiceImpl implements MailService {
           if (retries == 0) {
             log.log(
                 Level.SEVERE,
-                String.format("Email '%s' was not sent. Default case.", descriptionForLog));
+                String.format(
+                    "Messaging Exception: Email '%s' was not sent. Default case.",
+                    descriptionForLog));
             throw new MessagingException(defaultFailureMessage);
           }
       }
