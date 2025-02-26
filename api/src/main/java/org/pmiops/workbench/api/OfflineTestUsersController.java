@@ -4,8 +4,9 @@ import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER
 
 import jakarta.inject.Provider;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -14,6 +15,7 @@ import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.utils.UserUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,24 +82,23 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
 
   @Override
   public ResponseEntity<Void> deleteAllTestUserWorkspaces() {
-    WorkbenchConfig config = workbenchConfigProvider.get();
-    WorkbenchConfig.E2ETestUserConfig testUserConf = config.e2eTestUsers;
-
-    // only some environments have test users
-    if (testUserConf == null) {
-      LOGGER.info("This environment does not have a test user config block.  Exiting.");
-    } else {
-      taskQueueService.groupAndPushDeleteTestWorkspaceTasks(
-          testUserConf.testUserEmails.stream()
-              .flatMap(this::enumerateAoUWorkspaces)
-              .collect(Collectors.toList()));
-    }
+    deleteAllWorkspaces(
+        this::enumerateAoUWorkspaces, taskQueueService::groupAndPushDeleteTestWorkspaceTasks);
 
     return ResponseEntity.ok().build();
   }
 
   @Override
   public ResponseEntity<Void> deleteAllTestUserWorkspacesOrphanedInRawls() {
+    deleteAllWorkspaces(
+        this::enumerateRawlsWorkspaces,
+        taskQueueService::groupAndPushDeleteTestWorkspaceInRawlsTasks);
+
+    return ResponseEntity.ok().build();
+  }
+
+  private <T> void deleteAllWorkspaces(
+      Function<String, Stream<T>> enumerator, Consumer<List<T>> queue) {
     WorkbenchConfig config = workbenchConfigProvider.get();
     WorkbenchConfig.E2ETestUserConfig testUserConf = config.e2eTestUsers;
 
@@ -105,32 +106,29 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     if (testUserConf == null) {
       LOGGER.info("This environment does not have a test user config block.  Exiting.");
     } else {
-      taskQueueService.groupAndPushDeleteTestWorkspaceInRawlsTasks(
-          testUserConf.testUserEmails.stream()
-              .flatMap(this::enumerateRawlsWorkspaces)
-              .collect(Collectors.toList()));
+      queue.accept(testUserConf.testUserEmails.stream().flatMap(enumerator).toList());
     }
-
-    return ResponseEntity.ok().build();
   }
 
   private Stream<TestUserWorkspace> enumerateAoUWorkspaces(String username) {
     List<WorkspaceResponse> workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
+    String action = workspaces.isEmpty() ? "." : "; queueing for deletion";
     LOGGER.info(
         String.format(
-            "Test user %s currently owns %d workspaces; queueing for deletion",
-            username, workspaces.size()));
+            "Test user %s currently owns %d workspaces%s", username, workspaces.size(), action));
 
     return workspaces.stream()
         .map(ws -> workspaceMapper.toTestUserWorkspace(ws.getWorkspace(), username));
   }
 
   private Stream<TestUserRawlsWorkspace> enumerateRawlsWorkspaces(String username) {
-    var workspaces = impersonatedWorkspaceService.getOwnedWorkspacesOrphanedInRawls(username);
+    List<RawlsWorkspaceListResponse> workspaces =
+        impersonatedWorkspaceService.getOwnedWorkspacesOrphanedInRawls(username);
+    String action = workspaces.isEmpty() ? "." : "; queueing for deletion";
     LOGGER.info(
         String.format(
-            "Test user %s currently owns %d workspaces in Rawls; queueing for deletion",
-            username, workspaces.size()));
+            "Test user %s currently owns %d workspaces in Rawls%s",
+            username, workspaces.size(), action));
 
     return workspaces.stream()
         .map(ws -> workspaceMapper.toTestUserRawlsWorkspace(ws.getWorkspace(), username));
