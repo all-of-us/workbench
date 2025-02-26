@@ -86,7 +86,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   public ResponseEntity<Void> deleteAllTestUserWorkspaces() {
     LOGGER.info("Deleting test user workspaces...");
 
-    deleteAllWorkspaces(
+    deleteWorkspaces(
         this::enumerateAoUWorkspaces, taskQueueService::groupAndPushDeleteTestWorkspaceTasks);
 
     LOGGER.info("Done deleting test user workspaces.");
@@ -97,7 +97,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   public ResponseEntity<Void> deleteAllTestUserWorkspacesOrphanedInRawls() {
     LOGGER.info("Deleting test user workspaces in Rawls (Terra)...");
 
-    deleteAllWorkspaces(
+    deleteWorkspaces(
         this::enumerateRawlsWorkspaces,
         taskQueueService::groupAndPushDeleteTestWorkspaceInRawlsTasks);
 
@@ -105,7 +105,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     return ResponseEntity.ok().build();
   }
 
-  private <T> void deleteAllWorkspaces(
+  private <T> void deleteWorkspaces(
       Function<String, Stream<T>> enumerator, Consumer<List<T>> queue) {
     WorkbenchConfig config = workbenchConfigProvider.get();
     WorkbenchConfig.E2ETestUserConfig testUserConf = config.e2eTestUsers;
