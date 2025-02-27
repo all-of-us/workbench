@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -93,7 +94,9 @@ public class DiskAdminService {
                     disk -> {
                       Instant lastAccessed = Instant.parse(disk.getDateAccessed());
                       return (int) Duration.between(lastAccessed, now).toDays();
-                    }));
+                    },
+                    TreeMap::new, // sorts the resulting map by the key (days since last access)
+                    Collectors.toList()));
 
     // Dispatch notifications if any disks are the right number of days old.
     int notifySuccess = 0;
@@ -103,13 +106,15 @@ public class DiskAdminService {
     for (var entry : disksByDaysUnused.entrySet()) {
       int daysUnused = entry.getKey();
       List<Disk> disksForDay = entry.getValue();
-      if (daysUnused <= 0) {
-        // Our periodic notifications should not trigger on day 0.
-        continue;
-      }
 
-      if (!INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
-          && daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS != 0) {
+      boolean wantToNotify = shouldNotify(daysUnused);
+      String sendOrNot = wantToNotify ? "sending" : "not sending";
+      log.info(
+          String.format(
+              "checkPersistentDisks: %s notifications for %d disks which have been idle for %d days",
+              sendOrNot, disksForDay.size(), daysUnused));
+
+      if (!wantToNotify) {
         continue;
       }
 
@@ -144,6 +149,12 @@ public class DiskAdminService {
               notifyFail, notifySuccess + notifyFail + notifySkip),
           lastException);
     }
+  }
+
+  private boolean shouldNotify(int daysUnused) {
+    return daysUnused > 0
+        && (INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
+            || daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS == 0);
   }
 
   // Returns true if an email is sent.
