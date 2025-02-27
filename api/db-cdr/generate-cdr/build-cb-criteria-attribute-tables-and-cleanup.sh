@@ -217,6 +217,7 @@ FROM
                     WHERE domain_id = 'SURVEY'
                 )
             and survey_version_concept_id is not null
+            and survey_version_concept_id NOT IN (1703970, 1703870)
             and is_standard = 0
         GROUP BY 1,2
     )"
@@ -247,6 +248,7 @@ FROM
                     WHERE domain_id = 'SURVEY'
                 )
             and survey_version_concept_id is not null
+            and survey_version_concept_id NOT IN (1703970, 1703870)
             and is_standard = 0
             and value_source_concept_id != 0
         GROUP BY 1,2,3
