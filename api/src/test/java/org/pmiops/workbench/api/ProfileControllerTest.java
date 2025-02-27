@@ -1590,7 +1590,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         .isWithin(0.01)
         .of(234.56);
 
-    // setting a Free Credits Limit equal to the default will not override
+    // setting an initial credits limit equal to the default will not override
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
