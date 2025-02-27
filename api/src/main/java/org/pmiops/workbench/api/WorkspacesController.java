@@ -186,11 +186,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);
     } catch (Exception e) {
-      // Tell Google to set the billing account back to the free tier if the workspace
+      // Tell Google to set the billing account back to initial credits if the workspace
       // creation fails
       log.log(
           Level.SEVERE,
-          "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
+          "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to initial credits.",
           e);
 
       // I don't think this is a bug but it's confusing that we're calling a function that is
@@ -409,8 +409,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // A little unintuitive but setting this here reflects the current state of the workspace
     // while it was in the billing buffer. Setting this value will inform the update billing
-    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
-    // tier
+    // code to skip an unnecessary GCP API call if the billing account is being kept as
+    // initial-credits
     dbWorkspace.setBillingAccountName(
         workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
 
@@ -624,7 +624,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace =
           workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
     } catch (Exception e) {
-      // Tell Google to set the billing account back to the free tier if our clone fails
+      // Tell Google to set the billing account back to initial-credits if our clone fails
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
       throw e;
@@ -677,7 +677,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     return ResponseEntity.ok(
         new WorkspaceBillingUsageResponse()
-            .cost(initialCreditsService.getWorkspaceFreeTierBillingUsage(workspace)));
+            .cost(initialCreditsService.getWorkspaceInitialCreditsUsage(workspace)));
   }
 
   @Override
@@ -887,7 +887,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     double freeCreditsRemaining =
-        initialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
+        initialCreditsService.getWorkspaceCreatorInitialCreditsRemaining(dbWorkspace);
     return ResponseEntity.ok(
         new WorkspaceCreatorFreeCreditsRemainingResponse()
             .freeCreditsRemaining(freeCreditsRemaining));

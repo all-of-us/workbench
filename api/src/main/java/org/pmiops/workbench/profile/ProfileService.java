@@ -9,7 +9,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
@@ -54,9 +53,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
-
-  private static final Logger log = Logger.getLogger(ProfileService.class.getName());
-
   private final AccessModuleService accessModuleService;
   private final AccessTierService accessTierService;
   private final AddressMapper addressMapper;
@@ -125,9 +121,9 @@ public class ProfileService {
     final DbUser user =
         userService.findUserWithAuthoritiesAndPageVisits(userLite.getUserId()).orElse(userLite);
 
-    final @Nullable Double freeTierUsage = initialCreditsService.getCachedFreeTierUsage(user);
+    final @Nullable Double freeTierUsage = initialCreditsService.getCachedInitialCreditsUsage(user);
     final @Nullable Double freeTierDollarQuota =
-        initialCreditsService.getUserFreeTierDollarLimit(user);
+        initialCreditsService.getUserInitialCreditsLimit(user);
     final @Nullable VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         verifiedInstitutionalAffiliationDao
             .findFirstByUser(user)

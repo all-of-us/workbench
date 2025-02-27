@@ -213,7 +213,7 @@ public class DiskAdminService {
     if (BillingUtils.isInitialCredits(
         workspace.get().getBillingAccountName(), configProvider.get())) {
       initialCreditsRemaining =
-          initialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
+          initialCreditsService.getWorkspaceCreatorInitialCreditsRemaining(workspace.get());
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(

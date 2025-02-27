@@ -160,7 +160,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setDisabled(USER__DISABLED);
     user.setFamilyName(USER__FAMILY_NAME);
     user.setFirstSignInTime(USER__FIRST_SIGN_IN_TIME);
-    user.setFreeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
+    user.setInitialCreditsLimitOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
     user.setGivenName(USER__GIVEN_NAME);
     user.setLastModifiedTime(USER__LAST_MODIFIED_TIME);
     user.setProfessionalUrl(USER__PROFESSIONAL_URL);
