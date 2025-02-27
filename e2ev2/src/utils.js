@@ -114,8 +114,3 @@ const dismissLeoAuthErrorModal = (page) => {
   return page.waitForSelector("div[role='dialog'] div[role='button']").then(b => b.click());
 }
 export_({dismissLeoAuthErrorModal})
-
-const dismissPrivacyWarning = (page) => {
-  return page.waitForSelector("div[role='button'][aria-label='Acknowledge']").then(b => b.click());
-}
-export_({dismissPrivacyWarning})

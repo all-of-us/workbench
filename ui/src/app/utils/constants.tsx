@@ -2,7 +2,6 @@ export const DEMOGRAPHIC_SURVEY_V2_PATH = '/demographic-survey';
 
 export const DEMOGRAPHIC_SURVEY_SESSION_KEY =
   'demographic-survey-banner-dismissed';
-export const PRIVACY_WARNING_KEY = 'privacy-warning-acknowledged';
 
 // Demographic survey Questions Key
 export const ETHNIC_CATEGORIES = 'ethnicCategories';

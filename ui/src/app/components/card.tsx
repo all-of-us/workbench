@@ -45,7 +45,6 @@ export const styles = reactStyles({
   },
 });
 
-export const Card = withStyle(baseStyles.card)('div');
 export const WorkspaceCardBase = withStyle(styles.workspaceCard)('div');
 export const DomainCardBase = withStyle(styles.domainCard)('div');
 export const ActionCardBase = withStyle(styles.cohortActionCard)('div');

@@ -32,7 +32,6 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 import { Ethnicity, GenderIdentity } from 'app/page/cohort-participants-group';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import PrivacyPage from 'app/page/privacy-page';
 
 // Resolve typescript error: TS2339: Property 'setTestAccessTokenOverride' does not exist on type 'Window & typeof globalThis'.
 declare const window: Window &
@@ -74,13 +73,9 @@ export async function signInWithAccessToken(
   // is unlikely to be captured.
   await homePage.loadPage({ reload: true });
   await homePage.loadPage({ url: PageUrl.Home });
-
   // normally the user is routed to the homepage after sign-in, so that's the default here.
   // tests can override this.
   if (waitForLoad) {
-    const privacyWarningPage = new PrivacyPage(page);
-    await privacyWarningPage.isLoaded();
-    await privacyWarningPage.acknowledgePrivacyWarning();
     await postSignInPage.waitForLoad();
   }
 }

@@ -12,7 +12,6 @@ browserTest('create a workspace', async browser => {
   await tu.fakeSignIn(page)
   await page.goto(config.urlRoot())
   await utils.dismissLeoAuthErrorModal(page);
-  await utils.dismissPrivacyWarning(page);
 
   // Workspace creation isn't really available until billing accounts have been fetched.
   const [baEventPromise] = await tu.promiseWindowEvent(page, 'billing-accounts-loaded')

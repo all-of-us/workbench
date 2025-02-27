@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
-import { cond, DEFAULT } from '@terra-ui-packages/core-utils';
 import { withRouteData } from 'app/components/app-router';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
@@ -11,17 +10,13 @@ import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { ZendeskWidget } from 'app/components/zendesk-widget';
 import { DemographicSurvey } from 'app/pages/demographic-survey';
-import { PrivacyWarning } from 'app/pages/privacy-warning';
 import { NavBar } from 'app/pages/signed-in/nav-bar';
 import { SignedInRoutes } from 'app/routing/signed-in-app-routing';
 import { cdrVersionsApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { setInstitutionCategoryState } from 'app/utils/analytics';
-import {
-  DEMOGRAPHIC_SURVEY_SESSION_KEY,
-  PRIVACY_WARNING_KEY,
-} from 'app/utils/constants';
+import { DEMOGRAPHIC_SURVEY_SESSION_KEY } from 'app/utils/constants';
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
 import {
   cdrVersionStore,
@@ -71,8 +66,6 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
   const [hideFooter, setHideFooter] = useState(false);
-  const [hasAcknowledgedPrivacyWarning, setHasAcknowledgedPrivacyWarning] =
-    useState(!!localStorage.getItem(PRIVACY_WARNING_KEY));
 
   const { config } = useStore(serverConfigStore);
   const { tiers } = useStore(cdrVersionStore);
@@ -143,25 +136,6 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     );
   };
 
-  const SignedInContent = () =>
-    cond<JSX.Element>(
-      [
-        !hasAcknowledgedPrivacyWarning,
-        () => (
-          <PrivacyWarning
-            onAcknowledge={() => setHasAcknowledgedPrivacyWarning(true)}
-          />
-        ),
-      ],
-      [
-        shouldRedirectToDemographicSurveyPage(),
-        () => (
-          <DemographicSurveyPage routeData={{ title: 'Demographic Survey' }} />
-        ),
-      ],
-      [DEFAULT, () => <SignedInRoutes />]
-    );
-
   return (
     <FlexColumn
       style={{
@@ -171,7 +145,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
       }}
       data-test-id='signed-in'
     >
-      <NavBar minimal={!hasAcknowledgedPrivacyWarning} />
+      <NavBar />
       <FlexRow style={{ position: 'relative', flex: '1 0 auto' }}>
         <div style={styles.backgroundImage} />
         {/* We still want people to be able to access the homepage, etc. even if they shouldn't */}
@@ -187,7 +161,13 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              <SignedInContent />
+              {shouldRedirectToDemographicSurveyPage() ? (
+                <DemographicSurveyPage
+                  routeData={{ title: 'Demographic Survey' }}
+                />
+              ) : (
+                <SignedInRoutes />
+              )}
             </div>
           )}
       </FlexRow>
