@@ -450,8 +450,8 @@ paths:
       tags:
       - profile
       summary: Sync compliance training status
-      description: Retrieves moodleId(either from DB or call from Moodle API) and
-        gets Training status on the basis of that
+      description: Retrieves the Absorb training status for the user and updates access module
+        completion times and access tier membership when appropriate
       operationId: syncComplianceTrainingStatus
       responses:
         200:
