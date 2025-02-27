@@ -726,12 +726,12 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     }, []);
 
     /*
-      TODO Move these into the effect with an empty dependency array.
-        I suspect that these are only called when the component is reloaded,
-        so the initial effect should be run again. My goal here is that effects should
-      only depend on props or local state. When this is the case, we can them above the local
-      variables.
-    */
+        TODO Move these into the effect with an empty dependency array.
+          I suspect that these are only called when the component is reloaded,
+          so the initial effect should be run again. My goal here is that effects should
+        only depend on props or local state. When this is the case, we can them above the local
+        variables.
+      */
     // handle the route /ras-callback?code=<code>
     useEffect(() => {
       if (code) {
@@ -741,6 +741,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
+      console.log('What is nextFocused? ', nextFocused);
+      console.log('What is nextRequired? ', nextRequired);
       setFocusedModule(nextFocused);
       setActiveModules(
         fp.flow(
