@@ -337,7 +337,7 @@ public class DataSetControllerTest {
     doReturn(cdrBigQuerySchemaConfig).when(mockCdrBigQuerySchemaConfigService).getConfig();
 
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.accountId = "free-tier";
+    workbenchConfig.billing.accountId = "initial-credits";
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);

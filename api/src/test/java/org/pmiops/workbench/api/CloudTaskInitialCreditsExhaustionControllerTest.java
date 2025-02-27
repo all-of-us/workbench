@@ -141,7 +141,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     dbInstitution = institutionDao.save(createDbInstitution());
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
-    workbenchConfig.billing.accountId = "free-tier";
+    workbenchConfig.billing.accountId = "initial-credits";
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.freeTierCronUserBatchSize = 10;
     workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
