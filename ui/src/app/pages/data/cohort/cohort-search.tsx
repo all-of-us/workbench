@@ -209,6 +209,8 @@ export const CohortSearch = fp.flow(
         this.selectDeceased();
       } else if (domain.includes(Domain.FITBIT.toString())) {
         this.selectFitbit(domain, name);
+      } else if (domain.includes("ETM")) {
+        this.selectETM(domain, name);
       } else if (domain.includes(Domain.WEAR_CONSENT.toString())) {
         this.selectWearConsent();
       } else if (domain === Domain.WHOLE_GENOME_VARIANT) {
@@ -404,6 +406,25 @@ export const CohortSearch = fp.flow(
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
         'Select Has any Fitbit data'
+      );
+      saveCriteria([param]);
+    }
+
+    selectETM(domainId: string, name: string) {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: CriteriaType.PPI.toString(),
+        name,
+        group: false,
+        domainId,
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+          `Select Has any ${name} data`
       );
       saveCriteria([param]);
     }
