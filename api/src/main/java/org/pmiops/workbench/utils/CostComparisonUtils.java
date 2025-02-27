@@ -25,23 +25,21 @@ public class CostComparisonUtils {
   }
 
   public static boolean costAboveLimit(
-      final DbUser user, final double currentCost, Double defaultFreeCreditsDollarLimit) {
-    return compareCosts(
-            currentCost, getUserFreeTierDollarLimit(user, defaultFreeCreditsDollarLimit))
+      final DbUser user, final double currentCost, Double defaultInitialCreditsLimit) {
+    return compareCosts(currentCost, getUserInitialCreditsLimit(user, defaultInitialCreditsLimit))
         > 0;
   }
 
   /**
-   * Retrieve the Free Tier dollar limit actually applicable to this user: this user's override if
+   * Retrieve the intial credits limit actually applicable to this user: this user's override if
    * present, the environment's default if not
    *
    * @param user the user as represented in our database
-   * @param defaultFreeCreditsDollarLimit
+   * @param defaultInitialCreditsLimit
    * @return the US dollar amount, represented as a double
    */
-  public static double getUserFreeTierDollarLimit(
-      DbUser user, Double defaultFreeCreditsDollarLimit) {
-    return Optional.ofNullable(user.getFreeTierCreditsLimitDollarsOverride())
-        .orElse(defaultFreeCreditsDollarLimit);
+  public static double getUserInitialCreditsLimit(DbUser user, Double defaultInitialCreditsLimit) {
+    return Optional.ofNullable(user.getInitialCreditsLimitOverride())
+        .orElse(defaultInitialCreditsLimit);
   }
 }

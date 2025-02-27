@@ -197,8 +197,7 @@ public class UserController implements UserApiDelegate {
   @Override
   public ResponseEntity<WorkbenchListBillingAccountsResponse> listBillingAccounts() {
     List<BillingAccount> billingAccounts =
-        Stream.concat(maybeFreeTierBillingAccount(), maybeCloudBillingAccounts())
-            .collect(Collectors.toList());
+        Stream.concat(maybeInitialCreditsAccount(), maybeCloudBillingAccounts()).toList();
 
     return ResponseEntity.ok(
         new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts));
@@ -211,10 +210,10 @@ public class UserController implements UserApiDelegate {
   }
 
   /**
-   * @return the free tier billing account, if the user has free credits
+   * @return the initial credits billing account, if the user has any remaining credits
    */
-  private Stream<BillingAccount> maybeFreeTierBillingAccount() {
-    if (!initialCreditsService.userHasRemainingFreeTierCredits(userProvider.get())) {
+  private Stream<BillingAccount> maybeInitialCreditsAccount() {
+    if (!initialCreditsService.userHasRemainingInitialCredits(userProvider.get())) {
       return Stream.empty();
     }
 

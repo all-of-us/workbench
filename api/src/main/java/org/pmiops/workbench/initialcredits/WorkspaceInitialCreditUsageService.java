@@ -42,7 +42,7 @@ public class WorkspaceInitialCreditUsageService {
    * @param workspaceByProject
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void updateWorkspaceFreeTierUsageInDB(
+  public void updateWorkspaceInitialCreditsUsageInDB(
       Map<Long, Double> dbCostByWorkspace,
       Map<String, Double> liveCostByProject,
       Map<String, Long> workspaceByProject) {
@@ -64,25 +64,22 @@ public class WorkspaceInitialCreditUsageService {
             .collect(Collectors.toList());
 
     final Iterable<DbWorkspace> workspaceList = workspaceDao.findAllById(workspacesIdsToUpdate);
-    final Iterable<DbWorkspaceFreeTierUsage> workspaceFreeTierUsages =
+    final Iterable<DbWorkspaceFreeTierUsage> initialCreditsUsages =
         workspaceFreeTierUsageDao.findAllByWorkspaceIn(workspaceList);
 
-    // Prepare cache of workspace ID to the free tier use entity
-    Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToFreeTierUsageCache =
-        StreamSupport.stream(workspaceFreeTierUsages.spliterator(), false)
+    // Prepare cache of workspace ID to the initial credits usage entity
+    Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToUsageCache =
+        StreamSupport.stream(initialCreditsUsages.spliterator(), false)
             .collect(
                 Collectors.toMap(
                     wftu -> wftu.getWorkspace().getWorkspaceId(), Function.identity()));
 
+    // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces
+    // in one query
     workspaceList.forEach(
         w ->
             workspaceFreeTierUsageDao.updateCost(
-                workspaceIdToFreeTierUsageCache,
-                w,
-                liveCostByProject.get(
-                    w.getGoogleProject()))); // TODO updateCost queries for each workspace, can be
-    // optimized by getting all needed workspaces in one
-    // query
+                workspaceIdToUsageCache, w, liveCostByProject.get(w.getGoogleProject())));
 
     logger.info(
         String.format(
