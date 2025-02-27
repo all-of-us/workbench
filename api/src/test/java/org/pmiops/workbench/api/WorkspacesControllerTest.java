@@ -408,7 +408,7 @@ public class WorkspacesControllerTest {
   @BeforeEach
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.accountId = "free-tier";
+    workbenchConfig.billing.accountId = "initial-credits";
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);

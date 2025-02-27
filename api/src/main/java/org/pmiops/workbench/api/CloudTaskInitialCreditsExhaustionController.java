@@ -4,6 +4,7 @@ import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 import static org.pmiops.workbench.utils.CostComparisonUtils.getUserInitialCreditsLimit;
 
 import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -76,8 +76,7 @@ public class CloudTaskInitialCreditsExhaustionController
         request.getUsers().toString());
 
     Iterable<DbUser> users = userDao.findAllById(request.getUsers());
-    Set<DbUser> usersSet =
-        StreamSupport.stream(users.spliterator(), false).collect(Collectors.toSet());
+    Set<DbUser> usersSet = Streams.stream(users).collect(Collectors.toSet());
 
     Map<String, Double> stringKeyDbCostMap = (Map<String, Double>) request.getDbCostByCreator();
     Map<Long, Double> dbCostByCreator = convertMapKeysToLong(stringKeyDbCostMap);

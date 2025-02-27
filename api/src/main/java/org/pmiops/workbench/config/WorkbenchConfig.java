@@ -94,8 +94,8 @@ public class WorkbenchConfig {
       return fullBillingAccountName(accountId);
     }
 
-    // The full table name for the BigQuery billing export, which is read from by the free-tier
-    // usage tracking cron endpoint.
+    // The full table name for the BigQuery billing export, which is used by the
+    // checkInitialCreditsUsage cron endpoint.
     public String exportBigQueryTable;
     // The default dollar limit to apply to free-credit usage in this environment.
     public Double defaultFreeCreditsDollarLimit;

@@ -1,11 +1,11 @@
 package org.pmiops.workbench.initialcredits;
 
+import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -49,19 +49,17 @@ public class WorkspaceInitialCreditUsageService {
 
     final List<String> projectsToUpdate =
         liveCostByProject.keySet().stream()
-            .filter(project -> workspaceByProject.containsKey(project))
+            .filter(workspaceByProject::containsKey)
             .filter(
                 project ->
                     CostComparisonUtils.compareCosts(
                             dbCostByWorkspace.get(workspaceByProject.get(project)),
                             liveCostByProject.get(project))
                         != 0)
-            .collect(Collectors.toList());
+            .toList();
 
     List<Long> workspacesIdsToUpdate =
-        projectsToUpdate.stream()
-            .map(project -> workspaceByProject.get(project))
-            .collect(Collectors.toList());
+        projectsToUpdate.stream().map(workspaceByProject::get).toList();
 
     final Iterable<DbWorkspace> workspaceList = workspaceDao.findAllById(workspacesIdsToUpdate);
     final Iterable<DbWorkspaceFreeTierUsage> initialCreditsUsages =
@@ -69,10 +67,10 @@ public class WorkspaceInitialCreditUsageService {
 
     // Prepare cache of workspace ID to the initial credits usage entity
     Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToUsageCache =
-        StreamSupport.stream(initialCreditsUsages.spliterator(), false)
+        Streams.stream(initialCreditsUsages)
             .collect(
                 Collectors.toMap(
-                    wftu -> wftu.getWorkspace().getWorkspaceId(), Function.identity()));
+                    usage -> usage.getWorkspace().getWorkspaceId(), Function.identity()));
 
     // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces
     // in one query

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.base.Stopwatch;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -38,7 +37,8 @@ public class OfflineBillingControllerTest {
   })
   static class Configuration {}
 
-  Map<String, Double> workspaceCosts = new HashMap<>();
+  // Google Project -> Cost
+  Map<String, Double> workspaceCosts = Map.of("1", 0.019, "2", 0.4, "3", 1d, "4", 0.34);
 
   @Test
   public void testCheckInitialCreditsUsage() {
@@ -59,11 +59,6 @@ public class OfflineBillingControllerTest {
   }
 
   private void mockInitialCreditCosts() {
-    // Key: Google Project Value: Cost
-    workspaceCosts.put("1", 0.019);
-    workspaceCosts.put("2", 0.4);
-    workspaceCosts.put("3", 1d);
-    workspaceCosts.put("4", 0.34);
     when(mockInitialCreditsBatchUpdateService.getWorkspaceCostsFromBQ()).thenReturn(workspaceCosts);
   }
 }
