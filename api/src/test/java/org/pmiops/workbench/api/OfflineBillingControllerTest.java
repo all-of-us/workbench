@@ -38,12 +38,12 @@ public class OfflineBillingControllerTest {
   })
   static class Configuration {}
 
-  Map<String, Double> freeTierForAllWorkspace = new HashMap<>();
+  Map<String, Double> workspaceCosts = new HashMap<>();
 
   @Test
   public void testCheckInitialCreditsUsage() {
     mockUserId();
-    mockFreeTierCostForGP();
+    mockInitialCreditCosts();
     offlineBillingController.checkInitialCreditsUsage();
 
     // Confirm the database is cleared and saved with new value
@@ -51,20 +51,19 @@ public class OfflineBillingControllerTest {
     verify(mockGoogleProjectPerCostDao).batchInsertProjectPerCost(anyList());
 
     // Confirm that task as pushed with User Id List
-    verify(mockTaskQueueService).groupAndPushFreeTierBilling(Arrays.asList(1L, 2L, 3L));
+    verify(mockTaskQueueService).groupAndPushInitialCreditsUsage(Arrays.asList(1L, 2L, 3L));
   }
 
   private void mockUserId() {
     when(mockUserService.getAllUserIds()).thenReturn(Arrays.asList(1L, 2L, 3L));
   }
 
-  private void mockFreeTierCostForGP() {
+  private void mockInitialCreditCosts() {
     // Key: Google Project Value: Cost
-    freeTierForAllWorkspace.put("1", 0.019);
-    freeTierForAllWorkspace.put("2", 0.4);
-    freeTierForAllWorkspace.put("3", 1d);
-    freeTierForAllWorkspace.put("4", 0.34);
-    when(mockInitialCreditsBatchUpdateService.getFreeTierWorkspaceCostsFromBQ())
-        .thenReturn(freeTierForAllWorkspace);
+    workspaceCosts.put("1", 0.019);
+    workspaceCosts.put("2", 0.4);
+    workspaceCosts.put("3", 1d);
+    workspaceCosts.put("4", 0.34);
+    when(mockInitialCreditsBatchUpdateService.getWorkspaceCostsFromBQ()).thenReturn(workspaceCosts);
   }
 }

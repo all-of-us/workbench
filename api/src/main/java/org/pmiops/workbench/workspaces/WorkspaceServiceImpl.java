@@ -530,7 +530,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     if (isInitialCredits(newBillingAccountName, workbenchConfigProvider.get())) {
       DbUser creator = workspace.getCreator();
       boolean hasInitialCreditsRemaining =
-          initialCreditsService.userHasRemainingFreeTierCredits(creator);
+          initialCreditsService.userHasRemainingInitialCredits(creator);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
     }
   }

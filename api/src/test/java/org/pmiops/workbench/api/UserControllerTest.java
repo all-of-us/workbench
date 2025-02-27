@@ -353,10 +353,10 @@ public class UserControllerTest {
   }
 
   // Combinatorial tests for listBillingAccounts:
-  // free tier available vs. exhausted
+  // initial credits available vs. exhausted
   // cloud accounts available vs. none
 
-  static final String INITIAL_CREDITS_ID = "free-tier";
+  static final String INITIAL_CREDITS_ID = "initial-credits-acct-name";
   static final BillingAccount INITIAL_CREDITS_BILLING_ACCOUNT =
       new BillingAccount()
           .freeTier(true)
@@ -388,13 +388,13 @@ public class UserControllerTest {
               .freeTier(false)
               .open(true));
 
-  // billing upgrade is true, free tier is available, cloud accounts exist
+  // initial credits available, cloud accounts exist
 
   @Test
-  public void listBillingAccounts_upgradeYES_freeYES_cloudYES() throws IOException {
+  public void listBillingAccounts_initialYES_cloudYES() throws IOException {
     config.billing.accountId = INITIAL_CREDITS_ID;
 
-    when(mockInitialCreditsService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+    when(mockInitialCreditsService.userHasRemainingInitialCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
@@ -408,13 +408,13 @@ public class UserControllerTest {
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // billing upgrade is true, free tier is available, no cloud accounts
+  // initial credits are available, no cloud accounts
 
   @Test
-  public void listBillingAccounts_upgradeYES_freeYES_cloudNO() throws IOException {
+  public void listBillingAccounts_initialYES_cloudNO() throws IOException {
     config.billing.accountId = INITIAL_CREDITS_ID;
 
-    when(mockInitialCreditsService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+    when(mockInitialCreditsService.userHasRemainingInitialCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
@@ -427,13 +427,13 @@ public class UserControllerTest {
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // billing upgrade is true, free tier is exhausted, cloud accounts exist
+  // initial credits are exhausted, cloud accounts exist
 
   @Test
-  public void listBillingAccounts_upgradeYES_freeNO_cloudYES() throws IOException {
+  public void listBillingAccounts_initialNO_cloudYES() throws IOException {
     config.billing.accountId = INITIAL_CREDITS_ID;
 
-    when(mockInitialCreditsService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+    when(mockInitialCreditsService.userHasRemainingInitialCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
@@ -445,13 +445,13 @@ public class UserControllerTest {
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // billing upgrade is true, free tier is exhausted, no cloud accounts
+  // initial credits are exhausted, no cloud accounts
 
   @Test
-  public void listBillingAccounts_upgradeYES_freeNO_cloudNO() throws IOException {
+  public void listBillingAccounts_initialNO_cloudNO() throws IOException {
     config.billing.accountId = INITIAL_CREDITS_ID;
 
-    when(mockInitialCreditsService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+    when(mockInitialCreditsService.userHasRemainingInitialCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));

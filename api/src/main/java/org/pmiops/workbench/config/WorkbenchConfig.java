@@ -99,7 +99,7 @@ public class WorkbenchConfig {
     public String exportBigQueryTable;
     // The default dollar limit to apply to free-credit usage in this environment.
     public Double defaultFreeCreditsDollarLimit;
-    // Thresholds for email alerting based on free tier usage, by cost
+    // Thresholds for email alerting based on initial credits usage, by cost
     public List<Double> freeTierCostAlertThresholds;
     // The contact email from Carahsoft for billing account setup
     public String carahsoftEmail;
@@ -111,10 +111,10 @@ public class WorkbenchConfig {
     // information
     public Integer minutesBeforeLastFreeTierJob;
 
-    // A value that defines the number of days to consider between the last update of the Free tier
-    // usage in the database and the last workspace update when calculating the eligibility of a
-    // workspace free tier usage to be updated. To account for charges that may occur after the
-    // workspace gets deleted and after the last cron had run
+    // A value that defines the number of days to consider between the last update of initial
+    // credits usage in the database and the last workspace update when calculating the eligibility
+    // of a workspace initial credits usage to be updated. To account for charges that may occur
+    // after the workspace gets deleted and after the last cron had run
     public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
 
     // The number of days that initial credits are valid for.

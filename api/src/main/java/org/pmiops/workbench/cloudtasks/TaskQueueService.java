@@ -144,7 +144,7 @@ public class TaskQueueService {
     createAndPushAll(userIds, workbenchConfig.offlineBatch.usersPerAuditTask, AUDIT_PROJECTS);
   }
 
-  public void groupAndPushFreeTierBilling(List<Long> userIds) {
+  public void groupAndPushInitialCreditsUsage(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     createAndPushAll(
         userIds, workbenchConfig.billing.freeTierCronUserBatchSize, INITIAL_CREDITS_USAGE);

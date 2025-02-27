@@ -117,7 +117,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   }
 
   @Override
-  public void fireSetFreeTierDollarLimitOverride(
+  public void fireSetInitialCreditsOverride(
       Long targetUserId, @Nullable Double previousDollarQuota, @Nullable Double newDollarQuota) {
     DbUser adminUser = dbUserProvider.get();
     Builder builder =
@@ -129,7 +129,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .actionId(actionIdProvider.get())
             .actionType(ActionType.EDIT)
             .targetType(TargetType.ACCOUNT)
-            .targetPropertyMaybe(AccountTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName())
+            .targetPropertyMaybe(AccountTargetProperty.INITIAL_CREDITS_OVERRIDE.getPropertyName())
             .targetIdMaybe(targetUserId);
 
     if (previousDollarQuota != null) {

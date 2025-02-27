@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 /** Handles offline / cron-based API requests related to user management. */
 @RestController
 public class OfflineUserController implements OfflineUserApiDelegate {
-  private static final Logger log = Logger.getLogger(OfflineUserController.class.getName());
-
   private final UserService userService;
   private final TaskQueueService taskQueueService;
 

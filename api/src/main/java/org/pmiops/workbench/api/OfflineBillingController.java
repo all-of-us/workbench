@@ -21,7 +21,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineBillingController.class.getName());
 
   private final GoogleProjectPerCostDao googleProjectPerCostDao;
-  private final InitialCreditsBatchUpdateService freeTierBillingService;
+  private final InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   private final Provider<Stopwatch> stopwatchProvider;
   private final TaskQueueService taskQueueService;
   private final UserService userService;
@@ -29,11 +29,11 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   @Autowired
   OfflineBillingController(
       GoogleProjectPerCostDao googleProjectPerCostDao,
-      InitialCreditsBatchUpdateService freeTierBillingService,
+      InitialCreditsBatchUpdateService initialCreditsBatchUpdateService,
       Provider<Stopwatch> stopwatchProvider,
       TaskQueueService taskQueueService,
       UserService userService) {
-    this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.googleProjectPerCostDao = googleProjectPerCostDao;
     this.stopwatchProvider = stopwatchProvider;
     this.taskQueueService = taskQueueService;
@@ -48,7 +48,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
     // temp performance logging
     Stopwatch stopwatch = stopwatchProvider.get().start();
     List<DbGoogleProjectPerCost> workspaceCosts =
-        freeTierBillingService.getFreeTierWorkspaceCostsFromBQ().entrySet().stream()
+        initialCreditsBatchUpdateService.getWorkspaceCostsFromBQ().entrySet().stream()
             .map(DbGoogleProjectPerCost::new)
             .toList();
     Duration elapsed = stopwatch.stop().elapsed();
@@ -74,7 +74,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
             "checkInitialCreditsUsage: Inserted all workspace costs to googleproject_cost table in %s",
             formatDurationPretty(elapsed)));
 
-    taskQueueService.groupAndPushFreeTierBilling(userService.getAllUserIds());
+    taskQueueService.groupAndPushInitialCreditsUsage(userService.getAllUserIds());
     log.info("Pushed all users to the Cloud Task endpoint checkInitialCreditsUsage");
 
     return ResponseEntity.noContent().build();

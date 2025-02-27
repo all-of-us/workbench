@@ -239,7 +239,7 @@ public class DiskAdminServiceTest {
     stubWorkspaceOwners(workspace, List.of(user1));
 
     workspace.setBillingAccountName(config.billing.initialCreditsBillingAccountName());
-    when(mockInitialCreditsService.getWorkspaceCreatorFreeCreditsRemaining(workspace))
+    when(mockInitialCreditsService.getWorkspaceCreatorInitialCreditsRemaining(workspace))
         .thenReturn(123.0);
 
     assertDoesNotThrow(() -> service.checkPersistentDisks(List.of(idleDisk(Duration.ofDays(14L)))));
