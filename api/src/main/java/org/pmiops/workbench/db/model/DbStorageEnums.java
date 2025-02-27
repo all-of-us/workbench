@@ -222,6 +222,10 @@ public final class DbStorageEnums {
           .put(Domain.WEAR_CONSENT, (short) 30)
           .put(Domain.FITBIT_PLUS_DEVICE, (short) 31)
           .put(Domain.FITBIT_DEVICE, (short) 32)
+          .put(Domain.ETM_DELAYDISCOUNTING, (short) 33)
+          .put(Domain.ETM_EMORECOG, (short) 34)
+          .put(Domain.ETM_FLANKER, (short) 35)
+          .put(Domain.ETM_GRADCPT, (short) 36)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -260,6 +264,10 @@ public final class DbStorageEnums {
           .put(Domain.CONCEPT_QUICK_ADD, "Concept Quick Add")
           .put(Domain.SNP_INDEL_VARIANT, "SNP/Indel Variants")
           .put(Domain.WEAR_CONSENT, "Wear Consent")
+          .put(Domain.ETM_DELAYDISCOUNTING, "ETM Delay Discounting")
+          .put(Domain.ETM_EMORECOG, "Wear ETM EmoreCog")
+          .put(Domain.ETM_FLANKER, "Wear Flanker")
+          .put(Domain.ETM_GRADCPT, "Wear GradCPT")
           .build();
 
   public static Domain domainFromStorage(Short domain) {

@@ -53,8 +53,13 @@ echo "self reported count: $selfReportedCategoryDataCount"
 
 echo "Checking if device tables exists in this dataset"
 query="select count(table_id) as count from \`$BQ_PROJECT.$BQ_DATASET.__TABLES__\`
-where table_name=\"device\""
+where table_id=\"device\""
 deviceTableExist=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
+echo "Checking if EtM tables exists in this dataset"
+query="select count(table_id) as count from \`$BQ_PROJECT.$BQ_DATASET.__TABLES__\`
+where table_id=\"delaydiscounting\""
+etmTablesExist=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 ###############################
 # CREATE cb_criteria_menu TABLE
@@ -133,6 +138,14 @@ do
       ($((++ID)),$PARENT_ID,'Program Data','SURVEY','PPI','$line',0,$((++SORT_ORDER)))"
   fi
 done <<< "$surveyNames"
+
+if [[ $etmTablesExist > 0 ]];
+then
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_DELAYDISCOUNTING','ETM_DELAYDISCOUNTING','Has Any EtM Delay Discounting',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_EMORECOG','ETM_EMORECOG','Has Any EtM EmoreCog',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_FLANKER','ETM_FLANKER','Has Any EtM Flanker',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_GRADCPT','ETM_GRADCPT','Has Any EtM Grad CPT',0,$((++SORT_ORDER)))"
+fi
 
 if [[ $fitbitCount > 0 ]];
 then

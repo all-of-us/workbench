@@ -160,4 +160,8 @@ export const BOOLEAN_CRITERIA_DOMAINS = [
   Domain.ARRAY_DATA.toString(),
   Domain.STRUCTURAL_VARIANT_DATA.toString(),
   Domain.WEAR_CONSENT.toString(),
+  Domain.ETM_DELAYDISCOUNTING.toString(),
+  Domain.ETM_EMORECOG.toString(),
+  Domain.ETM_FLANKER.toString(),
+  Domain.ETM_GRADCPT.toString(),
 ];
