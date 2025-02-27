@@ -415,7 +415,7 @@ export const CohortSearch = fp.flow(
         id: null,
         parentId: null,
         parameterId: '',
-        type: CriteriaType.PPI.toString(),
+        type: CriteriaType.NONE.toString(),
         name,
         group: false,
         domainId,
