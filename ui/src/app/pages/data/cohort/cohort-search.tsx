@@ -209,7 +209,7 @@ export const CohortSearch = fp.flow(
         this.selectDeceased();
       } else if (domain.includes(Domain.FITBIT.toString())) {
         this.selectFitbit(domain, name);
-      } else if (domain.includes("ETM")) {
+      } else if (domain.includes('ETM')) {
         this.selectETM(domain, name);
       } else if (domain.includes(Domain.WEAR_CONSENT.toString())) {
         this.selectWearConsent();
@@ -424,7 +424,7 @@ export const CohortSearch = fp.flow(
         attributes: [],
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
-          `Select Has any ${name} data`
+        `Select Has any ${name} data`
       );
       saveCriteria([param]);
     }
