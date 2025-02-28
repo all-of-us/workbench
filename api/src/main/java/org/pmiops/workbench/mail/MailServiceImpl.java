@@ -341,7 +341,6 @@ public class MailServiceImpl implements MailService {
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)
       throws MessagingException {
-
     final String htmlMessage =
         buildHtml(
             UNUSED_DISK_RESOURCE,
