@@ -24,7 +24,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -102,7 +101,7 @@ public class DiskAdminService {
     int notifySuccess = 0;
     int notifySkip = 0;
     int notifyFail = 0;
-    Exception lastException = null;
+    boolean sawException = false;
     for (var entry : disksByDaysUnused.entrySet()) {
       int daysUnused = entry.getKey();
       List<Disk> disksForDay = entry.getValue();
@@ -132,7 +131,7 @@ public class DiskAdminService {
                   "checkPersistentDisks: failed to send notification for disk '%s/%s'",
                   disk.getGoogleProject(), disk.getName()),
               e);
-          lastException = e;
+          sawException = true;
           notifyFail++;
         }
       }
@@ -142,12 +141,11 @@ public class DiskAdminService {
         String.format(
             "checkPersistentDisks: sent %d notifications successfully (%d skipped, %d failed)",
             notifySuccess, notifySkip, notifyFail));
-    if (lastException != null) {
-      throw new ServerErrorException(
+    if (sawException) {
+      log.warning(
           String.format(
               "checkPersistentDisks: %d/%d disk notifications failed to send, see logs for details",
-              notifyFail, notifySuccess + notifyFail + notifySkip),
-          lastException);
+              notifyFail, notifySuccess + notifyFail + notifySkip));
     }
   }
 
