@@ -57,7 +57,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
 
   private final AccessModuleService accessModuleService;
   private final CloudResourceManagerService cloudResourceManagerService;
-  private final InitialCreditsBatchUpdateService freeTierBillingUpdateService;
+  private final InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   private final InitialCreditsService initialCreditsService;
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserService userService;
@@ -65,13 +65,13 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   CloudTaskUserController(
       AccessModuleService accessModuleService,
       CloudResourceManagerService cloudResourceManagerService,
-      InitialCreditsBatchUpdateService freeTierBillingUpdateService,
+      InitialCreditsBatchUpdateService initialCreditsBatchUpdateService,
       InitialCreditsService initialCreditsService,
       Provider<Stopwatch> stopwatchProvider,
       UserService userService) {
     this.accessModuleService = accessModuleService;
     this.cloudResourceManagerService = cloudResourceManagerService;
-    this.freeTierBillingUpdateService = freeTierBillingUpdateService;
+    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.initialCreditsService = initialCreditsService;
     this.stopwatchProvider = stopwatchProvider;
     this.userService = userService;
@@ -131,8 +131,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
    * Takes in batch of user Ids check whether users have incurred sufficient cost in their
    * workspaces to trigger alerts due to passing thresholds or exceeding limits
    *
-   * @param userIds : Batch of user IDs from cloud task queue: freeTierBillingQueue
-   * @return
+   * @param userIds : Batch of user IDs from cloud task queue: initialCreditsUsageQueue
    */
   @Override
   public ResponseEntity<Void> checkInitialCreditsUsageBatch(List<Long> userIds) {
@@ -143,7 +142,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
     return processUserIdBatch(
         userIds,
         "alerting for initial credits usage",
-        freeTierBillingUpdateService::checkInitialCreditsUsage);
+        initialCreditsBatchUpdateService::checkInitialCreditsUsage);
   }
 
   @Override

@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -22,7 +21,7 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 public class OfflineBillingControllerTest {
 
-  @Autowired private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
+  @Autowired private InitialCreditsBatchUpdateService mockInitialCreditsBatchUpdateService;
   @Autowired private OfflineBillingController offlineBillingController;
   @Autowired private TaskQueueService mockTaskQueueService;
   @Autowired private UserService mockUserService;
@@ -38,12 +37,13 @@ public class OfflineBillingControllerTest {
   })
   static class Configuration {}
 
-  Map<String, Double> freeTierForAllWorkspace = new HashMap<>();
+  // Google Project -> Cost
+  Map<String, Double> workspaceCosts = Map.of("1", 0.019, "2", 0.4, "3", 1d, "4", 0.34);
 
   @Test
   public void testCheckInitialCreditsUsage() {
     mockUserId();
-    mockFreeTierCostForGP();
+    mockInitialCreditCosts();
     offlineBillingController.checkInitialCreditsUsage();
 
     // Confirm the database is cleared and saved with new value
@@ -51,20 +51,14 @@ public class OfflineBillingControllerTest {
     verify(mockGoogleProjectPerCostDao).batchInsertProjectPerCost(anyList());
 
     // Confirm that task as pushed with User Id List
-    verify(mockTaskQueueService).groupAndPushFreeTierBilling(Arrays.asList(1L, 2L, 3L));
+    verify(mockTaskQueueService).groupAndPushInitialCreditsUsage(Arrays.asList(1L, 2L, 3L));
   }
 
   private void mockUserId() {
     when(mockUserService.getAllUserIds()).thenReturn(Arrays.asList(1L, 2L, 3L));
   }
 
-  private void mockFreeTierCostForGP() {
-    // Key: Google Project Value: Cost
-    freeTierForAllWorkspace.put("1", 0.019);
-    freeTierForAllWorkspace.put("2", 0.4);
-    freeTierForAllWorkspace.put("3", 1d);
-    freeTierForAllWorkspace.put("4", 0.34);
-    when(mockFreeTierBillingUpdateService.getFreeTierWorkspaceCostsFromBQ())
-        .thenReturn(freeTierForAllWorkspace);
+  private void mockInitialCreditCosts() {
+    when(mockInitialCreditsBatchUpdateService.getWorkspaceCostsFromBQ()).thenReturn(workspaceCosts);
   }
 }
