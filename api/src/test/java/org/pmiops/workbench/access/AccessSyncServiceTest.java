@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -37,6 +38,7 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.user.VwbUserService;
 
 @ExtendWith(MockitoExtension.class)
 public class AccessSyncServiceTest {
@@ -56,6 +58,8 @@ public class AccessSyncServiceTest {
   @Mock InitialCreditsService initialCreditsService;
 
   @Mock UserServiceAuditor userServiceAuditor;
+  @Mock VwbUserService vwbUserService;
+  @Mock TaskQueueService taskQueueService;
 
   Instant now = Instant.parse("2000-01-01T00:00:00.00Z");
 
@@ -74,7 +78,9 @@ public class AccessSyncServiceTest {
         accessModuleService,
         institutionService,
         userService,
-        userServiceAuditor);
+        userServiceAuditor,
+        vwbUserService,
+        taskQueueService);
     registeredTier = createRegisteredTier();
     when(accessTierService.getAllTiers()).thenReturn(List.of(registeredTier));
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());

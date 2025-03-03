@@ -164,3 +164,15 @@ queue:
   retry_parameters:
     task_retry_limit: 1
     task_age_limit: 5m
+
+- name: vwbPodCreationQueue
+  target: api
+
+  # rate parameters
+  bucket_size: 100
+  rate: 1/s
+  max_concurrent_requests: 5
+
+  retry_parameters:
+    task_retry_limit: 3
+    task_age_limit: 5m
