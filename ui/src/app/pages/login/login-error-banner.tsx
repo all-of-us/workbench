@@ -13,9 +13,11 @@ export const LOGIN_ERROR_BANNER = () => (
     }}
   >
     <ErrorMessage>
-      Scheduled Downtime Notice for the <AoU /> Researcher Workbench: The Researcher Workbench will be unavailable
-      for scheduled maintenance on Wednesday, March 5, 2025 and Friday, March 7, 2025 from 8:00 to 9:00 a.m. ET. To learn more, please see the
-      announcement on the User Support Hub <a href='https://support.researchallofus.org/hc/en-us' target='blank'>
+      Scheduled Downtime Notice for the <AoU /> Researcher Workbench: The
+      Researcher Workbench will be unavailable for scheduled maintenance on
+      Wednesday, March 5, 2025 and Friday, March 7, 2025 from 8:00 to 9:00 a.m.
+      ET. To learn more, please see the announcement on the User Support Hub{' '}
+      <a href='https://support.researchallofus.org/hc/en-us' target='blank'>
         {' '}
         here
       </a>{' '}
