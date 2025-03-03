@@ -2,6 +2,7 @@ package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfo;
+import com.google.common.base.Strings;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.inject.Provider;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -128,13 +130,13 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
       return false;
     }
 
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+    Optional<String> maybeToken = parseBearerToken(authorizationHeader);
+    if (maybeToken.isEmpty()) {
       log.warning("No bearer token found in request");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
-
-    final String token = authorizationHeader.substring("Bearer".length()).trim();
+    String token = maybeToken.get();
     final Userinfo userInfo = userInfoService.getUserInfo(token);
 
     // The Workbench considers the user's generated GSuite email to be their userName
@@ -213,6 +215,13 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
     }
 
     return true;
+  }
+
+  private Optional<String> parseBearerToken(String authorizationHeader) {
+    return Optional.ofNullable(authorizationHeader)
+        .filter(header -> header.startsWith("Bearer "))
+        .map(header -> header.substring("Bearer ".length()).trim())
+        .filter(token -> !Strings.isNullOrEmpty(token));
   }
 
   @Override
