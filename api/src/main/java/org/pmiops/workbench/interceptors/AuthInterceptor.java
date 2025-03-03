@@ -128,13 +128,14 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
       return false;
     }
 
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+    final String token = authorizationHeader.substring("Bearer".length()).trim();
+
+    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ") || token.isEmpty()) {
       log.warning("No bearer token found in request");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
 
-    final String token = authorizationHeader.substring("Bearer".length()).trim();
     final Userinfo userInfo = userInfoService.getUserInfo(token);
 
     // The Workbench considers the user's generated GSuite email to be their userName
