@@ -35,11 +35,10 @@ class VwbUserServiceTest {
 
   @InjectMocks private VwbUserService vwbUserService;
 
-  WorkbenchConfig.FeatureFlagsConfig featureFlags;
 
   @BeforeEach
   public void setUp() {
-    Mockito.reset(workbenchConfigProvider);
+    reset(workbenchConfigProvider);
   }
 
   void stub(boolean enableVWBUserCreation, boolean enableVwbPodCreation) {
