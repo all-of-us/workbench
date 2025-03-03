@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -34,7 +33,6 @@ class VwbUserServiceTest {
   @Mock private UserDao userDao;
 
   @InjectMocks private VwbUserService vwbUserService;
-
 
   @BeforeEach
   public void setUp() {
