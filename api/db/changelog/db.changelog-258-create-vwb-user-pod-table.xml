@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="tarekahmed" id="db.changelog-257-create-vwb-user-pod-table">
+  <changeSet author="tarekahmed" id="db.changelog-258-create-vwb-user-pod-table">
     <preConditions onFail="MARK_RAN">
       <not>
         <tableExists tableName="vwb_user_pod"/>
