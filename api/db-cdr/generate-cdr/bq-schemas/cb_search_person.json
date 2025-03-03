@@ -138,5 +138,25 @@
     "mode": "NULLABLE",
     "name": "self_reported_category",
     "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_etm_delaydiscounting",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_etm_emorecog",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_etm_flanker",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_etm_gradcpt",
+    "type": "INTEGER"
   }
 ]

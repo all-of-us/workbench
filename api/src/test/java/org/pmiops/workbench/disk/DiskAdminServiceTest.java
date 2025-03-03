@@ -2,7 +2,6 @@ package org.pmiops.workbench.disk;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,7 +33,6 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.disks.DiskAdminService;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.legacy_leonardo_client.ApiException;
@@ -223,8 +221,7 @@ public class DiskAdminServiceTest {
         .when(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(any(), any(), any(), anyBoolean(), anyInt(), any());
 
-    assertThrows(
-        ServerErrorException.class,
+    assertDoesNotThrow(
         () ->
             service.checkPersistentDisks(
                 List.of(

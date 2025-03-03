@@ -1,5 +1,5 @@
 env: standard
-runtime: nodejs18
+runtime: nodejs22
 service: tanagra-ui
 service_account: ${SERVICE_ACCOUNT}
 entrypoint: react-scripts start

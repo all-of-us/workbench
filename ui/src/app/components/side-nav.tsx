@@ -261,10 +261,6 @@ export const SideNav = (props: SideNavProps) => {
 
   const { minimal, profile, onToggleSideNav } = props;
 
-  const showAdminMenu =
-    !minimal &&
-    hasAuthorityForAction(profile, AuthorityGuardedAction.SHOW_ADMIN_MENU);
-
   const openContactWidget = () => {
     openZendeskWidget(
       profile.givenName,
@@ -367,15 +363,19 @@ export const SideNav = (props: SideNavProps) => {
         parentOnClick={() => openContactWidget()}
       />
 
-      {showAdminMenu && (
-        <SideNavItem
-          icon='user'
-          content='Admin'
-          parentOnClick={() => onToggleAdmin()}
-          onToggleSideNav={() => onToggleSideNav()}
-          containsSubItems={true}
-        />
-      )}
+      {!minimal &&
+        hasAuthorityForAction(
+          profile,
+          AuthorityGuardedAction.SHOW_ADMIN_MENU
+        ) && (
+          <SideNavItem
+            icon='user'
+            content='Admin'
+            parentOnClick={() => onToggleAdmin()}
+            onToggleSideNav={() => onToggleSideNav()}
+            containsSubItems={true}
+          />
+        )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
         showAdminOptions && (
           <SideNavItem

@@ -22,6 +22,8 @@ import org.springframework.web.method.HandlerMethod;
 @Import(FakeClockConfiguration.class)
 @SpringJUnitConfig
 public class CronInterceptorTest {
+  private static final String TASK = "synchronizeUserAccess";
+
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Mock private HandlerMethod handler;
@@ -44,16 +46,14 @@ public class CronInterceptorTest {
   @Test
   public void prehandleForCronNoHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(handler.getMethod())
-        .thenReturn(OfflineUserApi.class.getMethod("groupAndPushSynchronizeAccessTasks"));
+    when(handler.getMethod()).thenReturn(OfflineUserApi.class.getMethod(TASK));
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
 
   @Test
   public void prehandleForCronWithBadHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(handler.getMethod())
-        .thenReturn(OfflineUserApi.class.getMethod("groupAndPushSynchronizeAccessTasks"));
+    when(handler.getMethod()).thenReturn(OfflineUserApi.class.getMethod(TASK));
     when(request.getHeader(CronInterceptor.GAE_CRON_HEADER)).thenReturn("asdf");
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
@@ -61,8 +61,7 @@ public class CronInterceptorTest {
   @Test
   public void prehandleForCronWithHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(handler.getMethod())
-        .thenReturn(OfflineUserApi.class.getMethod("groupAndPushSynchronizeAccessTasks"));
+    when(handler.getMethod()).thenReturn(OfflineUserApi.class.getMethod(TASK));
     when(request.getHeader(CronInterceptor.GAE_CRON_HEADER)).thenReturn("true");
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }

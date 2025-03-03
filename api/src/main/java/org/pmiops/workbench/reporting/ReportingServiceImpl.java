@@ -47,6 +47,8 @@ public class ReportingServiceImpl implements ReportingService {
   @Transactional
   @Override
   public void collectRecordsAndUpload() {
+    logger.info("Uploading workbench tables in batches");
+
     final long captureTimestamp = clock.millis();
 
     // First: Upload the data in batches.

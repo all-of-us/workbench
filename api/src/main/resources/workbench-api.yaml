@@ -450,8 +450,8 @@ paths:
       tags:
       - profile
       summary: Sync compliance training status
-      description: Retrieves moodleId(either from DB or call from Moodle API) and
-        gets Training status on the basis of that
+      description: Retrieves the Absorb training status for the user and updates access module
+        completion times and access tier membership when appropriate
       operationId: syncComplianceTrainingStatus
       responses:
         200:
@@ -2449,14 +2449,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/checkFreeTierBillingUsage:
+  /v1/cron/checkInitialCreditsUsage:
     get:
       tags:
         - offlineBilling
         - cron
-      description: Find and alert users that have exceeded their free tier billing
-        usage
-      operationId: checkFreeTierBillingUsage
+      description: Find and alert users that have exceeded their initial credits usage limit.
+      operationId: checkInitialCreditsUsage
       security: [ ]
       responses:
         204:
@@ -2468,14 +2467,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/groupAndPushSynchronizeAccessTasks:
+  /v1/cron/synchronizeUserAccess:
     get:
       tags:
       - offlineUser
       - cron
       description: |
         This cron job ensures that cloud tasks are created to support /v1/cloudTask/synchronizeUserAccess.
-      operationId: groupAndPushSynchronizeAccessTasks
+      operationId: synchronizeUserAccess
       security: []
       responses:
         204:
@@ -6686,6 +6685,7 @@ components:
       - IGNITE_NORTHWELL_HEALTH_FEINSTEIN_INSTITUTE_FOR_MEDICAL_RESEARCH
       - NATIONAL_ALLIANCE_FOR_HISPANIC_HEALTH_NAHH
       - NATIONAL_BAPTIST_CONVENTION_USA_INC
+      - NATIONAL_LATINO_NETWORK_FOR_PRECISION_MEDICINE_AND_HEALTH_DISPARITIES
       - NETWORK_OF_THE_NATIONAL_LIBRARY_OF_MEDICINE_NNLM
       - PRIDENET_STANFORD_UNIVERSITY
       - PYXIS_PARTNERS
@@ -6729,6 +6729,10 @@ components:
       - CONCEPT_SET
       - CONCEPT_QUICK_ADD
       - WEAR_CONSENT
+      - ETM_DELAYDISCOUNTING
+      - ETM_EMORECOG
+      - ETM_FLANKER
+      - ETM_GRADCPT
     Surveys:
       type: string
       description: a survey for concepts

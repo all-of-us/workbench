@@ -51,7 +51,6 @@ import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.PageVisitMapper;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.ras.RasLinkService;
-import org.pmiops.workbench.user.VwbUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,7 +87,6 @@ public class ProfileController implements ProfileApiDelegate {
   private final RasLinkService rasLinkService;
   private final ComplianceTrainingService complianceTrainingService;
   private final InitialCreditsService initialCreditsService;
-  private final VwbUserService vwbUserService;
 
   @Autowired
   ProfileController(
@@ -111,8 +109,7 @@ public class ProfileController implements ProfileApiDelegate {
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService,
       ComplianceTrainingService complianceTrainingService,
-      InitialCreditsService initialCreditsService,
-      VwbUserService vwbUserService) {
+      InitialCreditsService initialCreditsService) {
     this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -133,7 +130,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.rasLinkService = rasLinkService;
     this.complianceTrainingService = complianceTrainingService;
     this.initialCreditsService = initialCreditsService;
-    this.vwbUserService = vwbUserService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -173,20 +169,11 @@ public class ProfileController implements ProfileApiDelegate {
         // to be replaced as part of RW-11416
         userService.acceptTerraTermsOfServiceDeprecated(dbUser);
       }
+      dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+      return saveUserWithConflictHandling(dbUser);
     }
 
     return dbUser;
-  }
-
-  private void maybeInitializeUserWithVwb(DbUser dbUser) {
-    if (dbUser.getFirstSignInTime() == null) {
-      vwbUserService.createUser(dbUser.getUsername());
-    }
-  }
-
-  private DbUser saveUserFirstSignIn(DbUser dbUser) {
-    dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
-    return saveUserWithConflictHandling(dbUser);
   }
 
   private ResponseEntity<Profile> getProfileResponse(DbUser user) {
@@ -199,8 +186,6 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> getMe() {
     // Record that the user signed in and run Terra initialization as needed.
     DbUser dbUser = maybeInitializeUserWithTerra();
-    maybeInitializeUserWithVwb(dbUser);
-    dbUser = saveUserFirstSignIn(dbUser);
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);
   }

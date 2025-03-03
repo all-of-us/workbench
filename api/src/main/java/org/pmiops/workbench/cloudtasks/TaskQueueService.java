@@ -72,11 +72,11 @@ public class TaskQueueService {
   // whether users have passed their initial credits expiration time and execute the consequences of
   // user initial credit expiration (DB update, deletion of runtimes)
   //
-  // INITIAL_CREDITS_USAGE - run as part of the cron checkFreeTierBillingUsage after retrieving
+  // INITIAL_CREDITS_USAGE - run as part of the cron checkInitialCreditsUsage after retrieving
   // per-workspace usage, to check all users' initial credits usage. All credit-exhausted users are
   // then pushed to the INITIAL_CREDITS_EXHAUSTION task queue.
   //
-  // INITIAL_CREDITS_EXHAUSTION - run as a sub-task of checkFreeTierBillingUsage, this executes the
+  // INITIAL_CREDITS_EXHAUSTION - run as a sub-task of checkInitialCreditsUsage, this executes the
   // consequences of user initial credit exhaustion (DB update, deletion of runtimes, sending email)
 
   public static final TaskQueuePair INITIAL_CREDITS_EXPIRATION =

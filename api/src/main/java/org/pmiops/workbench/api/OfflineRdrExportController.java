@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rdr.RdrExportService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
+  private static final Logger log = Logger.getLogger(OfflineRdrExportController.class.getName());
 
   private RdrExportService rdrExportService;
   private TaskQueueService taskQueueService;
@@ -35,6 +37,8 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
    */
   @Override
   public ResponseEntity<Void> exportData() {
+    log.info("Starting RDR export data cron job");
+
     // Its important to send all researcher information first to RDR before sending workspace since
     // workspace object will contain collaborator information (userId)
     try {
@@ -48,6 +52,8 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
     } catch (Exception ex) {
       throw new ServerErrorException("Error creating RDR export Cloud Tasks for workspaces", ex);
     }
+
+    log.info("Completed queueing cloud tasks for the RDR export data cron job");
     return ResponseEntity.noContent().build();
   }
 }

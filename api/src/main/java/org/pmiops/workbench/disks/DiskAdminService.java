@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -23,7 +24,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -93,23 +93,27 @@ public class DiskAdminService {
                     disk -> {
                       Instant lastAccessed = Instant.parse(disk.getDateAccessed());
                       return (int) Duration.between(lastAccessed, now).toDays();
-                    }));
+                    },
+                    TreeMap::new, // sorts the resulting map by the key (days since last access)
+                    Collectors.toList()));
 
     // Dispatch notifications if any disks are the right number of days old.
     int notifySuccess = 0;
     int notifySkip = 0;
     int notifyFail = 0;
-    Exception lastException = null;
+    boolean sawException = false;
     for (var entry : disksByDaysUnused.entrySet()) {
       int daysUnused = entry.getKey();
       List<Disk> disksForDay = entry.getValue();
-      if (daysUnused <= 0) {
-        // Our periodic notifications should not trigger on day 0.
-        continue;
-      }
 
-      if (!INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
-          && daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS != 0) {
+      boolean wantToNotify = shouldNotify(daysUnused);
+      String sendOrNot = wantToNotify ? "sending" : "not sending";
+      log.info(
+          String.format(
+              "checkPersistentDisks: %s notifications for %d disks which have been idle for %d days",
+              sendOrNot, disksForDay.size(), daysUnused));
+
+      if (!wantToNotify) {
         continue;
       }
 
@@ -127,7 +131,7 @@ public class DiskAdminService {
                   "checkPersistentDisks: failed to send notification for disk '%s/%s'",
                   disk.getGoogleProject(), disk.getName()),
               e);
-          lastException = e;
+          sawException = true;
           notifyFail++;
         }
       }
@@ -137,13 +141,18 @@ public class DiskAdminService {
         String.format(
             "checkPersistentDisks: sent %d notifications successfully (%d skipped, %d failed)",
             notifySuccess, notifySkip, notifyFail));
-    if (lastException != null) {
-      throw new ServerErrorException(
+    if (sawException) {
+      log.warning(
           String.format(
               "checkPersistentDisks: %d/%d disk notifications failed to send, see logs for details",
-              notifyFail, notifySuccess + notifyFail + notifySkip),
-          lastException);
+              notifyFail, notifySuccess + notifyFail + notifySkip));
     }
+  }
+
+  private boolean shouldNotify(int daysUnused) {
+    return daysUnused > 0
+        && (INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
+            || daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS == 0);
   }
 
   // Returns true if an email is sent.
