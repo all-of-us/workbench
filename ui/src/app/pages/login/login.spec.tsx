@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { AoU } from '../../components/text-wrappers';
 import { render, screen } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -43,10 +44,6 @@ describe('LoginComponent', () => {
   it('should show banner if flag is on', () => {
     serverConfigStore.get().config.enableLoginIssueBanner = true;
     component(loginProps);
-    expect(
-      screen.getByText(
-        /Researcher Workbench is currently experiencing an outage\./i
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Scheduled Downtime Notice/i)).toBeInTheDocument();
   });
 });
