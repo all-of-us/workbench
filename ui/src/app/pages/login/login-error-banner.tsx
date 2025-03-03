@@ -18,12 +18,12 @@ export const LOGIN_ERROR_BANNER = () => (
       Wednesday, March 5, 2025 and Friday, March 7, 2025 from 8:00 to 9:00 a.m.
       ET. To learn more, please see the announcement on the User Support Hub{' '}
       <a
-        href='https://support.researchallofus.org/hc/en-us'
-        target='https://support.researchallofus.org/hc/en-us/articles/35123782567700'
+        href='https://support.researchallofus.org/hc/en-us/articles/35123782567700'
+        target='blank'
       >
         {' '}
         here
-      </a>{' '}
+      </a>
       .
     </ErrorMessage>
   </div>
