@@ -29,7 +29,7 @@ public class CloudTaskVwbController implements CloudTaskVwbApiDelegate {
   @Override
   public ResponseEntity<Void> processCreateVwbPodTask(CreateVwbPodTaskRequest body) {
     if (!workbenchConfigProvider.get().featureFlags.enableVWBPodCreation) {
-      return null;
+      return ResponseEntity.badRequest().build();
     }
     Optional<DbUser> dbUser = userService.getByUsername(body.getUserName());
     // If the user exists and the user does not have a pod, create a pod for the user
