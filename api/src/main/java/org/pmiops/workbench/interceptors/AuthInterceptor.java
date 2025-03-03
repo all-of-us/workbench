@@ -2,6 +2,7 @@ package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfo;
+import com.google.common.base.Strings;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.inject.Provider;
@@ -135,6 +136,12 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
     }
 
     final String token = authorizationHeader.substring("Bearer".length()).trim();
+    if (Strings.isNullOrEmpty(token)) {
+      log.warning("No bearer token found in request");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      return false;
+    }
+
     final Userinfo userInfo = userInfoService.getUserInfo(token);
 
     // The Workbench considers the user's generated GSuite email to be their userName
