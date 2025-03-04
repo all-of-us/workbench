@@ -141,10 +141,10 @@ done <<< "$surveyNames"
 
 if [[ $etmTablesExist > 0 ]];
 then
-  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_DELAYDISCOUNTING','ETM_DELAYDISCOUNTING','Has Any EtM Delay Discounting',0,$((++SORT_ORDER)))"
-  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_EMORECOG','ETM_EMORECOG','Has Any EtM EmoreCog',0,$((++SORT_ORDER)))"
-  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_FLANKER','ETM_FLANKER','Has Any EtM Flanker',0,$((++SORT_ORDER)))"
-  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_GRADCPT','ETM_GRADCPT','Has Any EtM Grad CPT',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_DELAYDISCOUNTING','ETM_DELAYDISCOUNTING','Has Any EtM Now or Later test data',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_EMORECOG','ETM_EMORECOG','Has Any EtM Guess The Emotion test data',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_FLANKER','ETM_FLANKER','Has Any EtM Left or Right test data',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ETM_GRADCPT','ETM_GRADCPT','Has Any EtM City or Mountain test data',0,$((++SORT_ORDER)))"
 fi
 
 if [[ $fitbitCount > 0 ]];
