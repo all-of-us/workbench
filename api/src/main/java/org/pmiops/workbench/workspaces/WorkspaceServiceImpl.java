@@ -93,7 +93,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkspaceServiceImpl implements WorkspaceService {
 
   protected static final int RECENT_WORKSPACE_COUNT = 4;
-  private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
+  private static final Logger log = Logger.getLogger(WorkspaceServiceImpl.class.getName());
 
   private final AccessTierService accessTierService;
   private final BillingProjectAuditor billingProjectAuditor;
@@ -197,17 +197,31 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public List<WorkspaceResponse> listWorkspacesAsService() {
+  public List<String> getActiveWorkspaceNamespacesAsService() {
     // temp performance logging
     Stopwatch stopwatch = stopwatchProvider.get().start();
     List<RawlsWorkspaceListResponse> terraWorkspaces = fireCloudService.listWorkspacesAsService();
     Duration elapsed = stopwatch.stop().elapsed();
     log.info(
         String.format(
-            "getWorkspacesAsService: Retrieved %d Terra workspaces in %s",
+            "getActiveWorkspaceNamespacesAsService: Retrieved %d Terra workspaces in %s",
             terraWorkspaces.size(), formatDurationPretty(elapsed)));
-    return workspaceMapper.toApiWorkspaceResponseList(
-        workspaceDao, terraWorkspaces, initialCreditsService);
+
+    List<String> terraWorkspaceIds =
+        terraWorkspaces.stream()
+            .map(RawlsWorkspaceListResponse::getWorkspace)
+            .map(RawlsWorkspaceDetails::getWorkspaceId)
+            .toList();
+
+    stopwatch.reset().start();
+    List<DbWorkspace> rwbWorkspaces = workspaceDao.findActiveByFirecloudUuidIn(terraWorkspaceIds);
+    elapsed = stopwatch.stop().elapsed();
+    log.info(
+        String.format(
+            "getActiveWorkspaceNamespacesAsService: Retrieved %d RWB workspaces from DB in %s",
+            rwbWorkspaces.size(), formatDurationPretty(elapsed)));
+
+    return rwbWorkspaces.stream().map(DbWorkspace::getWorkspaceNamespace).toList();
   }
 
   @Override
