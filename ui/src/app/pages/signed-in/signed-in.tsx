@@ -2,6 +2,8 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
+import { Profile } from 'generated/fetch';
+
 import { cond, DEFAULT } from '@terra-ui-packages/core-utils';
 import { withRouteData } from 'app/components/app-router';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -67,6 +69,51 @@ const DemographicSurveyPage = fp.flow(
   withRoutingSpinner
 )(DemographicSurvey);
 
+interface SignedInContentProps {
+  profile: Profile;
+  hasAcknowledgedPrivacyWarning: boolean;
+  setHasAcknowledgedPrivacyWarning: (value: boolean) => void;
+}
+const SignedInContent = ({
+  profile,
+  hasAcknowledgedPrivacyWarning,
+  setHasAcknowledgedPrivacyWarning,
+}: SignedInContentProps) => {
+  // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session when the user selects Maybe Later Button on
+  // Demographic Survey Page and is cleared out on signOut.
+  // So, if this key exist, it means user should not be redirected to demographic survey page.
+  const hasDismissedDemographicSurvey = sessionStorage.getItem(
+    DEMOGRAPHIC_SURVEY_SESSION_KEY
+  );
+
+  const shouldRedirectToDemographicSurveyPage = () => {
+    const { demographicSurveyV2 } = profile;
+    return (
+      shouldShowDemographicSurvey(profile) &&
+      !demographicSurveyV2 &&
+      !hasDismissedDemographicSurvey
+    );
+  };
+
+  return cond<JSX.Element>(
+    [
+      !hasAcknowledgedPrivacyWarning,
+      () => (
+        <PrivacyWarning
+          onAcknowledge={() => setHasAcknowledgedPrivacyWarning(true)}
+        />
+      ),
+    ],
+    [
+      shouldRedirectToDemographicSurveyPage(),
+      () => (
+        <DemographicSurveyPage routeData={{ title: 'Demographic Survey' }} />
+      ),
+    ],
+    [DEFAULT, () => <SignedInRoutes />]
+  );
+};
+
 export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
@@ -127,41 +174,6 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     checkStoresLoaded();
   }, [profileState, tiers]);
 
-  // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session when the user selects Maybe Later Button on
-  // Demographic Survey Page and is cleared out on signOut.
-  // So, if this key exist, it means user should not be redirected to demographic survey page.
-  const hasDismissedDemographicSurvey = sessionStorage.getItem(
-    DEMOGRAPHIC_SURVEY_SESSION_KEY
-  );
-
-  const shouldRedirectToDemographicSurveyPage = () => {
-    const { demographicSurveyV2 } = profileState.profile;
-    return (
-      shouldShowDemographicSurvey(profileState.profile) &&
-      !demographicSurveyV2 &&
-      !hasDismissedDemographicSurvey
-    );
-  };
-
-  const SignedInContent = () =>
-    cond<JSX.Element>(
-      [
-        !hasAcknowledgedPrivacyWarning,
-        () => (
-          <PrivacyWarning
-            onAcknowledge={() => setHasAcknowledgedPrivacyWarning(true)}
-          />
-        ),
-      ],
-      [
-        shouldRedirectToDemographicSurveyPage(),
-        () => (
-          <DemographicSurveyPage routeData={{ title: 'Demographic Survey' }} />
-        ),
-      ],
-      [DEFAULT, () => <SignedInRoutes />]
-    );
-
   return (
     <FlexColumn
       style={{
@@ -187,7 +199,13 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              <SignedInContent />
+              <SignedInContent
+                {...{
+                  hasAcknowledgedPrivacyWarning,
+                  setHasAcknowledgedPrivacyWarning,
+                }}
+                profile={profileState.profile}
+              />
             </div>
           )}
       </FlexRow>
