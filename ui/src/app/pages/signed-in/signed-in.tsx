@@ -95,7 +95,7 @@ const SignedInContent = ({
     );
   };
 
-  return cond<JSX.Element>(
+  return cond(
     [
       !hasAcknowledgedPrivacyWarning,
       () => (
@@ -174,6 +174,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     checkStoresLoaded();
   }, [profileState, tiers]);
 
+  const { profile } = profileState;
   return (
     <FlexColumn
       style={{
@@ -189,9 +190,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
         {/* We still want people to be able to access the homepage, etc. even if they shouldn't */}
         {/* know about CDR details; they'll be blocked from other routes by not having access too */}
         {config &&
-          (tiers ||
-            (profileState.profile &&
-              !hasRegisteredTierAccess(profileState.profile))) && (
+          (tiers || (profile && !hasRegisteredTierAccess(profile))) && (
             <div
               style={
                 hideFooter
@@ -201,10 +200,10 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
             >
               <SignedInContent
                 {...{
+                  profile,
                   hasAcknowledgedPrivacyWarning,
                   setHasAcknowledgedPrivacyWarning,
                 }}
-                profile={profileState.profile}
               />
             </div>
           )}
