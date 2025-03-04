@@ -1,13 +1,16 @@
 package org.pmiops.workbench.workspaces;
 
 import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
+import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import com.google.common.base.Stopwatch;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -60,6 +63,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.tanagra.model.Cohort;
@@ -105,12 +109,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final InitialCreditsService initialCreditsService;
   private final MailService mailService;
   private final Provider<DbUser> userProvider;
+  private final Provider<Stopwatch> stopwatchProvider;
   private final Provider<TanagraApi> tanagraApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserMapper userMapper;
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
-  private final UserService userService;
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
@@ -131,6 +135,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       InitialCreditsService initialCreditsService,
       MailService mailService,
       Provider<DbUser> userProvider,
+      Provider<Stopwatch> stopwatchProvider,
       Provider<TanagraApi> tanagraApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
@@ -153,12 +158,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.firecloudMapper = firecloudMapper;
     this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
+    this.stopwatchProvider = stopwatchProvider;
     this.tanagraApiProvider = tanagraApiProvider;
     this.userDao = userDao;
     this.userMapper = userMapper;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
-    this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
@@ -166,10 +171,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public List<WorkspaceResponse> getWorkspaces() {
+  public List<WorkspaceResponse> listWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsService)
+            workspaceDao, fireCloudService.listWorkspaces(), initialCreditsService)
         .stream()
         .filter(WorkspaceServiceImpl::filterToNonPublished)
         .toList();
@@ -185,16 +190,24 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsService)
+            workspaceDao, fireCloudService.listWorkspaces(), initialCreditsService)
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().getFeaturedCategory() != null)
         .toList();
   }
 
   @Override
-  public List<WorkspaceResponse> getWorkspacesAsService() {
+  public List<WorkspaceResponse> listWorkspacesAsService() {
+    // temp performance logging
+    Stopwatch stopwatch = stopwatchProvider.get().start();
+    List<RawlsWorkspaceListResponse> terraWorkspaces = fireCloudService.listWorkspacesAsService();
+    Duration elapsed = stopwatch.stop().elapsed();
+    log.info(
+        String.format(
+            "getWorkspacesAsService: Retrieved %d Terra workspaces in %s",
+            terraWorkspaces.size(), formatDurationPretty(elapsed)));
     return workspaceMapper.toApiWorkspaceResponseList(
-        workspaceDao, fireCloudService.getWorkspacesAsService(), initialCreditsService);
+        workspaceDao, terraWorkspaces, initialCreditsService);
   }
 
   @Override
