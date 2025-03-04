@@ -3,7 +3,6 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { AoU } from '../../components/text-wrappers';
 import { render, screen } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
