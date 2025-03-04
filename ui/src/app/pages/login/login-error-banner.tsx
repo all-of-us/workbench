@@ -13,15 +13,18 @@ export const LOGIN_ERROR_BANNER = () => (
     }}
   >
     <ErrorMessage>
-      The <AoU /> Researcher Workbench is currently experiencing an outage. Our
-      team continues to work diligently to resolve this issue as quickly as
-      possible, and we apologize for any inconveniences this may cause. We will
-      provide updates via the
-      <a href='https://support.researchallofus.org/hc/en-us' target='blank'>
+      Scheduled Downtime Notice for the <AoU /> Researcher Workbench: The
+      Researcher Workbench will be unavailable for scheduled maintenance on
+      Wednesday, March 5, 2025 and Friday, March 7, 2025 from 8:00 to 9:00 a.m.
+      ET. To learn more, please see the announcement on the User Support Hub{' '}
+      <a
+        href='https://support.researchallofus.org/hc/en-us/articles/35123782567700'
+        target='blank'
+      >
         {' '}
-        User Support Hub homepage
-      </a>{' '}
-      when available.
+        here
+      </a>
+      .
     </ErrorMessage>
   </div>
 );
