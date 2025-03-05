@@ -466,7 +466,7 @@ describe('DataSetPage', () => {
 
     let { unmount } = componentAlt();
     await waitForNoSpinner();
-    expect(getAllPrePackagedConceptSets().length).toBe(15);
+    expect(getAllPrePackagedConceptSets().length).toBe(17);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
