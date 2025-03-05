@@ -164,7 +164,7 @@ if [[ "$behavioralHealthCount" > 0 ]]; then
   "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
   (concept_id,name,description,question_count,participant_count,order_number)
   VALUES
-  (1703870,'','Survey includes information about ...',0,0,9)"
+  (1703870,'','Survey includes information about a participant’s behavioral health and personality.',0,0,9)"
 fi
 
 #  Getting count for Emotional Health History and Well-Being Survey
@@ -177,7 +177,7 @@ if [[ "$emotionalHealthCount" > 0 ]]; then
   "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
   (concept_id,name,description,question_count,participant_count,order_number)
   VALUES
-  (1703970,'','Survey includes information about ...',0,0,10)"
+  (1703970,'','Survey includes information about a participant’s emotional and mental health as it relates to anxiety, depression, and stress.',0,0,10)"
 fi
 
 echo "Updating survey names on survey_module from cb_criteria table"

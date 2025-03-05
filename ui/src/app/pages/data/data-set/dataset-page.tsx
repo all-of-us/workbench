@@ -690,6 +690,8 @@ const prepackagedSurveyConceptSetToString = {
   SURVEY_SDOH: 'Social Determinants of Health',
   SURVEY_COVID_VACCINE: 'COVID-19 Vaccine',
   SURVEY_PFHH: 'Personal and Family Health History',
+  SURVEY_EMOTIONAL_HEALTH: 'Emotional Health History and Well-Being',
+  SURVEY_BEHAVIORAL_HEALTH: 'Behavioral Health and Personality',
 };
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
@@ -707,6 +709,8 @@ const PREPACKAGED_SURVEY_DOMAINS = {
   [PrePackagedConceptSetEnum.SURVEY_SDOH]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_PFHH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_EMOTIONAL_HEALTH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_BEHAVIORAL_HEALTH]: Domain.SURVEY,
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {

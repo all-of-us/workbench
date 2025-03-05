@@ -176,6 +176,8 @@ public class DataSetServiceImpl implements DataSetService {
           .put(PrePackagedConceptSetEnum.SURVEY_SDOH, 40192389L)
           .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, 1741006L)
           .put(PrePackagedConceptSetEnum.SURVEY_PFHH, 1740639L)
+          .put(PrePackagedConceptSetEnum.SURVEY_EMOTIONAL_HEALTH, 1703970L)
+          .put(PrePackagedConceptSetEnum.SURVEY_BEHAVIORAL_HEALTH, 1703870L)
           .build();
 
   private final BidiMap<String, Domain> TANAGRA_DOMAIN_MAP =
