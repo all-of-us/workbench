@@ -112,9 +112,9 @@ public interface FireCloudService {
 
   Optional<RawlsWorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace);
 
-  List<RawlsWorkspaceListResponse> getWorkspaces();
+  List<RawlsWorkspaceListResponse> listWorkspaces();
 
-  List<RawlsWorkspaceListResponse> getWorkspacesAsService();
+  List<RawlsWorkspaceListResponse> listWorkspacesAsService();
 
   void deleteWorkspace(String workspaceNamespace, String firecloudName);
 

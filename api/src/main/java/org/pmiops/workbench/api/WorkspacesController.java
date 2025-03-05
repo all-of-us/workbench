@@ -475,7 +475,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     return ResponseEntity.ok(
-        new WorkspaceResponseListResponse().items(workspaceService.getWorkspaces()));
+        new WorkspaceResponseListResponse().items(workspaceService.listWorkspaces()));
   }
 
   @Override

@@ -204,7 +204,7 @@ public class WorkspaceServiceTest {
         RawlsWorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.ACTIVE);
 
-    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
+    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).listWorkspaces();
 
     currentUser = new DbUser();
     currentUser.setUsername(DEFAULT_USERNAME);
@@ -334,19 +334,19 @@ public class WorkspaceServiceTest {
             workspaceNamespace,
             accessLevel);
     firecloudWorkspaceResponses.add(mockWorkspaceListResponse);
-    when(mockFireCloudService.getWorkspaces()).thenReturn(firecloudWorkspaceResponses);
+    when(mockFireCloudService.listWorkspaces()).thenReturn(firecloudWorkspaceResponses);
 
     return dbWorkspace;
   }
 
   @Test
-  public void getWorkspaces() {
-    assertThat(workspaceService.getWorkspaces()).hasSize(5);
+  public void listWorkspaces() {
+    assertThat(workspaceService.listWorkspaces()).hasSize(5);
   }
 
   @Test
-  public void getWorkspaces_skipDeleted() {
-    int currentWorkspacesSize = workspaceService.getWorkspaces().size();
+  public void listWorkspaces_skipDeleted() {
+    int currentWorkspacesSize = workspaceService.listWorkspaces().size();
 
     addMockedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
@@ -354,12 +354,12 @@ public class WorkspaceServiceTest {
         DEFAULT_WORKSPACE_NAMESPACE,
         RawlsWorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.DELETED);
-    assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
+    assertThat(workspaceService.listWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
 
   @Test
-  public void getWorkspaces_skipPublished() {
-    int currentWorkspacesSize = workspaceService.getWorkspaces().size();
+  public void listWorkspaces_skipPublished() {
+    int currentWorkspacesSize = workspaceService.listWorkspaces().size();
     addMockedPublishedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "published_reader",
@@ -368,12 +368,12 @@ public class WorkspaceServiceTest {
         WorkspaceActiveStatus.ACTIVE,
         RawlsWorkspaceAccessLevel.READER);
 
-    assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
+    assertThat(workspaceService.listWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
 
   @Test
-  public void getWorkspaces_published_butOwner() {
-    int currentWorkspacesSize = workspaceService.getWorkspaces().size();
+  public void listWorkspaces_published_butOwner() {
+    int currentWorkspacesSize = workspaceService.listWorkspaces().size();
     addMockedPublishedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "published_reader",
@@ -382,7 +382,7 @@ public class WorkspaceServiceTest {
         WorkspaceActiveStatus.ACTIVE,
         RawlsWorkspaceAccessLevel.OWNER);
 
-    assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize + 1);
+    assertThat(workspaceService.listWorkspaces().size()).isEqualTo(currentWorkspacesSize + 1);
   }
 
   @Test

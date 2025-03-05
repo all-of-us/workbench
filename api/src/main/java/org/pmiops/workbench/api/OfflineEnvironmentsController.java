@@ -177,9 +177,10 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
   @Override
   public ResponseEntity<Void> deleteUnsharedWorkspaceEnvironments() {
     List<String> activeNamespaces =
-        workspaceService.getWorkspacesAsService().stream()
+        workspaceService.listWorkspacesAsService().stream()
             .map(ws -> ws.getWorkspace().getNamespace())
             .toList();
+
     log.info(
         String.format(
             "Queuing %d active workspaces in batches for deletion of unshared resources",

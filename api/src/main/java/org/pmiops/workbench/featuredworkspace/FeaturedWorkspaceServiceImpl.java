@@ -61,7 +61,7 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
             .toList();
 
     Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
-        fireCloudService.getWorkspaces().stream()
+        fireCloudService.listWorkspaces().stream()
             .collect(
                 Collectors.toMap(
                     fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),

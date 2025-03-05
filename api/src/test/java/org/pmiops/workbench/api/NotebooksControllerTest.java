@@ -669,8 +669,8 @@ public class NotebooksControllerTest {
     RawlsWorkspaceListResponse fcListResponse = new RawlsWorkspaceListResponse();
     fcListResponse.setWorkspace(fcWorkspace);
     fcListResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
-    List<RawlsWorkspaceListResponse> workspaceResponses = mockFireCloudService.getWorkspaces();
+    List<RawlsWorkspaceListResponse> workspaceResponses = mockFireCloudService.listWorkspaces();
     workspaceResponses.add(fcListResponse);
-    doReturn(workspaceResponses).when(mockFireCloudService).getWorkspaces();
+    doReturn(workspaceResponses).when(mockFireCloudService).listWorkspaces();
   }
 }

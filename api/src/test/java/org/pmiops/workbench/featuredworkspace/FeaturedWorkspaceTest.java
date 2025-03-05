@@ -113,7 +113,7 @@ public class FeaturedWorkspaceTest {
             .workspace(new RawlsWorkspaceDetails().workspaceId(firecloudUuid))
             .accessLevel(RawlsWorkspaceAccessLevel.OWNER));
 
-    when(mockFireCloudService.getWorkspaces()).thenReturn(rawlsWorkspaces);
+    when(mockFireCloudService.listWorkspaces()).thenReturn(rawlsWorkspaces);
   }
 
   @Test
@@ -170,7 +170,7 @@ public class FeaturedWorkspaceTest {
     // override the mock so that FC getWorkspaces() does not return the workspace
     // which simulates inaccessibility to my user
 
-    when(mockFireCloudService.getWorkspaces()).thenReturn(Collections.emptyList());
+    when(mockFireCloudService.listWorkspaces()).thenReturn(Collections.emptyList());
 
     List<WorkspaceResponse> workspaceResponsesList =
         assertDoesNotThrow(
@@ -194,7 +194,7 @@ public class FeaturedWorkspaceTest {
             .map(ws -> ws.accessLevel(RawlsWorkspaceAccessLevel.NO_ACCESS))
             .toList();
 
-    when(mockFireCloudService.getWorkspaces()).thenReturn(workspaceWithoutAccess);
+    when(mockFireCloudService.listWorkspaces()).thenReturn(workspaceWithoutAccess);
 
     List<WorkspaceResponse> workspaceResponsesList =
         assertDoesNotThrow(

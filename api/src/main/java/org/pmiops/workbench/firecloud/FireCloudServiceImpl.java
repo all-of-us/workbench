@@ -4,7 +4,6 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import jakarta.inject.Provider;
@@ -120,7 +119,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   // All options are defined in this document:
   // https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#
   public static final List<String> FIRECLOUD_WORKSPACE_REQUIRED_FIELDS =
-      ImmutableList.of(
+      List.of(
           "accessLevel",
           "workspace.workspaceId",
           "workspace.name",
@@ -130,7 +129,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           "workspace.createdBy");
 
   public static final List<String> FIRECLOUD_WORKSPACE_REQUIRED_FIELDS_FOR_CLONE_FILE_TRANSFER =
-      ImmutableList.of("workspace.completedCloneWorkspaceFileTransfer");
+      List.of("workspace.completedCloneWorkspaceFileTransfer");
 
   @Autowired
   public FireCloudServiceImpl(
@@ -356,7 +355,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .name(workspaceFirecloudName)
             .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation)
             .authorizationDomain(
-                ImmutableList.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)))
+                List.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)))
             .attributes(new HashMap<>());
 
     return rawlsRetryHandler.run((context) -> workspacesApi.createWorkspace(workspaceRequest));
@@ -378,7 +377,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             // propagating copies of large data files elsewhere in the bucket.
             .copyFilesWithPrefix(NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY + "/")
             .authorizationDomain(
-                ImmutableList.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)))
+                List.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)))
             .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation)
             .attributes(new HashMap<>());
     return rawlsRetryHandler.run(
@@ -472,19 +471,23 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public List<RawlsWorkspaceListResponse> getWorkspaces() {
+  public List<RawlsWorkspaceListResponse> listWorkspaces() {
     return rawlsRetryHandler.run(
-        (context) ->
+        context ->
             endUserWorkspacesApiProvider.get().listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override
-  public List<RawlsWorkspaceListResponse> getWorkspacesAsService() {
+  public List<RawlsWorkspaceListResponse> listWorkspacesAsService() {
+    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
+
+    // this call can be slow, so let a long timeout
+    workspacesApi
+        .getApiClient()
+        .setReadTimeout(configProvider.get().firecloud.lenientTimeoutInSeconds * 1000);
+
     return rawlsRetryHandler.run(
-        (context) ->
-            serviceAccountWorkspaceApiProvider
-                .get()
-                .listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
+        context -> workspacesApi.listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override

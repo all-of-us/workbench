@@ -34,9 +34,9 @@ public interface WorkspaceService {
 
   boolean notebookTransferComplete(String workspaceNamespace, String workspaceTerraName);
 
-  List<WorkspaceResponse> getWorkspaces();
+  List<WorkspaceResponse> listWorkspaces();
 
-  List<WorkspaceResponse> getWorkspacesAsService();
+  List<WorkspaceResponse> listWorkspacesAsService();
 
   /**
    * Get all Featured workspaces from the DB.

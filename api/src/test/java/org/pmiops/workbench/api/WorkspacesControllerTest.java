@@ -511,9 +511,9 @@ public class WorkspacesControllerTest {
     doReturn(fcGetResponse)
         .when(fireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<RawlsWorkspaceListResponse> workspaceResponses = fireCloudService.getWorkspaces();
+    List<RawlsWorkspaceListResponse> workspaceResponses = fireCloudService.listWorkspaces();
     workspaceResponses.add(fcResponse);
-    doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
+    doReturn(workspaceResponses).when(fireCloudService).listWorkspaces();
   }
 
   /**
@@ -627,7 +627,7 @@ public class WorkspacesControllerTest {
         TestMockFactory.createTerraWorkspace(
             workspace.getNamespace(), workspace.getTerraName(), null));
     fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).listWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
     assertThat(
@@ -2793,7 +2793,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testEmptyFireCloudWorkspaces() {
-    when(fireCloudService.getWorkspaces()).thenReturn(new ArrayList<>());
+    when(fireCloudService.listWorkspaces()).thenReturn(new ArrayList<>());
     try {
       ResponseEntity<WorkspaceResponseListResponse> response = workspacesController.getWorkspaces();
       assertThat(response.getBody().getItems()).isEmpty();

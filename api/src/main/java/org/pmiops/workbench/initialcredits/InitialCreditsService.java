@@ -710,7 +710,7 @@ public class InitialCreditsService {
 
   private List<Workspace> getWorkspacesForUser(DbUser user) {
     return workspaceMapper
-        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspacesAsService(), this)
+        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.listWorkspacesAsService(), this)
         .stream()
         .map(WorkspaceResponse::getWorkspace)
         .filter(ws -> ws.getCreatorUser().getUserName().equals(user.getUsername()))
