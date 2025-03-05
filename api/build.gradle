@@ -67,10 +67,11 @@ plugins {
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
     id 'org.hidetake.swagger.generator' version '2.19.2'
-    id 'org.owasp.dependencycheck' version '8.4.2'
+    id 'org.owasp.dependencycheck' version '12.1.0'
     id 'org.springframework.boot' version '3.2.4'
     id 'jacoco'
 }
+
 
 if (System.getenv("ADD_XLINT_DEPRECATION")) {
   allprojects {
@@ -968,4 +969,14 @@ dependencies {
 explodeWar {
   dependsOn(bootWar)
 }
+
+
+
+dependencyCheck {
+    nvd {
+        apiKey = System.getenv('NVD_API_KEY')
+    }
+}
+
+
 
