@@ -32,6 +32,7 @@ public class DbCdrVersion {
   private Boolean hasFitbitSleepData;
   private Boolean hasFitbitDeviceData;
   private Boolean hasSurveyConductData;
+  private Boolean hasMHWBAndETMData;
   private Boolean tanagraEnabled;
   private String storageBasePath;
   private String wgsVcfMergedStoragePath;
@@ -253,6 +254,16 @@ public class DbCdrVersion {
 
   public DbCdrVersion setHasSurveyConductData(Boolean hasSurveyConductData) {
     this.hasSurveyConductData = hasSurveyConductData;
+    return this;
+  }
+
+  @Column(name = "has_mhwb_and_etm_data")
+  public Boolean getHasMHWBAndETMData() {
+    return Boolean.TRUE.equals(hasMHWBAndETMData);
+  }
+
+  public DbCdrVersion setHasMHWBAndETMData(Boolean hasMHWBAndETMData) {
+    this.hasMHWBAndETMData = hasMHWBAndETMData;
     return this;
   }
 
@@ -536,6 +547,7 @@ public class DbCdrVersion {
         hasCopeSurveyData,
         hasFitbitSleepData,
         hasFitbitDeviceData,
+        hasMHWBAndETMData,
         hasSurveyConductData,
         tanagraEnabled,
         storageBasePath,
@@ -589,6 +601,7 @@ public class DbCdrVersion {
         && Objects.equals(hasFitbitData, that.hasFitbitData)
         && Objects.equals(hasFitbitSleepData, that.hasFitbitSleepData)
         && Objects.equals(hasFitbitDeviceData, that.hasFitbitDeviceData)
+        && Objects.equals(hasMHWBAndETMData, that.hasMHWBAndETMData)
         && Objects.equals(hasSurveyConductData, that.hasSurveyConductData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
         && Objects.equals(tanagraEnabled, that.tanagraEnabled)

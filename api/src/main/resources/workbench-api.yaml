@@ -6881,6 +6881,8 @@ components:
           description: The public release number for the CDR version. This is consistent across tiers 
             and environments unlike cdrVersionId
           format: int64
+        hasMHWBAndETMData:
+          type: boolean
     DomainCard:
       required:
       - category
