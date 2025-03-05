@@ -265,6 +265,7 @@
   <include file="changelog/db.changelog-255-backfill-user-initial-credits-expiration.xml"/>
   <include file="changelog/db.changelog-256-add-partner-discovery-source.xml"/>
   <include file="changelog/db.changelog-257-increase-user-version-column.xml"/>
+  <include file="changelog/db.changelog-258-cdr-version-hasMHWBAndETM-field.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

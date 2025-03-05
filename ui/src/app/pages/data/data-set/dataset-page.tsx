@@ -690,6 +690,8 @@ const prepackagedSurveyConceptSetToString = {
   SURVEY_SDOH: 'Social Determinants of Health',
   SURVEY_COVID_VACCINE: 'COVID-19 Vaccine',
   SURVEY_PFHH: 'Personal and Family Health History',
+  SURVEY_EMOTIONAL_HEALTH: 'Emotional Health History and Well-Being',
+  SURVEY_BEHAVIORAL_HEALTH: 'Behavioral Health and Personality',
 };
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
@@ -697,7 +699,7 @@ const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
 };
 
-const PREPACKAGED_SURVEY_DOMAINS = {
+const PREPACKAGED_BASE_SURVEY_DOMAINS = {
   [PrePackagedConceptSetEnum.SURVEY_BASICS]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_LIFESTYLE]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH]: Domain.SURVEY,
@@ -707,6 +709,11 @@ const PREPACKAGED_SURVEY_DOMAINS = {
   [PrePackagedConceptSetEnum.SURVEY_SDOH]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_PFHH]: Domain.SURVEY,
+};
+
+const PREPACKAGED_WITH_MHWB_SURVEY_DOMAINS = {
+  [PrePackagedConceptSetEnum.SURVEY_EMOTIONAL_HEALTH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_BEHAVIORAL_HEALTH]: Domain.SURVEY,
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
@@ -738,6 +745,7 @@ const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
     Domain.ZIP_CODE_SOCIOECONOMIC,
 };
 let PREPACKAGED_DOMAINS = {};
+let PREPACKAGED_SURVEY_DOMAINS = {};
 let prepackagedConceptSetToString = {};
 
 // For converting domain strings to type Domain
@@ -867,7 +875,15 @@ export const DatasetPage = fp.flow(
         hasFitbitSleepData,
         hasFitbitDeviceData,
         hasWgsData,
+        hasMHWBAndETMData,
       } = getCdrVersion(workspace, cdrVersionTiersResponse);
+      PREPACKAGED_SURVEY_DOMAINS = PREPACKAGED_BASE_SURVEY_DOMAINS;
+      if (hasMHWBAndETMData) {
+        PREPACKAGED_SURVEY_DOMAINS = {
+          ...PREPACKAGED_SURVEY_DOMAINS,
+          ...PREPACKAGED_WITH_MHWB_SURVEY_DOMAINS,
+        };
+      }
       PREPACKAGED_DOMAINS = {
         ...PREPACKAGED_DOMAINS,
         ...PREPACKAGED_SURVEY_DOMAINS,
