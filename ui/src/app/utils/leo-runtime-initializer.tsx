@@ -79,11 +79,12 @@ export const throwRuntimeNotFound = (
     [
       !currentRuntime && !!gcePersistentDisk,
       () => {
-        const defaultRuntime = runtimePresets().generalAnalysis.runtimeTemplate;
+        const defaultRuntimeTemplate =
+          runtimePresets().generalAnalysis.runtimeTemplate;
         return {
-          ...defaultRuntime,
+          ...defaultRuntimeTemplate,
           gceWithPdConfig: {
-            ...defaultRuntime.gceWithPdConfig,
+            ...defaultRuntimeTemplate.gceWithPdConfig,
             persistentDisk: gcePersistentDisk,
           },
         };
