@@ -458,7 +458,7 @@ jobs:
                     | sed 's/\.[^.]*$//' \
                     | circleci tests split --split-by=timings --index=$CIRCLE_NODE_INDEX)
                   GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
-                  gradle :test $GRADLE_ARGS
+                  ./gradlew :test $GRADLE_ARGS
             - run:
                 name: Rename Jacoco exec file
                 working_directory: ~/workbench/api
@@ -537,15 +537,15 @@ jobs:
                 working_directory: ~/workbench/api
                 command: ./project.rb run-local-api-tests
 
-#  api-deps-check:
-#    executor: workbench-executor
-#    steps:
-#      - run-api-test:
-#          additional_steps:
-#            - run:
-#                name: Scan dependencies for vulnerabilities
-#                working_directory: ~/workbench/api
-#                command: ./gradlew dependencyCheckAnalyze --info
+  api-deps-check:
+    executor: workbench-executor
+    steps:
+      - run-api-test:
+          additional_steps:
+            - run:
+                name: Scan dependencies for vulnerabilities
+                working_directory: ~/workbench/api
+                command: ./gradlew dependencyCheckAnalyze --info
 
   api-integration-test:
     executor: workbench-executor
@@ -996,8 +996,8 @@ workflows:
           <<: *filter-release-tags
       - api-bigquery-test:
           <<: *filter-release-tags
-#      - api-deps-check:
-#          <<: *filter-release-tags
+      - api-deps-check:
+          <<: *filter-release-tags
       - api-integration-test:
           <<: *filter-release-tags
       - deploy-to-staging:
@@ -1006,7 +1006,7 @@ workflows:
             - api-local-test
             - api-unit-test
             - api-bigquery-test
-#            - api-deps-check
+            - api-deps-check
             - api-integration-test
             - ui-unit-test
       - puppeteer-env-setup:
