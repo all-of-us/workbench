@@ -5,7 +5,6 @@ import {
   Disk,
   DiskType,
   GpuConfig,
-  PersistentDiskRequest,
   Runtime,
   RuntimeConfigurationType,
 } from 'generated/fetch';
@@ -109,6 +108,7 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
   return runtime;
 };
 
+// can the DiskConfig that is requested be fulfilled by the existingDisk?
 export const canUseExistingDisk = (
   { detachableType, size }: Partial<DiskConfig>,
   existingDisk: Disk | null
@@ -117,6 +117,9 @@ export const canUseExistingDisk = (
   (!detachableType || detachableType === existingDisk.diskType) &&
   size >= existingDisk.size;
 
+// can the DiskConfig that is requested be fulfilled by the existingDisk?
+// if yes, use its name in the result DiskConfig
+// if no, remove the DiskConfig's existingDiskName in the result DiskConfig
 export const maybeWithExistingDiskName = (
   c: Omit<DiskConfig, 'existingDiskName'>,
   existingDisk: Disk | null
@@ -125,25 +128,6 @@ export const maybeWithExistingDiskName = (
     return { ...c, existingDiskName: existingDisk.name };
   }
   return { ...c, existingDiskName: null };
-};
-
-export const maybeWithPersistentDisk = (
-  runtime: Runtime,
-  persistentDisk: Disk | PersistentDiskRequest | null | undefined
-): Runtime => {
-  if (!runtime || !persistentDisk || !runtime.gceConfig) {
-    return runtime;
-  }
-  // TODO: why not all fields?
-  const { name, size, diskType } = persistentDisk;
-  return {
-    ...runtime,
-    gceConfig: null, // TODO: why not undefined?
-    gceWithPdConfig: {
-      ...runtime.gceConfig, // note: gceConfig.diskSize is discarded.  this is what we want.
-      persistentDisk: { name, size, diskType },
-    },
-  };
 };
 
 // TODO - this is way more complex than it needs to be, and likely has some errors
