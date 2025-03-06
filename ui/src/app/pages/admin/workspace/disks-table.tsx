@@ -15,7 +15,6 @@ import moment from 'moment';
 interface Props {
   sourceWorkspaceNamespace?: string;
 }
-
 export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);

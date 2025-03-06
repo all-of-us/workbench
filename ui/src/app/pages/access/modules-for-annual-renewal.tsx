@@ -207,6 +207,35 @@ const ActionButton = ({
   );
 };
 
+interface TimeEstimateProps {
+  showTimeEstimate: boolean;
+  renewalTimeEstimate: number;
+}
+const TimeEstimate = ({
+  showTimeEstimate,
+  renewalTimeEstimate,
+}: TimeEstimateProps) =>
+  showTimeEstimate ? (
+    <FlexColumn style={{ alignItems: 'center' }}>
+      <Clock style={{ color: colors.disabled, width: '5em' }} />
+      {renewalTimeEstimate} min
+    </FlexColumn>
+  ) : null;
+
+interface DateProps {
+  lastConfirmedDate: string;
+  nextReviewDate: string;
+  textStyle?: CSSProperties;
+}
+const Dates = ({ lastConfirmedDate, nextReviewDate, textStyle }: DateProps) => (
+  <div style={{ ...renewalStyle.dates, ...textStyle, fontWeight: 500 }}>
+    <div>Last Updated On:</div>
+    <div>Next Review:</div>
+    <div>{lastConfirmedDate}</div>
+    <div>{nextReviewDate}</div>
+  </div>
+);
+
 interface RenewalCardBodyProps {
   moduleStatus: AccessModuleStatus;
   setLoading: (boolean) => void;
@@ -215,7 +244,6 @@ interface RenewalCardBodyProps {
   showTimeEstimate?: boolean;
   profile: Profile;
 }
-
 export const RenewalCardBody = ({
   moduleStatus,
   setLoading,
@@ -254,23 +282,6 @@ export const RenewalCardBody = ({
     !blockComplianceTraining ||
     isRenewalCompleteForModule(moduleStatus, duccSignedVersion);
 
-  const TimeEstimate = () =>
-    showTimeEstimate ? (
-      <FlexColumn style={{ alignItems: 'center' }}>
-        <Clock style={{ color: colors.disabled, width: '5em' }} />
-        {renewalTimeEstimate} min
-      </FlexColumn>
-    ) : null;
-
-  const Dates = () => (
-    <div style={{ ...renewalStyle.dates, ...textStyle, fontWeight: 500 }}>
-      <div>Last Updated On:</div>
-      <div>Next Review:</div>
-      <div>{lastConfirmedDate}</div>
-      <div>{nextReviewDate}</div>
-    </div>
-  );
-
   const module = switchCase(
     moduleStatus.moduleName,
     [
@@ -278,7 +289,7 @@ export const RenewalCardBody = ({
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
-            <Dates />
+            <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
             <div
               style={{ marginBottom: '0.75rem', ...textStyle, fontWeight: 500 }}
             >
@@ -297,7 +308,7 @@ export const RenewalCardBody = ({
               gridArea: 'action',
             }}
           >
-            <TimeEstimate />
+            <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
             <ActionButton
               {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='Review'
@@ -316,7 +327,7 @@ export const RenewalCardBody = ({
         return (
           <React.Fragment>
             <div style={{ gridArea: 'content' }}>
-              <Dates />
+              <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
               <div style={textStyle}>
                 The <AoU /> Publication and Presentation Policy requires that
                 you report any upcoming publication or presentation resulting
@@ -374,7 +385,7 @@ export const RenewalCardBody = ({
                 gridArea: 'action',
               }}
             >
-              <TimeEstimate />
+              <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
               <ActionButton
                 {...{ moduleStatus, duccSignedVersion }}
                 actionButtonText='Confirm'
@@ -397,7 +408,7 @@ export const RenewalCardBody = ({
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
-            <Dates />
+            <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
             <div style={textStyle}>
               You are required to complete the refreshed ethics training courses
               to understand the privacy safeguards and the compliance
@@ -422,7 +433,7 @@ export const RenewalCardBody = ({
               gridArea: 'action',
             }}
           >
-            <TimeEstimate />
+            <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
             <TooltipTrigger
               content={COMPLIANCE_TRAINIING_OUTAGE_MESSAGE}
               disabled={disableComplianceTrainingTooltip}
@@ -473,7 +484,7 @@ export const RenewalCardBody = ({
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
-            <Dates />
+            <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
             <div style={textStyle}>
               You are required to complete the refreshed ethics training courses
               to understand the privacy safeguards and the compliance
@@ -498,7 +509,7 @@ export const RenewalCardBody = ({
               gridArea: 'action',
             }}
           >
-            <TimeEstimate />
+            <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
             <TooltipTrigger
               content={COMPLIANCE_TRAINIING_OUTAGE_MESSAGE}
               disabled={disableComplianceTrainingTooltip}
@@ -542,7 +553,7 @@ export const RenewalCardBody = ({
       () => (
         <React.Fragment>
           <div style={{ gridArea: 'content' }}>
-            <Dates />
+            <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
             <div style={textStyle}>
               Please review and sign the data user code of conduct consenting to
               the <AoU /> data use policy.
@@ -555,7 +566,7 @@ export const RenewalCardBody = ({
               gridArea: 'action',
             }}
           >
-            <TimeEstimate />
+            <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
             <ActionButton
               {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='View & Sign'
