@@ -76,6 +76,19 @@ export const throwRuntimeNotFound = (
   gcePersistentDisk: Disk
 ) => {
   const defaultRuntime = cond<Runtime>(
+    [
+      !currentRuntime && !!gcePersistentDisk,
+      () => {
+        const defaultRuntime = runtimePresets().generalAnalysis.runtimeTemplate;
+        return {
+          ...defaultRuntime,
+          gceWithPdConfig: {
+            ...defaultRuntime.gceWithPdConfig,
+            persistentDisk: gcePersistentDisk,
+          },
+        };
+      },
+    ],
     // no current or deleted runtime exists, so we default to the general analysis runtime template
     [!currentRuntime, () => runtimePresets().generalAnalysis.runtimeTemplate],
     // a current runtime exists and is not deleted, so we use it plus any preset overrides if appropriate
