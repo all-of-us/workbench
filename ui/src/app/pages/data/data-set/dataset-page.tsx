@@ -679,6 +679,10 @@ const prepackagedAllSurveyConceptSetToString = {
   FITBIT_DEVICE: 'Fitbit Device',
   WHOLE_GENOME: 'Short Read Whole Genome Sequencing Data',
   ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
+  ETM_EMORECOG: 'EtM Guess the Emotion',
+  ETM_FLANKER: 'EtM Left or Right',
+  ETM_GRADCPT: 'EtM City or Mountain',
+  ETM_DELAYDISCOUNTING: 'EtM Now or Later',
 };
 
 const prepackagedSurveyConceptSetToString = {
@@ -714,6 +718,13 @@ const PREPACKAGED_BASE_SURVEY_DOMAINS = {
 const PREPACKAGED_WITH_MHWB_SURVEY_DOMAINS = {
   [PrePackagedConceptSetEnum.SURVEY_EMOTIONAL_HEALTH]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_BEHAVIORAL_HEALTH]: Domain.SURVEY,
+};
+
+const PREPACKAGED_ETM_DOMAINS = {
+  [PrePackagedConceptSetEnum.ETM_EMORECOG]: Domain.ETM_EMORECOG,
+  [PrePackagedConceptSetEnum.ETM_FLANKER]: Domain.ETM_FLANKER,
+  [PrePackagedConceptSetEnum.ETM_GRADCPT]: Domain.ETM_GRADCPT,
+  [PrePackagedConceptSetEnum.ETM_DELAYDISCOUNTING]: Domain.ETM_DELAYDISCOUNTING,
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
@@ -772,6 +783,10 @@ const reverseDomainEnum = {
   FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBIT_SLEEP_DAILY_SUMMARY,
   FITBIT_SLEEP_LEVEL: Domain.FITBIT_SLEEP_LEVEL,
   FITBIT_DEVICE: Domain.FITBIT_DEVICE,
+  ETM_FLANKER: Domain.ETM_FLANKER,
+  ETM_GRADCPT: Domain.ETM_GRADCPT,
+  ETM_DELAYDISCOUNTING: Domain.ETM_DELAYDISCOUNTING,
+  ETM_EMORECOG: Domain.ETM_EMORECOG,
   PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICAL_MEASUREMENT_CSS,
   WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIP_CODE_SOCIOECONOMIC,
@@ -882,6 +897,10 @@ export const DatasetPage = fp.flow(
         PREPACKAGED_SURVEY_DOMAINS = {
           ...PREPACKAGED_SURVEY_DOMAINS,
           ...PREPACKAGED_WITH_MHWB_SURVEY_DOMAINS,
+        };
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_ETM_DOMAINS,
         };
       }
       PREPACKAGED_DOMAINS = {

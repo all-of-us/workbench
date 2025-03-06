@@ -52,6 +52,10 @@ public enum BigQueryDataSetTableInfo {
       Domain.FITBIT_SLEEP_DAILY_SUMMARY, "ds_sleep_daily_summary", null, null),
   FITBIT_SLEEP_LEVEL(Domain.FITBIT_SLEEP_LEVEL, "ds_sleep_level", null, null),
   FITBIT_DEVICE(Domain.FITBIT_DEVICE, "ds_fitbit_device", null, null),
+  ETM_DELAYDISCOUNTING(Domain.ETM_DELAYDISCOUNTING, "ds_delaydiscounting", null, null),
+  ETM_EMORECOG(Domain.ETM_EMORECOG, "ds_emorecog", null, null),
+  ETM_FLANKER(Domain.ETM_FLANKER, "ds_flanker", null, null),
+  ETM_GRADCPT(Domain.ETM_GRADCPT, "ds_gradcpt", null, null),
   ZIP_CODE_SOCIOECONOMIC(Domain.ZIP_CODE_SOCIOECONOMIC, "ds_zip_code_socioeconomic", null, null),
   VISIT(
       Domain.VISIT,

@@ -159,7 +159,11 @@ public class DataSetServiceImpl implements DataSetService {
           Domain.FITBIT_SLEEP_LEVEL,
           Domain.FITBIT_DEVICE,
           Domain.WHOLE_GENOME_VARIANT,
-          Domain.ZIP_CODE_SOCIOECONOMIC);
+          Domain.ZIP_CODE_SOCIOECONOMIC,
+          Domain.ETM_DELAYDISCOUNTING,
+          Domain.ETM_EMORECOG,
+          Domain.ETM_FLANKER,
+          Domain.ETM_GRADCPT);
 
   private static final ImmutableList<Domain> CONCEPT_SET_TYPE_WITH_MULTIPLE_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);

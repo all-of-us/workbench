@@ -350,6 +350,34 @@ function do_COPE_and_PFHH(){
   JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+  
+  echo "ds_emorecog - inserting data for emorecog survey"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_emorecog\`
+     (sitting_id, person_id)
+  SELECT sitting_id, person_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.emorecog\`"
+  
+  echo "ds_flanker - inserting data for flanker survey"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_flanker\`
+     (sitting_id, person_id)
+  SELECT sitting_id, person_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.flanker\`"
+  
+  echo "ds_gradcpt - inserting data for gradcpt survey"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_gradcpt\`
+     (sitting_id, person_id)
+  SELECT sitting_id, person_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.gradcpt\`"
+  
+  echo "ds_delaydiscounting - inserting data for delaydiscounting survey"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_delaydiscounting\`
+     (sitting_id, person_id)
+  SELECT sitting_id, person_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.delaydiscounting\`"
 }
 
 function do_PFHH(){

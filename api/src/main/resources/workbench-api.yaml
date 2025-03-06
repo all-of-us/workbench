@@ -8095,6 +8095,10 @@ components:
       - WHOLE_GENOME
       - BOTH
       - ZIP_CODE_SOCIOECONOMIC
+      - ETM_DELAYDISCOUNTING
+      - ETM_EMORECOG
+      - ETM_FLANKER
+      - ETM_GRADCPT
     DataSetExportRequest:
       required:
       - dataSetRequest
