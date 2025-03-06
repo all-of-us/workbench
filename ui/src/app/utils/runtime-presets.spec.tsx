@@ -28,18 +28,18 @@ describe(applyPresetOverride.name, () => {
 
     // test validity check: the original config differs from the preset, and specifically the PD name
     expect(runtime.gceWithPdConfig).not.toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
     );
     expect(runtime.gceWithPdConfig.persistentDisk.name).toBeTruthy();
     expect(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
         .persistentDisk.name
     ).toBeFalsy();
 
     const expectedConfig = {
-      ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
+      ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
       persistentDisk: {
-        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
           .persistentDisk,
         name: runtime.gceWithPdConfig.persistentDisk.name,
       },
@@ -58,7 +58,7 @@ describe(applyPresetOverride.name, () => {
 
     // test validity check: the original config differs from the preset
     expect(runtime.gceWithPdConfig).not.toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
     );
 
     expect(applyPresetOverride(runtime).gceWithPdConfig).toEqual(
@@ -74,11 +74,11 @@ describe(applyPresetOverride.name, () => {
 
     // test validity check: the original config differs from the preset
     expect(runtime.dataprocConfig).not.toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+      runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
     );
 
     expect(applyPresetOverride(runtime).dataprocConfig).toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+      runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
     );
   });
 
@@ -90,7 +90,7 @@ describe(applyPresetOverride.name, () => {
 
     // test validity check: the original config differs from the preset
     expect(runtime.dataprocConfig).not.toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+      runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
     );
 
     expect(applyPresetOverride(runtime).dataprocConfig).toEqual(
