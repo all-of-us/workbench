@@ -76,6 +76,8 @@ export const throwRuntimeNotFound = (
   gcePersistentDisk: Disk
 ) => {
   const defaultRuntime = cond<Runtime>(
+    // No current runtime exists, so we default to the general analysis runtime template while
+    // utilizing the existing persistent disk.
     [
       !currentRuntime && !!gcePersistentDisk,
       () => {
