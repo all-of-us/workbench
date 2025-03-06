@@ -208,37 +208,43 @@ const ActionButton = ({
 };
 
 interface TimeEstimateProps {
-  showTimeEstimate: boolean;
-  renewalTimeEstimate: number;
+  moduleStatus: AccessModuleStatus;
 }
-const TimeEstimate = ({
-  showTimeEstimate,
-  renewalTimeEstimate,
-}: TimeEstimateProps) =>
-  showTimeEstimate ? (
+const TimeEstimate = ({ moduleStatus }: TimeEstimateProps) => {
+  const { moduleName } = moduleStatus;
+  const { renewalTimeEstimate } = getAccessModuleConfig(moduleName);
+
+  return (
     <FlexColumn style={{ alignItems: 'center' }}>
       <Clock style={{ color: colors.disabled, width: '5em' }} />
       {renewalTimeEstimate} min
     </FlexColumn>
-  ) : null;
+  );
+};
 
 interface DateProps {
-  lastConfirmedDate: string;
-  nextReviewDate: string;
+  moduleStatus: AccessModuleStatus;
+  duccSignedVersion: number;
   textStyle?: CSSProperties;
 }
-const Dates = ({ lastConfirmedDate, nextReviewDate, textStyle }: DateProps) => (
-  <div style={{ ...renewalStyle.dates, ...textStyle, fontWeight: 500 }}>
-    <div>Last Updated On:</div>
-    <div>Next Review:</div>
-    <div>{lastConfirmedDate}</div>
-    <div>{nextReviewDate}</div>
-  </div>
-);
+const Dates = ({ moduleStatus, duccSignedVersion, textStyle }: DateProps) => {
+  const { lastConfirmedDate, nextReviewDate } = computeRenewalDisplayDates(
+    moduleStatus,
+    duccSignedVersion
+  );
+  return (
+    <div style={{ ...renewalStyle.dates, ...textStyle, fontWeight: 500 }}>
+      <div>Last Updated On:</div>
+      <div>Next Review:</div>
+      <div>{lastConfirmedDate}</div>
+      <div>{nextReviewDate}</div>
+    </div>
+  );
+};
 
 interface RenewalCardBodyProps {
   moduleStatus: AccessModuleStatus;
-  setLoading: (boolean) => void;
+  setLoading: (loading: boolean) => void;
   textStyle?: CSSProperties;
   radioButtonStyle?: CSSProperties;
   showTimeEstimate?: boolean;
@@ -265,14 +271,6 @@ export const RenewalCardBody = ({
 
   const { duccSignedVersion } = profile;
 
-  const { renewalTimeEstimate } = getAccessModuleConfig(
-    moduleStatus.moduleName
-  );
-  const { lastConfirmedDate, nextReviewDate } = computeRenewalDisplayDates(
-    moduleStatus,
-    duccSignedVersion
-  );
-
   const { blockComplianceTraining } = serverConfigStore.get().config;
 
   const showRefreshText =
@@ -289,7 +287,7 @@ export const RenewalCardBody = ({
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
-            <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
+            <Dates {...{ moduleStatus, duccSignedVersion, textStyle }} />
             <div
               style={{ marginBottom: '0.75rem', ...textStyle, fontWeight: 500 }}
             >
@@ -308,7 +306,7 @@ export const RenewalCardBody = ({
               gridArea: 'action',
             }}
           >
-            <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
+            {showTimeEstimate && <TimeEstimate {...{ moduleStatus }} />}
             <ActionButton
               {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='Review'
@@ -327,7 +325,7 @@ export const RenewalCardBody = ({
         return (
           <React.Fragment>
             <div style={{ gridArea: 'content' }}>
-              <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
+              <Dates {...{ moduleStatus, duccSignedVersion, textStyle }} />
               <div style={textStyle}>
                 The <AoU /> Publication and Presentation Policy requires that
                 you report any upcoming publication or presentation resulting
@@ -385,7 +383,7 @@ export const RenewalCardBody = ({
                 gridArea: 'action',
               }}
             >
-              <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
+              {showTimeEstimate && <TimeEstimate {...{ moduleStatus }} />}
               <ActionButton
                 {...{ moduleStatus, duccSignedVersion }}
                 actionButtonText='Confirm'
@@ -408,7 +406,7 @@ export const RenewalCardBody = ({
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
-            <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
+            <Dates {...{ moduleStatus, duccSignedVersion, textStyle }} />
             <div style={textStyle}>
               You are required to complete the refreshed ethics training courses
               to understand the privacy safeguards and the compliance
@@ -433,7 +431,7 @@ export const RenewalCardBody = ({
               gridArea: 'action',
             }}
           >
-            <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
+            {showTimeEstimate && <TimeEstimate {...{ moduleStatus }} />}
             <TooltipTrigger
               content={COMPLIANCE_TRAINIING_OUTAGE_MESSAGE}
               disabled={disableComplianceTrainingTooltip}
@@ -484,7 +482,7 @@ export const RenewalCardBody = ({
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
-            <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
+            <Dates {...{ moduleStatus, duccSignedVersion, textStyle }} />
             <div style={textStyle}>
               You are required to complete the refreshed ethics training courses
               to understand the privacy safeguards and the compliance
@@ -509,7 +507,7 @@ export const RenewalCardBody = ({
               gridArea: 'action',
             }}
           >
-            <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
+            {showTimeEstimate && <TimeEstimate {...{ moduleStatus }} />}
             <TooltipTrigger
               content={COMPLIANCE_TRAINIING_OUTAGE_MESSAGE}
               disabled={disableComplianceTrainingTooltip}
@@ -553,7 +551,7 @@ export const RenewalCardBody = ({
       () => (
         <React.Fragment>
           <div style={{ gridArea: 'content' }}>
-            <Dates {...{ lastConfirmedDate, nextReviewDate, textStyle }} />
+            <Dates {...{ moduleStatus, duccSignedVersion, textStyle }} />
             <div style={textStyle}>
               Please review and sign the data user code of conduct consenting to
               the <AoU /> data use policy.
@@ -566,7 +564,7 @@ export const RenewalCardBody = ({
               gridArea: 'action',
             }}
           >
-            <TimeEstimate {...{ showTimeEstimate, renewalTimeEstimate }} />
+            {showTimeEstimate && <TimeEstimate {...{ moduleStatus }} />}
             <ActionButton
               {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='View & Sign'

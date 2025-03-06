@@ -138,14 +138,7 @@ const AdminNotebookViewComponent = (props: Props) => {
 
   return (
     <React.Fragment>
-      <Header
-        {...{
-          workspaceDisplayName,
-          workspaceNamespace,
-          notebookNameWithSuffix,
-          accessReason,
-        }}
-      />
+      <Header {...props} {...{ workspaceDisplayName }} />
       <Main {...{ notebookHtml, errorMessage }} />
     </React.Fragment>
   );

@@ -83,39 +83,15 @@ const stylesFunction = {
 const USER_DISMISSED_ALERT_VALUE = 'DISMISSED';
 
 interface NewVersionFlagProps {
-  userHasDismissedAlert: boolean;
-  setUserHasDismissedAlert: Function;
+  namespace: string;
+  terraName: string;
   setShowModal: Function;
-  localStorageKey: string;
 }
 const NewVersionFlag = ({
-  userHasDismissedAlert,
-  setUserHasDismissedAlert,
+  namespace,
+  terraName,
   setShowModal,
-  localStorageKey,
-}: NewVersionFlagProps) => (
-  <Clickable
-    data-test-id='new-version-flag'
-    propagateDataTestId={true}
-    onClick={() => {
-      localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
-      setUserHasDismissedAlert(true);
-      setShowModal(true);
-    }}
-  >
-    <span style={stylesFunction.cdrVersionFlagCircle(!userHasDismissedAlert)}>
-      <ClrIcon shape='flag' class='is-solid' />
-    </span>
-  </Clickable>
-);
-
-const CdrVersion = (props: {
-  workspace: Workspace;
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
-}) => {
-  const { workspace, cdrVersionTiersResponse } = props;
-  const { namespace, terraName } = workspace;
-
+}: NewVersionFlagProps) => {
   const localStorageKey = `${namespace}-${terraName}-user-dismissed-cdr-version-update-alert`;
 
   const dismissedInLocalStorage = () =>
@@ -124,11 +100,36 @@ const CdrVersion = (props: {
   const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(
     dismissedInLocalStorage()
   );
+  useEffect(() => setUserHasDismissedAlert(dismissedInLocalStorage()));
+
+  return (
+    <Clickable
+      data-test-id='new-version-flag'
+      propagateDataTestId={true}
+      onClick={() => {
+        localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
+        setUserHasDismissedAlert(true);
+        setShowModal(true);
+      }}
+    >
+      <span style={stylesFunction.cdrVersionFlagCircle(!userHasDismissedAlert)}>
+        <ClrIcon shape='flag' class='is-solid' />
+      </span>
+    </Clickable>
+  );
+};
+
+const CdrVersion = (props: {
+  workspace: Workspace;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
+}) => {
+  const { workspace, cdrVersionTiersResponse } = props;
+  const { namespace, terraName } = workspace;
+
   const [showModal, setShowModal] = useState(false);
   const [navigate] = useNavigation();
 
   // check whether the user has previously dismissed the alert in localStorage, to determine icon color
-  useEffect(() => setUserHasDismissedAlert(dismissedInLocalStorage()));
 
   return (
     <FlexRow data-test-id='cdr-version' style={{ textTransform: 'none' }}>
@@ -136,10 +137,9 @@ const CdrVersion = (props: {
       {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && (
         <NewVersionFlag
           {...{
-            userHasDismissedAlert,
-            setUserHasDismissedAlert,
+            namespace,
+            terraName,
             setShowModal,
-            localStorageKey,
           }}
         />
       )}
