@@ -82,6 +82,33 @@ const stylesFunction = {
 
 const USER_DISMISSED_ALERT_VALUE = 'DISMISSED';
 
+interface NewVersionFlagProps {
+  userHasDismissedAlert: boolean;
+  setUserHasDismissedAlert: Function;
+  setShowModal: Function;
+  localStorageKey: string;
+}
+const NewVersionFlag = ({
+  userHasDismissedAlert,
+  setUserHasDismissedAlert,
+  setShowModal,
+  localStorageKey,
+}: NewVersionFlagProps) => (
+  <Clickable
+    data-test-id='new-version-flag'
+    propagateDataTestId={true}
+    onClick={() => {
+      localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
+      setUserHasDismissedAlert(true);
+      setShowModal(true);
+    }}
+  >
+    <span style={stylesFunction.cdrVersionFlagCircle(!userHasDismissedAlert)}>
+      <ClrIcon shape='flag' class='is-solid' />
+    </span>
+  </Clickable>
+);
+
 const CdrVersion = (props: {
   workspace: Workspace;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
@@ -103,27 +130,18 @@ const CdrVersion = (props: {
   // check whether the user has previously dismissed the alert in localStorage, to determine icon color
   useEffect(() => setUserHasDismissedAlert(dismissedInLocalStorage()));
 
-  const NewVersionFlag = () => (
-    <Clickable
-      data-test-id='new-version-flag'
-      propagateDataTestId={true}
-      onClick={() => {
-        localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
-        setUserHasDismissedAlert(true);
-        setShowModal(true);
-      }}
-    >
-      <span style={stylesFunction.cdrVersionFlagCircle(!userHasDismissedAlert)}>
-        <ClrIcon shape='flag' class='is-solid' />
-      </span>
-    </Clickable>
-  );
-
   return (
     <FlexRow data-test-id='cdr-version' style={{ textTransform: 'none' }}>
       {getCdrVersion(workspace, cdrVersionTiersResponse).name}
       {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && (
-        <NewVersionFlag />
+        <NewVersionFlag
+          {...{
+            userHasDismissedAlert,
+            setUserHasDismissedAlert,
+            setShowModal,
+            localStorageKey,
+          }}
+        />
       )}
       {showModal && (
         <CdrVersionUpgradeModal
