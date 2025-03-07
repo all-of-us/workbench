@@ -2089,7 +2089,7 @@ export const DatasetPage = fp.flow(
                   {fp.toPairs(previewList).map((value) => {
                     const domain: string = value[0];
                     // Strip underscores so we get the correct enum value
-                    const domainEnumValue = Domain[domain.replace(/_/g, '')];
+                    const domainEnumValue = Domain[domain];
                     const previewRow: DataSetPreviewInfo = value[1];
                     return (
                       <TooltipTrigger
