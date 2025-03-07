@@ -351,12 +351,26 @@ function do_COPE_and_PFHH(){
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
   
-  echo "ds_emorecog - inserting data for emorecog survey"
+  echo "ds_emorecog_metadata - inserting data for emorecog metadata"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_emorecog\`
-     (sitting_id, person_id)
-  SELECT sitting_id, person_id
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_emorecog_metadata\`
+     (sitting_id, person_id, src_id, response_device, screen_height, screen_width, touch, operating_system, test_duration, test_restarted, test_version, test_name, test_short_name, test_language, aou_version, test_params, user_utc_offset, test_start_date_time, test_end_date_time, user_agent)
+  SELECT sitting_id, person_id, src_id, metadata.response_device, metadata.screen_height, metadata.screen_width, metadata.touch, metadata.operating_system, metadata.test_duration, metadata.test_restarted, metadata.test_version, metadata.test_name, metadata.test_short_name, metadata.test_language, metadata.aou_version, metadata.test_params, metadata.user_utc_offset, metadata.test_start_date_time, metadata.test_end_date_time, metadata.user_agent
   FROM \`$BQ_PROJECT.$BQ_DATASET.emorecog\`"
+  
+  echo "ds_emorecog_outcomes - inserting data for emorecog outcomes"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_emorecog_outcomes\`
+    (sitting_id, person_id, src_id, score, accuracy, mean_rtc, median_rtc, sd_rtc, happy_accuracy, happy_mean_rtc, happy_median_rtc, happy_sd_rtc, angry_accuracy, angry_mean_rtc, angry_median_rtc, angry_sd_rtc, sad_accuracy, sad_mean_rtc, sad_median_rtc, sad_sd_rtc, fearful_accuracy, fearful_mean_rtc, fearful_median_rtc, fearful_sd_rtc, flag_median_rtc, flag_same_response, flag_trial_flags, any_timeouts)
+  SELECT sitting_id, person_id, src_id, outcomes.score, outcomes.accuracy, outcomes.mean_rtc, outcomes.median_rtc, outcomes.sd_rtc, outcomes.happy_accuracy, outcomes.happy_mean_rtc, outcomes.happy_median_rtc, outcomes.happy_sd_rtc, outcomes.angry_accuracy, outcomes.angry_mean_rtc, outcomes.angry_median_rtc, outcomes.angry_sd_rtc, outcomes.sad_accuracy, outcomes.sad_mean_rtc, outcomes.sad_median_rtc, outcomes.sad_sd_rtc, outcomes.fearful_accuracy, outcomes.fearful_mean_rtc, outcomes.fearful_median_rtc, outcomes.fearful_sd_rtc, outcomes.flag_median_rtc, outcomes.flag_same_response, outcomes.flag_trial_flags, outcomes.any_timeouts
+  FROM \`$BQ_PROJECT.$BQ_DATASET.emorecog\`"
+    
+  echo "ds_emorecog_trail_data - inserting data for emorecog trail data"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_emorecog_trail_data\`
+    (sitting_id, person_id, src_id, link_id, trial_id, emotion, response, correct, reaction_time, state, repeated, flagged, image, trial_timestamp)
+  SELECT sitting_id, person_id, src_id, link_id, trial_id, emotion, response, correct, reaction_time, state, repeated, flagged, image, trial_timestamp
+  FROM \`$BQ_PROJECT.$BQ_DATASET.emorecog\` CROSS JOIN UNNEST(trial_data)" 
   
   echo "ds_flanker - inserting data for flanker survey"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
