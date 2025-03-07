@@ -9534,7 +9534,7 @@ components:
           description: A URL linking to an incident report where users can read more
         type:
           type: string
-          enum: [PRE_LOGIN, POST_LOGIN]
+          enum: [BEFORE_LOGIN, AFTER_LOGIN]
           description: Whether the alert should be shown before or after login
     SumologicEgressEventRequest:
       type: object

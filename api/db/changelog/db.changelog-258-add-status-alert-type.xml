@@ -6,14 +6,14 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="eric" id="changelog-258-add-status-alert-type">
     <addColumn tableName="status_alert">
-      <column name="type" type="ENUM('PRE_LOGIN', 'POST_LOGIN')"/>
+      <column name="type" type="ENUM('BEFORE_LOGIN', 'AFTER_LOGIN')"/>
     </addColumn>
     <sql>
-      UPDATE status_alert SET type = 'POST_LOGIN';
+      UPDATE status_alert SET type = 'AFTER_LOGIN';
     </sql>
     <addNotNullConstraint
       tableName="status_alert"
       columnName="type"
-      columnDataType="ENUM('PRE_LOGIN', 'POST_LOGIN')"/>
+      columnDataType="ENUM('BEFORE_LOGIN', 'AFTER_LOGIN')"/>
   </changeSet>
 </databaseChangeLog>
