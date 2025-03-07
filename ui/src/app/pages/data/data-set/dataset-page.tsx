@@ -2118,7 +2118,7 @@ export const DatasetPage = fp.flow(
                               wordBreak: 'break-all',
                             }}
                           >
-                            {formatDomainString(domain)}
+                            {domainToTitle(domain)}
                             {previewRow.isLoading && (
                               <Spinner
                                 style={{
