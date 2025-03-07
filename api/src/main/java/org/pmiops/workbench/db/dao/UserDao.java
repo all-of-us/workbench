@@ -1,7 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbUser;
@@ -79,10 +82,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   List<DbUser> findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
       @Param("minCreationTime") Timestamp minCreationTime,
       @Param("maxCreationTime") Timestamp maxCreationTime);
-
-  @Query(
-      "SELECT v.vwbPodId FROM DbVwbUserPod v JOIN DbUser u ON v.user = u WHERE u.username = :email")
-  String findVwbPodIdByUsername(@Param("email") String email);
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {

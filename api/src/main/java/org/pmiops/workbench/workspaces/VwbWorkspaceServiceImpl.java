@@ -221,7 +221,8 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
 
     // Get the user's pod id
     String podId =
-        Optional.ofNullable(userDao.findVwbPodIdByUsername(workspace.getCreator()))
+        Optional.ofNullable(
+                userDao.findUserByUsername(workspace.getCreator()).getVwbUserPod().getVwbPodId())
             .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
 
     WorkspaceDescription workspaceDescription =
