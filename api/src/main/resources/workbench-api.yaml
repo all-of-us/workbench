@@ -9514,6 +9514,11 @@ components:
           description: Count of the AVAILABLE billing buffer projects in this access
             tier
           format: int64
+    StatusAlertLocation:
+      type: string
+      enum:
+        - BEFORE_LOGIN
+        - AFTER_LOGIN
     StatusAlert:
       type: object
       properties:
@@ -9532,10 +9537,9 @@ components:
         link:
           type: string
           description: A URL linking to an incident report where users can read more
-        type:
-          type: string
-          enum: [BEFORE_LOGIN, AFTER_LOGIN]
-          description: Whether the alert should be shown before or after login
+        alertLocation:
+          type: $ref: '#/components/schemas/StatusAlertLocation'
+          description: Where the status alert should be shown
     SumologicEgressEventRequest:
       type: object
       properties:
