@@ -368,3 +368,35 @@ VALUES
   ($((ID++)), 'DEVICE_TYPE', 'device.device_type', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
   ($((ID++)), 'LAST_SYNC_TIME', 'CAST(device.last_sync_time AS DATE) as last_sync_time', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
   ($((ID++)), 'SRC_ID', 'device.src_id', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device')"
+  
+echo "ds_linking - inserting EtM delaydiscounting data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting'),
+  ($((ID++)), 'SITTING_ID', 'delay.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting'),
+  ($((ID++)), 'PERSON_ID', 'delay.person_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting')"
+  
+echo "ds_linking - inserting EtM emorecog data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog'),
+  ($((ID++)), 'SITTING_ID', 'emore.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog'),
+  ($((ID++)), 'PERSON_ID', 'emore.person_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog')"
+  
+echo "ds_linking - inserting EtM flanker data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker'),
+  ($((ID++)), 'SITTING_ID', 'flank.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker'),
+  ($((ID++)), 'PERSON_ID', 'flank.person_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker')"
+  
+echo "ds_linking - inserting EtM gradcpt data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt'),
+  ($((ID++)), 'SITTING_ID', 'grad.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt'),
+  ($((ID++)), 'PERSON_ID', 'grad.person_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt')"

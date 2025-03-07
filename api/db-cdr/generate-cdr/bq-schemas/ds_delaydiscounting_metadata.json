@@ -1,0 +1,82 @@
+[
+  {
+    "name": "SITTING_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SRC_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "RESPONSE_DEVICE",
+    "type": "STRING"
+  },
+  {
+    "name": "SCREEN_HEIGHT",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SCREEN_WIDTH",
+    "type": "INTEGER"
+  },
+  {
+    "name": "TOUCH",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "OPERATING_SYSTEM",
+    "type": "STRING"
+  },
+  {
+    "name": "TEST_DURATION",
+    "type": "INTEGER"
+  },
+  {
+    "name": "TEST_RESTARTED",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "TEST_VERSION",
+    "type": "STRING"
+  },
+  {
+    "name": "TEST_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "TEST_SHORT_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "TEST_LANGUAGE",
+    "type": "STRING"
+  },
+  {
+    "name": "AOU_VERSION",
+    "type": "STRING"
+  },
+  {
+    "name": "TEST_PARAMS",
+    "type": "STRING"
+  },
+  {
+    "name": "USER_UTC_OFFSET",
+    "type": "INTEGER"
+  },
+  {
+    "name": "TEST_START_DATE_TIME",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "TEST_END_DATE_TIME",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "USER_AGENT",
+    "type": "STRING"
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "name": "SITTING_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SRC_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "LINK_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "TRIAL_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "TRIAL_TYPE",
+    "type": "STRING"
+  },
+  {
+    "name": "TRIAL_BLOCK",
+    "type": "STRING"
+  },
+  {
+    "name": "TARGET",
+    "type": "STRING"
+  },
+  {
+    "name": "FLANKERS",
+    "type": "STRING"
+  },
+  {
+    "name": "CONGRUENT",
+    "type": "INTEGER"
+  },
+  {
+    "name": "RESPONSE",
+    "type": "STRING"
+  },
+  {
+    "name": "CORRECT",
+    "type": "INTEGER"
+  },
+  {
+    "name": "REACTION_TIME",
+    "type": "FLOAT"
+  },
+  {
+    "name": "STATE",
+    "type": "STRING"
+  },
+  {
+    "name": "REPEATED",
+    "type": "INTEGER"
+  },
+  {
+    "name": "FLAGGED",
+    "type": "INTEGER"
+  },
+  {
+    "name": "TRIAL_TIMESTAMP",
+    "type": "TIMESTAMP"
+  }
+]

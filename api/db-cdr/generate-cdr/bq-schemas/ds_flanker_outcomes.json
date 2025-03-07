@@ -1,0 +1,86 @@
+[
+  {
+    "name": "SITTING_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SRC_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "SCORE",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEDIAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SD_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEDIAN_RT_CONGRUENT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ACCURACY_CONGRUENT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "RCS_CONGRUENT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEDIAN_RT_INCONGRUENT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ACCURACY_INCONGRUENT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "RCS_INCONGRUENT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEDIAN_RT_INTERFERENCE",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ACCURACY_INTERFERENCE",
+    "type": "FLOAT"
+  },
+  {
+    "name": "RCS_INTERFERENCE",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FLAG_MEDIAN_RTC",
+    "type": "INTEGER"
+  },
+  {
+    "name": "FLAG_ACCURACY",
+    "type": "INTEGER"
+  },
+  {
+    "name": "FLAG_TRIAL_FLAGS",
+    "type": "INTEGER"
+  },
+  {
+    "name": "ANY_TIMEOUTS",
+    "type": "INTEGER"
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "name": "SITTING_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SRC_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "SCORE",
+    "type": "INTEGER"
+  },
+  {
+    "name": "ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEDIAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SD_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "HAPPY_ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "HAPPY_MEAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "HAPPY_MEDIAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "HAPPY_SD_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ANGRY_ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ANGRY_MEAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ANGRY_MEDIAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ANGRY_SD_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SAD_ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SAD_MEAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SAD_MEDIAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SAD_SD_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FEARFUL_ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FEARFUL_MEAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FEARFUL_MEDIAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FEARFUL_SD_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FLAG_MEDIAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FLAG_SAME_RESPONSE",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FLAG_TRIAL_FLAGS",
+    "type": "INTEGER"
+  },
+  {
+    "name": "ANY_TIMEOUTS",
+    "type": "INTEGER"
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "name": "SITTING_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SRC_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "SCORE",
+    "type": "FLOAT"
+  },
+  {
+    "name": "CATCH_SCORE",
+    "type": "FLOAT"
+  },
+  {
+    "name": "LNK",
+    "type": "FLOAT"
+  },
+  {
+    "name": "TWO_WEEKS_LNK",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ONE_MONTH_LNK",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ONE_YEAR_LNK",
+    "type": "FLOAT"
+  },
+  {
+    "name": "TEN_YEARS_LNK",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FLAG_CATCH_TRIALS",
+    "type": "INTEGER"
+  },
+  {
+    "name": "ANY_TIMEOUTS",
+    "type": "INTEGER"
+  },
+  {
+    "name": "MEAN_RT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEDIAN_RT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SD_RT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FLAG_MEDIAN_RT",
+    "type": "INTEGER"
+  }
+]

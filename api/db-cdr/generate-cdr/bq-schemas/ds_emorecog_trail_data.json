@@ -1,0 +1,58 @@
+[
+  {
+    "name": "SITTING_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SRC_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "link_id",
+    "type": "STRING"
+  },
+  {
+    "name": "TRIAL_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "EMOTION",
+    "type": "STRING"
+  },
+  {
+    "name": "RESPONSE",
+    "type": "STRING"
+  },
+  {
+    "name": "CORRECT",
+    "type": "INTEGER"
+  },
+  {
+    "name": "REACTION_TIME",
+    "type": "FLOAT"
+  },
+  {
+    "name": "STATE",
+    "type": "STRING"
+  },
+  {
+    "name": "REPEATED",
+    "type": "INTEGER"
+  },
+  {
+    "name": "FLAGGED",
+    "type": "INTEGER"
+  },
+  {
+    "name": "IMAGE",
+    "type": "STRING"
+  },
+  {
+    "name": "TRIAL_TIMESTAMP",
+    "type": "TIMESTAMP"
+  }
+]

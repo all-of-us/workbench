@@ -1,0 +1,66 @@
+[
+  {
+    "name": "SITTING_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SRC_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "CV_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEDIAN_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SD_RTC",
+    "type": "FLOAT"
+  },
+  {
+    "name": "GO_ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "NOGO_ACCURACY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SCORE",
+    "type": "FLOAT"
+  },
+  {
+    "name": "DPRIME",
+    "type": "FLOAT"
+  },
+  {
+    "name": "CRIT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FLAG_TRIAL_FLAGS",
+    "type": "INTEGER"
+  },
+  {
+    "name": "FLAG_NON_RESPONSE",
+    "type": "INTEGER"
+  },
+  {
+    "name": "FLAG_OMISSION_ERROR_RATE",
+    "type": "INTEGER"
+  }
+]
