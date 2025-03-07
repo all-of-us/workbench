@@ -59,8 +59,8 @@
     },
     "cdrv8plus": {
       "methodNamespace": "aouwgscohortextraction-test",
-      "methodName": "echo-prototyping",
-      "methodRepoVersion": 18,
+      "methodName": "batch-prototyping",
+      "methodRepoVersion": 1,
       "methodLogicalVersion": 1
     }
   },
