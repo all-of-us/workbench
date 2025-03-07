@@ -108,6 +108,8 @@ public class DbUser {
   private String rasLinkUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
 
+  private DbVwbUserPod vwbUserPod;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id")
@@ -514,6 +516,19 @@ public class DbUser {
   public DbUser setGeneralDiscoverySourceOtherText(String generalDiscoverySourceOtherText) {
     this.generalDiscoverySourceOtherText = generalDiscoverySourceOtherText;
     return this;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DbVwbUserPod getVwbUserPod() {
+    return vwbUserPod;
+  }
+
+  public void setVwbUserPod(DbVwbUserPod vwbUserPod) {
+    this.vwbUserPod = vwbUserPod;
   }
 
   @ElementCollection(fetch = FetchType.LAZY)

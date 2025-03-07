@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -23,6 +24,7 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.user.VwbUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final UserDao userDao;
   private final InitialCreditsService initialCreditsService;
   private final UserServiceAuditor userServiceAuditor;
+  private final VwbUserService vwbUserService;
+  private final TaskQueueService taskQueueService;
 
   @Autowired
   public AccessSyncServiceImpl(
@@ -47,7 +51,9 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       InstitutionService institutionService,
       UserDao userDao,
       InitialCreditsService initialCreditsService,
-      UserServiceAuditor userServiceAuditor) {
+      UserServiceAuditor userServiceAuditor,
+      VwbUserService vwbUserService,
+      TaskQueueService taskQueueService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
     this.accessModuleService = accessModuleService;
@@ -55,6 +61,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.userDao = userDao;
     this.initialCreditsService = initialCreditsService;
     this.userServiceAuditor = userServiceAuditor;
+    this.vwbUserService = vwbUserService;
+    this.taskQueueService = taskQueueService;
   }
 
   /**
@@ -71,6 +79,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
           dbUser, previousAccessTiers, newAccessTiers, agent);
     }
 
+    createVwbUserIfNeeded(dbUser, previousAccessTiers, newAccessTiers);
+
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
@@ -82,6 +92,20 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
 
     return userDao.save(dbUser);
+  }
+
+  private void createVwbUserIfNeeded(
+      DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
+    // This means that the user has been granted access to a tier for the first time. Then perform
+    // the VWB creation logic.
+    if (previousAccessTiers.isEmpty() && !newAccessTiers.isEmpty()) {
+      // This call checks if the user already exists in VWB to avoid creating the user twice.
+      // Creating the user here is necessary to ensure that the user is created in VWB before adding
+      // them to the groups
+      vwbUserService.createUser(dbUser.getUsername());
+      // Create the pod asynchronously to avoid blocking the user
+      taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
+    }
   }
 
   private void addInitialCreditsExpirationIfAppropriate(
