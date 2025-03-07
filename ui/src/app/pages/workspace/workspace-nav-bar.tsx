@@ -100,6 +100,8 @@ const NewVersionFlag = ({
   const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(
     dismissedInLocalStorage()
   );
+
+  // check whether the user has previously dismissed the alert in localStorage, to determine icon color
   useEffect(() => setUserHasDismissedAlert(dismissedInLocalStorage()));
 
   return (
@@ -128,8 +130,6 @@ const CdrVersion = (props: {
 
   const [showModal, setShowModal] = useState(false);
   const [navigate] = useNavigation();
-
-  // check whether the user has previously dismissed the alert in localStorage, to determine icon color
 
   return (
     <FlexRow data-test-id='cdr-version' style={{ textTransform: 'none' }}>
