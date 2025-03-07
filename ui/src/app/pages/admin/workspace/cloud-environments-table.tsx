@@ -57,6 +57,40 @@ const userAppToRow = (userApp: UserAppEnvironment): CloudEnvironmentRow => {
   };
 };
 
+interface DeleteButtonProps {
+  row: CloudEnvironmentRow;
+  runtimeToDelete?: string;
+  setRuntimeToDelete: (runtimeName: string) => void;
+  setConfirmDeleteRuntime: (confirmDelete: boolean) => void;
+}
+const DeleteButton = ({
+  row,
+  runtimeToDelete,
+  setRuntimeToDelete,
+  setConfirmDeleteRuntime,
+}: DeleteButtonProps) => {
+  const tooltipContent =
+    row.appType === UIAppType.JUPYTER
+      ? 'The persistent disk will not be deleted.'
+      : 'Deletion is currently only available for Jupyter.  See RW-8943.';
+
+  return (
+    <TooltipTrigger content={tooltipContent}>
+      <Button
+        disabled={
+          row.appType !== UIAppType.JUPYTER || runtimeToDelete === row.name
+        }
+        onClick={() => {
+          setRuntimeToDelete(row.name);
+          setConfirmDeleteRuntime(true);
+        }}
+      >
+        Delete
+      </Button>
+    </TooltipTrigger>
+  );
+};
+
 interface Props {
   workspaceNamespace: string;
   onDelete: () => void;
@@ -69,7 +103,7 @@ export const CloudEnvironmentsTable = ({
   runtimes,
   userApps,
 }: Props) => {
-  const [runtimeToDelete, setRuntimeToDelete] = useState<string>();
+  const [runtimeToDelete, setRuntimeToDelete] = useState<string | null>();
   const [confirmDeleteRuntime, setConfirmDeleteRuntime] = useState(false);
 
   const deleteRuntime = () => {
@@ -85,29 +119,6 @@ export const CloudEnvironmentsTable = ({
   const cancelDeleteRuntime = () => {
     setConfirmDeleteRuntime(false);
     setRuntimeToDelete(null);
-  };
-
-  const DeleteButton = ({ row }: { row: CloudEnvironmentRow }) => {
-    const tooltipContent =
-      row.appType === UIAppType.JUPYTER
-        ? 'The persistent disk will not be deleted.'
-        : 'Deletion is currently only available for Jupyter.  See RW-8943.';
-
-    return (
-      <TooltipTrigger content={tooltipContent}>
-        <Button
-          disabled={
-            row.appType !== UIAppType.JUPYTER || runtimeToDelete === row.name
-          }
-          onClick={() => {
-            setRuntimeToDelete(row.name);
-            setConfirmDeleteRuntime(true);
-          }}
-        >
-          Delete
-        </Button>
-      </TooltipTrigger>
-    );
   };
 
   return runtimes && userApps ? (
@@ -146,7 +157,16 @@ export const CloudEnvironmentsTable = ({
         <Column field='lastAccessedTime' header='Last Accessed Time' />
         <Column field='status' header='Status' />
         <Column
-          body={(row: CloudEnvironmentRow) => <DeleteButton {...{ row }} />}
+          body={(row: CloudEnvironmentRow) => (
+            <DeleteButton
+              {...{
+                row,
+                runtimeToDelete,
+                setRuntimeToDelete,
+                setConfirmDeleteRuntime,
+              }}
+            />
+          )}
         />
       </DataTable>
     </div>

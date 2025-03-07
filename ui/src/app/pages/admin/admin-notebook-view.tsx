@@ -43,56 +43,70 @@ const styles = reactStyles({
   },
 });
 
+interface HeaderProps {
+  workspaceDisplayName: string;
+  workspaceNamespace: string;
+  notebookNameWithSuffix: string;
+  accessReason: string;
+}
+const Header = ({
+  workspaceDisplayName,
+  workspaceNamespace,
+  notebookNameWithSuffix,
+  accessReason,
+}: HeaderProps) => {
+  const workspace = workspaceDisplayName
+    ? `Workspace ${workspaceDisplayName}`
+    : 'Workspace';
+  const link = (
+    <StyledRouterLink path={`/admin/workspaces/${workspaceNamespace}`}>
+      {workspace} with namespace {workspaceNamespace}
+    </StyledRouterLink>
+  );
+  return (
+    <div style={styles.heading}>
+      Viewing {notebookNameWithSuffix} in {link} for reason:
+      <div>{accessReason}</div>
+    </div>
+  );
+};
+
+interface MainProps {
+  notebookHtml: string;
+  errorMessage: string;
+}
+const Main = ({ notebookHtml, errorMessage }: MainProps) => {
+  if (notebookHtml) {
+    return (
+      <iframe
+        id='notebook-frame'
+        style={styles.notebook}
+        srcDoc={notebookHtml}
+      />
+    );
+  } else if (errorMessage) {
+    return <div style={styles.error}>{errorMessage}</div>;
+  } else {
+    return <SpinnerOverlay />;
+  }
+};
+
 interface Props {
   workspaceNamespace: string;
   notebookNameWithSuffix: string;
   accessReason: string;
 }
-
 const AdminNotebookViewComponent = (props: Props) => {
   const { workspaceNamespace, notebookNameWithSuffix, accessReason } = props;
-  const [notebookHtml, setHtml] = useState('');
-  const [workspaceName, setWorkspaceName] = useState('');
+  const [notebookHtml, setNotebookHtml] = useState('');
+  const [workspaceDisplayName, setWorkspaceDisplayName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-
-  const Header = () => {
-    const workspace = workspaceName
-      ? `Workspace ${workspaceName}`
-      : 'Workspace';
-    const link = (
-      <StyledRouterLink path={`/admin/workspaces/${workspaceNamespace}`}>
-        {workspace} with namespace {workspaceNamespace}
-      </StyledRouterLink>
-    );
-    return (
-      <div style={styles.heading}>
-        Viewing {notebookNameWithSuffix} in {link} for reason:
-        <div>{accessReason}</div>
-      </div>
-    );
-  };
-
-  const Main = () => {
-    if (notebookHtml) {
-      return (
-        <iframe
-          id='notebook-frame'
-          style={styles.notebook}
-          srcDoc={notebookHtml}
-        />
-      );
-    } else if (errorMessage) {
-      return <div style={styles.error}>{errorMessage}</div>;
-    } else {
-      return <SpinnerOverlay />;
-    }
-  };
 
   useEffect(() => {
     workspaceAdminApi()
       .getWorkspaceAdminView(workspaceNamespace)
       .then((workspaceAdminView) =>
-        setWorkspaceName(workspaceAdminView.workspace.name)
+        setWorkspaceDisplayName(workspaceAdminView.workspace.name)
       );
   }, []);
 
@@ -108,7 +122,7 @@ const AdminNotebookViewComponent = (props: Props) => {
       .adminReadOnlyNotebook(workspaceNamespace, notebookNameWithSuffix, {
         reason: accessReason,
       })
-      .then((response) => setHtml(response.html))
+      .then((response) => setNotebookHtml(response.html))
       .catch((e) => {
         if (e.status === 404) {
           setErrorMessage(`Notebook ${notebookNameWithSuffix} was not found`);
@@ -124,8 +138,8 @@ const AdminNotebookViewComponent = (props: Props) => {
 
   return (
     <React.Fragment>
-      <Header />
-      <Main />
+      <Header {...props} {...{ workspaceDisplayName }} />
+      <Main {...{ notebookHtml, errorMessage }} />
     </React.Fragment>
   );
 };

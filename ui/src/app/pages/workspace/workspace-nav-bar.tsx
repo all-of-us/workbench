@@ -82,13 +82,16 @@ const stylesFunction = {
 
 const USER_DISMISSED_ALERT_VALUE = 'DISMISSED';
 
-const CdrVersion = (props: {
-  workspace: Workspace;
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
-}) => {
-  const { workspace, cdrVersionTiersResponse } = props;
-  const { namespace, terraName } = workspace;
-
+interface NewVersionFlagProps {
+  namespace: string;
+  terraName: string;
+  setShowModal: (show: boolean) => void;
+}
+const NewVersionFlag = ({
+  namespace,
+  terraName,
+  setShowModal,
+}: NewVersionFlagProps) => {
   const localStorageKey = `${namespace}-${terraName}-user-dismissed-cdr-version-update-alert`;
 
   const dismissedInLocalStorage = () =>
@@ -97,13 +100,11 @@ const CdrVersion = (props: {
   const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(
     dismissedInLocalStorage()
   );
-  const [showModal, setShowModal] = useState(false);
-  const [navigate] = useNavigation();
 
   // check whether the user has previously dismissed the alert in localStorage, to determine icon color
   useEffect(() => setUserHasDismissedAlert(dismissedInLocalStorage()));
 
-  const NewVersionFlag = () => (
+  return (
     <Clickable
       data-test-id='new-version-flag'
       propagateDataTestId={true}
@@ -118,12 +119,29 @@ const CdrVersion = (props: {
       </span>
     </Clickable>
   );
+};
+
+const CdrVersion = (props: {
+  workspace: Workspace;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
+}) => {
+  const { workspace, cdrVersionTiersResponse } = props;
+  const { namespace, terraName } = workspace;
+
+  const [showModal, setShowModal] = useState(false);
+  const [navigate] = useNavigation();
 
   return (
     <FlexRow data-test-id='cdr-version' style={{ textTransform: 'none' }}>
       {getCdrVersion(workspace, cdrVersionTiersResponse).name}
       {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && (
-        <NewVersionFlag />
+        <NewVersionFlag
+          {...{
+            namespace,
+            terraName,
+            setShowModal,
+          }}
+        />
       )}
       {showModal && (
         <CdrVersionUpgradeModal

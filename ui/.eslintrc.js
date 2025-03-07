@@ -79,6 +79,7 @@ module.exports = {
     // '@typescript-eslint/prefer-function-type': 'warn',
 
     'react/jsx-uses-vars': 'warn',
+    'react/no-unstable-nested-components': ['warn', { allowAsProps: true }],
     'react-hooks/rules-of-hooks': 'warn',
     // 'react-hooks/exhaustive-deps': 'warn',  // 45 instances as of 3 Jan 2022
 
