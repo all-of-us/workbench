@@ -45,6 +45,7 @@ import {
 } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CircleWithText } from 'app/icons/circleWithText';
+import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
 import { dataTabPath } from 'app/routing/utils';
@@ -1965,7 +1966,7 @@ export const DatasetPage = fp.flow(
                         domainValueSetLookup.has(domain) && (
                           <div key={domain}>
                             <Subheader style={{ fontWeight: 'bold' }}>
-                              {formatDomain(domain)}
+                              {domainToTitle(domain)}
                             </Subheader>
                             {domainValueSetLookup
                               .get(domain)
