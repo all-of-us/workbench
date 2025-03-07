@@ -14,6 +14,7 @@ public class DbStatusAlert {
   private String title;
   private String message;
   private String link;
+  private String type;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +55,16 @@ public class DbStatusAlert {
 
   public DbStatusAlert setLink(String link) {
     this.link = link;
+    return this;
+  }
+
+  @Column(name = "type")
+  public String getType() {
+    return type;
+  }
+
+  public DbStatusAlert setType(String type) {
+    this.type = type;
     return this;
   }
 }

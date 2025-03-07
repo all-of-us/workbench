@@ -9,7 +9,8 @@ public class StatusAlertConversionUtils {
         .statusAlertId(statusAlert.getStatusAlertId())
         .title(statusAlert.getTitle())
         .message(statusAlert.getMessage())
-        .link(statusAlert.getLink());
+        .link(statusAlert.getLink())
+        .type(statusAlert.getType());
   }
 
   public static DbStatusAlert toDbStatusAlert(StatusAlert statusAlert) {
@@ -20,6 +21,7 @@ public class StatusAlertConversionUtils {
     dbStatusAlert.setLink(statusAlert.getLink());
     dbStatusAlert.setMessage(statusAlert.getMessage());
     dbStatusAlert.setTitle(statusAlert.getTitle());
+    dbStatusAlert.setType(statusAlert.getType());
     return dbStatusAlert;
   }
 }
