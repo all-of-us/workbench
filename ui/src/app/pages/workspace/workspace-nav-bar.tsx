@@ -85,7 +85,7 @@ const USER_DISMISSED_ALERT_VALUE = 'DISMISSED';
 interface NewVersionFlagProps {
   namespace: string;
   terraName: string;
-  setShowModal: Function;
+  setShowModal: (show: boolean) => void;
 }
 const NewVersionFlag = ({
   namespace,

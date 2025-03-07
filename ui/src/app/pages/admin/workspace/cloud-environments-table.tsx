@@ -59,7 +59,7 @@ const userAppToRow = (userApp: UserAppEnvironment): CloudEnvironmentRow => {
 
 interface DeleteButtonProps {
   row: CloudEnvironmentRow;
-  runtimeToDelete: string;
+  runtimeToDelete?: string;
   setRuntimeToDelete: (runtimeName: string) => void;
   setConfirmDeleteRuntime: (confirmDelete: boolean) => void;
 }
@@ -103,7 +103,7 @@ export const CloudEnvironmentsTable = ({
   runtimes,
   userApps,
 }: Props) => {
-  const [runtimeToDelete, setRuntimeToDelete] = useState<string>();
+  const [runtimeToDelete, setRuntimeToDelete] = useState<string | null>();
   const [confirmDeleteRuntime, setConfirmDeleteRuntime] = useState(false);
 
   const deleteRuntime = () => {
