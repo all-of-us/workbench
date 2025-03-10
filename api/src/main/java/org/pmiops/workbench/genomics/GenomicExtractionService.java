@@ -77,6 +77,8 @@ public class GenomicExtractionService {
 
   private static final int EARLIEST_SUPPORTED_LEGACY_METHOD_VERSION = 3;
 
+  private static final BigDecimal MEMORY_RETRY_MULTIPLIER = BigDecimal.valueOf(1.5);
+
   private final FireCloudService fireCloudService;
   private final GenomicDatasetService genomicDatasetService;
   private final JiraService jiraService;
@@ -510,7 +512,7 @@ public class GenomicExtractionService {
                     .methodConfigurationName(methodConfig.getName())
                     .deleteIntermediateOutputFiles(true)
                     .useCallCache(true)
-                    .memoryRetryMultiplier(BigDecimal.valueOf(1.5)),
+                    .memoryRetryMultiplier(MEMORY_RETRY_MULTIPLIER),
                 cohortExtractionConfig.operationalTerraWorkspaceNamespace,
                 cohortExtractionConfig.operationalTerraWorkspaceName);
 
