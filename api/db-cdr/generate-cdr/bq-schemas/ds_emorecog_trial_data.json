@@ -12,7 +12,7 @@
     "type": "STRING"
   },
   {
-    "name": "link_id",
+    "name": "LINK_ID",
     "type": "STRING"
   },
   {
