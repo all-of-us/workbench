@@ -50,7 +50,6 @@ public class CommonMappers {
 
   public static Timestamp timestamp(OffsetDateTime offsetDateTime) {
     return Optional.ofNullable(offsetDateTime)
-        .map(odt -> odt.atZoneSameInstant(Clock.systemDefaultZone().getZone()).toOffsetDateTime())
         .map(OffsetDateTime::toInstant)
         .map(Timestamp::from)
         .orElse(null);
