@@ -164,14 +164,50 @@ export function domainToTitle(domain: any): string {
     case Domain.ETM_DELAYDISCOUNTING:
       domain = 'EtM Now or Later';
       break;
+    case Domain.ETM_DELAYDISCOUNTING_METADATA:
+      domain = 'EtM Now or Later Metadata';
+      break;
+    case Domain.ETM_DELAYDISCOUNTING_OUTCOMES:
+      domain = 'EtM Now or Later Outcomes';
+      break;
+    case Domain.ETM_DELAYDISCOUNTING_TRIAL_DATA:
+      domain = 'EtM Now or Later Trial Data';
+      break;
     case Domain.ETM_EMORECOG:
       domain = 'EtM Guess the Emotion';
+      break;
+    case Domain.ETM_EMORECOG_METADATA:
+      domain = 'EtM Guess the Emotion Metadata';
+      break;
+    case Domain.ETM_EMORECOG_OUTCOMES:
+      domain = 'EtM Guess the Emotion Outcomes';
+      break;
+    case Domain.ETM_EMORECOG_TRIAL_DATA:
+      domain = 'EtM Guess the Emotion Trial Data';
       break;
     case Domain.ETM_FLANKER:
       domain = 'EtM Left or Right';
       break;
+    case Domain.ETM_FLANKER_METADATA:
+      domain = 'EtM Left or Right Metadata';
+      break;
+    case Domain.ETM_FLANKER_OUTCOMES:
+      domain = 'EtM Left or Right Outcomes';
+      break;
+    case Domain.ETM_FLANKER_TRIAL_DATA:
+      domain = 'EtM Left or Right Trial Data';
+      break;
     case Domain.ETM_GRADCPT:
       domain = 'EtM City or Mountain';
+      break;
+    case Domain.ETM_GRADCPT_METADATA:
+      domain = 'EtM City or Mountain Metadata';
+      break;
+    case Domain.ETM_GRADCPT_OUTCOMES:
+      domain = 'EtM City or Mountain Outcomes';
+      break;
+    case Domain.ETM_GRADCPT_TRIAL_DATA:
+      domain = 'EtM City or Mountain Trial Data';
       break;
   }
   return domain;
