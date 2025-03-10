@@ -173,7 +173,7 @@ public class GenomicExtractionService {
                   if (isTerminal(status)) {
                     OffsetDateTime completionTime =
                         firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate();
-                    Timestamp completionTimestamp = CommonMappers.timestamp(completionTime);
+                    Timestamp completionTimestamp = convertToSystemTimestamp(completionTime);
                     dbSubmission.setCompletionTime(completionTimestamp);
                   }
 
@@ -189,6 +189,16 @@ public class GenomicExtractionService {
               }
             })
         .toList();
+  }
+
+  // Convert a given offset date time to a timestamp in the system's default time zone.
+  private Timestamp convertToSystemTimestamp(OffsetDateTime offsetDateTime) {
+    if (offsetDateTime == null) {
+      return null;
+    }
+    OffsetDateTime dateTimeInSystemOffset =
+        offsetDateTime.atZoneSameInstant(Clock.systemDefaultZone().getZone()).toOffsetDateTime();
+    return CommonMappers.timestamp(dateTimeInSystemOffset);
   }
 
   private Long getWorkflowSize(FirecloudSubmission firecloudSubmission) throws ApiException {
@@ -511,7 +521,7 @@ public class GenomicExtractionService {
     dbSubmission.setCreator(userProvider.get());
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     OffsetDateTime submissionDate = submissionResponse.getSubmissionDate();
-    Timestamp timestamp = CommonMappers.timestamp(submissionDate);
+    Timestamp timestamp = convertToSystemTimestamp(submissionDate);
     dbSubmission.setTerraSubmissionDate(timestamp);
     dbSubmission.setTerraStatusEnum(TerraJobStatus.RUNNING);
     dbSubmission.setSampleCount((long) personIds.size());
