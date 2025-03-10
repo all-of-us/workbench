@@ -1,8 +1,14 @@
-import { StatusAlert, StatusAlertApi } from 'generated/fetch';
+import {
+  StatusAlert,
+  StatusAlertApi,
+  StatusAlertLocation,
+} from 'generated/fetch';
 
 export class StatusAlertApiStub extends StatusAlertApi {
-  constructor() {
+  private alertLocationStub: StatusAlertLocation;
+  constructor(alertLocation?: StatusAlertLocation) {
     super(undefined);
+    this.alertLocationStub = alertLocation || StatusAlertLocation.AFTER_LOGIN;
   }
 
   public getStatusAlert(): Promise<StatusAlert> {
@@ -11,6 +17,7 @@ export class StatusAlertApiStub extends StatusAlertApi {
       title: 'lol',
       message: 'lol lol lol',
       link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      alertLocation: this.alertLocationStub,
     };
     return new Promise<StatusAlert>((resolve) => resolve(statusAlertStub));
   }
