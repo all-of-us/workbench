@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { StatusAlert } from 'generated/fetch';
+import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import { firstPartyCookiesEnabled } from 'app/utils/cookies';
@@ -35,7 +35,10 @@ export const StatusAlertBannerMaybe = () => {
   useEffect(() => {
     const getAlert = async () => {
       const statusAlert = await statusAlertApi().getStatusAlert();
-      if (!!statusAlert) {
+      if (
+        !!statusAlert &&
+        statusAlert.alertLocation === StatusAlertLocation.AFTER_LOGIN
+      ) {
         setShowStatusAlert(shouldShowStatusAlert(statusAlert));
         setStatusAlertDetails(statusAlert);
       }
