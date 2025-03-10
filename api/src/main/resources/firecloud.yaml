@@ -2570,6 +2570,27 @@ components:
           enum:
             - NoNewCalls
             - ContinueWhilePossible
+        memoryRetryMultiplier:
+          type: number
+          description: If a task fails due to running out of memory and the stderr of the task
+            contains one of error keys that is set in Cromwell config along with maxRetries in its
+            runtime attributes, then it will be retried with its memory multiplied by this amount.
+            See Cromwell docs for more information.
+        ignoreEmptyOutputs:
+          type: boolean
+          description: Whether or not to create output columns if they would be empty and optional.
+            Defaults to false (columns are created).
+        monitoringScript:
+          type: string
+          description: Location of user-defined monitoring script that runs inside the task container
+        monitoringImage:
+          type: string
+          description: User-defined monitoring container that runs as a sibling to the task container.
+            Alternative to monitoringScript.
+        monitoringImageScript:
+          type: string
+          description: When using monitoringImage, a user-defined script that runs inside the
+            monitoring container
       description: If the referenced method configuration takes no root entity, do
         not define `entityType`, `entityName` and `expression`.
     SubmissionResponse:

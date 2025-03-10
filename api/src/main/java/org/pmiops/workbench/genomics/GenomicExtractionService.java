@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import jakarta.inject.Provider;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -75,6 +76,8 @@ public class GenomicExtractionService {
   private static final int MAX_EXTRACTION_SCATTER = 2_000;
 
   private static final int EARLIEST_SUPPORTED_LEGACY_METHOD_VERSION = 3;
+
+  private static final BigDecimal MEMORY_RETRY_MULTIPLIER = BigDecimal.valueOf(1.5);
 
   private final FireCloudService fireCloudService;
   private final GenomicDatasetService genomicDatasetService;
@@ -505,10 +508,11 @@ public class GenomicExtractionService {
             .get()
             .createSubmission(
                 new FirecloudSubmissionRequest()
-                    .deleteIntermediateOutputFiles(true)
                     .methodConfigurationNamespace(methodConfig.getNamespace())
                     .methodConfigurationName(methodConfig.getName())
-                    .useCallCache(false),
+                    .deleteIntermediateOutputFiles(true)
+                    .useCallCache(true)
+                    .memoryRetryMultiplier(MEMORY_RETRY_MULTIPLIER),
                 cohortExtractionConfig.operationalTerraWorkspaceNamespace,
                 cohortExtractionConfig.operationalTerraWorkspaceName);
 
