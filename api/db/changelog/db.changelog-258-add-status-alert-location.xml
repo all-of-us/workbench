@@ -4,16 +4,16 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="eric" id="changelog-258-add-status-alert-type">
+  <changeSet author="eric" id="changelog-258-add-status-alert-location">
     <addColumn tableName="status_alert">
-      <column name="type" type="ENUM('BEFORE_LOGIN', 'AFTER_LOGIN')"/>
+      <column name="alert_location" type="ENUM('BEFORE_LOGIN', 'AFTER_LOGIN')"/>
     </addColumn>
     <sql>
-      UPDATE status_alert SET type = 'AFTER_LOGIN';
+      UPDATE status_alert SET alert_location = 'AFTER_LOGIN';
     </sql>
     <addNotNullConstraint
       tableName="status_alert"
-      columnName="type"
+      columnName="alert_location"
       columnDataType="ENUM('BEFORE_LOGIN', 'AFTER_LOGIN')"/>
   </changeSet>
 </databaseChangeLog>
