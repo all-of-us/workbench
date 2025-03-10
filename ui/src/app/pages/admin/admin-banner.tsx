@@ -1,6 +1,10 @@
 import * as React from 'react';
 import ReactSwitch from 'react-switch';
+import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
+
+import { StatusAlertLocation } from 'generated/fetch';
+const { BEFORE_LOGIN, AFTER_LOGIN } = StatusAlertLocation;
 
 import { BoldHeader, Header } from 'app/components/headers';
 import { TextArea, TextInput } from 'app/components/inputs';
@@ -22,6 +26,7 @@ interface AdminBannerState {
   bannerEnabled: boolean;
   bannerHeadline: string;
   readMoreLink: string;
+  alertLocation: StatusAlertLocation;
 }
 const validators = {
   bannerDescription: { ...required, ...notTooLong(4000) },
@@ -39,6 +44,7 @@ export class AdminBanner extends React.Component<
       bannerEnabled: false,
       bannerHeadline: '',
       readMoreLink: '',
+      alertLocation: AFTER_LOGIN,
     };
   }
 
@@ -52,6 +58,7 @@ export class AdminBanner extends React.Component<
           bannerEnabled: statusAlert.title !== null && statusAlert.title !== '',
           bannerHeadline: statusAlert.title,
           readMoreLink: statusAlert.link,
+          alertLocation: statusAlert.alertLocation || AFTER_LOGIN,
         })
       );
   }
@@ -63,12 +70,14 @@ export class AdminBanner extends React.Component<
         title: this.state.bannerHeadline,
         message: this.state.bannerDescription,
         link: this.state.readMoreLink,
+        alertLocation: this.state.alertLocation,
       });
     } else {
       statusAlertApi().postStatusAlert({
         title: '',
         message: '',
         link: '',
+        alertLocation: AFTER_LOGIN,
       });
       this.setState({
         bannerDescription: '',
@@ -79,8 +88,13 @@ export class AdminBanner extends React.Component<
   }
 
   render() {
-    const { bannerDescription, bannerEnabled, bannerHeadline, readMoreLink } =
-      this.state;
+    const {
+      bannerDescription,
+      bannerEnabled,
+      bannerHeadline,
+      readMoreLink,
+      alertLocation,
+    } = this.state;
     const errors = validate(
       {
         bannerDescription,
@@ -125,6 +139,15 @@ export class AdminBanner extends React.Component<
           value={readMoreLink}
           data-test-id='read-more-link-input'
           placeholder='Paste button link'
+        />
+        <Header style={styles.smallHeaderStyles}>Banner Type</Header>
+        <Dropdown
+          value={alertLocation}
+          options={[
+            { value: BEFORE_LOGIN, label: 'Before Login' },
+            { value: AFTER_LOGIN, label: 'After Login' },
+          ]}
+          onChange={(e) => this.setState({ alertLocation: e.value })}
         />
         <TooltipTrigger
           content={
