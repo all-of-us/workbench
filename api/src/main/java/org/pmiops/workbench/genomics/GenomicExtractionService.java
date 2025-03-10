@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import jakarta.inject.Provider;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -505,10 +506,11 @@ public class GenomicExtractionService {
             .get()
             .createSubmission(
                 new FirecloudSubmissionRequest()
-                    .deleteIntermediateOutputFiles(true)
                     .methodConfigurationNamespace(methodConfig.getNamespace())
                     .methodConfigurationName(methodConfig.getName())
-                    .useCallCache(false),
+                    .deleteIntermediateOutputFiles(true)
+                    .useCallCache(true)
+                    .memoryRetryMultiplier(BigDecimal.valueOf(1.5)),
                 cohortExtractionConfig.operationalTerraWorkspaceNamespace,
                 cohortExtractionConfig.operationalTerraWorkspaceName);
 
