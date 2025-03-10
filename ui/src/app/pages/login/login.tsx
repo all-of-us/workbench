@@ -1,9 +1,13 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
+
+import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { Button, StyledExternalLink } from 'app/components/buttons';
 import { CookieBanner } from 'app/components/cookie-banner';
 import { GoogleSignInButton } from 'app/components/google-sign-in';
 import { Header, SmallHeader } from 'app/components/headers';
+import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { serverConfigStore } from 'app/utils/stores';
@@ -46,10 +50,26 @@ interface LoginProps {
   onCreateAccount: Function;
 }
 export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
+  const [statusAlertDetails, setStatusAlertDetails] =
+    useState<StatusAlert | null>(null);
+
+  useEffect(() => {
+    const getAlert = async () => {
+      const statusAlert = await statusAlertApi().getStatusAlert();
+      console.log('Status alert:', statusAlert);
+      if (statusAlert) {
+        setStatusAlertDetails(statusAlert);
+      }
+    };
+
+    getAlert();
+  }, []);
+
   return (
     <React.Fragment>
-      {serverConfigStore.get().config.enableLoginIssueBanner && (
-        <LOGIN_ERROR_BANNER />
+      {statusAlertDetails?.alertLocation ===
+        StatusAlertLocation.BEFORE_LOGIN && (
+        <LOGIN_ERROR_BANNER details={statusAlertDetails.message} />
       )}
       <div
         data-test-id='login'
