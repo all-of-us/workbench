@@ -369,34 +369,302 @@ VALUES
   ($((ID++)), 'LAST_SYNC_TIME', 'CAST(device.last_sync_time AS DATE) as last_sync_time', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device'),
   ($((ID++)), 'SRC_ID', 'device.src_id', 'FROM \`\${projectId}.\${dataSetId}.device\` device', 'Fitbit_device')"
   
-echo "ds_linking - inserting EtM delaydiscounting data"
+echo "ds_linking - inserting EtM delaydiscounting metadata"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting'),
-  ($((ID++)), 'SITTING_ID', 'delay.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting'),
-  ($((ID++)), 'PERSON_ID', 'delay.person_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting')"
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'SITTING_ID', 'delay.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'PERSON_ID', 'delay.person_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'SRC_ID', 'delay.src_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'RESPONSE_DEVICE', 'delay.metadata.response_device', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'SCREEN_HEIGHT', 'delay.metadata.screen_height', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'SCREEN_WIDTH', 'delay.metadata.screen_width', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TOUCH', 'delay.metadata.touch', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'OPERATING_SYSTEM', 'delay.metadata.operating_system', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_DURATION', 'delay.metadata.test_duration', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_RESTARTED', 'delay.metadata.test_restarted', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_VERSION', 'delay.metadata.test_version', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_NAME', 'delay.metadata.test_name', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_SHORT_NAME', 'delay.metadata.test_short_name', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_LANGUAGE', 'delay.metadata.test_language', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'AOU_VERSION', 'delay.metadata.aou_version', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_PARAMS', 'delay.metadata.test_params', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'USER_UTC_OFFSET', 'delay.metadata.user_utc_offset', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_START_DATE_TIME', 'delay.metadata.test_start_date_time', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'TEST_END_DATE_TIME', 'delay.metadata.test_end_date_time', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata'),
+  ($((ID++)), 'USER_AGENT', 'delay.metadata.user_agent', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_metadata')"
   
-echo "ds_linking - inserting EtM emorecog data"
+echo "ds_linking - inserting EtM delaydiscounting outcomes"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog'),
-  ($((ID++)), 'SITTING_ID', 'emore.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog'),
-  ($((ID++)), 'PERSON_ID', 'emore.person_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog')"
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'SITTING_ID', 'delay.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'PERSON_ID', 'delay.person_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'SRC_ID', 'delay.src_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'SCORE', 'delay.outcomes.score', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'CATCH_SCORE', 'delay.outcomes.catch_score', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'LNK', 'delay.outcomes.lnk', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'TWO_WEEKS_LNK', 'delay.outcomes.two_weeks_lnk', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'ONE_MONTH_LNK', 'delay.outcomes.one_month_lnk', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'ONE_YEAR_LNK', 'delay.outcomes.one_year_lnk', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'TEN_YEARS_LNK', 'delay.outcomes.ten_years_lnk', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'FLAG_CATCH_TRIALS', 'delay.outcomes.flag_catch_trials', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'ANY_TIMEOUTS', 'delay.outcomes.any_timeouts', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'MEAN_RT', 'delay.outcomes.mean_rt', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'MEDIAN_RT', 'delay.outcomes.median_rt', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'SD_RT', 'delay.outcomes.sd_rt', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes'),
+  ($((ID++)), 'FLAG_MEDIAN_RT', 'delay.outcomes.flag_median_rt', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` delay', 'Etm_delaydiscounting_outcomes')"
   
-echo "ds_linking - inserting EtM flanker data"
+echo "ds_linking - inserting EtM delaydiscounting trial data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker'),
-  ($((ID++)), 'SITTING_ID', 'flank.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker'),
-  ($((ID++)), 'PERSON_ID', 'flank.person_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker')"
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'SITTING_ID', 'delay.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'PERSON_ID', 'delay.person_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'SRC_ID', 'delay.src_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'LINK_ID', 'delay.link_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'TRIAL_ID', 'delay.trial_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'TRIAL_TYPE', 'delay.trial_type', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'TYPE_NUM', 'delay.type_num', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'DELAY_TIME', 'delay.delay_time', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'DELAY_TIME_DAYS', 'delay.delay_time_days', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'RESPONSE', 'delay.response', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'PRESENT_AMOUNT', 'delay.present_amount', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'FUTURE_AMOUNT', 'delay.future_amount', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'CATCH_CORRECT', 'delay.catch_correct', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'CURRENT_K', 'delay.current_k', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'REACTION_TIME', 'delay.reaction_time', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'STATE', 'delay.state', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'REPEATED', 'delay.repeated', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'TRIAL_TIMESTAMP', 'delay.trial_timestamp', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data')"
+
+echo "ds_linking - inserting EtM emorecog metadata"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'SITTING_ID', 'emore.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'PERSON_ID', 'emore.person_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'SRC_ID', 'emore.src_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'RESPONSE_DEVICE', 'emore.metadata.response_device', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'SCREEN_HEIGHT', 'emore.metadata.screen_height', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'SCREEN_WIDTH', 'emore.metadata.screen_width', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TOUCH', 'emore.metadata.touch', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'OPERATING_SYSTEM', 'emore.metadata.operating_system', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_DURATION', 'emore.metadata.test_duration', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_RESTARTED', 'emore.metadata.test_restarted', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_VERSION', 'emore.metadata.test_version', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_NAME', 'emore.metadata.test_name', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_SHORT_NAME', 'emore.metadata.test_short_name', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_LANGUAGE', 'emore.metadata.test_language', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'AOU_VERSION', 'emore.metadata.aou_version', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_PARAMS', 'emore.metadata.test_params', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'USER_UTC_OFFSET', 'emore.metadata.user_utc_offset', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_START_DATE_TIME', 'emore.metadata.test_start_date_time', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'TEST_END_DATE_TIME', 'emore.metadata.test_end_date_time', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata'),
+  ($((ID++)), 'USER_AGENT', 'emore.metadata.user_agent', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_metadata')"
   
-echo "ds_linking - inserting EtM gradcpt data"
+echo "ds_linking - inserting EtM emorecog outcomes"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt'),
-  ($((ID++)), 'SITTING_ID', 'grad.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt'),
-  ($((ID++)), 'PERSON_ID', 'grad.person_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt')"
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'SITTING_ID', 'emore.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'PERSON_ID', 'emore.person_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'SRC_ID', 'emore.src_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'SCORE', 'emore.outcomes.score', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'ACCURACY', 'emore.outcomes.accuracy', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'MEAN_RTC', 'emore.outcomes.mean_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'MEDIAN_RTC', 'emore.outcomes.median_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'SD_RTC', 'emore.outcomes.sd_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'HAPPY_ACCURACY', 'emore.outcomes.happy_accuracy', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'HAPPY_MEAN_RTC', 'emore.outcomes.happy_mean_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'HAPPY_MEDIAN_RTC', 'emore.outcomes.happy_median_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'HAPPY_SD_RTC', 'emore.outcomes.happy_sd_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'ANGRY_ACCURACY', 'emore.outcomes.angry_accuracy', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'ANGRY_MEAN_RTC', 'emore.outcomes.angry_mean_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'ANGRY_MEDIAN_RTC', 'emore.outcomes.angry_median_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'ANGRY_SD_RTC', 'emore.outcomes.angry_sd_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'SAD_ACCURACY', 'emore.outcomes.sad_accuracy', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'SAD_MEAN_RTC', 'emore.outcomes.sad_mean_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'SAD_MEDIAN_RTC', 'emore.outcomes.sad_median_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'SAD_SD_RTC', 'emore.outcomes.sad_sd_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'FEARFUL_ACCURACY', 'emore.outcomes.fearful_accuracy', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'FEARFUL_MEAN_RTC', 'emore.outcomes.fearful_mean_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'FEARFUL_MEDIAN_RTC', 'emore.outcomes.fearful_median_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'FEARFUL_SD_RTC', 'emore.outcomes.fearful_sd_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'FLAG_MEDIAN_RTC', 'emore.outcomes.flag_median_rtc', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'FLAG_SAME_RESPONSE', 'emore.outcomes.flag_same_response', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'FLAG_TRIAL_FLAGS', 'emore.outcomes.flag_trial_flags', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes'),
+  ($((ID++)), 'any_timeouts', 'emore.outcomes.any_timeouts', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` emore', 'Etm_emorecog_outcomes')"
+  
+echo "ds_linking - inserting EtM emorecog trial data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'SITTING_ID', 'emore.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'PERSON_ID', 'emore.person_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'SRC_ID', 'emore.src_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'LINK_ID', 'emore.link_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'TRIAL_ID', 'emore.trial_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'EMOTION', 'emore.emotion', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'RESPONSE', 'emore.response', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'CORRECT', 'emore.correct', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'REACTION_TIME', 'emore.reaction_time', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'STATE', 'emore.state', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'REPEATED', 'emore.repeated', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'FLAGGED', 'emore.flagged', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'IMAGE', 'emore.image', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'TRIAL_TIMESTAMP', 'emore.trial_timestamp', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data')"
+
+echo "ds_linking - inserting EtM flanker metadata"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'SITTING_ID', 'flank.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'PERSON_ID', 'flank.person_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'SRC_ID', 'flank.src_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'RESPONSE_DEVICE', 'flank.metadata.response_device', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'SCREEN_HEIGHT', 'flank.metadata.screen_height', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'SCREEN_WIDTH', 'flank.metadata.screen_width', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TOUCH', 'flank.metadata.touch', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'OPERATING_SYSTEM', 'flank.metadata.operating_system', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_DURATION', 'flank.metadata.test_duration', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_RESTARTED', 'flank.metadata.test_restarted', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_VERSION', 'flank.metadata.test_version', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_NAME', 'flank.metadata.test_name', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_SHORT_NAME', 'flank.metadata.test_short_name', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_LANGUAGE', 'flank.metadata.test_language', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'AOU_VERSION', 'flank.metadata.aou_version', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_PARAMS', 'flank.metadata.test_params', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'USER_UTC_OFFSET', 'flank.metadata.user_utc_offset', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_START_DATE_TIME', 'flank.metadata.test_start_date_time', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'TEST_END_DATE_TIME', 'flank.metadata.test_end_date_time', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata'),
+  ($((ID++)), 'USER_AGENT', 'flank.metadata.user_agent', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_metadata')"
+  
+echo "ds_linking - inserting EtM flanker outcomes"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'SITTING_ID', 'flank.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'PERSON_ID', 'flank.person_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'SRC_ID', 'flank.src_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'SCORE', 'flank.outcomes.score', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'ACCURACY', 'flank.outcomes.accuracy', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'MEAN_RTC', 'flank.outcomes.mean_rtc', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'MEDIAN_RTC', 'flank.outcomes.median_rtc', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'SD_RTC', 'flank.outcomes.sd_rtc', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'MEDIAN_RT_CONGRUENT', 'flank.outcomes.median_rt_congruent', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'ACCURACY_CONGRUENT', 'flank.outcomes.accuracy_congruent', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'RCS_CONGRUENT', 'flank.outcomes.rcs_congruent', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'MEDIAN_RT_INCONGRUENT', 'flank.outcomes.median_rt_incongruent', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'ACCURACY_INCONGRUENT', 'flank.outcomes.accuracy_incongruent', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'RCS_INCONGRUENT', 'flank.outcomes.rcs_incongruent', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'MEDIAN_RT_INTERFERENCE', 'flank.outcomes.median_rt_interference', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'ACCURACY_INTERFERENCE', 'flank.outcomes.accuracy_interference', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'RCS_INTERFERENCE', 'flank.outcomes.rcs_interference', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'FLAG_MEDIAN_RTC', 'flank.outcomes.flag_median_rtc', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'FLAG_ACCURACY', 'flank.outcomes.flag_accuracy', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'FLAG_TRIAL_FLAGS', 'flank.outcomes.flag_trial_flags', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes'),
+  ($((ID++)), 'ANY_TIMEOUTS', 'flank.outcomes.any_timeouts', 'FROM \`\${projectId}.\${dataSetId}.flanker\` flank', 'Etm_flanker_outcomes')"
+  
+echo "ds_linking - inserting EtM flanker trial data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'SITTING_ID', 'flank.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'PERSON_ID', 'flank.person_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'SRC_ID', 'flank.src_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'LINK_ID', 'flank.link_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'TRIAL_ID', 'flank.trial_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'TRIAL_TYPE', 'flank.trial_type', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'TRIAL_BLOCK', 'flank.trial_block', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'TARGET', 'flank.target', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'FLANKERS', 'flank.flankers', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'CONGRUENT', 'flank.congruent', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'RESPONSE', 'flank.response', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'CORRECT', 'flank.correct', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'REACTION_TIME', 'flank.reaction_time', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'STATE', 'flank.state', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'REPEATED', 'flank.repeated', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'FLAGGED', 'flank.flagged', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'TRIAL_TIMESTAMP', 'flank.trial_timestamp', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data')"
+  
+echo "ds_linking - inserting EtM gradcpt metadata"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'SITTING_ID', 'grad.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'PERSON_ID', 'grad.person_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'SRC_ID', 'grad.src_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'RESPONSE_DEVICE', 'grad.metadata.response_device', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'SCREEN_HEIGHT', 'grad.metadata.screen_height', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'SCREEN_WIDTH', 'grad.metadata.screen_width', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TOUCH', 'grad.metadata.touch', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'OPERATING_SYSTEM', 'grad.metadata.operating_system', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_DURATION', 'grad.metadata.test_duration', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_RESTARTED', 'grad.metadata.test_restarted', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_VERSION', 'grad.metadata.test_version', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_NAME', 'grad.metadata.test_name', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_SHORT_NAME', 'grad.metadata.test_short_name', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_LANGUAGE', 'grad.metadata.test_language', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'AOU_VERSION', 'grad.metadata.aou_version', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_PARAMS', 'grad.metadata.test_params', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'USER_UTC_OFFSET', 'grad.metadata.user_utc_offset', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_START_DATE_TIME', 'grad.metadata.test_start_date_time', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'TEST_END_DATE_TIME', 'grad.metadata.test_end_date_time', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata'),
+  ($((ID++)), 'USER_AGENT', 'grad.metadata.user_agent', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_metadata')"
+  
+echo "ds_linking - inserting EtM gradcpt outcomes"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'SITTING_ID', 'grad.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'PERSON_ID', 'grad.person_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'SRC_ID', 'grad.src_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'CV_RTC', 'grad.outcomes.cv_rtc', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'ACCURACY', 'grad.outcomes.accuracy', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'MEAN_RTC', 'grad.outcomes.mean_rtc', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'MEDIAN_RTC', 'grad.outcomes.median_rtc', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'SD_RTC', 'grad.outcomes.sd_rtc', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'GO_ACCURACY', 'grad.outcomes.go_accuracy', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'NOGO_ACCURACY', 'grad.outcomes.nogo_accuracy', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'SCORE', 'grad.outcomes.score', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'DPRIME', 'grad.outcomes.dprime', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'CRIT', 'grad.outcomes.crit', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'FLAG_TRIAL_FLAGS', 'grad.outcomes.flag_trial_flags', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'FLAG_NON_RESPONSE', 'grad.outcomes.flag_non_response', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes'),
+  ($((ID++)), 'FLAG_OMISSION_ERROR_RATE', 'grad.outcomes.flag_omission_error_rate', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` grad', 'Etm_gradcpt_outcomes')"
+  
+echo "ds_linking - inserting EtM gradcpt trial data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'SITTING_ID', 'grad.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'PERSON_ID', 'grad.person_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'SRC_ID', 'grad.src_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'LINK_ID', 'grad.link_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'TRIAL_ID', 'grad.trial_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'TRIAL_TYPE', 'grad.trial_type', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'GO', 'grad.go', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'TRIAL_LENGTH', 'grad.trial_length', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'CORRECT', 'grad.correct', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'REACTION_TIME', 'grad.reaction_time', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'IMAGE_OPACITY', 'grad.image_opacity', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'RESPONSE_TYPE', 'grad.response_type', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'RESPONSE_CODE', 'grad.response_code', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'STATE', 'grad.state', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'FLAGGED', 'grad.flagged', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'IMAGE', 'grad.image', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'TRIAL_TIMESTAMP', 'grad.trial_timestamp', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'RESPONSE_TIMESTAMP', 'grad.response_timestamp', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data')"

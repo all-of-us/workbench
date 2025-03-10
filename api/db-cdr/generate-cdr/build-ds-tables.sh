@@ -365,33 +365,75 @@ function do_COPE_and_PFHH(){
   SELECT sitting_id, person_id, src_id, outcomes.score, outcomes.accuracy, outcomes.mean_rtc, outcomes.median_rtc, outcomes.sd_rtc, outcomes.happy_accuracy, outcomes.happy_mean_rtc, outcomes.happy_median_rtc, outcomes.happy_sd_rtc, outcomes.angry_accuracy, outcomes.angry_mean_rtc, outcomes.angry_median_rtc, outcomes.angry_sd_rtc, outcomes.sad_accuracy, outcomes.sad_mean_rtc, outcomes.sad_median_rtc, outcomes.sad_sd_rtc, outcomes.fearful_accuracy, outcomes.fearful_mean_rtc, outcomes.fearful_median_rtc, outcomes.fearful_sd_rtc, outcomes.flag_median_rtc, outcomes.flag_same_response, outcomes.flag_trial_flags, outcomes.any_timeouts
   FROM \`$BQ_PROJECT.$BQ_DATASET.emorecog\`"
     
-  echo "ds_emorecog_trail_data - inserting data for emorecog trail data"
+  echo "ds_emorecog_trial_data - inserting data for emorecog trial data"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_emorecog_trail_data\`
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_emorecog_trial_data\`
     (sitting_id, person_id, src_id, link_id, trial_id, emotion, response, correct, reaction_time, state, repeated, flagged, image, trial_timestamp)
   SELECT sitting_id, person_id, src_id, link_id, trial_id, emotion, response, correct, reaction_time, state, repeated, flagged, image, trial_timestamp
   FROM \`$BQ_PROJECT.$BQ_DATASET.emorecog\` CROSS JOIN UNNEST(trial_data)" 
   
-  echo "ds_flanker - inserting data for flanker survey"
+  echo "ds_flanker_metadata - inserting data for flanker metadata"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_flanker\`
-     (sitting_id, person_id)
-  SELECT sitting_id, person_id
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_flanker_metadata\`
+     (sitting_id, person_id, src_id, response_device, screen_height, screen_width, touch, operating_system, test_duration, test_restarted, test_version, test_name, test_short_name, test_language, aou_version, test_params, test_start_date_time, test_end_date_time, user_agent, user_utc_offset)
+  SELECT sitting_id, person_id, src_id, metadata.response_device, metadata.screen_height, metadata.screen_width, metadata.touch, metadata.operating_system, metadata.test_duration, metadata.test_restarted, metadata.test_version, metadata.test_name, metadata.test_short_name, metadata.test_language, metadata.aou_version, metadata.test_params, metadata.test_start_date_time, metadata.test_end_date_time, metadata.user_agent, metadata.user_utc_offset
   FROM \`$BQ_PROJECT.$BQ_DATASET.flanker\`"
   
-  echo "ds_gradcpt - inserting data for gradcpt survey"
+  echo "ds_flanker_outcomes - inserting data for flanker outcomes"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_gradcpt\`
-     (sitting_id, person_id)
-  SELECT sitting_id, person_id
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_flanker_outcomes\`
+     (sitting_id, person_id, src_id, score, accuracy, mean_rtc, median_rtc, sd_rtc, median_rt_congruent, accuracy_congruent, rcs_congruent, median_rt_incongruent, accuracy_incongruent, rcs_incongruent, median_rt_interference, accuracy_interference, rcs_interference, flag_median_rtc, flag_accuracy, flag_trial_flags, any_timeouts)
+  SELECT sitting_id, person_id, src_id, outcomes.score, outcomes.accuracy, outcomes.mean_rtc, outcomes.median_rtc, outcomes.sd_rtc, outcomes.median_rt_congruent, outcomes.accuracy_congruent, outcomes.rcs_congruent, outcomes.median_rt_incongruent, outcomes.accuracy_incongruent, outcomes.rcs_incongruent, outcomes.median_rt_interference, outcomes.accuracy_interference, outcomes.rcs_interference, outcomes.flag_median_rtc, outcomes.flag_accuracy, outcomes.flag_trial_flags, outcomes.any_timeouts
+  FROM \`$BQ_PROJECT.$BQ_DATASET.flanker\`"
+  
+  echo "ds_flanker_trial_data - inserting data for flanker trial_data"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_flanker_trial_data\`
+     (sitting_id, person_id, src_id, link_id, trial_id, trial_type, trial_block, target, flankers, congruent, response, correct, reaction_time, state, repeated, flagged, trial_timestamp)
+  SELECT sitting_id, person_id, src_id, link_id, trial_id, trial_type, trial_block, target, flankers, congruent, response, correct, reaction_time, state, repeated, flagged, trial_timestamp
+  FROM \`$BQ_PROJECT.$BQ_DATASET.flanker\` CROSS JOIN UNNEST(trial_data)"
+  
+  echo "ds_gradcpt_metadata - inserting data for gradcpt metadata"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_gradcpt_metadata\`
+     (sitting_id, person_id, src_id, response_device, screen_height, screen_width, touch, operating_system, test_duration, test_restarted, test_version, test_name, test_short_name, test_language, aou_version, test_params, test_start_date_time, test_end_date_time, user_agent, user_utc_offset)
+  SELECT sitting_id, person_id, src_id, metadata.response_device, metadata.screen_height, metadata.screen_width, metadata.touch, metadata.operating_system, metadata.test_duration, metadata.test_restarted, metadata.test_version, metadata.test_name, metadata.test_short_name, metadata.test_language, metadata.aou_version, metadata.test_params, metadata.test_start_date_time, metadata.test_end_date_time, metadata.user_agent, metadata.user_utc_offset
   FROM \`$BQ_PROJECT.$BQ_DATASET.gradcpt\`"
   
-  echo "ds_delaydiscounting - inserting data for delaydiscounting survey"
+  echo "ds_gradcpt_outcomes - inserting data for gradcpt outcomes"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_delaydiscounting\`
-     (sitting_id, person_id)
-  SELECT sitting_id, person_id
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_gradcpt_outcomes\`
+     (sitting_id, person_id, src_id, cv_rtc, accuracy, mean_rtc, median_rtc, sd_rtc, go_accuracy, nogo_accuracy, score, dprime, crit, flag_trial_flags, flag_non_response, flag_omission_error_rate)
+  SELECT sitting_id, person_id, src_id, outcomes.cv_rtc, outcomes.accuracy, outcomes.mean_rtc, outcomes.median_rtc, outcomes.sd_rtc, outcomes.go_accuracy, outcomes.nogo_accuracy, outcomes.score, outcomes.dprime, outcomes.crit, outcomes.flag_trial_flags, outcomes.flag_non_response, outcomes.flag_omission_error_rate
+  FROM \`$BQ_PROJECT.$BQ_DATASET.gradcpt\`"
+  
+  echo "ds_gradcpt_trial_data - inserting data for gradcpt trial_data"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_gradcpt_metadata_trial_data\`
+     (sitting_id, person_id, src_id, link_id, trial_id, trial_type, go, trial_length, correct, reaction_time, image_opacity, response_type, response_code, state, flagged, image, trial_timestamp, response_timestamp)
+  SELECT sitting_id, person_id, src_id, link_id, trial_id, trial_type, go, trial_length, correct, reaction_time, image_opacity, response_type, response_code, state, flagged, image, trial_timestamp, response_timestamp
+  FROM \`$BQ_PROJECT.$BQ_DATASET.gradcpt\` CROSS JOIN UNNEST(trial_data)"
+  
+  echo "ds_delaydiscounting_metadata - inserting data for delaydiscounting metadata"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_delaydiscounting_metadata\`
+     (sitting_id, person_id, src_id, response_device, screen_height, screen_width, touch, operating_system, test_duration, test_restarted, test_version, test_name, test_short_name, test_language, aou_version, test_params, user_utc_offset, test_start_date_time, test_end_date_time, user_agent)
+  SELECT sitting_id, person_id, src_id, metadata.response_device, metadata.screen_height, metadata.screen_width, metadata.touch, metadata.operating_system, metadata.test_duration, metadata.test_restarted, metadata.test_version, metadata.test_name, metadata.test_short_name, metadata.test_language, metadata.aou_version, metadata.test_params, metadata.user_utc_offset, metadata.test_start_date_time, metadata.test_end_date_time, metadata.user_agent
   FROM \`$BQ_PROJECT.$BQ_DATASET.delaydiscounting\`"
+  
+  echo "ds_delaydiscounting_outcomes - inserting data for delaydiscounting outcomes"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_delaydiscounting_outcomes\`
+     (sitting_id, person_id, src_id, score, catch_score, lnk, two_weeks_lnk, one_month_lnk, one_year_lnk, ten_years_lnk, flag_catch_trials, any_timeouts, mean_rt, median_rt, sd_rt, flag_median_rt)
+  SELECT sitting_id, person_id, src_id, outcomes.score, outcomes.catch_score, outcomes.lnk, outcomes.two_weeks_lnk, outcomes.one_month_lnk, outcomes.one_year_lnk, outcomes.ten_years_lnk, outcomes.flag_catch_trials, outcomes.any_timeouts, outcomes.mean_rt, outcomes.median_rt, outcomes.sd_rt, outcomes.flag_median_rt
+  FROM \`$BQ_PROJECT.$BQ_DATASET.delaydiscounting\`"
+  
+  echo "ds_delaydiscounting_trial_data - inserting data for delaydiscounting trial_data"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_delaydiscounting_trial_data\`
+     (sitting_id, person_id, src_id, link_id, trial_id, trial_type, type_num, delay_time, delay_time_days, response, present_amount, future_amount, catch_correct, current_k, reaction_time, state, repeated, trial_timestamp)
+  SELECT sitting_id, person_id, src_id, link_id, trial_id, trial_type, type_num, delay_time, delay_time_days, response, present_amount, future_amount, catch_correct, current_k, reaction_time, state, repeated, trial_timestamp
+  FROM \`$BQ_PROJECT.$BQ_DATASET.delaydiscounting\` CROSS JOIN UNNEST(trial_data)"
 }
 
 function do_PFHH(){

@@ -52,10 +52,21 @@ public enum BigQueryDataSetTableInfo {
       Domain.FITBIT_SLEEP_DAILY_SUMMARY, "ds_sleep_daily_summary", null, null),
   FITBIT_SLEEP_LEVEL(Domain.FITBIT_SLEEP_LEVEL, "ds_sleep_level", null, null),
   FITBIT_DEVICE(Domain.FITBIT_DEVICE, "ds_fitbit_device", null, null),
-  ETM_DELAYDISCOUNTING(Domain.ETM_DELAYDISCOUNTING, "ds_delaydiscounting", null, null),
-  ETM_EMORECOG(Domain.ETM_EMORECOG, "ds_emorecog", null, null),
-  ETM_FLANKER(Domain.ETM_FLANKER, "ds_flanker", null, null),
-  ETM_GRADCPT(Domain.ETM_GRADCPT, "ds_gradcpt", null, null),
+  ETM_DELAYDISCOUNTING_METADATA(
+      Domain.ETM_DELAYDISCOUNTING_METADATA, "ds_delaydiscounting_metadata", null, null),
+  ETM_DELAYDISCOUNTING_OUTCOMES(
+      Domain.ETM_DELAYDISCOUNTING_OUTCOMES, "ds_delaydiscounting_outcomes", null, null),
+  ETM_DELAYDISCOUNTING_TRIAL_DATA(
+      Domain.ETM_DELAYDISCOUNTING_TRIAL_DATA, "ds_delaydiscounting_trail_data", null, null),
+  ETM_EMORECOG_METADATA(Domain.ETM_EMORECOG_METADATA, "ds_emorecog_metadata", null, null),
+  ETM_EMORECOG_OUTCOMES(Domain.ETM_EMORECOG_OUTCOMES, "ds_emorecog_outcomes", null, null),
+  ETM_EMORECOG_TRIAL_DATA(Domain.ETM_EMORECOG_TRIAL_DATA, "ds_emorecog_trial_data", null, null),
+  ETM_FLANKER_METADATA(Domain.ETM_FLANKER_METADATA, "ds_flanker_metadata", null, null),
+  ETM_FLANKER_OUTCOMES(Domain.ETM_FLANKER_OUTCOMES, "ds_flanker_outcomes", null, null),
+  ETM_FLANKER_TRIAL_DATA(Domain.ETM_FLANKER_TRIAL_DATA, "ds_flanker_trial_data", null, null),
+  ETM_GRADCPT_METADATA(Domain.ETM_GRADCPT_METADATA, "ds_gradcpt_metadata", null, null),
+  ETM_GRADCPT_OUTCOMES(Domain.ETM_GRADCPT_OUTCOMES, "ds_gradcpt_outcomes", null, null),
+  ETM_GRADCPT_TRIAL_DATA(Domain.ETM_GRADCPT_TRIAL_DATA, "ds_gradcpt_trial_data", null, null),
   ZIP_CODE_SOCIOECONOMIC(Domain.ZIP_CODE_SOCIOECONOMIC, "ds_zip_code_socioeconomic", null, null),
   VISIT(
       Domain.VISIT,

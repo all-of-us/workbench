@@ -160,10 +160,18 @@ public class DataSetServiceImpl implements DataSetService {
           Domain.FITBIT_DEVICE,
           Domain.WHOLE_GENOME_VARIANT,
           Domain.ZIP_CODE_SOCIOECONOMIC,
-          Domain.ETM_DELAYDISCOUNTING,
-          Domain.ETM_EMORECOG,
-          Domain.ETM_FLANKER,
-          Domain.ETM_GRADCPT);
+          Domain.ETM_DELAYDISCOUNTING_METADATA,
+          Domain.ETM_DELAYDISCOUNTING_OUTCOMES,
+          Domain.ETM_DELAYDISCOUNTING_TRIAL_DATA,
+          Domain.ETM_EMORECOG_METADATA,
+          Domain.ETM_EMORECOG_OUTCOMES,
+          Domain.ETM_EMORECOG_TRIAL_DATA,
+          Domain.ETM_FLANKER_METADATA,
+          Domain.ETM_FLANKER_OUTCOMES,
+          Domain.ETM_FLANKER_TRIAL_DATA,
+          Domain.ETM_GRADCPT_METADATA,
+          Domain.ETM_GRADCPT_OUTCOMES,
+          Domain.ETM_GRADCPT_TRIAL_DATA);
 
   private static final ImmutableList<Domain> CONCEPT_SET_TYPE_WITH_MULTIPLE_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);
