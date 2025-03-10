@@ -159,7 +159,19 @@ public class DataSetServiceImpl implements DataSetService {
           Domain.FITBIT_SLEEP_LEVEL,
           Domain.FITBIT_DEVICE,
           Domain.WHOLE_GENOME_VARIANT,
-          Domain.ZIP_CODE_SOCIOECONOMIC);
+          Domain.ZIP_CODE_SOCIOECONOMIC,
+          Domain.ETM_DELAYDISCOUNTING_METADATA,
+          Domain.ETM_DELAYDISCOUNTING_OUTCOMES,
+          Domain.ETM_DELAYDISCOUNTING_TRIAL_DATA,
+          Domain.ETM_EMORECOG_METADATA,
+          Domain.ETM_EMORECOG_OUTCOMES,
+          Domain.ETM_EMORECOG_TRIAL_DATA,
+          Domain.ETM_FLANKER_METADATA,
+          Domain.ETM_FLANKER_OUTCOMES,
+          Domain.ETM_FLANKER_TRIAL_DATA,
+          Domain.ETM_GRADCPT_METADATA,
+          Domain.ETM_GRADCPT_OUTCOMES,
+          Domain.ETM_GRADCPT_TRIAL_DATA);
 
   private static final ImmutableList<Domain> CONCEPT_SET_TYPE_WITH_MULTIPLE_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);
@@ -176,6 +188,8 @@ public class DataSetServiceImpl implements DataSetService {
           .put(PrePackagedConceptSetEnum.SURVEY_SDOH, 40192389L)
           .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, 1741006L)
           .put(PrePackagedConceptSetEnum.SURVEY_PFHH, 1740639L)
+          .put(PrePackagedConceptSetEnum.SURVEY_EMOTIONAL_HEALTH, 1703970L)
+          .put(PrePackagedConceptSetEnum.SURVEY_BEHAVIORAL_HEALTH, 1703870L)
           .build();
 
   private final BidiMap<String, Domain> TANAGRA_DOMAIN_MAP =

@@ -59,8 +59,8 @@
     },
     "cdrv8plus": {
       "methodNamespace": "aouwgscohortextraction-test",
-      "methodName": "echo-prototyping",
-      "methodRepoVersion": 18,
+      "methodName": "GvsExtractCohortFromSampleNamesV8",
+      "methodRepoVersion": 3,
       "methodLogicalVersion": 1
     }
   },

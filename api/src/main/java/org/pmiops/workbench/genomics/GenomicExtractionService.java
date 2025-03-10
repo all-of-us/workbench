@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,9 +171,10 @@ public class GenomicExtractionService {
                   }
 
                   if (isTerminal(status)) {
-                    dbSubmission.setCompletionTime(
-                        CommonMappers.timestamp(
-                            firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
+                    OffsetDateTime completionTime =
+                        firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate();
+                    Timestamp completionTimestamp = convertToSystemTimestamp(completionTime);
+                    dbSubmission.setCompletionTime(completionTimestamp);
                   }
 
                   if (TerraJobStatus.FAILED.equals(status) && !status.equals(oldStatus)) {
@@ -187,6 +189,16 @@ public class GenomicExtractionService {
               }
             })
         .toList();
+  }
+
+  // Convert a given offset date time to a timestamp in the system's default time zone.
+  private Timestamp convertToSystemTimestamp(OffsetDateTime offsetDateTime) {
+    if (offsetDateTime == null) {
+      return null;
+    }
+    OffsetDateTime dateTimeInSystemOffset =
+        offsetDateTime.atZoneSameInstant(Clock.systemDefaultZone().getZone()).toOffsetDateTime();
+    return CommonMappers.timestamp(dateTimeInSystemOffset);
   }
 
   private Long getWorkflowSize(FirecloudSubmission firecloudSubmission) throws ApiException {
@@ -253,7 +265,7 @@ public class GenomicExtractionService {
             dbSubmission.getTerraSubmissionDate().toInstant(),
             dbSubmission.getCompletionTime().toInstant());
     return Stream.of(
-        JiraContent.text(String.format("Terra job details (as pmi-ops.org user):\n")),
+        JiraContent.text("Terra job details (as pmi-ops.org user):\n"),
         JiraContent.link(
             String.format(
                 "%s#workspaces/%s/%s/job_history/%s",
@@ -508,8 +520,9 @@ public class GenomicExtractionService {
     dbSubmission.setDataset(dataSet);
     dbSubmission.setCreator(userProvider.get());
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    dbSubmission.setTerraSubmissionDate(
-        CommonMappers.timestamp(submissionResponse.getSubmissionDate()));
+    OffsetDateTime submissionDate = submissionResponse.getSubmissionDate();
+    Timestamp timestamp = convertToSystemTimestamp(submissionDate);
+    dbSubmission.setTerraSubmissionDate(timestamp);
     dbSubmission.setTerraStatusEnum(TerraJobStatus.RUNNING);
     dbSubmission.setSampleCount((long) personIds.size());
     dbSubmission.setOutputDir(outputDir);

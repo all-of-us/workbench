@@ -6734,6 +6734,18 @@ components:
       - ETM_EMORECOG
       - ETM_FLANKER
       - ETM_GRADCPT
+      - ETM_DELAYDISCOUNTING_METADATA
+      - ETM_DELAYDISCOUNTING_OUTCOMES
+      - ETM_DELAYDISCOUNTING_TRIAL_DATA
+      - ETM_EMORECOG_METADATA
+      - ETM_EMORECOG_OUTCOMES
+      - ETM_EMORECOG_TRIAL_DATA
+      - ETM_FLANKER_METADATA
+      - ETM_FLANKER_OUTCOMES
+      - ETM_FLANKER_TRIAL_DATA
+      - ETM_GRADCPT_METADATA
+      - ETM_GRADCPT_OUTCOMES
+      - ETM_GRADCPT_TRIAL_DATA
     Surveys:
       type: string
       description: a survey for concepts
@@ -6882,6 +6894,8 @@ components:
           description: The public release number for the CDR version. This is consistent across tiers 
             and environments unlike cdrVersionId
           format: int64
+        hasMHWBAndETMData:
+          type: boolean
     DomainCard:
       required:
       - category
@@ -8081,6 +8095,8 @@ components:
       - SURVEY_SDOH
       - SURVEY_COVID_VACCINE
       - SURVEY_PFHH
+      - SURVEY_EMOTIONAL_HEALTH
+      - SURVEY_BEHAVIORAL_HEALTH
       - FITBIT
       - FITBIT_HEART_RATE_SUMMARY
       - FITBIT_HEART_RATE_LEVEL
@@ -8092,6 +8108,18 @@ components:
       - WHOLE_GENOME
       - BOTH
       - ZIP_CODE_SOCIOECONOMIC
+      - ETM_DELAYDISCOUNTING_METADATA
+      - ETM_DELAYDISCOUNTING_OUTCOMES
+      - ETM_DELAYDISCOUNTING_TRIAL_DATA
+      - ETM_EMORECOG_METADATA
+      - ETM_EMORECOG_OUTCOMES
+      - ETM_EMORECOG_TRIAL_DATA
+      - ETM_FLANKER_METADATA
+      - ETM_FLANKER_OUTCOMES
+      - ETM_FLANKER_TRIAL_DATA
+      - ETM_GRADCPT_METADATA
+      - ETM_GRADCPT_OUTCOMES
+      - ETM_GRADCPT_TRIAL_DATA
     DataSetExportRequest:
       required:
       - dataSetRequest

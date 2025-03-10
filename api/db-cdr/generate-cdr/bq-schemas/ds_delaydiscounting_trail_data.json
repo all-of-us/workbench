@@ -1,0 +1,74 @@
+[
+  {
+    "name": "SITTING_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SRC_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "LINK_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "TRAIL_ID",
+    "type": "STRING"
+  },
+  {
+    "name": "TRAIL_TYPE",
+    "type": "STRING"
+  },
+  {
+    "name": "TYPE_NUM",
+    "type": "INTEGER"
+  },
+  {
+    "name": "DELAY_TIME",
+    "type": "STRING"
+  },
+  {
+    "name": "DELAY_TIME_DAYS",
+    "type": "FLOAT"
+  },
+  {
+    "name": "RESPONSE",
+    "type": "STRING"
+  },
+  {
+    "name": "PRESENT_AMOUNT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FUTURE_AMOUNT",
+    "type": "INTEGER"
+  },
+  {
+    "name": "CATCH_CORRECT",
+    "type": "INTEGER"
+  },
+  {
+    "name": "CURRENT_K",
+    "type": "FLOAT"
+  },
+  {
+    "name": "REACTION_TIME",
+    "type": "FLOAT"
+  },
+  {
+    "name": "STATE",
+    "type": "STRING"
+  },
+  {
+    "name": "REPEATED",
+    "type": "INTEGER"
+  },
+  {
+    "name": "TRIAL_TIMESTAMP",
+    "type": "TIMESTAMP"
+  }
+]
