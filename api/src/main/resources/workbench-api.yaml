@@ -71,6 +71,7 @@ paths:
       - status-alert
       description: Returns status alert information if any exists.
       operationId: getStatusAlert
+      security: []
       responses:
         200:
           description: A status alert information object.
@@ -9538,8 +9539,7 @@ components:
           type: string
           description: A URL linking to an incident report where users can read more
         alertLocation:
-          type: $ref: '#/components/schemas/StatusAlertLocation'
-          description: Where the status alert should be shown
+          $ref: '#/components/schemas/StatusAlertLocation'
     SumologicEgressEventRequest:
       type: object
       properties:

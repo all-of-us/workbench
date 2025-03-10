@@ -2,6 +2,7 @@ package org.pmiops.workbench.statusalerts;
 
 import org.pmiops.workbench.db.model.DbStatusAlert;
 import org.pmiops.workbench.model.StatusAlert;
+import org.pmiops.workbench.model.StatusAlertLocation;
 
 public class StatusAlertConversionUtils {
   public static StatusAlert toApiStatusAlert(DbStatusAlert statusAlert) {
@@ -10,7 +11,7 @@ public class StatusAlertConversionUtils {
         .title(statusAlert.getTitle())
         .message(statusAlert.getMessage())
         .link(statusAlert.getLink())
-        .type(statusAlert.getType());
+        .alertLocation(StatusAlertLocation.valueOf(statusAlert.getAlertLocation()));
   }
 
   public static DbStatusAlert toDbStatusAlert(StatusAlert statusAlert) {
@@ -21,7 +22,7 @@ public class StatusAlertConversionUtils {
     dbStatusAlert.setLink(statusAlert.getLink());
     dbStatusAlert.setMessage(statusAlert.getMessage());
     dbStatusAlert.setTitle(statusAlert.getTitle());
-    dbStatusAlert.setType(statusAlert.getType());
+    dbStatusAlert.setAlertLocation(statusAlert.getAlertLocation().name());
     return dbStatusAlert;
   }
 }

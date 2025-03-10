@@ -14,7 +14,7 @@ public class DbStatusAlert {
   private String title;
   private String message;
   private String link;
-  private String type;
+  private String alertLocation;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,13 +58,13 @@ public class DbStatusAlert {
     return this;
   }
 
-  @Column(name = "type")
-  public String getType() {
-    return type;
+  @Column(name = "alert_location")
+  public String getAlertLocation() {
+    return alertLocation;
   }
 
-  public DbStatusAlert setType(String type) {
-    this.type = type;
+  public DbStatusAlert setAlertLocation(String alertLocation) {
+    this.alertLocation = alertLocation;
     return this;
   }
 }
