@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.model.StatusAlert;
+import org.pmiops.workbench.model.StatusAlertLocation;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -19,8 +20,8 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 public class StatusAlertControllerTest {
   private static final Instant NOW = Instant.now();
-  private String STATUS_ALERT_INITIAL_TITLE = "Hello World";
-  private String STATUS_ALERT_INITIAL_DESCRIPTION = "Status alert description";
+  private final String STATUS_ALERT_INITIAL_TITLE = "Hello World";
+  private final String STATUS_ALERT_INITIAL_DESCRIPTION = "Status alert description";
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @Autowired private StatusAlertController statusAlertController;
@@ -39,7 +40,8 @@ public class StatusAlertControllerTest {
     StatusAlert initialStatusAlert =
         new StatusAlert()
             .title(STATUS_ALERT_INITIAL_TITLE)
-            .message(STATUS_ALERT_INITIAL_DESCRIPTION);
+            .message(STATUS_ALERT_INITIAL_DESCRIPTION)
+            .alertLocation(StatusAlertLocation.AFTER_LOGIN);
     statusAlertController.postStatusAlert(initialStatusAlert);
   }
 
@@ -48,6 +50,7 @@ public class StatusAlertControllerTest {
     StatusAlert statusAlert = statusAlertController.getStatusAlert().getBody();
     assertThat(statusAlert.getTitle()).matches(STATUS_ALERT_INITIAL_TITLE);
     assertThat(statusAlert.getMessage()).matches(STATUS_ALERT_INITIAL_DESCRIPTION);
+    assertThat(statusAlert.getAlertLocation()).isEqualTo(StatusAlertLocation.AFTER_LOGIN);
   }
 
   @Test
@@ -59,11 +62,13 @@ public class StatusAlertControllerTest {
         new StatusAlert()
             .title(updatedStatusAlertTitle)
             .message(updatedStatusAlertDescription)
-            .link(updatedStatusAlertLink);
+            .link(updatedStatusAlertLink)
+            .alertLocation(StatusAlertLocation.AFTER_LOGIN);
     statusAlertController.postStatusAlert(statusAlert);
     StatusAlert updatedStatusAlert = statusAlertController.getStatusAlert().getBody();
     assertThat(updatedStatusAlert.getTitle()).matches(updatedStatusAlertTitle);
     assertThat(updatedStatusAlert.getMessage()).matches(updatedStatusAlertDescription);
     assertThat(updatedStatusAlert.getLink()).matches(updatedStatusAlertLink);
+    assertThat(updatedStatusAlert.getAlertLocation()).isEqualTo(StatusAlertLocation.AFTER_LOGIN);
   }
 }
