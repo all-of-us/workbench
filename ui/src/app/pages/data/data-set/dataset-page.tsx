@@ -45,6 +45,7 @@ import {
 } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CircleWithText } from 'app/icons/circleWithText';
+import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
 import { dataTabPath } from 'app/routing/utils';
@@ -679,6 +680,18 @@ const prepackagedAllSurveyConceptSetToString = {
   FITBIT_DEVICE: 'Fitbit Device',
   WHOLE_GENOME: 'Short Read Whole Genome Sequencing Data',
   ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
+  ETM_EMORECOG_METADATA: 'EtM Guess the Emotionn Metadata',
+  ETM_EMORECOG_OUTCOMES: 'EtM Guess the Emotionn Outcomes',
+  ETM_EMORECOG_TRIAL_DATA: 'EtM Guess the Emotionn Trial Data',
+  ETM_FLANKER_METADATA: 'EtM Left or Right Metadata',
+  ETM_FLANKER_OUTCOMES: 'EtM Left or Right Outcomes',
+  ETM_FLANKER_TRIAL_DATA: 'EtM Left or Right Trial Data',
+  ETM_GRADCPT_METADATA: 'EtM City or Mountain Metadata',
+  ETM_GRADCPT_OUTCOMES: 'EtM City or Mountain Outcomes',
+  ETM_GRADCPT_TRIAL_DATA: 'EtM City or Mountain Trial Data',
+  ETM_DELAYDISCOUNTING_METADATA: 'EtM Now or Later Metadata',
+  ETM_DELAYDISCOUNTING_OUTCOMES: 'EtM Now or Later Outcomes',
+  ETM_DELAYDISCOUNTING_TRIAL_DATA: 'EtM Now or Later Trial Data',
 };
 
 const prepackagedSurveyConceptSetToString = {
@@ -690,6 +703,8 @@ const prepackagedSurveyConceptSetToString = {
   SURVEY_SDOH: 'Social Determinants of Health',
   SURVEY_COVID_VACCINE: 'COVID-19 Vaccine',
   SURVEY_PFHH: 'Personal and Family Health History',
+  SURVEY_EMOTIONAL_HEALTH: 'Emotional Health History and Well-Being',
+  SURVEY_BEHAVIORAL_HEALTH: 'Behavioral Health and Personality',
 };
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
@@ -697,7 +712,7 @@ const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
 };
 
-const PREPACKAGED_SURVEY_DOMAINS = {
+const PREPACKAGED_BASE_SURVEY_DOMAINS = {
   [PrePackagedConceptSetEnum.SURVEY_BASICS]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_LIFESTYLE]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH]: Domain.SURVEY,
@@ -707,6 +722,34 @@ const PREPACKAGED_SURVEY_DOMAINS = {
   [PrePackagedConceptSetEnum.SURVEY_SDOH]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEY_PFHH]: Domain.SURVEY,
+};
+
+const PREPACKAGED_WITH_MHWB_SURVEY_DOMAINS = {
+  [PrePackagedConceptSetEnum.SURVEY_EMOTIONAL_HEALTH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_BEHAVIORAL_HEALTH]: Domain.SURVEY,
+};
+
+const PREPACKAGED_ETM_DOMAINS = {
+  [PrePackagedConceptSetEnum.ETM_EMORECOG_METADATA]:
+    Domain.ETM_EMORECOG_METADATA,
+  [PrePackagedConceptSetEnum.ETM_EMORECOG_OUTCOMES]:
+    Domain.ETM_EMORECOG_OUTCOMES,
+  [PrePackagedConceptSetEnum.ETM_EMORECOG_TRIAL_DATA]:
+    Domain.ETM_EMORECOG_TRIAL_DATA,
+  [PrePackagedConceptSetEnum.ETM_FLANKER_METADATA]: Domain.ETM_FLANKER_METADATA,
+  [PrePackagedConceptSetEnum.ETM_FLANKER_OUTCOMES]: Domain.ETM_FLANKER_OUTCOMES,
+  [PrePackagedConceptSetEnum.ETM_FLANKER_TRIAL_DATA]:
+    Domain.ETM_FLANKER_TRIAL_DATA,
+  [PrePackagedConceptSetEnum.ETM_GRADCPT_METADATA]: Domain.ETM_GRADCPT_METADATA,
+  [PrePackagedConceptSetEnum.ETM_GRADCPT_OUTCOMES]: Domain.ETM_GRADCPT_OUTCOMES,
+  [PrePackagedConceptSetEnum.ETM_GRADCPT_TRIAL_DATA]:
+    Domain.ETM_GRADCPT_TRIAL_DATA,
+  [PrePackagedConceptSetEnum.ETM_DELAYDISCOUNTING_METADATA]:
+    Domain.ETM_DELAYDISCOUNTING_METADATA,
+  [PrePackagedConceptSetEnum.ETM_DELAYDISCOUNTING_OUTCOMES]:
+    Domain.ETM_DELAYDISCOUNTING_OUTCOMES,
+  [PrePackagedConceptSetEnum.ETM_DELAYDISCOUNTING_TRIAL_DATA]:
+    Domain.ETM_DELAYDISCOUNTING_TRIAL_DATA,
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
@@ -738,6 +781,7 @@ const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
     Domain.ZIP_CODE_SOCIOECONOMIC,
 };
 let PREPACKAGED_DOMAINS = {};
+let PREPACKAGED_SURVEY_DOMAINS = {};
 let prepackagedConceptSetToString = {};
 
 // For converting domain strings to type Domain
@@ -764,6 +808,22 @@ const reverseDomainEnum = {
   FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBIT_SLEEP_DAILY_SUMMARY,
   FITBIT_SLEEP_LEVEL: Domain.FITBIT_SLEEP_LEVEL,
   FITBIT_DEVICE: Domain.FITBIT_DEVICE,
+  ETM_FLANKER: Domain.ETM_FLANKER,
+  ETM_FLANKER_METADATA: Domain.ETM_FLANKER_METADATA,
+  ETM_FLANKER_OUTCOMES: Domain.ETM_FLANKER_OUTCOMES,
+  ETM_FLANKER_TRIAL_DATA: Domain.ETM_FLANKER_TRIAL_DATA,
+  ETM_GRADCPT: Domain.ETM_GRADCPT,
+  ETM_GRADCPT_METADATA: Domain.ETM_GRADCPT_METADATA,
+  ETM_GRADCPT_OUTCOMES: Domain.ETM_GRADCPT_OUTCOMES,
+  ETM_GRADCPT_TRIAL_DATA: Domain.ETM_GRADCPT_TRIAL_DATA,
+  ETM_DELAYDISCOUNTING: Domain.ETM_DELAYDISCOUNTING,
+  ETM_DELAYDISCOUNTING_METADATA: Domain.ETM_DELAYDISCOUNTING_METADATA,
+  ETM_DELAYDISCOUNTING_OUTCOMES: Domain.ETM_DELAYDISCOUNTING_OUTCOMES,
+  ETM_DELAYDISCOUNTING_TRIAL_DATA: Domain.ETM_DELAYDISCOUNTING_TRIAL_DATA,
+  ETM_EMORECOG: Domain.ETM_EMORECOG,
+  ETM_EMORECOG_METADATA: Domain.ETM_EMORECOG_METADATA,
+  ETM_EMORECOG_OUTCOMES: Domain.ETM_EMORECOG_OUTCOMES,
+  ETM_EMORECOG_TRIAL_DATA: Domain.ETM_EMORECOG_TRIAL_DATA,
   PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICAL_MEASUREMENT_CSS,
   WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIP_CODE_SOCIOECONOMIC,
@@ -867,7 +927,19 @@ export const DatasetPage = fp.flow(
         hasFitbitSleepData,
         hasFitbitDeviceData,
         hasWgsData,
+        hasMHWBAndETMData,
       } = getCdrVersion(workspace, cdrVersionTiersResponse);
+      PREPACKAGED_SURVEY_DOMAINS = PREPACKAGED_BASE_SURVEY_DOMAINS;
+      if (hasMHWBAndETMData) {
+        PREPACKAGED_SURVEY_DOMAINS = {
+          ...PREPACKAGED_SURVEY_DOMAINS,
+          ...PREPACKAGED_WITH_MHWB_SURVEY_DOMAINS,
+        };
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_ETM_DOMAINS,
+        };
+      }
       PREPACKAGED_DOMAINS = {
         ...PREPACKAGED_DOMAINS,
         ...PREPACKAGED_SURVEY_DOMAINS,
@@ -1930,7 +2002,7 @@ export const DatasetPage = fp.flow(
                         domainValueSetLookup.has(domain) && (
                           <div key={domain}>
                             <Subheader style={{ fontWeight: 'bold' }}>
-                              {formatDomain(domain)}
+                              {domainToTitle(domain)}
                             </Subheader>
                             {domainValueSetLookup
                               .get(domain)
@@ -2053,7 +2125,7 @@ export const DatasetPage = fp.flow(
                   {fp.toPairs(previewList).map((value) => {
                     const domain: string = value[0];
                     // Strip underscores so we get the correct enum value
-                    const domainEnumValue = Domain[domain.replace(/_/g, '')];
+                    const domainEnumValue = Domain[domain];
                     const previewRow: DataSetPreviewInfo = value[1];
                     return (
                       <TooltipTrigger
@@ -2082,7 +2154,7 @@ export const DatasetPage = fp.flow(
                               wordBreak: 'break-all',
                             }}
                           >
-                            {formatDomainString(domain)}
+                            {domainToTitle(domain)}
                             {previewRow.isLoading && (
                               <Spinner
                                 style={{

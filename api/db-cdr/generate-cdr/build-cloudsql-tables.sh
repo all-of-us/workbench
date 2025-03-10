@@ -154,6 +154,32 @@ if [[ "$minuteCount" > 0 ]]; then
   (1741006,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,8)"
 fi
 
+#  Getting count for Behavioral Health And Personality Survey
+query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+where concept_id = 1703870"
+behavioralHealthCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+if [[ "$behavioralHealthCount" > 0 ]]; then
+  # Insert row for Behavioral Health And Personality Survey
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
+  (concept_id,name,description,question_count,participant_count,order_number)
+  VALUES
+  (1703870,'','Survey includes information about a participant’s behavioral health and personality.',0,0,9)"
+fi
+
+#  Getting count for Emotional Health History and Well-Being Survey
+query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+where concept_id = 1703970"
+emotionalHealthCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+if [[ "$emotionalHealthCount" > 0 ]]; then
+  # Insert row for Emotional Health History and Well-Being Survey
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
+  (concept_id,name,description,question_count,participant_count,order_number)
+  VALUES
+  (1703970,'','Survey includes information about a participant’s emotional and mental health as it relates to anxiety, depression, and stress.',0,0,10)"
+fi
+
 echo "Updating survey names on survey_module from cb_criteria table"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\` sm
