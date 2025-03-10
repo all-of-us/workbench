@@ -10,7 +10,6 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { serverConfigStore } from 'app/utils/stores';
 
 import { LOGIN_ERROR_BANNER } from './login-error-banner';
 
@@ -56,7 +55,6 @@ export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
   useEffect(() => {
     const getAlert = async () => {
       const statusAlert = await statusAlertApi().getStatusAlert();
-      console.log('Status alert:', statusAlert);
       if (statusAlert) {
         setStatusAlertDetails(statusAlert);
       }
