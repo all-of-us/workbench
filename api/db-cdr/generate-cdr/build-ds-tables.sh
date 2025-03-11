@@ -409,7 +409,7 @@ function do_COPE_and_PFHH(){
   
   echo "ds_gradcpt_trial_data - inserting data for gradcpt trial_data"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_gradcpt_metadata_trial_data\`
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_gradcpt_trial_data\`
      (sitting_id, person_id, src_id, link_id, trial_id, trial_type, go, trial_length, correct, reaction_time, image_opacity, response_type, response_code, state, flagged, image, trial_timestamp, response_timestamp)
   SELECT sitting_id, person_id, src_id, link_id, trial_id, trial_type, go, trial_length, correct, reaction_time, image_opacity, response_type, response_code, state, flagged, image, trial_timestamp, response_timestamp
   FROM \`$BQ_PROJECT.$BQ_DATASET.gradcpt\` CROSS JOIN UNNEST(trial_data)"
