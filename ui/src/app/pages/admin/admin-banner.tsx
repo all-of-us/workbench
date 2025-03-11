@@ -137,11 +137,7 @@ export class AdminBanner extends React.Component<
             <TextInput
               disabled={isBeforeLogin || bannerEnabled}
               onChange={(v) => this.setState({ bannerHeadline: v })}
-              value={
-                isBeforeLogin
-                  ? 'Scheduled Downtime Notice for the Researcher Workbench'
-                  : bannerHeadline
-              }
+              value={bannerHeadline}
               data-test-id='banner-headline-input'
               placeholder='Type headline text'
             />
@@ -196,7 +192,13 @@ export class AdminBanner extends React.Component<
               // BEFORE_LOGIN has a fixed hedline, so toggling should clear the headline
               // to help avoid confusion
               onChange={(e) =>
-                this.setState({ alertLocation: e.value, bannerHeadline: '' })
+                this.setState({
+                  alertLocation: e.value,
+                  bannerHeadline:
+                    e.value === BEFORE_LOGIN
+                      ? 'Scheduled Downtime Notice for the Researcher Workbench'
+                      : '',
+                })
               }
             />
           </div>
