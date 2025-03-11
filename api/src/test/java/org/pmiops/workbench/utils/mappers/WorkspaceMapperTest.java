@@ -275,14 +275,14 @@ public class WorkspaceMapperTest {
   }
 
   @Test
-  public void testConvertsFirecloudResponseToApiResponse_3_param_version() {
+  public void testConvertsFirecloudResponseToApiResponse_4_param_version() {
     RawlsWorkspaceListResponse rawlsResponse =
         new RawlsWorkspaceListResponse()
             .workspace(sourceFirecloudWorkspace)
             .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER);
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
-            sourceDbWorkspace, rawlsResponse, initialCreditsService);
+            sourceDbWorkspace, rawlsResponse, null, initialCreditsService);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
 
