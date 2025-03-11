@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { ErrorMessage } from 'app/components/messages';
-import { AoU } from 'app/components/text-wrappers';
 
 interface LoginErrorBannerProps {
   header: string;
