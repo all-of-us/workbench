@@ -4,6 +4,7 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.mapstruct.CollectionMappingStrategy;
@@ -13,9 +14,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.CdrVersion;
+import org.pmiops.workbench.model.InitialCreditResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
@@ -81,6 +84,46 @@ public interface WorkspaceMapper {
       RawlsWorkspaceDetails fcWorkspace,
       @Context InitialCreditsService initialCreditsService);
 
+  // DEPRECATED and subject to deletion.
+  // Make an explicit choice to use either displayName for UI or terraName for Terra calls.
+  @Mapping(target = "name", source = "dbWorkspace.name")
+  @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
+  @Mapping(target = "namespace", source = "dbWorkspace.workspaceNamespace")
+  @Mapping(target = "displayName", source = "dbWorkspace.name")
+  @Mapping(target = "terraName", source = "fcWorkspace.name")
+  @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
+  @Mapping(target = "creatorUser.userName", source = "dbWorkspace.creator.username")
+  // Need to work with security before exposing
+  // Should change to contactEmail or institutionalEmail
+  @Mapping(target = "creatorUser.email", ignore = true)
+  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
+  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
+  @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
+  @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
+  @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
+  @Mapping(target = "billingStatus", source = "dbWorkspace", qualifiedByName = "getBillingStatus")
+  // we can use InitialCreditsService for these fields as well, but it can be more performant
+  // to precompute these values and access them via InitialCreditResponse
+  @Mapping(
+      target = "initialCredits.eligibleForExtension",
+      source = "initialCreditsResponse.eligibleForExtension")
+  @Mapping(
+      target = "initialCredits.expirationEpochMillis",
+      source = "initialCreditsResponse.expirationEpochMillis")
+  @Mapping(
+      target = "initialCredits.extensionEpochMillis",
+      source = "initialCreditsResponse.extensionEpochMillis")
+  @Mapping(
+      target = "initialCredits.expirationBypassed",
+      source = "initialCreditsResponse.expirationBypassed")
+  Workspace toApiWorkspaceWithPrecomputedInitialCreditResponse(
+      DbWorkspace dbWorkspace,
+      RawlsWorkspaceDetails fcWorkspace,
+      InitialCreditResponse initialCreditsResponse,
+      @Context InitialCreditsService initialCreditsService);
+
   @Mapping(
       target = "accessLevel",
       source = "accessLevel",
@@ -91,9 +134,11 @@ public interface WorkspaceMapper {
   default WorkspaceResponse toApiWorkspaceResponse(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceListResponse fcResponse,
-      InitialCreditsService initialCreditsService) {
+      InitialCreditResponse initialCreditsResponse,
+      @Context InitialCreditsService initialCreditsService) {
     return toApiWorkspaceResponse(
-        toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), initialCreditsService),
+        toApiWorkspaceWithPrecomputedInitialCreditResponse(
+            dbWorkspace, fcResponse.getWorkspace(), initialCreditsResponse, initialCreditsService),
         fcResponse.getAccessLevel());
   }
 
@@ -115,19 +160,52 @@ public interface WorkspaceMapper {
     return toApiWorkspaceResponseList(dbWorkspaces, fcWorkspacesByUuid, initialCreditsService);
   }
 
+  @Mapping(
+      target = "eligibleForExtension",
+      source = "creator",
+      qualifiedByName = "checkInitialCreditsExtensionEligibility")
+  @Mapping(
+      target = "expirationEpochMillis",
+      source = "creator",
+      qualifiedByName = "getInitialCreditsExpiration")
+  @Mapping(
+      target = "extensionEpochMillis",
+      source = "creator",
+      qualifiedByName = "getInitialCreditsExtension")
+  @Mapping(
+      target = "expirationBypassed",
+      source = "creator",
+      qualifiedByName = "isInitialCreditExpirationBypassed")
+  @Mapping(target = "exhausted", ignore = true)
+  InitialCreditResponse toCreditsResponse(
+      DbUser creator, @Context InitialCreditsService initialCreditsService);
+
   // safely combines dbWorkspaces and fcWorkspacesByUuid,
   // returning only workspaces which appear in both
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
       List<DbWorkspace> dbWorkspaces,
       Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid,
       InitialCreditsService initialCreditsService) {
+
+    Map<DbUser, InitialCreditResponse> creditsByCreator =
+        dbWorkspaces.stream()
+            .map(DbWorkspace::getCreator)
+            .distinct()
+            .collect(
+                Collectors.toMap(
+                    Function.identity(), user -> toCreditsResponse(user, initialCreditsService)));
+
     return dbWorkspaces.stream()
         .flatMap(
             dbWorkspace ->
                 Stream.ofNullable(fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid()))
                     .map(
                         fcResponse ->
-                            toApiWorkspaceResponse(dbWorkspace, fcResponse, initialCreditsService)))
+                            toApiWorkspaceResponse(
+                                dbWorkspace,
+                                fcResponse,
+                                creditsByCreator.get(dbWorkspace.getCreator()),
+                                initialCreditsService)))
         .toList();
   }
 
