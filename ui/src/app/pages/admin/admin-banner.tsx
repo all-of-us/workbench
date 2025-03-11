@@ -111,6 +111,7 @@ export class AdminBanner extends React.Component<
           }[v] || validate.prettify(v)),
       }
     );
+    const isBeforeLogin = alertLocation === BEFORE_LOGIN;
     return (
       <div style={{ width: '36rem', margin: '1.5rem' }}>
         <BoldHeader style={{ fontSize: 18 }}>Service Banners</BoldHeader>
@@ -118,8 +119,13 @@ export class AdminBanner extends React.Component<
           Banner Headline
         </Header>
         <TextInput
+          disabled={isBeforeLogin}
           onChange={(v) => this.setState({ bannerHeadline: v })}
-          value={bannerHeadline}
+          value={
+            isBeforeLogin
+              ? 'Scheduled Downtime Notice for the Researcher Workbench'
+              : bannerHeadline
+          }
           data-test-id='banner-headline-input'
           placeholder='Type headline text'
         />
@@ -147,7 +153,11 @@ export class AdminBanner extends React.Component<
             { value: BEFORE_LOGIN, label: 'Before Login' },
             { value: AFTER_LOGIN, label: 'After Login' },
           ]}
-          onChange={(e) => this.setState({ alertLocation: e.value })}
+          // BEFORE_LOGIN has a fixed hedline, so toggling should clear the headline
+          // to help avoid confusion
+          onChange={(e) =>
+            this.setState({ alertLocation: e.value, bannerHeadline: '' })
+          }
         />
         <TooltipTrigger
           content={
