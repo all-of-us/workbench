@@ -120,8 +120,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   // https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#
   public static final List<String> FIRECLOUD_WORKSPACE_REQUIRED_FIELDS =
       List.of(
-          "workspace.workspaceId",
           "accessLevel",
+          "workspace.workspaceId",
           "workspace.name",
           "workspace.namespace",
           "workspace.googleProject",
