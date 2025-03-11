@@ -54,8 +54,6 @@ describe('LoginComponent', () => {
       new StatusAlertApiStub(StatusAlertLocation.BEFORE_LOGIN)
     );
     component(loginProps);
-    expect(
-      await screen.findByText(/Scheduled Downtime Notice/i)
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Stub Title/i)).toBeInTheDocument();
   });
 });

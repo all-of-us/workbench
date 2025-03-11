@@ -14,8 +14,8 @@ export class StatusAlertApiStub extends StatusAlertApi {
   public getStatusAlert(): Promise<StatusAlert> {
     const statusAlertStub = {
       statusAlertId: 1,
-      title: 'lol',
-      message: 'lol lol lol',
+      title: 'Stub Title',
+      message: 'This is a stub message.',
       link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       alertLocation: this.alertLocationStub,
     };
