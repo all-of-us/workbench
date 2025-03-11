@@ -1,12 +1,7 @@
 import * as React from 'react';
 
-import {
-  ProfileApi,
-  StatusAlertApi,
-  StatusAlertLocation,
-} from 'generated/fetch';
+import { ProfileApi, StatusAlertApi } from 'generated/fetch';
 
-import { StatusAlertApiStub } from '../../../testing/stubs/status-alert-api-stub';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -15,6 +10,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { renderWithRouter } from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import { StatusAlertApiStub } from 'testing/stubs/status-alert-api-stub';
 
 import { SignIn, SignInProps } from './sign-in';
 
