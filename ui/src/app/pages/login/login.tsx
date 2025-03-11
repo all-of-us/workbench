@@ -11,7 +11,7 @@ import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-import { LOGIN_ERROR_BANNER } from './login-error-banner';
+import { LoginBanner } from './login-banner';
 
 export const styles = reactStyles({
   sign: {
@@ -67,7 +67,7 @@ export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
     <React.Fragment>
       {statusAlertDetails?.alertLocation ===
         StatusAlertLocation.BEFORE_LOGIN && (
-        <LOGIN_ERROR_BANNER
+        <LoginBanner
           header={statusAlertDetails.title}
           details={statusAlertDetails.message}
           moreInfoLink={statusAlertDetails.link}

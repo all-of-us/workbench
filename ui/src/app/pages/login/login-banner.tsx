@@ -8,7 +8,7 @@ interface LoginErrorBannerProps {
   details: string;
   moreInfoLink?: string;
 }
-export const LOGIN_ERROR_BANNER = ({
+export const LoginBanner = ({
   header,
   details,
   moreInfoLink,
@@ -25,7 +25,7 @@ export const LOGIN_ERROR_BANNER = ({
       {header}: {details}{' '}
       {moreInfoLink && (
         <>
-          To learn more, please see the announcement on the User" Support Hub{' '}
+          To learn more, please see the announcement on the User Support Hub{' '}
           <a href={moreInfoLink} target='blank'>
             {' '}
             here
