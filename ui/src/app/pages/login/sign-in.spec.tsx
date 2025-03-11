@@ -1,7 +1,12 @@
 import * as React from 'react';
 
-import { ProfileApi } from 'generated/fetch';
+import {
+  ProfileApi,
+  StatusAlertApi,
+  StatusAlertLocation,
+} from 'generated/fetch';
 
+import { StatusAlertApiStub } from '../../../testing/stubs/status-alert-api-stub';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -92,6 +97,7 @@ describe('SignIn', () => {
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
+    registerApiClient(StatusAlertApi, new StatusAlertApiStub());
     window.scrollTo = () => {};
     props = {
       windowSize: { width: defaultWindowWidth, height: 0 },
