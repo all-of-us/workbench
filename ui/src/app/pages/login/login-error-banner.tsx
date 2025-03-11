@@ -4,9 +4,15 @@ import { ErrorMessage } from 'app/components/messages';
 import { AoU } from 'app/components/text-wrappers';
 
 interface LoginErrorBannerProps {
+  header: string;
   details: string;
+  moreInfoLink?: string;
 }
-export const LOGIN_ERROR_BANNER = ({ details }: LoginErrorBannerProps) => (
+export const LOGIN_ERROR_BANNER = ({
+  header,
+  details,
+  moreInfoLink,
+}: LoginErrorBannerProps) => (
   <div
     style={{
       fontWeight: 800,
@@ -16,16 +22,17 @@ export const LOGIN_ERROR_BANNER = ({ details }: LoginErrorBannerProps) => (
     }}
   >
     <ErrorMessage>
-      Scheduled Downtime Notice for the <AoU /> Researcher Workbench: {details}{' '}
-      To learn more, please see the announcement on the User Support Hub{' '}
-      <a
-        href='https://support.researchallofus.org/hc/en-us/articles/35123782567700'
-        target='blank'
-      >
-        {' '}
-        here
-      </a>
-      .
+      {header}: {details}{' '}
+      {moreInfoLink && (
+        <>
+          To learn more, please see the announcement on the User" Support Hub{' '}
+          <a href={moreInfoLink} target='blank'>
+            {' '}
+            here
+          </a>
+          .
+        </>
+      )}
     </ErrorMessage>
   </div>
 );

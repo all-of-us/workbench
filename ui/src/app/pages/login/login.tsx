@@ -67,7 +67,11 @@ export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
     <React.Fragment>
       {statusAlertDetails?.alertLocation ===
         StatusAlertLocation.BEFORE_LOGIN && (
-        <LOGIN_ERROR_BANNER details={statusAlertDetails.message} />
+        <LOGIN_ERROR_BANNER
+          header={statusAlertDetails.title}
+          details={statusAlertDetails.message}
+          moreInfoLink={statusAlertDetails.link}
+        />
       )}
       <div
         data-test-id='login'
