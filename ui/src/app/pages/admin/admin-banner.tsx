@@ -94,6 +94,7 @@ export class AdminBanner extends React.Component<
         bannerDescription: '',
         bannerHeadline: '',
         readMoreLink: '',
+        alertLocation: AFTER_LOGIN,
       });
     }
   }
