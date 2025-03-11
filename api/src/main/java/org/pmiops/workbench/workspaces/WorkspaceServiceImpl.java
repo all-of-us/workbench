@@ -204,10 +204,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     Duration elapsed = stopwatch.stop().elapsed();
     log.info(
         String.format(
-            "getWorkspacesAsService: Retrieved %d Terra workspaces in %s",
+            "listWorkspacesAsService: Retrieved %d Terra workspaces in %s",
             terraWorkspaces.size(), formatDurationPretty(elapsed)));
-    return workspaceMapper.toApiWorkspaceResponseList(
-        workspaceDao, terraWorkspaces, initialCreditsService);
+
+    stopwatch.reset().start();
+    List<WorkspaceResponse> rwbWorkspaces =
+        workspaceMapper.toApiWorkspaceResponseList(
+            workspaceDao, terraWorkspaces, initialCreditsService);
+    elapsed = stopwatch.stop().elapsed();
+    log.info(
+        String.format(
+            "listWorkspacesAsService: Mapped %d RWB workspaces in %s",
+            rwbWorkspaces.size(), formatDurationPretty(elapsed)));
+
+    return rwbWorkspaces;
   }
 
   @Override
