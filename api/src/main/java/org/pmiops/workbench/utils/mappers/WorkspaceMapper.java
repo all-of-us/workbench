@@ -187,6 +187,7 @@ public interface WorkspaceMapper {
       Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid,
       InitialCreditsService initialCreditsService) {
 
+    // compute initial credits once per creator, instead of once per workspace
     Map<DbUser, InitialCreditResponse> creditsByCreator =
         dbWorkspaces.stream()
             .map(DbWorkspace::getCreator)
