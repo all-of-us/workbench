@@ -57,7 +57,7 @@ public enum BigQueryDataSetTableInfo {
   ETM_DELAYDISCOUNTING_OUTCOMES(
       Domain.ETM_DELAYDISCOUNTING_OUTCOMES, "ds_delaydiscounting_outcomes", null, null),
   ETM_DELAYDISCOUNTING_TRIAL_DATA(
-      Domain.ETM_DELAYDISCOUNTING_TRIAL_DATA, "ds_delaydiscounting_trail_data", null, null),
+      Domain.ETM_DELAYDISCOUNTING_TRIAL_DATA, "ds_delaydiscounting_trial_data", null, null),
   ETM_EMORECOG_METADATA(Domain.ETM_EMORECOG_METADATA, "ds_emorecog_metadata", null, null),
   ETM_EMORECOG_OUTCOMES(Domain.ETM_EMORECOG_OUTCOMES, "ds_emorecog_outcomes", null, null),
   ETM_EMORECOG_TRIAL_DATA(Domain.ETM_EMORECOG_TRIAL_DATA, "ds_emorecog_trial_data", null, null),
