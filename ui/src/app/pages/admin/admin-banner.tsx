@@ -190,7 +190,7 @@ export class AdminBanner extends React.Component<
                 { value: BEFORE_LOGIN, label: 'Before Login' },
                 { value: AFTER_LOGIN, label: 'After Login' },
               ]}
-              // BEFORE_LOGIN has a fixed hedline, so toggling should clear the headline
+              // BEFORE_LOGIN has a fixed headline, so toggling should clear the headline
               // to help avoid confusion
               onChange={(e) =>
                 this.setState({
