@@ -118,17 +118,6 @@ export class AdminBanner extends React.Component<
         <Header style={{ ...styles.smallHeaderStyles, marginTop: '0.75rem' }}>
           Banner Headline
         </Header>
-        <TextInput
-          disabled={isBeforeLogin}
-          onChange={(v) => this.setState({ bannerHeadline: v })}
-          value={
-            isBeforeLogin
-              ? 'Scheduled Downtime Notice for the Researcher Workbench'
-              : bannerHeadline
-          }
-          data-test-id='banner-headline-input'
-          placeholder='Type headline text'
-        />
         <TooltipTrigger
           content={isBeforeLogin && 'Before Login banner has a fixed headline.'}
           side='right'
