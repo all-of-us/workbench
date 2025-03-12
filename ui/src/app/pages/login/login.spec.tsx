@@ -10,7 +10,9 @@ import {
   clearApiClients,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { StatusAlertApiStub } from 'testing/stubs/status-alert-api-stub';
 
 import LoginReactComponent from './login';
@@ -30,6 +32,13 @@ describe('LoginComponent', () => {
       signIn: () => {},
       onCreateAccount: () => {},
     };
+
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableLoginIssueBanner: false,
+      },
+    });
   });
 
   afterEach(() => {
