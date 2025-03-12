@@ -67,7 +67,7 @@ export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
 
   return (
     <React.Fragment>
-      {/* Temporary banner. In case you need an after login banner and a prelogin banner, 
+      {/* Temporary banner. In case you need an after login banner and a prelogin banner,
       use the admin tool for the after login banner and this for pre-login banner.*/}
       {serverConfigStore.get().config.enableLoginIssueBanner && (
         <BACKUP_LOGIN_BANNER />
