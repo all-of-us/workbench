@@ -660,12 +660,29 @@ public class InitialCreditsService {
       return Collections.emptyMap();
     }
 
+    // RW-14649: VWB workspaces may not have Google Projects
+    Map<Boolean, List<WorkspaceCostView>> partitionedByGoogleProjectPresence =
+        allCostsInDbForUsers.stream()
+            .collect(Collectors.partitioningBy(w -> w.getGoogleProject() != null));
+
+    List<WorkspaceCostView> missingProjects = partitionedByGoogleProjectPresence.get(false);
+    if (!missingProjects.isEmpty()) {
+      logger.info(
+          String.format(
+              "checkInitialCreditsUsageForUsers: Workspace IDs with null Google Project: %s",
+              missingProjects.stream()
+                  .map(WorkspaceCostView::getWorkspaceId)
+                  .sorted()
+                  .map(workspaceId -> Long.toString(workspaceId))
+                  .collect(Collectors.joining(","))));
+    }
+
     final Map<String, Long> workspaceByProject =
-        findWorkspacesThatRequireUpdates(allCostsInDbForUsers);
+        findWorkspacesThatRequireUpdates(partitionedByGoogleProjectPresence.get(true));
 
     logger.info(
         String.format(
-            "FreeTierBillingUsage: Workspace IDs that require updates: %s",
+            "checkInitialCreditsUsageForUsers: Workspace IDs that require updates: %s",
             workspaceByProject.values().stream()
                 .sorted()
                 .map(workspaceId -> Long.toString(workspaceId))
