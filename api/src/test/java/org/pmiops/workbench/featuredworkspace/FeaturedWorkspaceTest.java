@@ -167,7 +167,7 @@ public class FeaturedWorkspaceTest {
   public void testGetByFeaturedCategory_inaccessible() {
     mockFeaturedWorkspaces("Tutorial_namespace", DbFeaturedCategory.TUTORIAL_WORKSPACES, "one");
 
-    // override the mock so that FC getWorkspaces() does not return the workspace
+    // override the mock so that FC listWorkspaces() does not return the workspace
     // which simulates inaccessibility to my user
 
     when(mockFireCloudService.listWorkspaces()).thenReturn(Collections.emptyList());
@@ -186,7 +186,7 @@ public class FeaturedWorkspaceTest {
     String namespace = "Tutorial_namespace";
     mockFeaturedWorkspaces(namespace, DbFeaturedCategory.TUTORIAL_WORKSPACES, "one");
 
-    // override the mock so that FC getWorkspaces() returns the workspace with NO_ACCESS
+    // override the mock so that FC listWorkspaces() returns the workspace with NO_ACCESS
     // which simulates that my user is not in the workspace's tier auth domain
 
     var workspaceWithoutAccess =

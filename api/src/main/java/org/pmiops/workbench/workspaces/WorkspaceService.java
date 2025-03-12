@@ -36,7 +36,7 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> listWorkspaces();
 
-  List<WorkspaceResponse> listWorkspacesAsService();
+  List<String> getActiveWorkspaceNamespacesAsService();
 
   /**
    * Get all Featured workspaces from the DB.
