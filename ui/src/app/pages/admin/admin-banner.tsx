@@ -139,7 +139,6 @@ export class AdminBanner extends React.Component<
               disabled={isBeforeLogin || bannerEnabled}
               onChange={(v) => this.setState({ bannerHeadline: v })}
               value={bannerHeadline}
-              data-test-id='banner-headline-input'
               placeholder='Type headline text'
             />
           </div>
@@ -154,7 +153,6 @@ export class AdminBanner extends React.Component<
               disabled={bannerEnabled}
               value={bannerDescription}
               onChange={(v) => this.setState({ bannerDescription: v })}
-              data-test-id='banner-description-input'
               placeholder='Type descriptive banner text'
             />
           </div>
@@ -172,7 +170,6 @@ export class AdminBanner extends React.Component<
               disabled={bannerEnabled}
               onChange={(v) => this.setState({ readMoreLink: v })}
               value={readMoreLink}
-              data-test-id='read-more-link-input'
               placeholder='Paste button link'
             />
           </div>
