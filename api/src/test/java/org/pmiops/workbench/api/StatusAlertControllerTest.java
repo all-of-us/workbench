@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.model.StatusAlert;
 import org.pmiops.workbench.model.StatusAlertLocation;
@@ -53,22 +55,29 @@ public class StatusAlertControllerTest {
     assertThat(statusAlert.getAlertLocation()).isEqualTo(StatusAlertLocation.AFTER_LOGIN);
   }
 
-  @Test
-  public void testPostStatusAlert() {
+  @ParameterizedTest
+  @EnumSource(StatusAlertLocation.class) // This will provide both BEFORE_LOGIN and AFTER_LOGIN
+  public void testPostStatusAlert(StatusAlertLocation location) {
     String updatedStatusAlertTitle = "Title 2";
     String updatedStatusAlertDescription = "Description 2";
     String updatedStatusAlertLink = "This has a link";
+
     StatusAlert statusAlert =
         new StatusAlert()
             .title(updatedStatusAlertTitle)
             .message(updatedStatusAlertDescription)
             .link(updatedStatusAlertLink)
-            .alertLocation(StatusAlertLocation.AFTER_LOGIN);
+            .alertLocation(location); // Use the parameterized location
+
     statusAlertController.postStatusAlert(statusAlert);
     StatusAlert updatedStatusAlert = statusAlertController.getStatusAlert().getBody();
-    assertThat(updatedStatusAlert.getTitle()).matches(updatedStatusAlertTitle);
+    assertThat(updatedStatusAlert.getTitle())
+        .matches(
+            location.equals(StatusAlertLocation.AFTER_LOGIN)
+                ? updatedStatusAlertTitle
+                : "Scheduled Downtime Notice for the Researcher Workbench");
     assertThat(updatedStatusAlert.getMessage()).matches(updatedStatusAlertDescription);
     assertThat(updatedStatusAlert.getLink()).matches(updatedStatusAlertLink);
-    assertThat(updatedStatusAlert.getAlertLocation()).isEqualTo(StatusAlertLocation.AFTER_LOGIN);
+    assertThat(updatedStatusAlert.getAlertLocation()).isEqualTo(location);
   }
 }

@@ -22,7 +22,10 @@ public class StatusAlertConversionUtils {
     }
     dbStatusAlert.setLink(statusAlert.getLink());
     dbStatusAlert.setMessage(statusAlert.getMessage());
-    dbStatusAlert.setTitle(statusAlert.getTitle());
+    dbStatusAlert.setTitle(
+        statusAlert.getAlertLocation().equals(StatusAlertLocation.AFTER_LOGIN)
+            ? statusAlert.getTitle()
+            : "Scheduled Downtime Notice for the Researcher Workbench");
     dbStatusAlert.setAlertLocation(DbAlertLocation.valueOf(statusAlert.getAlertLocation().name()));
     return dbStatusAlert;
   }
