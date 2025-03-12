@@ -14,7 +14,7 @@ public class DbStatusAlert {
   private String title;
   private String message;
   private String link;
-  private String alertLocation;
+  private DbAlertLocation alertLocation;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,12 +59,17 @@ public class DbStatusAlert {
   }
 
   @Column(name = "alert_location")
-  public String getAlertLocation() {
+  public DbAlertLocation getAlertLocation() {
     return alertLocation;
   }
 
-  public DbStatusAlert setAlertLocation(String alertLocation) {
+  public DbStatusAlert setAlertLocation(DbAlertLocation alertLocation) {
     this.alertLocation = alertLocation;
     return this;
+  }
+
+  public enum DbAlertLocation {
+    BEFORE_LOGIN,
+    AFTER_LOGIN,
   }
 }
