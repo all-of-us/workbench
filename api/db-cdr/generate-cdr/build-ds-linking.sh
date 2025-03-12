@@ -422,9 +422,9 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
   ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
-  ($((ID++)), 'SITTING_ID', 'delay.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
-  ($((ID++)), 'PERSON_ID', 'delay.person_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
-  ($((ID++)), 'SRC_ID', 'delay.src_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'SITTING_ID', 'sitting_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'PERSON_ID', 'person_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
+  ($((ID++)), 'SRC_ID', 'src_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
   ($((ID++)), 'LINK_ID', 'delay.link_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
   ($((ID++)), 'TRIAL_ID', 'delay.trial_id', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
   ($((ID++)), 'TRIAL_TYPE', 'delay.trial_type', 'FROM \`\${projectId}.\${dataSetId}.delaydiscounting\` CROSS JOIN UNNEST(trial_data) delay', 'Etm_delaydiscounting_trial_data'),
@@ -506,9 +506,9 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
   ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
-  ($((ID++)), 'SITTING_ID', 'emore.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
-  ($((ID++)), 'PERSON_ID', 'emore.person_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
-  ($((ID++)), 'SRC_ID', 'emore.src_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'SITTING_ID', 'sitting_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'PERSON_ID', 'person_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
+  ($((ID++)), 'SRC_ID', 'src_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
   ($((ID++)), 'LINK_ID', 'emore.link_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
   ($((ID++)), 'TRIAL_ID', 'emore.trial_id', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
   ($((ID++)), 'EMOTION', 'emore.emotion', 'FROM \`\${projectId}.\${dataSetId}.emorecog\` CROSS JOIN UNNEST(trial_data) emore', 'Etm_emorecog_trial_data'),
@@ -579,9 +579,9 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
   ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
-  ($((ID++)), 'SITTING_ID', 'flank.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
-  ($((ID++)), 'PERSON_ID', 'flank.person_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
-  ($((ID++)), 'SRC_ID', 'flank.src_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'SITTING_ID', 'sitting_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'PERSON_ID', 'person_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
+  ($((ID++)), 'SRC_ID', 'src_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
   ($((ID++)), 'LINK_ID', 'flank.link_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
   ($((ID++)), 'TRIAL_ID', 'flank.trial_id', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
   ($((ID++)), 'TRIAL_TYPE', 'flank.trial_type', 'FROM \`\${projectId}.\${dataSetId}.flanker\` CROSS JOIN UNNEST(trial_data) flank', 'Etm_flanker_trial_data'),
@@ -650,9 +650,9 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
   ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
-  ($((ID++)), 'SITTING_ID', 'grad.sitting_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
-  ($((ID++)), 'PERSON_ID', 'grad.person_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
-  ($((ID++)), 'SRC_ID', 'grad.src_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'SITTING_ID', 'sitting_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'PERSON_ID', 'person_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
+  ($((ID++)), 'SRC_ID', 'src_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
   ($((ID++)), 'LINK_ID', 'grad.link_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
   ($((ID++)), 'TRIAL_ID', 'grad.trial_id', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
   ($((ID++)), 'TRIAL_TYPE', 'grad.trial_type', 'FROM \`\${projectId}.\${dataSetId}.gradcpt\` CROSS JOIN UNNEST(trial_data) grad', 'Etm_gradcpt_trial_data'),
