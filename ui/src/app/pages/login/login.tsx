@@ -1,14 +1,19 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
+
+import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { Button, StyledExternalLink } from 'app/components/buttons';
 import { CookieBanner } from 'app/components/cookie-banner';
 import { GoogleSignInButton } from 'app/components/google-sign-in';
 import { Header, SmallHeader } from 'app/components/headers';
+import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { serverConfigStore } from 'app/utils/stores';
 
-import { LOGIN_ERROR_BANNER } from './login-error-banner';
+import { BACKUP_LOGIN_BANNER } from './backup-login-banner';
+import { LoginBanner } from './login-banner';
 
 export const styles = reactStyles({
   sign: {
@@ -46,10 +51,34 @@ interface LoginProps {
   onCreateAccount: Function;
 }
 export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
+  const [statusAlertDetails, setStatusAlertDetails] =
+    useState<StatusAlert | null>(null);
+
+  useEffect(() => {
+    const getAlert = async () => {
+      const statusAlert = await statusAlertApi().getStatusAlert();
+      if (statusAlert) {
+        setStatusAlertDetails(statusAlert);
+      }
+    };
+
+    getAlert();
+  }, []);
+
   return (
     <React.Fragment>
+      {/* Temporary banner. In case you need an after login banner and a prelogin banner,
+      use the admin tool for the after login banner and this for pre-login banner.*/}
       {serverConfigStore.get().config.enableLoginIssueBanner && (
-        <LOGIN_ERROR_BANNER />
+        <BACKUP_LOGIN_BANNER />
+      )}
+      {statusAlertDetails?.alertLocation ===
+        StatusAlertLocation.BEFORE_LOGIN && (
+        <LoginBanner
+          header={statusAlertDetails.title}
+          details={statusAlertDetails.message}
+          moreInfoLink={statusAlertDetails.link}
+        />
       )}
       <div
         data-test-id='login'

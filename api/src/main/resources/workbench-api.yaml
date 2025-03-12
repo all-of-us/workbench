@@ -71,6 +71,7 @@ paths:
       - status-alert
       description: Returns status alert information if any exists.
       operationId: getStatusAlert
+      security: []
       responses:
         200:
           description: A status alert information object.
@@ -9542,6 +9543,11 @@ components:
           description: Count of the AVAILABLE billing buffer projects in this access
             tier
           format: int64
+    StatusAlertLocation:
+      type: string
+      enum:
+        - BEFORE_LOGIN
+        - AFTER_LOGIN
     StatusAlert:
       type: object
       properties:
@@ -9560,6 +9566,8 @@ components:
         link:
           type: string
           description: A URL linking to an incident report where users can read more
+        alertLocation:
+          $ref: '#/components/schemas/StatusAlertLocation'
     SumologicEgressEventRequest:
       type: object
       properties:

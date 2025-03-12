@@ -2,6 +2,8 @@ package org.pmiops.workbench.db.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,6 +16,7 @@ public class DbStatusAlert {
   private String title;
   private String message;
   private String link;
+  private DbAlertLocation alertLocation;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,5 +58,21 @@ public class DbStatusAlert {
   public DbStatusAlert setLink(String link) {
     this.link = link;
     return this;
+  }
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "alert_location", nullable = false)
+  public DbAlertLocation getAlertLocation() {
+    return alertLocation;
+  }
+
+  public DbStatusAlert setAlertLocation(DbAlertLocation alertLocation) {
+    this.alertLocation = alertLocation;
+    return this;
+  }
+
+  public enum DbAlertLocation {
+    BEFORE_LOGIN,
+    AFTER_LOGIN,
   }
 }

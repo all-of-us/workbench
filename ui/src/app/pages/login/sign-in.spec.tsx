@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ProfileApi } from 'generated/fetch';
+import { ProfileApi, StatusAlertApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -10,6 +10,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { renderWithRouter } from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import { StatusAlertApiStub } from 'testing/stubs/status-alert-api-stub';
 
 import { SignIn, SignInProps } from './sign-in';
 
@@ -92,6 +93,7 @@ describe('SignIn', () => {
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
+    registerApiClient(StatusAlertApi, new StatusAlertApiStub());
     window.scrollTo = () => {};
     props = {
       windowSize: { width: defaultWindowWidth, height: 0 },

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { ErrorMessage } from 'app/components/messages';
 import { AoU } from 'app/components/text-wrappers';
 
-export const LOGIN_ERROR_BANNER = () => (
+export const BACKUP_LOGIN_BANNER = () => (
   <div
     style={{
       fontWeight: 800,
