@@ -10,6 +10,9 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 public interface StatusAlertMapper {
   StatusAlert toStatusAlert(DbStatusAlert statusAlert);
 
-  @Mapping(target = "title", expression = "java(statusAlert.getAlertLocation() == StatusAlertLocation.AFTER_LOGIN ? statusAlert.getTitle() : \"Scheduled Downtime Notice for the Researcher Workbench\")")
+  @Mapping(
+      target = "title",
+      expression =
+          "java(statusAlert.getAlertLocation() == StatusAlertLocation.AFTER_LOGIN ? statusAlert.getTitle() : \"Scheduled Downtime Notice for the Researcher Workbench\")")
   DbStatusAlert toDbStatusAlert(StatusAlert statusAlert);
 }

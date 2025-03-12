@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.model.StatusAlert;
 import org.pmiops.workbench.model.StatusAlertLocation;
+import org.pmiops.workbench.statusalerts.StatusAlertMapperImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -29,7 +30,7 @@ public class StatusAlertControllerTest {
   @Autowired private StatusAlertController statusAlertController;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, StatusAlertController.class})
+  @Import({FakeClockConfiguration.class, StatusAlertController.class, StatusAlertMapperImpl.class})
   static class Configuration {
     @Bean
     public Clock clock() {
