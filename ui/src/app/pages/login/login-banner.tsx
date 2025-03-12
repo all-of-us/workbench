@@ -26,7 +26,6 @@ export const LoginBanner = ({
         <>
           To learn more, please see the announcement on the User Support Hub{' '}
           <a href={moreInfoLink} target='_blank'>
-            {' '}
             here
           </a>
           .
