@@ -38,10 +38,7 @@ export const StatusAlertBannerMaybe = () => {
                   message: alert.message,
                   toastType: ToastType.WARNING,
                   footer: alert.link ? (
-                    <Button
-                      data-test-id='status-banner-read-more-button'
-                      onClick={() => window.open(alert.link, '_blank')}
-                    >
+                    <Button onClick={() => window.open(alert.link, '_blank')}>
                       READ MORE
                     </Button>
                   ) : undefined,
