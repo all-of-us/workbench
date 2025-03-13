@@ -1,8 +1,10 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+
 import { switchCase } from '@terra-ui-packages/core-utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+
 import { FlexColumn, FlexRow } from './flex';
 import { ClrIcon } from './icons';
 
@@ -29,6 +31,8 @@ const styles = reactStyles({
   message: {
     lineHeight: '20px',
     marginTop: '.45rem',
+    paddingRight: '.3rem',
+    fontSize: '14px',
   },
   footer: {
     marginTop: '.75rem',
@@ -60,7 +64,11 @@ export enum ToastType {
   WARNING,
 }
 
-const styleForType = (toastType: ToastType, zIndex, styleOverrides?: React.CSSProperties): React.CSSProperties =>
+const styleForType = (
+  toastType: ToastType,
+  zIndex,
+  styleOverrides?: React.CSSProperties
+): React.CSSProperties =>
   switchCase(
     toastType,
     [
@@ -68,7 +76,7 @@ const styleForType = (toastType: ToastType, zIndex, styleOverrides?: React.CSSPr
       () => ({
         ...styles.infoBanner,
         zIndex,
-        ...styleOverrides
+        ...styleOverrides,
       }),
     ],
     [
@@ -77,7 +85,7 @@ const styleForType = (toastType: ToastType, zIndex, styleOverrides?: React.CSSPr
         ...styles.infoBanner,
         zIndex,
         backgroundColor: colorWithWhiteness(colors.highlight, 0.5),
-        ...styleOverrides
+        ...styleOverrides,
       }),
     ]
   );
