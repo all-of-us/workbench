@@ -5,8 +5,9 @@ import { DataTable } from 'primereact/datatable';
 
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
+import { Button, IconButton } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
+import { PlaygroundIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
 import {
   Modal,
@@ -74,6 +75,32 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     loadBanners();
   }, []);
 
+  const deleteProduct = async (id) => {
+    console.log('Deleting banner:', id);
+    try {
+      await statusAlertApi().deleteStatusAlert(id);
+      const statusAlerts = await statusAlertApi().getStatusAlerts();
+      setBanners(statusAlerts);
+    } catch (error) {
+      console.error('Error deleting banner:', error);
+    }
+  };
+
+  const actionBodyTemplate = (rowData) => {
+    return (
+      <IconButton
+        label='Delete'
+        icon={PlaygroundIcon}
+        className='p-button-danger'
+        onClick={() => {
+          console.log('What is row data? ', rowData);
+          deleteProduct(rowData.statusAlertId);
+        }}
+        style={{ height: '2rem', width: '2rem' }}
+      />
+    );
+  };
+
   const handleCreateBanner = async () => {
     try {
       await statusAlertApi().postStatusAlert(newBanner);
@@ -139,6 +166,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
               : 'After Login'
           }
         />
+        <Column body={actionBodyTemplate} header='Actions' />
       </DataTable>
 
       {showCreateModal && (

@@ -101,6 +101,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/StatusAlert'
       x-codegen-request-body-name: statusAlert
+  /v1/status-alert/{id}:
+    delete:
+      tags:
+      - status-alert
+      description: Deletes the specified status alert
+      operationId: deleteStatusAlert
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the status alert to delete
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        204:
+          description: Request Received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
   /v1/profile:
     get:
       tags:
