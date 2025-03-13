@@ -1,7 +1,11 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
+
+import com.google.common.base.Stopwatch;
+import jakarta.inject.Provider;
+import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
@@ -16,22 +20,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class OfflineBillingController implements OfflineBillingApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineBillingController.class.getName());
 
-  private final InitialCreditsBatchUpdateService freeTierBillingService;
   private final GoogleProjectPerCostDao googleProjectPerCostDao;
+  private final InitialCreditsBatchUpdateService freeTierBillingService;
+  private final Provider<Stopwatch> stopwatchProvider;
   private final TaskQueueService taskQueueService;
-
   private final UserService userService;
 
   @Autowired
   OfflineBillingController(
-      InitialCreditsBatchUpdateService freeTierBillingService,
       GoogleProjectPerCostDao googleProjectPerCostDao,
-      UserService userService,
-      TaskQueueService taskQueueService) {
+      InitialCreditsBatchUpdateService freeTierBillingService,
+      Provider<Stopwatch> stopwatchProvider,
+      TaskQueueService taskQueueService,
+      UserService userService) {
     this.freeTierBillingService = freeTierBillingService;
+    this.googleProjectPerCostDao = googleProjectPerCostDao;
+    this.stopwatchProvider = stopwatchProvider;
     this.taskQueueService = taskQueueService;
     this.userService = userService;
-    this.googleProjectPerCostDao = googleProjectPerCostDao;
   }
 
   @Override
@@ -39,20 +45,29 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
     log.info("Checking initial credits usage for all workspaces");
 
     // Get cost for all workspace from BQ
-    Map<String, Double> freeTierForAllWorkspace =
-        freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();
+    // temp performance logging
+    Stopwatch stopwatch = stopwatchProvider.get().start();
+    List<DbGoogleProjectPerCost> workspaceCosts =
+        freeTierBillingService.getFreeTierWorkspaceCostsFromBQ().entrySet().stream()
+            .map(DbGoogleProjectPerCost::new)
+            .toList();
+    Duration elapsed = stopwatch.stop().elapsed();
+    log.info(
+        String.format(
+            "checkInitialCreditsUsage: Retrieved %d workspace cost entries from BigQuery in %s",
+            workspaceCosts.size(), formatDurationPretty(elapsed)));
 
-    List<DbGoogleProjectPerCost> googleProjectCostList =
-        freeTierForAllWorkspace.entrySet().stream().map(DbGoogleProjectPerCost::new).toList();
-
+    stopwatch.reset().start();
     // Clear table googleproject_cost and then insert all entries from BQ
     googleProjectPerCostDao.deleteAll();
-    googleProjectPerCostDao.batchInsertProjectPerCost(googleProjectCostList);
-    log.info("Inserted all workspace costs to googleproject_cost table");
+    googleProjectPerCostDao.batchInsertProjectPerCost(workspaceCosts);
+    elapsed = stopwatch.stop().elapsed();
+    log.info(
+        String.format(
+            "checkInitialCreditsUsage: Inserted all workspace costs to googleproject_cost table in %s",
+            formatDurationPretty(elapsed)));
 
-    List<Long> allUserIds = userService.getAllUserIds();
-
-    taskQueueService.groupAndPushFreeTierBilling(allUserIds);
+    taskQueueService.groupAndPushFreeTierBilling(userService.getAllUserIds());
     log.info("Pushed all users to the Cloud Task endpoint checkInitialCreditsUsage");
 
     return ResponseEntity.noContent().build();
