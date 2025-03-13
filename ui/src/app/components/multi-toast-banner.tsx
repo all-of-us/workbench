@@ -5,8 +5,15 @@ import colors from 'app/styles/colors';
 
 import { FlexColumn, FlexRow } from './flex';
 import { ArrowLeft, ArrowRight, ClrIcon } from './icons';
-import { MultiToastMessage } from './multi-toast-message.model';
 import { ToastBanner, ToastType } from './toast-banner';
+
+interface MultiToastMessage {
+  id: string;
+  title: string;
+  message: string | JSX.Element;
+  toastType: ToastType;
+  footer?: string | JSX.Element;
+}
 
 interface Props {
   messages: MultiToastMessage[];
