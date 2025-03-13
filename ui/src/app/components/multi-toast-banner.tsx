@@ -4,16 +4,9 @@ import { useState } from 'react';
 import colors from 'app/styles/colors';
 
 import { FlexColumn, FlexRow } from './flex';
-import { ArrowLeft, ArrowRight, ClrIcon } from './icons';
-import { ToastBanner, ToastType } from './toast-banner';
-
-interface MultiToastMessage {
-  id: string;
-  title: string;
-  message: string | JSX.Element;
-  toastType: ToastType;
-  footer?: string | JSX.Element;
-}
+import { ArrowLeft, ArrowRight } from './icons';
+import { MultiToastMessage } from './multi-toast-message.model';
+import { ToastBanner } from './toast-banner';
 
 interface Props {
   messages: MultiToastMessage[];
