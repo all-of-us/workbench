@@ -60,6 +60,13 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
     stopwatch.reset().start();
     // Clear table googleproject_cost and then insert all entries from BQ
     googleProjectPerCostDao.deleteAll();
+    elapsed = stopwatch.stop().elapsed();
+    log.info(
+        String.format(
+            "checkInitialCreditsUsage: cleared googleproject_cost table in %s",
+            formatDurationPretty(elapsed)));
+
+    stopwatch.reset().start();
     googleProjectPerCostDao.batchInsertProjectPerCost(workspaceCosts);
     elapsed = stopwatch.stop().elapsed();
     log.info(
