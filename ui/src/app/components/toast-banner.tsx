@@ -1,10 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-
 import { switchCase } from '@terra-ui-packages/core-utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-
 import { FlexColumn, FlexRow } from './flex';
 import { ClrIcon } from './icons';
 
@@ -31,8 +29,6 @@ const styles = reactStyles({
   message: {
     lineHeight: '20px',
     marginTop: '.45rem',
-    paddingRight: '.3rem',
-    fontSize: '14px',
   },
   footer: {
     marginTop: '.75rem',
@@ -64,7 +60,7 @@ export enum ToastType {
   WARNING,
 }
 
-const styleForType = (toastType: ToastType, zIndex): React.CSSProperties =>
+const styleForType = (toastType: ToastType, zIndex, styleOverrides?: React.CSSProperties): React.CSSProperties =>
   switchCase(
     toastType,
     [
@@ -72,6 +68,7 @@ const styleForType = (toastType: ToastType, zIndex): React.CSSProperties =>
       () => ({
         ...styles.infoBanner,
         zIndex,
+        ...styleOverrides
       }),
     ],
     [
@@ -80,6 +77,7 @@ const styleForType = (toastType: ToastType, zIndex): React.CSSProperties =>
         ...styles.infoBanner,
         zIndex,
         backgroundColor: colorWithWhiteness(colors.highlight, 0.5),
+        ...styleOverrides
       }),
     ]
   );
@@ -91,11 +89,13 @@ interface ToastProps {
   toastType: ToastType;
   zIndex: any; // TODO better type
   footer?: string | JSX.Element;
+  style?: React.CSSProperties;
 }
+
 export const ToastBanner = (props: ToastProps) => {
-  const { title, message, onClose, toastType, zIndex, footer } = props;
+  const { title, message, onClose, toastType, zIndex, footer, style } = props;
   return ReactDOM.createPortal(
-    <FlexColumn style={styleForType(toastType, zIndex)}>
+    <FlexColumn style={styleForType(toastType, zIndex, style)}>
       <FlexRow style={{ alignItems: 'center', marginTop: '.15rem' }}>
         {toastType === ToastType.WARNING && warningIcon}
         <div style={styles.title}>{title}</div>

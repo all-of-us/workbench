@@ -1,0 +1,75 @@
+import * as React from 'react';
+import { useState } from 'react';
+import { FlexColumn, FlexRow } from './flex';
+import { ToastBanner, ToastType } from './toast-banner';
+import { ClrIcon } from './icons';
+import { MultiToastMessage } from './multi-toast-message.model';
+import colors from 'app/styles/colors';
+
+interface Props {
+  messages: MultiToastMessage[];
+  baseZIndex?: number;
+  onDismiss: (messageId: string) => void;
+}
+
+export const MultiToastBanner = ({ messages, baseZIndex = 1000, onDismiss }: Props) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (messages.length === 0) {
+    return null;
+  }
+
+  const currentMessage = messages[currentIndex];
+  const hasMultipleMessages = messages.length > 1;
+
+  return (
+    <FlexColumn>
+      <ToastBanner
+        key={currentMessage.id}
+        title={currentMessage.title}
+        message={
+          <FlexColumn>
+            <div>{currentMessage.message}</div>
+            {hasMultipleMessages && (
+              <FlexRow style={{ marginTop: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                <FlexRow style={{ alignItems: 'center', gap: '0.5rem' }}>
+                  <ClrIcon
+                    shape='angle-left'
+                    size={16}
+                    style={{
+                      cursor: currentIndex > 0 ? 'pointer' : 'not-allowed',
+                      color: currentIndex > 0 ? colors.accent : colors.disabled,
+                    }}
+                    onClick={() => currentIndex > 0 && setCurrentIndex(prev => prev - 1)}
+                  />
+                  <span style={{ fontSize: '12px', color: colors.primary }}>
+                    {currentIndex + 1} of {messages.length}
+                  </span>
+                  <ClrIcon
+                    shape='angle-right'
+                    size={16}
+                    style={{
+                      cursor: currentIndex < messages.length - 1 ? 'pointer' : 'not-allowed',
+                      color: currentIndex < messages.length - 1 ? colors.accent : colors.disabled,
+                    }}
+                    onClick={() => 
+                      currentIndex < messages.length - 1 && 
+                      setCurrentIndex(prev => prev + 1)
+                    }
+                  />
+                </FlexRow>
+              </FlexRow>
+            )}
+          </FlexColumn>
+        }
+        footer={currentMessage.footer}
+        onClose={() => {
+          onDismiss(currentMessage.id);
+          setCurrentIndex(Math.min(currentIndex, Math.max(messages.length - 2, 0)));
+        }}
+        toastType={currentMessage.toastType}
+        zIndex={baseZIndex}
+      />
+    </FlexColumn>
+  );
+};
