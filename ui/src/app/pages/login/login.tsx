@@ -56,7 +56,7 @@ export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
 
   useEffect(() => {
     const getAlert = async () => {
-      const statusAlert = await statusAlertApi().getStatusAlert();
+      const statusAlert = await statusAlertApi().getStatusAlerts()[0];
       if (statusAlert) {
         setStatusAlertDetails(statusAlert);
       }

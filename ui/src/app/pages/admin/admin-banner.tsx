@@ -62,16 +62,17 @@ export class AdminBanner extends React.Component<
   componentDidMount(): void {
     this.props.hideSpinner();
     statusAlertApi()
-      .getStatusAlert()
-      .then((statusAlert) =>
+      .getStatusAlerts()
+      .then((statusAlerts) => {
+        const statusAlert = statusAlerts[0];
         this.setState({
           bannerDescription: statusAlert.message,
           bannerEnabled: statusAlert.title !== null && statusAlert.title !== '',
           bannerHeadline: statusAlert.title,
           readMoreLink: statusAlert.link,
           alertLocation: statusAlert.alertLocation || AFTER_LOGIN,
-        })
-      );
+        });
+      });
   }
 
   handleBannerToggle(checked: boolean) {
