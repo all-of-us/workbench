@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,15 +50,17 @@ public class StatusAlertControllerTest {
   }
 
   @Test
-  public void testGetStatusAlert() {
-    StatusAlert statusAlert = statusAlertController.getStatusAlert().getBody();
+  public void testGetStatusAlerts() {
+    List<StatusAlert> statusAlerts = statusAlertController.getStatusAlerts().getBody();
+    assertThat(statusAlerts).isNotEmpty();
+    StatusAlert statusAlert = statusAlerts.get(0);
     assertThat(statusAlert.getTitle()).matches(STATUS_ALERT_INITIAL_TITLE);
     assertThat(statusAlert.getMessage()).matches(STATUS_ALERT_INITIAL_DESCRIPTION);
     assertThat(statusAlert.getAlertLocation()).isEqualTo(StatusAlertLocation.AFTER_LOGIN);
   }
 
   @ParameterizedTest
-  @EnumSource(StatusAlertLocation.class) // This will provide both BEFORE_LOGIN and AFTER_LOGIN
+  @EnumSource(StatusAlertLocation.class)
   public void testPostStatusAlert(StatusAlertLocation location) {
     String updatedStatusAlertTitle = "Title 2";
     String updatedStatusAlertDescription = "Description 2";
@@ -68,10 +71,12 @@ public class StatusAlertControllerTest {
             .title(updatedStatusAlertTitle)
             .message(updatedStatusAlertDescription)
             .link(updatedStatusAlertLink)
-            .alertLocation(location); // Use the parameterized location
+            .alertLocation(location);
 
     statusAlertController.postStatusAlert(statusAlert);
-    StatusAlert updatedStatusAlert = statusAlertController.getStatusAlert().getBody();
+    List<StatusAlert> statusAlerts = statusAlertController.getStatusAlerts().getBody();
+    assertThat(statusAlerts).isNotEmpty();
+    StatusAlert updatedStatusAlert = statusAlerts.get(0);
     assertThat(updatedStatusAlert.getTitle())
         .matches(
             location.equals(StatusAlertLocation.AFTER_LOGIN)

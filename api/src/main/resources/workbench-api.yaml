@@ -70,7 +70,7 @@ paths:
       tags:
       - status-alert
       description: Returns status alert information if any exists.
-      operationId: getStatusAlert
+      operationId: getStatusAlerts
       security: []
       responses:
         200:
@@ -78,7 +78,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatusAlert'
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusAlert'
     post:
       tags:
       - status-alert
