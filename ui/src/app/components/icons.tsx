@@ -9,6 +9,7 @@ import {
   faCheckCircle,
   faClock,
   faExclamationTriangle,
+  faLongArrowAltLeft,
   faLongArrowAltRight,
   faMinusCircle,
   faRepeat,
@@ -172,7 +173,9 @@ const Icon = ({ shape, size, style, color, ...props }) => {
     />
   );
 };
-
+export const ArrowLeft = (props) => (
+  <Icon shape={faLongArrowAltLeft} {...props} />
+);
 export const ArrowRight = (props) => (
   <Icon shape={faLongArrowAltRight} {...props} />
 );
