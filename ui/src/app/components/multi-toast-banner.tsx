@@ -47,6 +47,7 @@ export const MultiToastBanner = ({
                 <FlexRow style={{ alignItems: 'center', gap: '0.5rem' }}>
                   <ArrowLeft
                     size={16}
+                    title="Previous message"
                     style={{
                       cursor: currentIndex > 0 ? 'pointer' : 'not-allowed',
                       color: currentIndex > 0 ? colors.accent : colors.disabled,
@@ -60,6 +61,7 @@ export const MultiToastBanner = ({
                   </span>
                   <ArrowRight
                     size={16}
+                    title="Next message"
                     style={{
                       cursor:
                         currentIndex < messages.length - 1
