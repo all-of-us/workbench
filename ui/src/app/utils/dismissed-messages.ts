@@ -29,7 +29,10 @@ export const saveDismissedMessage = (messageId: string): void => {
     const dismissedIds = getDismissedMessageIds();
     if (!dismissedIds.includes(messageId)) {
       dismissedIds.push(messageId);
-      localStorage.setItem(DISMISSED_MESSAGES_KEY, JSON.stringify(dismissedIds));
+      localStorage.setItem(
+        DISMISSED_MESSAGES_KEY,
+        JSON.stringify(dismissedIds)
+      );
     }
   } catch (e) {
     console.error('Error saving dismissed message', e);

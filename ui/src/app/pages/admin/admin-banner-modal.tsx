@@ -39,7 +39,6 @@ export const AdminBannerModal = ({
     if (isCreating) {
       return;
     }
-    
     setIsCreating(true);
     try {
       await onCreate();
@@ -114,7 +113,12 @@ export const AdminBannerModal = ({
         </Button>
         <Button
           onClick={handleCreate}
-          disabled={!banner.title || !banner.message || !banner.alertLocation || isCreating}
+          disabled={
+            !banner.title ||
+            !banner.message ||
+            !banner.alertLocation ||
+            isCreating
+          }
         >
           Create Banner
         </Button>

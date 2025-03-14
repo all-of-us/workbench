@@ -10,9 +10,7 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { serverConfigStore } from 'app/utils/stores';
 
-import { BACKUP_LOGIN_BANNER } from './backup-login-banner';
 import { LoginBanner } from './login-banner';
 
 export const styles = reactStyles({
