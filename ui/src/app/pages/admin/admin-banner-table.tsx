@@ -98,8 +98,13 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     loadBanners();
   }, []);
 
+  useEffect(() => {
+    setLoading(false);
+  }, [banners]);
+
   const deleteBanner = async (id) => {
     try {
+      setLoading(true);
       await statusAlertApi().deleteStatusAlert(id);
       const statusAlerts = await statusAlertApi().getStatusAlerts();
       setBanners(statusAlerts);
