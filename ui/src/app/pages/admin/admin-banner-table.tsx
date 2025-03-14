@@ -58,7 +58,6 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     const loadBanners = async () => {
       setLoading(true);
       try {
-        // Temporary solution until StatusAlertApi is regenerated
         const statusAlerts = await statusAlertApi().getStatusAlerts();
         setBanners(statusAlerts);
       } finally {
