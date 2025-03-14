@@ -9,7 +9,7 @@ import { firstPartyCookiesEnabled } from 'app/utils/cookies';
 import { Button } from './buttons';
 import { MultiToastBanner } from './multi-toast-banner';
 import { MultiToastMessage } from './multi-toast-message.model';
-import { ToastBanner, ToastType } from './toast-banner';
+import { ToastType } from './toast-banner';
 
 const STATUS_ALERT_COOKIE_KEY = 'status-alert-banner-dismissed';
 const INITIAL_STATUS_ALERT: MultiToastMessage = {
