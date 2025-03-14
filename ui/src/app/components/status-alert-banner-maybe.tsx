@@ -68,10 +68,6 @@ export const StatusAlertBannerMaybe = () => {
   }
 
   return (
-    <MultiToastBanner
-      messages={alertMessages}
-      baseZIndex={1000}
-      onDismiss={handleDismiss}
-    />
+    <MultiToastBanner messages={alertMessages} onDismiss={handleDismiss} />
   );
 };
