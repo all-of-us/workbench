@@ -7,14 +7,16 @@ import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import { firstPartyCookiesEnabled } from 'app/utils/cookies';
 
 import { Button } from './buttons';
+import { MultiToastBanner } from './multi-toast-banner';
+import { MultiToastMessage } from './multi-toast-message.model';
 import { ToastBanner, ToastType } from './toast-banner';
 
 const STATUS_ALERT_COOKIE_KEY = 'status-alert-banner-dismissed';
-const INITIAL_STATUS_ALERT: StatusAlert = {
-  statusAlertId: 0,
+const INITIAL_STATUS_ALERT: MultiToastMessage = {
+  id: '',
   title: '',
   message: '',
-  link: '',
+  toastType: ToastType.WARNING,
 };
 
 const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
@@ -29,15 +31,27 @@ const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
 
 export const StatusAlertBannerMaybe = () => {
   const [showStatusAlert, setShowStatusAlert] = useState(false);
-  const [statusAlertDetails, setStatusAlertDetails] =
-    useState(INITIAL_STATUS_ALERT);
+  const [alert, setAlert] = useState(INITIAL_STATUS_ALERT);
 
   useEffect(() => {
     const getAlert = async () => {
       const statusAlert = await statusAlertApi().getStatusAlert();
+
       if (statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN) {
+        const messageId = `status-alert-${statusAlert.statusAlertId}`;
+        const message: MultiToastMessage = {
+          id: messageId,
+          title: statusAlert.title,
+          message: statusAlert.message,
+          toastType: ToastType.WARNING,
+          footer: statusAlert.link ? (
+            <Button onClick={() => window.open(statusAlert.link, '_blank')}>
+              READ MORE
+            </Button>
+          ) : undefined,
+        };
         setShowStatusAlert(shouldShowStatusAlert(statusAlert));
-        setStatusAlertDetails(statusAlert);
+        setAlert(message);
       }
     };
 
@@ -46,31 +60,12 @@ export const StatusAlertBannerMaybe = () => {
 
   const acknowledgeAlert = () => {
     if (firstPartyCookiesEnabled()) {
-      localStorage.setItem(
-        STATUS_ALERT_COOKIE_KEY,
-        `${statusAlertDetails.statusAlertId}`
-      );
+      localStorage.setItem(STATUS_ALERT_COOKIE_KEY, `${alert.id}`);
     }
     setShowStatusAlert(false);
   };
 
-  const footer = statusAlertDetails.link && (
-    <Button
-      data-test-id='status-banner-read-more-button'
-      onClick={() => window.open(statusAlertDetails.link, '_blank')}
-    >
-      READ MORE
-    </Button>
-  );
-
   return showStatusAlert ? (
-    <ToastBanner
-      title={statusAlertDetails.title}
-      message={statusAlertDetails.message}
-      onClose={() => acknowledgeAlert()}
-      toastType={ToastType.WARNING}
-      zIndex={1000}
-      footer={footer}
-    />
+    <MultiToastBanner messages={[alert]} onDismiss={acknowledgeAlert} />
   ) : null;
 };
