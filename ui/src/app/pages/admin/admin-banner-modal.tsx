@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
@@ -25,6 +26,7 @@ export const AdminBannerModal = ({
   onClose,
   onCreate,
 }: AdminBannerModalProps) => {
+  const [isCreating, setIsCreating] = useState(false);
   const locationOptions = [
     { value: StatusAlertLocation.AFTER_LOGIN, label: 'After Login' },
     { value: StatusAlertLocation.BEFORE_LOGIN, label: 'Before Login' },
@@ -32,6 +34,19 @@ export const AdminBannerModal = ({
 
   const isBeforeLogin =
     banner.alertLocation === StatusAlertLocation.BEFORE_LOGIN;
+
+  const handleCreate = async () => {
+    if (isCreating) {
+      return;
+    }
+    
+    setIsCreating(true);
+    try {
+      await onCreate();
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <Modal onRequestClose={onClose}>
@@ -98,8 +113,8 @@ export const AdminBannerModal = ({
           Cancel
         </Button>
         <Button
-          onClick={onCreate}
-          disabled={!banner.title || !banner.message || !banner.alertLocation}
+          onClick={handleCreate}
+          disabled={!banner.title || !banner.message || !banner.alertLocation || isCreating}
         >
           Create Banner
         </Button>

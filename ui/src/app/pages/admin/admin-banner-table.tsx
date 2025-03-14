@@ -7,7 +7,8 @@ import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { Button, IconButton } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
-import { PlaygroundIcon } from 'app/components/icons';
+import { TrashCan } from 'app/components/icons';
+import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
@@ -97,7 +98,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     loadBanners();
   }, []);
 
-  const deleteProduct = async (id) => {
+  const deleteBanner = async (id) => {
     try {
       await statusAlertApi().deleteStatusAlert(id);
       const statusAlerts = await statusAlertApi().getStatusAlerts();
@@ -109,15 +110,17 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <IconButton
-        label='Delete'
-        icon={PlaygroundIcon}
-        className='p-button-danger'
-        onClick={() => {
-          deleteProduct(rowData.statusAlertId);
-        }}
-        style={{ height: '2rem', width: '2rem' }}
-      />
+      <TooltipTrigger content='Delete Banner'>
+        <IconButton
+          label='Delete'
+          icon={TrashCan}
+          className='p-button-danger'
+          onClick={() => {
+            deleteBanner(rowData.statusAlertId);
+          }}
+          style={{ height: '1.5rem', width: '1.5rem' }}
+        />
+      </TooltipTrigger>
     );
   };
 
