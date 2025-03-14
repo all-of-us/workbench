@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react';
 
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
-import { isDismissed, saveDismissedMessage } from '../utils/dismissed-messages';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import { firstPartyCookiesEnabled } from 'app/utils/cookies';
+import {
+  isDismissed,
+  saveDismissedMessage,
+} from 'app/utils/dismissed-messages';
 
 import { Button } from './buttons';
 import { ToastBanner, ToastType } from './toast-banner';
