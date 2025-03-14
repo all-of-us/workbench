@@ -35,7 +35,7 @@ public class StatusAlertController implements StatusAlertApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteStatusAlert(Long id) {
+  public ResponseEntity<Void> deleteStatusAlert(Long id) {
     statusAlertDao.deleteById(id);
     return ResponseEntity.noContent().build();
   }

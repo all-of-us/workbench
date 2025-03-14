@@ -118,10 +118,6 @@ paths:
       responses:
         204:
           description: Request Received.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
   /v1/profile:
     get:
       tags:
