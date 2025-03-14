@@ -19,6 +19,7 @@ import LoginReactComponent from './login';
 
 describe('LoginComponent', () => {
   let loginProps: { signIn: Function; onCreateAccount: Function };
+  let statusAlertStub: StatusAlertApiStub;
 
   const component = (props) =>
     render(
@@ -39,6 +40,9 @@ describe('LoginComponent', () => {
         enableLoginIssueBanner: false,
       },
     });
+
+    statusAlertStub = new StatusAlertApiStub();
+    registerApiClient(StatusAlertApi, statusAlertStub);
   });
 
   afterEach(() => {
@@ -47,32 +51,57 @@ describe('LoginComponent', () => {
   });
 
   it('should render', () => {
-    registerApiClient(
-      StatusAlertApi,
-      new StatusAlertApiStub(StatusAlertLocation.AFTER_LOGIN)
-    );
     component(loginProps);
     expect(
       screen.getByText('Already have a Researcher Workbench account?')
     ).toBeInTheDocument();
   });
 
-  it('should show banner status alert is BEFORE_LOGIN', async () => {
-    registerApiClient(
-      StatusAlertApi,
-      new StatusAlertApiStub(StatusAlertLocation.BEFORE_LOGIN)
-    );
+  it('should show multiple banner status alerts that are BEFORE_LOGIN', async () => {
+    statusAlertStub.addAlerts([
+      {
+        title: 'Alert 1',
+        message: 'Message 1',
+        link: 'link1',
+        alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+      },
+      {
+        title: 'Alert 2',
+        message: 'Message 2',
+        link: 'link2',
+        alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+      },
+    ]);
+
     component(loginProps);
-    expect(await screen.findByText(/Stub Title/i)).toBeInTheDocument();
+
+    expect(await screen.findByText(/Alert 1/)).toBeInTheDocument();
+    expect(screen.getByText(/Message 1/)).toBeInTheDocument();
+    expect(await screen.findByText(/Alert 2/)).toBeInTheDocument();
+    expect(screen.getByText(/Message 2/)).toBeInTheDocument();
   });
 
-  it('should show backup banner if flag is on', () => {
-    registerApiClient(
-      StatusAlertApi,
-      new StatusAlertApiStub(StatusAlertLocation.AFTER_LOGIN)
-    );
-    serverConfigStore.get().config.enableLoginIssueBanner = true;
+  it('should only show BEFORE_LOGIN alerts', async () => {
+    statusAlertStub.addAlerts([
+      {
+        title: 'Before Login Alert',
+        message: 'Should show',
+        link: 'link1',
+        alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+      },
+      {
+        title: 'After Login Alert',
+        message: 'Should not show',
+        link: 'link2',
+        alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      },
+    ]);
+
     component(loginProps);
-    expect(screen.getByText(/Scheduled Downtime Notice/i)).toBeInTheDocument();
+
+    expect(await screen.findByText(/Before Login Alert/)).toBeInTheDocument();
+    expect(screen.getByText(/Should show/)).toBeInTheDocument();
+    expect(screen.queryByText(/After Login Alert/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Should not show/)).not.toBeInTheDocument();
   });
 });
