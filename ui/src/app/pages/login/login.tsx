@@ -51,35 +51,30 @@ interface LoginProps {
   onCreateAccount: Function;
 }
 export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
-  const [statusAlertDetails, setStatusAlertDetails] =
-    useState<StatusAlert | null>(null);
+  const [statusAlerts, setStatusAlerts] = useState<StatusAlert[]>([]);
 
   useEffect(() => {
-    const getAlert = async () => {
-      const statusAlert = await statusAlertApi().getStatusAlerts()[0];
-      if (statusAlert) {
-        setStatusAlertDetails(statusAlert);
-      }
+    const getAlerts = async () => {
+      setStatusAlerts(await statusAlertApi().getStatusAlerts());
     };
 
-    getAlert();
+    getAlerts();
   }, []);
 
   return (
     <React.Fragment>
-      {/* Temporary banner. In case you need an after login banner and a prelogin banner,
-      use the admin tool for the after login banner and this for pre-login banner.*/}
-      {serverConfigStore.get().config.enableLoginIssueBanner && (
-        <BACKUP_LOGIN_BANNER />
-      )}
-      {statusAlertDetails?.alertLocation ===
-        StatusAlertLocation.BEFORE_LOGIN && (
-        <LoginBanner
-          header={statusAlertDetails.title}
-          details={statusAlertDetails.message}
-          moreInfoLink={statusAlertDetails.link}
-        />
-      )}
+      {statusAlerts
+        .filter(
+          (alert) => alert.alertLocation === StatusAlertLocation.BEFORE_LOGIN
+        )
+        .map((alert, index) => (
+          <LoginBanner
+            key={`login-banner-${index}`}
+            header={alert.title}
+            details={alert.message}
+            moreInfoLink={alert.link}
+          />
+        ))}
       <div
         data-test-id='login'
         style={{
