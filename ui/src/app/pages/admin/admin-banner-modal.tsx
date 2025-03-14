@@ -1,8 +1,9 @@
 import * as React from 'react';
+
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
-import { TextInput } from 'app/components/inputs';
+import { Select, TextInput } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
@@ -23,6 +24,11 @@ export const AdminBannerModal = ({
   onClose,
   onCreate,
 }: AdminBannerModalProps) => {
+  const locationOptions = [
+    { value: StatusAlertLocation.AFTER_LOGIN, label: 'After Login' },
+    { value: StatusAlertLocation.BEFORE_LOGIN, label: 'Before Login' },
+  ];
+
   return (
     <Modal onRequestClose={onClose}>
       <ModalTitle>Create New Banner</ModalTitle>
@@ -31,9 +37,7 @@ export const AdminBannerModal = ({
           <label>Title</label>
           <TextInput
             value={banner.title}
-            onChange={(value) =>
-              setBanner({ ...banner, title: value })
-            }
+            onChange={(value) => setBanner({ ...banner, title: value })}
             placeholder='Enter banner title'
           />
         </div>
@@ -41,9 +45,7 @@ export const AdminBannerModal = ({
           <label>Message</label>
           <TextInput
             value={banner.message}
-            onChange={(value) =>
-              setBanner({ ...banner, message: value })
-            }
+            onChange={(value) => setBanner({ ...banner, message: value })}
             placeholder='Enter banner message'
           />
         </div>
@@ -51,32 +53,22 @@ export const AdminBannerModal = ({
           <label>Link (Optional)</label>
           <TextInput
             value={banner.link}
-            onChange={(value) =>
-              setBanner({ ...banner, link: value })
-            }
+            onChange={(value) => setBanner({ ...banner, link: value })}
             placeholder='Enter banner link'
           />
         </div>
         <div>
           <label>Location</label>
-          <select
+          <Select
             value={banner.alertLocation}
-            onChange={(e) =>
+            options={locationOptions}
+            onChange={(value) =>
               setBanner({
                 ...banner,
-                alertLocation:
-                  e.target.value as StatusAlertLocation,
+                alertLocation: value,
               })
             }
-            style={{ width: '100%', padding: '0.5rem' }}
-          >
-            <option value={StatusAlertLocation.AFTER_LOGIN}>
-              After Login
-            </option>
-            <option value={StatusAlertLocation.BEFORE_LOGIN}>
-              Before Login
-            </option>
-          </select>
+          />
         </div>
       </ModalBody>
       <ModalFooter>
@@ -87,10 +79,7 @@ export const AdminBannerModal = ({
         >
           Cancel
         </Button>
-        <Button
-          onClick={onCreate}
-          disabled={!banner.title || !banner.message}
-        >
+        <Button onClick={onCreate} disabled={!banner.title || !banner.message}>
           Create Banner
         </Button>
       </ModalFooter>
