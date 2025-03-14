@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
+import { StatusAlertLocation } from 'generated/fetch';
 
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import {
