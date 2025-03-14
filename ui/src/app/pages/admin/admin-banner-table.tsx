@@ -8,17 +8,11 @@ import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 import { Button, IconButton } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
 import { PlaygroundIcon } from 'app/components/icons';
-import { TextInput } from 'app/components/inputs';
-import {
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalTitle,
-} from 'app/components/modals';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
+import { AdminBannerModal } from './admin-banner-modal';
 
 const styles = reactStyles({
   page: {
@@ -170,79 +164,12 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
       </DataTable>
 
       {showCreateModal && (
-        <Modal onRequestClose={() => setShowCreateModal(false)}>
-          <ModalTitle>Create New Banner</ModalTitle>
-          <ModalBody>
-            <div style={{ marginBottom: '1rem' }}>
-              <label>Title</label>
-              <TextInput
-                value={newBanner.title}
-                onChange={(value) =>
-                  setNewBanner({ ...newBanner, title: value })
-                }
-                placeholder='Enter banner title'
-              />
-            </div>
-            <div style={{ marginBottom: '1rem' }}>
-              <label>Message</label>
-              <TextInput
-                value={newBanner.message}
-                onChange={(value) =>
-                  setNewBanner({ ...newBanner, message: value })
-                }
-                placeholder='Enter banner message'
-              />
-            </div>
-            <div style={{ marginBottom: '1rem' }}>
-              <label>Link (Optional)</label>
-              <TextInput
-                value={newBanner.link}
-                onChange={(value) =>
-                  setNewBanner({ ...newBanner, link: value })
-                }
-                placeholder='Enter banner link'
-              />
-            </div>
-            <div>
-              <label>Location</label>
-              <select
-                value={newBanner.alertLocation}
-                onChange={(e) =>
-                  setNewBanner({
-                    ...newBanner,
-                    alertLocation:
-                      e.target.value === 'BEFORE_LOGIN'
-                        ? StatusAlertLocation.BEFORE_LOGIN
-                        : StatusAlertLocation.AFTER_LOGIN,
-                  })
-                }
-                style={{ width: '100%', padding: '0.5rem' }}
-              >
-                <option value={StatusAlertLocation.AFTER_LOGIN}>
-                  After Login
-                </option>
-                <option value={StatusAlertLocation.BEFORE_LOGIN}>
-                  Before Login
-                </option>
-              </select>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              type='secondary'
-              onClick={() => setShowCreateModal(false)}
-              style={{ marginRight: '1rem' }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateBanner}
-              disabled={!newBanner.title || !newBanner.message}
-            >
-              Create Banner
-            </Button>
-          </ModalFooter>
-        </Modal>
+        <AdminBannerModal
+          banner={newBanner}
+          setBanner={setNewBanner}
+          onClose={() => setShowCreateModal(false)}
+          onCreate={handleCreateBanner}
+        />
       )}
     </div>
   );
