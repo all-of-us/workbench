@@ -79,7 +79,10 @@ export const AdminBannerModal = ({
         >
           Cancel
         </Button>
-        <Button onClick={onCreate} disabled={!banner.title || !banner.message}>
+        <Button
+          onClick={onCreate}
+          disabled={!banner.title || !banner.message || !banner.alertLocation}
+        >
           Create Banner
         </Button>
       </ModalFooter>
