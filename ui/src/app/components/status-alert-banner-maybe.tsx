@@ -5,11 +5,14 @@ import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import { firstPartyCookiesEnabled } from 'app/utils/cookies';
+import {
+  isDismissed,
+  saveDismissedMessage,
+} from 'app/utils/dismissed-messages';
 
 import { Button } from './buttons';
 import { ToastBanner, ToastType } from './toast-banner';
 
-const STATUS_ALERT_COOKIE_KEY = 'status-alert-banner-dismissed';
 const INITIAL_STATUS_ALERT: StatusAlert = {
   statusAlertId: 0,
   title: '',
@@ -19,9 +22,9 @@ const INITIAL_STATUS_ALERT: StatusAlert = {
 
 const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
   const { statusAlertId, message } = statusAlert;
+  const messageId = `status-alert-${statusAlertId}`;
   if (firstPartyCookiesEnabled()) {
-    const cookie = localStorage.getItem(STATUS_ALERT_COOKIE_KEY);
-    return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!message;
+    return !isDismissed(messageId);
   } else {
     return !!message;
   }
@@ -45,12 +48,7 @@ export const StatusAlertBannerMaybe = () => {
   }, []);
 
   const acknowledgeAlert = () => {
-    if (firstPartyCookiesEnabled()) {
-      localStorage.setItem(
-        STATUS_ALERT_COOKIE_KEY,
-        `${statusAlertDetails.statusAlertId}`
-      );
-    }
+    saveDismissedMessage(`status-alert-${statusAlertDetails.statusAlertId}`);
     setShowStatusAlert(false);
   };
 
