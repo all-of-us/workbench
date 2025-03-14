@@ -136,5 +136,4 @@ describe('MultiToastBanner', () => {
     // Should call onDismiss with the correct message id
     expect(onDismissMock).toHaveBeenCalledWith('message1');
   });
-
 });

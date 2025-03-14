@@ -29,23 +29,23 @@ export class StatusAlertApiStub extends StatusAlertApi {
   public async postStatusAlert(alert: StatusAlert): Promise<StatusAlert> {
     const newAlert = {
       ...alert,
-      statusAlertId: this.nextId++
+      statusAlertId: this.nextId++,
     };
     this.alerts.push(newAlert);
     return Promise.resolve(newAlert);
   }
 
   public async deleteStatusAlert(id: number): Promise<void> {
-    this.alerts = this.alerts.filter(alert => alert.statusAlertId !== id);
+    this.alerts = this.alerts.filter((alert) => alert.statusAlertId !== id);
     return Promise.resolve();
   }
 
   // Helper method for tests to add multiple alerts at once
   public addAlerts(alerts: Omit<StatusAlert, 'statusAlertId'>[]): void {
-    alerts.forEach(alert => {
+    alerts.forEach((alert) => {
       this.alerts.push({
         ...alert,
-        statusAlertId: this.nextId++
+        statusAlertId: this.nextId++,
       });
     });
   }
