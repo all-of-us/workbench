@@ -32,7 +32,11 @@ public class RawlsConfig {
   public static final String END_USER_LENIENT_TIMEOUT_API_CLIENT =
       "rawlsEndUserLenientTimeoutApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "rawlsServiceAccountApiClient";
-  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "rawlsWorkspaceAclsApi";
+  public static final String SERVICE_ACCOUNT_LENIENT_TIMEOUT_API_CLIENT =
+      "rawlsServiceAccountLenientTimeoutApiClient";
+  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "rawlsServiceAccountWorkspacesApi";
+  public static final String SERVICE_ACCOUNT_LENIENT_TIMEOUT_WORKSPACE_API =
+      "rawlsServiceAccountLenientTimeoutWorkspacesApi";
   public static final String END_USER_WORKSPACE_API = "rawlsWorkspacesApi";
   public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API =
       "rawlsLenientTimeoutWorkspacesApi";
@@ -72,6 +76,20 @@ public class RawlsConfig {
     return apiClient;
   }
 
+  @Bean(name = SERVICE_ACCOUNT_LENIENT_TIMEOUT_API_CLIENT)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ApiClient allOfUsLenientTimeoutApiClient(
+      RawlsApiClientFactory factory, WorkbenchConfig config) {
+    ApiClient apiClient = factory.newRawlsApiClient();
+    try {
+      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(BILLING_SCOPES));
+      apiClient.setReadTimeout(config.firecloud.lenientTimeoutInSeconds * 1000);
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+    return apiClient;
+  }
+
   @Bean(name = END_USER_WORKSPACE_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
@@ -93,6 +111,15 @@ public class RawlsConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspacesApi workspacesApiAcls(
       @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+    WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = SERVICE_ACCOUNT_LENIENT_TIMEOUT_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspacesApi workspacesLenientTimeoutApiAcls(
+      @Qualifier(SERVICE_ACCOUNT_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
     WorkspacesApi api = new WorkspacesApi();
     api.setApiClient(apiClient);
     return api;
