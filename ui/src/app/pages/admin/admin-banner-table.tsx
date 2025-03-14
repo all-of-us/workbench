@@ -71,7 +71,6 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
   }, []);
 
   const deleteProduct = async (id) => {
-    console.log('Deleting banner:', id);
     try {
       await statusAlertApi().deleteStatusAlert(id);
       const statusAlerts = await statusAlertApi().getStatusAlerts();
@@ -88,7 +87,6 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
         icon={PlaygroundIcon}
         className='p-button-danger'
         onClick={() => {
-          console.log('What is row data? ', rowData);
           deleteProduct(rowData.statusAlertId);
         }}
         style={{ height: '2rem', width: '2rem' }}

@@ -10,6 +10,7 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
 
 interface AdminBannerModalProps {
   banner: StatusAlert;
@@ -29,17 +30,30 @@ export const AdminBannerModal = ({
     { value: StatusAlertLocation.BEFORE_LOGIN, label: 'Before Login' },
   ];
 
+  const isBeforeLogin =
+    banner.alertLocation === StatusAlertLocation.BEFORE_LOGIN;
+
   return (
     <Modal onRequestClose={onClose}>
       <ModalTitle>Create New Banner</ModalTitle>
       <ModalBody>
         <div style={{ marginBottom: '1rem' }}>
           <label>Title</label>
-          <TextInput
-            value={banner.title}
-            onChange={(value) => setBanner({ ...banner, title: value })}
-            placeholder='Enter banner title'
-          />
+          <TooltipTrigger
+            content={
+              isBeforeLogin && '"Before Login" banner has a fixed headline.'
+            }
+            side='right'
+          >
+            <div>
+              <TextInput
+                value={banner.title}
+                onChange={(value) => setBanner({ ...banner, title: value })}
+                placeholder='Enter banner title'
+                disabled={isBeforeLogin}
+              />
+            </div>
+          </TooltipTrigger>
         </div>
         <div style={{ marginBottom: '1rem' }}>
           <label>Message</label>
@@ -65,6 +79,10 @@ export const AdminBannerModal = ({
             onChange={(value) =>
               setBanner({
                 ...banner,
+                title:
+                  value === StatusAlertLocation.AFTER_LOGIN
+                    ? ''
+                    : 'Scheduled Downtime Notice for the Researcher Workbench',
                 alertLocation: value,
               })
             }
