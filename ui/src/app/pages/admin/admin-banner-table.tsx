@@ -18,6 +18,7 @@ import { AdminBannerModal } from './admin-banner-modal';
 const styles = reactStyles({
   page: {
     padding: '1rem',
+    maxWidth: '100%',
   },
   header: {
     marginBottom: '1rem',
@@ -25,21 +26,48 @@ const styles = reactStyles({
   },
   tableStyle: {
     fontSize: 12,
-    minWidth: 800,
+    width: '100%',
+  },
+  tableContainer: {
+    overflowX: 'auto',
+    width: '100%',
+    minWidth: '100%',
   },
   colStyle: {
     fontSize: 12,
     height: '60px',
-    lineHeight: '0.75rem',
-    overflow: 'hidden',
+    lineHeight: '1.2rem',
     padding: '.5em',
+    overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+  },
+  titleCol: {
+    width: '20%',
+  },
+  messageCol: {
+    width: '40%',
+  },
+  linkCol: {
+    width: '17%',
+  },
+  locationCol: {
+    width: '10%',
+  },
+  actionCol: {
+    width: '5%',
+    textAlign: 'center',
   },
   createButtonContainer: {
     display: 'flex',
     justifyContent: 'flex-end',
     marginBottom: '1rem',
+  },
+  messageText: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    display: 'block',
   },
 });
 
@@ -110,6 +138,22 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     }
   };
 
+  const messageBodyTemplate = (rowData: StatusAlert) => {
+    return (
+      <span style={styles.messageText} title={rowData.message}>
+        {rowData.message}
+      </span>
+    );
+  };
+
+  const linkBodyTemplate = (rowData: StatusAlert) => {
+    return (
+      <span style={styles.messageText} title={rowData.link || '-'}>
+        {rowData.link || '-'}
+      </span>
+    );
+  };
+
   if (loading) {
     return <SpinnerOverlay />;
   }
@@ -122,44 +166,50 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
           Create New Banner
         </Button>
       </div>
-      <DataTable
-        value={banners}
-        emptyMessage='No active banners found'
-        style={styles.tableStyle}
-      >
-        <Column
-          field='statusAlertId'
-          header='ID'
-          style={{ ...styles.colStyle, width: '50px' }}
-        />
-        <Column
-          field='title'
-          header='Title'
-          style={{ ...styles.colStyle, width: '200px' }}
-        />
-        <Column
-          field='message'
-          header='Message'
-          style={{ ...styles.colStyle, width: '400px' }}
-        />
-        <Column
-          field='link'
-          header='Link'
-          style={{ ...styles.colStyle, width: '200px' }}
-          body={(rowData: StatusAlert) => rowData.link || '-'}
-        />
-        <Column
-          field='alertLocation'
-          header='Location'
-          style={{ ...styles.colStyle, width: '150px' }}
-          body={(rowData: StatusAlert) =>
-            rowData.alertLocation === StatusAlertLocation.BEFORE_LOGIN
-              ? 'Before Login'
-              : 'After Login'
-          }
-        />
-        <Column body={actionBodyTemplate} header='Actions' />
-      </DataTable>
+      <div style={styles.tableContainer}>
+        <DataTable
+          value={banners}
+          emptyMessage='No active banners found'
+          style={styles.tableStyle}
+          resizableColumns={true}
+          columnResizeMode='expand'
+          scrollable={true}
+          scrollHeight='flex'
+        >
+          <Column
+            field='title'
+            header='Title'
+            style={{ ...styles.colStyle, ...styles.titleCol }}
+          />
+          <Column
+            field='message'
+            header='Message'
+            style={{ ...styles.colStyle, ...styles.messageCol }}
+            body={messageBodyTemplate}
+          />
+          <Column
+            field='link'
+            header='Link'
+            style={{ ...styles.colStyle, ...styles.linkCol }}
+            body={linkBodyTemplate}
+          />
+          <Column
+            field='alertLocation'
+            header='Location'
+            style={{ ...styles.colStyle, ...styles.locationCol }}
+            body={(rowData: StatusAlert) =>
+              rowData.alertLocation === StatusAlertLocation.BEFORE_LOGIN
+                ? 'Before Login'
+                : 'After Login'
+            }
+          />
+          <Column
+            body={actionBodyTemplate}
+            header='Actions'
+            style={{ ...styles.colStyle, ...styles.actionCol }}
+          />
+        </DataTable>
+      </div>
 
       {showCreateModal && (
         <AdminBannerModal
