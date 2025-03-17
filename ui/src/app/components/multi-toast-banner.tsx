@@ -10,15 +10,11 @@ import { ToastBanner } from './toast-banner';
 
 interface Props {
   messages: MultiToastMessage[];
-  baseZIndex?: number;
+  zIndex?: number;
   onDismiss: (messageId: string) => void;
 }
 
-export const MultiToastBanner = ({
-  messages,
-  baseZIndex = 1000,
-  onDismiss,
-}: Props) => {
+export const MultiToastBanner = ({ messages, zIndex, onDismiss }: Props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (messages.length === 0) {
@@ -90,7 +86,7 @@ export const MultiToastBanner = ({
           );
         }}
         toastType={currentMessage.toastType}
-        zIndex={baseZIndex}
+        zIndex={zIndex}
       />
     </FlexColumn>
   );

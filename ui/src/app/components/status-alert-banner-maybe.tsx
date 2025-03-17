@@ -76,6 +76,10 @@ export const StatusAlertBannerMaybe = () => {
   };
 
   return showStatusAlert ? (
-    <MultiToastBanner messages={[alert]} onDismiss={acknowledgeAlert} />
+    <MultiToastBanner
+      messages={[alert]}
+      onDismiss={acknowledgeAlert}
+      zIndex={1000}
+    />
   ) : null;
 };
