@@ -115,7 +115,7 @@ export const ToastBanner = (props: ToastProps) => {
         size={20}
         style={styles.closeIcon}
         onClick={() => onClose()}
-        title={'Dismiss alert'}
+        title='Dismiss alert'
       />
     </FlexColumn>,
     document.getElementsByTagName('body')[0]
