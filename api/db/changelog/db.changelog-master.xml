@@ -267,6 +267,7 @@
   <include file="changelog/db.changelog-257-increase-user-version-column.xml"/>
   <include file="changelog/db.changelog-258-cdr-version-hasMHWBAndETM-field.xml"/>
   <include file="changelog/db.changelog-259-add-status-alert-location.xml"/>
+  <include file="changelog/db.changelog-260-create-vwb-user-pod-table.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

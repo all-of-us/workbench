@@ -128,8 +128,8 @@
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": true,
     "enableVWBEgressMonitor": true,
-    "enableVWBUserAccessManagement": false,
-    "enableVWBUserCreation": true
+    "enableVWBUserAccessManagement": true,
+    "enableVWBUserAndPodCreation": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

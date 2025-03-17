@@ -1,17 +1,14 @@
 package org.pmiops.workbench.vwb.usermanager;
 
 import jakarta.inject.Provider;
+import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.vwb.user.ApiException;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
+import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
 import org.pmiops.workbench.vwb.user.api.WorkbenchGroupApi;
-import org.pmiops.workbench.vwb.user.model.GroupRole;
-import org.pmiops.workbench.vwb.user.model.OrganizationMember;
-import org.pmiops.workbench.vwb.user.model.Principal;
-import org.pmiops.workbench.vwb.user.model.PrincipalUser;
-import org.pmiops.workbench.vwb.user.model.SetAccessOperation;
-import org.pmiops.workbench.vwb.user.model.SetAccessRequest;
-import org.pmiops.workbench.vwb.user.model.UserCreateRequest;
+import org.pmiops.workbench.vwb.user.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,18 +28,22 @@ public class VwbUserManagerClient {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  private final Provider<PodApi> podApiProvider;
+
   public VwbUserManagerClient(
       @Qualifier(VwbUserManagerConfig.VWB_SERVICE_ACCOUNT_USER_API)
           Provider<UserV2Api> userV2ApiProvider,
       Provider<OrganizationV2Api> organizationV2ApiProvider,
       Provider<WorkbenchGroupApi> groupApiProvider,
       VwbUserManagerRetryHandler vwbUserManagerRetryHandler,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      Provider<PodApi> podApiProvider) {
     this.userV2ApiProvider = userV2ApiProvider;
     this.organizationV2ApiProvider = organizationV2ApiProvider;
     this.groupApiProvider = groupApiProvider;
     this.vwbUserManagerRetryHandler = vwbUserManagerRetryHandler;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.podApiProvider = podApiProvider;
   }
 
   public OrganizationMember getOrganizationMember(String userName) {
@@ -84,6 +85,54 @@ public class VwbUserManagerClient {
     vwbUserManagerRetryHandler.run(
         context -> {
           groupApiProvider.get().setGroupAccess(setAccessRequest, groupName, organizationId);
+          return null;
+        });
+  }
+
+  public PodDescription createPodForUserWithEmail(String email) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    String initialCreditBillingAccount = workbenchConfigProvider.get().billing.accountId;
+    logger.info("Creating pod for user in VWB with email {}", email);
+    return vwbUserManagerRetryHandler.run(
+        context ->
+            podApiProvider
+                .get()
+                .createPod(
+                    new PodCreateRequest()
+                        .userFacingId("user-pod-" + email.substring(0, email.indexOf('@')))
+                        .description("Pod for " + email)
+                        .environment(
+                            new PodEnvironment()
+                                .environmentType(PodEnvironmentType.GCP)
+                                .environmentDataGcp(
+                                    new PodEnvironmentDataGcp()
+                                        .billingAccountId(initialCreditBillingAccount))),
+                    organizationId));
+  }
+
+  public void sharePodWithUserWithRole(UUID podId, String email, PodRole podRole)
+      throws ApiException {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.info("Sharing pod {} with user {} with role {}", podId, email, podRole);
+    vwbUserManagerRetryHandler.runAndThrowChecked(
+        context -> {
+          podApiProvider.get().grantMemberPodRole(organizationId, podId.toString(), email, podRole);
+          return null;
+        });
+  }
+
+  public void deletePod(UUID podId) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.info("Deleting pod {}", podId);
+    vwbUserManagerRetryHandler.run(
+        context -> {
+          podApiProvider
+              .get()
+              .deletePod(
+                  new DeletePodRequest()
+                      .jobControl(new JobControl().id(UUID.randomUUID().toString())),
+                  organizationId,
+                  podId.toString());
           return null;
         });
   }

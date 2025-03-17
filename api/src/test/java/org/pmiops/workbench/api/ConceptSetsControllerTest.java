@@ -81,6 +81,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
@@ -266,7 +267,9 @@ public class ConceptSetsControllerTest {
     EgressObjectLengthsRemediationService.class,
     WorkspaceServiceFactory.class,
     WsmClient.class,
-    VwbAccessService.class
+    VwbAccessService.class,
+    VwbUserService.class,
+    TaskQueueService.class
   })
   static class Configuration {
     @Bean

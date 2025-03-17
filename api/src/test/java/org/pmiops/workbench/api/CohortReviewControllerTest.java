@@ -132,6 +132,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -312,7 +313,9 @@ public class CohortReviewControllerTest {
     WorkspaceResourcesService.class,
     WorkspaceService.class,
     WorkspaceServiceFactory.class,
-    WsmClient.class
+    WsmClient.class,
+    VwbUserService.class,
+    TaskQueueService.class
   })
   static class Configuration {
     @Bean
