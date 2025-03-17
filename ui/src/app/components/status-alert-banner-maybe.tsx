@@ -1,17 +1,20 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
+import { StatusAlertLocation } from 'generated/fetch';
 
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import { firstPartyCookiesEnabled } from 'app/utils/cookies';
+import {
+  isDismissed,
+  saveDismissedMessage,
+} from 'app/utils/dismissed-messages';
 
 import { Button } from './buttons';
 import { MultiToastBanner } from './multi-toast-banner';
 import { MultiToastMessage } from './multi-toast-message.model';
 import { ToastType } from './toast-banner';
 
-const STATUS_ALERT_COOKIE_KEY = 'status-alert-banner-dismissed';
 const INITIAL_STATUS_ALERT: MultiToastMessage = {
   id: '',
   title: '',
@@ -19,11 +22,13 @@ const INITIAL_STATUS_ALERT: MultiToastMessage = {
   toastType: ToastType.WARNING,
 };
 
-const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
-  const { statusAlertId, message } = statusAlert;
+const getDismissalId = (message: MultiToastMessage) =>
+  `status-alert-${message.id}`;
+
+const shouldShowStatusAlert = (message: MultiToastMessage) => {
+  const messageId = getDismissalId(message);
   if (firstPartyCookiesEnabled()) {
-    const cookie = localStorage.getItem(STATUS_ALERT_COOKIE_KEY);
-    return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!message;
+    return !isDismissed(messageId);
   } else {
     return !!message;
   }
@@ -37,7 +42,11 @@ export const StatusAlertBannerMaybe = () => {
     const getAlert = async () => {
       const statusAlert = await statusAlertApi().getStatusAlert();
 
-      if (statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN) {
+      if (
+        statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
+        statusAlert?.title &&
+        statusAlert?.message
+      ) {
         const messageId = `status-alert-${statusAlert.statusAlertId}`;
         const message: MultiToastMessage = {
           id: messageId,
@@ -50,7 +59,7 @@ export const StatusAlertBannerMaybe = () => {
             </Button>
           ) : undefined,
         };
-        setShowStatusAlert(shouldShowStatusAlert(statusAlert));
+        setShowStatusAlert(shouldShowStatusAlert(message));
         setAlert(message);
       }
     };
@@ -59,9 +68,7 @@ export const StatusAlertBannerMaybe = () => {
   }, []);
 
   const acknowledgeAlert = () => {
-    if (firstPartyCookiesEnabled()) {
-      localStorage.setItem(STATUS_ALERT_COOKIE_KEY, `${alert.id}`);
-    }
+    saveDismissedMessage(getDismissalId(alert));
     setShowStatusAlert(false);
   };
 

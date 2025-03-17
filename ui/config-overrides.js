@@ -34,7 +34,7 @@ module.exports = {
     return config;
   },
   jest: function(config) {
-    config.testMatch = ["**/*.spec.tsx"];
+    config.testMatch = ["**/*.spec.{ts,tsx}"];
     return config;
   }
 }
