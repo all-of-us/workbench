@@ -98,7 +98,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
     // This means that the user has been granted access to a tier for the first time. Then perform
     // the VWB creation logic.
-    if (previousAccessTiers.isEmpty() && !newAccessTiers.isEmpty()) {
+    if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
       // This call checks if the user already exists in VWB to avoid creating the user twice.
       // Creating the user here is necessary to ensure that the user is created in VWB before adding
       // them to the groups
@@ -106,6 +106,11 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       // Create the pod asynchronously to avoid blocking the user
       taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
     }
+  }
+
+  private boolean userHasFirstAccessToTiers(
+      List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
+    return previousAccessTiers.isEmpty() && !newAccessTiers.isEmpty();
   }
 
   private void addInitialCreditsExpirationIfAppropriate(
@@ -118,8 +123,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
           dbUser.getUserInitialCreditsExpiration();
 
       // A user's credits should begin to expire when they gain access to their first tier.
-      if (previousAccessTiers.isEmpty()
-          && !newAccessTiers.isEmpty()
+      if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)
           && null == maybeCreditsExpiration) {
         initialCreditsService.createInitialCreditsExpiration(dbUser);
       }

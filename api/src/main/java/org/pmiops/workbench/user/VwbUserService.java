@@ -37,7 +37,7 @@ public class VwbUserService {
    * @param email The email of the user to create.
    */
   public void createUser(String email) {
-    if (!workbenchConfigProvider.get().featureFlags.enableVWBUserCreation) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBUserAndPodCreation) {
       return;
     }
     OrganizationMember organizationMember = vwbUserManagerClient.getOrganizationMember(email);
@@ -55,7 +55,7 @@ public class VwbUserService {
    * @return The created pod, or null if the pod could not be created.
    */
   public DbVwbUserPod createInitialCreditsPodForUser(DbUser dbUser) {
-    if (!workbenchConfigProvider.get().featureFlags.enableVWBPodCreation) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBUserAndPodCreation) {
       return null;
     }
     String email = dbUser.getUsername();
@@ -74,7 +74,7 @@ public class VwbUserService {
           new DbVwbUserPod()
               .setVwbPodId(initialCreditsPodForUser.getPodId().toString())
               .setUser(dbUser)
-              .setActive(true);
+              .setInitialCreditsActive(true);
       dbUser.setVwbUserPod(dbVwbUserPod);
       userDao.save(dbUser);
 

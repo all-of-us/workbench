@@ -39,17 +39,16 @@ class VwbUserServiceTest {
     reset(workbenchConfigProvider);
   }
 
-  void stub(boolean enableVWBUserCreation, boolean enableVwbPodCreation) {
+  void stub(boolean enableVWBUserAndPodCreation) {
     WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.featureFlags.enableVWBUserCreation = enableVWBUserCreation;
-    workbenchConfig.featureFlags.enableVWBPodCreation = enableVwbPodCreation;
+    workbenchConfig.featureFlags.enableVWBUserAndPodCreation = enableVWBUserAndPodCreation;
 
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
   }
 
   @Test
   void createUser_featureFlagDisabled() {
-    stub(false, false);
+    stub(false);
 
     vwbUserService.createUser("test@example.com");
 
@@ -58,7 +57,7 @@ class VwbUserServiceTest {
 
   @Test
   void createUser_userAlreadyExists() {
-    stub(true, false);
+    stub(true);
     OrganizationMember organizationMember = mock(OrganizationMember.class);
     when(vwbUserManagerClient.getOrganizationMember("test@example.com"))
         .thenReturn(organizationMember);
@@ -71,7 +70,7 @@ class VwbUserServiceTest {
 
   @Test
   void createUser_userDoesNotExist() {
-    stub(true, false);
+    stub(true);
 
     OrganizationMember organizationMember = mock(OrganizationMember.class);
     when(vwbUserManagerClient.getOrganizationMember("test@example.com"))
@@ -85,7 +84,7 @@ class VwbUserServiceTest {
 
   @Test
   void createInitialCreditsPodForUser_featureFlagDisabled() {
-    stub(false, false);
+    stub(false);
 
     DbUser dbUser = mock(DbUser.class);
 
@@ -97,7 +96,7 @@ class VwbUserServiceTest {
 
   @Test
   void createInitialCreditsPodForUser_success() throws ApiException {
-    stub(true, true);
+    stub(true);
     UUID uuid = UUID.randomUUID();
 
     DbUser dbUser = mock(DbUser.class);

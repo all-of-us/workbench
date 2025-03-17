@@ -10,7 +10,7 @@ public class DbVwbUserPod {
   private Long vwbUserPodId;
   private DbUser user;
   private String vwbPodId;
-  private Boolean isActive;
+  private Boolean isInitialCreditsActive;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,13 +45,13 @@ public class DbVwbUserPod {
     return this;
   }
 
-  @Column(name = "is_active")
-  public Boolean isActive() {
-    return isActive;
+  @Column(name = "is_initial_credit_active")
+  public Boolean isInitialCreditsActive() {
+    return isInitialCreditsActive;
   }
 
-  public DbVwbUserPod setActive(Boolean isActive) {
-    this.isActive = isActive;
+  public DbVwbUserPod setInitialCreditsActive(Boolean isInitialCreditsActive) {
+    this.isInitialCreditsActive = isInitialCreditsActive;
     return this;
   }
 
@@ -62,11 +62,11 @@ public class DbVwbUserPod {
     DbVwbUserPod that = (DbVwbUserPod) o;
     return Objects.equals(vwbUserPodId, that.vwbUserPodId)
         && Objects.equals(vwbPodId, that.vwbPodId)
-        && Objects.equals(isActive, that.isActive);
+        && Objects.equals(isInitialCreditsActive, that.isInitialCreditsActive);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(vwbUserPodId, vwbPodId, isActive);
+    return Objects.hash(vwbUserPodId, vwbPodId, isInitialCreditsActive);
   }
 }
