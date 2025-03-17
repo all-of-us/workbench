@@ -20,9 +20,12 @@ const INITIAL_STATUS_ALERT: StatusAlert = {
   link: '',
 };
 
+const getMessageId = (statusAlert: StatusAlert) =>
+  `status-alert-${statusAlert.statusAlertId}`;
+
 const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
-  const { statusAlertId, message } = statusAlert;
-  const messageId = `status-alert-${statusAlertId}`;
+  const { message } = statusAlert;
+  const messageId = getMessageId(statusAlert);
   if (firstPartyCookiesEnabled()) {
     return !isDismissed(messageId);
   } else {
@@ -52,7 +55,7 @@ export const StatusAlertBannerMaybe = () => {
   }, []);
 
   const acknowledgeAlert = () => {
-    saveDismissedMessage(`status-alert-${statusAlertDetails.statusAlertId}`);
+    saveDismissedMessage(getMessageId(statusAlertDetails));
     setShowStatusAlert(false);
   };
 
