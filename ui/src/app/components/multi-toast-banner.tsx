@@ -1,9 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import colors from 'app/styles/colors';
-
-import { FlexColumn, FlexRow } from './flex';
+import { FlexColumn } from './flex';
 import { MultiToastMessage } from './multi-toast-message.model';
 import { PaginationNavigation } from './pagination-navigation';
 import { ToastBanner } from './toast-banner';
