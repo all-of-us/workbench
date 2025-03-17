@@ -85,13 +85,14 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
 
   useEffect(() => {
     const loadBanners = async () => {
+      props.hideSpinner();
       setLoading(true);
       try {
         const statusAlerts = await statusAlertApi().getStatusAlerts();
         setBanners(statusAlerts);
-      } finally {
+      } catch (e) {
+        console.error('Error loading status alerts: ', e);
         setLoading(false);
-        props.hideSpinner();
       }
     };
 
