@@ -55,7 +55,9 @@ export const AdminBannerModal = ({
           <label>Title</label>
           <TooltipTrigger
             content={
-              isBeforeLogin ? '"Before Login" banner has a fixed headline.' : null
+              isBeforeLogin
+                ? '"Before Login" banner has a fixed headline.'
+                : null
             }
             side='right'
           >
