@@ -1,5 +1,6 @@
 import * as cookies from './cookies';
 import {
+  DISMISSED_MESSAGES_KEY,
   getDismissedMessageIds,
   isDismissed,
   saveDismissedMessage,
@@ -12,7 +13,6 @@ jest.mock('./cookies', () => ({
 
 describe('dismissed-messages', () => {
   let localStorageMock: { [key: string]: string };
-  const DISMISSED_MESSAGES_KEY = 'dismissed-messages';
 
   beforeEach(() => {
     // Clear all mocks

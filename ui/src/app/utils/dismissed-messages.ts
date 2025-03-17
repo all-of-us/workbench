@@ -1,6 +1,6 @@
 import { firstPartyCookiesEnabled } from './cookies';
-
-const DISMISSED_MESSAGES_KEY = 'dismissed-messages';
+// Used in testing
+export const DISMISSED_MESSAGES_KEY = 'dismissed-messages';
 
 export const getDismissedMessageIds = (): string[] => {
   if (!firstPartyCookiesEnabled()) {
