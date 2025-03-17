@@ -24,12 +24,11 @@ const getMessageId = (statusAlert: StatusAlert) =>
   `status-alert-${statusAlert.statusAlertId}`;
 
 const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
-  const { message } = statusAlert;
   const messageId = getMessageId(statusAlert);
   if (firstPartyCookiesEnabled()) {
     return !isDismissed(messageId);
   } else {
-    return !!message;
+    return !!statusAlert?.message;
   }
 };
 
