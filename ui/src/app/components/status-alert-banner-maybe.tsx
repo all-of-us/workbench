@@ -38,7 +38,11 @@ export const StatusAlertBannerMaybe = () => {
   useEffect(() => {
     const getAlert = async () => {
       const statusAlert = await statusAlertApi().getStatusAlert();
-      if (statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN) {
+      if (
+        statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
+        statusAlert?.title &&
+        statusAlert?.message
+      ) {
         setShowStatusAlert(shouldShowStatusAlert(statusAlert));
         setStatusAlertDetails(statusAlert);
       }
