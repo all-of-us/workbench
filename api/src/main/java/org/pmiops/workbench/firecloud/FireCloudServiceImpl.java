@@ -1,5 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
+import static org.pmiops.workbench.utils.ApiClientUtils.withLenientTimeout;
+
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -556,12 +558,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public String staticRstudioNotebooksConvert(byte[] notebook) {
+    ConvertApi convertApi =
+        withLenientTimeout(configProvider.get(), endUserStaticConvertApiProvider.get());
     return calhounRetryHandler.run(
         (context) -> {
           try {
-            return Files.asCharSource(
-                    endUserStaticConvertApiProvider.get().convertRmd(notebook),
-                    Charset.defaultCharset())
+            return Files.asCharSource(convertApi.convertRmd(notebook), Charset.defaultCharset())
                 .read();
           } catch (IOException e) {
             throw new WorkbenchException("fail to read RStudio raw content", e);
