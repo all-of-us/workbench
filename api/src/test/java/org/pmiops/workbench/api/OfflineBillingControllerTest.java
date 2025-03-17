@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Stopwatch;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,19 +23,18 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 public class OfflineBillingControllerTest {
 
-  @Autowired private InitialCreditsBatchUpdateService mockFreeTierBillingUpdateService;
   @Autowired private OfflineBillingController offlineBillingController;
-  @Autowired private TaskQueueService mockTaskQueueService;
-  @Autowired private UserService mockUserService;
-  @Autowired private GoogleProjectPerCostDao mockGoogleProjectPerCostDao;
+
+  @MockBean private GoogleProjectPerCostDao mockGoogleProjectPerCostDao;
+  @MockBean private InitialCreditsBatchUpdateService mockInitialCreditsBatchUpdateService;
+  @MockBean private TaskQueueService mockTaskQueueService;
+  @MockBean private UserService mockUserService;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, OfflineBillingController.class})
-  @MockBean({
-    InitialCreditsBatchUpdateService.class,
-    TaskQueueService.class,
-    UserService.class,
-    GoogleProjectPerCostDao.class
+  @Import({
+    FakeClockConfiguration.class,
+    OfflineBillingController.class,
+    Stopwatch.class,
   })
   static class Configuration {}
 
@@ -64,7 +64,7 @@ public class OfflineBillingControllerTest {
     freeTierForAllWorkspace.put("2", 0.4);
     freeTierForAllWorkspace.put("3", 1d);
     freeTierForAllWorkspace.put("4", 0.34);
-    when(mockFreeTierBillingUpdateService.getFreeTierWorkspaceCostsFromBQ())
+    when(mockInitialCreditsBatchUpdateService.getFreeTierWorkspaceCostsFromBQ())
         .thenReturn(freeTierForAllWorkspace);
   }
 }

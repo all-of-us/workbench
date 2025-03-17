@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { StatusAlertLocation } from 'generated/fetch';
+import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import {
@@ -13,6 +13,23 @@ import { Button } from './buttons';
 import { MultiToastBanner } from './multi-toast-banner';
 import { MultiToastMessage } from './multi-toast-message.model';
 import { ToastType } from './toast-banner';
+
+const getDismissalId = (statusAlert: StatusAlert) =>
+  `status-alert-${statusAlert.statusAlertId}`;
+
+const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
+  return {
+    id: getDismissalId(statusAlert),
+    title: statusAlert.title,
+    message: statusAlert.message,
+    toastType: ToastType.WARNING,
+    footer: statusAlert.link ? (
+      <Button onClick={() => window.open(statusAlert.link, '_blank')}>
+        READ MORE
+      </Button>
+    ) : undefined,
+  };
+};
 
 export const StatusAlertBannerMaybe = () => {
   const [alertMessages, setAlertMessages] = useState<MultiToastMessage[]>([]);
@@ -32,17 +49,7 @@ export const StatusAlertBannerMaybe = () => {
             ) {
               const messageId = `status-alert-${alert.statusAlertId}`;
               if (!isDismissed(messageId)) {
-                const apiMessage: MultiToastMessage = {
-                  id: messageId,
-                  title: alert.title,
-                  message: alert.message,
-                  toastType: ToastType.WARNING,
-                  footer: alert.link ? (
-                    <Button onClick={() => window.open(alert.link, '_blank')}>
-                      READ MORE
-                    </Button>
-                  ) : undefined,
-                };
+                const apiMessage: MultiToastMessage = toToastMessage(alert);
                 messages.push(apiMessage);
               }
             }
@@ -68,6 +75,10 @@ export const StatusAlertBannerMaybe = () => {
   }
 
   return (
-    <MultiToastBanner messages={alertMessages} onDismiss={handleDismiss} />
+    <MultiToastBanner
+      messages={alertMessages}
+      onDismiss={handleDismiss}
+      zIndex={1000}
+    />
   );
 };

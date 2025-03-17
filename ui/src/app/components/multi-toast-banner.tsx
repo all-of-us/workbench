@@ -1,24 +1,18 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import colors from 'app/styles/colors';
-
-import { FlexColumn, FlexRow } from './flex';
-import { ArrowLeft, ArrowRight } from './icons';
+import { FlexColumn } from './flex';
 import { MultiToastMessage } from './multi-toast-message.model';
+import { PaginationNavigation } from './pagination-navigation';
 import { ToastBanner } from './toast-banner';
 
 interface Props {
   messages: MultiToastMessage[];
-  baseZIndex?: number;
+  zIndex?: number;
   onDismiss: (messageId: string) => void;
 }
 
-export const MultiToastBanner = ({
-  messages,
-  baseZIndex = 1000,
-  onDismiss,
-}: Props) => {
+export const MultiToastBanner = ({ messages, zIndex, onDismiss }: Props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (messages.length === 0) {
@@ -37,48 +31,14 @@ export const MultiToastBanner = ({
           <FlexColumn>
             <div>{currentMessage.message}</div>
             {hasMultipleMessages && (
-              <FlexRow
-                style={{
-                  marginTop: '0.5rem',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+              <PaginationNavigation
+                {...{
+                  currentIndex,
+                  setCurrentIndex,
+                  numElements: messages.length,
+                  singularName: 'message',
                 }}
-              >
-                <FlexRow style={{ alignItems: 'center', gap: '0.5rem' }}>
-                  <ArrowLeft
-                    size={16}
-                    title='Previous message'
-                    style={{
-                      cursor: currentIndex > 0 ? 'pointer' : 'not-allowed',
-                      color: currentIndex > 0 ? colors.accent : colors.disabled,
-                    }}
-                    onClick={() =>
-                      currentIndex > 0 && setCurrentIndex((prev) => prev - 1)
-                    }
-                  />
-                  <span style={{ fontSize: '12px', color: colors.primary }}>
-                    {currentIndex + 1} of {messages.length}
-                  </span>
-                  <ArrowRight
-                    size={16}
-                    title='Next message'
-                    style={{
-                      cursor:
-                        currentIndex < messages.length - 1
-                          ? 'pointer'
-                          : 'not-allowed',
-                      color:
-                        currentIndex < messages.length - 1
-                          ? colors.accent
-                          : colors.disabled,
-                    }}
-                    onClick={() =>
-                      currentIndex < messages.length - 1 &&
-                      setCurrentIndex((prev) => prev + 1)
-                    }
-                  />
-                </FlexRow>
-              </FlexRow>
+              />
             )}
           </FlexColumn>
         }
@@ -90,7 +50,7 @@ export const MultiToastBanner = ({
           );
         }}
         toastType={currentMessage.toastType}
-        zIndex={baseZIndex}
+        zIndex={zIndex}
       />
     </FlexColumn>
   );

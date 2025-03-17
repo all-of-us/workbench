@@ -4,10 +4,12 @@ import jakarta.inject.Provider;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
@@ -88,6 +90,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
+    List<String> failedDeletions = new ArrayList<>();
     for (LeonardoListRuntimeResponse listRuntimeResponse : responses) {
       final String googleProject =
           leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
@@ -145,14 +148,26 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
         continue;
       }
 
-      leonardoApiClient.deleteRuntimeAsService(
-          googleProject, runtime.getRuntimeName(), /* deleteDisk */ false);
+      try {
+        leonardoApiClient.deleteRuntimeAsService(
+            googleProject, runtime.getRuntimeName(), /* deleteDisk */ false);
+      } catch (WorkbenchException e) {
+        log.warning(String.format("error deleting runtime '%s': %s", runtimeId, e.getMessage()));
+        failedDeletions.add(runtimeId);
+      }
     }
+
     log.info(
         String.format(
-            "Deleted %d old runtimes and %d idle runtimes "
-                + "of %d total runtimes (%d of which were idle)",
+            "Deleted %d old runtimes and %d idle runtimes of %d total runtimes (%d of which were idle).",
             activeDeletes, unusedDeletes, responses.size(), idles));
+
+    if (!failedDeletions.isEmpty()) {
+      throw new ServerErrorException(
+          String.format(
+              "Failed to delete these runtimes: %s",
+              failedDeletions.size(), String.join(", ", failedDeletions)));
+    }
 
     return ResponseEntity.noContent().build();
   }
