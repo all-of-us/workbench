@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
@@ -29,13 +28,9 @@ public class RawlsConfig {
   // Some groups of FireCloud APIs will use one, while some will use the other.
   //
   public static final String END_USER_API_CLIENT = "rawlsEndUserApiClient";
-  public static final String END_USER_LENIENT_TIMEOUT_API_CLIENT =
-      "rawlsEndUserLenientTimeoutApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "rawlsServiceAccountApiClient";
   public static final String SERVICE_ACCOUNT_WORKSPACE_API = "rawlsWorkspaceAclsApi";
   public static final String END_USER_WORKSPACE_API = "rawlsWorkspacesApi";
-  public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API =
-      "rawlsLenientTimeoutWorkspacesApi";
   public static final String SERVICE_ACCOUNT_BILLING_V2_API = "rawlsServiceAccountBillingV2Api";
   public static final String END_USER_STATIC_BILLING_V2_API = "rawlsEndUserBillingV2Api";
 
@@ -45,18 +40,6 @@ public class RawlsConfig {
       UserAuthentication userAuthentication, RawlsApiClientFactory factory) {
     ApiClient apiClient = factory.newRawlsApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    return apiClient;
-  }
-
-  @Bean(name = END_USER_LENIENT_TIMEOUT_API_CLIENT)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient endUserLenientTimeoutApiClient(
-      UserAuthentication userAuthentication,
-      RawlsApiClientFactory factory,
-      WorkbenchConfig config) {
-    ApiClient apiClient = factory.newRawlsApiClient();
-    apiClient.setAccessToken(userAuthentication.getCredentials());
-    apiClient.setReadTimeout(config.firecloud.lenientTimeoutInSeconds * 1000);
     return apiClient;
   }
 
@@ -75,15 +58,6 @@ public class RawlsConfig {
   @Bean(name = END_USER_WORKSPACE_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
-    WorkspacesApi api = new WorkspacesApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = END_USER_LENIENT_TIMEOUT_WORKSPACE_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspacesApi lenientTimeoutWorkspacesApi(
-      @Qualifier(END_USER_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
     WorkspacesApi api = new WorkspacesApi();
     api.setApiClient(apiClient);
     return api;
