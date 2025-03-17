@@ -103,7 +103,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     setLoading(false);
   }, [banners]);
 
-  const deleteBanner = async (id) => {
+  const deleteBanner = async (id: number) => {
     try {
       setLoading(true);
       await statusAlertApi().deleteStatusAlert(id);
@@ -114,16 +114,13 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     }
   };
 
-  const actionBodyTemplate = (rowData) => {
+  const actionBodyTemplate = (rowData: StatusAlert) => {
     return (
       <TooltipTrigger content='Delete Banner'>
         <IconButton
           label='Delete'
           icon={TrashCan}
-          className='p-button-danger'
-          onClick={() => {
-            deleteBanner(rowData.statusAlertId);
-          }}
+          onClick={() => deleteBanner(rowData.statusAlertId)}
           style={{ height: '1.5rem', width: '1.5rem' }}
         />
       </TooltipTrigger>
