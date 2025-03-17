@@ -13,7 +13,7 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_W
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
-import static org.pmiops.workbench.utils.ApiClientUtils.withLenientTimeout;
+import static org.pmiops.workbench.utils.ApiClientUtils.withTimeoutInSeconds;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -530,8 +530,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public List<ListPersistentDiskResponse> listDisksAsService() {
-    DisksApi disksApi =
-        withLenientTimeout(workbenchConfigProvider.get(), serviceDisksApiProvider.get());
+    DisksApi disksApi = withTimeoutInSeconds(120, serviceDisksApiProvider.get());
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisks(
