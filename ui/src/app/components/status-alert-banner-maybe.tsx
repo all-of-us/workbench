@@ -11,71 +11,75 @@ import {
 } from 'app/utils/dismissed-messages';
 
 import { Button } from './buttons';
-import { ToastBanner, ToastType } from './toast-banner';
+import { MultiToastBanner } from './multi-toast-banner';
+import { MultiToastMessage } from './multi-toast-message.model';
+import { ToastType } from './toast-banner';
 
-const INITIAL_STATUS_ALERT: StatusAlert = {
-  statusAlertId: 0,
+const INITIAL_STATUS_ALERT: MultiToastMessage = {
+  id: '',
   title: '',
   message: '',
-  link: '',
+  toastType: ToastType.WARNING,
 };
 
-const getMessageId = (statusAlert: StatusAlert) =>
+const getDismissalId = (statusAlert: StatusAlert) =>
   `status-alert-${statusAlert.statusAlertId}`;
 
+const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
+  return {
+    id: getDismissalId(statusAlert),
+    title: statusAlert.title,
+    message: statusAlert.message,
+    toastType: ToastType.WARNING,
+    footer: statusAlert.link ? (
+      <Button onClick={() => window.open(statusAlert.link, '_blank')}>
+        READ MORE
+      </Button>
+    ) : undefined,
+  };
+};
+
 const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
-  const { message } = statusAlert;
-  const messageId = getMessageId(statusAlert);
+  const messageId = getDismissalId(statusAlert);
   if (firstPartyCookiesEnabled()) {
     return !isDismissed(messageId);
   } else {
-    return !!message;
+    return !!statusAlert;
   }
 };
 
 export const StatusAlertBannerMaybe = () => {
   const [showStatusAlert, setShowStatusAlert] = useState(false);
-  const [statusAlertDetails, setStatusAlertDetails] =
-    useState(INITIAL_STATUS_ALERT);
+  const [alert, setAlert] = useState(INITIAL_STATUS_ALERT);
 
   useEffect(() => {
     const getAlert = async () => {
       const statusAlert = await statusAlertApi().getStatusAlert();
+
       if (
         statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
         statusAlert?.title &&
         statusAlert?.message
       ) {
+        const message: MultiToastMessage = toToastMessage(statusAlert);
         setShowStatusAlert(shouldShowStatusAlert(statusAlert));
-        setStatusAlertDetails(statusAlert);
+        setAlert(message);
       }
     };
 
     getAlert();
   }, []);
 
-  const acknowledgeAlert = () => {
-    saveDismissedMessage(getMessageId(statusAlertDetails));
+  const acknowledgeAlert = (dismissalId: string) => {
+    saveDismissedMessage(dismissalId);
     setShowStatusAlert(false);
   };
 
-  const footer = statusAlertDetails.link && (
-    <Button
-      data-test-id='status-banner-read-more-button'
-      onClick={() => window.open(statusAlertDetails.link, '_blank')}
-    >
-      READ MORE
-    </Button>
-  );
-
   return showStatusAlert ? (
-    <ToastBanner
-      title={statusAlertDetails.title}
-      message={statusAlertDetails.message}
-      onClose={() => acknowledgeAlert()}
-      toastType={ToastType.WARNING}
+    <MultiToastBanner
+      messages={[alert]}
+      onDismiss={acknowledgeAlert}
       zIndex={1000}
-      footer={footer}
     />
   ) : null;
 };
