@@ -5,11 +5,14 @@ import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import { firstPartyCookiesEnabled } from 'app/utils/cookies';
+import {
+  isDismissed,
+  saveDismissedMessage,
+} from 'app/utils/dismissed-messages';
 
 import { Button } from './buttons';
 import { ToastBanner, ToastType } from './toast-banner';
 
-const STATUS_ALERT_COOKIE_KEY = 'status-alert-banner-dismissed';
 const INITIAL_STATUS_ALERT: StatusAlert = {
   statusAlertId: 0,
   title: '',
@@ -17,11 +20,14 @@ const INITIAL_STATUS_ALERT: StatusAlert = {
   link: '',
 };
 
+const getMessageId = (statusAlert: StatusAlert) =>
+  `status-alert-${statusAlert.statusAlertId}`;
+
 const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
-  const { statusAlertId, message } = statusAlert;
+  const { message } = statusAlert;
+  const messageId = getMessageId(statusAlert);
   if (firstPartyCookiesEnabled()) {
-    const cookie = localStorage.getItem(STATUS_ALERT_COOKIE_KEY);
-    return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!message;
+    return !isDismissed(messageId);
   } else {
     return !!message;
   }
@@ -35,7 +41,11 @@ export const StatusAlertBannerMaybe = () => {
   useEffect(() => {
     const getAlert = async () => {
       const statusAlert = await statusAlertApi().getStatusAlert();
-      if (statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN) {
+      if (
+        statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
+        statusAlert?.title &&
+        statusAlert?.message
+      ) {
         setShowStatusAlert(shouldShowStatusAlert(statusAlert));
         setStatusAlertDetails(statusAlert);
       }
@@ -45,12 +55,7 @@ export const StatusAlertBannerMaybe = () => {
   }, []);
 
   const acknowledgeAlert = () => {
-    if (firstPartyCookiesEnabled()) {
-      localStorage.setItem(
-        STATUS_ALERT_COOKIE_KEY,
-        `${statusAlertDetails.statusAlertId}`
-      );
-    }
+    saveDismissedMessage(getMessageId(statusAlertDetails));
     setShowStatusAlert(false);
   };
 
