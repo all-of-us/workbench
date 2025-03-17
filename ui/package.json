@@ -108,7 +108,6 @@
     "url": "^0.11.3"
   },
   "resolutions": {
-    "axios": "^1.7.8",
     "glob": "^9",
     "node-fetch": "^2",
     "nth-check": "^2.0.1",
