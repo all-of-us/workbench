@@ -559,7 +559,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     ConvertApi convertApi =
         withLenientTimeout(configProvider.get(), endUserStaticConvertApiProvider.get());
     return calhounRetryHandler.run(
-        (context) -> {
+        context -> {
           try {
             return Files.asCharSource(convertApi.convertRmd(notebook), Charset.defaultCharset())
                 .read();
