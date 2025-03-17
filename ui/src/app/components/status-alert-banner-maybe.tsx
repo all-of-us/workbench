@@ -14,12 +14,12 @@ import { MultiToastBanner } from './multi-toast-banner';
 import { MultiToastMessage } from './multi-toast-message.model';
 import { ToastType } from './toast-banner';
 
-const getDismissalId = (statusAlert: StatusAlert) =>
+const getMessageId = (statusAlert: StatusAlert) =>
   `status-alert-${statusAlert.statusAlertId}`;
 
 const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
   return {
-    id: getDismissalId(statusAlert),
+    id: getMessageId(statusAlert),
     title: statusAlert.title,
     message: statusAlert.message,
     toastType: ToastType.WARNING,
@@ -47,8 +47,7 @@ export const StatusAlertBannerMaybe = () => {
               alert.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
               alert.message
             ) {
-              const messageId = `status-alert-${alert.statusAlertId}`;
-              if (!isDismissed(messageId)) {
+              if (!isDismissed(getMessageId(alert))) {
                 const apiMessage: MultiToastMessage = toToastMessage(alert);
                 messages.push(apiMessage);
               }
