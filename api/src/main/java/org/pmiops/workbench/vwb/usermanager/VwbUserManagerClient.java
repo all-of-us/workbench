@@ -89,7 +89,7 @@ public class VwbUserManagerClient {
         });
   }
 
-  public PodDescription createInitialCreditsPodForUser(String email) {
+  public PodDescription createPodForUserWithEmail(String email) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     String initialCreditBillingAccount = workbenchConfigProvider.get().billing.accountId;
     logger.info("Creating pod for user in VWB with email {}", email);

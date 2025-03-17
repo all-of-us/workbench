@@ -91,7 +91,7 @@ class VwbUserServiceTest {
     DbVwbUserPod result = vwbUserService.createInitialCreditsPodForUser(dbUser);
 
     assertNull(result);
-    verify(vwbUserManagerClient, never()).createInitialCreditsPodForUser(anyString());
+    verify(vwbUserManagerClient, never()).createPodForUserWithEmail(anyString());
   }
 
   @Test
@@ -103,7 +103,7 @@ class VwbUserServiceTest {
     when(dbUser.getUsername()).thenReturn("test@example.com");
     PodDescription podDescription = mock(PodDescription.class);
     when(podDescription.getPodId()).thenReturn(uuid);
-    when(vwbUserManagerClient.createInitialCreditsPodForUser("test@example.com"))
+    when(vwbUserManagerClient.createPodForUserWithEmail("test@example.com"))
         .thenReturn(podDescription);
 
     DbVwbUserPod result = vwbUserService.createInitialCreditsPodForUser(dbUser);

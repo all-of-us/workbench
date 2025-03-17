@@ -64,8 +64,7 @@ public class VwbUserService {
       return dbUser.getVwbUserPod();
     }
 
-    PodDescription initialCreditsPodForUser =
-        vwbUserManagerClient.createInitialCreditsPodForUser(email);
+    PodDescription initialCreditsPodForUser = vwbUserManagerClient.createPodForUserWithEmail(email);
     try {
       vwbUserManagerClient.sharePodWithUserWithRole(
           initialCreditsPodForUser.getPodId(), email, PodRole.ADMIN);

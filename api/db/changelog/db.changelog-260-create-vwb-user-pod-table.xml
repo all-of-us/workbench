@@ -20,7 +20,7 @@
       <column name="vwb_pod_id" type="varchar(100)">
         <constraints nullable="false"/>
       </column>
-      <column name="is_active" type="boolean">
+      <column name="is_initial_credit_active" type="boolean">
         <constraints nullable="false"/>
       </column>
     </createTable>
