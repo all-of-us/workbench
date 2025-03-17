@@ -88,9 +88,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<ConvertApi> endUserStaticConvertApiProvider;
 
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
+  private final Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider;
   private final Provider<org.pmiops.workbench.firecloud.api.WorkspacesApi>
       fcEndUserWorkspacesApiProvider;
-  private final Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
 
   // old Terms of Service endpoints, before RW-11416
@@ -148,8 +148,6 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<WorkspacesApi> endUserWorkspacesApiProvider,
       @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
           Provider<org.pmiops.workbench.firecloud.api.WorkspacesApi> fcEndUserWorkspacesApiProvider,
-      @Qualifier(RawlsConfig.END_USER_LENIENT_TIMEOUT_WORKSPACE_API)
-          Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider,
       @Qualifier(RawlsConfig.SERVICE_ACCOUNT_WORKSPACE_API)
           Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider,
       Provider<StatusApi> statusApiProvider,
@@ -178,8 +176,9 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.nihApiProvider = nihApiProvider;
     this.endUserStaticConvertApiProvider = endUserStaticConvertApiProvider;
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
+    this.endUserLenientTimeoutWorkspacesApiProvider =
+        () -> withLenientTimeout(configProvider.get(), endUserWorkspacesApiProvider.get());
     this.fcEndUserWorkspacesApiProvider = fcEndUserWorkspacesApiProvider;
-    this.endUserLenientTimeoutWorkspacesApiProvider = endUserLenientTimeoutWorkspacesApiProvider;
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
