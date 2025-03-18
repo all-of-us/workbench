@@ -14,7 +14,7 @@ import {
 } from 'app/components/data-user-code-of-conduct';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { DataAccessRequirements } from 'app/pages/access/data-access-requirements';
-import { AdminBanner } from 'app/pages/admin/admin-banner';
+import { AdminBannerTable } from 'app/pages/admin/admin-banner-table';
 import { AdminEgressAudit } from 'app/pages/admin/admin-egress-audit';
 import { AdminEgressEvents } from 'app/pages/admin/admin-egress-events';
 import { AdminNotebookView } from 'app/pages/admin/admin-notebook-view';
@@ -53,7 +53,10 @@ import {
   restrictDemographicSurvey,
 } from './guards';
 
-const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
+const AdminBannerPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminBannerTable);
 const AdminEgressAuditPage = fp.flow(
   withRouteData,
   withRoutingSpinner

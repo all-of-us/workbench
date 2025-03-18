@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
-import { firstPartyCookiesEnabled } from 'app/utils/cookies';
 import {
   isDismissed,
   saveDismissedMessage,
@@ -15,19 +14,12 @@ import { MultiToastBanner } from './multi-toast-banner';
 import { MultiToastMessage } from './multi-toast-message.model';
 import { ToastType } from './toast-banner';
 
-const INITIAL_STATUS_ALERT: MultiToastMessage = {
-  id: '',
-  title: '',
-  message: '',
-  toastType: ToastType.WARNING,
-};
-
-const getDismissalId = (statusAlert: StatusAlert) =>
+const getMessageId = (statusAlert: StatusAlert) =>
   `status-alert-${statusAlert.statusAlertId}`;
 
 const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
   return {
-    id: getDismissalId(statusAlert),
+    id: getMessageId(statusAlert),
     title: statusAlert.title,
     message: statusAlert.message,
     toastType: ToastType.WARNING,
@@ -39,47 +31,53 @@ const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
   };
 };
 
-const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
-  const messageId = getDismissalId(statusAlert);
-  if (firstPartyCookiesEnabled()) {
-    return !isDismissed(messageId);
-  } else {
-    return !!statusAlert;
-  }
-};
-
 export const StatusAlertBannerMaybe = () => {
-  const [showStatusAlert, setShowStatusAlert] = useState(false);
-  const [alert, setAlert] = useState(INITIAL_STATUS_ALERT);
+  const [alertMessages, setAlertMessages] = useState<MultiToastMessage[]>([]);
 
   useEffect(() => {
-    const getAlert = async () => {
-      const statusAlert = await statusAlertApi().getStatusAlert();
+    const getAlerts = async () => {
+      const messages: MultiToastMessage[] = [];
 
-      if (
-        statusAlert?.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
-        statusAlert?.title &&
-        statusAlert?.message
-      ) {
-        const message: MultiToastMessage = toToastMessage(statusAlert);
-        setShowStatusAlert(shouldShowStatusAlert(statusAlert));
-        setAlert(message);
+      try {
+        const statusAlerts = await statusAlertApi().getStatusAlerts();
+        if (statusAlerts && statusAlerts.length > 0) {
+          // Process each alert and create a message if it's not dismissed
+          statusAlerts.forEach((alert) => {
+            if (
+              alert.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
+              alert.message
+            ) {
+              if (!isDismissed(getMessageId(alert))) {
+                const apiMessage: MultiToastMessage = toToastMessage(alert);
+                messages.push(apiMessage);
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching status alerts:', error);
       }
+
+      setAlertMessages(messages);
     };
 
-    getAlert();
+    getAlerts();
   }, []);
 
-  const acknowledgeAlert = (dismissalId: string) => {
-    saveDismissedMessage(dismissalId);
-    setShowStatusAlert(false);
+  const handleDismiss = (messageId: string) => {
+    saveDismissedMessage(messageId);
+    setAlertMessages((prev) => prev.filter((msg) => msg.id !== messageId));
   };
 
-  return showStatusAlert ? (
+  if (alertMessages.length === 0) {
+    return null;
+  }
+
+  return (
     <MultiToastBanner
-      messages={[alert]}
-      onDismiss={acknowledgeAlert}
+      messages={alertMessages}
+      onDismiss={handleDismiss}
       zIndex={1000}
     />
-  ) : null;
+  );
 };

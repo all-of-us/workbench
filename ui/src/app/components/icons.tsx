@@ -13,6 +13,7 @@ import {
   faLongArrowAltRight,
   faMinusCircle,
   faRepeat,
+  faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -173,7 +174,6 @@ const Icon = ({ shape, size, style, color, ...props }) => {
     />
   );
 };
-
 export const ArrowLeft = (props) => (
   <Icon shape={faLongArrowAltLeft} {...props} />
 );
@@ -192,6 +192,7 @@ export const ExclamationTriangle = (props) => (
 );
 export const MinusCircle = (props) => <Icon shape={faMinusCircle} {...props} />;
 export const Repeat = (props) => <Icon shape={faRepeat} {...props} />;
+export const TrashCan = (props) => <Icon shape={faTrash} {...props} />;
 
 const svgIcon =
   (src) =>
