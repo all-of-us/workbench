@@ -86,4 +86,54 @@ public class StatusAlertControllerTest {
     assertThat(updatedStatusAlert.getLink()).matches(updatedStatusAlertLink);
     assertThat(updatedStatusAlert.getAlertLocation()).isEqualTo(location);
   }
+
+  @Test
+  public void testMultipleStatusAlerts() {
+    // Create two additional alerts
+    StatusAlert alert2 = new StatusAlert()
+        .title("Second Alert")
+        .message("Second alert message")
+        .alertLocation(StatusAlertLocation.AFTER_LOGIN);
+    StatusAlert alert3 = new StatusAlert()
+        .title("Third Alert")
+        .message("Third alert message")
+        .alertLocation(StatusAlertLocation.AFTER_LOGIN);
+
+    statusAlertController.postStatusAlert(alert2);
+    statusAlertController.postStatusAlert(alert3);
+
+    // Verify we get all alerts in descending order by ID
+    List<StatusAlert> statusAlerts = statusAlertController.getStatusAlerts().getBody();
+    assertThat(statusAlerts).hasSize(3);
+    assertThat(statusAlerts.get(0).getTitle()).matches("Third Alert");
+    assertThat(statusAlerts.get(1).getTitle()).matches("Second Alert");
+    assertThat(statusAlerts.get(2).getTitle()).matches(STATUS_ALERT_INITIAL_TITLE);
+  }
+
+  @Test
+  public void testMultipleStatusAlertsWithDifferentLocations() {
+    // Create alerts with different locations
+    StatusAlert beforeLoginAlert = new StatusAlert()
+        .title("Before Login Alert")
+        .message("Alert shown before login")
+        .alertLocation(StatusAlertLocation.BEFORE_LOGIN);
+    StatusAlert afterLoginAlert = new StatusAlert()
+        .title("After Login Alert")
+        .message("Alert shown after login")
+        .alertLocation(StatusAlertLocation.AFTER_LOGIN);
+
+    statusAlertController.postStatusAlert(beforeLoginAlert);
+    statusAlertController.postStatusAlert(afterLoginAlert);
+
+    List<StatusAlert> statusAlerts = statusAlertController.getStatusAlerts().getBody();
+    assertThat(statusAlerts).hasSize(3);
+
+    // Verify the most recent alerts come first and titles are set correctly based on location
+    StatusAlert mostRecent = statusAlerts.get(0);
+    StatusAlert second = statusAlerts.get(1);
+    assertThat(mostRecent.getTitle()).matches("After Login Alert");
+    assertThat(mostRecent.getAlertLocation()).isEqualTo(StatusAlertLocation.AFTER_LOGIN);
+    assertThat(second.getTitle()).matches("Scheduled Downtime Notice for the Researcher Workbench");
+    assertThat(second.getAlertLocation()).isEqualTo(StatusAlertLocation.BEFORE_LOGIN);
+  }
 }
