@@ -12,3 +12,8 @@ export const formatUsd = (number) => {
     }).format(number);
   }
 };
+
+export const inRange = (value: number, start?: number, end?: number): boolean => {
+  if (value === null || value === undefined) return false;
+  return value >= (start ?? Number.NEGATIVE_INFINITY) && value <= (end ?? Number.POSITIVE_INFINITY);
+};

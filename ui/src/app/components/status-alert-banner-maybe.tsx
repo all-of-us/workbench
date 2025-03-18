@@ -8,6 +8,7 @@ import {
   isDismissed,
   saveDismissedMessage,
 } from 'app/utils/dismissed-messages';
+import { inRange } from 'app/utils/numbers';
 
 import { Button } from './buttons';
 import { MultiToastBanner } from './multi-toast-banner';
@@ -17,17 +18,9 @@ import { ToastType } from './toast-banner';
 const getMessageId = (statusAlert: StatusAlert) =>
   `status-alert-${statusAlert.statusAlertId}`;
 
-const isAlertActive = (alert: StatusAlert): boolean => {
-  const now = Date.now();
-  const startTime = alert.startTimeEpochMillis; // If null, starts immediately
-  const endTime = alert.endTimeEpochMillis; // If null, never expires
-  return (
-    alert.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
-    (!startTime || now >= startTime) &&
-    (!endTime || now <= endTime)
-  );
-};
-
+const isAlertActive = (alert: StatusAlert): boolean =>
+  alert.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
+  inRange(Date.now(), alert.startTimeEpochMillis, alert.endTimeEpochMillis);
 const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
   return {
     id: getMessageId(statusAlert),
