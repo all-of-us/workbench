@@ -265,6 +265,68 @@ public class WorkspaceDaoTest {
         .isEqualTo(Collections.emptySet());
   }
 
+  @Test
+  public void findNamespacesByActiveStatusAndFirecloudUuidsIn_none() {
+    assertThat(workspaceDao.findNamespacesByActiveStatusAndFirecloudUuidIn(Collections.emptyList()))
+        .isEmpty();
+  }
+
+  @Test
+  public void findNamespacesByActiveStatusAndFirecloudUuidsIn_one() {
+    String namespace = "my-namespace";
+    String uuid = "my-uuid";
+
+    workspaceDao.save(
+        dbWorkspace
+            .setWorkspaceNamespace(namespace)
+            .setFirecloudUuid(uuid)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+
+    assertThat(
+            workspaceDao.findNamespacesByActiveStatusAndFirecloudUuidIn(
+                Collections.singleton(uuid)))
+        .containsExactly(namespace);
+  }
+
+  @Test
+  public void findNamespacesByActiveStatusAndFirecloudUuidsIn_multiple() {
+    DbWorkspace ws1 =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceNamespace("something")
+                .setFirecloudUuid("123")
+                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+
+    DbWorkspace ws2 =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceNamespace("something-else")
+                .setFirecloudUuid("456")
+                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+
+    DbWorkspace unmatchedUuid =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceNamespace("nope")
+                .setFirecloudUuid("789")
+                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+
+    DbWorkspace deleted =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceNamespace("oh no")
+                .setFirecloudUuid("000")
+                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
+
+    List<String> requestedUuids =
+        List.of(ws1.getFirecloudUuid(), ws2.getFirecloudUuid(), deleted.getFirecloudUuid());
+    List<String> expectedNamespaces =
+        List.of(ws1.getWorkspaceNamespace(), ws2.getWorkspaceNamespace());
+
+    assertThat(workspaceDao.findNamespacesByActiveStatusAndFirecloudUuidIn(requestedUuids))
+        .containsExactlyElementsIn(expectedNamespaces);
+  }
+
   private DbWorkspace createWorkspace() {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setVersion(1);

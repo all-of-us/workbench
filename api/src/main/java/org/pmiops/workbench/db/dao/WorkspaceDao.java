@@ -116,6 +116,13 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       @Param("initialCreditAccountNames") List<String> initialCreditAccountNames,
       @Param("creators") Set<DbUser> creators);
 
+  @Query(
+      "SELECT w.workspaceNamespace "
+          + "FROM DbWorkspace w "
+          + "WHERE w.firecloudUuid in (:firecloudUuids) "
+          + "AND w.activeStatus = 0") // active
+  List<String> findNamespacesByActiveStatusAndFirecloudUuidIn(Collection<String> firecloudUuids);
+
   interface WorkspaceCostView {
     Long getWorkspaceId();
 
