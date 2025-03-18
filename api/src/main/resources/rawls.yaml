@@ -2050,23 +2050,6 @@ paths:
         500:
           $ref: '#/components/responses/RawlsInternalError'
       x-codegen-request-body-name: workspaceRequest
-  /api/workspaces/{workspaceNamespace}/{workspaceName}/bucketUsage:
-    get:
-      tags:
-        - workspaces
-      summary: Get bucket usage
-      description: Get the storage bucket usage
-      operationId: getBucketUsage
-      parameters:
-        - $ref: '#/components/parameters/workspaceNamespacePathParam'
-        - $ref: '#/components/parameters/workspaceNamePathParam'
-      responses:
-        200:
-          description: Successful Request
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/BucketUsageResponse'
   /api/workspaces/tags:
     get:
       tags:
@@ -3855,19 +3838,6 @@ components:
         bucketLocation:
           type: string
           description: Region (NOT multi-region) in which bucket attached to the workspace should be created. If not provided, the bucket will be created in the 'US' multi-region.
-      description: ""
-    BucketUsageResponse:
-      required:
-        - usageInBytes
-      type: object
-      properties:
-        usageInBytes:
-          type: integer
-          description: The current storage bucket usage in bytes
-        lastUpdated:
-          type: string
-          format: timestamp
-          description: timestamp (UTC) marking the date that the bucket usage was last updated (YYYY-MM-DDThh:mm:ss.fffZ)
       description: ""
     PendingCloneWorkspaceFileTransfer:
       type: object
