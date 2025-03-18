@@ -26,9 +26,8 @@ public class StatusAlertController implements StatusAlertApiDelegate {
   @Override
   public ResponseEntity<StatusAlert> getStatusAlert() {
     return ResponseEntity.ok(
-        statusAlertDao
-            .findAllByOrderByStatusAlertIdDesc()
-            .stream().findFirst()
+        statusAlertDao.findAllByOrderByStatusAlertIdDesc().stream()
+            .findFirst()
             .map(statusAlertMapper::toStatusAlert)
             .orElse(new StatusAlert()));
   }

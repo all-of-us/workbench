@@ -90,14 +90,16 @@ public class StatusAlertControllerTest {
   @Test
   public void testMultipleStatusAlerts() {
     // Create two additional alerts
-    StatusAlert alert2 = new StatusAlert()
-        .title("Second Alert")
-        .message("Second alert message")
-        .alertLocation(StatusAlertLocation.AFTER_LOGIN);
-    StatusAlert alert3 = new StatusAlert()
-        .title("Third Alert")
-        .message("Third alert message")
-        .alertLocation(StatusAlertLocation.AFTER_LOGIN);
+    StatusAlert alert2 =
+        new StatusAlert()
+            .title("Second Alert")
+            .message("Second alert message")
+            .alertLocation(StatusAlertLocation.AFTER_LOGIN);
+    StatusAlert alert3 =
+        new StatusAlert()
+            .title("Third Alert")
+            .message("Third alert message")
+            .alertLocation(StatusAlertLocation.AFTER_LOGIN);
 
     statusAlertController.postStatusAlert(alert2);
     statusAlertController.postStatusAlert(alert3);
@@ -113,14 +115,16 @@ public class StatusAlertControllerTest {
   @Test
   public void testMultipleStatusAlertsWithDifferentLocations() {
     // Create alerts with different locations
-    StatusAlert beforeLoginAlert = new StatusAlert()
-        .title("Before Login Alert")
-        .message("Alert shown before login")
-        .alertLocation(StatusAlertLocation.BEFORE_LOGIN);
-    StatusAlert afterLoginAlert = new StatusAlert()
-        .title("After Login Alert")
-        .message("Alert shown after login")
-        .alertLocation(StatusAlertLocation.AFTER_LOGIN);
+    StatusAlert beforeLoginAlert =
+        new StatusAlert()
+            .title("Before Login Alert")
+            .message("Alert shown before login")
+            .alertLocation(StatusAlertLocation.BEFORE_LOGIN);
+    StatusAlert afterLoginAlert =
+        new StatusAlert()
+            .title("After Login Alert")
+            .message("Alert shown after login")
+            .alertLocation(StatusAlertLocation.AFTER_LOGIN);
 
     statusAlertController.postStatusAlert(beforeLoginAlert);
     statusAlertController.postStatusAlert(afterLoginAlert);
