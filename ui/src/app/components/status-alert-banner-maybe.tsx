@@ -17,6 +17,17 @@ import { ToastType } from './toast-banner';
 const getMessageId = (statusAlert: StatusAlert) =>
   `status-alert-${statusAlert.statusAlertId}`;
 
+const isAlertActive = (alert: StatusAlert): boolean => {
+  const now = Date.now();
+  const startTime = alert.startTimeEpochMillis; // If null, starts immediately
+  const endTime = alert.endTimeEpochMillis; // If null, never expires
+  return (
+    alert.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
+    (!startTime || now >= startTime) &&
+    (!endTime || now <= endTime)
+  );
+};
+
 const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
   return {
     id: getMessageId(statusAlert),
@@ -43,10 +54,7 @@ export const StatusAlertBannerMaybe = () => {
         if (statusAlerts && statusAlerts.length > 0) {
           // Process each alert and create a message if it's not dismissed
           statusAlerts.forEach((alert) => {
-            if (
-              alert.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
-              alert.message
-            ) {
+            if (isAlertActive(alert)) {
               if (!isDismissed(getMessageId(alert))) {
                 const apiMessage: MultiToastMessage = toToastMessage(alert);
                 messages.push(apiMessage);
