@@ -47,6 +47,22 @@ export const AdminBannerModal = ({
     }
   };
 
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const date = e.target.value ? new Date(e.target.value) : null;
+    setBanner({ ...banner, startTimeEpochMillis: date?.getTime() });
+  };
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const date = e.target.value ? new Date(e.target.value) : null;
+    setBanner({ ...banner, endTimeEpochMillis: date?.getTime() });
+  };
+
+  const formatDateTimeLocal = (timestamp: number | null | undefined) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toISOString().slice(0, 16); // Format as YYYY-MM-DDThh:mm
+  };
+
   return (
     <Modal onRequestClose={onClose}>
       <ModalTitle>Create New Banner</ModalTitle>
@@ -87,7 +103,7 @@ export const AdminBannerModal = ({
             placeholder='Enter banner link'
           />
         </div>
-        <div>
+        <div style={{ marginBottom: '1rem' }}>
           <label>Location</label>
           <Select
             value={banner.alertLocation}
@@ -102,6 +118,24 @@ export const AdminBannerModal = ({
                 alertLocation: value,
               })
             }
+          />
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Start Time (Optional)</label>
+          <input
+            type="datetime-local"
+            value={formatDateTimeLocal(banner.startTimeEpochMillis)}
+            onChange={handleStartTimeChange}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div>
+          <label>End Time (Optional)</label>
+          <input
+            type="datetime-local"
+            value={formatDateTimeLocal(banner.endTimeEpochMillis)}
+            onChange={handleEndTimeChange}
+            style={{ width: '100%' }}
           />
         </div>
       </ModalBody>

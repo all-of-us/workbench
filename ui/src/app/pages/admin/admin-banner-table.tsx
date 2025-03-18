@@ -160,6 +160,13 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     );
   };
 
+  const timestampTemplate = (value: number | null | undefined) => {
+    if (!value) {
+      return '-';
+    }
+    return new Date(value).toLocaleString();
+  };
+
   if (loading) {
     return <SpinnerOverlay />;
   }
@@ -208,6 +215,20 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
                 ? 'Before Login'
                 : 'After Login'
             }
+          />
+          <Column
+            field='startTimeEpochMillis'
+            header='Start Time'
+            body={(rowData) => timestampTemplate(rowData.startTimeEpochMillis)}
+            style={{ width: '12%' }}
+            sortable
+          />
+          <Column
+            field='endTimeEpochMillis'
+            header='End Time'
+            body={(rowData) => timestampTemplate(rowData.endTimeEpochMillis)}
+            style={{ width: '12%' }}
+            sortable
           />
           <Column
             body={actionBodyTemplate}
