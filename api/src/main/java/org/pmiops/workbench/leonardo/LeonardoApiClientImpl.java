@@ -495,7 +495,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void deletePersistentDiskAsService(String googleProject, String diskName)
       throws WorkbenchException {
     DisksApi disksApi = serviceDisksApiProvider.get();
-    log.info("deletePersistentDiskAsService timeout: " + disksApi.getApiClient().getReadTimeout());
     leonardoRetryHandler.run(
         (context) -> {
           disksApi.deleteDisk(googleProject, diskName);
@@ -532,7 +531,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<ListPersistentDiskResponse> listDisksAsService() {
     DisksApi disksApi = withTimeoutInSeconds(120, serviceDisksApiProvider.get());
-    log.info("listDisksAsService timeout: " + disksApi.getApiClient().getReadTimeout());
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisks(
@@ -546,7 +544,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject) {
 
     DisksApi disksApi = serviceDisksApiProvider.get();
-    log.info("listDisksByProjectAsService timeout: " + disksApi.getApiClient().getReadTimeout());
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(

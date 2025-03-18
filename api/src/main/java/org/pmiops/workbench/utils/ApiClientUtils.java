@@ -49,6 +49,6 @@ public class ApiClientUtils {
 
   private static org.broadinstitute.dsde.workbench.client.leonardo.ApiClient withTimeoutInSeconds(
       int timeoutSeconds, org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
-    return apiClient.setReadTimeout(timeoutSeconds);
+    return apiClient.setReadTimeout(timeoutSeconds * 1000);
   }
 }
