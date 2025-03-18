@@ -69,8 +69,8 @@ paths:
     get:
       tags:
       - status-alert
-      description: Returns status alert information if any exists.
-      operationId: getStatusAlerts
+      description: DEPRECATED - Returns status alert information if any exists.
+      operationId: getStatusAlert
       security: []
       responses:
         200:
@@ -78,9 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/StatusAlert'
+                $ref: '#/components/schemas/StatusAlert'
     post:
       tags:
       - status-alert
@@ -101,6 +99,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/StatusAlert'
       x-codegen-request-body-name: statusAlert
+  /v2/status-alert:
+    get:
+      tags:
+      - status-alert
+      description: Returns status alert information if any exists.
+      operationId: getStatusAlerts
+      security: []
+      responses:
+        200:
+          description: A status alert information object.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusAlert'
   /v1/status-alert/{id}:
     delete:
       tags:
