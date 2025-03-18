@@ -304,19 +304,20 @@ public class WorkspaceDaoTest {
                 .setFirecloudUuid("456")
                 .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
 
-    DbWorkspace unmatchedUuid =
-        workspaceDao.save(
-            new DbWorkspace()
-                .setWorkspaceNamespace("nope")
-                .setFirecloudUuid("789")
-                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+    // these two won't match
 
     DbWorkspace deleted =
         workspaceDao.save(
             new DbWorkspace()
-                .setWorkspaceNamespace("oh no")
-                .setFirecloudUuid("000")
+                .setWorkspaceNamespace("gone")
+                .setFirecloudUuid("bye")
                 .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
+
+    workspaceDao.save(
+        new DbWorkspace()
+            .setWorkspaceNamespace("don't want it")
+            .setFirecloudUuid("not searching for this one")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
 
     List<String> requestedUuids =
         List.of(ws1.getFirecloudUuid(), ws2.getFirecloudUuid(), deleted.getFirecloudUuid());
