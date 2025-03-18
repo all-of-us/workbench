@@ -9622,11 +9622,11 @@ components:
           description: A URL linking to an incident report where users can read more
         alertLocation:
           $ref: '#/components/schemas/StatusAlertLocation'
-        start_time:
+        startTimeEpochMillis:
           type: integer
           description: Start time for when this alert should be shown, in milliseconds since epoch. Null starts immediately.
           format: int64
-        end_time:
+        endTimeEpochMillis:
           type: integer
           description: End time for when this alert should no longer be shown, in milliseconds since epoch. Null means it never expires.
           format: int64
