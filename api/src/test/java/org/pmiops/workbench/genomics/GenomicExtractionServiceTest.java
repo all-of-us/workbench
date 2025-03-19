@@ -81,11 +81,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -102,12 +102,13 @@ public class GenomicExtractionServiceTest {
   @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
   @Autowired WorkspaceDao workspaceDao;
 
-  @MockBean FireCloudService mockFireCloudService;
-  @MockBean VwbAccessService mockVwbAccessService;
-  @MockBean GenomicDatasetService mockGenomicDatasetService;
-  @MockBean JiraService mockJiraService;
-  @MockBean MethodConfigurationsApi mockMethodConfigurationsApi;
-  @MockBean SubmissionsApi mockSubmissionsApi;
+  @MockitoBean FireCloudService mockFireCloudService;
+  @MockitoBean GenomicDatasetService mockGenomicDatasetService;
+  @MockitoBean InitialCreditsService mockInitialCreditsService;
+  @MockitoBean JiraService mockJiraService;
+  @MockitoBean MethodConfigurationsApi mockMethodConfigurationsApi;
+  @MockitoBean SubmissionsApi mockSubmissionsApi;
+  @MockitoBean VwbAccessService mockVwbAccessService;
 
   private DbWorkspace targetWorkspace;
 
@@ -124,7 +125,6 @@ public class GenomicExtractionServiceTest {
     GenomicExtractionService.class,
     WorkspaceAuthService.class,
   })
-  @MockBean({InitialCreditsService.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
