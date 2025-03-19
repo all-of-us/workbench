@@ -13,7 +13,16 @@ export const formatUsd = (number) => {
   }
 };
 
-export const inRange = (value: number, start?: number, end?: number): boolean => {
-  if (value === null || value === undefined) return false;
-  return value >= (start ?? Number.NEGATIVE_INFINITY) && value <= (end ?? Number.POSITIVE_INFINITY);
+export const inRange = (
+  value: number,
+  start?: number,
+  end?: number
+): boolean => {
+  if (value === null || value === undefined) {
+    return false;
+  }
+  return (
+    value >= (start ?? Number.NEGATIVE_INFINITY) &&
+    value <= (end ?? Number.POSITIVE_INFINITY)
+  );
 };

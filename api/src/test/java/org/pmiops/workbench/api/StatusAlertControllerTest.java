@@ -32,7 +32,12 @@ public class StatusAlertControllerTest {
   @Autowired private StatusAlertController statusAlertController;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, StatusAlertController.class, StatusAlertMapperImpl.class, CommonMappers.class})
+  @Import({
+    FakeClockConfiguration.class,
+    StatusAlertController.class,
+    StatusAlertMapperImpl.class,
+    CommonMappers.class
+  })
   static class Configuration {
     @Bean
     public Clock clock() {

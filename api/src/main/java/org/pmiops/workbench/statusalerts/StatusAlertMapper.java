@@ -7,7 +7,9 @@ import org.pmiops.workbench.model.StatusAlert;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(config = MapStructConfig.class, uses = {CommonMappers.class})
+@Mapper(
+    config = MapStructConfig.class,
+    uses = {CommonMappers.class})
 public interface StatusAlertMapper {
   @Mapping(target = "startTimeEpochMillis", source = "startTime")
   @Mapping(target = "endTimeEpochMillis", source = "endTime")

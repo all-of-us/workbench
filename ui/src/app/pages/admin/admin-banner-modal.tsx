@@ -58,7 +58,9 @@ export const AdminBannerModal = ({
   };
 
   const formatDateTimeLocal = (timestamp: number | null | undefined) => {
-    if (!timestamp) return '';
+    if (!timestamp) {
+      return '';
+    }
     const date = new Date(timestamp);
     return date.toISOString().slice(0, 16); // Format as YYYY-MM-DDThh:mm
   };
@@ -123,7 +125,7 @@ export const AdminBannerModal = ({
         <div style={{ marginBottom: '1rem' }}>
           <label>Start Time (Optional)</label>
           <input
-            type="datetime-local"
+            type='datetime-local'
             value={formatDateTimeLocal(banner.startTimeEpochMillis)}
             onChange={handleStartTimeChange}
             style={{ width: '100%' }}
@@ -132,7 +134,7 @@ export const AdminBannerModal = ({
         <div>
           <label>End Time (Optional)</label>
           <input
-            type="datetime-local"
+            type='datetime-local'
             value={formatDateTimeLocal(banner.endTimeEpochMillis)}
             onChange={handleEndTimeChange}
             style={{ width: '100%' }}
