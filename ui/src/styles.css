@@ -159,7 +159,7 @@ input[type="datetime-local"] {
   border: 1px solid #b7b7b7;
   border-radius: 3px;
   height: 2.25rem;
-  padding: 0rem 0.75rem;
+  padding: 0 0.75rem;
   width: 100%;
 }
 
