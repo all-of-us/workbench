@@ -67,7 +67,7 @@ const styles = reactStyles({
   messageText: {
     display: 'block',
     whiteSpace: 'normal',
-    wordBreak: 'normal'
+    wordBreak: 'normal',
   },
 });
 
@@ -187,7 +187,12 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
           scrollable={false}
           scrollHeight='flex'
         >
-          <Column field='title' header='Title' style={styles.colStyle} sortable />
+          <Column
+            field='title'
+            header='Title'
+            style={styles.colStyle}
+            sortable
+          />
           <Column
             field='message'
             header='Message'
