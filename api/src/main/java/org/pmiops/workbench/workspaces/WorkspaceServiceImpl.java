@@ -214,14 +214,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             .toList();
 
     stopwatch.reset().start();
-    List<DbWorkspace> rwbWorkspaces = workspaceDao.findActiveByFirecloudUuidIn(terraWorkspaceIds);
+    List<String> rwbNamespaces =
+        workspaceDao.findNamespacesByActiveStatusAndFirecloudUuidIn(terraWorkspaceIds);
     elapsed = stopwatch.stop().elapsed();
     log.info(
         String.format(
             "getActiveWorkspaceNamespacesAsService: Retrieved %d RWB workspaces from DB in %s",
-            rwbWorkspaces.size(), formatDurationPretty(elapsed)));
+            rwbNamespaces.size(), formatDurationPretty(elapsed)));
 
-    return rwbWorkspaces.stream().map(DbWorkspace::getWorkspaceNamespace).toList();
+    return rwbNamespaces;
   }
 
   @Override
