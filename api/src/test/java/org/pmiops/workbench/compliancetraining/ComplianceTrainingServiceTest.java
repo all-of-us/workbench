@@ -49,11 +49,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -71,7 +71,7 @@ public class ComplianceTrainingServiceTest {
   @MockBean private UserService userService;
 
   // use a SpyBean when we need the full service for some tests and mocks for others
-  @SpyBean private AccessModuleService accessModuleService;
+  @MockitoSpyBean private AccessModuleService accessModuleService;
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private FakeClock fakeClock;
