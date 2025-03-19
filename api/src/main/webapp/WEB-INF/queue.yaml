@@ -133,8 +133,8 @@ queue:
   target: api
 
   # rate parameters
-  bucket_size: 500
-  rate: 1/s
+  bucket_size: 1
+  rate: 1/m
   max_concurrent_requests: 10
 
   retry_parameters:
