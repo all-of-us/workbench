@@ -623,18 +623,9 @@ dependencies {
     testImplementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     testImplementation 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
-    testImplementation("org.springframework.boot:spring-boot-test:$project.ext.SPRING_BOOT_VERSION") {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-        exclude group: 'com.vaadin.external.google', module: 'android-json'
-    }
-    testImplementation("org.springframework.boot:spring-boot-test-autoconfigure:$project.ext.SPRING_BOOT_VERSION") {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-        exclude group: 'com.vaadin.external.google', module: 'android-json'
-    }
-    testImplementation("org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION") {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-        exclude group: 'com.vaadin.external.google', module: 'android-json'
-    }
+    testImplementation("org.springframework.boot:spring-boot-test:$project.ext.SPRING_BOOT_VERSION")
+    testImplementation("org.springframework.boot:spring-boot-test-autoconfigure:$project.ext.SPRING_BOOT_VERSION")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION")
 }
 
 tasks.compileJava {
