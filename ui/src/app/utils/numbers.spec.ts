@@ -3,7 +3,7 @@ import { inRange } from './numbers';
 describe('inRange', () => {
   it('should return true when value is within range', () => {
     expect(inRange(5, 1, 10)).toBe(true);
-    expect(inRange(1, 1, 10)).toBe(true);  // Edge case: value equals lower bound
+    expect(inRange(1, 1, 10)).toBe(true); // Edge case: value equals lower bound
     expect(inRange(10, 1, 10)).toBe(true); // Edge case: value equals upper bound
   });
 
