@@ -619,7 +619,9 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-test'
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'com.vaadin.external.google', module: 'android-json'
+    }
 }
 
 tasks.compileJava {
