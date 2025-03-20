@@ -520,11 +520,10 @@ export const WorkspaceEdit = fp.flow(
         billingInfo.billingAccountName !==
         this.props.workspace.billingAccountName
       ) {
-        // This should never happen but it means the database is out of sync with Google
+        // This should never happen, but it means the database is out of sync with Google
         // and does not have the correct billing account stored.
         // We cannot send over the correct billing account info since the current user
         // does not have permissions to set it.
-
         reportError(
           `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
             `Stored value is ${this.props.workspace.billingAccountName}. ` +
