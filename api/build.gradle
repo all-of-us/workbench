@@ -26,7 +26,7 @@ buildscript {
         GAE_VERSION = '2.0.36'
         GOOGLE_AUTH_LIBRARY_VERSION = '1.35.0'
         GSON_VERSION = '2.13.1'
-        HIBERNATE_VERSION = '6.5.3.Final'
+        HIBERNATE_VERSION = '6.6.11.Final'
         JACKSON_VERSION = '2.18.3'
         LIQUIBASE_VERSION = '4.31.1'
         // 1.5.7+ results in a runtime error:
