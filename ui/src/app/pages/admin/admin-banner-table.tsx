@@ -71,16 +71,23 @@ const styles = reactStyles({
   },
 });
 
-export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
-  const [banners, setBanners] = useState<StatusAlert[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newBanner, setNewBanner] = useState<StatusAlert>({
+const getDefaultStatusAlert = (): StatusAlert => {
+  return {
     title: '',
     message: '',
     link: '',
     alertLocation: StatusAlertLocation.AFTER_LOGIN,
-  });
+    startTimeEpochMillis: Date.now(),
+  };
+};
+
+export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
+  const [banners, setBanners] = useState<StatusAlert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newBanner, setNewBanner] = useState<StatusAlert>(
+    getDefaultStatusAlert()
+  );
 
   useEffect(() => {
     const loadBanners = async () => {
@@ -132,12 +139,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
       const statusAlerts = await statusAlertApi().getStatusAlerts();
       setBanners(statusAlerts);
       setShowCreateModal(false);
-      setNewBanner({
-        title: '',
-        message: '',
-        link: '',
-        alertLocation: StatusAlertLocation.AFTER_LOGIN,
-      });
+      setNewBanner(getDefaultStatusAlert());
     } catch (error) {
       console.error('Error creating banner:', error);
     }

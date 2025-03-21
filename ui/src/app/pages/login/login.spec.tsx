@@ -66,12 +66,14 @@ describe('LoginComponent', () => {
         message: 'Message 1',
         link: 'link1',
         alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+        startTimeEpochMillis: Date.now(),
       },
       {
         title: 'Alert 2',
         message: 'Message 2',
         link: 'link2',
         alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+        startTimeEpochMillis: Date.now(),
       },
     ]);
 
@@ -90,12 +92,14 @@ describe('LoginComponent', () => {
         message: 'Should show',
         link: 'link1',
         alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+        startTimeEpochMillis: Date.now(),
       },
       {
         title: 'After Login Alert',
         message: 'Should not show',
         link: 'link2',
         alertLocation: StatusAlertLocation.AFTER_LOGIN,
+        startTimeEpochMillis: Date.now(),
       },
     ]);
 

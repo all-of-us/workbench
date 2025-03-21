@@ -48,13 +48,34 @@ export const AdminBannerModal = ({
   };
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value ? new Date(e.target.value) : null;
-    setBanner({ ...banner, startTimeEpochMillis: date?.getTime() });
+    const selectedDateEpochMillis = e.target.value
+      ? new Date(e.target.value).getTime()
+      : null;
+
+    setBanner({
+      ...banner,
+      startTimeEpochMillis: selectedDateEpochMillis,
+      endTimeEpochMillis:
+        banner.endTimeEpochMillis &&
+        banner.endTimeEpochMillis <= selectedDateEpochMillis
+          ? null // Clear end time if it's before the new start time
+          : banner.endTimeEpochMillis, // Keep end time if it's after start time
+    });
   };
 
   const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value ? new Date(e.target.value) : null;
-    setBanner({ ...banner, endTimeEpochMillis: date?.getTime() });
+    const selectedDateEpochMillis = e.target.value
+      ? new Date(e.target.value).getTime()
+      : null;
+    setBanner({
+      ...banner,
+      startTimeEpochMillis:
+        selectedDateEpochMillis &&
+        selectedDateEpochMillis <= banner.startTimeEpochMillis
+          ? null
+          : banner.startTimeEpochMillis,
+      endTimeEpochMillis: selectedDateEpochMillis,
+    });
   };
 
   const formatDateTimeLocal = (timestamp: number | null | undefined) => {
@@ -123,8 +144,9 @@ export const AdminBannerModal = ({
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Start Time (Optional)</label>
+          <label htmlFor='start-time'>Start Time (Optional)</label>
           <input
+            id='start-time'
             type='datetime-local'
             value={formatDateTimeLocal(banner.startTimeEpochMillis)}
             onChange={handleStartTimeChange}
@@ -132,8 +154,9 @@ export const AdminBannerModal = ({
           />
         </div>
         <div>
-          <label>End Time (Optional)</label>
+          <label htmlFor='end-time'>End Time (Optional)</label>
           <input
+            id='end-time'
             type='datetime-local'
             value={formatDateTimeLocal(banner.endTimeEpochMillis)}
             onChange={handleEndTimeChange}

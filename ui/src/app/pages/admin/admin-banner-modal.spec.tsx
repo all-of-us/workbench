@@ -1,6 +1,6 @@
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import {
@@ -11,12 +11,15 @@ import {
 
 import { AdminBannerModal } from './admin-banner-modal';
 
+const ONE_HOUR = 1000 * 60 * 60;
+
 describe('AdminBannerModal', () => {
   const defaultBanner: StatusAlert = {
     title: '',
     message: '',
     link: '',
     alertLocation: null,
+    startTimeEpochMillis: Date.now(),
   };
 
   const mockSetBanner = jest.fn();
@@ -59,6 +62,7 @@ describe('AdminBannerModal', () => {
       message: 'Test Message',
       link: '',
       alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
 
     renderModal(<AdminBannerModal {...defaultProps} banner={filledBanner} />);
@@ -68,7 +72,7 @@ describe('AdminBannerModal', () => {
   });
 
   it('should call onClose when Cancel button is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: 100 });
     renderModal(<AdminBannerModal {...defaultProps} />);
 
     await user.click(screen.getByText('Cancel'));
@@ -82,6 +86,7 @@ describe('AdminBannerModal', () => {
       message: 'Test Message',
       link: '',
       alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
 
     renderModal(<AdminBannerModal {...defaultProps} banner={filledBanner} />);
@@ -97,6 +102,7 @@ describe('AdminBannerModal', () => {
       message: '',
       link: '',
       alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
 
     renderModal(
@@ -121,6 +127,7 @@ describe('AdminBannerModal', () => {
       message: 'Test Message',
       link: '',
       alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
     renderModal(<AdminBannerModal {...defaultProps} banner={filledBanner} />);
 
@@ -145,6 +152,7 @@ describe('AdminBannerModal', () => {
       message: '',
       link: '',
       alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
 
     renderModal(
@@ -163,5 +171,75 @@ describe('AdminBannerModal', () => {
         alertLocation: StatusAlertLocation.AFTER_LOGIN,
       })
     );
+  });
+
+  it('should reset end time when start time is set to a time after the existing end time', async () => {
+    const user = userEvent.setup();
+    const startTime = new Date('2023-01-01T10:00:00.000Z');
+    const endTime = new Date(startTime.getTime() + ONE_HOUR);
+
+    const bannerWithDates: StatusAlert = {
+      title: 'Test Title',
+      message: 'Test Message',
+      link: '',
+      alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: null,
+      endTimeEpochMillis: endTime.getTime(),
+    };
+
+    renderModal(
+      <AdminBannerModal {...defaultProps} banner={bannerWithDates} />
+    );
+
+    // Find the start time input and set it to a time after the end time
+    const startTimeInput = screen.getByLabelText('Start Time (Optional)');
+
+    const newStartTime = new Date(endTime.getTime() + 24 + ONE_HOUR);
+    await user.click(startTimeInput);
+    await user.paste(newStartTime.toISOString().slice(0, 16));
+
+    // Verify end time was reset
+    await waitFor(() => {
+      expect(mockSetBanner).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endTimeEpochMillis: null,
+        })
+      );
+    });
+  });
+
+  it('should reset start time when end time is set to a time before the existing start time', async () => {
+    const user = userEvent.setup();
+    const startTime = new Date('2023-01-01T10:00:00.000Z');
+    const endTime = new Date(startTime.getTime() + ONE_HOUR);
+
+    const bannerWithDates: StatusAlert = {
+      title: 'Test Title',
+      message: 'Test Message',
+      link: '',
+      alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: startTime.getTime(),
+      endTimeEpochMillis: null,
+    };
+
+    renderModal(
+      <AdminBannerModal {...defaultProps} banner={bannerWithDates} />
+    );
+
+    // Find the end time input and set it to a time before the start time
+    const endTimeInput = screen.getByLabelText('End Time (Optional)');
+
+    const newEndTime = new Date(startTime.getTime() - ONE_HOUR);
+    await user.click(endTimeInput);
+    await user.paste(newEndTime.toISOString().slice(0, 16));
+
+    // Verify start time was reset
+    await waitFor(() => {
+      expect(mockSetBanner).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startTimeEpochMillis: null,
+        })
+      );
+    });
   });
 });

@@ -9603,6 +9603,11 @@ components:
         - BEFORE_LOGIN
         - AFTER_LOGIN
     StatusAlert:
+      required:
+      - message
+      - title
+      - alertLocation
+      - startTimeEpochMillis
       type: object
       properties:
         statusAlertId:
