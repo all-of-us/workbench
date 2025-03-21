@@ -9,17 +9,17 @@
     <addColumn tableName="status_alert">
       <!-- Time when alert should start being displayed -->
       <column name="start_time" type="datetime">
-        <constraints nullable="true"/>
+        <constraints nullable="false"/>
       </column>
       <!-- Time when alert should stop being displayed -->
       <column name="end_time" type="datetime">
         <constraints nullable="true"/>
       </column>
     </addColumn>
-    
+
     <comment>
       Added start_time and end_time columns to status_alert table to support time-limited alerts.
-      - start_time: When the alert should begin displaying (null = immediately/already active)
+      - start_time: When the alert should begin displaying
       - end_time: When the alert should stop displaying (null = no expiration)
     </comment>
   </changeSet>
