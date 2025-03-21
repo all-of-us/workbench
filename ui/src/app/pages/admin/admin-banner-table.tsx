@@ -222,7 +222,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
           />
           <Column
             field='startTimeEpochMillis'
-            header='Start Time'
+            header='Start Time (Local)'
             body={(rowData) => timestampTemplate(rowData.startTimeEpochMillis)}
             sortable
           />

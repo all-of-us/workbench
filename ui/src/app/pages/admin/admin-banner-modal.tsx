@@ -20,6 +20,18 @@ interface AdminBannerModalProps {
   onCreate: () => void;
 }
 
+// Expects a local date-time string in the format 'YYYY-MM-DDThh:mm' and returns the epoch milliseconds
+const convertLocalDateTimeToEpochMillis = (localDateTime: string) => {
+  if (!localDateTime) {
+    return null;
+  }
+  const [datePart, timePart] = localDateTime.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hours, minutes] = timePart.split(':').map(Number);
+  const localDate = new Date(year, month - 1, day, hours, minutes);
+  return localDate.getTime();
+};
+
 export const AdminBannerModal = ({
   banner,
   setBanner,
@@ -48,9 +60,9 @@ export const AdminBannerModal = ({
   };
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDateEpochMillis = e.target.value
-      ? new Date(e.target.value).getTime()
-      : null;
+    const selectedDateEpochMillis = convertLocalDateTimeToEpochMillis(
+      e.target.value
+    );
 
     setBanner({
       ...banner,
@@ -64,9 +76,10 @@ export const AdminBannerModal = ({
   };
 
   const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDateEpochMillis = e.target.value
-      ? new Date(e.target.value).getTime()
-      : null;
+    const selectedDateEpochMillis = convertLocalDateTimeToEpochMillis(
+      e.target.value
+    );
+
     setBanner({
       ...banner,
       startTimeEpochMillis:
@@ -83,7 +96,15 @@ export const AdminBannerModal = ({
       return '';
     }
     const date = new Date(timestamp);
-    return date.toISOString().slice(0, 16); // Format as YYYY-MM-DDThh:mm
+
+    // Format as YYYY-MM-DDThh:mm in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 because months are 0-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   return (
@@ -144,7 +165,7 @@ export const AdminBannerModal = ({
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor='start-time'>Start Time (Optional)</label>
+          <label htmlFor='start-time'>Start Time (Local)</label>
           <input
             id='start-time'
             type='datetime-local'
