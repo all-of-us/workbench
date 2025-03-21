@@ -36,12 +36,12 @@ const styles = reactStyles({
   },
   colStyle: {
     fontSize: 12,
-    height: '60px',
+    height: 'auto',
     lineHeight: '1.2rem',
     padding: '.5em',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
+    overflow: 'visible',
+    whiteSpace: 'normal',
+    wordBreak: 'normal',
   },
   titleCol: {
     width: '20%',
@@ -65,23 +65,29 @@ const styles = reactStyles({
     marginBottom: '1rem',
   },
   messageText: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
     display: 'block',
+    whiteSpace: 'normal',
+    wordBreak: 'normal',
   },
 });
+
+const getDefaultStatusAlert = (): StatusAlert => {
+  return {
+    title: '',
+    message: '',
+    link: '',
+    alertLocation: StatusAlertLocation.AFTER_LOGIN,
+    startTimeEpochMillis: Date.now(),
+  };
+};
 
 export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
   const [banners, setBanners] = useState<StatusAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newBanner, setNewBanner] = useState<StatusAlert>({
-    title: '',
-    message: '',
-    link: '',
-    alertLocation: StatusAlertLocation.AFTER_LOGIN,
-  });
+  const [newBanner, setNewBanner] = useState<StatusAlert>(
+    getDefaultStatusAlert()
+  );
 
   useEffect(() => {
     const loadBanners = async () => {
@@ -133,12 +139,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
       const statusAlerts = await statusAlertApi().getStatusAlerts();
       setBanners(statusAlerts);
       setShowCreateModal(false);
-      setNewBanner({
-        title: '',
-        message: '',
-        link: '',
-        alertLocation: StatusAlertLocation.AFTER_LOGIN,
-      });
+      setNewBanner(getDefaultStatusAlert());
     } catch (error) {
       console.error('Error creating banner:', error);
     }
@@ -160,6 +161,13 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     );
   };
 
+  const timestampTemplate = (value: number | null | undefined) => {
+    if (!value) {
+      return '-';
+    }
+    return new Date(value).toLocaleString();
+  };
+
   if (loading) {
     return <SpinnerOverlay />;
   }
@@ -177,42 +185,58 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
           value={banners}
           emptyMessage='No active banners found'
           style={styles.tableStyle}
-          resizableColumns={true}
           columnResizeMode='expand'
-          scrollable={true}
+          scrollable={false}
           scrollHeight='flex'
         >
           <Column
             field='title'
             header='Title'
-            style={{ ...styles.colStyle, ...styles.titleCol }}
+            style={styles.colStyle}
+            sortable
           />
           <Column
             field='message'
             header='Message'
-            style={{ ...styles.colStyle, ...styles.messageCol }}
+            style={styles.colStyle}
             body={messageBodyTemplate}
+            sortable
           />
           <Column
             field='link'
             header='Link'
-            style={{ ...styles.colStyle, ...styles.linkCol }}
+            style={styles.colStyle}
             body={linkBodyTemplate}
+            sortable
           />
           <Column
             field='alertLocation'
             header='Location'
-            style={{ ...styles.colStyle, ...styles.locationCol }}
+            style={styles.colStyle}
             body={(rowData: StatusAlert) =>
               rowData.alertLocation === StatusAlertLocation.BEFORE_LOGIN
                 ? 'Before Login'
                 : 'After Login'
             }
+            sortable
+          />
+          <Column
+            field='startTimeEpochMillis'
+            header='Start Time (Local)'
+            body={(rowData) => timestampTemplate(rowData.startTimeEpochMillis)}
+            sortable
+          />
+          <Column
+            field='endTimeEpochMillis'
+            header='End Time'
+            style={styles.colStyle}
+            body={(rowData) => timestampTemplate(rowData.endTimeEpochMillis)}
+            sortable
           />
           <Column
             body={actionBodyTemplate}
             header='Actions'
-            style={{ ...styles.colStyle, ...styles.actionCol }}
+            style={styles.colStyle}
           />
         </DataTable>
       </div>

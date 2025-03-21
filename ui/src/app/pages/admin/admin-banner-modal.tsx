@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
-import { Select, TextInput } from 'app/components/inputs';
+import { DurationInput, Select, TextInput } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
@@ -12,6 +12,17 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
+import colors from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
+
+const styles = reactStyles({
+  label: {
+    color: colors.primary,
+  },
+  input: {
+    color: colors.primary,
+  },
+});
 
 interface AdminBannerModalProps {
   banner: StatusAlert;
@@ -19,6 +30,18 @@ interface AdminBannerModalProps {
   onClose: () => void;
   onCreate: () => void;
 }
+
+// Expects a local date-time string in the format 'YYYY-MM-DDThh:mm' and returns the epoch milliseconds
+const convertLocalDateTimeToEpochMillis = (localDateTime: string) => {
+  if (!localDateTime) {
+    return null;
+  }
+  const [datePart, timePart] = localDateTime.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hours, minutes] = timePart.split(':').map(Number);
+  const localDate = new Date(year, month - 1, day, hours, minutes);
+  return localDate.getTime();
+};
 
 export const AdminBannerModal = ({
   banner,
@@ -47,12 +70,60 @@ export const AdminBannerModal = ({
     }
   };
 
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDateEpochMillis = convertLocalDateTimeToEpochMillis(
+      e.target.value
+    );
+
+    setBanner({
+      ...banner,
+      startTimeEpochMillis: selectedDateEpochMillis,
+      endTimeEpochMillis:
+        banner.endTimeEpochMillis &&
+        banner.endTimeEpochMillis <= selectedDateEpochMillis
+          ? null // Clear end time if it's before the new start time
+          : banner.endTimeEpochMillis, // Keep end time if it's after start time
+    });
+  };
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDateEpochMillis = convertLocalDateTimeToEpochMillis(
+      e.target.value
+    );
+
+    setBanner({
+      ...banner,
+      startTimeEpochMillis:
+        selectedDateEpochMillis &&
+        selectedDateEpochMillis <= banner.startTimeEpochMillis
+          ? null
+          : banner.startTimeEpochMillis,
+      endTimeEpochMillis: selectedDateEpochMillis,
+    });
+  };
+
+  const formatDateTimeLocal = (timestamp: number | null | undefined) => {
+    if (!timestamp) {
+      return '';
+    }
+    const date = new Date(timestamp);
+
+    // Format as YYYY-MM-DDThh:mm in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 because months are 0-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   return (
     <Modal onRequestClose={onClose}>
       <ModalTitle>Create New Banner</ModalTitle>
       <ModalBody>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Title</label>
+          <label style={styles.label}>Title</label>
           <TooltipTrigger
             content={
               isBeforeLogin
@@ -63,6 +134,7 @@ export const AdminBannerModal = ({
           >
             <div>
               <TextInput
+                style={styles.input}
                 value={banner.title}
                 onChange={(value) => setBanner({ ...banner, title: value })}
                 placeholder='Enter banner title'
@@ -72,24 +144,27 @@ export const AdminBannerModal = ({
           </TooltipTrigger>
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Message</label>
+          <label style={styles.label}>Message</label>
           <TextInput
+            style={styles.input}
             value={banner.message}
             onChange={(value) => setBanner({ ...banner, message: value })}
             placeholder='Enter banner message'
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Link (Optional)</label>
+          <label style={styles.label}>Link (Optional)</label>
           <TextInput
+            style={styles.input}
             value={banner.link}
             onChange={(value) => setBanner({ ...banner, link: value })}
             placeholder='Enter banner link'
           />
         </div>
-        <div>
-          <label>Location</label>
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={styles.label}>Location</label>
           <Select
+            style={styles.input}
             value={banner.alertLocation}
             options={locationOptions}
             onChange={(value) =>
@@ -102,6 +177,34 @@ export const AdminBannerModal = ({
                 alertLocation: value,
               })
             }
+          />
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={styles.label} htmlFor='start-time'>
+            Start Time (Local)
+          </label>
+          <input
+            id='start-time'
+            type='datetime-local'
+            value={formatDateTimeLocal(banner.startTimeEpochMillis)}
+            onChange={handleStartTimeChange}
+            style={styles.input}
+          />
+        </div>
+        <div>
+          <label style={styles.label} htmlFor='end-time'>
+            End Time (Optional)
+          </label>
+          <DurationInput
+            value={{ days: 0, hours: 0, minutes: 0 }}
+            onChange={() => console.log('Waiting')}
+          />
+          <input
+            id='end-time'
+            type='datetime-local'
+            value={formatDateTimeLocal(banner.endTimeEpochMillis)}
+            onChange={handleEndTimeChange}
+            style={{ width: '100%' }}
           />
         </div>
       </ModalBody>
