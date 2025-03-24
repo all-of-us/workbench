@@ -463,28 +463,26 @@ export const IconButton = ({
   disabled = false,
   title = '',
   ...props
-}) => {
-  return (
-    <TooltipTrigger side='left' content={tooltip}>
-      <TerraUIInteractive
-        tagName='div'
-        style={{
-          color: disabled ? colors.disabled : colors.accent,
-          cursor: disabled ? 'auto' : 'pointer',
-          ...style,
-        }}
-        hover={{
-          color: !disabled && colorWithWhiteness(colors.accent, 0.2),
-          ...hover,
-        }}
-        disabled={disabled}
-        {...props}
-      >
-        <Icon {...{ title, disabled, style }} />
-      </TerraUIInteractive>
-    </TooltipTrigger>
-  );
-};
+}) => (
+  <TooltipTrigger side='left' content={tooltip}>
+    <TerraUIInteractive
+      tagName='div'
+      style={{
+        color: disabled ? colors.disabled : colors.accent,
+        cursor: disabled ? 'auto' : 'pointer',
+        ...style,
+      }}
+      hover={{
+        color: !disabled && colorWithWhiteness(colors.accent, 0.2),
+        ...hover,
+      }}
+      disabled={disabled}
+      {...props}
+    >
+      <Icon {...{ title, disabled, style }} />
+    </TerraUIInteractive>
+  </TooltipTrigger>
+);
 
 export const SnowmanButton = ({ ...props }) => (
   <IconButton icon={SnowmanIcon} {...props} />
