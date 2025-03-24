@@ -259,6 +259,7 @@
       "wgsClinvarMultiHailPath": "wgs/short_read/snpindel/clinvar/multiMT/hail.mt",
       "wgsClinvarSplitHailPath": "wgs/short_read/snpindel/clinvar/splitMT/hail.mt",
       "wgsClinvarVcfPath": "wgs/short_read/snpindel/clinvar/vcf",
+      "wgsCMRGVcfPath": "wgs/short_read/snpindel/cmrg",
       "publicReleaseNumber": 8
     }
   ]

@@ -61,6 +61,7 @@ public class DbCdrVersion {
   private String wgsLongReadsHailT2T;
   private String wgsLongReadsJointVcfGRCh38;
   private String wgsLongReadsJointVcfT2T;
+  private String wgsCMRGVcfPath;
 
   private String vwbTemplateId;
 
@@ -528,6 +529,15 @@ public class DbCdrVersion {
     return this;
   }
 
+  @Column(name = "wgs_cmrg_vcf_path")
+  public String getWgsCMRGVcfPath() {
+    return wgsCMRGVcfPath;
+  }
+
+  public void setWgsCMRGVcfPath(String wgsCMRGVcfPath) {
+    this.wgsCMRGVcfPath = wgsCMRGVcfPath;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -574,7 +584,8 @@ public class DbCdrVersion {
         wgsLongReadsJointVcfGRCh38,
         wgsLongReadsJointVcfT2T,
         publicReleaseNumber,
-        vwbTemplateId);
+        vwbTemplateId,
+        wgsCMRGVcfPath);
   }
 
   @Override
@@ -629,6 +640,7 @@ public class DbCdrVersion {
         && Objects.equals(wgsLongReadsHailT2T, that.wgsLongReadsHailT2T)
         && Objects.equals(wgsLongReadsJointVcfGRCh38, that.wgsLongReadsJointVcfGRCh38)
         && Objects.equals(wgsLongReadsJointVcfT2T, that.wgsLongReadsJointVcfT2T)
-        && Objects.equals(vwbTemplateId, that.vwbTemplateId);
+        && Objects.equals(vwbTemplateId, that.vwbTemplateId)
+        && Objects.equals(wgsCMRGVcfPath, that.wgsCMRGVcfPath);
   }
 }

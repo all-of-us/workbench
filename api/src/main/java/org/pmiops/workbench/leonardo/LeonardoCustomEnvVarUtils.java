@@ -70,6 +70,7 @@ public class LeonardoCustomEnvVarUtils {
       "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_GRCH38_PATH";
   private static final String WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH_KEY =
       "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH";
+  private static final String WGS_CMRG_VCF_PATH_KEY = "WGS_CMRG_VCF_PATH";
 
   private static final String ARTIFACT_REGISTRY_DOCKER_REPO_KEY = "ARTIFACT_REGISTRY_DOCKER_REPO";
 
@@ -160,6 +161,7 @@ public class LeonardoCustomEnvVarUtils {
               .put(
                   WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getWgsLongReadsJointVcfT2T()))
+              .put(WGS_CMRG_VCF_PATH_KEY, Optional.ofNullable(cdrVersion.getWgsCMRGVcfPath()))
               .build();
       vars.putAll(
           partialStoragePaths.entrySet().stream()
