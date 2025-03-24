@@ -204,6 +204,35 @@ commands:
           wip_id: "circleci-wip-staging"
           wip_provider_id: "circleci-oidc-prv-staging"
 
+  gcloud-auth-login-oidc-preprod:
+    description: "Activate CircleCI service account credential for the Preprod environment"
+    steps:
+    - gcloud-auth-login-oidc:
+        project_id: "589109405884"  # all-of-us-rw-preprod
+        wip_id: "circleci-wip-preprod"
+        wip_provider_id: "circleci-oidc-prv-preprod"
+        service_account: "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com"
+
+  deploy-to-preprod-command:
+    description: "Deploy API and UI to preprod App Engine"
+    steps:
+    - checkout-code
+    - attach_workspace:
+        at: .
+    - gcloud-auth-login-oidc-preprod
+    - run:
+        working_directory: ~/workbench/deploy
+        command: |
+          ./project.rb deploy \
+            --project all-of-us-rw-preprod \
+            --account "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com" \
+            --git-version "${CIRCLE_TAG}" \
+            --app-version "${CIRCLE_TAG}" \
+            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+            --key-file << pipeline.parameters.circle-service-account-key >> \
+            --promote
+        name: Deploy API and UI to all-of-us-rw-preprod App Engine
+
   deploy-to-stable-command:
     description: "Deploy API and UI to stable App Engine"
     steps:
@@ -976,7 +1005,12 @@ workflows:
 
   playground:
     jobs:
+      - hold-for-a:
+          type: approval
       - playground:
+          context: "Business Owners"
+          requires:
+            - hold
           <<: *filter-pr-branch
   e2ev2:
     jobs:
@@ -1026,6 +1060,14 @@ workflows:
           <<: *filter-release-tags
           requires:
             - deploy-to-staging
+      - hold-for-business-owner-approval:
+          type: approval
+          requires:
+            - deploy-to-stable
+      - deploy-to-preprod:
+          <<: *filter-release-tags
+          requires:
+              - deploy-to-stable
 
   nightly-tests:
     triggers:
