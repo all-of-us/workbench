@@ -1010,7 +1010,7 @@ workflows:
       - playground:
           context: "Business Owners"
           requires:
-            - hold
+            - hold-for-a
           <<: *filter-pr-branch
   e2ev2:
     jobs:
