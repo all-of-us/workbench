@@ -1005,12 +1005,17 @@ workflows:
 
   playground:
     jobs:
-      - hold-for-a:
+      - hold-for-business-owner-approval:
+          type: approval
+      - hold-for-security-approval:
           type: approval
       - playground:
-          context: "Business Owners"
+          context:
+            - "Business Owners"
+            - "Security"
           requires:
-            - hold-for-a
+            - hold-for-business-owner-approval
+            - hold-for-security-approval
           <<: *filter-pr-branch
   e2ev2:
     jobs:
