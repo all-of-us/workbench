@@ -1064,10 +1064,10 @@ workflows:
           type: approval
           requires:
             - deploy-to-stable
-      - deploy-to-preprod:
-          <<: *filter-release-tags
-          requires:
-              - deploy-to-stable
+#      - deploy-to-preprod:
+#          <<: *filter-release-tags
+#          requires:
+#              - deploy-to-stable
 
   nightly-tests:
     triggers:
