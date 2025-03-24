@@ -530,19 +530,17 @@ export const CardButton = ({
   style = {},
   children,
   ...props
-}) => {
-  return (
-    <Clickable
-      disabled={disabled}
-      {...props}
-      {...fp.merge(computeStyle(cardButtonStyle, { disabled }), {
-        style,
-      })}
-    >
-      {children}
-    </Clickable>
-  );
-};
+}) => (
+  <Clickable
+    disabled={disabled}
+    {...props}
+    {...fp.merge(computeStyle(cardButtonStyle, { disabled }), {
+      style,
+    })}
+  >
+    {children}
+  </Clickable>
+);
 
 const tabButtonStyle = {
   style: {
