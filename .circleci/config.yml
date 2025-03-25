@@ -771,7 +771,16 @@ jobs:
                   {
                     "content": [
                       {
-                        "text": "Business Approver - '"${BUSINESS_APPROVER_NAME}"'",
+                        "text": "Business Owner - '"${BUSINESS_APPROVER_NAME}"'",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Security - '"${SECURITY_APPROVER_NAME}"'",
                         "type": "text"
                       }
                     ],
