@@ -662,7 +662,7 @@ jobs:
             curl --request POST \
               --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
               --header 'accept: application/json' \
-              --header 'authorization: Basic ${JIRA_KEY}' \
+              --header "authorization: Basic ${JIRA_KEY}" \
               --header 'content-type: application/json' \
               --data '{
               "body": {
