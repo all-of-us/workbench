@@ -662,7 +662,7 @@ jobs:
             # Get the approval data from CircleCI API
             RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
               "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
-            
+            echo $RESPONSE
             # Extract approver using jq
             APPROVER=$(echo $RESPONSE | jq -r '.items[] | select(.type=="approval" and .status=="success") | .approved_by')
             
