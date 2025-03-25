@@ -1119,8 +1119,8 @@ workflows:
           #   - "Business Owners"
           #   - "Security"
           requires:
-            - hold-for-business-owner-approval
-            - hold-for-security-approval
+            - business-owner-approval
+            - security-approval
           <<: *filter-pr-branch
   e2ev2:
     jobs:
