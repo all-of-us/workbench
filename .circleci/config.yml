@@ -660,7 +660,7 @@ jobs:
           name: Check API Token
           command: |
             # Test API token access
-            curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+            curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
               "https://circleci.com/api/v2/me" | jq .
       - run:
           name: Get Approver with Debug
@@ -670,12 +670,12 @@ jobs:
             
             # Try direct workflow endpoint first
             echo "Trying workflow endpoint..."
-            curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+            curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
               "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID" | jq .
             
             # Then try jobs endpoint
             echo "Trying jobs endpoint..."
-            curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+            curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
               "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job" | jq .
       - run:
           name: Get Workflow Context
@@ -684,7 +684,7 @@ jobs:
             env | grep CIRCLE_ | grep -v TOKEN | grep -v KEY | grep -v PASSWORD
             
             # See if pipeline info is available
-            curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+            curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
               "https://circleci.com/api/v2/pipeline/$CIRCLE_PIPELINE_ID" | jq .
       - run:
           name: Get Approver
