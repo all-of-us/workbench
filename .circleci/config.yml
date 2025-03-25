@@ -759,7 +759,7 @@ jobs:
                       {
                         "text": "This request has been approved by the following approvers:",
                         "type": "text"
-                      }
+                      },
                       {
                         "text": "Bussiness Approver: '"${BUSINESS_APPROVER_NAME}"'",
                         "type": "text"
