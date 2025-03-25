@@ -687,17 +687,54 @@ jobs:
             curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
               "https://circleci.com/api/v2/pipeline/$CIRCLE_PIPELINE_ID" | jq .
       - run:
-          name: Get Approver
+          name: Get Multiple Approvers
           command: |
-            # Get the approval data from CircleCI API
-            RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+            # Get all jobs in the workflow
+            JOBS_RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
               "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
-            echo "CIRCLE_WORKFLOW_ID: $CIRCLE_WORKFLOW_ID"
-            echo $RESPONSE
-            # Extract approver using jq
-            APPROVER=$(echo $RESPONSE | jq -r '.items[] | select(.type=="approval" and .status=="success") | .approved_by')
             
-            echo "Approved by: $APPROVER"
+            # Extract security approver ID
+            SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+              select(.name=="hold-for-security-approval" and .type=="approval" and .status=="success") | 
+              .approved_by')
+            
+            # Extract business owner approver ID
+            BUSINESS_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+              select(.name=="hold-for-business-owner-approval" and .type=="approval" and .status=="success") | 
+              .approved_by')
+            
+            echo "Security Approver ID: $SECURITY_APPROVER_ID"
+            echo "Business Approver ID: $BUSINESS_APPROVER_ID"
+            
+            # Get security approver details
+            if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
+              SECURITY_USER=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+                "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
+            
+              SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name')
+              SECURITY_LOGIN=$(echo $SECURITY_USER | jq -r '.login')
+            
+              echo "Security approved by: $SECURITY_NAME ($SECURITY_LOGIN)"
+              echo "export SECURITY_APPROVER_NAME=\"$SECURITY_NAME\"" >> $BASH_ENV
+              echo "export SECURITY_APPROVER_LOGIN=\"$SECURITY_LOGIN\"" >> $BASH_ENV
+            else
+              echo "No security approver found or information unavailable"
+            fi
+            
+            # Get business owner details
+            if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
+              BUSINESS_USER=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+                "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
+            
+              BUSINESS_NAME=$(echo $BUSINESS_USER | jq -r '.name')
+              BUSINESS_LOGIN=$(echo $BUSINESS_USER | jq -r '.login')
+            
+              echo "Business approved by: $BUSINESS_NAME ($BUSINESS_LOGIN)"
+              echo "export BUSINESS_APPROVER_NAME=\"$BUSINESS_NAME\"" >> $BASH_ENV
+              echo "export BUSINESS_APPROVER_LOGIN=\"$BUSINESS_LOGIN\"" >> $BASH_ENV
+            else
+              echo "No business approver found or information unavailable"
+            fi
       # - run:
       #     name: Comment on Jira
       #     command: |
