@@ -657,45 +657,47 @@ jobs:
           command: |
             echo Hello Circle!
       - run:
-          name: Check Variable Names
+          name: Check API Token
           command: |
-            echo "Using CIRCLECI_API_TOKEN instead of CIRCLE_TOKEN"
-            # Test with the correct variable name
-            curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
+            # Test API token access
+            curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
               "https://circleci.com/api/v2/me" | jq .
       - run:
-          name: Advanced Debugging
+          name: Get Approver with Debug
           command: |
+            # Debug variables
             echo "CIRCLE_WORKFLOW_ID: $CIRCLE_WORKFLOW_ID"
-            echo "CIRCLE_BUILD_NUM: $CIRCLE_BUILD_NUM"
-            echo "CIRCLE_PIPELINE_ID: $CIRCLE_PIPELINE_ID"
             
-            # Check pipeline data first
-            echo "Checking pipeline data..."
-            PIPELINE_DATA=$(curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
-              "https://circleci.com/api/v2/pipeline/$CIRCLE_PIPELINE_ID")
-            echo $PIPELINE_DATA | jq .
+            # Try direct workflow endpoint first
+            echo "Trying workflow endpoint..."
+            curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID" | jq .
             
-            # Extract workflow information from pipeline
-            echo "Extracting workflows from pipeline..."
-            echo $PIPELINE_DATA | jq '.workflows'
-            
-            # Try with different data format
-            echo "Trying with project slug..."
-            PROJECT_SLUG="${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
-            curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
-              "https://circleci.com/api/v2/project/gh/$PROJECT_SLUG/pipeline/$CIRCLE_PIPELINE_ID" | jq .
+            # Then try jobs endpoint
+            echo "Trying jobs endpoint..."
+            curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job" | jq .
       - run:
-          name: Try Pipeline Workflows
+          name: Get Workflow Context
           command: |
-            echo "Using pipeline workflows endpoint..."
-            curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
-              "https://circleci.com/api/v2/pipeline/$CIRCLE_PIPELINE_ID/workflow" | jq .
+            # Print all CIRCLE_ environment variables (without exposing secrets)
+            env | grep CIRCLE_ | grep -v TOKEN | grep -v KEY | grep -v PASSWORD
+            
+            # See if pipeline info is available
+            curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+              "https://circleci.com/api/v2/pipeline/$CIRCLE_PIPELINE_ID" | jq .
       - run:
-          name: Check Rate Limits
+          name: Get Approver
           command: |
-            curl -i -H "Circle-Token: $CIRCLECI_API_TOKEN" \
-              "https://circleci.com/api/v2/me" | grep -i "rate"
+            # Get the approval data from CircleCI API
+            RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
+            echo "CIRCLE_WORKFLOW_ID: $CIRCLE_WORKFLOW_ID"
+            echo $RESPONSE
+            # Extract approver using jq
+            APPROVER=$(echo $RESPONSE | jq -r '.items[] | select(.type=="approval" and .status=="success") | .approved_by')
+            
+            echo "Approved by: $APPROVER"
       # - run:
       #     name: Comment on Jira
       #     command: |
