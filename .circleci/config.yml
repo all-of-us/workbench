@@ -657,6 +657,27 @@ jobs:
           command: |
             echo Hello Circle!
       - run:
+          name: Check API Token
+          command: |
+            # Test API token access
+            curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+              "https://circleci.com/api/v2/me" | jq .
+      - run:
+          name: Get Approver with Debug
+          command: |
+            # Debug variables
+            echo "CIRCLE_WORKFLOW_ID: $CIRCLE_WORKFLOW_ID"
+            
+            # Try direct workflow endpoint first
+            echo "Trying workflow endpoint..."
+            curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID" | jq .
+            
+            # Then try jobs endpoint
+            echo "Trying jobs endpoint..."
+            curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job" | jq .
+      - run:
           name: Get Workflow Context
           command: |
             # Print all CIRCLE_ environment variables (without exposing secrets)
