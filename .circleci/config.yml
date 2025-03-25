@@ -1110,9 +1110,9 @@ workflows:
 
   playground:
     jobs:
-      - hold-for-business-owner-approval:
+      - business-owner-approval:
           type: approval
-      - hold-for-security-approval:
+      - security-approval:
           type: approval
       - playground:
           # context:
