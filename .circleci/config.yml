@@ -680,7 +680,7 @@ jobs:
                 "type": "doc",
                 "version": 1
               }
-            }
+            }'
 
   e2ev2-deploy-ui:
     machine:
