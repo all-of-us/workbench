@@ -656,6 +656,31 @@ jobs:
           name: Echo
           command: |
             echo Hello Circle!
+      - run:
+          name: Comment on Jira
+          command: |
+            curl --request POST \
+              --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
+              --header 'accept: application/json' \
+              --header 'authorization: Basic ${JIRA_KEY}' \
+              --header 'content-type: application/json' \
+              --data '{
+              "body": {
+                "content": [
+                  {
+                    "content": [
+                      {
+                        "text": "This is a test",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  }
+                ],
+                "type": "doc",
+                "version": 1
+              }
+            }
 
   e2ev2-deploy-ui:
     machine:
@@ -1010,9 +1035,9 @@ workflows:
       - hold-for-security-approval:
           type: approval
       - playground:
-          context:
-            - "Business Owners"
-            - "Security"
+          # context:
+          #   - "Business Owners"
+          #   - "Security"
           requires:
             - hold-for-business-owner-approval
             - hold-for-security-approval
