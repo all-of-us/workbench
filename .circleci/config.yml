@@ -755,8 +755,7 @@ jobs:
                       {
                         "text": "This is a test. ",
                         "type": "text"
-                      },
-
+                      }
                     ],
                     "type": "paragraph"
                   },
@@ -766,17 +765,15 @@ jobs:
                         "text": "This request has been approved by the following approvers:",
                         "type": "text"
                       }
-
                     ],
                     "type": "paragraph"
                   },
                   {
                     "content": [
                       {
-                        "text": "Bussiness Approver - '"${BUSINESS_APPROVER_NAME}"'",
+                        "text": "Business Approver - '"${BUSINESS_APPROVER_NAME}"'",
                         "type": "text"
                       }
-
                     ],
                     "type": "paragraph"
                   }
