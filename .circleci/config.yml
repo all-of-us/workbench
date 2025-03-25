@@ -665,12 +665,12 @@ jobs:
             
             # Extract security approver ID
             SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
-              select(.name=="hold-for-security-approval" and .type=="approval" and .status=="success") | 
+              select(.name=="security-approval" and .type=="approval" and .status=="success") | 
               .approved_by')
             
             # Extract business owner approver ID
             BUSINESS_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
-              select(.name=="hold-for-business-owner-approval" and .type=="approval" and .status=="success") | 
+              select(.name=="business-owner-approval" and .type=="approval" and .status=="success") | 
               .approved_by')
             
             echo "Security Approver ID: $SECURITY_APPROVER_ID"
