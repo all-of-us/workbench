@@ -657,6 +657,15 @@ jobs:
           command: |
             echo Hello Circle!
       - run:
+          name: Get Workflow Context
+          command: |
+            # Print all CIRCLE_ environment variables (without exposing secrets)
+            env | grep CIRCLE_ | grep -v TOKEN | grep -v KEY | grep -v PASSWORD
+            
+            # See if pipeline info is available
+            curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+              "https://circleci.com/api/v2/pipeline/$CIRCLE_PIPELINE_ID" | jq .
+      - run:
           name: Get Approver
           command: |
             # Get the approval data from CircleCI API
