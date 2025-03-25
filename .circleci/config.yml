@@ -657,30 +657,41 @@ jobs:
           command: |
             echo Hello Circle!
       - run:
-          name: Comment on Jira
+          name: Get Approver
           command: |
-            curl --request POST \
-              --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
-              --header 'accept: application/json' \
-              --header "authorization: Basic ${JIRA_KEY}" \
-              --header 'content-type: application/json' \
-              --data '{
-              "body": {
-                "content": [
-                  {
-                    "content": [
-                      {
-                        "text": "This is a test",
-                        "type": "text"
-                      }
-                    ],
-                    "type": "paragraph"
-                  }
-                ],
-                "type": "doc",
-                "version": 1
-              }
-            }'
+            # Get the approval data from CircleCI API
+            RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_API_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
+            
+            # Extract approver using jq
+            APPROVER=$(echo $RESPONSE | jq -r '.items[] | select(.type=="approval" and .status=="success") | .approved_by')
+            
+            echo "Approved by: $APPROVER"
+      # - run:
+      #     name: Comment on Jira
+      #     command: |
+      #       curl --request POST \
+      #         --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
+      #         --header 'accept: application/json' \
+      #         --header "authorization: Basic ${JIRA_KEY}" \
+      #         --header 'content-type: application/json' \
+      #         --data '{
+      #         "body": {
+      #           "content": [
+      #             {
+      #               "content": [
+      #                 {
+      #                   "text": "This is a test",
+      #                   "type": "text"
+      #                 }
+      #               ],
+      #               "type": "paragraph"
+      #             }
+      #           ],
+      #           "type": "doc",
+      #           "version": 1
+      #         }
+      #       }'
 
   e2ev2-deploy-ui:
     machine:
