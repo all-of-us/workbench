@@ -183,8 +183,7 @@
       "accessTier": "controlled",
       "tanagraEnabled": true,
       "vwbTemplateId": "c843d45c-8030-4db8-9bf1-7a50545af6cf",
-      "publicReleaseNumber": 8,
-      "wgsCMRGVcfPath": "wgs/short_read/snpindel/cmrg"
+      "publicReleaseNumber": 8
     }
   ]
 }
