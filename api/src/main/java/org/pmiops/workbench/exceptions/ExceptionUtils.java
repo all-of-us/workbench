@@ -133,7 +133,7 @@ public class ExceptionUtils {
   }
 
   public static WorkbenchException convertWsmException(
-      org.pmiops.workbench.wsmanager.ApiException e) {
+      org.pmiops.workbench.vwb.wsmanager.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
