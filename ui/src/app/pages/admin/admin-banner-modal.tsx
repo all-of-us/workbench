@@ -185,6 +185,8 @@ export const AdminBannerModal = ({
           <input
             id='start-time'
             type='datetime-local'
+            min={formatDateTimeLocal(Date.now())}
+            max={formatDateTimeLocal(banner.endTimeEpochMillis)}
             value={formatDateTimeLocal(banner.startTimeEpochMillis)}
             onChange={handleStartTimeChange}
             style={styles.input}
@@ -197,6 +199,7 @@ export const AdminBannerModal = ({
           <input
             id='end-time'
             type='datetime-local'
+            min={formatDateTimeLocal(banner.startTimeEpochMillis + 1)}
             value={formatDateTimeLocal(banner.endTimeEpochMillis)}
             onChange={handleEndTimeChange}
             style={{ width: '100%' }}
