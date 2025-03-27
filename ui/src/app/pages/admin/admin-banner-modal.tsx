@@ -4,12 +4,7 @@ import { useState } from 'react';
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
-import {
-  DurationInput,
-  Select,
-  TextInput,
-  Toggle,
-} from 'app/components/inputs';
+import { DurationInput, Select, TextInput } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
@@ -55,7 +50,6 @@ export const AdminBannerModal = ({
   onCreate,
 }: AdminBannerModalProps) => {
   const [isCreating, setIsCreating] = useState(false);
-  const [duration, setDuration] = useState(null);
   const locationOptions = [
     { value: StatusAlertLocation.AFTER_LOGIN, label: 'After Login' },
     { value: StatusAlertLocation.BEFORE_LOGIN, label: 'Before Login' },
@@ -84,7 +78,11 @@ export const AdminBannerModal = ({
     setBanner({
       ...banner,
       startTimeEpochMillis: selectedDateEpochMillis,
-      endTimeEpochMillis: selectedDateEpochMillis + duration,
+      endTimeEpochMillis:
+        banner.endTimeEpochMillis &&
+        banner.endTimeEpochMillis <= selectedDateEpochMillis
+          ? null // Clear end time if it's before the new start time
+          : banner.endTimeEpochMillis, // Keep end time if it's after start time
     });
   };
 
@@ -120,24 +118,8 @@ export const AdminBannerModal = ({
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  // Format date for display in a user-friendly format (MM/DD/YYYY, hh:mm AM/PM)
-  const formatDateTimeDisplay = (timestamp: number | null | undefined) => {
-    if (!timestamp) {
-      return '';
-    }
-    const date = new Date(timestamp);
-    return date.toLocaleString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
-
   return (
-    <Modal onRequestClose={onClose} width={500}>
+    <Modal onRequestClose={onClose}>
       <ModalTitle>Create New Banner</ModalTitle>
       <ModalBody>
         <div style={{ marginBottom: '1rem' }}>
@@ -211,28 +193,19 @@ export const AdminBannerModal = ({
         </div>
         <div>
           <label style={styles.label} htmlFor='end-time'>
-            Duration
+            End Time (Optional)
           </label>
-          <Toggle
-            name={`Banner will be visible until
-                ${
-                  duration !== null
-                    ? formatDateTimeDisplay(
-                        banner.startTimeEpochMillis + duration
-                      )
-                    : 'deleted'
-                }`}
-            checked={duration !== null}
-            onToggle={() => setDuration(duration ? null : 1)}
+          <DurationInput
+            value={{ days: 0, hours: 0, minutes: 0 }}
+            onChange={() => console.log('Waiting')}
           />
-          {duration !== null && (
-            <DurationInput
-              value={duration}
-              onChange={(x) => {
-                setDuration(x);
-              }}
-            />
-          )}
+          <input
+            id='end-time'
+            type='datetime-local'
+            value={formatDateTimeLocal(banner.endTimeEpochMillis)}
+            onChange={handleEndTimeChange}
+            style={{ width: '100%' }}
+          />
         </div>
       </ModalBody>
       <ModalFooter>
