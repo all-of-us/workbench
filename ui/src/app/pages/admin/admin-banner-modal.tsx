@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
-import { DurationInput, Select, TextInput } from 'app/components/inputs';
+import { Select, TextInput } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
@@ -12,17 +12,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
-
-const styles = reactStyles({
-  label: {
-    color: colors.primary,
-  },
-  input: {
-    color: colors.primary,
-  },
-});
 
 interface AdminBannerModalProps {
   banner: StatusAlert;
@@ -123,7 +112,7 @@ export const AdminBannerModal = ({
       <ModalTitle>Create New Banner</ModalTitle>
       <ModalBody>
         <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label}>Title</label>
+          <label>Title</label>
           <TooltipTrigger
             content={
               isBeforeLogin
@@ -134,7 +123,6 @@ export const AdminBannerModal = ({
           >
             <div>
               <TextInput
-                style={styles.input}
                 value={banner.title}
                 onChange={(value) => setBanner({ ...banner, title: value })}
                 placeholder='Enter banner title'
@@ -144,27 +132,24 @@ export const AdminBannerModal = ({
           </TooltipTrigger>
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label}>Message</label>
+          <label>Message</label>
           <TextInput
-            style={styles.input}
             value={banner.message}
             onChange={(value) => setBanner({ ...banner, message: value })}
             placeholder='Enter banner message'
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label}>Link (Optional)</label>
+          <label>Link (Optional)</label>
           <TextInput
-            style={styles.input}
             value={banner.link}
             onChange={(value) => setBanner({ ...banner, link: value })}
             placeholder='Enter banner link'
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label}>Location</label>
+          <label>Location</label>
           <Select
-            style={styles.input}
             value={banner.alertLocation}
             options={locationOptions}
             onChange={(value) =>
@@ -180,25 +165,17 @@ export const AdminBannerModal = ({
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label} htmlFor='start-time'>
-            Start Time (Local)
-          </label>
+          <label htmlFor='start-time'>Start Time (Local)</label>
           <input
             id='start-time'
             type='datetime-local'
             value={formatDateTimeLocal(banner.startTimeEpochMillis)}
             onChange={handleStartTimeChange}
-            style={styles.input}
+            style={{ width: '100%' }}
           />
         </div>
         <div>
-          <label style={styles.label} htmlFor='end-time'>
-            End Time (Optional)
-          </label>
-          <DurationInput
-            value={{ days: 0, hours: 0, minutes: 0 }}
-            onChange={() => console.log('Waiting')}
-          />
+          <label htmlFor='end-time'>End Time (Optional)</label>
           <input
             id='end-time'
             type='datetime-local'
