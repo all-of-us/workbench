@@ -70,7 +70,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   Set<DbUser> findUsersByUsernameInAndDisabledFalse(List<String> usernames);
 
   @Query(
-      "SELECT dbUser.userId FROM DbUser dbUser "
+      "SELECT DISTINCT dbUser.userId FROM DbUser dbUser "
           + "JOIN DbUserAccessTier uat ON uat.user.userId = dbUser.userId "
           + "WHERE uat.tierAccessStatus = 1 ") // TierAccessStatus.ENABLED
   List<Long> findUserIdsWithCurrentTierAccess();
