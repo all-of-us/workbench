@@ -89,7 +89,7 @@ public interface UserService {
 
   List<DbUser> getAllUsers();
 
-  List<DbUser> getAllUsersExcludingDisabled();
+  List<Long> getAllUserIdsWithCurrentTierAccess();
 
   List<DbUser> getAllUsersWithActiveInitialCredits();
 

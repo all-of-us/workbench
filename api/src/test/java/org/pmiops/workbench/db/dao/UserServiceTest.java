@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.directory.model.User;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.access.VwbAccessService;
@@ -38,6 +40,7 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
@@ -80,9 +83,13 @@ public class UserServiceTest {
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
+
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
   private static List<DbAccessModule> accessModules;
+  private static DbAccessTier registeredTier;
+  private static DbAccessTier controlledTier;
+
   @MockBean private DirectoryService mockDirectoryService;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private InstitutionService mockInstitutionService;
@@ -90,7 +97,9 @@ public class UserServiceTest {
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessTierService accessTierService;
   @Autowired private FakeClock fakeClock;
+  @Autowired private InstitutionDao institutionDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
@@ -98,7 +107,6 @@ public class UserServiceTest {
 
   // use a SpyBean when we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
-  @Autowired private InstitutionDao institutionDao;
 
   @Import({
     FakeClockConfiguration.class,
@@ -167,7 +175,8 @@ public class UserServiceTest {
     providedDbUser = user;
 
     // key UserService logic depends on the existence of the Registered Tier
-    accessTierDao.save(createRegisteredTier());
+    registeredTier = accessTierDao.save(createRegisteredTier());
+    controlledTier = accessTierDao.save(createControlledTier());
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
@@ -622,9 +631,10 @@ public class UserServiceTest {
     Timestamp tomorrow = Timestamp.from(START_INSTANT.plus(1, ChronoUnit.DAYS));
 
     DbUser noCreditsUser =
-        PresetData.createDbUser()
-            .setUsername("nocredits@researchallofus.org")
-            .setUserInitialCreditsExpiration(null);
+        userDao.save(
+            PresetData.createDbUser()
+                .setUsername("nocredits@researchallofus.org")
+                .setUserInitialCreditsExpiration(null));
     DbUser notExpiredUser =
         createUserWithSpecifiedInitialCreditsExpiration(
             "notexpired@researchallofus.org", today, tomorrow, null);
@@ -639,6 +649,32 @@ public class UserServiceTest {
     assertThat(activeUsers).containsAtLeast(notExpiredUser, expiredButNotCleanedUser);
     assertThat(activeUsers).doesNotContain(noCreditsUser);
     assertThat(activeUsers).doesNotContain(expiredAndCleanedUser);
+  }
+
+  @Test
+  public void testGetAllUserIdsWithCurrentTierAccess() {
+    DbUser rtUser = userDao.save(new DbUser().setUserId(1).setUsername("rt"));
+    DbUser exRtUser = userDao.save(new DbUser().setUserId(2).setUsername("ex-rt"));
+    DbUser ctUser = userDao.save(new DbUser().setUserId(3).setUsername("ct"));
+    DbUser exCtUser = userDao.save(new DbUser().setUserId(4).setUsername("ex-ct"));
+    // user with no tier access
+    userDao.save(new DbUser().setUserId(5).setUsername("none"));
+
+    // add "rt" and "ex-rt" to the Registered Tier, but then remove ex-rt
+
+    accessTierService.addUserToTier(rtUser, registeredTier);
+    accessTierService.addUserToTier(exRtUser, registeredTier);
+    accessTierService.removeUserFromTier(exRtUser, registeredTier);
+
+    // add "ct" and "ex-ct" to the Controlled Tier, but then remove ex-ct
+
+    accessTierService.addUserToTier(ctUser, controlledTier);
+    accessTierService.addUserToTier(exCtUser, controlledTier);
+    accessTierService.removeUserFromTier(exCtUser, controlledTier);
+
+    // former tier members are excluded
+    assertThat(userService.getAllUserIdsWithCurrentTierAccess())
+        .containsExactly(rtUser.getUserId(), ctUser.getUserId());
   }
 
   private DbUser createUserWithSpecifiedInitialCreditsExpiration(

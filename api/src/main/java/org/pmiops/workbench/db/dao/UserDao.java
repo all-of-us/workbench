@@ -41,9 +41,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   @Query("SELECT user FROM DbUser user")
   List<DbUser> findUsers();
 
-  @Query("SELECT user FROM DbUser user WHERE user.disabled = FALSE")
-  List<DbUser> findUsersExcludingDisabled();
-
   @Query(
       "SELECT user FROM DbUser user JOIN FETCH user.userInitialCreditsExpiration uice WHERE uice.expirationCleanupTime IS NULL")
   List<DbUser> findUsersWithActiveInitialCredits();
@@ -71,6 +68,12 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
   Set<DbUser> findUsersByUsernameInAndDisabledFalse(List<String> usernames);
+
+  @Query(
+      "SELECT DISTINCT dbUser.userId FROM DbUser dbUser "
+          + "JOIN DbUserAccessTier uat ON uat.user.userId = dbUser.userId "
+          + "WHERE uat.tierAccessStatus = 1 ") // TierAccessStatus.ENABLED
+  List<Long> findUserIdsWithCurrentTierAccess();
 
   @Query(
       "SELECT u FROM DbUser u "

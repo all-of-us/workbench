@@ -29,7 +29,8 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkAuditProjectAccess() {
-    taskQueueService.groupAndPushAuditProjectsTasks(userService.getAllUserIds());
+    taskQueueService.groupAndPushAuditProjectsTasks(
+        userService.getAllUserIdsWithCurrentTierAccess());
     return ResponseEntity.noContent().build();
   }
 
