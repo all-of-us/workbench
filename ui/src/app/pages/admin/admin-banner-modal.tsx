@@ -24,6 +24,8 @@ const styles = reactStyles({
   },
 });
 
+const ONE_YEAR = 365 * 24 * 60 * 60 * 1000;
+
 interface AdminBannerModalProps {
   banner: StatusAlert;
   setBanner: React.Dispatch<React.SetStateAction<StatusAlert>>;
@@ -186,7 +188,9 @@ export const AdminBannerModal = ({
             id='start-time'
             type='datetime-local'
             min={formatDateTimeLocal(Date.now())}
-            max={formatDateTimeLocal(banner.endTimeEpochMillis)}
+            max={formatDateTimeLocal(
+              banner.endTimeEpochMillis || Date.now() + ONE_YEAR
+            )}
             value={formatDateTimeLocal(banner.startTimeEpochMillis)}
             onChange={handleStartTimeChange}
             style={styles.input}
@@ -200,6 +204,7 @@ export const AdminBannerModal = ({
             id='end-time'
             type='datetime-local'
             min={formatDateTimeLocal(banner.startTimeEpochMillis + 1)}
+            max={formatDateTimeLocal(Date.now() + ONE_YEAR)}
             value={formatDateTimeLocal(banner.endTimeEpochMillis)}
             onChange={handleEndTimeChange}
             style={{ width: '100%' }}
