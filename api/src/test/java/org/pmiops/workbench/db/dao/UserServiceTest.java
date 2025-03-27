@@ -622,9 +622,10 @@ public class UserServiceTest {
     Timestamp tomorrow = Timestamp.from(START_INSTANT.plus(1, ChronoUnit.DAYS));
 
     DbUser noCreditsUser =
-        PresetData.createDbUser()
-            .setUsername("nocredits@researchallofus.org")
-            .setUserInitialCreditsExpiration(null);
+        userDao.save(
+            PresetData.createDbUser()
+                .setUsername("nocredits@researchallofus.org")
+                .setUserInitialCreditsExpiration(null));
     DbUser notExpiredUser =
         createUserWithSpecifiedInitialCreditsExpiration(
             "notexpired@researchallofus.org", today, tomorrow, null);
@@ -639,6 +640,17 @@ public class UserServiceTest {
     assertThat(activeUsers).containsAtLeast(notExpiredUser, expiredButNotCleanedUser);
     assertThat(activeUsers).doesNotContain(noCreditsUser);
     assertThat(activeUsers).doesNotContain(expiredAndCleanedUser);
+  }
+
+  @Test
+  public void testGetAllUserIdsWithCurrentTierAccess() {
+
+    DbUser rtUser = userDao.save(new DbUser().setUserId(1).setUsername("rt"));
+    DbUser ctUser = userDao.save(new DbUser().setUserId(2).setUsername("ct"));
+    DbUser noTierUser = userDao.save(new DbUser().setUserId(2).setUsername("none"));
+
+    assertThat(userService.getAllUserIdsWithCurrentTierAccess())
+        .containsExactly(rtUser.getUserId(), ctUser.getUserId());
   }
 
   private DbUser createUserWithSpecifiedInitialCreditsExpiration(
