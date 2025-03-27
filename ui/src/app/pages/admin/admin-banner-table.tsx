@@ -145,6 +145,11 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     }
   };
 
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setNewBanner(getDefaultStatusAlert());
+  };
+
   const messageBodyTemplate = (rowData: StatusAlert) => {
     return (
       <span style={styles.messageText} title={rowData.message}>
@@ -245,7 +250,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
         <AdminBannerModal
           banner={newBanner}
           setBanner={setNewBanner}
-          onClose={() => setShowCreateModal(false)}
+          onClose={handleCloseModal}
           onCreate={handleCreateBanner}
         />
       )}
