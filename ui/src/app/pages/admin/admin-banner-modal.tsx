@@ -12,6 +12,17 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
+import colors from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
+
+const styles = reactStyles({
+  label: {
+    color: colors.primary,
+  },
+  input: {
+    color: colors.primary,
+  },
+});
 
 interface AdminBannerModalProps {
   banner: StatusAlert;
@@ -112,7 +123,7 @@ export const AdminBannerModal = ({
       <ModalTitle>Create New Banner</ModalTitle>
       <ModalBody>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Title</label>
+          <label style={styles.label}>Title</label>
           <TooltipTrigger
             content={
               isBeforeLogin
@@ -127,28 +138,31 @@ export const AdminBannerModal = ({
                 onChange={(value) => setBanner({ ...banner, title: value })}
                 placeholder='Enter banner title'
                 disabled={isBeforeLogin}
+                style={styles.input}
               />
             </div>
           </TooltipTrigger>
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Message</label>
+          <label style={styles.label}>Message</label>
           <TextInput
             value={banner.message}
             onChange={(value) => setBanner({ ...banner, message: value })}
             placeholder='Enter banner message'
+            style={styles.input}
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Link (Optional)</label>
+          <label style={styles.label}>Link (Optional)</label>
           <TextInput
             value={banner.link}
             onChange={(value) => setBanner({ ...banner, link: value })}
             placeholder='Enter banner link'
+            style={styles.input}
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Location</label>
+          <label style={styles.label}>Location</label>
           <Select
             value={banner.alertLocation}
             options={locationOptions}
@@ -165,17 +179,21 @@ export const AdminBannerModal = ({
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor='start-time'>Start Time (Local)</label>
+          <label style={styles.label} htmlFor='start-time'>
+            Start Time (Local)
+          </label>
           <input
             id='start-time'
             type='datetime-local'
             value={formatDateTimeLocal(banner.startTimeEpochMillis)}
             onChange={handleStartTimeChange}
-            style={{ width: '100%' }}
+            style={styles.input}
           />
         </div>
         <div>
-          <label htmlFor='end-time'>End Time (Optional)</label>
+          <label style={styles.label} htmlFor='end-time'>
+            End Time (Optional)
+          </label>
           <input
             id='end-time'
             type='datetime-local'
