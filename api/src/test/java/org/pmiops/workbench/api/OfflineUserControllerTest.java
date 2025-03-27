@@ -18,7 +18,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -70,8 +69,7 @@ public class OfflineUserControllerTest {
   public void setUp() {
     incrementedUserId = 1L;
     List<DbUser> users = createUsers();
-    List<Long> userIds = users.stream().map(DbUser::getUserId).collect(Collectors.toList());
-    when(mockUserService.getAllUsersExcludingDisabled()).thenReturn(users);
+    List<Long> userIds = users.stream().map(DbUser::getUserId).toList();
     when(mockUserService.getAllUsers()).thenReturn(users);
     when(mockUserService.getAllUsersWithActiveInitialCredits()).thenReturn(users);
     when(mockUserService.getAllUserIds()).thenReturn(userIds);
