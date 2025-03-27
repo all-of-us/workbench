@@ -154,7 +154,16 @@ h3 {
   font-size: 16px;
 }
 
-body, input[text] {
+input[type="datetime-local"] {
+  background-color: white;
+  border: 1px solid #b7b7b7;
+  border-radius: 3px;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  width: 100%;
+}
+
+body, input[text], input[type="datetime-local"] {
   color: #888;
   font-weight: 300;
 }
@@ -202,7 +211,7 @@ input[type=text], input[type=password] {
   border: 1px solid #9a9a9a;
 }
 
-input[type=text]:focus, input[type=password]:focus {
+input[type="text"]:focus, input[type="password"]:focus, input[type="datetime-local"]:focus {
   border: 1px solid #0094d2;
 }
 

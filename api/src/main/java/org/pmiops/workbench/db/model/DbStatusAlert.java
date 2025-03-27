@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "status_alert")
@@ -17,6 +18,8 @@ public class DbStatusAlert {
   private String message;
   private String link;
   private DbAlertLocation alertLocation;
+  private Timestamp startTime;
+  private Timestamp endTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,6 +71,26 @@ public class DbStatusAlert {
 
   public DbStatusAlert setAlertLocation(DbAlertLocation alertLocation) {
     this.alertLocation = alertLocation;
+    return this;
+  }
+
+  @Column(name = "start_time")
+  public Timestamp getStartTime() {
+    return startTime;
+  }
+
+  public DbStatusAlert setStartTime(Timestamp startTime) {
+    this.startTime = startTime;
+    return this;
+  }
+
+  @Column(name = "end_time")
+  public Timestamp getEndTime() {
+    return endTime;
+  }
+
+  public DbStatusAlert setEndTime(Timestamp endTime) {
+    this.endTime = endTime;
     return this;
   }
 

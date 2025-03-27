@@ -269,6 +269,7 @@
   <include file="changelog/db.changelog-259-add-status-alert-location.xml"/>
   <include file="changelog/db.changelog-260-create-vwb-user-pod-table.xml"/>
   <include file="changelog/db.changelog-261-add-cdr-env-var.xml"/>
+  <include file="changelog/db.changelog-262-add-status-alert-time-range.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
