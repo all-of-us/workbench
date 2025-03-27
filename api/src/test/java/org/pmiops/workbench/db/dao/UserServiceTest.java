@@ -657,7 +657,8 @@ public class UserServiceTest {
     DbUser exRtUser = userDao.save(new DbUser().setUserId(2).setUsername("ex-rt"));
     DbUser ctUser = userDao.save(new DbUser().setUserId(3).setUsername("ct"));
     DbUser exCtUser = userDao.save(new DbUser().setUserId(4).setUsername("ex-ct"));
-    DbUser noTierUser = userDao.save(new DbUser().setUserId(5).setUsername("none"));
+    // user with no tier access
+    userDao.save(new DbUser().setUserId(5).setUsername("none"));
 
     // add "rt" and "ex-rt" to the Registered Tier, but then remove ex-rt
 
