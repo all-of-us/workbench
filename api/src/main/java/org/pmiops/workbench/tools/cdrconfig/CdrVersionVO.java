@@ -58,4 +58,6 @@ public class CdrVersionVO {
   public String vwbTemplateId;
 
   public int publicReleaseNumber;
+
+  public String wgsCMRGVcfPath;
 }

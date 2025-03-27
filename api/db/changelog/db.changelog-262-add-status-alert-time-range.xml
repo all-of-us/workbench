@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="erollins" id="changelog-261-add-status-alert-time-range">
+  <changeSet author="erollins" id="changelog-262-add-status-alert-time-range">
     <!-- Add start_time and end_time columns to status_alert table -->
     <addColumn tableName="status_alert">
       <!-- Time when alert should start being displayed -->
