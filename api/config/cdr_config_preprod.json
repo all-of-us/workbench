@@ -295,7 +295,6 @@
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered",
-      "tanagraEnabled": true,
       "publicReleaseNumber": -1
     },
     {
@@ -327,7 +326,6 @@
       "wgsLongReadsHailT2T": "longreads/hail.mt/T2T",
       "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
       "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T",
-      "tanagraEnabled": true,
       "publicReleaseNumber": -1
     }
   ]
