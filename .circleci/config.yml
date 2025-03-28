@@ -204,6 +204,35 @@ commands:
           wip_id: "circleci-wip-staging"
           wip_provider_id: "circleci-oidc-prv-staging"
 
+  gcloud-auth-login-oidc-preprod:
+    description: "Activate CircleCI service account credential for the Preprod environment"
+    steps:
+    - gcloud-auth-login-oidc:
+        project_id: "589109405884"  # all-of-us-rw-preprod
+        wip_id: "circleci-wip-preprod"
+        wip_provider_id: "circleci-oidc-prv-preprod"
+        service_account: "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com"
+
+  deploy-to-preprod-command:
+    description: "Deploy API and UI to preprod App Engine"
+    steps:
+    - checkout-code
+    - attach_workspace:
+        at: .
+    - gcloud-auth-login-oidc-preprod
+    - run:
+        working_directory: ~/workbench/deploy
+        command: |
+          ./project.rb deploy \
+            --project all-of-us-rw-preprod \
+            --account "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com" \
+            --git-version "${CIRCLE_TAG}" \
+            --app-version "${CIRCLE_TAG}" \
+            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+            --key-file << pipeline.parameters.circle-service-account-key >> \
+            --promote
+        name: Deploy API and UI to all-of-us-rw-preprod App Engine
+
   deploy-to-stable-command:
     description: "Deploy API and UI to stable App Engine"
     steps:
@@ -627,6 +656,113 @@ jobs:
           name: Echo
           command: |
             echo Hello Circle!
+      - run:
+          name: Get Multiple Approvers
+          command: |
+            # Get all jobs in the workflow
+            JOBS_RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
+            
+            echo "Jobs Response: $JOBS_RESPONSE"
+            
+            # Extract security approver ID
+            SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+              select(.name=="security-approval" and .type=="approval" and .status=="success") | 
+              .approved_by')
+            
+            # Extract business owner approver ID
+            BUSINESS_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+              select(.name=="business-owner-approval" and .type=="approval" and .status=="success") | 
+              .approved_by')
+            
+            echo "Security Approver ID: $SECURITY_APPROVER_ID"
+            echo "Business Approver ID: $BUSINESS_APPROVER_ID"
+            
+            # Get security approver details
+            if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
+              SECURITY_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
+                "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
+            
+            echo "Security User: $SECURITY_USER"
+            
+              SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name')
+              SECURITY_LOGIN=$(echo $SECURITY_USER | jq -r '.login')
+            
+              echo "Security approved by: $SECURITY_NAME ($SECURITY_LOGIN)"
+              echo "export SECURITY_APPROVER_NAME=\"$SECURITY_NAME\"" >> $BASH_ENV
+              echo "export SECURITY_APPROVER_LOGIN=\"$SECURITY_LOGIN\"" >> $BASH_ENV
+            else
+              echo "No security approver found or information unavailable"
+            fi
+            
+            # Get business owner details
+            if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
+              BUSINESS_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
+                "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
+            
+            echo "Security User: $BUSINESS_USER"
+            
+              BUSINESS_NAME=$(echo $BUSINESS_USER | jq -r '.name')
+              BUSINESS_LOGIN=$(echo $BUSINESS_USER | jq -r '.login')
+            
+              echo "Business approved by: $BUSINESS_NAME ($BUSINESS_LOGIN)"
+              echo "export BUSINESS_APPROVER_NAME=\"$BUSINESS_NAME\"" >> $BASH_ENV
+              echo "export BUSINESS_APPROVER_LOGIN=\"$BUSINESS_LOGIN\"" >> $BASH_ENV
+            else
+              echo "No business approver found or information unavailable"
+            fi
+      - run:
+          name: Comment on Jira
+          command: |
+            curl --request POST \
+              --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
+              --header 'accept: application/json' \
+              --header "authorization: Basic ${JIRA_KEY}" \
+              --header 'content-type: application/json' \
+              --data '{
+              "body": {
+                "content": [
+                  {
+                    "content": [
+                      {
+                        "text": "This is a test. ",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "This request has been approved by the following approvers:",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Business Owner - '"${BUSINESS_APPROVER_NAME}"'",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Security - '"${SECURITY_APPROVER_NAME}"'",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  }
+                ],
+                "type": "doc",
+                "version": 1
+              }
+            }'
 
   e2ev2-deploy-ui:
     machine:
@@ -976,7 +1112,17 @@ workflows:
 
   playground:
     jobs:
+      - business-owner-approval:
+          type: approval
+      - security-approval:
+          type: approval
       - playground:
+          # context:
+          #   - "Business Owners"
+          #   - "Security"
+          requires:
+            - business-owner-approval
+            - security-approval
           <<: *filter-pr-branch
   e2ev2:
     jobs:
@@ -1026,6 +1172,14 @@ workflows:
           <<: *filter-release-tags
           requires:
             - deploy-to-staging
+      - hold-for-business-owner-approval:
+          type: approval
+          requires:
+            - deploy-to-stable
+#      - deploy-to-preprod:
+#          <<: *filter-release-tags
+#          requires:
+#              - deploy-to-stable
 
   nightly-tests:
     triggers:
