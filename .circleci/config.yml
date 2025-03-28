@@ -661,7 +661,7 @@ jobs:
           command: |
             # Get all jobs in the workflow
             JOBS_RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
-              "https://circleci.com/api/v1/workflow/$CIRCLE_WORKFLOW_ID/job")
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
             
             # Extract security approver ID
             SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
@@ -678,7 +678,7 @@ jobs:
             
             # Get security approver details
             if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
-              SECURITY_USER=$(curl -s -H "Circle-Token: $STATUS_TOKEN" \
+              SECURITY_USER=$(curl -s -H "Circle-Token: $CIRCLE_2025_TOKEN" \
                 "https://circleci.com/api/v1/user/$SECURITY_APPROVER_ID")
             
             echo "Security User: $SECURITY_USER"
@@ -695,8 +695,8 @@ jobs:
             
             # Get business owner details
             if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
-              BUSINESS_USER=$(curl -s -H "Circle-Token: $STATUS_TOKEN" \
-                "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
+              BUSINESS_USER=$(curl -s -H "Circle-Token: $CIRCLE_2025_TOKEN" \
+                "https://circleci.com/api/v1/user/$BUSINESS_APPROVER_ID")
             
             echo "Security User: $BUSINESS_USER"
             
