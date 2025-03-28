@@ -678,7 +678,7 @@ jobs:
             
             # Get security approver details
             if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
-              SECURITY_USER=$(curl -s -H "Circle-Token: $USER_TOKEN" \
+              SECURITY_USER=$(curl -s -H "Circle-Token: $CIRCLE_2025_TOKEN" \
                 "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
             
             echo "Security User: $SECURITY_USER"
@@ -695,7 +695,7 @@ jobs:
             
             # Get business owner details
             if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
-              BUSINESS_USER=$(curl -s -H "Circle-Token: $USER_TOKEN" \
+              BUSINESS_USER=$(curl -s -H "Circle-Token: $CIRCLE_2025_TOKEN" \
                 "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
             
             echo "Security User: $BUSINESS_USER"
