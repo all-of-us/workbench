@@ -29,6 +29,7 @@
     "build": "yarn clean && tsc -p tsconfig.json",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "yarn lint --fix",
+    "libyear": "libyear",
     "format": "prettier --config .prettierrc.js --write --ignore-unknown \"**/*.{ts,js}\""
   },
   "keywords": [
