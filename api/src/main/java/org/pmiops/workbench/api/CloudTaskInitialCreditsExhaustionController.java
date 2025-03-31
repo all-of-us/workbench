@@ -75,8 +75,8 @@ public class CloudTaskInitialCreditsExhaustionController
         "handleInitialCreditsExhaustionBatch: Processing request for users: {}",
         request.getUsers().toString());
 
-    Iterable<DbUser> users = userDao.findAllById(request.getUsers());
-    Set<DbUser> usersSet = Streams.stream(users).collect(Collectors.toSet());
+    Set<DbUser> users =
+        Streams.stream(userDao.findAllById(request.getUsers())).collect(Collectors.toSet());
 
     Map<String, Double> stringKeyDbCostMap = (Map<String, Double>) request.getDbCostByCreator();
     Map<Long, Double> dbCostByCreator = convertMapKeysToLong(stringKeyDbCostMap);
@@ -84,12 +84,11 @@ public class CloudTaskInitialCreditsExhaustionController
     Map<String, Double> stringKeyLiveCostMap = (Map<String, Double>) request.getLiveCostByCreator();
     Map<Long, Double> liveCostByCreator = convertMapKeysToLong(stringKeyLiveCostMap);
 
-    var newlyExhaustedUsers = getNewlyExhaustedUsers(usersSet, dbCostByCreator, liveCostByCreator);
+    var newlyExhaustedUsers = getNewlyExhaustedUsers(users, dbCostByCreator, liveCostByCreator);
 
     handleExhaustedUsers(newlyExhaustedUsers);
 
-    alertUsersBasedOnTheThreshold(
-        usersSet, dbCostByCreator, liveCostByCreator, newlyExhaustedUsers);
+    alertUsersBasedOnTheThreshold(users, dbCostByCreator, liveCostByCreator, newlyExhaustedUsers);
 
     logger.info(
         "handleInitialCreditsExhaustionBatch: Finished processing request for users: {}",

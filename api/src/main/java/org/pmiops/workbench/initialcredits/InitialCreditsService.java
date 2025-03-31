@@ -276,8 +276,7 @@ public class InitialCreditsService {
    */
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && !userIdsList.isEmpty()) {
-      Iterable<DbUser> users = userDao.findAllById(userIdsList);
-      users.forEach(this::checkExpiration);
+      userDao.findAllById(userIdsList).forEach(this::checkExpiration);
     }
   }
 

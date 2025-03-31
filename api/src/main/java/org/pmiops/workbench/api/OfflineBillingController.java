@@ -33,8 +33,8 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
       Provider<Stopwatch> stopwatchProvider,
       TaskQueueService taskQueueService,
       UserService userService) {
-    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.googleProjectPerCostDao = googleProjectPerCostDao;
+    this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.stopwatchProvider = stopwatchProvider;
     this.taskQueueService = taskQueueService;
     this.userService = userService;
