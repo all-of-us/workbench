@@ -307,7 +307,7 @@ describe('WorkspaceAbout', () => {
     const initialCreditsBillingAccountId = 'initial-credits';
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
-      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
+      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
@@ -330,7 +330,7 @@ describe('WorkspaceAbout', () => {
     const initialCreditsBillingAccountId = 'initial-credits';
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
-      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
+      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
@@ -358,7 +358,7 @@ describe('WorkspaceAbout', () => {
         givenName: profile.givenName,
         familyName: profile.familyName,
       },
-      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
+      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: nowPlusDays(-1),
@@ -404,7 +404,7 @@ describe('WorkspaceAbout', () => {
         givenName: profile.givenName,
         familyName: profile.familyName,
       },
-      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
+      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: nowPlusDays(-1),
@@ -446,7 +446,7 @@ describe('WorkspaceAbout', () => {
         givenName: 'Bob',
         familyName: 'Pop',
       },
-      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
+      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: nowPlusDays(-1),
@@ -492,7 +492,7 @@ describe('WorkspaceAbout', () => {
         givenName: 'Bob',
         familyName: 'Pop',
       },
-      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
+      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: nowPlusDays(-1),

@@ -27,7 +27,7 @@ export const defaultProps: CommonCreateGkeAppProps = {
   workspace: {
     ...workspaceStubs[0],
     accessLevel: WorkspaceAccessLevel.WRITER,
-    billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
+    billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
   },
   profileState: {
