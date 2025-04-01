@@ -162,7 +162,7 @@ describe(WorkspaceEdit.name, () => {
       config: {
         ...defaultServerConfig,
         freeTierBillingAccountId: 'freetier',
-        defaultFreeCreditsDollarLimit: 100.0,
+        defaultInitialCreditsDollarLimit: 100.0,
         gsuiteDomain: '',
       },
     });

@@ -546,7 +546,7 @@ describe(getErrorsAndWarnings.name, () => {
   it('should show a cost warning when the user has enough remaining initial credits', () => {
     const usingInitialCredits = true;
     const creatorFreeCreditsRemaining =
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit + 1;
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit + 1;
 
     // want a running cost over $25/hr
 
@@ -569,7 +569,7 @@ describe(getErrorsAndWarnings.name, () => {
   it('should show a cost error when the user does not have enough remaining initial credits', () => {
     const usingInitialCredits = true;
     const creatorFreeCreditsRemaining =
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit - 1;
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit - 1;
 
     // want a running cost over $25/hr
 

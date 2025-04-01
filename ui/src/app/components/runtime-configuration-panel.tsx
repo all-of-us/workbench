@@ -183,7 +183,7 @@ export const getErrorsAndWarnings = ({
     // the default amount of free credits because (1) this can result in overspend and (2) we have
     // easy access to remaining credits, and not the creator's quota.
     creatorFreeCreditsRemaining >
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit;
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit;
 
   const runningCostValidatorWithMessage = () => {
     const maxRunningCost = usingInitialCredits ? 25 : 150;

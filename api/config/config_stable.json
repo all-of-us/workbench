@@ -22,8 +22,8 @@
     "accountId": "01DDC8-7ED304-6E46FE",
     "projectNamePrefix": "aou-rw-stable-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
-    "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [
+    "defaultInitialCreditsDollarLimit": 300.0,
+    "initialCreditsCostAlertThresholds": [
       0.5,
       0.75
     ],
@@ -31,9 +31,8 @@
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
-    "freeTierCronUserBatchSize": 100,
-    "minutesBeforeLastFreeTierJob": 60,
-    "numberOfDaysToConsiderForFreeTierUsageUpdate": 2
+    "minutesBeforeLastInitialCreditsJob": 60,
+    "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 2
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -157,6 +156,7 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
+    "usersPerCheckInitialCreditsUsageTask": 100,
     "usersPerCheckInitialCreditsExpirationTask": 50,
     "usersPerAccessExpirationEmailTask": 500,
     "workspacesPerDeleteWorkspaceEnvironmentsTask": 50,
