@@ -503,8 +503,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<DbUser> getAllUsersWithActiveInitialCredits() {
-    return userDao.findUsersWithActiveInitialCredits();
+  public List<Long> getAllUserIdsWithActiveInitialCredits() {
+    return userDao.findUserIdsWithActiveInitialCredits();
   }
 
   /**

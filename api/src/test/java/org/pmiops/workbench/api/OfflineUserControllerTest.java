@@ -11,6 +11,7 @@ import static org.pmiops.workbench.cloudtasks.TaskQueueService.AUDIT_PROJECTS;
 
 import com.google.cloud.tasks.v2.CloudTasksClient;
 import com.google.cloud.tasks.v2.Task;
+import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -52,8 +53,9 @@ public class OfflineUserControllerTest {
   @Import({
     FakeClockConfiguration.class,
     OfflineUserController.class,
+    Stopwatch.class,
     TaskQueueService.class,
-    WorkbenchLocationConfigService.class
+    WorkbenchLocationConfigService.class,
   })
   @MockBean({CloudTasksClient.class, UserService.class})
   static class Configuration {
@@ -71,9 +73,9 @@ public class OfflineUserControllerTest {
     List<DbUser> users = createUsers();
     List<Long> userIds = users.stream().map(DbUser::getUserId).toList();
     when(mockUserService.getAllUserIds()).thenReturn(userIds);
+    when(mockUserService.getAllUserIdsWithActiveInitialCredits()).thenReturn(userIds);
     when(mockUserService.getAllUserIdsWithCurrentTierAccess()).thenReturn(userIds);
     when(mockUserService.getAllUsers()).thenReturn(users);
-    when(mockUserService.getAllUsersWithActiveInitialCredits()).thenReturn(users);
     when(mockCloudTasksClient.createTask(anyString(), any(Task.class)))
         .thenReturn(Task.newBuilder().setName("name").build());
 

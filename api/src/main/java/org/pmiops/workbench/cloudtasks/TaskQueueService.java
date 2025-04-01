@@ -230,9 +230,9 @@ public class TaskQueueService {
             .liveCostByCreator(liveCostByCreator));
   }
 
-  public void groupAndPushCheckInitialCreditExpirationTasks(List<Long> userIds) {
+  public List<String> groupAndPushCheckInitialCreditExpirationTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    createAndPushAll(
+    return createAndPushAll(
         userIds,
         workbenchConfig.offlineBatch.usersPerCheckInitialCreditsExpirationTask,
         INITIAL_CREDITS_EXPIRATION);

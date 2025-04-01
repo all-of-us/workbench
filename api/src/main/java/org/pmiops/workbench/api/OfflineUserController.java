@@ -1,8 +1,15 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
+
+import com.google.common.base.Stopwatch;
+import jakarta.inject.Provider;
+import java.time.Duration;
+import java.util.List;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,13 +17,20 @@ import org.springframework.web.bind.annotation.RestController;
 /** Handles offline / cron-based API requests related to user management. */
 @RestController
 public class OfflineUserController implements OfflineUserApiDelegate {
-  private final UserService userService;
+  private final Logger logger = LoggerFactory.getLogger(OfflineUserController.class);
+
+  private final Provider<Stopwatch> stopwatchProvider;
   private final TaskQueueService taskQueueService;
+  private final UserService userService;
 
   @Autowired
-  public OfflineUserController(UserService userService, TaskQueueService taskQueueService) {
-    this.userService = userService;
+  public OfflineUserController(
+      Provider<Stopwatch> stopwatchProvider,
+      TaskQueueService taskQueueService,
+      UserService userService) {
+    this.stopwatchProvider = stopwatchProvider;
     this.taskQueueService = taskQueueService;
+    this.userService = userService;
   }
 
   /**
@@ -43,9 +57,25 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     return ResponseEntity.noContent().build();
   }
 
+  @Override
   public ResponseEntity<Void> checkInitialCreditsExpiration() {
-    taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(
-        userService.getAllUsersWithActiveInitialCredits().stream().map(DbUser::getUserId).toList());
+    // temp performance logging
+    Stopwatch stopwatch = stopwatchProvider.get().start();
+    List<Long> userIds = userService.getAllUserIdsWithActiveInitialCredits();
+    Duration elapsed = stopwatch.stop().elapsed();
+    logger.info(
+        String.format(
+            "checkInitialCreditsExpiration: Retrieved %d user IDs from DB in %s",
+            userIds.size(), formatDurationPretty(elapsed)));
+
+    stopwatch.reset().start();
+    List<String> taskIds = taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(userIds);
+    elapsed = stopwatch.stop().elapsed();
+    logger.info(
+        String.format(
+            "checkInitialCreditsExpiration: Grouped and pushed %d user IDs into %d tasks in %s",
+            userIds.size(), taskIds.size(), formatDurationPretty(elapsed)));
+
     return ResponseEntity.noContent().build();
   }
 }

@@ -625,7 +625,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testGetAllUsersWithActiveInitialCredits() {
+  public void testGetAllUserIdsWithActiveInitialCredits() {
     Timestamp today = Timestamp.from(START_INSTANT);
     Timestamp yesterday = Timestamp.from(START_INSTANT.minus(1, ChronoUnit.DAYS));
     Timestamp tomorrow = Timestamp.from(START_INSTANT.plus(1, ChronoUnit.DAYS));
@@ -645,10 +645,11 @@ public class UserServiceTest {
         createUserWithSpecifiedInitialCreditsExpiration(
             "expiredandcleaned@researchallofus.org", yesterday, today, today);
 
-    List<DbUser> activeUsers = userService.getAllUsersWithActiveInitialCredits();
-    assertThat(activeUsers).containsAtLeast(notExpiredUser, expiredButNotCleanedUser);
-    assertThat(activeUsers).doesNotContain(noCreditsUser);
-    assertThat(activeUsers).doesNotContain(expiredAndCleanedUser);
+    List<Long> activeUsers = userService.getAllUserIdsWithActiveInitialCredits();
+    assertThat(activeUsers)
+        .containsAtLeast(notExpiredUser.getUserId(), expiredButNotCleanedUser.getUserId());
+    assertThat(activeUsers).doesNotContain(noCreditsUser.getUserId());
+    assertThat(activeUsers).doesNotContain(expiredAndCleanedUser.getUserId());
   }
 
   @Test
