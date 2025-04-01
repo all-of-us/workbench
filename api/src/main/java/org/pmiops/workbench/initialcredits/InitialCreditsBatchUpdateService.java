@@ -5,6 +5,7 @@ import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Streams;
 import jakarta.inject.Provider;
 import java.time.Duration;
 import java.util.HashMap;
@@ -68,25 +69,27 @@ public class InitialCreditsBatchUpdateService {
   public void checkInitialCreditsUsage(List<Long> userIdList) {
     Set<String> googleProjectsForUserSet = workspaceDao.getGoogleProjectForUserList(userIdList);
 
-    List<DbGoogleProjectPerCost> googleProjectPerCostList =
-        (List<DbGoogleProjectPerCost>)
-            googleProjectPerCostDao.findAllByGoogleProjectId(googleProjectsForUserSet);
-
     // Create Map Key: googleProject and value: cost
+    Stopwatch stopwatch = stopwatchProvider.get().start();
     Map<String, Double> userWorkspaceBQCosts =
-        googleProjectPerCostList.stream()
+        Streams.stream(googleProjectPerCostDao.findAllByGoogleProjectId(googleProjectsForUserSet))
             .collect(
                 Collectors.toMap(
                     DbGoogleProjectPerCost::getGoogleProjectId, DbGoogleProjectPerCost::getCost));
+    Duration elapsed = stopwatch.stop().elapsed();
+    log.info(
+        String.format(
+            "checkInitialCreditsUsage: Retrieved %d workspace cost entries from DB in %s",
+            userWorkspaceBQCosts.size(), formatDurationPretty(elapsed)));
 
-    Stopwatch stopwatch = stopwatchProvider.get().start();
+    stopwatch.reset().start();
     Map<String, Double> userWorkspaceBQCosts2 =
         getAllWorkspaceCostsFromBQ().entrySet().stream()
             .filter(entry -> googleProjectsForUserSet.contains(entry.getKey()))
             .collect(
                 Collectors.groupingBy(
                     Entry::getKey, Collectors.summingDouble(Map.Entry::getValue)));
-    Duration elapsed = stopwatch.stop().elapsed();
+    elapsed = stopwatch.stop().elapsed();
     log.info(
         String.format(
             "checkInitialCreditsUsage: Filtered %d workspace cost entries from BigQuery in %s",
