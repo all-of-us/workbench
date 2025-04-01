@@ -47,41 +47,40 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/** Methods relating to Free Tier credit usage and limits */
+/** Methods relating to initial credits usage and limits */
 @Service
 public class InitialCreditsService {
-
-  private final TaskQueueService taskQueueService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserDao userDao;
   private final Clock clock;
+  private final FireCloudService fireCloudService;
+  private final InstitutionService institutionService;
+  private final LeonardoApiClient leonardoApiClient;
+  private final MailService mailService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final TaskQueueService taskQueueService;
+  private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
-  private final LeonardoApiClient leonardoApiClient;
-  private final InstitutionService institutionService;
-  private final MailService mailService;
   private final WorkspaceMapper workspaceMapper;
-  private final FireCloudService fireCloudService;
 
   private static final Logger logger = LoggerFactory.getLogger(InitialCreditsService.class);
 
   @Autowired
   public InitialCreditsService(
-      TaskQueueService taskQueueService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      UserDao userDao,
       Clock clock,
+      FireCloudService fireCloudService,
+      InstitutionService institutionService,
+      LeonardoApiClient leonardoApiClient,
+      MailService mailService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      TaskQueueService taskQueueService,
+      UserDao userDao,
       UserServiceAuditor userServiceAuditor,
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService,
-      LeonardoApiClient leonardoApiClient,
-      InstitutionService institutionService,
-      MailService mailService,
-      WorkspaceMapper workspaceMapper,
-      FireCloudService fireCloudService) {
+      WorkspaceMapper workspaceMapper) {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
@@ -97,13 +96,12 @@ public class InitialCreditsService {
     this.workspaceMapper = workspaceMapper;
   }
 
-  public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
-    DbWorkspaceFreeTierUsage dbWorkspaceFreeTierUsage =
-        workspaceFreeTierUsageDao.findOneByWorkspace(dbWorkspace);
-    if (dbWorkspaceFreeTierUsage == null) {
+  public double getWorkspaceInitialCreditsUsage(DbWorkspace dbWorkspace) {
+    DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(dbWorkspace);
+    if (usage == null) {
       return 0;
     }
-    return dbWorkspaceFreeTierUsage.getCost();
+    return usage.getCost();
   }
 
   /**
@@ -127,7 +125,7 @@ public class InitialCreditsService {
       logger.info("No workspaces require updates");
       return;
     }
-    updateFreeTierUsageInDb(allCostsInDbForUsers, liveCostsInBQ, workspaceByProject);
+    updateInitialCreditsUsageInDb(allCostsInDbForUsers, liveCostsInBQ, workspaceByProject);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator = getDbCostByCreatorCache(allCostsInDbForUsers);
@@ -149,10 +147,10 @@ public class InitialCreditsService {
   /**
    * Filter the users to get only the users that have costs higher than the lowest threshold. This
    * means we'll be pushing cloud tasks for these users to notify them about their costs but the
-   * decision to notify or not is left to the handleInitialCreditsExhaustion cloud task. Another way
-   * to think about this is to have the logic to decide whether to include the user to be notified
-   * here. This is done to avoid pushing cloud tasks for users that have costs lower than the lowest
-   * threshold.
+   * decision to notify or not is left to the handleInitialCreditsExhaustionBatch cloud task.
+   * Another way to think about this is to have the logic to decide whether to include the user to
+   * be notified here. This is done to avoid pushing cloud tasks for users that have costs lower
+   * than the lowest threshold.
    *
    * @param users the users to filter
    * @param liveCostByCreator the live cost by creator
@@ -167,7 +165,7 @@ public class InitialCreditsService {
                 users.stream()
                     .filter(
                         user -> {
-                          final double limit = getUserFreeTierDollarLimit(user);
+                          final double limit = getUserInitialCreditsLimit(user);
                           final double userLiveCost =
                               Optional.ofNullable(liveCostByCreator.get(user.getUserId()))
                                   .orElse(0.0);
@@ -178,8 +176,8 @@ public class InitialCreditsService {
   }
 
   /**
-   * Retrieve the user's total free tier usage from the DB by summing across the Workspaces they
-   * have created. This is NOT live BigQuery data: it is only as recent as the last
+   * Retrieve the user's total initial credits usage from the DB by summing across the Workspaces
+   * they have created. This is NOT live BigQuery data: it is only as recent as the last
    * checkInitialCreditsUsage cron job, recorded as last_update_time in the DB.
    *
    * <p>Note: return value may be null, to enable direct assignment to the nullable Profile field
@@ -188,36 +186,36 @@ public class InitialCreditsService {
    * @return the total USD amount spent in workspaces created by this user, represented as a double
    */
   @Nullable
-  public Double getCachedFreeTierUsage(DbUser user) {
+  public Double getCachedInitialCreditsUsage(DbUser user) {
     return workspaceFreeTierUsageDao.totalCostByUser(user);
   }
 
   /**
-   * Does this user have remaining free tier credits? Compare the user-specific free tier limit (may
-   * be the system default) to the amount they have used.
+   * Does this user have remaining initial credits? Compare the user-specific initial credits limit
+   * (may be the system default) to the amount they have used.
    *
    * @param user the user as represented in our database
    * @return whether the user has remaining credits
    */
-  public boolean userHasRemainingFreeTierCredits(DbUser user) {
-    final double usage = Optional.ofNullable(getCachedFreeTierUsage(user)).orElse(0.0);
+  public boolean userHasRemainingInitialCredits(DbUser user) {
+    final double usage = Optional.ofNullable(getCachedInitialCreditsUsage(user)).orElse(0.0);
     return !costAboveLimit(user, usage);
   }
 
   /**
-   * Retrieve the Free Tier dollar limit actually applicable to this user: this user's override if
+   * Retrieve the Initial Credits limit actually applicable to this user: this user's override if
    * present, the environment's default if not
    *
    * @param user the user as represented in our database
    * @return the US dollar amount, represented as a double
    */
-  public double getUserFreeTierDollarLimit(DbUser user) {
-    return CostComparisonUtils.getUserFreeTierDollarLimit(
+  public double getUserInitialCreditsLimit(DbUser user) {
+    return CostComparisonUtils.getUserInitialCreditsLimit(
         user, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
   }
 
   /**
-   * Set a Free Tier dollar limit override value for this user, but only if the value to set differs
+   * Set an Initial Credits limit override value for this user, but only if the value to set differs
    * from the system default or the user has an existing override. If the user has no override and
    * the value to set it equal to the system default, retain the system default so this user's quota
    * continues to track it.
@@ -231,7 +229,7 @@ public class InitialCreditsService {
    * @return whether an override was set
    */
   public boolean maybeSetDollarLimitOverride(DbUser user, double newDollarLimit) {
-    final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
+    final Double previousLimitMaybe = user.getInitialCreditsLimitOverride();
 
     if (!areUserCreditsExpired(user)
         && (previousLimitMaybe != null
@@ -240,15 +238,14 @@ public class InitialCreditsService {
                 workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit))) {
 
       // TODO: prevent setting this limit directly except in this method?
-      user.setFreeTierCreditsLimitDollarsOverride(newDollarLimit);
-      user = userDao.save(user);
+      user = userDao.save(user.setInitialCreditsLimitOverride(newDollarLimit));
 
-      if (userHasRemainingFreeTierCredits(user)) {
+      if (userHasRemainingInitialCredits(user)) {
         // may be redundant: enable anyway
         setAllToUnexhausted(user);
       }
 
-      userServiceAuditor.fireSetFreeTierDollarLimitOverride(
+      userServiceAuditor.fireSetInitialCreditsOverride(
           user.getUserId(), previousLimitMaybe, newDollarLimit);
       return true;
     }
@@ -257,20 +254,18 @@ public class InitialCreditsService {
   }
 
   /**
-   * Given a workspace, find the amount of free credits that the workspace creator has left.
+   * Given a workspace, find the amount of initial credits that the workspace creator has left.
    *
-   * @param dbWorkspace The workspace for which to find its creator's free credits remaining
-   * @return The amount of free credits in USD the workspace creator has left, represented as a
+   * @param dbWorkspace The workspace for which to find its creator's initial credits remaining
+   * @return The amount of initial credits in USD the workspace creator has left, represented as a
    *     double
    */
-  public double getWorkspaceCreatorFreeCreditsRemaining(DbWorkspace dbWorkspace) {
-    Double creatorCachedFreeTierUsage = this.getCachedFreeTierUsage(dbWorkspace.getCreator());
-    Double creatorFreeTierDollarLimit = this.getUserFreeTierDollarLimit(dbWorkspace.getCreator());
-    double creatorFreeCreditsRemaining =
-        creatorCachedFreeTierUsage == null
-            ? creatorFreeTierDollarLimit
-            : creatorFreeTierDollarLimit - creatorCachedFreeTierUsage;
-    return Math.max(creatorFreeCreditsRemaining, 0);
+  public double getWorkspaceCreatorInitialCreditsRemaining(DbWorkspace dbWorkspace) {
+    Double creatorCachedUsage = this.getCachedInitialCreditsUsage(dbWorkspace.getCreator());
+    Double creatorLimit = this.getUserInitialCreditsLimit(dbWorkspace.getCreator());
+    double creatorCreditsRemaining =
+        creatorCachedUsage == null ? creatorLimit : creatorLimit - creatorCachedUsage;
+    return Math.max(creatorCreditsRemaining, 0);
   }
 
   /**
@@ -281,8 +276,7 @@ public class InitialCreditsService {
    */
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && !userIdsList.isEmpty()) {
-      Iterable<DbUser> users = userDao.findAllById(userIdsList);
-      users.forEach(this::checkExpiration);
+      userDao.findAllById(userIdsList).forEach(this::checkExpiration);
     }
   }
 
@@ -426,7 +420,7 @@ public class InitialCreditsService {
     Instant now = clock.instant();
     WorkbenchConfig.BillingConfig billingConfig = workbenchConfigProvider.get().billing;
 
-    return userHasRemainingFreeTierCredits(dbUser)
+    return userHasRemainingInitialCredits(dbUser)
         && initialCreditsExpiration != null
         && initialCreditsExpiration.getExtensionTime() == null
         && initialCreditsExpiration.getCreditStartTime() != null
@@ -509,7 +503,7 @@ public class InitialCreditsService {
     List<WorkspaceCostView> allCostsInDbForUsers = workspaceDao.getWorkspaceCostViews(users);
 
     allCostsInDbForUsers =
-        findWorkspaceFreeTierUsagesThatWereNotRecentlyUpdated(allCostsInDbForUsers);
+        findWorkspaceInitialCreditsUsagesThatWereNotRecentlyUpdated(allCostsInDbForUsers);
     return allCostsInDbForUsers;
   }
 
@@ -527,27 +521,27 @@ public class InitialCreditsService {
   }
 
   /**
-   * Filter the costs further by getting the workspaces that are active, or deleted but their free
-   * tier last updated time is before the workspace last updated time. This filtration ensures that
-   * BQ will not be queried unnecessarily for the costs of deleted workspaces that we already have
-   * their latest costs The method will return the workspace in either of these cases:
+   * Filter the costs further by getting the workspaces that are active, or deleted but their
+   * initial credits last updated time is before the workspace last updated time. This filtration
+   * ensures that BQ will not be queried unnecessarily for the costs of deleted workspaces that we
+   * already have their latest costs The method will return the workspace in either of these cases:
    *
    * <ol>
    *   <li>The workspace is active
    *   <li>The workspace is deleted within the past 6 months and any of the following is true.
    *       <ol>
-   *         <li>Free Tier Usage last updated time is null. This means that it wasn't calculated
-   *             before
+   *         <li>Initial Credits Usage last updated time is null. This means that it wasn't
+   *             calculated before
    *         <li>Workspace last updated time is null. This means we don't have enough info about the
    *             workspace, so we need to get its cost from BQ
-   *         <li>Free Tier Usage time is before the Workspace last updated time (Here the workspace
-   *             last updated time will be the time that the workspace was deleted). This means that
-   *             the workspace got changed some time after our last calculation, so we need to
-   *             recalculate its usage
-   *         <li>Free Tier Usage time is after the Workspace last updated time (Here the workspace
-   *             last updated time will be the time that the workspace was deleted), but the
-   *             difference is smaller than a certain value. This case to account for charges that
-   *             may occur after the workspace gets deleted and after the last cron had run.
+   *         <li>Initial Credits Usage time is before the Workspace last updated time (Here the
+   *             workspace last updated time will be the time that the workspace was deleted). This
+   *             means that the workspace got changed some time after our last calculation, so we
+   *             need to recalculate its usage
+   *         <li>Initial Credits Usage time is after the Workspace last updated time (Here the
+   *             workspace last updated time will be the time that the workspace was deleted), but
+   *             the difference is smaller than a certain value. This case to account for charges
+   *             that may occur after the workspace gets deleted and after the last cron had run.
    *       </ol>
    * </ol>
    *
@@ -568,11 +562,13 @@ public class InitialCreditsService {
                                 || c.getWorkspaceLastUpdated()
                                     .toLocalDateTime()
                                     .isAfter(LocalDateTime.now().minusMonths(6)))
-                            && (c.getFreeTierLastUpdated() == null
+                            && (c.getInitialCreditsLastUpdated() == null
                                 || c.getWorkspaceLastUpdated() == null
-                                || c.getFreeTierLastUpdated().before(c.getWorkspaceLastUpdated())
-                                || (c.getFreeTierLastUpdated().after(c.getWorkspaceLastUpdated())
-                                    && c.getFreeTierLastUpdated().getTime()
+                                || c.getInitialCreditsLastUpdated()
+                                    .before(c.getWorkspaceLastUpdated())
+                                || (c.getInitialCreditsLastUpdated()
+                                        .after(c.getWorkspaceLastUpdated())
+                                    && c.getInitialCreditsLastUpdated().getTime()
                                             - c.getWorkspaceLastUpdated().getTime()
                                         < Duration.ofDays(
                                                 workbenchConfigProvider.get()
@@ -591,34 +587,32 @@ public class InitialCreditsService {
   }
 
   /**
-   * Get only the workspaces that their free tier were updated before the configured time. This
-   * insures that we don't calculate the costs unnecessarily again if we run the job manually to
-   * clear up the backlog
+   * Get only the workspaces whose initial credits usages were updated before the configured time.
+   * This insures that we don't calculate the costs unnecessarily again if we run the job manually
+   * to clear up the backlog
    *
    * @param allCostsInDbForUsers a List of {@link WorkspaceCostView} which contains all info about
    *     workspaces including when they were last updated.
-   * @return A filtered list containing the workspaces free tier usage entries that were not last
-   *     updated in the last 60 minutes.
+   * @return A filtered list containing the workspaces' initial credits usage entries that were not
+   *     last updated in the last 60 minutes.
    */
   @NotNull
-  private List<WorkspaceCostView> findWorkspaceFreeTierUsagesThatWereNotRecentlyUpdated(
+  private List<WorkspaceCostView> findWorkspaceInitialCreditsUsagesThatWereNotRecentlyUpdated(
       List<WorkspaceCostView> allCostsInDbForUsers) {
     Timestamp minusMinutes =
-        Timestamp.valueOf(LocalDateTime.now().minusMinutes(getMinutesBeforeLastFreeTierJob()));
+        Timestamp.valueOf(
+            LocalDateTime.now().minusMinutes(getMinutesBeforeLastInitialCreditsJob()));
 
-    List<WorkspaceCostView> filteredCostsInDbForUsers =
-        allCostsInDbForUsers.stream()
-            .filter(
-                c ->
-                    c.getFreeTierLastUpdated() == null
-                        || c.getFreeTierLastUpdated().before(minusMinutes))
-            .collect(Collectors.toList());
-
-    return filteredCostsInDbForUsers;
+    return allCostsInDbForUsers.stream()
+        .filter(
+            c ->
+                c.getInitialCreditsLastUpdated() == null
+                    || c.getInitialCreditsLastUpdated().before(minusMinutes))
+        .toList();
   }
 
   /**
-   * Use the live cost from BQ to update the workspace free tier usage in the DB.
+   * Use the live cost from BQ to update the workspace initial credits usage in the DB.
    *
    * @param workspaceCostViews List of {@link WorkspaceCostView} containing all workspaces for the
    *     current batch of users
@@ -626,7 +620,7 @@ public class InitialCreditsService {
    *     workspaces and the values are the workspace IDs.
    * @return a Map of all live costs.
    */
-  private void updateFreeTierUsageInDb(
+  private void updateInitialCreditsUsageInDb(
       List<WorkspaceCostView> workspaceCostViews,
       Map<String, Double> allCostsInBqByProject,
       Map<String, Long> workspaceByProject) {
@@ -637,9 +631,9 @@ public class InitialCreditsService {
             .collect(
                 Collectors.toMap(
                     WorkspaceCostView::getWorkspaceId,
-                    v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
+                    v -> Optional.ofNullable(v.getInitialCreditsCost()).orElse(0.0)));
 
-    workspaceInitialCreditUsageService.updateWorkspaceFreeTierUsageInDB(
+    workspaceInitialCreditUsageService.updateWorkspaceInitialCreditsUsageInDB(
         dbCostByWorkspace, allCostsInBqByProject, workspaceByProject);
   }
 
@@ -648,7 +642,7 @@ public class InitialCreditsService {
         user, currentCost, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
   }
 
-  private Integer getMinutesBeforeLastFreeTierJob() {
+  private Integer getMinutesBeforeLastInitialCreditsJob() {
     return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob)
         .orElse(120);
   }
@@ -721,7 +715,7 @@ public class InitialCreditsService {
                 Collectors.groupingBy(
                     WorkspaceCostView::getCreatorId,
                     Collectors.summingDouble(
-                        v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0))));
+                        v -> Optional.ofNullable(v.getInitialCreditsCost()).orElse(0.0))));
     return dbCostByCreator;
   }
 

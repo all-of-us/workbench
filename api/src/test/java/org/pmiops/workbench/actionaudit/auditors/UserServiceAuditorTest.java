@@ -113,9 +113,9 @@ public class UserServiceAuditorTest {
   }
 
   @Test
-  public void testSetFreeTierDollarQuota_initial() {
+  public void testSetInitialCreditsOverride_initial() {
     DbUser user = createUser();
-    userServiceAuditor.fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 123.45);
+    userServiceAuditor.fireSetInitialCreditsOverride(user.getUserId(), null, 123.45);
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent eventSent = eventArg.getValue();
@@ -124,15 +124,15 @@ public class UserServiceAuditorTest {
     assertThat(eventSent.targetType()).isEqualTo(TargetType.ACCOUNT);
     assertThat(eventSent.targetIdMaybe()).isEqualTo(user.getUserId());
     assertThat(eventSent.targetPropertyMaybe())
-        .isEqualTo(AccountTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName());
+        .isEqualTo(AccountTargetProperty.INITIAL_CREDITS_OVERRIDE.getPropertyName());
     assertThat(eventSent.previousValueMaybe()).isNull();
     assertThat(eventSent.newValueMaybe()).isEqualTo("123.45");
   }
 
   @Test
-  public void testSetFreeTierDollarQuota_chnge() {
+  public void testSetInitialCreditsOverride_change() {
     DbUser user = createUser();
-    userServiceAuditor.fireSetFreeTierDollarLimitOverride(user.getUserId(), 123.45, 500.0);
+    userServiceAuditor.fireSetInitialCreditsOverride(user.getUserId(), 123.45, 500.0);
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent eventSent = eventArg.getValue();
@@ -141,7 +141,7 @@ public class UserServiceAuditorTest {
     assertThat(eventSent.targetType()).isEqualTo(TargetType.ACCOUNT);
     assertThat(eventSent.targetIdMaybe()).isEqualTo(user.getUserId());
     assertThat(eventSent.targetPropertyMaybe())
-        .isEqualTo(AccountTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName());
+        .isEqualTo(AccountTargetProperty.INITIAL_CREDITS_OVERRIDE.getPropertyName());
     assertThat(eventSent.previousValueMaybe()).isEqualTo("123.45");
     assertThat(eventSent.newValueMaybe()).isEqualTo("500.0");
   }

@@ -251,7 +251,7 @@ public class CohortsControllerTest {
     @Bean
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.billing.accountId = "free-tier";
+      workbenchConfig.billing.accountId = "initial-credits";
       return workbenchConfig;
     }
   }

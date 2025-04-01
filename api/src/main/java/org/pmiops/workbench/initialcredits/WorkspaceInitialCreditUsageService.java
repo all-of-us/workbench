@@ -1,11 +1,11 @@
 package org.pmiops.workbench.initialcredits;
 
+import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -42,47 +42,42 @@ public class WorkspaceInitialCreditUsageService {
    * @param workspaceByProject
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void updateWorkspaceFreeTierUsageInDB(
+  public void updateWorkspaceInitialCreditsUsageInDB(
       Map<Long, Double> dbCostByWorkspace,
       Map<String, Double> liveCostByProject,
       Map<String, Long> workspaceByProject) {
 
     final List<String> projectsToUpdate =
         liveCostByProject.keySet().stream()
-            .filter(project -> workspaceByProject.containsKey(project))
+            .filter(workspaceByProject::containsKey)
             .filter(
                 project ->
                     CostComparisonUtils.compareCosts(
                             dbCostByWorkspace.get(workspaceByProject.get(project)),
                             liveCostByProject.get(project))
                         != 0)
-            .collect(Collectors.toList());
+            .toList();
 
     List<Long> workspacesIdsToUpdate =
-        projectsToUpdate.stream()
-            .map(project -> workspaceByProject.get(project))
-            .collect(Collectors.toList());
+        projectsToUpdate.stream().map(workspaceByProject::get).toList();
 
     final Iterable<DbWorkspace> workspaceList = workspaceDao.findAllById(workspacesIdsToUpdate);
-    final Iterable<DbWorkspaceFreeTierUsage> workspaceFreeTierUsages =
+    final Iterable<DbWorkspaceFreeTierUsage> initialCreditsUsages =
         workspaceFreeTierUsageDao.findAllByWorkspaceIn(workspaceList);
 
-    // Prepare cache of workspace ID to the free tier use entity
-    Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToFreeTierUsageCache =
-        StreamSupport.stream(workspaceFreeTierUsages.spliterator(), false)
+    // Prepare cache of workspace ID to the initial credits usage entity
+    Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToUsageCache =
+        Streams.stream(initialCreditsUsages)
             .collect(
                 Collectors.toMap(
-                    wftu -> wftu.getWorkspace().getWorkspaceId(), Function.identity()));
+                    usage -> usage.getWorkspace().getWorkspaceId(), Function.identity()));
 
+    // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces
+    // in one query
     workspaceList.forEach(
         w ->
             workspaceFreeTierUsageDao.updateCost(
-                workspaceIdToFreeTierUsageCache,
-                w,
-                liveCostByProject.get(
-                    w.getGoogleProject()))); // TODO updateCost queries for each workspace, can be
-    // optimized by getting all needed workspaces in one
-    // query
+                workspaceIdToUsageCache, w, liveCostByProject.get(w.getGoogleProject())));
 
     logger.info(
         String.format(

@@ -1546,7 +1546,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void test_updateAccountProperties_free_tier_quota() {
     createAccountAndDbUserWithAffiliation();
 
-    final Double originalQuota = dbUser.getFreeTierCreditsLimitDollarsOverride();
+    final Double originalQuota = dbUser.getInitialCreditsLimitOverride();
     final Double newQuota = 123.4;
 
     final AccountPropertyUpdate request =
@@ -1556,7 +1556,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
 
     verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(dbUser.getUserId(), originalQuota, newQuota);
+        .fireSetInitialCreditsOverride(dbUser.getUserId(), originalQuota, newQuota);
   }
 
   @Test
@@ -1570,7 +1570,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileService.updateAccountProperties(request);
 
     verify(mockUserServiceAuditor, never())
-        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
   }
 
   // don't set an override if the value to set is equal to the system default
@@ -1590,7 +1590,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         .isWithin(0.01)
         .of(234.56);
 
-    // setting a Free Credits Limit equal to the default will not override
+    // setting an initial credits limit equal to the default will not override
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
@@ -1598,7 +1598,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .freeCreditsLimit(config.billing.defaultFreeCreditsDollarLimit);
     profileService.updateAccountProperties(request);
     verify(mockUserServiceAuditor, never())
-        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
 
     // the user's profile continues to track default changes
 

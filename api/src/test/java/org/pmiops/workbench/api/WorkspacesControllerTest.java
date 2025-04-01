@@ -408,7 +408,7 @@ public class WorkspacesControllerTest {
   @BeforeEach
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.accountId = "free-tier";
+    workbenchConfig.billing.accountId = "initial-credits";
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
@@ -1147,7 +1147,7 @@ public class WorkspacesControllerTest {
 
     doReturn(false)
         .when(mockInitialCreditsService)
-        .userHasRemainingFreeTierCredits(
+        .userHasRemainingInitialCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -1174,7 +1174,7 @@ public class WorkspacesControllerTest {
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     doReturn(true)
         .when(mockInitialCreditsService)
-        .userHasRemainingFreeTierCredits(
+        .userHasRemainingInitialCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -2843,7 +2843,7 @@ public class WorkspacesControllerTest {
         ws.getTerraName(),
         ws.getCreatorUser().getUserName(),
         WorkspaceAccessLevel.OWNER);
-    when(mockInitialCreditsService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
+    when(mockInitialCreditsService.getWorkspaceInitialCreditsUsage(any())).thenReturn(cost);
 
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
         workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName()).getBody();

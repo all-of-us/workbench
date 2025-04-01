@@ -212,7 +212,7 @@ public class WorkspaceServiceTest {
     currentUser.setDisabled(false);
 
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.accountId = "free-tier-account";
+    workbenchConfig.billing.accountId = "initial-credits";
   }
 
   private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(

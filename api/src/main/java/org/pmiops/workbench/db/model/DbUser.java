@@ -59,7 +59,7 @@ public class DbUser {
   private String username;
   // The email address that can be used to contact the user.
   private String contactEmail;
-  private Double freeTierCreditsLimitDollarsOverride = null;
+  private Double initialCreditsLimitOverride = null;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
   private boolean disabled;
@@ -196,12 +196,12 @@ public class DbUser {
   }
 
   @Column(name = "free_tier_credits_limit_dollars_override")
-  public Double getFreeTierCreditsLimitDollarsOverride() {
-    return freeTierCreditsLimitDollarsOverride;
+  public Double getInitialCreditsLimitOverride() {
+    return initialCreditsLimitOverride;
   }
 
-  public DbUser setFreeTierCreditsLimitDollarsOverride(Double freeTierCreditsLimitDollarsOverride) {
-    this.freeTierCreditsLimitDollarsOverride = freeTierCreditsLimitDollarsOverride;
+  public DbUser setInitialCreditsLimitOverride(Double freeTierCreditsLimitDollarsOverride) {
+    this.initialCreditsLimitOverride = freeTierCreditsLimitDollarsOverride;
     return this;
   }
 
@@ -624,7 +624,7 @@ public class DbUser {
         .append(disabled, dbUser.disabled)
         .append(username, dbUser.username)
         .append(contactEmail, dbUser.contactEmail)
-        .append(freeTierCreditsLimitDollarsOverride, dbUser.freeTierCreditsLimitDollarsOverride)
+        .append(initialCreditsLimitOverride, dbUser.initialCreditsLimitOverride)
         .append(firstSignInTime, dbUser.firstSignInTime)
         .append(creationTime, dbUser.creationTime)
         .append(givenName, dbUser.givenName)
@@ -639,7 +639,7 @@ public class DbUser {
         .append(userId)
         .append(username)
         .append(contactEmail)
-        .append(freeTierCreditsLimitDollarsOverride)
+        .append(initialCreditsLimitOverride)
         .append(firstSignInTime)
         .append(disabled)
         .append(creationTime)
