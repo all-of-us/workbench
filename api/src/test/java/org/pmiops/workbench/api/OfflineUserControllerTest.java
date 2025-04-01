@@ -71,9 +71,9 @@ public class OfflineUserControllerTest {
     List<DbUser> users = createUsers();
     List<Long> userIds = users.stream().map(DbUser::getUserId).toList();
     when(mockUserService.getAllUserIds()).thenReturn(userIds);
+    when(mockUserService.getAllUserIdsWithActiveInitialCredits()).thenReturn(userIds);
     when(mockUserService.getAllUserIdsWithCurrentTierAccess()).thenReturn(userIds);
     when(mockUserService.getAllUsers()).thenReturn(users);
-    when(mockUserService.getAllUsersWithActiveInitialCredits()).thenReturn(users);
     when(mockCloudTasksClient.createTask(anyString(), any(Task.class)))
         .thenReturn(Task.newBuilder().setName("name").build());
 
