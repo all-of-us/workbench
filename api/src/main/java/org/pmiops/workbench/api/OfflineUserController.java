@@ -69,12 +69,12 @@ public class OfflineUserController implements OfflineUserApiDelegate {
             userIds.size(), formatDurationPretty(elapsed)));
 
     stopwatch.reset().start();
-    List<String> queueIds = taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(userIds);
+    List<String> taskIds = taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(userIds);
     elapsed = stopwatch.stop().elapsed();
     logger.info(
         String.format(
             "checkInitialCreditsExpiration: Grouped and pushed %d user IDs into %d tasks in %s",
-            userIds.size(), queueIds.size(), formatDurationPretty(elapsed)));
+            userIds.size(), taskIds.size(), formatDurationPretty(elapsed)));
 
     return ResponseEntity.noContent().build();
   }
