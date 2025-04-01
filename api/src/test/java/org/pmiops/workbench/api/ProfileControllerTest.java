@@ -177,8 +177,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_DUCC_VERSION = 27; // arbitrary for test
-  private static final String AOU_TOS_NOT_ACCEPTED_ERROR_MESSAGE =
-      "No Terms of Service acceptance recorded for user ID";
   private CreateAccountRequest createAccountRequest;
   private User googleUser;
   private static DbUser dbUser;
@@ -1578,14 +1576,14 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void test_updateAccountProperties_free_tier_quota_no_override() {
-    config.billing.defaultFreeCreditsDollarLimit = 123.45;
+    config.billing.defaultInitialCreditsDollarLimit = 123.45;
 
     final Profile original = createAccountAndDbUserWithAffiliation();
     assertThat(original.getFreeTierDollarQuota()).isWithin(0.01).of(123.45);
 
     // update the default - the user's profile also updates
 
-    config.billing.defaultFreeCreditsDollarLimit = 234.56;
+    config.billing.defaultInitialCreditsDollarLimit = 234.56;
     assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
         .isWithin(0.01)
         .of(234.56);
@@ -1595,14 +1593,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
             .username(FULL_USER_NAME)
-            .freeCreditsLimit(config.billing.defaultFreeCreditsDollarLimit);
+            .freeCreditsLimit(config.billing.defaultInitialCreditsDollarLimit);
     profileService.updateAccountProperties(request);
     verify(mockUserServiceAuditor, never())
         .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
 
     // the user's profile continues to track default changes
 
-    config.billing.defaultFreeCreditsDollarLimit = 345.67;
+    config.billing.defaultInitialCreditsDollarLimit = 345.67;
     assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
         .isWithin(0.01)
         .of(345.67);

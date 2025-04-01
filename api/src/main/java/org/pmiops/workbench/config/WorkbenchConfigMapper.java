@@ -24,7 +24,10 @@ public interface WorkbenchConfigMapper {
       source = "config.server.publicApiKeyForErrorReports")
   @Mapping(
       target = "defaultFreeCreditsDollarLimit",
-      source = "config.billing.defaultFreeCreditsDollarLimit")
+      source = "config.billing.defaultInitialCreditsDollarLimit")
+  @Mapping(
+      target = "defaultInitialCreditsDollarLimit",
+      source = "config.billing.defaultInitialCreditsDollarLimit")
   @Mapping(target = "enableComplianceTraining", source = "config.access.enableComplianceTraining")
   @Mapping(target = "absorbSamlIdentityProviderId", source = "config.absorb.samlIdentityProviderId")
   @Mapping(target = "absorbSamlServiceProviderId", source = "config.absorb.samlServiceProviderId")

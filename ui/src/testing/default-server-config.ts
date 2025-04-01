@@ -62,7 +62,7 @@ const defaultServerConfig: ConfigResponse = {
   publicApiKeyForErrorReports: 'notasecret',
   enableComplianceTraining: true,
   unsafeAllowSelfBypass: false,
-  defaultFreeCreditsDollarLimit: 300,
+  defaultInitialCreditsDollarLimit: 300,
   rasHost: 'https://stsstg.nih.gov/',
   rasClientId: '903cfaeb-57d9-4ef6-5659-04377794ed65',
   enableRasIdMeLinking: false,

@@ -128,7 +128,7 @@ describe(CreateGkeApp.name, () => {
       config: {
         ...defaultServerConfig,
         freeTierBillingAccountId: freeTierBillingAccountId,
-        defaultFreeCreditsDollarLimit: 100.0,
+        defaultInitialCreditsDollarLimit: 100.0,
         gsuiteDomain: '',
       },
     });
