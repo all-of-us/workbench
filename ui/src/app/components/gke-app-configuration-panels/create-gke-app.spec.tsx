@@ -55,16 +55,16 @@ import {
 } from './create-gke-app';
 
 const onClose = jest.fn();
-const freeTierBillingAccountId = 'freetier';
+const initialCreditsBillingAccountId = 'initial-credits';
 const workspace = workspaceStubs[0];
 const oneHour = 1000 * 60 * 60;
 export const defaultProps: CommonCreateGkeAppProps = {
   onClose,
-  creatorFreeCreditsRemaining: null,
+  creatorInitialCreditsRemaining: null,
   workspace: {
     ...workspace,
     accessLevel: WorkspaceAccessLevel.WRITER,
-    billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+    billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     initialCredits: {
       ...workspace.initialCredits,
@@ -127,7 +127,7 @@ describe(CreateGkeApp.name, () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        freeTierBillingAccountId: freeTierBillingAccountId,
+        initialCreditsBillingAccountId,
         defaultInitialCreditsDollarLimit: 100.0,
         gsuiteDomain: '',
       },

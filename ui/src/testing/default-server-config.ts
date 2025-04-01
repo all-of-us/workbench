@@ -69,7 +69,7 @@ const defaultServerConfig: ConfigResponse = {
   enableRasLoginGovLinking: true,
   accessRenewalLookback: 330,
   complianceTrainingRenewalLookback: 30,
-  freeTierBillingAccountId: 'freetier',
+  initialCreditsBillingAccountId: 'initial-credits',
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
   tanagraBaseUrl: 'https://test.fake-research-aou.org',

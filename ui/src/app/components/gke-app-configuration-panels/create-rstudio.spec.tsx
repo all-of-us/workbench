@@ -20,14 +20,14 @@ import { CommonCreateGkeAppProps } from './create-gke-app';
 import { CreateRStudio } from './create-rstudio';
 
 const onClose = jest.fn();
-const freeTierBillingAccountId = 'freetier';
+const initialCreditsBillingAccountId = 'initial-credits';
 export const defaultProps: CommonCreateGkeAppProps = {
   onClose,
-  creatorFreeCreditsRemaining: null,
+  creatorInitialCreditsRemaining: null,
   workspace: {
     ...workspaceStubs[0],
     accessLevel: WorkspaceAccessLevel.WRITER,
-    billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+    billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
   },
   profileState: {
@@ -56,7 +56,7 @@ describe(CreateRStudio.name, () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        freeTierBillingAccountId: freeTierBillingAccountId,
+        initialCreditsBillingAccountId,
         defaultInitialCreditsDollarLimit: 100.0,
         gsuiteDomain: '',
       },

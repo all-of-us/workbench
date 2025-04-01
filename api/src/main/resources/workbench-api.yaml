@@ -7177,7 +7177,11 @@ components:
           description: The URL that can sign out RAS login session.
         freeTierBillingAccountId:
           type: string
-          description: The free tier billing account id
+          description: DEPRECATED in favor of initialCreditsBillingAccountId.
+            The initial credits billing account id
+        initialCreditsBillingAccountId:
+          type: string
+          description: The initial credits billing account id
         accessModules:
           type: array
           items:

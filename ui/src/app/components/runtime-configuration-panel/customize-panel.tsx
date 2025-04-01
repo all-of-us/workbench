@@ -52,7 +52,7 @@ export interface CustomizePanelProps {
   allowDataproc: boolean;
   analysisConfig: AnalysisConfig;
   attachedPdExists: boolean;
-  creatorFreeCreditsRemaining: number;
+  creatorInitialCreditsRemaining: number;
   currentRuntime: Runtime;
   environmentChanged: boolean;
   errorMessageContent: JSX.Element[];
@@ -78,7 +78,7 @@ export const CustomizePanel = ({
   allowDataproc,
   analysisConfig,
   attachedPdExists,
-  creatorFreeCreditsRemaining,
+  creatorInitialCreditsRemaining,
   currentRuntime,
   environmentChanged,
   errorMessageContent,
@@ -133,7 +133,7 @@ export const CustomizePanel = ({
       <div style={styles.controlSection}>
         <EnvironmentInformedActionPanel
           {...{
-            creatorFreeCreditsRemaining,
+            creatorInitialCreditsRemaining,
             profile,
             analysisConfig,
             environmentChanged,

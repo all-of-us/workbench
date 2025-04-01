@@ -17,7 +17,7 @@ import { PanelContent } from './utils';
 
 export interface CreatePanelProps {
   analysisConfig: AnalysisConfig;
-  creatorFreeCreditsRemaining: number;
+  creatorInitialCreditsRemaining: number;
   onClose: () => void;
   profile: Profile;
   requestAnalysisConfig: (ac: AnalysisConfig) => void;
@@ -29,7 +29,7 @@ export interface CreatePanelProps {
 }
 export const CreatePanel = ({
   analysisConfig,
-  creatorFreeCreditsRemaining,
+  creatorInitialCreditsRemaining,
   onClose,
   profile,
   requestAnalysisConfig,
@@ -49,7 +49,7 @@ export const CreatePanel = ({
       <div data-test-id='runtime-create-panel' style={styles.controlSection}>
         <EnvironmentInformedActionPanel
           {...{
-            creatorFreeCreditsRemaining,
+            creatorInitialCreditsRemaining,
             profile,
             workspace,
             analysisConfig,

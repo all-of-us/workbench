@@ -304,9 +304,10 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should see initial credit expiration date', async () => {
+    const initialCreditsBillingAccountId = 'initial-credits';
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
-      billingAccountName: 'billingAccounts/free',
+      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
@@ -315,7 +316,7 @@ describe('WorkspaceAbout', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        freeTierBillingAccountId: 'free',
+        initialCreditsBillingAccountId,
       },
     });
     component();
@@ -326,9 +327,10 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should not see initial credit expiration date when enableInitialCreditsExpiration is false', async () => {
+    const initialCreditsBillingAccountId = 'initial-credits';
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
-      billingAccountName: 'billingAccounts/free',
+      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
@@ -337,7 +339,7 @@ describe('WorkspaceAbout', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        freeTierBillingAccountId: 'free',
+        initialCreditsBillingAccountId,
         enableInitialCreditsExpiration: false,
       },
     });
@@ -348,6 +350,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('eligble creator should be able to request extension', async () => {
+    const initialCreditsBillingAccountId = 'initial-credits';
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
       creatorUser: {
@@ -355,7 +358,7 @@ describe('WorkspaceAbout', () => {
         givenName: profile.givenName,
         familyName: profile.familyName,
       },
-      billingAccountName: 'billingAccounts/free',
+      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: nowPlusDays(-1),
@@ -364,7 +367,7 @@ describe('WorkspaceAbout', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        freeTierBillingAccountId: 'free',
+        initialCreditsBillingAccountId,
       },
     });
     profileStore.set({
@@ -393,6 +396,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('ineligble creator should not be able to request extension', async () => {
+    const initialCreditsBillingAccountId = 'initial-credits';
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
       creatorUser: {
@@ -400,7 +404,7 @@ describe('WorkspaceAbout', () => {
         givenName: profile.givenName,
         familyName: profile.familyName,
       },
-      billingAccountName: 'billingAccounts/free',
+      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: nowPlusDays(-1),
@@ -409,7 +413,7 @@ describe('WorkspaceAbout', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        freeTierBillingAccountId: 'free',
+        initialCreditsBillingAccountId,
       },
     });
     profileStore.set({
@@ -434,6 +438,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('non-creator should not be able to request extension', async () => {
+    const initialCreditsBillingAccountId = 'initial-credits';
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
       creatorUser: {
@@ -441,7 +446,7 @@ describe('WorkspaceAbout', () => {
         givenName: 'Bob',
         familyName: 'Pop',
       },
-      billingAccountName: 'billingAccounts/free',
+      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: nowPlusDays(-1),
@@ -450,7 +455,7 @@ describe('WorkspaceAbout', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        freeTierBillingAccountId: 'free',
+        initialCreditsBillingAccountId,
       },
     });
     profileStore.set({
@@ -479,6 +484,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should not see initial credit expiration section when bypassed', async () => {
+    const initialCreditsBillingAccountId = 'initial-credits';
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
       creatorUser: {
@@ -486,7 +492,7 @@ describe('WorkspaceAbout', () => {
         givenName: 'Bob',
         familyName: 'Pop',
       },
-      billingAccountName: 'billingAccounts/free',
+      billingAccountName: 'billingAccounts/' + initialCreditsBillingAccountId,
       initialCredits: {
         exhausted: false,
         expirationEpochMillis: nowPlusDays(-1),
@@ -496,7 +502,7 @@ describe('WorkspaceAbout', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        freeTierBillingAccountId: 'free',
+        initialCreditsBillingAccountId,
       },
     });
     component();

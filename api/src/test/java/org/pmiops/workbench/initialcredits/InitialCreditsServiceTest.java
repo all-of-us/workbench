@@ -145,7 +145,7 @@ public class InitialCreditsServiceTest {
   public void setUp() throws MessagingException {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.5, .75);
-    workbenchConfig.billing.accountId = "free-tier";
+    workbenchConfig.billing.accountId = "initial-credits";
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
     workbenchConfig.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
