@@ -96,7 +96,7 @@ describe(GKEAppConfigurationPanel.name, () => {
     workspaceNamespace: 'aou-rw-1234',
     onClose: jest.fn(),
     initialPanelContent: null,
-    creatorFreeCreditsRemaining: 300,
+    creatorInitialCreditsRemaining: 300,
 
     // Use RSTUDIO_DEFAULT_PROPS for the rest of the props since they shouldn't affect this test
     workspace: rstudioDefaultProps.workspace,

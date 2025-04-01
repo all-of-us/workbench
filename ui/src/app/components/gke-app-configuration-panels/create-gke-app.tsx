@@ -122,7 +122,7 @@ export interface CreateGkeAppProps {
   userApps: UserAppEnvironment[];
   appType: AppType;
   onClose: () => void;
-  creatorFreeCreditsRemaining: number | null;
+  creatorInitialCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
   disk: Disk | undefined;
@@ -148,7 +148,7 @@ export const CreateGkeApp = ({
   userApps,
   appType,
   onClose,
-  creatorFreeCreditsRemaining,
+  creatorInitialCreditsRemaining,
   workspace,
   profileState,
   disk,
@@ -305,7 +305,7 @@ export const CreateGkeApp = ({
       <div style={{ ...styles.controlSection }}>
         <EnvironmentInformedActionPanel
           {...{
-            creatorFreeCreditsRemaining,
+            creatorInitialCreditsRemaining,
             profile,
             workspace,
           }}

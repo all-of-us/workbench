@@ -161,7 +161,7 @@ describe(WorkspaceEdit.name, () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        freeTierBillingAccountId: 'freetier',
+        initialCreditsBillingAccountId: 'initial-credits',
         defaultInitialCreditsDollarLimit: 100.0,
         gsuiteDomain: '',
       },

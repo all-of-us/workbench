@@ -149,7 +149,7 @@ describe(AppsPanel.name, () => {
   const leoAppsStub = new LeoAppsApiStub();
   let user: UserEvent;
   beforeEach(() => {
-    const freeTierBillingAccountId = 'FreeTierBillingAccountId';
+    const initialCreditsBillingAccountId = 'initialCreditsBillingAccountId';
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     registerApiClient(RuntimeApi, runtimeStub);
@@ -159,7 +159,7 @@ describe(AppsPanel.name, () => {
     workspaceStub = {
       ...workspaceDataStub,
       billingStatus: BillingStatus.ACTIVE,
-      billingAccountName: `billingAccounts/${freeTierBillingAccountId}`,
+      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
     };
     runtimeStore.set({
       workspaceNamespace: workspaceStub.namespace,
@@ -167,7 +167,7 @@ describe(AppsPanel.name, () => {
       runtimeLoaded: true,
     });
     serverConfigStore.set({
-      config: { ...defaultServerConfig, freeTierBillingAccountId },
+      config: { ...defaultServerConfig, initialCreditsBillingAccountId },
     });
 
     user = userEvent.setup();

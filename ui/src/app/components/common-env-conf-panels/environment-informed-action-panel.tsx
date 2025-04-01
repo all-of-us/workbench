@@ -26,22 +26,22 @@ import { styles } from './styles';
 interface CostsDrawnFromProps {
   usingInitialCredits: boolean;
   userIsCreator: boolean;
-  creatorFreeCreditsRemaining: number;
+  creatorInitialCreditsRemaining: number;
   billingAccountName: string;
   style?: CSSProperties;
 }
 const CostsDrawnFrom = ({
   usingInitialCredits,
   userIsCreator,
-  creatorFreeCreditsRemaining,
+  creatorInitialCreditsRemaining,
   billingAccountName,
   style,
 }: CostsDrawnFromProps) => {
   const remainingCredits =
-    creatorFreeCreditsRemaining === null ? (
+    creatorInitialCreditsRemaining === null ? (
       <Spinner size={10} />
     ) : (
-      formatUsd(creatorFreeCreditsRemaining)
+      formatUsd(creatorInitialCreditsRemaining)
     );
 
   return cond(
@@ -75,7 +75,7 @@ const CostsDrawnFrom = ({
 };
 
 interface PanelProps {
-  creatorFreeCreditsRemaining: number;
+  creatorInitialCreditsRemaining: number;
   profile: Profile;
   workspace: Workspace;
   analysisConfig: AnalysisConfig;
@@ -86,7 +86,7 @@ interface PanelProps {
   environmentChanged?: boolean;
 }
 export const EnvironmentInformedActionPanel = ({
-  creatorFreeCreditsRemaining,
+  creatorInitialCreditsRemaining,
   profile,
   workspace,
   analysisConfig,
@@ -128,7 +128,7 @@ export const EnvironmentInformedActionPanel = ({
         />
         {showCostsDrawnFromWithCosts && (
           <CostsDrawnFrom
-            {...{ creatorFreeCreditsRemaining }}
+            {...{ creatorInitialCreditsRemaining }}
             usingInitialCredits={isUsingInitialCredits(workspace)}
             userIsCreator={profile.username === workspace.creatorUser.userName}
             billingAccountName={workspace.billingAccountName}
@@ -141,7 +141,7 @@ export const EnvironmentInformedActionPanel = ({
       </FlexRow>
       {!showCostsDrawnFromWithCosts && (
         <CostsDrawnFrom
-          {...{ creatorFreeCreditsRemaining }}
+          {...{ creatorInitialCreditsRemaining }}
           usingInitialCredits={isUsingInitialCredits(workspace)}
           userIsCreator={profile.username === workspace.creatorUser.userName}
           billingAccountName={workspace.billingAccountName}
