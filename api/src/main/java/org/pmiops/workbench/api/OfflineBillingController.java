@@ -48,7 +48,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
     // temp performance logging
     Stopwatch stopwatch = stopwatchProvider.get().start();
     List<DbGoogleProjectPerCost> workspaceCosts =
-        initialCreditsBatchUpdateService.getWorkspaceCostsFromBQ().entrySet().stream()
+        initialCreditsBatchUpdateService.getAllWorkspaceCostsFromBQ().entrySet().stream()
             .map(DbGoogleProjectPerCost::new)
             .toList();
     Duration elapsed = stopwatch.stop().elapsed();

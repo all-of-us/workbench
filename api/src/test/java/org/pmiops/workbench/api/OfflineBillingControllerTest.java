@@ -59,6 +59,7 @@ public class OfflineBillingControllerTest {
   }
 
   private void mockInitialCreditCosts() {
-    when(mockInitialCreditsBatchUpdateService.getWorkspaceCostsFromBQ()).thenReturn(workspaceCosts);
+    when(mockInitialCreditsBatchUpdateService.getAllWorkspaceCostsFromBQ())
+        .thenReturn(workspaceCosts);
   }
 }
