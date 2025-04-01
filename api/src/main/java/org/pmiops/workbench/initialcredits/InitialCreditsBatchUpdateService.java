@@ -6,6 +6,7 @@ import jakarta.inject.Provider;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.BigQueryService;
@@ -67,6 +68,13 @@ public class InitialCreditsBatchUpdateService {
             .collect(
                 Collectors.toMap(
                     DbGoogleProjectPerCost::getGoogleProjectId, DbGoogleProjectPerCost::getCost));
+
+    Map<String, Double> userWorkspaceBQCosts2 =
+        getWorkspaceCostsFromBQ().entrySet().stream()
+            .filter(entry -> googleProjectsForUserSet.contains(entry.getKey()))
+            .collect(
+                Collectors.groupingBy(
+                    Entry::getKey, Collectors.summingDouble(Map.Entry::getValue)));
 
     Set<DbUser> dbUserSet =
         userIdList.stream().map(userDao::findUserByUserId).collect(Collectors.toSet());
