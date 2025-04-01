@@ -23,7 +23,6 @@ import {
 import {
   AnalysisConfig,
   fromAnalysisConfig,
-  maybeWithPersistentDisk,
   toAnalysisConfig,
   withAnalysisConfigDefaults,
 } from 'app/utils/analysis-config';
@@ -39,7 +38,10 @@ import {
   getAnalysisConfigDiffs,
 } from 'app/utils/runtime-diffs';
 import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
-import { applyPresetOverride } from 'app/utils/runtime-presets';
+import {
+  applyPresetOverride,
+  maybeWithPersistentDisk,
+} from 'app/utils/runtime-presets';
 import {
   canUpdateRuntime,
   isVisible,
