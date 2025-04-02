@@ -4,60 +4,70 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Stopwatch;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.config.BigQueryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbGoogleProjectPerCost;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class InitialCreditsBatchUpdateServiceTest {
 
-  @Autowired private GoogleProjectPerCostDao mockGoogleProjectPerCostDao;
   @Autowired private WorkspaceDao mockWorkspaceDao;
   @Autowired private InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
   @Autowired private InitialCreditsService mockInitialCreditsService;
   @Autowired private UserDao mockUserDao;
 
+  private static WorkbenchConfig config;
+
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, InitialCreditsBatchUpdateService.class})
-  @MockBean({
-    GoogleProjectPerCostDao.class,
-    UserDao.class,
-    WorkspaceDao.class,
-    WorkbenchConfig.class,
+  @Import({
+    BigQueryConfig.class,
     BigQueryService.class,
-    InitialCreditsService.class
+    FakeClockConfiguration.class,
+    InitialCreditsBatchUpdateService.class,
+    Stopwatch.class,
   })
-  static class Configuration {}
+  @MockBean({UserDao.class, WorkspaceDao.class, InitialCreditsService.class})
+  static class Configuration {
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig workbenchConfig() {
+      return config;
+    }
+  }
 
-  Set<DbUser> mockDbuserSet = new HashSet<DbUser>();
+  Set<DbUser> mockDbuserSet = new HashSet<>();
 
-  Set<String> googleProjectIdsSet = new HashSet<>(Arrays.asList("12", "22", "23", "32", "33"));
+  Set<String> googleProjectIdsSet = new HashSet<>(List.of("12", "22", "23", "32", "33"));
 
-  @BeforeAll
-  public void init() throws Exception {
+  @BeforeEach
+  public void init() {
+    config = WorkbenchConfig.createEmptyConfig();
+    // config.billing = new WorkbenchConfig.BillingConfig();
     mockDbUser();
     mockGoogleProjectsForUser();
-    mockGoogleProjectCost();
   }
 
   @Test
@@ -65,7 +75,6 @@ public class InitialCreditsBatchUpdateServiceTest {
     initialCreditsBatchUpdateService.checkInitialCreditsUsage(Arrays.asList(1L, 2L, 3L));
 
     verify(mockWorkspaceDao, times(1)).getGoogleProjectForUserList(Arrays.asList(1L, 2L, 3L));
-    verify(mockGoogleProjectPerCostDao, times(1)).findAllByGoogleProjectId(googleProjectIdsSet);
 
     verify(mockInitialCreditsService)
         .checkInitialCreditsUsageForUsers(mockDbuserSet, getUserCostMap());
@@ -86,18 +95,6 @@ public class InitialCreditsBatchUpdateServiceTest {
   private void mockGoogleProjectsForUser() {
     when(mockWorkspaceDao.getGoogleProjectForUserList(Arrays.asList(1L, 2L, 3L)))
         .thenReturn(googleProjectIdsSet);
-  }
-
-  private void mockGoogleProjectCost() {
-    List<DbGoogleProjectPerCost> dbGoogleProjectPerCostList =
-        Arrays.asList(
-            new DbGoogleProjectPerCost("12", 0.013),
-            new DbGoogleProjectPerCost("22", 1.123),
-            new DbGoogleProjectPerCost("23", 6.5),
-            new DbGoogleProjectPerCost("32", 0.34),
-            new DbGoogleProjectPerCost("33", 0.9));
-    when(mockGoogleProjectPerCostDao.findAllByGoogleProjectId(googleProjectIdsSet))
-        .thenReturn(dbGoogleProjectPerCostList);
   }
 
   private Map<String, Double> getUserCostMap() {
