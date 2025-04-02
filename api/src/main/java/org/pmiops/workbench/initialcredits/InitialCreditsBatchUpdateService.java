@@ -61,13 +61,13 @@ public class InitialCreditsBatchUpdateService {
    * @param userIdList
    */
   public void checkInitialCreditsUsage(List<Long> userIdList) {
-    Set<String> googleProjectsForUserSet = workspaceDao.getGoogleProjectForUserList(userIdList);
+    Set<String> googleProjects = workspaceDao.getWorkspaceGoogleProjectsForCreators(userIdList);
 
     // Create Map Key: googleProject and value: cost
     Stopwatch stopwatch = stopwatchProvider.get().start();
     Map<String, Double> userWorkspaceBQCosts =
         getAllWorkspaceCostsFromBQ().entrySet().stream()
-            .filter(entry -> googleProjectsForUserSet.contains(entry.getKey()))
+            .filter(entry -> googleProjects.contains(entry.getKey()))
             .collect(
                 Collectors.groupingBy(
                     Entry::getKey, Collectors.summingDouble(Map.Entry::getValue)));
