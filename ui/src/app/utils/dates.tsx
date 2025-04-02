@@ -1,7 +1,9 @@
 import { isBlank } from './index';
 
-export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
-export const ONE_YEAR = 365 * MILLIS_PER_DAY;
+export const MILLIS_PER_MINUTE = 60 * 1000;
+export const MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
+export const MILLIS_PER_DAY = 24 * MILLIS_PER_HOUR;
+export const MILLIS_PER_YEAR = 365 * MILLIS_PER_DAY;
 export const getWholeDaysFromNow = (timeInMillis: number): number =>
   Math.floor((timeInMillis - Date.now()) / MILLIS_PER_DAY);
 export const plusDays = (date: number, days: number): number =>

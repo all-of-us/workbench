@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import validate from 'validate.js';
 
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
@@ -15,7 +15,11 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { convertLocalDateTimeToEpochMillis, formatDateTimeLocal, ONE_YEAR } from 'app/utils/dates';
+import {
+  convertLocalDateTimeToEpochMillis,
+  formatDateTimeLocal,
+  MILLIS_PER_YEAR,
+} from 'app/utils/dates';
 
 const styles = reactStyles({
   label: {
@@ -63,64 +67,70 @@ export const AdminBannerModal = ({
   onCreate,
 }: AdminBannerModalProps) => {
   const [isCreating, setIsCreating] = useState(false);
-  
-  const isBeforeLogin = banner.alertLocation === StatusAlertLocation.BEFORE_LOGIN;
-  
+
+  const isBeforeLogin =
+    banner.alertLocation === StatusAlertLocation.BEFORE_LOGIN;
+
   const locationOptions = [
     { value: StatusAlertLocation.AFTER_LOGIN, label: 'After Login' },
     { value: StatusAlertLocation.BEFORE_LOGIN, label: 'Before Login' },
   ];
 
   // Validation
-  const constraints = useMemo(() => ({
-    title: {
-      presence: {
-        allowEmpty: false,
-        message: 'Please enter a banner title'
-      }
-    },
-    message: {
-      presence: {
-        allowEmpty: false,
-        message: 'Please enter a banner message'
-      }
-    },
-    startTimeEpochMillis: {
-      presence: {
-        allowEmpty: false,
-        message: 'Please enter a start time'
-      }
-    },
-    alertLocation: {
-      presence: {
-        message: 'Please select a banner location'
-      }
-    }
-  }), []);
+  const constraints = useMemo(
+    () => ({
+      title: {
+        presence: {
+          allowEmpty: false,
+          message: 'Please enter a banner title',
+        },
+      },
+      message: {
+        presence: {
+          allowEmpty: false,
+          message: 'Please enter a banner message',
+        },
+      },
+      startTimeEpochMillis: {
+        presence: {
+          allowEmpty: false,
+          message: 'Please enter a start time',
+        },
+      },
+      alertLocation: {
+        presence: {
+          message: 'Please select a banner location',
+        },
+      },
+    }),
+    []
+  );
 
   const getValidationErrors = (): string[] => {
     if (isCreating) {
       return ['Creating banner...'];
     }
-    
-    const validationResult = validate(banner, constraints, {fullMessages: false});
+
+    const validationResult = validate(banner, constraints, {
+      fullMessages: false,
+    });
     if (!validationResult) {
       return [];
     }
-    
+
     const errors = validationResult as Record<string, string[]>;
     const errorMessages: string[] = [];
-    Object.keys(errors).forEach(key => {
+    Object.keys(errors).forEach((key) => {
       if (Array.isArray(errors[key])) {
         errorMessages.push(...errors[key]);
       }
     });
-    
+
     return errorMessages;
   };
 
   const errors: string[] = getValidationErrors();
-  
+
   // Event handlers
   const handleCreate = async () => {
     if (isCreating || errors.length > 0) {
@@ -141,9 +151,10 @@ export const AdminBannerModal = ({
   const handleLocationChange = (value: StatusAlertLocation) => {
     setBanner({
       ...banner,
-      title: value === StatusAlertLocation.AFTER_LOGIN 
-        ? '' 
-        : 'Scheduled Downtime Notice for the Researcher Workbench',
+      title:
+        value === StatusAlertLocation.AFTER_LOGIN
+          ? ''
+          : 'Scheduled Downtime Notice for the Researcher Workbench',
       alertLocation: value,
     });
   };
@@ -184,9 +195,11 @@ export const AdminBannerModal = ({
     <Modal onRequestClose={onClose}>
       <ModalTitle>Create New Banner</ModalTitle>
       <ModalBody>
-        <FormField 
-          label="Title" 
-          tooltip={isBeforeLogin ? '"Before Login" banner has a fixed headline.' : null}
+        <FormField
+          label='Title'
+          tooltip={
+            isBeforeLogin ? '"Before Login" banner has a fixed headline.' : null
+          }
         >
           <TextInput
             value={banner.title}
@@ -196,8 +209,8 @@ export const AdminBannerModal = ({
             style={styles.input}
           />
         </FormField>
-        
-        <FormField label="Message">
+
+        <FormField label='Message'>
           <TextInput
             value={banner.message}
             onChange={(value) => handleBannerChange('message', value)}
@@ -205,8 +218,8 @@ export const AdminBannerModal = ({
             style={styles.input}
           />
         </FormField>
-        
-        <FormField label="Link (Optional)">
+
+        <FormField label='Link (Optional)'>
           <TextInput
             value={banner.link}
             onChange={(value) => handleBannerChange('link', value)}
@@ -214,42 +227,42 @@ export const AdminBannerModal = ({
             style={styles.input}
           />
         </FormField>
-        
-        <FormField label="Location">
+
+        <FormField label='Location'>
           <Select
             value={banner.alertLocation}
             options={locationOptions}
             onChange={handleLocationChange}
           />
         </FormField>
-        
-        <FormField label="Start Time (Local)">
+
+        <FormField label='Start Time (Local)'>
           <input
             id='start-time'
             type='datetime-local'
             min={formatDateTimeLocal(Date.now())}
             max={formatDateTimeLocal(
-              banner.endTimeEpochMillis || Date.now() + ONE_YEAR
+              banner.endTimeEpochMillis || Date.now() + MILLIS_PER_YEAR
             )}
             value={formatDateTimeLocal(banner.startTimeEpochMillis)}
             onChange={handleStartTimeChange}
             style={styles.input}
           />
         </FormField>
-        
-        <FormField label="End Time (Optional)">
+
+        <FormField label='End Time (Optional)'>
           <input
             id='end-time'
             type='datetime-local'
             min={formatDateTimeLocal(banner.startTimeEpochMillis + 1)}
-            max={formatDateTimeLocal(Date.now() + ONE_YEAR)}
+            max={formatDateTimeLocal(Date.now() + MILLIS_PER_YEAR)}
             value={formatDateTimeLocal(banner.endTimeEpochMillis)}
             onChange={handleEndTimeChange}
             style={styles.input}
           />
         </FormField>
       </ModalBody>
-      
+
       <ModalFooter>
         <Button
           type='secondary'
@@ -259,20 +272,19 @@ export const AdminBannerModal = ({
           Cancel
         </Button>
         <TooltipTrigger
-          content={errors.length > 0 ? (
-            <div>
-              {errors.map((error, index) => (
-                <div key={index}>{error}</div>
-              ))}
-            </div>
-          ) : null}
+          content={
+            errors.length > 0 ? (
+              <div>
+                {errors.map((error, index) => (
+                  <div key={index}>{error}</div>
+                ))}
+              </div>
+            ) : null
+          }
           side='top'
         >
           <div>
-            <Button
-              onClick={handleCreate}
-              disabled={errors.length > 0}
-            >
+            <Button onClick={handleCreate} disabled={errors.length > 0}>
               Create Banner
             </Button>
           </div>

@@ -10,14 +10,13 @@ import {
   clearApiClients,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { MILLIS_PER_HOUR } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { StatusAlertApiStub } from 'testing/stubs/status-alert-api-stub';
 
 import LoginReactComponent from './login';
-
-const ONE_HOUR = 1000 * 60 * 60;
 
 describe('LoginComponent', () => {
   let loginProps: { signIn: Function; onCreateAccount: Function };
@@ -113,8 +112,8 @@ describe('LoginComponent', () => {
 
   it('should show alerts with current time between start and end times', async () => {
     const now = Date.now();
-    const oneHourAgo = now - ONE_HOUR;
-    const oneHourLater = now + ONE_HOUR;
+    const oneHourAgo = now - MILLIS_PER_HOUR;
+    const oneHourLater = now + MILLIS_PER_HOUR;
 
     statusAlertStub.addAlerts([
       {
@@ -136,8 +135,8 @@ describe('LoginComponent', () => {
 
   it('should not show alerts with start time in the future', async () => {
     const now = Date.now();
-    const oneHourLater = now + ONE_HOUR;
-    const twoHoursLater = now + ONE_HOUR * 2;
+    const oneHourLater = now + MILLIS_PER_HOUR;
+    const twoHoursLater = now + MILLIS_PER_HOUR * 2;
 
     statusAlertStub.addAlerts([
       {
@@ -159,8 +158,8 @@ describe('LoginComponent', () => {
 
   it('should not show alerts with end time in the past', async () => {
     const now = Date.now();
-    const twoHoursAgo = now - 2 * ONE_HOUR;
-    const oneHourAgo = now - ONE_HOUR;
+    const twoHoursAgo = now - 2 * MILLIS_PER_HOUR;
+    const oneHourAgo = now - MILLIS_PER_HOUR;
 
     statusAlertStub.addAlerts([
       {
@@ -182,7 +181,7 @@ describe('LoginComponent', () => {
 
   it('should show alerts with null start time (always active from beginning)', async () => {
     const now = Date.now();
-    const oneHourLater = now + ONE_HOUR;
+    const oneHourLater = now + MILLIS_PER_HOUR;
 
     statusAlertStub.addAlerts([
       {
@@ -202,7 +201,7 @@ describe('LoginComponent', () => {
 
   it('should show alerts with null end time (never expires)', async () => {
     const now = Date.now();
-    const oneHourAgo = now - ONE_HOUR;
+    const oneHourAgo = now - MILLIS_PER_HOUR;
 
     statusAlertStub.addAlerts([
       {
