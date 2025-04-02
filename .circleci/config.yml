@@ -1117,12 +1117,12 @@ workflows:
       - security-approval:
           type: approval
       - playground:
-          # context:
-          #   - "Business Owners"
-          #   - "Security"
+          context:
+          - "Business Owners"
+          - "Security"
           requires:
-            - business-owner-approval
-            - security-approval
+          - business-owner-approval
+          - security-approval
           <<: *filter-pr-branch
   e2ev2:
     jobs:
