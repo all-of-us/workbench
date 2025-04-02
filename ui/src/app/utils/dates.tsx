@@ -1,6 +1,7 @@
 import { isBlank } from './index';
 
 export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+export const ONE_YEAR = 365 * MILLIS_PER_DAY;
 export const getWholeDaysFromNow = (timeInMillis: number): number =>
   Math.floor((timeInMillis - Date.now()) / MILLIS_PER_DAY);
 export const plusDays = (date: number, days: number): number =>
@@ -70,3 +71,40 @@ export const maybeToSingleDate = (
   }
   return undefined;
 };
+
+/**
+ * Converts a local date-time string (in format YYYY-MM-DDThh:mm) to epoch milliseconds
+ * @param localDateTime String in format YYYY-MM-DDThh:mm
+ * @returns Epoch time in milliseconds, or null if the input is falsy
+ */
+export function convertLocalDateTimeToEpochMillis(localDateTime: string): number | null {
+  if (!localDateTime) {
+    return null;
+  }
+  const [datePart, timePart] = localDateTime.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hours, minutes] = timePart.split(':').map(Number);
+  const localDate = new Date(year, month - 1, day, hours, minutes);
+  return localDate.getTime();
+}
+
+/**
+ * Formats epoch milliseconds to a local date-time string in format YYYY-MM-DDThh:mm
+ * @param timestamp Epoch time in milliseconds
+ * @returns Formatted date-time string, or empty string if the input is falsy
+ */
+export function formatDateTimeLocal(timestamp: number | null | undefined): string {
+  if (!timestamp) {
+    return '';
+  }
+  const date = new Date(timestamp);
+
+  // Format as YYYY-MM-DDThh:mm in local timezone
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}

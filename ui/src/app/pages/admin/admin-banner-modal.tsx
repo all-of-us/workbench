@@ -15,6 +15,7 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { convertLocalDateTimeToEpochMillis, formatDateTimeLocal, ONE_YEAR } from 'app/utils/dates';
 
 const styles = reactStyles({
   label: {
@@ -23,9 +24,10 @@ const styles = reactStyles({
   input: {
     color: colors.primary,
   },
+  formField: {
+    marginBottom: '1rem',
+  },
 });
-
-const ONE_YEAR = 365 * 24 * 60 * 60 * 1000;
 
 interface AdminBannerModalProps {
   banner: StatusAlert;
@@ -34,17 +36,25 @@ interface AdminBannerModalProps {
   onCreate: () => void;
 }
 
-// Expects a local date-time string in the format 'YYYY-MM-DDThh:mm' and returns the epoch milliseconds
-const convertLocalDateTimeToEpochMillis = (localDateTime: string) => {
-  if (!localDateTime) {
-    return null;
-  }
-  const [datePart, timePart] = localDateTime.split('T');
-  const [year, month, day] = datePart.split('-').map(Number);
-  const [hours, minutes] = timePart.split(':').map(Number);
-  const localDate = new Date(year, month - 1, day, hours, minutes);
-  return localDate.getTime();
-};
+// Form field component to reduce repetition
+interface FormFieldProps {
+  label: string;
+  children: React.ReactNode;
+  tooltip?: React.ReactNode;
+}
+
+const FormField: React.FC<FormFieldProps> = ({ label, children, tooltip }) => (
+  <div style={styles.formField}>
+    <label style={styles.label}>{label}</label>
+    {tooltip ? (
+      <TooltipTrigger content={tooltip} side='right'>
+        <div>{children}</div>
+      </TooltipTrigger>
+    ) : (
+      children
+    )}
+  </div>
+);
 
 export const AdminBannerModal = ({
   banner,
@@ -53,44 +63,41 @@ export const AdminBannerModal = ({
   onCreate,
 }: AdminBannerModalProps) => {
   const [isCreating, setIsCreating] = useState(false);
+  
+  const isBeforeLogin = banner.alertLocation === StatusAlertLocation.BEFORE_LOGIN;
+  
   const locationOptions = [
     { value: StatusAlertLocation.AFTER_LOGIN, label: 'After Login' },
     { value: StatusAlertLocation.BEFORE_LOGIN, label: 'Before Login' },
   ];
 
-  const isBeforeLogin =
-    banner.alertLocation === StatusAlertLocation.BEFORE_LOGIN;
-
-  // Define validation constraints
-  const constraints = useMemo(() => {
-    return {
-      title: {
-        presence: {
-          allowEmpty: false,
-          message: 'Please enter a banner title'
-        }
-      },
-      message: {
-        presence: {
-          allowEmpty: false,
-          message: 'Please enter a banner message'
-        }
-      },
-      startTimeEpochMillis: {
-        presence: {
-          allowEmpty: false,
-          message: 'Please enter a start time'
-        }
-      },
-      alertLocation: {
-        presence: {
-          message: 'Please select a banner location'
-        }
+  // Validation
+  const constraints = useMemo(() => ({
+    title: {
+      presence: {
+        allowEmpty: false,
+        message: 'Please enter a banner title'
       }
-    };
-  }, []);
+    },
+    message: {
+      presence: {
+        allowEmpty: false,
+        message: 'Please enter a banner message'
+      }
+    },
+    startTimeEpochMillis: {
+      presence: {
+        allowEmpty: false,
+        message: 'Please enter a start time'
+      }
+    },
+    alertLocation: {
+      presence: {
+        message: 'Please select a banner location'
+      }
+    }
+  }), []);
 
-  // Run validation and get error messages
   const getValidationErrors = (): string[] => {
     if (isCreating) {
       return ['Creating banner...'];
@@ -101,10 +108,7 @@ export const AdminBannerModal = ({
       return [];
     }
     
-    // Type assertion to help TypeScript understand this is a validation errors object
     const errors = validationResult as Record<string, string[]>;
-    
-    // Convert nested error arrays to a flat array
     const errorMessages: string[] = [];
     Object.keys(errors).forEach(key => {
       if (Array.isArray(errors[key])) {
@@ -117,6 +121,7 @@ export const AdminBannerModal = ({
 
   const errors: string[] = getValidationErrors();
   
+  // Event handlers
   const handleCreate = async () => {
     if (isCreating || errors.length > 0) {
       return;
@@ -127,6 +132,20 @@ export const AdminBannerModal = ({
     } finally {
       setIsCreating(false);
     }
+  };
+
+  const handleBannerChange = (field: keyof StatusAlert, value: any) => {
+    setBanner({ ...banner, [field]: value });
+  };
+
+  const handleLocationChange = (value: StatusAlertLocation) => {
+    setBanner({
+      ...banner,
+      title: value === StatusAlertLocation.AFTER_LOGIN 
+        ? '' 
+        : 'Scheduled Downtime Notice for the Researcher Workbench',
+      alertLocation: value,
+    });
   };
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,86 +180,50 @@ export const AdminBannerModal = ({
     });
   };
 
-  const formatDateTimeLocal = (timestamp: number | null | undefined) => {
-    if (!timestamp) {
-      return '';
-    }
-    const date = new Date(timestamp);
-
-    // Format as YYYY-MM-DDThh:mm in local timezone
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 because months are 0-indexed
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
   return (
     <Modal onRequestClose={onClose}>
       <ModalTitle>Create New Banner</ModalTitle>
       <ModalBody>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label}>Title</label>
-          <TooltipTrigger
-            content={
-              isBeforeLogin
-                ? '"Before Login" banner has a fixed headline.'
-                : null
-            }
-            side='right'
-          >
-            <div>
-              <TextInput
-                value={banner.title}
-                onChange={(value) => setBanner({ ...banner, title: value })}
-                placeholder='Enter banner title'
-                disabled={isBeforeLogin}
-                style={styles.input}
-              />
-            </div>
-          </TooltipTrigger>
-        </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label}>Message</label>
+        <FormField 
+          label="Title" 
+          tooltip={isBeforeLogin ? '"Before Login" banner has a fixed headline.' : null}
+        >
+          <TextInput
+            value={banner.title}
+            onChange={(value) => handleBannerChange('title', value)}
+            placeholder='Enter banner title'
+            disabled={isBeforeLogin}
+            style={styles.input}
+          />
+        </FormField>
+        
+        <FormField label="Message">
           <TextInput
             value={banner.message}
-            onChange={(value) => setBanner({ ...banner, message: value })}
+            onChange={(value) => handleBannerChange('message', value)}
             placeholder='Enter banner message'
             style={styles.input}
           />
-        </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label}>Link (Optional)</label>
+        </FormField>
+        
+        <FormField label="Link (Optional)">
           <TextInput
             value={banner.link}
-            onChange={(value) => setBanner({ ...banner, link: value })}
+            onChange={(value) => handleBannerChange('link', value)}
             placeholder='Enter banner link'
             style={styles.input}
           />
-        </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label}>Location</label>
+        </FormField>
+        
+        <FormField label="Location">
           <Select
             value={banner.alertLocation}
             options={locationOptions}
-            onChange={(value) =>
-              setBanner({
-                ...banner,
-                title:
-                  value === StatusAlertLocation.AFTER_LOGIN
-                    ? ''
-                    : 'Scheduled Downtime Notice for the Researcher Workbench',
-                alertLocation: value,
-              })
-            }
+            onChange={handleLocationChange}
           />
-        </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={styles.label} htmlFor='start-time'>
-            Start Time (Local)
-          </label>
+        </FormField>
+        
+        <FormField label="Start Time (Local)">
           <input
             id='start-time'
             type='datetime-local'
@@ -252,11 +235,9 @@ export const AdminBannerModal = ({
             onChange={handleStartTimeChange}
             style={styles.input}
           />
-        </div>
-        <div>
-          <label style={styles.label} htmlFor='end-time'>
-            End Time (Optional)
-          </label>
+        </FormField>
+        
+        <FormField label="End Time (Optional)">
           <input
             id='end-time'
             type='datetime-local'
@@ -264,10 +245,11 @@ export const AdminBannerModal = ({
             max={formatDateTimeLocal(Date.now() + ONE_YEAR)}
             value={formatDateTimeLocal(banner.endTimeEpochMillis)}
             onChange={handleEndTimeChange}
-            style={{ width: '100%' }}
+            style={styles.input}
           />
-        </div>
+        </FormField>
       </ModalBody>
+      
       <ModalFooter>
         <Button
           type='secondary'
