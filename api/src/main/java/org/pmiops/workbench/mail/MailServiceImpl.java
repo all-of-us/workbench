@@ -841,7 +841,10 @@ public class MailServiceImpl implements MailService {
         }
       }
     } catch (ApiException e) {
-      return new ImmutablePair<>(Status.API_ERROR, String.format("Code: %s | Response: %s | Exception: %s", e.getCode(), e.getResponseBody(), e));
+      return new ImmutablePair<>(
+          Status.API_ERROR,
+          String.format(
+              "Code: %s | Response: %s | Exception: %s", e.getCode(), e.getResponseBody(), e));
     } catch (Exception e) {
       return new ImmutablePair<>(Status.API_ERROR, e.toString());
     }
