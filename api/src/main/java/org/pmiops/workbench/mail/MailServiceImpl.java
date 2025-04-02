@@ -44,6 +44,7 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
+import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
@@ -839,6 +840,11 @@ public class MailServiceImpl implements MailService {
           return new ImmutablePair<>(Status.REJECTED, msgStatus.getRejectReason());
         }
       }
+    } catch (ApiException e) {
+      return new ImmutablePair<>(
+          Status.API_ERROR,
+          String.format(
+              "Code: %s | Response: %s | Exception: %s", e.getCode(), e.getResponseBody(), e));
     } catch (Exception e) {
       return new ImmutablePair<>(Status.API_ERROR, e.toString());
     }
