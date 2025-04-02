@@ -63,9 +63,8 @@ public class InitialCreditsBatchUpdateService {
   public void checkInitialCreditsUsage(List<Long> userIdList) {
     Set<String> googleProjects = workspaceDao.getWorkspaceGoogleProjectsForCreators(userIdList);
 
-    // Create Map Key: googleProject and value: cost
     Stopwatch stopwatch = stopwatchProvider.get().start();
-    Map<String, Double> userWorkspaceBQCosts =
+    Map<String, Double> userWorkspaceCosts =
         getAllWorkspaceCostsFromBQ().entrySet().stream()
             .filter(entry -> googleProjects.contains(entry.getKey()))
             .collect(
@@ -75,12 +74,12 @@ public class InitialCreditsBatchUpdateService {
     log.info(
         String.format(
             "checkInitialCreditsUsage: Filtered %d workspace cost entries from BigQuery in %s",
-            userWorkspaceBQCosts.size(), formatDurationPretty(elapsed)));
+            userWorkspaceCosts.size(), formatDurationPretty(elapsed)));
 
     Set<DbUser> dbUserSet =
         userIdList.stream().map(userDao::findUserByUserId).collect(Collectors.toSet());
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(dbUserSet, userWorkspaceBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(dbUserSet, userWorkspaceCosts);
   }
 
   private Map<String, Double> getAllWorkspaceCostsFromBQ() {
