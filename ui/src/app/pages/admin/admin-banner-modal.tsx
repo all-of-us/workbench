@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import validate from 'validate.js';
 
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
@@ -60,8 +61,64 @@ export const AdminBannerModal = ({
   const isBeforeLogin =
     banner.alertLocation === StatusAlertLocation.BEFORE_LOGIN;
 
-  const handleCreate = async () => {
+  // Define validation constraints
+  const constraints = useMemo(() => {
+    return {
+      title: {
+        presence: {
+          allowEmpty: false,
+          message: 'Please enter a banner title'
+        }
+      },
+      message: {
+        presence: {
+          allowEmpty: false,
+          message: 'Please enter a banner message'
+        }
+      },
+      startTimeEpochMillis: {
+        presence: {
+          allowEmpty: false,
+          message: 'Please enter a start time'
+        }
+      },
+      alertLocation: {
+        presence: {
+          message: 'Please select a banner location'
+        }
+      }
+    };
+  }, []);
+
+  // Run validation and get error messages
+  const getValidationErrors = (): string[] => {
     if (isCreating) {
+      return ['Creating banner...'];
+    }
+    
+    const validationResult = validate(banner, constraints, {fullMessages: false});
+    if (!validationResult) {
+      return [];
+    }
+    
+    // Type assertion to help TypeScript understand this is a validation errors object
+    const errors = validationResult as Record<string, string[]>;
+    
+    // Convert nested error arrays to a flat array
+    const errorMessages: string[] = [];
+    Object.keys(errors).forEach(key => {
+      if (Array.isArray(errors[key])) {
+        errorMessages.push(...errors[key]);
+      }
+    });
+    
+    return errorMessages;
+  };
+
+  const errors: string[] = getValidationErrors();
+  
+  const handleCreate = async () => {
+    if (isCreating || errors.length > 0) {
       return;
     }
     setIsCreating(true);
@@ -219,17 +276,25 @@ export const AdminBannerModal = ({
         >
           Cancel
         </Button>
-        <Button
-          onClick={handleCreate}
-          disabled={
-            !banner.title ||
-            !banner.message ||
-            !banner.alertLocation ||
-            isCreating
-          }
+        <TooltipTrigger
+          content={errors.length > 0 ? (
+            <div>
+              {errors.map((error, index) => (
+                <div key={index}>{error}</div>
+              ))}
+            </div>
+          ) : null}
+          side='top'
         >
-          Create Banner
-        </Button>
+          <div>
+            <Button
+              onClick={handleCreate}
+              disabled={errors.length > 0}
+            >
+              Create Banner
+            </Button>
+          </div>
+        </TooltipTrigger>
       </ModalFooter>
     </Modal>
   );
