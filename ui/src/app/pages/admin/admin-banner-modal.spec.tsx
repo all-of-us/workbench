@@ -2,6 +2,7 @@ import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MILLIS_PER_HOUR } from 'app/utils/dates';
 
 import {
   expectButtonElementDisabled,
@@ -10,8 +11,6 @@ import {
 } from 'testing/react-test-helpers';
 
 import { AdminBannerModal } from './admin-banner-modal';
-
-const ONE_HOUR = 1000 * 60 * 60;
 
 describe('AdminBannerModal', () => {
   const defaultBanner: StatusAlert = {
@@ -176,7 +175,7 @@ describe('AdminBannerModal', () => {
   it('should reset end time when start time is set to a time after the existing end time', async () => {
     const user = userEvent.setup();
     const startTime = new Date('2023-01-01T10:00:00.000Z');
-    const endTime = new Date(startTime.getTime() + ONE_HOUR);
+    const endTime = new Date(startTime.getTime() + MILLIS_PER_HOUR);
 
     const bannerWithDates: StatusAlert = {
       title: 'Test Title',
@@ -194,7 +193,7 @@ describe('AdminBannerModal', () => {
     // Find the start time input and set it to a time after the end time
     const startTimeInput = screen.getByLabelText('Start Time (Local)');
 
-    const newStartTime = new Date(endTime.getTime() + 24 + ONE_HOUR);
+    const newStartTime = new Date(endTime.getTime() + 24 + MILLIS_PER_HOUR);
     await user.click(startTimeInput);
     await user.paste(newStartTime.toISOString().slice(0, 16));
 
