@@ -4,10 +4,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.BigQueryUtils.tableRow;
 
 import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.FieldValue.Attribute;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.Schema;
@@ -106,23 +105,18 @@ public class InitialCreditsBatchUpdateServiceTest {
   private void mockGoogleProjectCost() {
     Schema s =
         Schema.of(
-            Field.of("id", LegacySQLTypeName.STRING), Field.of("cost", LegacySQLTypeName.NUMERIC));
+            Field.of("id", LegacySQLTypeName.STRING), Field.of("cost", LegacySQLTypeName.STRING));
 
     List<FieldValueList> tableRows =
         List.of(
-            bqRow("12", "0.013"),
-            bqRow("22", "1.123"),
-            bqRow("23", "6.5"),
-            bqRow("32", "0.34"),
-            bqRow("33", "0.9"));
+            tableRow("12", "0.013"),
+            tableRow("22", "1.123"),
+            tableRow("23", "6.5"),
+            tableRow("32", "0.34"),
+            tableRow("33", "0.9"));
 
     when(mockBigQueryService.executeQuery(any()))
         .thenReturn(BigQueryUtils.newTableResult(s, tableRows));
-  }
-
-  private FieldValueList bqRow(String id, String cost) {
-    return FieldValueList.of(
-        List.of(FieldValue.of(Attribute.PRIMITIVE, id), FieldValue.of(Attribute.PRIMITIVE, cost)));
   }
 
   private Map<String, Double> getUserCostMap() {
