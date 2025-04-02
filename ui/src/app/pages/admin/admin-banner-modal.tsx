@@ -28,7 +28,7 @@ const styles = reactStyles({
   input: {
     color: colors.primary,
   },
-  formField: {
+  modalField: {
     marginBottom: '1rem',
   },
 });
@@ -41,23 +41,18 @@ interface AdminBannerModalProps {
 }
 
 // Form field component to reduce repetition
-interface FormFieldProps {
+interface ModalFieldProps {
   label: string;
   children: React.ReactNode;
-  tooltip?: React.ReactNode;
   fieldId?: string;
 }
 
-const FormField: React.FC<FormFieldProps> = ({ label, children, tooltip, fieldId }) => (
-  <div style={styles.formField}>
-    <label style={styles.label} htmlFor={fieldId}>{label}</label>
-    {tooltip ? (
-      <TooltipTrigger content={tooltip} side='right'>
-        <div>{children}</div>
-      </TooltipTrigger>
-    ) : (
-      children
-    )}
+const ModalField = ({ label, children, fieldId }: ModalFieldProps) => (
+  <div style={styles.modalField}>
+    <label style={styles.label} htmlFor={fieldId}>
+      {label}
+    </label>
+    {children}
   </div>
 );
 
@@ -196,24 +191,29 @@ export const AdminBannerModal = ({
     <Modal onRequestClose={onClose}>
       <ModalTitle>Create New Banner</ModalTitle>
       <ModalBody>
-        <FormField
-          label='Title'
-          fieldId='banner-title'
-          tooltip={
-            isBeforeLogin ? '"Before Login" banner has a fixed headline.' : null
-          }
-        >
-          <TextInput
-            id='banner-title'
-            value={banner.title}
-            onChange={(value) => handleBannerChange('title', value)}
-            placeholder='Enter banner title'
-            disabled={isBeforeLogin}
-            style={styles.input}
-          />
-        </FormField>
+        <ModalField label='Title' fieldId='banner-title'>
+          <TooltipTrigger
+            content={
+              isBeforeLogin
+                ? '"Before Login" banner has a fixed headline.'
+                : null
+            }
+            side='right'
+          >
+            <div>
+              <TextInput
+                id='banner-title'
+                value={banner.title}
+                onChange={(value) => handleBannerChange('title', value)}
+                placeholder='Enter banner title'
+                disabled={isBeforeLogin}
+                style={styles.input}
+              />
+            </div>
+          </TooltipTrigger>
+        </ModalField>
 
-        <FormField label='Message' fieldId='banner-message'>
+        <ModalField label='Message' fieldId='banner-message'>
           <TextInput
             id='banner-message'
             value={banner.message}
@@ -221,9 +221,9 @@ export const AdminBannerModal = ({
             placeholder='Enter banner message'
             style={styles.input}
           />
-        </FormField>
+        </ModalField>
 
-        <FormField label='Link (Optional)' fieldId='banner-link'>
+        <ModalField label='Link (Optional)' fieldId='banner-link'>
           <TextInput
             id='banner-link'
             value={banner.link}
@@ -231,18 +231,18 @@ export const AdminBannerModal = ({
             placeholder='Enter banner link'
             style={styles.input}
           />
-        </FormField>
+        </ModalField>
 
-        <FormField label='Location' fieldId='banner-location'>
+        <ModalField label='Location' fieldId='banner-location'>
           <Select
             id='banner-location'
             value={banner.alertLocation}
             options={locationOptions}
             onChange={handleLocationChange}
           />
-        </FormField>
+        </ModalField>
 
-        <FormField label='Start Time (Local)' fieldId='start-time'>
+        <ModalField label='Start Time (Local)' fieldId='start-time'>
           <input
             id='start-time'
             type='datetime-local'
@@ -254,9 +254,9 @@ export const AdminBannerModal = ({
             onChange={handleStartTimeChange}
             style={styles.input}
           />
-        </FormField>
+        </ModalField>
 
-        <FormField label='End Time (Optional)' fieldId='end-time'>
+        <ModalField label='End Time (Optional)' fieldId='end-time'>
           <input
             id='end-time'
             type='datetime-local'
@@ -266,7 +266,7 @@ export const AdminBannerModal = ({
             onChange={handleEndTimeChange}
             style={styles.input}
           />
-        </FormField>
+        </ModalField>
       </ModalBody>
 
       <ModalFooter>
