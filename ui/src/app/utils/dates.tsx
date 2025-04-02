@@ -77,7 +77,9 @@ export const maybeToSingleDate = (
  * @param localDateTime String in format YYYY-MM-DDThh:mm
  * @returns Epoch time in milliseconds, or null if the input is falsy
  */
-export function convertLocalDateTimeToEpochMillis(localDateTime: string): number | null {
+export function convertLocalDateTimeToEpochMillis(
+  localDateTime: string
+): number | null {
   if (!localDateTime) {
     return null;
   }
@@ -93,7 +95,9 @@ export function convertLocalDateTimeToEpochMillis(localDateTime: string): number
  * @param timestamp Epoch time in milliseconds
  * @returns Formatted date-time string, or empty string if the input is falsy
  */
-export function formatDateTimeLocal(timestamp: number | null | undefined): string {
+export function formatDateTimeLocal(
+  timestamp: number | null | undefined
+): string {
   if (!timestamp) {
     return '';
   }
