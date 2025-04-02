@@ -45,11 +45,12 @@ interface FormFieldProps {
   label: string;
   children: React.ReactNode;
   tooltip?: React.ReactNode;
+  fieldId?: string;
 }
 
-const FormField: React.FC<FormFieldProps> = ({ label, children, tooltip }) => (
+const FormField: React.FC<FormFieldProps> = ({ label, children, tooltip, fieldId }) => (
   <div style={styles.formField}>
-    <label style={styles.label}>{label}</label>
+    <label style={styles.label} htmlFor={fieldId}>{label}</label>
     {tooltip ? (
       <TooltipTrigger content={tooltip} side='right'>
         <div>{children}</div>
@@ -197,11 +198,13 @@ export const AdminBannerModal = ({
       <ModalBody>
         <FormField
           label='Title'
+          fieldId='banner-title'
           tooltip={
             isBeforeLogin ? '"Before Login" banner has a fixed headline.' : null
           }
         >
           <TextInput
+            id='banner-title'
             value={banner.title}
             onChange={(value) => handleBannerChange('title', value)}
             placeholder='Enter banner title'
@@ -210,8 +213,9 @@ export const AdminBannerModal = ({
           />
         </FormField>
 
-        <FormField label='Message'>
+        <FormField label='Message' fieldId='banner-message'>
           <TextInput
+            id='banner-message'
             value={banner.message}
             onChange={(value) => handleBannerChange('message', value)}
             placeholder='Enter banner message'
@@ -219,8 +223,9 @@ export const AdminBannerModal = ({
           />
         </FormField>
 
-        <FormField label='Link (Optional)'>
+        <FormField label='Link (Optional)' fieldId='banner-link'>
           <TextInput
+            id='banner-link'
             value={banner.link}
             onChange={(value) => handleBannerChange('link', value)}
             placeholder='Enter banner link'
@@ -228,15 +233,16 @@ export const AdminBannerModal = ({
           />
         </FormField>
 
-        <FormField label='Location'>
+        <FormField label='Location' fieldId='banner-location'>
           <Select
+            id='banner-location'
             value={banner.alertLocation}
             options={locationOptions}
             onChange={handleLocationChange}
           />
         </FormField>
 
-        <FormField label='Start Time (Local)'>
+        <FormField label='Start Time (Local)' fieldId='start-time'>
           <input
             id='start-time'
             type='datetime-local'
@@ -250,7 +256,7 @@ export const AdminBannerModal = ({
           />
         </FormField>
 
-        <FormField label='End Time (Optional)'>
+        <FormField label='End Time (Optional)' fieldId='end-time'>
           <input
             id='end-time'
             type='datetime-local'
