@@ -9,7 +9,7 @@
     <addColumn tableName="status_alert">
       <!-- Time when alert should start being displayed -->
       <column name="start_time" type="datetime">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <!-- Time when alert should stop being displayed -->
       <column name="end_time" type="datetime">
@@ -17,9 +17,15 @@
       </column>
     </addColumn>
 
+    <!-- Backfill start_time with current timestamp for all existing rows -->
+    <sql>UPDATE status_alert SET start_time = NOW() WHERE start_time IS NULL</sql>
+
+    <!-- Now set start_time to not nullable after backfilling -->
+    <addNotNullConstraint tableName="status_alert" columnName="start_time" columnDataType="datetime"/>
+
     <comment>
       Added start_time and end_time columns to status_alert table to support time-limited alerts.
-      - start_time: When the alert should begin displaying
+      - start_time: When the alert should begin displaying (backfilled with current timestamp)
       - end_time: When the alert should stop displaying (null = no expiration)
     </comment>
   </changeSet>
