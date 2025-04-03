@@ -173,14 +173,8 @@ export const useRuntimeStatus = (
     // Additional status changes can be put here
     const resolutionCondition: (r: Runtime) => boolean = switchCase(
       runtimeStatusRequest,
-      [
-        RuntimeStatusRequest.DeleteRuntime,
-        () => (r) => r === null || r.status === RuntimeStatus.DELETED,
-      ],
-      [
-        RuntimeStatusRequest.DeleteRuntimeAndPD,
-        () => (r) => r === null || r.status === RuntimeStatus.DELETED,
-      ],
+      [RuntimeStatusRequest.DeleteRuntime, () => (r) => r === null],
+      [RuntimeStatusRequest.DeleteRuntimeAndPD, () => (r) => r === null],
       [
         RuntimeStatusRequest.DeletePD,
         () => (r) =>
