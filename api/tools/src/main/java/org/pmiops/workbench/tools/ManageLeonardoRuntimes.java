@@ -181,7 +181,7 @@ public class ManageLeonardoRuntimes {
     if (parts.length != 2) {
       System.err.printf(
           "given runtime ID '%s' is invalid, wanted format 'googleProject/runtimeName'%n",
-              runtimeId);
+          runtimeId);
       return;
     }
     String googleProject = parts[0];

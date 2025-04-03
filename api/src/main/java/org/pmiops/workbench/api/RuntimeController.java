@@ -86,15 +86,15 @@ public class RuntimeController implements RuntimeApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     String googleProject = dbWorkspace.getGoogleProject();
 
-      LeonardoGetRuntimeResponse leoRuntimeResponse =
-          leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
-      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
-        log.warning(
-            String.format(
-                "Observed Leonardo runtime with unexpected error status:\n%s",
-                formatRuntimeErrors(leoRuntimeResponse.getErrors())));
-      }
-      return ResponseEntity.ok(leonardoMapper.toApiRuntime(leoRuntimeResponse));
+    LeonardoGetRuntimeResponse leoRuntimeResponse =
+        leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
+    if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+      log.warning(
+          String.format(
+              "Observed Leonardo runtime with unexpected error status:\n%s",
+              formatRuntimeErrors(leoRuntimeResponse.getErrors())));
+    }
+    return ResponseEntity.ok(leonardoMapper.toApiRuntime(leoRuntimeResponse));
   }
 
   private String formatRuntimeErrors(@Nullable List<LeonardoClusterError> errors) {
