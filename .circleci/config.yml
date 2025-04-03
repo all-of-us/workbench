@@ -1055,6 +1055,20 @@ jobs:
           key: v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
 
+  successful-business-owner-approval:
+    executor: workbench-executor
+    steps:
+      - run:
+          name: "Confirms successful business owner approval"
+          command: echo "Business Owner approval was successful"
+
+  successful-security-approval:
+    executor: workbench-executor
+    steps:
+      - run:
+          name: "Confirms successful security approval"
+          command: echo "Security approval was successful"
+
 workflows:
   build-test-deploy:
     jobs:
@@ -1114,16 +1128,26 @@ workflows:
     jobs:
       - business-owner-approval:
           type: approval
-          context:
-          - "Business Owners"
       - security-approval:
           type: approval
           context:
           - "Security"
-      - playground:
+      - successful-business-owner-approval:
           requires:
           - business-owner-approval
+          context:
+          - "Business Owners"
+          <<: *filter-pr-branch
+      - successful-security-approval:
+          requires:
           - security-approval
+          context:
+          - "Security"
+          <<: *filter-pr-branch
+      - playground:
+          requires:
+          - successful-business-owner-approval
+          - successful-security-approval
           <<: *filter-pr-branch
   e2ev2:
     jobs:
