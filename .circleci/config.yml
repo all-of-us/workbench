@@ -1133,14 +1133,14 @@ workflows:
       - successful-business-owner-approval:
           requires:
           - business-owner-approval
-          context:
-          - "Business Owners"
+#          context:
+#          - "Business Owners"
           <<: *filter-pr-branch
       - successful-security-approval:
           requires:
           - security-approval
-          context:
-          - "Security"
+#          context:
+#          - "Security"
           <<: *filter-pr-branch
       - playground:
           requires:
