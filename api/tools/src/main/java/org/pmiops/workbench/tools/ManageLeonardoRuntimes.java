@@ -57,7 +57,7 @@ public class ManageLeonardoRuntimes {
 
   private static final Logger log = Logger.getLogger(ManageLeonardoRuntimes.class.getName());
 
-  private LeonardoMapper leonardoMapper;
+  private final LeonardoMapper leonardoMapper;
 
   public ManageLeonardoRuntimes(LeonardoMapper leonardoMapper) {
     this.leonardoMapper = leonardoMapper;
@@ -155,7 +155,7 @@ public class ManageLeonardoRuntimes {
             (c) -> {
               System.out.println(formatTabular(c));
             });
-        System.out.println(String.format("listed %d runtimes", runtimes.size()));
+        System.out.printf("listed %d runtimes%n", runtimes.size());
         break;
     }
   }
@@ -167,7 +167,7 @@ public class ManageLeonardoRuntimes {
 
     List<LeonardoListRuntimeResponse> runtimes;
     if (googleProjectId.isPresent()) {
-      runtimes = api.listRuntimesByProject(googleProjectId.get(), null, includeDeleted);
+      runtimes = api.listRuntimesByProject(googleProjectId.get(), null);
     } else {
       runtimes = api.listRuntimes(null, includeDeleted);
     }
@@ -179,10 +179,9 @@ public class ManageLeonardoRuntimes {
       throws IOException, ApiException {
     String[] parts = runtimeId.split("/");
     if (parts.length != 2) {
-      System.err.println(
-          String.format(
-              "given runtime ID '%s' is invalid, wanted format 'googleProject/runtimeName'",
-              runtimeId));
+      System.err.printf(
+          "given runtime ID '%s' is invalid, wanted format 'googleProject/runtimeName'%n",
+              runtimeId);
       return;
     }
     String googleProject = parts[0];
@@ -204,7 +203,7 @@ public class ManageLeonardoRuntimes {
         PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), LeonardoGetRuntimeResponse.class);
 
     System.out.println(PRETTY_GSON.toJson(resp.getData()));
-    System.out.printf("\n\nTo inspect logs in cloud storage, run the following:\n\n");
+    System.out.print("\n\nTo inspect logs in cloud storage, run the following:\n\n");
 
     System.out.printf(
         "    gsutil -i %s ls gs://%s/**\n",
@@ -229,10 +228,7 @@ public class ManageLeonardoRuntimes {
               if (oldest != null && createdDate.isAfter(oldest)) {
                 return false;
               }
-              if (!ids.isEmpty() && !ids.contains(runtimeId(r))) {
-                return false;
-              }
-              return true;
+              return ids.isEmpty() || ids.contains(runtimeId(r));
             })
         .forEachOrdered(
             (r) -> {
@@ -258,7 +254,7 @@ public class ManageLeonardoRuntimes {
           "failed to find/delete runtimes: {1}",
           new Object[] {Joiner.on(", ").join(remaining)});
     }
-    System.out.println(String.format("%sdeleted %d runtimes", dryMsg, deleted.get()));
+    System.out.printf("%sdeleted %d runtimes%n", dryMsg, deleted.get());
   }
 
   @Bean

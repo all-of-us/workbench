@@ -151,13 +151,6 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
-          name: includeDeleted
-          description: Optional filter that includes any runtimes with a Deleted status.
-          required: false
-          schema:
-            type: boolean
-            default: false
       responses:
         "200":
           description: List of runtimes
@@ -1577,7 +1570,6 @@ components:
         - Stopped
         - Starting
         - Deleting
-        - Deleted
         - Unknown
     InstanceStatus:
       type: string

@@ -30,7 +30,7 @@ public interface LeonardoApiClient {
   List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
   List<LeonardoListRuntimeResponse> listRuntimesByProject(
-      String googleProject, boolean includeDeleted);
+      String googleProject);
 
   /**
    * Creates a notebooks runtime owned by the current authenticated user.

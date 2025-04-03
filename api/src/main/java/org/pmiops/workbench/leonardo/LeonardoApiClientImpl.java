@@ -309,16 +309,16 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return legacyLeonardoRetryHandler.run(
         (context) ->
             runtimesApi.listRuntimesByProject(
-                googleProject, /* labels */ null, /* includeDeleted */ false));
+                googleProject, /* labels */ null));
   }
 
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesByProject(
-      String googleProject, boolean includeDeleted) {
+      String googleProject) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     return legacyLeonardoRetryHandler.run(
         (context) ->
-            runtimesApi.listRuntimesByProject(googleProject, /* labels */ null, includeDeleted));
+            runtimesApi.listRuntimesByProject(googleProject, /* labels */ null));
   }
 
   @Override

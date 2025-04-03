@@ -8920,7 +8920,6 @@ components:
       - Stopped
       - Starting
       - Deleting
-      - Deleted
       - Unknown
     AppStatus:
       type: string
