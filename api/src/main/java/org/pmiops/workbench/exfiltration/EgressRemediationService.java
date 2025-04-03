@@ -101,11 +101,11 @@ public abstract class EgressRemediationService {
     // Execute the action, if any
     escalation.ifPresent(
         e -> {
-          EgressRemediationAction action = getEgressRemediationAction(user, e, event);
+          EgressRemediationAction action = processEgressRemediationAction(user, e, event);
 
           if (egressPolicy != null && egressPolicy.enableJiraTicketing) {
             try {
-              logEvent(event, action);
+              logEventToJira(event, action);
             } catch (ApiException ex) {
               throw new ServerErrorException("failed to log event to Jira", ex);
             }
@@ -126,7 +126,7 @@ public abstract class EgressRemediationService {
   }
 
   @NotNull
-  private EgressRemediationAction getEgressRemediationAction(
+  private EgressRemediationAction processEgressRemediationAction(
       DbUser user, Escalation e, DbEgressEvent event) {
     if (ExfiltrationUtils.isVwbEgressEvent(event)) {
       if (e.disableUser != null) {
@@ -151,7 +151,7 @@ public abstract class EgressRemediationService {
   protected abstract void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException;
 
-  protected abstract void logEvent(DbEgressEvent event, EgressRemediationAction action)
+  protected abstract void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
       throws ApiException;
 
   protected abstract boolean shouldSkipEgressEvent(DbEgressEvent event);
@@ -167,7 +167,7 @@ public abstract class EgressRemediationService {
    * @return the count of logical egress incidents for this user for all time, including any events
    *     which are actively being processed
    */
-  protected int getEgressIncidentCountForUser(DbEgressEvent event, DbUser user) {
+  protected int getEgressIncidentCountForUser(DbEgressEvent unused, DbUser user) {
     List<DbEgressEvent> events =
         egressEventDao.findAllByUserAndStatusNotIn(
             user,
@@ -186,10 +186,7 @@ public abstract class EgressRemediationService {
 
     for (List<DbEgressEvent> partition : eventsByWorkspace) {
       List<Instant> sortedEventCreationTimes =
-          partition.stream()
-              .map(e -> e.getCreationTime().toInstant())
-              .sorted()
-              .collect(Collectors.toList());
+          partition.stream().map(e -> e.getCreationTime().toInstant()).sorted().toList();
 
       // Note: partitions cannot be empty, per above workspace partitioning.
       Instant lastGroupStart = sortedEventCreationTimes.get(0);
@@ -242,7 +239,7 @@ public abstract class EgressRemediationService {
     List<Escalation> descendingEscalations =
         policy.escalations.stream()
             .sorted(Comparator.comparingInt((Escalation e) -> e.afterIncidentCount).reversed())
-            .collect(Collectors.toList());
+            .toList();
     for (Escalation e : descendingEscalations) {
       // We validate against duplicate afterIncidentCount's upstream. If somehow we still have
       // duplicates at this point, we pick the last matching escalation, as the above sort is
