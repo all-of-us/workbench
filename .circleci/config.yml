@@ -1114,12 +1114,13 @@ workflows:
     jobs:
       - business-owner-approval:
           type: approval
-      - security-approval:
-          type: approval
-      - playground:
           context:
           - "Business Owners"
+      - security-approval:
+          type: approval
+          context:
           - "Security"
+      - playground:
           requires:
           - business-owner-approval
           - security-approval
