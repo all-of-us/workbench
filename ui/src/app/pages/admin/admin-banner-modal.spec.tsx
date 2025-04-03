@@ -2,7 +2,7 @@ import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MILLIS_PER_HOUR } from 'app/utils/dates';
+import { MILLIS_PER_DAY, MILLIS_PER_HOUR } from 'app/utils/dates';
 
 import {
   expectButtonElementDisabled,
@@ -193,7 +193,7 @@ describe('AdminBannerModal', () => {
     // Find the start time input and set it to a time after the end time
     const startTimeInput = screen.getByLabelText('Start Time (Local)');
 
-    const newStartTime = new Date(endTime.getTime() + 24 + MILLIS_PER_HOUR);
+    const newStartTime = new Date(endTime.getTime() + MILLIS_PER_DAY);
     await user.click(startTimeInput);
     await user.paste(newStartTime.toISOString().slice(0, 16));
 
