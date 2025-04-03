@@ -94,48 +94,8 @@ export const throwRuntimeNotFound = (
     ],
     // no current or deleted runtime exists, so we default to the general analysis runtime template
     [!currentRuntime, () => runtimePresets().generalAnalysis.runtimeTemplate],
-    // a current runtime exists and is not deleted, so we use it plus any preset overrides if appropriate
-    [
-      currentRuntime?.status !== RuntimeStatus.DELETED,
-      () => applyPresetOverride(currentRuntime),
-    ],
-    // this workspace previously contained a dataproc runtime, which is now deleted,
-    // so we use that previous configuration plus any preset overrides if appropriate
-    [
-      currentRuntime?.status === RuntimeStatus.DELETED &&
-        !!currentRuntime?.dataprocConfig,
-      () => applyPresetOverride(currentRuntime),
-    ],
-    // this workspace previously contained a GCE runtime, and a GCE PD exists, so we combine them
-    // Note: we don't store information about runtime<->PD associations with the runtime, with the following implications:
-    // - matching our assumption that only one runtime and PD exist, we assume that it's appropriate to associate them
-    // - the runtime has `gceConfig` populated and NOT `gceWithPdConfig`, regardless of whether it had a PD associated with it
-    [
-      currentRuntime?.status === RuntimeStatus.DELETED &&
-        !!currentRuntime?.gceConfig &&
-        !!gcePersistentDisk,
-      () =>
-        applyPresetOverride(
-          maybeWithPersistentDisk(currentRuntime, gcePersistentDisk)
-        ),
-    ],
-    // this workspace previously contained a GCE runtime, and no GCE PD exists, but we require a PD for all GCE runtimes,
-    // so we add one to the new configuration from the general analysis runtime template.
-    // Note: all deleted runtime configurations have `gceConfig` populated and NOT `gceWithPdConfig`,
-    // regardless of whether it had a PD associated with it when it existed
-    [
-      currentRuntime?.status === RuntimeStatus.DELETED &&
-        !!currentRuntime?.gceConfig &&
-        !gcePersistentDisk,
-      () =>
-        applyPresetOverride(
-          maybeWithPersistentDisk(
-            currentRuntime,
-            runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-              .persistentDisk
-          )
-        ),
-    ]
+    // a current runtime exists, so we use it plus any preset overrides if appropriate
+    [currentRuntime, () => applyPresetOverride(currentRuntime)]
   );
 
   throw new InitialRuntimeNotFoundError(defaultRuntime);
@@ -315,13 +275,6 @@ export class LeoRuntimeInitializer {
     return this.currentRuntime && this.resolutionCondition(this.currentRuntime);
   }
 
-  private isRuntimeDeleted(): boolean {
-    return (
-      this.currentRuntime &&
-      this.currentRuntime.status === RuntimeStatus.DELETED
-    );
-  }
-
   private isRuntimeStopped(): boolean {
     return (
       this.currentRuntime &&
@@ -458,7 +411,7 @@ export class LeoRuntimeInitializer {
       if (this.reachedResolution()) {
         // We've reached the goal - resolve the Promise.
         return this.resolve(this.currentRuntime);
-      } else if (this.currentRuntime === null || this.isRuntimeDeleted()) {
+      } else if (this.currentRuntime === null) {
         await this.createRuntime();
       } else if (this.isRuntimeStopped()) {
         await this.resumeRuntime();
