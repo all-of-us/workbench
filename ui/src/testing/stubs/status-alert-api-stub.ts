@@ -8,7 +8,10 @@ export class StatusAlertApiStub extends StatusAlertApi {
   private alerts: StatusAlert[] = [];
   private nextId = 1;
 
-  constructor(alertLocation?: StatusAlertLocation) {
+  constructor(
+    alertLocation?: StatusAlertLocation,
+    startTimeEpochMillis?: number
+  ) {
     super(undefined);
     // Initialize with a default alert if location is provided
     if (alertLocation) {
@@ -18,6 +21,7 @@ export class StatusAlertApiStub extends StatusAlertApi {
         message: 'This is a stub message.',
         link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         alertLocation,
+        startTimeEpochMillis: startTimeEpochMillis || Date.now(),
       });
     }
   }

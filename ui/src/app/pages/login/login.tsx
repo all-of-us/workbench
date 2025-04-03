@@ -10,6 +10,7 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { inRange } from 'app/utils/numbers';
 
 import { LoginBanner } from './login-banner';
 
@@ -63,7 +64,13 @@ export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
     <React.Fragment>
       {statusAlerts
         .filter(
-          (alert) => alert.alertLocation === StatusAlertLocation.BEFORE_LOGIN
+          (alert) =>
+            alert.alertLocation === StatusAlertLocation.BEFORE_LOGIN &&
+            inRange(
+              Date.now(),
+              alert.startTimeEpochMillis,
+              alert.endTimeEpochMillis
+            )
         )
         .map((alert, index) => (
           <LoginBanner

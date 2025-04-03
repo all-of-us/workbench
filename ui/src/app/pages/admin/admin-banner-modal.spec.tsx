@@ -1,7 +1,8 @@
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MILLIS_PER_DAY, MILLIS_PER_HOUR } from 'app/utils/dates';
 
 import {
   expectButtonElementDisabled,
@@ -17,6 +18,7 @@ describe('AdminBannerModal', () => {
     message: '',
     link: '',
     alertLocation: null,
+    startTimeEpochMillis: Date.now(),
   };
 
   const mockSetBanner = jest.fn();
@@ -59,6 +61,7 @@ describe('AdminBannerModal', () => {
       message: 'Test Message',
       link: '',
       alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
 
     renderModal(<AdminBannerModal {...defaultProps} banner={filledBanner} />);
@@ -68,7 +71,7 @@ describe('AdminBannerModal', () => {
   });
 
   it('should call onClose when Cancel button is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: 100 });
     renderModal(<AdminBannerModal {...defaultProps} />);
 
     await user.click(screen.getByText('Cancel'));
@@ -82,6 +85,7 @@ describe('AdminBannerModal', () => {
       message: 'Test Message',
       link: '',
       alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
 
     renderModal(<AdminBannerModal {...defaultProps} banner={filledBanner} />);
@@ -97,6 +101,7 @@ describe('AdminBannerModal', () => {
       message: '',
       link: '',
       alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
 
     renderModal(
@@ -121,6 +126,7 @@ describe('AdminBannerModal', () => {
       message: 'Test Message',
       link: '',
       alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
     renderModal(<AdminBannerModal {...defaultProps} banner={filledBanner} />);
 
@@ -145,6 +151,7 @@ describe('AdminBannerModal', () => {
       message: '',
       link: '',
       alertLocation: StatusAlertLocation.BEFORE_LOGIN,
+      startTimeEpochMillis: Date.now(),
     };
 
     renderModal(
@@ -163,5 +170,40 @@ describe('AdminBannerModal', () => {
         alertLocation: StatusAlertLocation.AFTER_LOGIN,
       })
     );
+  });
+
+  it('should reset end time when start time is set to a time after the existing end time', async () => {
+    const user = userEvent.setup();
+    const startTime = new Date('2023-01-01T10:00:00.000Z');
+    const endTime = new Date(startTime.getTime() + MILLIS_PER_HOUR);
+
+    const bannerWithDates: StatusAlert = {
+      title: 'Test Title',
+      message: 'Test Message',
+      link: '',
+      alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: null,
+      endTimeEpochMillis: endTime.getTime(),
+    };
+
+    renderModal(
+      <AdminBannerModal {...defaultProps} banner={bannerWithDates} />
+    );
+
+    // Find the start time input and set it to a time after the end time
+    const startTimeInput = screen.getByLabelText('Start Time (Local)');
+
+    const newStartTime = new Date(endTime.getTime() + MILLIS_PER_DAY);
+    await user.click(startTimeInput);
+    await user.paste(newStartTime.toISOString().slice(0, 16));
+
+    // Verify end time was reset
+    await waitFor(() => {
+      expect(mockSetBanner).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endTimeEpochMillis: null,
+        })
+      );
+    });
   });
 });
