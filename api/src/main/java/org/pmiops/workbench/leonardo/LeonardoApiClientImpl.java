@@ -307,9 +307,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     return legacyLeonardoRetryHandler.run(
-        (context) ->
-            runtimesApi.listRuntimesByProject(
-                googleProject, /* labels */ null));
+        (context) -> runtimesApi.listRuntimesByProject(googleProject, /* labels */ null));
   }
 
   @Override
