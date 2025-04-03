@@ -95,7 +95,7 @@ export const throwRuntimeNotFound = (
     // no current or deleted runtime exists, so we default to the general analysis runtime template
     [!currentRuntime, () => runtimePresets().generalAnalysis.runtimeTemplate],
     // a current runtime exists, so we use it plus any preset overrides if appropriate
-    [currentRuntime, () => applyPresetOverride(currentRuntime)]
+    [!!currentRuntime, () => applyPresetOverride(currentRuntime)]
   );
 
   throw new InitialRuntimeNotFoundError(defaultRuntime);
