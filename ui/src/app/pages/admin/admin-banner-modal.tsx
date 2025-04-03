@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import validate from 'validate.js';
 
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
