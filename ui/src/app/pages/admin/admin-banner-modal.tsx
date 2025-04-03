@@ -56,6 +56,32 @@ const ModalField = ({ label, children, fieldId }: ModalFieldProps) => (
   </div>
 );
 
+const BANNER_VALIDATION_CONSTRAINTS = {
+  title: {
+    presence: {
+      allowEmpty: false,
+      message: 'Please enter a banner title',
+    },
+  },
+  message: {
+    presence: {
+      allowEmpty: false,
+      message: 'Please enter a banner message',
+    },
+  },
+  startTimeEpochMillis: {
+    presence: {
+      allowEmpty: false,
+      message: 'Please enter a start time',
+    },
+  },
+  alertLocation: {
+    presence: {
+      message: 'Please select a banner location',
+    },
+  },
+};
+
 export const AdminBannerModal = ({
   banner,
   setBanner,
@@ -72,42 +98,12 @@ export const AdminBannerModal = ({
     { value: StatusAlertLocation.BEFORE_LOGIN, label: 'Before Login' },
   ];
 
-  // Validation
-  const constraints = useMemo(
-    () => ({
-      title: {
-        presence: {
-          allowEmpty: false,
-          message: 'Please enter a banner title',
-        },
-      },
-      message: {
-        presence: {
-          allowEmpty: false,
-          message: 'Please enter a banner message',
-        },
-      },
-      startTimeEpochMillis: {
-        presence: {
-          allowEmpty: false,
-          message: 'Please enter a start time',
-        },
-      },
-      alertLocation: {
-        presence: {
-          message: 'Please select a banner location',
-        },
-      },
-    }),
-    []
-  );
-
   const getValidationErrors = (): string[] => {
     if (isCreating) {
       return ['Creating banner...'];
     }
 
-    const validationResult = validate(banner, constraints, {
+    const validationResult = validate(banner, BANNER_VALIDATION_CONSTRAINTS, {
       fullMessages: false,
     });
     if (!validationResult) {
