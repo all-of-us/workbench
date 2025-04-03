@@ -1056,14 +1056,16 @@ jobs:
 
 
   successful-business-owner-approval:
-    executor: workbench-executor
+    machine:
+      image: default # latest stable version
     steps:
       - run:
           name: "Confirms successful business owner approval"
           command: echo "Business Owner approval was successful"
 
   successful-security-approval:
-    executor: workbench-executor
+    machine:
+      image: default # latest stable version
     steps:
       - run:
           name: "Confirms successful security approval"
