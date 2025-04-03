@@ -313,15 +313,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListRuntimeResponse> listRuntimesByProject(
-      String googleProject) {
-    RuntimesApi runtimesApi = runtimesApiProvider.get();
-    return legacyLeonardoRetryHandler.run(
-        (context) ->
-            runtimesApi.listRuntimesByProject(googleProject, /* labels */ null));
-  }
-
-  @Override
   public void deleteRuntime(String googleProject, String runtimeName, Boolean deleteDisk) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     legacyLeonardoRetryHandler.run(
@@ -415,7 +406,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   }
                   return true;
                 })
-            .collect(Collectors.toList());
+            .toList();
     if (results.contains(false)) {
       throw new ServerErrorException("failed to stop all user runtimes, see logs for details");
     }
@@ -779,7 +770,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   }
                   return true;
                 })
-            .collect(Collectors.toList());
+            .toList();
     if (results.contains(false)) {
       throw new ServerErrorException("failed to stop all user runtimes, see logs for details");
     }
