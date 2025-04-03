@@ -1130,8 +1130,6 @@ workflows:
           type: approval
       - security-approval:
           type: approval
-          context:
-          - "Security"
       - successful-business-owner-approval:
           requires:
           - business-owner-approval
