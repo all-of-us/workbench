@@ -15,9 +15,13 @@ describe('inRange', () => {
   it('should handle undefined bounds properly', () => {
     expect(inRange(5)).toBe(true); // No bounds specified, should always be true
     expect(inRange(5, 1)).toBe(true); // Only lower bound specified
+    expect(inRange(1, 5)).toBe(false); // Only lower bound
     expect(inRange(5, undefined, 10)).toBe(true); // Only upper bound specified
+    expect(inRange(15, undefined, 10)).toBe(false); // Only upper bound specified
     expect(inRange(-100, undefined, 10)).toBe(true); // Only upper bound specified, negative value
-    expect(inRange(100, 1, undefined)).toBe(true); // Only lower bound specified, large value
+    expect(inRange(-100, undefined, -210)).toBe(false); // Only upper bound specified, negative value
+    expect(inRange(100, 1, undefined)).toBe(true); // Only lower bound specified
+    expect(inRange(-3, 2, undefined)).toBe(false); // Only lower bound specified
   });
 
   it('should handle edge cases with bounds', () => {
