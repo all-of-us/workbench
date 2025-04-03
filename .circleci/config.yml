@@ -743,7 +743,7 @@ jobs:
                   {
                     "content": [
                       {
-                        "text": "Business Owner - '"${BUSINESS_APPROVER_NAME}"'",
+                        "text": "Business Owner - '"${BUSINESS_APPROVER_NAME:-$BUSINESS_APPROVER_LOGIN}"'",
                         "type": "text"
                       }
                     ],
@@ -752,7 +752,7 @@ jobs:
                   {
                     "content": [
                       {
-                        "text": "Security - '"${SECURITY_APPROVER_NAME}"'",
+                        "text": "Security - '"${SECURITY_APPROVER_NAME:-SECURITY_APPROVER_LOGIN}"'",
                         "type": "text"
                       }
                     ],
