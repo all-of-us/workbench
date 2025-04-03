@@ -7,8 +7,6 @@ import { isAbortError, reportError } from 'app/utils/errors';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import { runtimeDiskStore, runtimeStore } from 'app/utils/stores';
 
-import { maybeWithPersistentDisk } from './analysis-config';
-
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
 const DEFAULT_OVERALL_TIMEOUT = 1000 * 60 * 20;
