@@ -117,20 +117,26 @@ public class InitialCreditsService {
             .map(l -> Long.toString(l))
             .collect(Collectors.joining(","));
     logger.info(String.format("Checking billing usage for user IDs: %s ", userIdsAsString));
-    // Current cost in DB
-    List<WorkspaceCostView> allCostsInDbForUsers = getAllCostsInDbForUsers(users);
+    // Current cost in DB for those workspaces which have not been "recently" updated, as defined by
+    // a config value.  This guards against excessive updating of workspaces.
+    List<WorkspaceCostView> dbCostsForNotRecentlyUpdatedWorkspaces =
+        getNotRecentlyUpdatedDbCostsForUsers(users);
 
-    final Map<String, Long> workspaceByProject = getWorkspaceByProjectCache(allCostsInDbForUsers);
+    final Map<String, Long> workspaceByProject =
+        getWorkspaceByProjectCache(dbCostsForNotRecentlyUpdatedWorkspaces);
     if (workspaceByProject.isEmpty()) {
       logger.info("No workspaces require updates");
       return;
     }
-    updateInitialCreditsUsageInDb(allCostsInDbForUsers, liveCostsInBQ, workspaceByProject);
+    updateInitialCreditsUsageInDb(
+        dbCostsForNotRecentlyUpdatedWorkspaces, liveCostsInBQ, workspaceByProject);
 
     // Cache cost in DB by creator
-    final Map<Long, Double> dbCostByCreator = getDbCostByCreatorCache(allCostsInDbForUsers);
+    final Map<Long, Double> dbCostByCreator =
+        getDbCostByCreatorCache(dbCostsForNotRecentlyUpdatedWorkspaces);
     // check cost thresholds for the relevant users
-    final Map<Long, Long> creatorByWorkspace = getCreatorByWorkspaceCache(allCostsInDbForUsers);
+    final Map<Long, Long> creatorByWorkspace =
+        getCreatorByWorkspaceCache(dbCostsForNotRecentlyUpdatedWorkspaces);
     // Cache cost in BQ by creator
     final Map<Long, Double> liveCostByCreator =
         getLiveCostByCreatorCache(liveCostsInBQ, workspaceByProject, creatorByWorkspace);
@@ -499,12 +505,9 @@ public class InitialCreditsService {
   }
 
   @NotNull
-  private List<WorkspaceCostView> getAllCostsInDbForUsers(Set<DbUser> users) {
+  private List<WorkspaceCostView> getNotRecentlyUpdatedDbCostsForUsers(Set<DbUser> users) {
     List<WorkspaceCostView> allCostsInDbForUsers = workspaceDao.getWorkspaceCostViews(users);
-
-    allCostsInDbForUsers =
-        findWorkspaceInitialCreditsUsagesThatWereNotRecentlyUpdated(allCostsInDbForUsers);
-    return allCostsInDbForUsers;
+    return findWorkspaceInitialCreditsUsagesThatWereNotRecentlyUpdated(allCostsInDbForUsers);
   }
 
   private void setAllToUnexhausted(final DbUser user) {
