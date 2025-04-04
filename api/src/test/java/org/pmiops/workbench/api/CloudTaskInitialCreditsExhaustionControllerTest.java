@@ -594,7 +594,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    final DbWorkspace InitialCreditsWorkspace =
+    final DbWorkspace initialCreditsWorkspace =
         createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
     final DbWorkspace userAccountWorkspace =
         new DbWorkspace()
@@ -611,7 +611,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
-    assertThat(InitialCreditsWorkspace.isInitialCreditsExhausted()).isEqualTo(true);
+    assertThat(initialCreditsWorkspace.isInitialCreditsExhausted()).isEqualTo(true);
 
     final DbWorkspace retrievedWorkspace =
         workspaceDao.findById(userAccountWorkspace.getWorkspaceId()).get();
