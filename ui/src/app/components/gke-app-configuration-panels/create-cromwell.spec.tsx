@@ -22,15 +22,15 @@ import { CommonCreateGkeAppProps } from './create-gke-app';
 // tests for behavior specific to Cromwell.  For behavior common to all GKE Apps, see create-gke-app.spec
 describe(CreateCromwell.name, () => {
   const onClose = jest.fn();
-  const freeTierBillingAccountId = 'freetier';
+  const initialCreditsBillingAccountId = 'initial-credits';
 
   const defaultProps: CommonCreateGkeAppProps = {
     onClose,
-    creatorFreeCreditsRemaining: null,
+    creatorInitialCreditsRemaining: null,
     workspace: {
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,
-      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     },
     profileState: {
@@ -57,8 +57,8 @@ describe(CreateCromwell.name, () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        freeTierBillingAccountId: freeTierBillingAccountId,
-        defaultFreeCreditsDollarLimit: 100.0,
+        initialCreditsBillingAccountId,
+        defaultInitialCreditsDollarLimit: 100.0,
         gsuiteDomain: '',
       },
     });

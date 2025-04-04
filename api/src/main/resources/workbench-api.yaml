@@ -7137,8 +7137,12 @@ components:
           default: false
         defaultFreeCreditsDollarLimit:
           type: number
-          description: The default dollar amount of free credits allotted to each
-            user
+          description: DEPRECATED in favor of defaultInitialCreditsDollarLimit.
+            The default dollar amount of initial credits allotted to each user
+          format: double
+        defaultInitialCreditsDollarLimit:
+          type: number
+          description: The default dollar amount of initial credits allotted to each user
           format: double
         enableEventDateModifier:
           type: boolean
@@ -7173,7 +7177,11 @@ components:
           description: The URL that can sign out RAS login session.
         freeTierBillingAccountId:
           type: string
-          description: The free tier billing account id
+          description: DEPRECATED in favor of initialCreditsBillingAccountId.
+            The initial credits billing account id
+        initialCreditsBillingAccountId:
+          type: string
+          description: The initial credits billing account id
         accessModules:
           type: array
           items:

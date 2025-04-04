@@ -163,7 +163,7 @@ const diskSizeValidatorWithMessage = (
 
 interface ErrorsWarningsProps {
   usingInitialCredits: boolean;
-  creatorFreeCreditsRemaining?: number;
+  creatorInitialCreditsRemaining?: number;
   analysisConfig: AnalysisConfig;
 }
 interface ErrorsWarningsResult {
@@ -172,7 +172,7 @@ interface ErrorsWarningsResult {
 }
 export const getErrorsAndWarnings = ({
   usingInitialCredits,
-  creatorFreeCreditsRemaining = 0,
+  creatorInitialCreditsRemaining = 0,
   analysisConfig,
 }: ErrorsWarningsProps): ErrorsWarningsResult => {
   const costErrorsAsWarnings =
@@ -182,8 +182,8 @@ export const getErrorsAndWarnings = ({
     // use. Allow them to provision a larger runtime (still warn them). Block them if they get below
     // the default amount of free credits because (1) this can result in overspend and (2) we have
     // easy access to remaining credits, and not the creator's quota.
-    creatorFreeCreditsRemaining >
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit;
+    creatorInitialCreditsRemaining >
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit;
 
   const runningCostValidatorWithMessage = () => {
     const maxRunningCost = usingInitialCredits ? 25 : 150;
@@ -256,7 +256,7 @@ export const getErrorsAndWarnings = ({
 export interface RuntimeConfigurationPanelProps {
   onClose?: () => void;
   initialPanelContent?: PanelContent;
-  creatorFreeCreditsRemaining?: number;
+  creatorInitialCreditsRemaining?: number;
   profileState: ProfileStore;
 }
 export const RuntimeConfigurationPanel = fp.flow(
@@ -270,7 +270,7 @@ export const RuntimeConfigurationPanel = fp.flow(
     profileState: { profile },
     onClose = () => {},
     initialPanelContent,
-    creatorFreeCreditsRemaining,
+    creatorInitialCreditsRemaining,
   }: RuntimeConfigurationPanelProps &
     WithCdrVersions &
     WithCurrentWorkspace) => {
@@ -331,7 +331,7 @@ export const RuntimeConfigurationPanel = fp.flow(
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
       {
         usingInitialCredits: isUsingInitialCredits(workspace),
-        creatorFreeCreditsRemaining,
+        creatorInitialCreditsRemaining,
         analysisConfig,
       }
     );
@@ -412,7 +412,7 @@ export const RuntimeConfigurationPanel = fp.flow(
               <CreatePanel
                 {...{
                   analysisConfig,
-                  creatorFreeCreditsRemaining,
+                  creatorInitialCreditsRemaining,
                   onClose,
                   profile,
                   requestAnalysisConfig,
@@ -503,7 +503,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                 {...{
                   analysisConfig,
                   attachedPdExists,
-                  creatorFreeCreditsRemaining,
+                  creatorInitialCreditsRemaining,
                   currentRuntime,
                   environmentChanged,
                   errorMessageContent,

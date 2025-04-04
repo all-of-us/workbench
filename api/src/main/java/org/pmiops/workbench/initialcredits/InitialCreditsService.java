@@ -164,7 +164,7 @@ public class InitialCreditsService {
    */
   private Set<DbUser> filterUsersHigherThanTheLowestThreshold(
       Set<DbUser> users, final Map<Long, Double> liveCostByCreator) {
-    return workbenchConfigProvider.get().billing.freeTierCostAlertThresholds.stream()
+    return workbenchConfigProvider.get().billing.initialCreditsCostAlertThresholds.stream()
         .min(Comparator.naturalOrder())
         .map(
             lowestThreshold ->
@@ -217,7 +217,7 @@ public class InitialCreditsService {
    */
   public double getUserInitialCreditsLimit(DbUser user) {
     return CostComparisonUtils.getUserInitialCreditsLimit(
-        user, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
+        user, workbenchConfigProvider.get().billing.defaultInitialCreditsDollarLimit);
   }
 
   /**
@@ -241,7 +241,7 @@ public class InitialCreditsService {
         && (previousLimitMaybe != null
             || CostComparisonUtils.costsDiffer(
                 newDollarLimit,
-                workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit))) {
+                workbenchConfigProvider.get().billing.defaultInitialCreditsDollarLimit))) {
 
       // TODO: prevent setting this limit directly except in this method?
       user = userDao.save(user.setInitialCreditsLimitOverride(newDollarLimit));
@@ -576,7 +576,7 @@ public class InitialCreditsService {
                                         < Duration.ofDays(
                                                 workbenchConfigProvider.get()
                                                     .billing
-                                                    .numberOfDaysToConsiderForFreeTierUsageUpdate)
+                                                    .numberOfDaysToConsiderForInitialCreditsUsageUpdate)
                                             .toMillis()))))
             .toList();
 
@@ -642,11 +642,12 @@ public class InitialCreditsService {
 
   private boolean costAboveLimit(final DbUser user, final double currentCost) {
     return CostComparisonUtils.costAboveLimit(
-        user, currentCost, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
+        user, currentCost, workbenchConfigProvider.get().billing.defaultInitialCreditsDollarLimit);
   }
 
   private Integer getMinutesBeforeLastInitialCreditsJob() {
-    return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob)
+    return Optional.ofNullable(
+            workbenchConfigProvider.get().billing.minutesBeforeLastInitialCreditsJob)
         .orElse(120);
   }
 
