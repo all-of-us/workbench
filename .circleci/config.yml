@@ -706,6 +706,13 @@ jobs:
               BUSINESS_LOGIN=$(echo $BUSINESS_USER | jq -r '.login')
             
               echo "Business approved by: $BUSINESS_NAME ($BUSINESS_LOGIN)"
+              if [ -z "${BUSINESS_NAME}" ]; then
+                echo "BUSINESS_NAME is unset or empty (null)"
+              elif [ "${BUSINESS_NAME}" = "null" ]; then
+                echo "BUSINESS_NAME is the string 'null'"
+              else
+                echo "BUSINESS_NAME has a value: ${BUSINESS_NAME}"
+              fi
               echo "export BUSINESS_APPROVER_NAME=\"$BUSINESS_NAME\"" >> $BASH_ENV
               echo "export BUSINESS_APPROVER_LOGIN=\"$BUSINESS_LOGIN\"" >> $BASH_ENV
             else
