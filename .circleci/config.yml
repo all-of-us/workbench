@@ -875,6 +875,12 @@ jobs:
               --promote \
               --auth-token $TANAGRA_DEPLOY_TOKEN
 
+  deploy-to-preprod:
+    executor: workbench-executor
+    resource_class: large
+    steps:
+    - deploy-to-preprod-command
+
   deploy-to-stable:
     executor: workbench-executor
     resource_class: large
