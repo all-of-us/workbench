@@ -693,11 +693,25 @@ jobs:
                 {
                   "content": [
                     {
-                      "text": "",
+                      "type": "mention",
+                      "attrs": {
+                        "id": "61f82f70f5f5b80070c68c8c",
+                        "text": "Eric Rollins"
+                      }
+                    },
+                    {
+                      "text": " or ",
                       "type": "text"
                     }
                   ],
                   "type": "paragraph"
+                },
+                {
+                      "type": "mention",
+                      "attrs": {
+                        "id": "61f82f70f5f5b80070c68c8c",
+                        "text": "Eric Rollins"
+                      }
                 },
                 {
                   "content": [
