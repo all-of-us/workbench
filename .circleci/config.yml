@@ -756,6 +756,8 @@ jobs:
                 {
                   "content": [
                     {
+  
+                      "marks": [{type: "link", attrs: {href: "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'"}}]
                       "text": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'",
                       "type": "text"
                     }
