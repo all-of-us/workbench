@@ -686,7 +686,7 @@ jobs:
               echo "Security User: $SECURITY_USER"
             
               SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name // .login')
-              echo "export SECURITY_APPROVER=\"$SECURITY_NAME\"" >> $
+              echo "export SECURITY_APPROVER=\"$SECURITY_NAME\"" >> $BASH_ENV
               echo "Security approved by: $SECURITY_NAME"
             else
               echo "No security approver found or information unavailable"
