@@ -747,24 +747,12 @@ jobs:
                 {
                   "content": [
                     {
-                      "type": "mention",
-                      "attrs": {
-                        "id": "61f82f70f5f5b80070c68c8c",
-                        "text": "Stu"
-                      }
-                    }
-                  ],
-                  "type": "paragraph"
-                },
-                {
-                  "content": [
-                    {
-                      "text": "",
+                      "text": "Please visit the link below to approve the release:",
                       "type": "text"
                     }
                   ],
                   "type": "paragraph"
-                }
+                },
               ],
               "type": "doc",
               "version": 1
