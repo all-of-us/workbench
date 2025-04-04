@@ -1297,34 +1297,36 @@ workflows:
           requires:
             - deploy-to-staging
       - ask-for-approvals:
-          <<: *filter-pr-branch
+          <<: *filter-release-tags
           requires:
             - deploy-to-stable
       - business-owner-approval:
+          <<: *filter-release-tags
           type: approval
           requires:
-          - ask-for-approvals
+            - ask-for-approvals
       - security-approval:
+          <<: *filter-release-tags
           type: approval
           requires:
-          - ask-for-approvals
+            - ask-for-approvals
       - successful-business-owner-approval:
           requires:
           - business-owner-approval
           context:
           - "Business Owners"
-          <<: *filter-pr-branch
+          <<: *filter-release-tags
       - successful-security-approval:
           requires:
           - security-approval
           context:
           - "Security"
-          <<: *filter-pr-branch
+          <<: *filter-release-tags
       - document-approvals:
           requires:
           - successful-business-owner-approval
           - successful-security-approval
-          <<: *filter-pr-branch
+          <<: *filter-release-tags
       - deploy-to-preprod:
           <<: *filter-release-tags
           requires:
