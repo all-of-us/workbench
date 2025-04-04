@@ -683,14 +683,11 @@ jobs:
               SECURITY_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
                 "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
             
-            echo "Security User: $SECURITY_USER"
+              echo "Security User: $SECURITY_USER"
             
-              SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name')
-              SECURITY_LOGIN=$(echo $SECURITY_USER | jq -r '.login')
-            
-              echo "Security approved by: $SECURITY_NAME ($SECURITY_LOGIN)"
-              echo "export SECURITY_APPROVER_NAME=\"$SECURITY_NAME\"" >> $BASH_ENV
-              echo "export SECURITY_APPROVER_LOGIN=\"$SECURITY_LOGIN\"" >> $BASH_ENV
+              SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name // .login')
+              echo "export SECURITY_APPROVER=\"$SECURITY_NAME\"" >> $
+              echo "Security approved by: $SECURITY_NAME"
             else
               echo "No security approver found or information unavailable"
             fi
@@ -700,13 +697,10 @@ jobs:
               BUSINESS_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
                 "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
             
-            echo "Security User: $BUSINESS_USER"
+              echo "Business Owner User: $BUSINESS_USER"
               BUSINESS_NAME=$(echo $BUSINESS_USER | jq -r '.name // .login')
-
-            
-              
               echo "export BUSINESS_APPROVER=\"$BUSINESS_NAME\"" >> $BASH_ENV
-              echo "Business approved by: $BUSINESS_NAME ($BUSINESS_LOGIN)"
+              echo "Business approved by: $BUSINESS_NAME"
             else
               echo "No business approver found or information unavailable"
             fi
@@ -751,7 +745,7 @@ jobs:
                   {
                     "content": [
                       {
-                        "text": "Security - '"${SECURITY_APPROVER_NAME:-SECURITY_APPROVER_LOGIN}"'",
+                        "text": "Security - '"${SECURITY_APPROVER}"'",
                         "type": "text"
                       }
                     ],
