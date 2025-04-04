@@ -657,6 +657,15 @@ jobs:
           command: |
             echo Hello Circle!!
 
+  ask-for-approval:
+    machine:
+      image: default # latest stable version
+    steps:
+    - run:
+        name: Echo
+        command: |
+          echo Could I have your approval please?
+
   document-approvals:
     machine:
       image: default # latest stable version
@@ -1139,6 +1148,8 @@ workflows:
   deployment-approvals:
     jobs:
     - playground:
+        <<: *filter-pr-branch
+    - ask-for-approval:
         <<: *filter-pr-branch
     - business-owner-approval:
         type: approval
