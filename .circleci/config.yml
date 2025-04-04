@@ -1129,9 +1129,6 @@ workflows:
     jobs:
       - playground:
           <<: *filter-pr-branch
-          requires:
-            - api-unit-test
-            - ui-unit-test
       - business-owner-approval:
           type: approval
       - security-approval:
