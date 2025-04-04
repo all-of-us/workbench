@@ -23,9 +23,6 @@ public interface WorkbenchConfigMapper {
       target = "publicApiKeyForErrorReports",
       source = "config.server.publicApiKeyForErrorReports")
   @Mapping(
-      target = "defaultFreeCreditsDollarLimit",
-      source = "config.billing.defaultInitialCreditsDollarLimit")
-  @Mapping(
       target = "defaultInitialCreditsDollarLimit",
       source = "config.billing.defaultInitialCreditsDollarLimit")
   @Mapping(target = "enableComplianceTraining", source = "config.access.enableComplianceTraining")
@@ -44,7 +41,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
   @Mapping(target = "tanagraBaseUrl", source = "config.tanagra.baseUrl")
-  @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "initialCreditsBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
