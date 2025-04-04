@@ -656,106 +656,112 @@ jobs:
           name: Echo
           command: |
             echo Hello Circle!!
-      - run:
-          name: Get Multiple Approvers
-          command: |
-            # Get all jobs in the workflow
-            JOBS_RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
-              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
-            
-            echo "Jobs Response: $JOBS_RESPONSE"
-            
-            # Extract security approver ID
-            SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
-              select(.name=="security-approval" and .type=="approval" and .status=="success") | 
-              .approved_by')
-            
-            # Extract business owner approver ID
-            BUSINESS_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
-              select(.name=="business-owner-approval" and .type=="approval" and .status=="success") | 
-              .approved_by')
-            
-            echo "Security Approver ID: $SECURITY_APPROVER_ID"
-            echo "Business Approver ID: $BUSINESS_APPROVER_ID"
-            
-            # Get security approver details
-            if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
-              SECURITY_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
-                "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
-            
-              echo "Security User: $SECURITY_USER"
-            
-              SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name // .login')
-              echo "export SECURITY_APPROVER=\"$SECURITY_NAME\"" >> $BASH_ENV
-              echo "Security approved by: $SECURITY_NAME"
-            else
-              echo "No security approver found or information unavailable"
-            fi
-            
-            # Get business owner details
-            if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
-              BUSINESS_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
-                "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
-            
-              echo "Business Owner User: $BUSINESS_USER"
-              BUSINESS_NAME=$(echo $BUSINESS_USER | jq -r '.name // .login')
-              echo "export BUSINESS_APPROVER=\"$BUSINESS_NAME\"" >> $BASH_ENV
-              echo "Business approved by: $BUSINESS_NAME"
-            else
-              echo "No business approver found or information unavailable"
-            fi
-      - run:
-          name: Comment on Jira
-          command: |
-            curl --request POST \
-              --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
-              --header 'accept: application/json' \
-              --header "authorization: Basic ${JIRA_KEY}" \
-              --header 'content-type: application/json' \
-              --data '{
-              "body": {
-                "content": [
-                  {
-                    "content": [
-                      {
-                        "text": "This is a test. ",
-                        "type": "text"
-                      }
-                    ],
-                    "type": "paragraph"
-                  },
-                  {
-                    "content": [
-                      {
-                        "text": "This request has been approved by the following approvers:",
-                        "type": "text"
-                      }
-                    ],
-                    "type": "paragraph"
-                  },
-                  {
-                    "content": [
-                      {
-                        "text": "Business Owner - '"${BUSINESS_APPROVER}"'",
-                        "type": "text"
-                      }
-                    ],
-                    "type": "paragraph"
-                  },
-                  {
-                    "content": [
-                      {
-                        "text": "Security - '"${SECURITY_APPROVER}"'",
-                        "type": "text"
-                      }
-                    ],
-                    "type": "paragraph"
-                  }
-                ],
-                "type": "doc",
-                "version": 1
-              }
-            }'
+
+  document-approvals:
+    machine:
+      image: default # latest stable version
+    steps:
+    - run:
+        name: Get Multiple Approvers
+        command: |
+          # Get all jobs in the workflow
+          JOBS_RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+            "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
+          
+          echo "Jobs Response: $JOBS_RESPONSE"
+          
+          # Extract security approver ID
+          SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+            select(.name=="security-approval" and .type=="approval" and .status=="success") | 
+            .approved_by')
+          
+          # Extract business owner approver ID
+          BUSINESS_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+            select(.name=="business-owner-approval" and .type=="approval" and .status=="success") | 
+            .approved_by')
+          
+          echo "Security Approver ID: $SECURITY_APPROVER_ID"
+          echo "Business Approver ID: $BUSINESS_APPROVER_ID"
+          
+          # Get security approver details
+          if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
+            SECURITY_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
+              "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
+          
+            echo "Security User: $SECURITY_USER"
+          
+            SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name // .login')
+            echo "export SECURITY_APPROVER=\"$SECURITY_NAME\"" >> $BASH_ENV
+            echo "Security approved by: $SECURITY_NAME"
+          else
+            echo "No security approver found or information unavailable"
+          fi
+          
+          # Get business owner details
+          if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
+            BUSINESS_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
+              "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
+          
+            echo "Business Owner User: $BUSINESS_USER"
+            BUSINESS_NAME=$(echo $BUSINESS_USER | jq -r '.name // .login')
+            echo "export BUSINESS_APPROVER=\"$BUSINESS_NAME\"" >> $BASH_ENV
+            echo "Business approved by: $BUSINESS_NAME"
+          else
+            echo "No business approver found or information unavailable"
+          fi
+    - run:
+        name: Comment on Jira
+        command: |
+          curl --request POST \
+            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
+            --header 'accept: application/json' \
+            --header "authorization: Basic ${JIRA_KEY}" \
+            --header 'content-type: application/json' \
+            --data '{
+            "body": {
+              "content": [
+                {
+                  "content": [
+                    {
+                      "text": "This is a test. ",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "This request has been approved by the following approvers:",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "Business Owner - '"${BUSINESS_APPROVER}"'",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "Security - '"${SECURITY_APPROVER}"'",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                }
+              ],
+              "type": "doc",
+              "version": 1
+            }
+          }'
+
 
   e2ev2-deploy-ui:
     machine:
@@ -1121,6 +1127,11 @@ workflows:
 
   playground:
     jobs:
+      - playground:
+          <<: *filter-pr-branch
+          requires:
+            - api-unit-test
+            - ui-unit-test
       - business-owner-approval:
           type: approval
       - security-approval:
@@ -1137,7 +1148,7 @@ workflows:
 #          context:
 #          - "Security"
           <<: *filter-pr-branch
-      - playground:
+      - document-approvals:
           requires:
           - successful-business-owner-approval
           - successful-security-approval
