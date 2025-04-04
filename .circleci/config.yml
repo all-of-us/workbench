@@ -655,7 +655,7 @@ jobs:
       - run:
           name: Echo
           command: |
-            echo Hello Circle!!
+            echo Hello Circle!
 
   ask-for-approvals:
     machine:
