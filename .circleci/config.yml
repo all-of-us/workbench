@@ -1256,7 +1256,7 @@ workflows:
           requires:
             - e2ev2-deploy-ui
 
-  deploy-staging-and-stable:
+  deploy-to-higher-environments:
     jobs:
       - api-local-test:
           <<: *filter-release-tags
