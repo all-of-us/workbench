@@ -1252,8 +1252,6 @@ workflows:
     jobs:
     - playground:
         <<: *filter-pr-branch
-    - ask-for-approvals:
-        <<: *filter-pr-branch
     - business-owner-approval:
         type: approval
     - security-approval:
@@ -1323,25 +1321,29 @@ workflows:
           <<: *filter-release-tags
           requires:
             - deploy-to-staging
+      - ask-for-approvals:
+          <<: *filter-pr-branch
+          requires:
+            - deploy-to-stable
       - business-owner-approval:
           type: approval
           requires:
-          - deploy-to-stable
+          - ask-for-approvals
       - security-approval:
           type: approval
           requires:
-          - deploy-to-stable
+          - ask-for-approvals
       - successful-business-owner-approval:
           requires:
           - business-owner-approval
-          #          context:
-          #          - "Business Owners"
+          context:
+          - "Business Owners"
           <<: *filter-pr-branch
       - successful-security-approval:
           requires:
           - security-approval
-          #          context:
-          #          - "Security"
+          context:
+          - "Security"
           <<: *filter-pr-branch
       - document-approvals:
           requires:
