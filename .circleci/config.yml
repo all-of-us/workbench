@@ -713,7 +713,7 @@ jobs:
                     {
                       "text": " (security)",
                       "type": "text"
-                    },
+                    }
                   ],
                   "type": "paragraph"
                 },
