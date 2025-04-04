@@ -7135,11 +7135,6 @@ components:
           description: Whether a user is allowed to self-bypass. Only enabled in test
             environments.
           default: false
-        defaultFreeCreditsDollarLimit:
-          type: number
-          description: DEPRECATED in favor of defaultInitialCreditsDollarLimit.
-            The default dollar amount of initial credits allotted to each user
-          format: double
         defaultInitialCreditsDollarLimit:
           type: number
           description: The default dollar amount of initial credits allotted to each user
@@ -7175,10 +7170,6 @@ components:
         rasLogoutUrl:
           type: string
           description: The URL that can sign out RAS login session.
-        freeTierBillingAccountId:
-          type: string
-          description: DEPRECATED in favor of initialCreditsBillingAccountId.
-            The initial credits billing account id
         initialCreditsBillingAccountId:
           type: string
           description: The initial credits billing account id
