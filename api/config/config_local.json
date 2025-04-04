@@ -128,7 +128,7 @@
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": true,
     "enableVWBEgressMonitor": true,
-    "enableVWBUserAccessManagement": true,
+    "enableVWBUserAccessManagement": false,
     "enableVWBUserAndPodCreation": true
   },
   "actionAudit": {
