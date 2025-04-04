@@ -657,14 +657,62 @@ jobs:
           command: |
             echo Hello Circle!!
 
-  ask-for-approval:
+  ask-for-approvals:
     machine:
       image: default # latest stable version
     steps:
     - run:
-        name: Echo
+        name: Comment on Jira
         command: |
-          echo Could I have your approval please?
+          curl --request POST \
+            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
+            --header 'accept: application/json' \
+            --header "authorization: Basic ${JIRA_KEY}" \
+            --header 'content-type: application/json' \
+            --data '{
+            "body": {
+              "content": [
+                {
+                  "content": [
+                    {
+                      "text": "This is a test. ",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "Requesting change approval for this release of the Workbench to production. 1 security and 1 business approval are needed for release",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "Business Owner"'",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "Security"'",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                }
+              ],
+              "type": "doc",
+              "version": 1
+            }
+          }'
 
   document-approvals:
     machine:
@@ -770,7 +818,6 @@ jobs:
               "version": 1
             }
           }'
-
 
   e2ev2-deploy-ui:
     machine:
@@ -1149,7 +1196,7 @@ workflows:
     jobs:
     - playground:
         <<: *filter-pr-branch
-    - ask-for-approval:
+    - ask-for-approvals:
         <<: *filter-pr-branch
     - business-owner-approval:
         type: approval
