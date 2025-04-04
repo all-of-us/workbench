@@ -717,6 +717,33 @@ jobs:
                   ],
                   "type": "paragraph"
                 },
+                          {
+                  "content": [
+                    {
+                      "type": "mention",
+                      "attrs": {
+                        "id": "61f82f70f5f5b80070c68c8c",
+                        "text": "Eric Rollins"
+                      }
+                    },
+                    {
+                      "text": " or ",
+                      "type": "text"
+                    },
+                    {
+                      "type": "mention",
+                      "attrs": {
+                        "id": "61f82f70f5f5b80070c68c8c",
+                        "text": "Eric Rollins"
+                      }
+                    },
+                    {
+                      "text": " (business)",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
                 {
                   "content": [
                     {
