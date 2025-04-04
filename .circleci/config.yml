@@ -717,7 +717,7 @@ jobs:
                   ],
                   "type": "paragraph"
                 },
-                          {
+                {
                   "content": [
                     {
                       "type": "mention",
@@ -753,6 +753,15 @@ jobs:
                   ],
                   "type": "paragraph"
                 },
+                {
+                  "content": [
+                    {
+                      "text": "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                }
               ],
               "type": "doc",
               "version": 1
