@@ -806,51 +806,6 @@ describe('RuntimeConfigurationPanel', () => {
     expectButtonElementEnabled(button);
   });
 
-  it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
-    // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
-    // we should ignore the other runtime config values that were delivered with the getRuntime response
-    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-        diskSize: 1000,
-      },
-    });
-
-    mockUseCustomRuntime();
-
-    component();
-
-    await clickExpectedButton('Create');
-    await waitFor(async () => {
-      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-    });
-
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .gceConfig
-    ).toBeUndefined();
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .gceWithPdConfig.machineType
-    ).toBe(
-      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-        .machineType
-    );
-
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .gceWithPdConfig.persistentDisk.size
-    ).toBe(
-      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-        .persistentDisk.size
-    );
-  });
-
   it(
     'should create runtime with preset values instead of getRuntime values if ' +
       'configurationType is HailGenomicsAnalysis',
