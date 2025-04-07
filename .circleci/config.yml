@@ -243,6 +243,13 @@ commands:
               --key-file << pipeline.parameters.circle-service-account-key >> \
               --promote
           name: Deploy API and UI to all-of-us-rw-staging App Engine
+      - run:
+          name: Display JIRA issue
+          command: |
+            if [ -n "$JIRA_ISSUE_KEY" ]; then
+              echo "Created JIRA issue: $JIRA_ISSUE_KEY"
+              echo "JIRA URL: https://precisionmedicineinitiative.atlassian.net/browse/${JIRA_ISSUE_KEY}"
+            fi
 
   halt-test-check:
     description: "Exiting job because code in the following paths have not changed: << parameters.dir_names >> directories"
