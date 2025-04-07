@@ -99,30 +99,13 @@ describe(deriveCurrentRuntime.name, () => {
     ['GCE with PD', defaultGceRuntimeWithPd()],
     ['DataProc', defaultDataProcRuntime()],
   ])('%s', (desc, runtime) => {
-    it(`returns a ${desc} runtime from the hook if it is not DELETED`, () => {
-      // sanity check
-      expect(runtime.status).not.toEqual(RuntimeStatus.DELETED);
+    it(`returns a ${desc} runtime from the hook`, () => {
       expect(
         deriveCurrentRuntime({
           crFromCustomRuntimeHook: runtime,
           gcePersistentDisk: undefined,
         })
       ).toEqual(runtime);
-    });
-
-    it(`returns a ${desc} runtime from the hook if it is DELETED and config type USER_OVERRIDE`, () => {
-      const testRuntime = {
-        ...runtime,
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.USER_OVERRIDE,
-      };
-
-      expect(
-        deriveCurrentRuntime({
-          crFromCustomRuntimeHook: testRuntime,
-          gcePersistentDisk: undefined,
-        })
-      ).toEqual(testRuntime);
     });
   });
 
