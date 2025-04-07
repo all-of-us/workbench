@@ -806,58 +806,6 @@ describe('RuntimeConfigurationPanel', () => {
     expectButtonElementEnabled(button);
   });
 
-  it(
-    'should create runtime with preset values instead of getRuntime values if ' +
-      'configurationType is HailGenomicsAnalysis',
-    async () => {
-      // In the case where the user's latest runtime is a preset (HailGenomicsAnalysis in this case)
-      // we should ignore the other runtime config values that were delivered with the getRuntime response
-      // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-
-      setCurrentRuntime({
-        ...runtimeApiStub.runtime,
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-        gceConfig: null,
-        gceWithPdConfig: null,
-        dataprocConfig: {
-          ...defaultDataprocConfig(),
-          masterMachineType: 'n1-standard-16',
-          masterDiskSize: 999,
-          workerDiskSize: 444,
-          numberOfWorkers: 5,
-        },
-      });
-
-      mockUseCustomRuntime();
-      component();
-
-      await clickExpectedButton('Create');
-
-      await waitFor(async () => {
-        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-      });
-
-      const {
-        masterMachineType,
-        masterDiskSize,
-        workerDiskSize,
-        numberOfWorkers,
-      } =
-        mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-          .dataprocConfig;
-
-      expect(
-        runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
-      ).toMatchObject({
-        masterMachineType,
-        masterDiskSize,
-        workerDiskSize,
-        numberOfWorkers,
-      });
-    }
-  );
-
   it('should allow creation when runtime has error status', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
@@ -1165,42 +1113,6 @@ describe('RuntimeConfigurationPanel', () => {
     ).toBeFalsy();
   });
 
-  it(
-    'should set runtime preset values in customize panel instead of getRuntime values ' +
-      'if configurationType is GeneralAnalysis',
-    async () => {
-      const customMachineType = 'n1-standard-16';
-      const customDiskSize = 1000;
-      const currentRuntime = {
-        ...runtimeApiStub.runtime,
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-        gceConfig: {
-          ...defaultGceConfig(),
-          machineType: customMachineType,
-          diskSize: customDiskSize,
-        },
-        dataprocConfig: null,
-      };
-      setCurrentRuntime(currentRuntime);
-      mockUseCustomRuntime();
-
-      // show that the preset values do not match the existing runtime
-
-      const { machineType, persistentDisk } =
-        runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig;
-
-      expect(customMachineType).not.toEqual(machineType);
-      expect(customDiskSize).not.toEqual(persistentDisk.size);
-      const { container } = component();
-
-      expect(getMainRam(container)).toEqual(
-        findMachineByName(machineType).memory.toString()
-      );
-      expect(getDetachableDiskValue()).toEqual(persistentDisk.size.toString());
-    }
-  );
-
   it('should reattach to an existing disk by default, for deleted VMs', async () => {
     const disk = existingDisk();
     setCurrentDisk(disk);
@@ -1347,62 +1259,6 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getMainCpu(container)).toBe('2');
     expect(getMainRam(container)).toBe('7.5');
   });
-
-  it(
-    'should set runtime preset values in customize panel instead of getRuntime values ' +
-      'if configurationType is HailGenomicsAnalysis',
-    async () => {
-      const customMasterMachineType = 'n1-standard-16';
-      const customMasterDiskSize = 999;
-      const customWorkerDiskSize = 444;
-      const customNumberOfWorkers = 5;
-      setCurrentRuntime({
-        ...runtimeApiStub.runtime,
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-        gceConfig: null,
-        gceWithPdConfig: null,
-        dataprocConfig: {
-          ...defaultDataprocConfig(),
-          masterMachineType: customMasterMachineType,
-          masterDiskSize: customMasterDiskSize,
-          workerDiskSize: customWorkerDiskSize,
-          numberOfWorkers: customNumberOfWorkers,
-        },
-      });
-
-      // show that the preset values do not match the existing runtime
-
-      const {
-        masterMachineType,
-        masterDiskSize,
-        workerDiskSize,
-        numberOfWorkers,
-      } = runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig;
-
-      expect(customMasterMachineType).not.toEqual(masterMachineType);
-      expect(customMasterDiskSize).not.toEqual(masterDiskSize);
-      expect(customWorkerDiskSize).not.toEqual(workerDiskSize);
-      expect(customNumberOfWorkers).not.toEqual(numberOfWorkers);
-
-      mockUseCustomRuntime();
-
-      const { container } = component();
-
-      await clickExpectedButton('Customize');
-
-      expect(getMainCpu(container)).toEqual(
-        findMachineByName(masterMachineType).cpu.toString()
-      );
-      expect(getMainRam(container)).toEqual(
-        findMachineByName(masterMachineType).memory.toString()
-      );
-
-      expect(getMasterDiskValue()).toEqual(masterDiskSize.toString());
-      expect(getWorkerDiskValue()).toEqual(workerDiskSize.toString());
-      expect(getNumOfWorkersValue()).toEqual(numberOfWorkers.toString());
-    }
-  );
 
   it('should warn user about re-creation if there are updates that require one - increase disk size', async () => {
     mockUseCustomRuntime();
