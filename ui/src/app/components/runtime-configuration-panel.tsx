@@ -76,20 +76,6 @@ interface DeriveCurrentRuntimeProps {
   crFromCustomRuntimeHook: Runtime;
   gcePersistentDisk: Disk;
 }
-export const deriveCurrentRuntime = ({
-  crFromCustomRuntimeHook,
-  gcePersistentDisk,
-}: DeriveCurrentRuntimeProps): Runtime =>
-  // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-  crFromCustomRuntimeHook &&
-  crFromCustomRuntimeHook.status === RuntimeStatus.DELETED
-    ? applyPresetOverride(
-        // The attached disk information is lost for deleted runtimes. In any case,
-        // by default we want to offer that the user reattach their existing disk,
-        // if any and if the configuration allows it.
-        maybeWithPersistentDisk(crFromCustomRuntimeHook, gcePersistentDisk)
-      )
-    : crFromCustomRuntimeHook;
 
 interface CCProps {
   pendingRuntime: Runtime;
@@ -280,15 +266,8 @@ export const RuntimeConfigurationPanel = fp.flow(
       namespace,
       googleProject
     );
-    const [
-      { currentRuntime: crFromCustomRuntimeHook, pendingRuntime },
-      setRuntimeRequest,
-    ] = useCustomRuntime(namespace, gcePersistentDisk);
-
-    const currentRuntime = deriveCurrentRuntime({
-      crFromCustomRuntimeHook,
-      gcePersistentDisk,
-    });
+    const [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
+      useCustomRuntime(namespace, gcePersistentDisk);
 
     // Prioritize the "pendingRuntime", if any. When an update is pending, we want
     // to render the target runtime details, which  may not match the current runtime.
