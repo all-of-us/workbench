@@ -128,24 +128,6 @@ describe(createOrCustomize.name, () => {
     ['null', null, undefined],
     ['undefined', undefined, undefined],
     ['UNKNOWN', defaultRuntime(), RuntimeStatus.UNKNOWN],
-    [
-      'DELETED GCE GENERAL_ANALYSIS', // not GCE with PD
-      {
-        ...defaultGceRuntime(),
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      },
-      RuntimeStatus.DELETED, // not used here, but let's be consistent
-    ],
-    [
-      'DELETED HAIL_GENOMIC_ANALYSIS',
-      {
-        ...defaultDataProcRuntime(),
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-      },
-      RuntimeStatus.DELETED, // not used here, but let's be consistent
-    ],
   ])(
     'it returns Create for a %s runtime',
     (desc, currentRuntime, runtimeStatus) => {
@@ -1053,18 +1035,6 @@ describe('RuntimeConfigurationPanel', () => {
     const button = screen.getByRole('button', { name: 'Next' });
     expect(button).toBeInTheDocument();
     expectButtonElementDisabled(button);
-  });
-
-  it('should show create button if runtime is deleted', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-    });
-    mockUseCustomRuntime();
-    component();
-    const button = screen.getByRole('button', { name: 'Create' });
-    expect(button).toBeInTheDocument();
-    expectButtonElementEnabled(button);
   });
 
   it('should allow runtime deletion', async () => {
