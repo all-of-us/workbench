@@ -34,7 +34,6 @@ export const stubResource: WorkspaceResource = {
   permission: 'OWNER',
   cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
   accessTierShortName: AccessTierShortNames.Registered,
-  workspaceBillingStatus: BillingStatus.ACTIVE,
   lastModifiedEpochMillis: 1634763170,
   adminLocked: false,
 };

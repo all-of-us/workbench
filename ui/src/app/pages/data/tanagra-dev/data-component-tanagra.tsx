@@ -118,7 +118,6 @@ const mapTanagraWorkspaceResource = ({
   workspaceNamespace: workspace.namespace,
   workspaceFirecloudName: workspace.terraName, // Placeholder until workspaceFirecloudName is removed from WorkspaceResource
   workspaceTerraName: workspace.terraName,
-  workspaceBillingStatus: workspace.billingStatus,
   cdrVersionId: workspace.cdrVersionId,
   accessTierShortName: workspace.accessTierShortName,
   permission: workspace.accessLevel.toString(),
