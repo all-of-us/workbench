@@ -256,18 +256,20 @@ export const withCurrentWorkspace = () => {
  * @returns The current workspace data from the currentWorkspaceStore
  */
 export const useCurrentWorkspace = (): WorkspaceData => {
-  const [workspace, setWorkspace] = useState<WorkspaceData>(currentWorkspaceStore.getValue());
-  
+  const [workspace, setWorkspace] = useState<WorkspaceData>(
+    currentWorkspaceStore.getValue()
+  );
+
   useEffect(() => {
-    const subscription = currentWorkspaceStore.subscribe(value => {
+    const subscription = currentWorkspaceStore.subscribe((value) => {
       setWorkspace(value);
     });
-    
+
     return () => {
       subscription.unsubscribe();
     };
   }, []);
-  
+
   return workspace;
 };
 
