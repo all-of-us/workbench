@@ -1,7 +1,5 @@
 package org.pmiops.workbench.workspaces.resources;
 
-import org.pmiops.workbench.model.BillingStatus;
-
 /**
  * A transitional POJO to assist WorkspaceResourceMapper, consisting of the fields sourced from
  * DbWorkspace and WorkspaceAccessLevel
@@ -10,7 +8,6 @@ class WorkspaceFields {
   private Long workspaceId;
   private String workspaceNamespace;
   private String workspaceFirecloudName;
-  private BillingStatus workspaceBillingStatus;
   private String cdrVersionId;
   private String accessTierShortName;
   private boolean adminLocked;
@@ -37,14 +34,6 @@ class WorkspaceFields {
 
   public void setWorkspaceFirecloudName(String workspaceFirecloudName) {
     this.workspaceFirecloudName = workspaceFirecloudName;
-  }
-
-  public BillingStatus getWorkspaceBillingStatus() {
-    return workspaceBillingStatus;
-  }
-
-  public void setWorkspaceBillingStatus(BillingStatus workspaceBillingStatus) {
-    this.workspaceBillingStatus = workspaceBillingStatus;
   }
 
   public String getCdrVersionId() {
