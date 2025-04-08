@@ -258,7 +258,7 @@ export const getErrorsAndWarnings = ({
   };
 };
 
-export const RuntimeConfigurationPanelContent = fp.flow(
+const RuntimeConfigurationPanelContent = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )(
