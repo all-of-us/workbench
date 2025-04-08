@@ -4,11 +4,13 @@ import { mockNavigate } from 'setupTests';
 import { AppsApi, AppStatus, UserAppEnvironment } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { appDisplayPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
@@ -32,7 +34,7 @@ describe(OpenGkeAppButton.name, () => {
     onClose: () => {},
   };
 
-  let user;
+  let user: UserEvent;
 
   const component = async (propOverrides?: Partial<OpenGkeAppButtonProps>) => {
     const allProps = { ...defaultProps, ...propOverrides };
@@ -47,6 +49,7 @@ describe(OpenGkeAppButton.name, () => {
   beforeEach(() => {
     registerApiClient(AppsApi, new AppsApiStub());
     user = userEvent.setup();
+    serverConfigStore.set({ config: defaultServerConfig });
   });
   afterEach(() => {
     jest.resetAllMocks();

@@ -5,8 +5,10 @@ import { NotebooksApi, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { screen, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
@@ -34,6 +36,7 @@ describe('App Selector', () => {
 
   beforeEach(() => {
     registerApiClient(NotebooksApi, new NotebooksApiStub());
+    serverConfigStore.set({ config: defaultServerConfig });
   });
 
   it('should enable START button if user has OWNER access', async () => {
