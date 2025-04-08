@@ -75,7 +75,11 @@ describe(useCustomRuntime.name, () => {
 
   const setCurrentDisk = (d: Disk) => {
     disksApiStub.disk = d;
-    runtimeDiskStore.set({ ...runtimeDiskStore.get(), gcePersistentDisk: d });
+    runtimeDiskStore.set({
+      ...runtimeDiskStore.get(),
+      gcePersistentDisk: d,
+      gcePersistentDiskLoaded: true,
+    });
   };
 
   it('should update runtime when request includes updated runtime', async () => {
