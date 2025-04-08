@@ -899,6 +899,7 @@ describe('RuntimeConfigurationPanel', () => {
     runtimeDiskStore.set({
       workspaceNamespace: workspace.namespace,
       gcePersistentDisk: null,
+      gcePersistentDiskLoaded: true,
     });
 
     // Add this in your beforeEach block where you set up other mocks
@@ -964,7 +965,7 @@ describe('RuntimeConfigurationPanel', () => {
         gcePersistentDisk: runtimeDiskStore.get().gcePersistentDisk,
         isLoaded: true,
       }));
-    
+
     // Use rerender instead of creating a new component
     rerender(
       <MemoryRouter>
