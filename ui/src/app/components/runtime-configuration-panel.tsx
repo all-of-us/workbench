@@ -15,6 +15,7 @@ import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import {
   summarizeErrors,
+  useCurrentWorkspace,
   WithCdrVersions,
   withCdrVersions,
   WithCurrentWorkspace,
@@ -38,7 +39,11 @@ import {
   diffsToUpdateMessaging,
   getAnalysisConfigDiffs,
 } from 'app/utils/runtime-diffs';
-import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
+import {
+  useCustomRuntime,
+  useRuntimeAndDiskStores,
+  useRuntimeStatus,
+} from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   canUpdateRuntime,
@@ -268,9 +273,7 @@ export const RuntimeConfigurationPanelContents = fp.flow(
   }: RuntimeConfigurationPanelProps &
     WithCdrVersions &
     WithCurrentWorkspace) => {
-    const { runtimeLoaded } = useStore(runtimeStore);
-    const { gcePersistentDisk, gcePersistentDiskLoaded } =
-      useStore(runtimeDiskStore);
+    const { gcePersistentDisk } = useStore(runtimeDiskStore);
     const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
       namespace,
       googleProject
@@ -382,10 +385,6 @@ export const RuntimeConfigurationPanelContents = fp.flow(
       } else {
         runtimeCannotBeUpdatedExplanation = `Runtime cannot be updated, because it is in the ${runtimeStatus} state.`;
       }
-    }
-
-    if (!runtimeLoaded || !gcePersistentDiskLoaded) {
-      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
     }
 
     return (
@@ -595,6 +594,14 @@ export const RuntimeConfigurationPanel = ({
   initialPanelContent,
   creatorInitialCreditsRemaining,
 }: RuntimeConfigurationPanelProps) => {
+  const workspace = useCurrentWorkspace();
+  const { namespace } = workspace;
+  const { isLoaded } = useRuntimeAndDiskStores(namespace);
+
+  if (!isLoaded) {
+    return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
+  }
+
   return (
     <RuntimeConfigurationPanelContents
       {...{
