@@ -516,11 +516,7 @@ public class InitialCreditsService {
             ws ->
                 BillingUtils.isInitialCredits(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .forEach(
-            ws -> {
-              ws.setInitialCreditsExhausted(false);
-              workspaceDao.save(ws);
-            });
+        .forEach(ws -> workspaceDao.save(ws.setInitialCreditsExhausted(false)));
   }
 
   /**
