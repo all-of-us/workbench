@@ -250,6 +250,27 @@ export const connectReplaySubject = <T extends {}>(
 export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
+
+/**
+ * Hook that provides access to the current workspace data
+ * @returns The current workspace data from the currentWorkspaceStore
+ */
+export const useCurrentWorkspace = (): WorkspaceData => {
+  const [workspace, setWorkspace] = useState<WorkspaceData>(currentWorkspaceStore.getValue());
+  
+  useEffect(() => {
+    const subscription = currentWorkspaceStore.subscribe(value => {
+      setWorkspace(value);
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  
+  return workspace;
+};
+
 export interface WithCurrentWorkspace {
   workspace: WorkspaceData;
 }
