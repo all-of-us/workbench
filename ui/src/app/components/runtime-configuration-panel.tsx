@@ -258,7 +258,7 @@ export const getErrorsAndWarnings = ({
   };
 };
 
-export const RuntimeConfigurationPanelContents = fp.flow(
+export const RuntimeConfigurationPanelContent = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )(
@@ -603,7 +603,7 @@ export const RuntimeConfigurationPanel = ({
   }
 
   return (
-    <RuntimeConfigurationPanelContents
+    <RuntimeConfigurationPanelContent
       {...{
         onClose,
         profileState,
