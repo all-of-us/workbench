@@ -253,13 +253,7 @@ export const getErrorsAndWarnings = ({
   };
 };
 
-export interface RuntimeConfigurationPanelProps {
-  onClose?: () => void;
-  initialPanelContent?: PanelContent;
-  creatorInitialCreditsRemaining?: number;
-  profileState: ProfileStore;
-}
-export const RuntimeConfigurationPanel = fp.flow(
+export const RuntimeConfigurationPanelContents = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )(
@@ -275,7 +269,8 @@ export const RuntimeConfigurationPanel = fp.flow(
     WithCdrVersions &
     WithCurrentWorkspace) => {
     const { runtimeLoaded } = useStore(runtimeStore);
-    const { gcePersistentDisk } = useStore(runtimeDiskStore);
+    const { gcePersistentDisk, gcePersistentDiskLoaded } =
+      useStore(runtimeDiskStore);
     const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
       namespace,
       googleProject
@@ -291,7 +286,7 @@ export const RuntimeConfigurationPanel = fp.flow(
     });
 
     // Prioritize the "pendingRuntime", if any. When an update is pending, we want
-    // to render the target runtime details, which  may not match the current runtime.
+    // to render the target runtime details, which may not match the current runtime.
     const existingAnalysisConfig = toAnalysisConfig(
       pendingRuntime || currentRuntime || ({} as Partial<Runtime>),
       gcePersistentDisk
@@ -389,7 +384,7 @@ export const RuntimeConfigurationPanel = fp.flow(
       }
     }
 
-    if (!runtimeLoaded) {
+    if (!runtimeLoaded || !gcePersistentDiskLoaded) {
       return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
     }
 
@@ -586,3 +581,28 @@ export const RuntimeConfigurationPanel = fp.flow(
     );
   }
 );
+
+export interface RuntimeConfigurationPanelProps {
+  onClose?: () => void;
+  initialPanelContent?: PanelContent;
+  creatorInitialCreditsRemaining?: number;
+  profileState: ProfileStore;
+}
+
+export const RuntimeConfigurationPanel = ({
+  profileState,
+  onClose = () => {},
+  initialPanelContent,
+  creatorInitialCreditsRemaining,
+}: RuntimeConfigurationPanelProps) => {
+  return (
+    <RuntimeConfigurationPanelContents
+      {...{
+        onClose,
+        profileState,
+        creatorInitialCreditsRemaining,
+        initialPanelContent,
+      }}
+    />
+  );
+};
