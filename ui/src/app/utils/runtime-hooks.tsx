@@ -119,6 +119,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
         runtimeDiskStore.set({
           workspaceNamespace: null,
           gcePersistentDisk: null,
+          gcePersistentDiskLoaded: false,
         }),
       async () => {
         let gcePersistentDisk: Disk = null;
@@ -139,6 +140,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
           runtimeDiskStore.set({
             workspaceNamespace: currentWorkspaceNamespace,
             gcePersistentDisk,
+            gcePersistentDiskLoaded: true,
           });
         }
       }
