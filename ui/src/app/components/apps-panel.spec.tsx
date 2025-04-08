@@ -260,16 +260,6 @@ describe(AppsPanel.name, () => {
     await expectExpandableApp(user, 'Jupyter');
   });
 
-  it('should disable apps when initial credit expiration is enabled and billing is inactive', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableInitialCreditsExpiration: false },
-    });
-
-    await component();
-
-    await expectAppsInAppsPanelToBeDisabled(user);
-  });
-
   it('should show unexpanded apps by default', async () => {
     appsStub.listAppsResponse = [];
 

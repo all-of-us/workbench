@@ -164,6 +164,9 @@ export function convertToResource(
     lastModifiedEpochMillis: inputResource.lastModifiedTime,
     lastModifiedBy: inputResource.lastModifiedBy,
     adminLocked,
+
+    // deprecated and will be removed soon
+    workspaceBillingStatus: undefined,
   };
 }
 

@@ -29,22 +29,25 @@ interface Props extends CommonActionMenuProps {
 export const ResourceListActionMenu = (props: Props) => {
   const { resource, workspace } = props;
 
-  const inactiveBilling = !isValidBilling(workspace);
-
   return cond(
     [isCohort(resource), () => <CohortActionMenu {...props} />],
     [isCohortReview(resource), () => <CohortReviewActionMenu {...props} />],
     [isConceptSet(resource), () => <ConceptSetActionMenu {...props} />],
     [
       isDataSet(resource),
-      () => <DatasetActionMenu {...{ ...props, inactiveBilling }} />,
+      () => (
+        <DatasetActionMenu
+          {...{ ...props }}
+          inactiveBilling={!isValidBilling(workspace)}
+        />
+      ),
     ],
     [
       isNotebook(resource),
       () => (
         <NotebookActionMenu
           {...props}
-          disableDuplicate={inactiveBilling}
+          disableDuplicate={!isValidBilling(workspace)}
           useAppFilesListIcon={false}
         />
       ),

@@ -89,8 +89,14 @@ describe(OpenGkeAppButton.name, () => {
       await waitFor(() => expect(onClose).toHaveBeenCalled());
     });
 
-    it(`should not allow creating a running ${appType} app when billing status is not active.`, async () => {
-      await component({ userApp });
+    it(`should not allow creating a running ${appType} app when billing is exhausted.`, async () => {
+      await component({
+        userApp,
+        workspace: {
+          ...workspaceStubs[0],
+          initialCredits: { exhausted: true },
+        },
+      });
       const button = await waitFor(() => {
         const openButton = findOpenButton(appType);
         expectButtonElementDisabled(openButton);
