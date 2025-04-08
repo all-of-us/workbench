@@ -1,12 +1,7 @@
 import * as React from 'react';
 import { mockNavigate } from 'setupTests';
 
-import {
-  AppsApi,
-  AppStatus,
-  BillingStatus,
-  UserAppEnvironment,
-} from 'generated/fetch';
+import { AppsApi, AppStatus, UserAppEnvironment } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,7 +28,6 @@ import { OpenGkeAppButton, OpenGkeAppButtonProps } from './open-gke-app-button';
 describe(OpenGkeAppButton.name, () => {
   const defaultProps: OpenGkeAppButtonProps = {
     userApp: null,
-    billingStatus: BillingStatus.ACTIVE,
     workspace: workspaceStubs[0],
     onClose: () => {},
   };
@@ -93,7 +87,7 @@ describe(OpenGkeAppButton.name, () => {
     });
 
     it(`should not allow creating a running ${appType} app when billing status is not active.`, async () => {
-      await component({ userApp, billingStatus: BillingStatus.INACTIVE });
+      await component({ userApp });
       const button = await waitFor(() => {
         const openButton = findOpenButton(appType);
         expectButtonElementDisabled(openButton);
