@@ -656,6 +656,7 @@ describe('RuntimeConfigurationPanel', () => {
   const runtimeDiskStoreStub = {
     workspaceNamespace: workspaceStubs[0].namespace,
     gcePersistentDisk: null,
+    gcePersistentDiskLoaded: true,
   };
   runtimeDiskStore.set(runtimeDiskStoreStub);
 
@@ -900,6 +901,17 @@ describe('RuntimeConfigurationPanel', () => {
       gcePersistentDisk: null,
     });
 
+    // Add this in your beforeEach block where you set up other mocks
+    jest
+      .spyOn(runtimeHooks, 'useRuntimeAndDiskStores')
+      .mockImplementation(() => ({
+        runtimeLoaded: true,
+        gcePersistentDiskLoaded: true,
+        runtime: runtimeStore.get().runtime,
+        gcePersistentDisk: runtimeDiskStore.get().gcePersistentDisk,
+        isLoaded: true,
+      }));
+
     mockSetRuntimeRequest = jest.fn();
   });
 
@@ -923,10 +935,18 @@ describe('RuntimeConfigurationPanel', () => {
   };
 
   it('should show loading spinner while loading', async () => {
-    // simulate not done loading
-    runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
+    // Override the mock to simulate loading state
+    jest
+      .spyOn(runtimeHooks, 'useRuntimeAndDiskStores')
+      .mockImplementation(() => ({
+        runtimeLoaded: false,
+        gcePersistentDiskLoaded: false,
+        runtime: null,
+        gcePersistentDisk: null,
+        isLoaded: false,
+      }));
 
-    const { container } = component();
+    const { container, rerender } = component();
     expect(container).toBeInTheDocument();
 
     await waitFor(() =>
@@ -934,7 +954,23 @@ describe('RuntimeConfigurationPanel', () => {
       expect(screen.queryByLabelText('Please Wait')).toBeInTheDocument()
     );
 
-    runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: true });
+    // Now mock it as loaded
+    jest
+      .spyOn(runtimeHooks, 'useRuntimeAndDiskStores')
+      .mockImplementation(() => ({
+        runtimeLoaded: true,
+        gcePersistentDiskLoaded: true,
+        runtime: runtimeStore.get().runtime,
+        gcePersistentDisk: runtimeDiskStore.get().gcePersistentDisk,
+        isLoaded: true,
+      }));
+    
+    // Use rerender instead of creating a new component
+    rerender(
+      <MemoryRouter>
+        <RuntimeConfigurationPanel {...defaultProps} />
+      </MemoryRouter>
+    );
 
     await waitFor(() =>
       expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
