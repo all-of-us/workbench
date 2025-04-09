@@ -5,6 +5,7 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForControlledTierRenewal;
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierRenewal;
 
+import com.google.api.services.directory.model.User;
 import com.google.api.services.oauth2.model.Userinfo;
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Provider;
@@ -610,10 +611,12 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
+    boolean isEnrolledIn2FA =
+        directoryService.getUser(targetUser.getUsername()).map(User::getIsEnrolledIn2Sv).orElse(false);
     return syncTwoFactorAuthStatus(
         targetUser,
         agent,
-        directoryService.getUserOrThrow(targetUser.getUsername()).getIsEnrolledIn2Sv());
+        isEnrolledIn2FA);
   }
 
   @Override

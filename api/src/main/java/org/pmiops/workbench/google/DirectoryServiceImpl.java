@@ -17,9 +17,7 @@ import com.google.api.services.directory.model.Users;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import jakarta.inject.Provider;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -162,35 +160,6 @@ public class DirectoryServiceImpl implements DirectoryService {
   @Override
   public User getUserOrThrow(String username) {
     return getUser(username).orElseThrow(() -> new NotFoundException("user not found"));
-  }
-
-  @Override
-  public Map<String, Boolean> getAllTwoFactorAuthStatuses() {
-    final String domain = gSuiteDomain();
-    Map<String, Boolean> statuses = Maps.newHashMap();
-    Users response = null;
-    do {
-      final String pageToken =
-          Optional.ofNullable(response).map(r -> r.getNextPageToken()).orElse(null);
-      try {
-        response =
-            retryHandler.runAndThrowChecked(
-                (context) ->
-                    getGoogleDirectoryService()
-                        .users()
-                        .list()
-                        .setProjection("basic")
-                        .setDomain(domain)
-                        .setPageToken(pageToken)
-                        .execute());
-      } catch (IOException e) {
-        throw ExceptionUtils.convertGoogleIOException(e);
-      }
-      for (User u : response.getUsers()) {
-        statuses.put(u.getPrimaryEmail(), u.getIsEnrolledIn2Sv());
-      }
-    } while (!Strings.isNullOrEmpty(response.getNextPageToken()));
-    return statuses;
   }
 
   @Override
