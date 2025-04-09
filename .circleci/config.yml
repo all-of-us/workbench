@@ -279,14 +279,14 @@ commands:
               echo "Created JIRA issue: $JIRA_ISSUE_KEY"
               echo "JIRA URL: https://precisionmedicineinitiative.atlassian.net/browse/${JIRA_ISSUE_KEY}"
               # Save the JIRA key to a file
-              echo $JIRA_ISSUE_KEY > /tmp/workspace/jira-env.sh
+              echo $JIRA_ISSUE_KEY > ~/workbench/jira-env.sh
             else
               echo "ERROR: JIRA_ISSUE_KEY not found or empty!"
               echo "A JIRA issue is required for this deployment."
               exit 1
             fi
       - persist_to_workspace:
-          root: /tmp/workspace
+          root: ~/workbench
           paths:
             - jira-env.sh
 
