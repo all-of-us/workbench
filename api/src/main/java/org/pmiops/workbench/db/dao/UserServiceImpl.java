@@ -612,11 +612,11 @@ public class UserServiceImpl implements UserService {
   @Override
   public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
     boolean isEnrolledIn2FA =
-        directoryService.getUser(targetUser.getUsername()).map(User::getIsEnrolledIn2Sv).orElse(false);
-    return syncTwoFactorAuthStatus(
-        targetUser,
-        agent,
-        isEnrolledIn2FA);
+        directoryService
+            .getUser(targetUser.getUsername())
+            .map(User::getIsEnrolledIn2Sv)
+            .orElse(false);
+    return syncTwoFactorAuthStatus(targetUser, agent, isEnrolledIn2FA);
   }
 
   @Override
