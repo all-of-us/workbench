@@ -683,8 +683,8 @@ jobs:
     - run:
         name: Load JIRA issue key
         command: |
-          if [ -f /tmp/workspace/jira-env.sh ]; then
-            source /tmp/workspace/jira-env.sh
+          if [ -f ~/workbench/jira-env.sh ]; then
+            source ~/workbench/jira-env.sh
             echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
           else
             echo "ERROR: jira-env.sh not found"
@@ -799,8 +799,8 @@ jobs:
     - run:
         name: Load JIRA issue key
         command: |
-          if [ -f /tmp/workspace/jira-env.sh ]; then
-            source /tmp/workspace/jira-env.sh
+          if [ -f ~/workbench/jira-env.sh ]; then
+            source ~/workbench/jira-env.sh
             echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
           else
             echo "ERROR: jira-env.sh not found"
