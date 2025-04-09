@@ -257,6 +257,13 @@ export const getErrorsAndWarnings = ({
   };
 };
 
+export interface RuntimeConfigurationPanelProps {
+  onClose?: () => void;
+  initialPanelContent?: PanelContent;
+  creatorInitialCreditsRemaining?: number;
+  profileState: ProfileStore;
+}
+
 const RuntimeConfigurationPanelContent = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
@@ -579,13 +586,6 @@ const RuntimeConfigurationPanelContent = fp.flow(
     );
   }
 );
-
-export interface RuntimeConfigurationPanelProps {
-  onClose?: () => void;
-  initialPanelContent?: PanelContent;
-  creatorInitialCreditsRemaining?: number;
-  profileState: ProfileStore;
-}
 
 export const RuntimeConfigurationPanel = ({
   profileState,
