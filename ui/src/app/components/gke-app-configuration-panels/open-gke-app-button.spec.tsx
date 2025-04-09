@@ -8,6 +8,7 @@ import userEvent, { UserEvent } from '@testing-library/user-event';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { appDisplayPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { MILLIS_PER_DAY } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -96,6 +97,30 @@ describe(OpenGkeAppButton.name, () => {
           ...workspaceStubs[0],
           billingAccountName: `billingAccounts/${defaultServerConfig.initialCreditsBillingAccountId}`,
           initialCredits: { exhausted: true },
+        },
+      });
+      const button = await waitFor(() => {
+        const openButton = findOpenButton(appType);
+        expectButtonElementDisabled(openButton);
+        return openButton;
+      });
+
+      await user.pointer([{ pointerName: 'mouse', target: button }]);
+
+      await screen.findByText(
+        'You have either run out of initial credits or have an inactive billing account.'
+      );
+    });
+
+    it(`should not allow creating a running ${appType} app when billing is expired.`, async () => {
+      await component({
+        userApp,
+        workspace: {
+          ...workspaceStubs[0],
+          billingAccountName: `billingAccounts/${defaultServerConfig.initialCreditsBillingAccountId}`,
+          initialCredits: {
+            expirationEpochMillis: Date.now() - MILLIS_PER_DAY,
+          },
         },
       });
       const button = await waitFor(() => {
