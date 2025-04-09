@@ -902,7 +902,6 @@ describe('RuntimeConfigurationPanel', () => {
       gcePersistentDiskLoaded: true,
     });
 
-    // Add this in your beforeEach block where you set up other mocks
     jest
       .spyOn(runtimeHooks, 'useRuntimeAndDiskStores')
       .mockImplementation(() => ({
