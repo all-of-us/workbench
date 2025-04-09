@@ -35,7 +35,4 @@ export const stubResource: WorkspaceResource = {
   accessTierShortName: AccessTierShortNames.Registered,
   lastModifiedEpochMillis: 1634763170,
   adminLocked: false,
-
-  // deprecated and will be removed soon
-  workspaceBillingStatus: undefined,
 };

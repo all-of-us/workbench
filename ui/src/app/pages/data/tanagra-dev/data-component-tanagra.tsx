@@ -126,9 +126,6 @@ const mapTanagraWorkspaceResource = ({
   reviewTanagra: review,
   lastModifiedEpochMillis: lastModified.getTime(),
   adminLocked: workspace.adminLocked,
-
-  // deprecated and will be removed soon
-  workspaceBillingStatus: undefined,
 });
 
 interface Props extends WithSpinnerOverlayProps {
