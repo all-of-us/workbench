@@ -1,5 +1,7 @@
 package org.pmiops.workbench.utils.mappers;
 
+import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
+
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
@@ -15,7 +17,9 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.stereotype.Service;
 
@@ -125,6 +129,16 @@ public class CommonMappers {
   public Long getInitialCreditsExtension(
       DbUser source, @Context InitialCreditsService initialCreditsService) {
     return initialCreditsService.getCreditsExtension(source).map(this::timestamp).orElse(null);
+  }
+
+  @Named("getBillingStatus")
+  public BillingStatus getBillingStatus(
+      DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService) {
+    return (isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfigProvider.get())
+            && (dbWorkspace.isInitialCreditsExhausted()
+                || initialCreditsService.areUserCreditsExpired(dbWorkspace.getCreator())))
+        ? BillingStatus.INACTIVE
+        : BillingStatus.ACTIVE;
   }
 
   @Named("checkInitialCreditsExtensionEligibility")

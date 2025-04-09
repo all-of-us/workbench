@@ -7477,6 +7477,8 @@ components:
           type: string
         researchPurpose:
           $ref: '#/components/schemas/ResearchPurpose'
+        billingStatus:
+          $ref: '#/components/schemas/BillingStatus'
         creationTime:
           type: integer
           description: Milliseconds since the UNIX epoch.
@@ -9498,6 +9500,7 @@ components:
       - cdrVersionId
       - lastModifiedEpochMillis
       - permission
+      - workspaceBillingStatus
       - workspaceFirecloudName
       - workspaceNamespace
       type: object
@@ -9509,6 +9512,8 @@ components:
           type: string
         workspaceFirecloudName:
           type: string
+        workspaceBillingStatus:
+          $ref: '#/components/schemas/BillingStatus'
         cdrVersionId:
           type: string
         accessTierShortName:
