@@ -94,28 +94,25 @@ public class WorkbenchConfig {
       return fullBillingAccountName(accountId);
     }
 
-    // The full table name for the BigQuery billing export, which is read from by the free-tier
-    // usage tracking cron endpoint.
+    // The full table name for the BigQuery billing export, which is used by the
+    // checkInitialCreditsUsage cron endpoint.
     public String exportBigQueryTable;
-    // The default dollar limit to apply to free-credit usage in this environment.
-    public Double defaultFreeCreditsDollarLimit;
-    // Thresholds for email alerting based on free tier usage, by cost
-    public List<Double> freeTierCostAlertThresholds;
+    // The default dollar limit to apply to initial credits usage in this environment.
+    public Double defaultInitialCreditsDollarLimit;
+    // Thresholds for email alerting based on initial credits usage, by cost
+    public List<Double> initialCreditsCostAlertThresholds;
     // The contact email from Carahsoft for billing account setup
     public String carahsoftEmail;
 
-    // The batch size used by the cron job to process users
-    public Integer freeTierCronUserBatchSize;
-
-    // The number of minutes elapsed after the last cron run to update the free tier billing
+    // The number of minutes elapsed after the last cron run to update the initial credits billing
     // information
-    public Integer minutesBeforeLastFreeTierJob;
+    public Integer minutesBeforeLastInitialCreditsJob;
 
-    // A value that defines the number of days to consider between the last update of the Free tier
-    // usage in the database and the last workspace update when calculating the eligibility of a
-    // workspace free tier usage to be updated. To account for charges that may occur after the
-    // workspace gets deleted and after the last cron had run
-    public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
+    // A value that defines the number of days to consider between the last update of initial
+    // credits usage in the database and the last workspace update when calculating the eligibility
+    // of a workspace initial credits usage to be updated. To account for charges that may occur
+    // after the workspace gets deleted and after the last cron had run
+    public Long numberOfDaysToConsiderForInitialCreditsUsageUpdate;
 
     // The number of days that initial credits are valid for.
     public Long initialCreditsValidityPeriodDays;
@@ -416,6 +413,8 @@ public class WorkbenchConfig {
     public Integer usersPerAuditTask;
     // Number of users to process within a single access synchronization task.
     public Integer usersPerSynchronizeAccessTask;
+    // Number of users to process within a single check initial credits usage task.
+    public Integer usersPerCheckInitialCreditsUsageTask;
     // Number of users to process within a single check initial credits expiration task.
     public Integer usersPerCheckInitialCreditsExpirationTask;
     // Number of users to process within a single access expiration email task.

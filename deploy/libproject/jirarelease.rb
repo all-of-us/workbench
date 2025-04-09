@@ -125,6 +125,7 @@ class JiraReleaseClient
     end
 
     Common.new.status "Created [#{issue.key}] with release notes for #{to_tag}"
+    return issue.key
   end
 
   def comment_ticket(tag, msg)

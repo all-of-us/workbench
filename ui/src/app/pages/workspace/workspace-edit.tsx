@@ -437,7 +437,7 @@ export const WorkspaceEdit = fp.flow(
       const freeTierBillingAccount: BillingAccount = {
         name:
           'billingAccounts/' +
-          serverConfigStore.get().config.freeTierBillingAccountId,
+          serverConfigStore.get().config.initialCreditsBillingAccountId,
         freeTier: true,
         open: true,
         displayName: this.formatFreeTierBillingAccountName(),

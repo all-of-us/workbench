@@ -545,8 +545,8 @@ describe(getErrorsAndWarnings.name, () => {
 
   it('should show a cost warning when the user has enough remaining initial credits', () => {
     const usingInitialCredits = true;
-    const creatorFreeCreditsRemaining =
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit + 1;
+    const creatorInitialCreditsRemaining =
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit + 1;
 
     // want a running cost over $25/hr
 
@@ -558,7 +558,7 @@ describe(getErrorsAndWarnings.name, () => {
       'Your runtime is expensive. Are you sure you wish to proceed?';
 
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
-      { usingInitialCredits, analysisConfig, creatorFreeCreditsRemaining }
+      { usingInitialCredits, analysisConfig, creatorInitialCreditsRemaining }
     );
 
     expect(errorMessageContent).toEqual([]);
@@ -568,8 +568,8 @@ describe(getErrorsAndWarnings.name, () => {
 
   it('should show a cost error when the user does not have enough remaining initial credits', () => {
     const usingInitialCredits = true;
-    const creatorFreeCreditsRemaining =
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit - 1;
+    const creatorInitialCreditsRemaining =
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit - 1;
 
     // want a running cost over $25/hr
 
@@ -581,7 +581,7 @@ describe(getErrorsAndWarnings.name, () => {
       'Your runtime is too expensive. To proceed using free credits, reduce your running costs below'; // $cost
 
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
-      { usingInitialCredits, analysisConfig, creatorFreeCreditsRemaining }
+      { usingInitialCredits, analysisConfig, creatorInitialCreditsRemaining }
     );
 
     expect(warningMessageContent).toEqual([]);
@@ -884,7 +884,7 @@ describe('RuntimeConfigurationPanel', () => {
       },
       accessLevel: WorkspaceAccessLevel.WRITER,
       billingAccountName:
-        'billingAccounts/' + defaultServerConfig.freeTierBillingAccountId,
+        'billingAccounts/' + defaultServerConfig.initialCreditsBillingAccountId,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       googleProject: runtimeApiStub.runtime.googleProject,
     });

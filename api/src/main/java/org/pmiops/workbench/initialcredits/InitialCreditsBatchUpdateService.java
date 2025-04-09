@@ -1,67 +1,57 @@
 package org.pmiops.workbench.initialcredits;
 
+import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
+
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Range;
+import com.google.common.base.Stopwatch;
 import jakarta.inject.Provider;
+import java.time.Duration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbGoogleProjectPerCost;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * Class to call the {@link InitialCreditsService} with batches of users. This ensures that
- * FreeTierBillingService will commit the transaction for a smaller batch of users instead of
- * processing all users in one transaction and eventually timing out. See RW-6280
+ * InitialCreditsBatchUpdateService will commit the transaction for a smaller batch of users instead
+ * of processing all users in one transaction and eventually timing out. See RW-6280
  */
 @Service
 public class InitialCreditsBatchUpdateService {
-
-  private static final Logger logger =
+  private static final Logger log =
       Logger.getLogger(InitialCreditsBatchUpdateService.class.getName());
 
-  private final UserDao userDao;
-  private final InitialCreditsService initialCreditsService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
-
   private final BigQueryService bigQueryService;
-
-  private final GoogleProjectPerCostDao googleProjectPerCostDao;
-
+  private final InitialCreditsService initialCreditsService;
+  private final Provider<Stopwatch> stopwatchProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
-
-  private static final int MIN_USERS_BATCH = 5;
-  private static final int MAX_USERS_BATCH = 999;
-  public static final Range<Integer> batchSizeRange =
-      Range.closed(MIN_USERS_BATCH, MAX_USERS_BATCH);
 
   @Autowired
   public InitialCreditsBatchUpdateService(
-      GoogleProjectPerCostDao googleProjectPerCostDao,
-      UserDao userDao,
+      BigQueryService bigQueryService,
       InitialCreditsService initialCreditsService,
+      Provider<Stopwatch> stopwatchProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceDao workspaceDao,
-      BigQueryService bigQueryService) {
-    this.googleProjectPerCostDao = googleProjectPerCostDao;
-    this.userDao = userDao;
-    this.initialCreditsService = initialCreditsService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
+      UserDao userDao,
+      WorkspaceDao workspaceDao) {
     this.bigQueryService = bigQueryService;
+    this.initialCreditsService = initialCreditsService;
+    this.userDao = userDao;
+    this.stopwatchProvider = stopwatchProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
   }
 
@@ -71,55 +61,28 @@ public class InitialCreditsBatchUpdateService {
    * @param userIdList
    */
   public void checkInitialCreditsUsage(List<Long> userIdList) {
-    Set<String> googleProjectsForUserSet = workspaceDao.getGoogleProjectForUserList(userIdList);
+    Set<String> googleProjects = workspaceDao.getWorkspaceGoogleProjectsForCreators(userIdList);
 
-    List<DbGoogleProjectPerCost> googleProjectPerCostList =
-        (List<DbGoogleProjectPerCost>)
-            googleProjectPerCostDao.findAllByGoogleProjectId(googleProjectsForUserSet);
-
-    // Create Map Key: googleProject and value: cost
-    Map<String, Double> userWorkspaceBQCosts =
-        googleProjectPerCostList.stream()
+    Stopwatch stopwatch = stopwatchProvider.get().start();
+    Map<String, Double> userWorkspaceCosts =
+        getAllWorkspaceCostsFromBQ().entrySet().stream()
+            .filter(entry -> googleProjects.contains(entry.getKey()))
             .collect(
-                Collectors.toMap(
-                    DbGoogleProjectPerCost::getGoogleProjectId, DbGoogleProjectPerCost::getCost));
+                Collectors.groupingBy(
+                    Entry::getKey, Collectors.summingDouble(Map.Entry::getValue)));
+    Duration elapsed = stopwatch.stop().elapsed();
+    log.info(
+        String.format(
+            "checkInitialCreditsUsage: Filtered %d workspace cost entries from BigQuery in %s",
+            userWorkspaceCosts.size(), formatDurationPretty(elapsed)));
 
     Set<DbUser> dbUserSet =
         userIdList.stream().map(userDao::findUserByUserId).collect(Collectors.toSet());
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(dbUserSet, userWorkspaceBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(dbUserSet, userWorkspaceCosts);
   }
 
-  /**
-   * 1- Get users who have active free tier workspaces 2- Iterate over these users in batches of X
-   * and find the cost of their workspaces before/after
-   */
-  public void checkInitialCreditsUsage() {
-    logger.info("Checking Free Tier Billing usage - start");
-
-    Iterable<DbUser> freeTierActiveWorkspaceCreators = userDao.findAll();
-    long numberOfUsers = Iterators.size(freeTierActiveWorkspaceCreators.iterator());
-    int count = 0;
-
-    Map<String, Double> allBQCosts = getFreeTierWorkspaceCostsFromBQ();
-
-    logger.info(String.format("Retrieved all BQ costs, size is: %d", allBQCosts.size()));
-
-    for (List<DbUser> usersPartition :
-        Iterables.partition(
-            freeTierActiveWorkspaceCreators, freeTierCronUserBatchSizeFromConfig())) {
-      logger.info(
-          String.format(
-              "Processing users batch of size/total: %d/%d. Current iteration is: %d",
-              usersPartition.size(), numberOfUsers, count++));
-      initialCreditsService.checkInitialCreditsUsageForUsers(
-          new HashSet<>(usersPartition), allBQCosts);
-    }
-
-    logger.info("Checking Free Tier Billing usage - finish");
-  }
-
-  public Map<String, Double> getFreeTierWorkspaceCostsFromBQ() {
+  private Map<String, Double> getAllWorkspaceCostsFromBQ() {
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
                 "SELECT id, SUM(cost) cost FROM `"
@@ -135,21 +98,5 @@ public class InitialCreditsBatchUpdateService {
     }
 
     return liveCostByWorkspace;
-  }
-
-  private int freeTierCronUserBatchSizeFromConfig() {
-    Integer freeTierCronUserBatchSize =
-        workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
-    logger.info(String.format("freeTierCronUserBatchSize is %d", freeTierCronUserBatchSize));
-
-    if (freeTierCronUserBatchSize == null || !batchSizeRange.contains(freeTierCronUserBatchSize)) {
-      freeTierCronUserBatchSize =
-          freeTierCronUserBatchSize != null
-                  && freeTierCronUserBatchSize < batchSizeRange.lowerEndpoint()
-              ? batchSizeRange.lowerEndpoint()
-              : batchSizeRange.upperEndpoint();
-    }
-
-    return freeTierCronUserBatchSize;
   }
 }

@@ -41,12 +41,11 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   @Query("SELECT user FROM DbUser user")
   List<DbUser> findUsers();
 
-  @Query("SELECT user FROM DbUser user WHERE user.disabled = FALSE")
-  List<DbUser> findUsersExcludingDisabled();
-
   @Query(
-      "SELECT user FROM DbUser user JOIN FETCH user.userInitialCreditsExpiration uice WHERE uice.expirationCleanupTime IS NULL")
-  List<DbUser> findUsersWithActiveInitialCredits();
+      "SELECT user.userId FROM DbUser user "
+          + "JOIN DbUserInitialCreditsExpiration exp ON exp.user.userId = user.userId "
+          + "WHERE exp.expirationCleanupTime IS NULL")
+  List<Long> findUserIdsWithActiveInitialCredits();
 
   /** Returns the user with their authorities loaded. */
   @Query("SELECT user FROM DbUser user LEFT JOIN FETCH user.authorities WHERE user.userId = :id")
@@ -54,7 +53,9 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   /** Returns the user with the page visits and authorities loaded. */
   @Query(
-      "SELECT user FROM DbUser user LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
+      "SELECT user FROM DbUser user "
+          + "LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits "
+          + "WHERE user.userId = :id")
   DbUser findUserWithAuthoritiesAndPageVisits(@Param("id") long id);
 
   // Find users matching the requested access tier and a (name or username) search term.
@@ -71,6 +72,12 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
   Set<DbUser> findUsersByUsernameInAndDisabledFalse(List<String> usernames);
+
+  @Query(
+      "SELECT DISTINCT dbUser.userId FROM DbUser dbUser "
+          + "JOIN DbUserAccessTier uat ON uat.user.userId = dbUser.userId "
+          + "WHERE uat.tierAccessStatus = 1 ") // TierAccessStatus.ENABLED
+  List<Long> findUserIdsWithCurrentTierAccess();
 
   @Query(
       "SELECT u FROM DbUser u "

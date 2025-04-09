@@ -130,9 +130,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
     Long getCreatorId();
 
-    Double getFreeTierCost();
+    Double getInitialCreditsCost();
 
-    Timestamp getFreeTierLastUpdated();
+    Timestamp getInitialCreditsLastUpdated();
 
     Timestamp getWorkspaceLastUpdated();
 
@@ -143,8 +143,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       "SELECT w.workspaceId AS workspaceId, "
           + "w.googleProject AS googleProject, "
           + "w.creator.id AS creatorId, "
-          + "f.cost AS freeTierCost, "
-          + "f.lastUpdateTime AS freeTierLastUpdated, "
+          + "f.cost AS initialCreditsCost, "
+          + "f.lastUpdateTime AS initialCreditsLastUpdated, "
           + "w.lastModifiedTime AS workspaceLastUpdated, "
           + "w.activeStatus AS activeStatus "
           + "FROM DbWorkspace w "
@@ -156,6 +156,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   @Query(
       "SELECT DISTINCT(w.googleProject) AS googleProject "
           + "FROM DbWorkspace w "
-          + "WHERE w.creator.userId in (:creatoridList)")
-  Set<String> getGoogleProjectForUserList(@Param("creatoridList") List<Long> creatorIdList);
+          + "WHERE w.creator.userId in (:creatorIds)")
+  Set<String> getWorkspaceGoogleProjectsForCreators(@Param("creatorIds") List<Long> creatorIds);
 }

@@ -81,7 +81,7 @@ describe(CreateGkeAppButton.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve());
 
   beforeEach(() => {
-    const freeTierBillingAccountId = 'FreeTierBillingAccountId';
+    const initialCreditsBillingAccountId = 'initialCreditsBillingAccountId';
     const workspaceStub = buildWorkspaceStub();
     const oneMinute = 60 * 1000;
     defaultProps = {
@@ -89,7 +89,7 @@ describe(CreateGkeAppButton.name, () => {
       existingApp: null,
       workspace: {
         ...workspaceStub,
-        billingAccountName: `billingAccounts/${freeTierBillingAccountId}`,
+        billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
         namespace: workspaceNamespace,
         initialCredits: {
           ...workspaceStub.initialCredits,
@@ -101,7 +101,7 @@ describe(CreateGkeAppButton.name, () => {
     };
 
     serverConfigStore.set({
-      config: { ...defaultServerConfig, freeTierBillingAccountId },
+      config: { ...defaultServerConfig, initialCreditsBillingAccountId },
     });
     registerApiClient(AppsApi, new AppsApiStub());
     registerApiClient(DisksApi, new DisksApiStub());

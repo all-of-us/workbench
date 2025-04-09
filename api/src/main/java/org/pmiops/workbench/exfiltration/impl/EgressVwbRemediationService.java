@@ -68,7 +68,8 @@ public class EgressVwbRemediationService extends EgressRemediationService {
   }
 
   @Override
-  protected void logEvent(DbEgressEvent event, EgressRemediationAction action) throws ApiException {
+  protected void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
+      throws ApiException {
     egressJiraHandler.logEventToJira(event, action);
   }
 

@@ -1,9 +1,10 @@
 package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
-import static org.pmiops.workbench.utils.CostComparisonUtils.getUserFreeTierDollarLimit;
+import static org.pmiops.workbench.utils.CostComparisonUtils.getUserInitialCreditsLimit;
 
 import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -39,26 +39,26 @@ public class CloudTaskInitialCreditsExhaustionController
   private static final Logger logger =
       LoggerFactory.getLogger(CloudTaskInitialCreditsExhaustionController.class);
 
-  private final WorkspaceDao workspaceDao;
-  private final WorkspaceService workspaceService;
-  private final UserDao userDao;
-  private final Provider<WorkbenchConfig> workbenchConfig;
   private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
+  private final Provider<WorkbenchConfig> workbenchConfig;
+  private final UserDao userDao;
+  private final WorkspaceDao workspaceDao;
+  private final WorkspaceService workspaceService;
 
   CloudTaskInitialCreditsExhaustionController(
-      WorkspaceDao workspaceDao,
-      WorkspaceService workspaceService,
-      UserDao userDao,
-      Provider<WorkbenchConfig> workbenchConfig,
       LeonardoApiClient leonardoApiClient,
-      MailService mailService) {
-    this.workspaceDao = workspaceDao;
-    this.workspaceService = workspaceService;
-    this.userDao = userDao;
-    this.workbenchConfig = workbenchConfig;
+      MailService mailService,
+      Provider<WorkbenchConfig> workbenchConfig,
+      UserDao userDao,
+      WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService) {
     this.leonardoApiClient = leonardoApiClient;
     this.mailService = mailService;
+    this.userDao = userDao;
+    this.workbenchConfig = workbenchConfig;
+    this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
   }
 
   @SuppressWarnings("unchecked")
@@ -75,9 +75,8 @@ public class CloudTaskInitialCreditsExhaustionController
         "handleInitialCreditsExhaustionBatch: Processing request for users: {}",
         request.getUsers().toString());
 
-    Iterable<DbUser> users = userDao.findAllById(request.getUsers());
-    Set<DbUser> usersSet =
-        StreamSupport.stream(users.spliterator(), false).collect(Collectors.toSet());
+    Set<DbUser> users =
+        Streams.stream(userDao.findAllById(request.getUsers())).collect(Collectors.toSet());
 
     Map<String, Double> stringKeyDbCostMap = (Map<String, Double>) request.getDbCostByCreator();
     Map<Long, Double> dbCostByCreator = convertMapKeysToLong(stringKeyDbCostMap);
@@ -85,12 +84,11 @@ public class CloudTaskInitialCreditsExhaustionController
     Map<String, Double> stringKeyLiveCostMap = (Map<String, Double>) request.getLiveCostByCreator();
     Map<Long, Double> liveCostByCreator = convertMapKeysToLong(stringKeyLiveCostMap);
 
-    var newlyExhaustedUsers = getNewlyExhaustedUsers(usersSet, dbCostByCreator, liveCostByCreator);
+    var newlyExhaustedUsers = getNewlyExhaustedUsers(users, dbCostByCreator, liveCostByCreator);
 
     handleExhaustedUsers(newlyExhaustedUsers);
 
-    alertUsersBasedOnTheThreshold(
-        usersSet, dbCostByCreator, liveCostByCreator, newlyExhaustedUsers);
+    alertUsersBasedOnTheThreshold(users, dbCostByCreator, liveCostByCreator, newlyExhaustedUsers);
 
     logger.info(
         "handleInitialCreditsExhaustionBatch: Finished processing request for users: {}",
@@ -106,11 +104,12 @@ public class CloudTaskInitialCreditsExhaustionController
               "handleExhaustedUsers: handling user with exhausted credits {}", user.getUsername());
           workspaceService.updateInitialCreditsExhaustion(user, true);
           // delete apps and runtimes
-          deleteAppsAndRuntimesInFreeTierWorkspaces(user);
+          deleteAppsAndRuntimesInInitialCreditsWorkspaces(user);
           try {
             mailService.alertUserInitialCreditsExhausted(user);
           } catch (MessagingException e) {
-            logger.warn("failed to send free tier exhaustion email to {}", user.getUsername(), e);
+            logger.warn(
+                "failed to send initial credits exhaustion email to {}", user.getUsername(), e);
           }
         });
   }
@@ -121,7 +120,7 @@ public class CloudTaskInitialCreditsExhaustionController
       Map<Long, Double> liveCostByCreator,
       Set<DbUser> newlyExhaustedUsers) {
     final List<Double> costThresholdsInDescOrder =
-        workbenchConfig.get().billing.freeTierCostAlertThresholds;
+        workbenchConfig.get().billing.initialCreditsCostAlertThresholds;
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
     Map<Long, DbUser> usersCache =
@@ -153,10 +152,10 @@ public class CloudTaskInitialCreditsExhaustionController
   }
 
   /**
-   * Get the list of newly exhausted users (who exceeded their free tier limit) and mark all their
-   * workspaces as inactive
+   * Get the list of newly exhausted users (those who exceeded their initial credits limit) and mark
+   * all their workspaces as inactive
    *
-   * @param allUsers set of all users to filter them whether they have active free tier workspace
+   * @param allUsers set of all users to filter whether they have active initial credits workspaces
    * @param dbCostByCreator Map of userId->dbCost
    * @param liveCostByCreator Map of userId->liveCost
    * @return a {@link Set} of newly exhausted users
@@ -168,9 +167,10 @@ public class CloudTaskInitialCreditsExhaustionController
 
     final Map<Long, DbUser> dbUsersWithChangedCosts =
         findDbUsersWithChangedCosts(allUsers, dbCostByCreator, liveCostByCreator);
-    Set<DbUser> freeTierUsers = getFreeTierActiveWorkspaceCreatorsIn(allUsers);
+    Set<DbUser> creatorsWithInitialCredits =
+        filterToWorkspaceCreatorsWithActiveInitialCredits(allUsers);
 
-    // Find users who exceeded their free tier limit
+    // Find users who exceeded their initial credits limit
     // Here costs in liveCostByCreator could be outdated because we're filtering on active  or
     // recently deleted workspaces in previous steps.
     // However, dbCostByCreator will contain the up-to-date costs for all the
@@ -183,19 +183,19 @@ public class CloudTaskInitialCreditsExhaustionController
                         e.getValue(),
                         Math.max(
                             dbCostByCreator.get(e.getKey()), liveCostByCreator.get(e.getKey())),
-                        workbenchConfig.get().billing.defaultFreeCreditsDollarLimit))
+                        workbenchConfig.get().billing.defaultInitialCreditsDollarLimit))
             .map(Map.Entry::getValue)
             .collect(Collectors.toSet());
 
-    final Set<DbUser> newlyExhaustedFreeTierUsers =
-        Sets.intersection(exhaustedUsers, freeTierUsers);
+    final Set<DbUser> newlyExhaustedCreatorsWithInitialCredits =
+        Sets.intersection(exhaustedUsers, creatorsWithInitialCredits);
 
     logger.info(
         String.format(
-            "Found %d users exceeding their free tier limit, out of which, %d are new",
-            exhaustedUsers.size(), newlyExhaustedFreeTierUsers.size()));
+            "Found %d users exceeding their initial credits limit, out of which, %d are new",
+            exhaustedUsers.size(), newlyExhaustedCreatorsWithInitialCredits.size()));
 
-    return newlyExhaustedFreeTierUsers;
+    return newlyExhaustedCreatorsWithInitialCredits;
   }
 
   /**
@@ -230,12 +230,12 @@ public class CloudTaskInitialCreditsExhaustionController
     return dbUsersWithChangedCosts;
   }
 
-  private Set<DbUser> getFreeTierActiveWorkspaceCreatorsIn(Set<DbUser> users) {
+  private Set<DbUser> filterToWorkspaceCreatorsWithActiveInitialCredits(Set<DbUser> users) {
     return workspaceDao.findCreatorsByActiveInitialCredits(
         List.of(workbenchConfig.get().billing.initialCreditsBillingAccountName()), users);
   }
 
-  private void deleteAppsAndRuntimesInFreeTierWorkspaces(DbUser user) {
+  private void deleteAppsAndRuntimesInInitialCreditsWorkspaces(DbUser user) {
     logger.info("Deleting apps and runtimes for user {}", user.getUsername());
 
     workspaceDao.findAllByCreator(user).stream()
@@ -259,7 +259,7 @@ public class CloudTaskInitialCreditsExhaustionController
    * Has this user passed a cost threshold between this check and the previous run?
    *
    * <p>Compare this user's total cost with that of the previous run, and trigger an alert if this
-   * is the run which pushed it over a free credits threshold.
+   * is the run which pushed it over an initial credits threshold.
    *
    * @param user The user to check
    * @param currentCost The current total cost incurred by this user, according to BigQuery
@@ -271,8 +271,8 @@ public class CloudTaskInitialCreditsExhaustionController
       DbUser user, double currentCost, double previousCost, List<Double> thresholdsInDescOrder) {
 
     final double limit =
-        getUserFreeTierDollarLimit(
-            user, workbenchConfig.get().billing.defaultFreeCreditsDollarLimit);
+        getUserInitialCreditsLimit(
+            user, workbenchConfig.get().billing.defaultInitialCreditsDollarLimit);
     final double remainingBalance = limit - currentCost;
 
     // this shouldn't happen, but it did (RW-4678)
@@ -280,7 +280,7 @@ public class CloudTaskInitialCreditsExhaustionController
     if (CostComparisonUtils.compareCosts(currentCost, previousCost) < 0) {
       String msg =
           String.format(
-              "User %s (%s) has %f in total free tier spending in BigQuery, "
+              "User %s (%s) has %f in total initial credits spending in BigQuery, "
                   + "which is less than the %f previous spending we have recorded in the DB",
               user.getUsername(),
               Optional.ofNullable(user.getContactEmail()).orElse("NULL"),

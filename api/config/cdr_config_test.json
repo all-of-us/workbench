@@ -122,7 +122,6 @@
       "hasSurveyConductData": true,
       "hasMHWBAndETMData": true,
       "accessTier": "registered",
-      "tanagraEnabled": true,
       "publicReleaseNumber": 4
     },
     {
@@ -147,7 +146,6 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "tanagraEnabled": true,
       "publicReleaseNumber": 4
     },
     {

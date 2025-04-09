@@ -132,7 +132,6 @@
       "hasSurveyConductData": true,
       "hasMHWBAndETMData": true,
       "accessTier": "registered",
-      "tanagraEnabled": true,
       "publicReleaseNumber": 5
     },
     {
@@ -156,7 +155,6 @@
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "tanagraEnabled": true,
       "publicReleaseNumber": 5
     }
   ]

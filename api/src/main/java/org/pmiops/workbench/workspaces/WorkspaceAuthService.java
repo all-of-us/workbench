@@ -61,7 +61,7 @@ public class WorkspaceAuthService {
 
   /*
    * This function will check if a workspace is eligible to be using initial credits.
-   * This involves checking whether they have a free tier billing account
+   * This involves checking whether it's using the initial credits billing account
    * and that their initial credits have not been exhausted or expired.
    */
   public void validateInitialCreditUsage(String workspaceNamespace, String workspaceTerraName)

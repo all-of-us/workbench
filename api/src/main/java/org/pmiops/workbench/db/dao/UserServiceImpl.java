@@ -498,13 +498,13 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<DbUser> getAllUsersExcludingDisabled() {
-    return userDao.findUsersExcludingDisabled();
+  public List<Long> getAllUserIdsWithCurrentTierAccess() {
+    return userDao.findUserIdsWithCurrentTierAccess();
   }
 
   @Override
-  public List<DbUser> getAllUsersWithActiveInitialCredits() {
-    return userDao.findUsersWithActiveInitialCredits();
+  public List<Long> getAllUserIdsWithActiveInitialCredits() {
+    return userDao.findUserIdsWithActiveInitialCredits();
   }
 
   /**

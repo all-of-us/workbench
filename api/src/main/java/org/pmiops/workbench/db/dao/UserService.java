@@ -89,9 +89,9 @@ public interface UserService {
 
   List<DbUser> getAllUsers();
 
-  List<DbUser> getAllUsersExcludingDisabled();
+  List<Long> getAllUserIdsWithCurrentTierAccess();
 
-  List<DbUser> getAllUsersWithActiveInitialCredits();
+  List<Long> getAllUserIdsWithActiveInitialCredits();
 
   /**
    * Find users whose name or username match the supplied search terms and who have the appropriate

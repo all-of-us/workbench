@@ -2,9 +2,12 @@ package org.pmiops.workbench.utils;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.PageImpl;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValue.Attribute;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableResult;
+import java.util.Arrays;
 import java.util.List;
 
 public class BigQueryUtils {
@@ -23,5 +26,10 @@ public class BigQueryUtils {
 
   public static TableResult emptyTableResult() {
     return newTableResult(null, 0L, new PageImpl<>(null, "", null));
+  }
+
+  public static FieldValueList tableRow(String... rowData) {
+    return FieldValueList.of(
+        Arrays.stream(rowData).map(value -> FieldValue.of(Attribute.PRIMITIVE, value)).toList());
   }
 }

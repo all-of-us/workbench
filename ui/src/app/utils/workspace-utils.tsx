@@ -11,7 +11,8 @@ export const EARLIEST_PUBLIC_CDR_VERSION_NUMBER_INCLUDING_AIAN = 8;
 export const isUsingInitialCredits = (workspace: Workspace): boolean => {
   return (
     workspace.billingAccountName ===
-    'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId
+    'billingAccounts/' +
+      serverConfigStore.get().config.initialCreditsBillingAccountId
   );
 };
 

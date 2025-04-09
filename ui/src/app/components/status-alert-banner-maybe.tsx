@@ -8,6 +8,7 @@ import {
   isDismissed,
   saveDismissedMessage,
 } from 'app/utils/dismissed-messages';
+import { inRange } from 'app/utils/numbers';
 
 import { Button } from './buttons';
 import { MultiToastBanner } from './multi-toast-banner';
@@ -17,6 +18,9 @@ import { ToastType } from './toast-banner';
 const getMessageId = (statusAlert: StatusAlert) =>
   `status-alert-${statusAlert.statusAlertId}`;
 
+const isAlertActive = (alert: StatusAlert): boolean =>
+  alert.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
+  inRange(Date.now(), alert.startTimeEpochMillis, alert.endTimeEpochMillis);
 const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
   return {
     id: getMessageId(statusAlert),
@@ -43,10 +47,7 @@ export const StatusAlertBannerMaybe = () => {
         if (statusAlerts && statusAlerts.length > 0) {
           // Process each alert and create a message if it's not dismissed
           statusAlerts.forEach((alert) => {
-            if (
-              alert.alertLocation === StatusAlertLocation.AFTER_LOGIN &&
-              alert.message
-            ) {
+            if (isAlertActive(alert)) {
               if (!isDismissed(getMessageId(alert))) {
                 const apiMessage: MultiToastMessage = toToastMessage(alert);
                 messages.push(apiMessage);

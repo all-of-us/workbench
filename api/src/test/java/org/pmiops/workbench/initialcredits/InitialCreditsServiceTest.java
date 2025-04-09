@@ -144,16 +144,16 @@ public class InitialCreditsServiceTest {
   @BeforeEach
   public void setUp() throws MessagingException {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
-    workbenchConfig.billing.accountId = "free-tier";
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
-    workbenchConfig.billing.freeTierCronUserBatchSize = 10;
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.5, .75);
+    workbenchConfig.billing.accountId = "initial-credits";
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
     workbenchConfig.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
     workbenchConfig.billing.initialCreditsExpirationWarningDays = warningPeriodDays;
-    workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
-    workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2L;
+    workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
+    workbenchConfig.billing.numberOfDaysToConsiderForInitialCreditsUsageUpdate = 2L;
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
+    workbenchConfig.offlineBatch.usersPerCheckInitialCreditsUsageTask = 10;
 
     workspace =
         spyWorkspaceDao.save(
@@ -176,7 +176,7 @@ public class InitialCreditsServiceTest {
     final double limit = 100.0;
     final double costUnderThreshold = 49.5;
 
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = limit;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = limit;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -228,14 +228,14 @@ public class InitialCreditsServiceTest {
   public void checkInitialCreditsUsage_altDollarThresholds() {
 
     // set alert thresholds at 30% and 65% instead
-    workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.3, .65));
+    workbenchConfig.billing.initialCreditsCostAlertThresholds = Doubles.asList(.3, .65);
 
     final double limit = 100.0;
     final double costUnderThreshold = 29.9;
 
     double costOverThreshold = 30.1;
 
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = limit;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = limit;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -282,7 +282,7 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void checkInitialCreditsUsage_disabledUserNotIgnored() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
 
@@ -305,7 +305,7 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void checkInitialCreditsUsage_deletedWorkspaceNotIgnored() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
@@ -330,7 +330,7 @@ public class InitialCreditsServiceTest {
   @Test
   public void checkInitialCreditsUsage_noAlert() {
     // set limit so usage is just under the 50% threshold
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 49.99);
@@ -349,7 +349,7 @@ public class InitialCreditsServiceTest {
   @Test
   public void checkInitialCreditsUsage_workspaceMissingCreatorNoNPE() {
     // set limit so usage is just under the 50% threshold
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 49.99);
@@ -368,46 +368,44 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void maybeSetDollarLimitOverride_true() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
     commitTransaction();
 
     assertThat(initialCreditsService.maybeSetDollarLimitOverride(user, 200.0)).isTrue();
-    verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
+    verify(mockUserServiceAuditor).fireSetInitialCreditsOverride(user.getUserId(), null, 200.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 200.0);
 
     DbUser currentUser = userDao.findUserByUserId(user.getUserId());
     assertThat(initialCreditsService.maybeSetDollarLimitOverride(currentUser, 100.0)).isTrue();
-    verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(user.getUserId(), 200.0, 100.0);
+    verify(mockUserServiceAuditor).fireSetInitialCreditsOverride(user.getUserId(), 200.0, 100.0);
     assertWithinBillingTolerance(
-        initialCreditsService.getUserFreeTierDollarLimit(currentUser), 100.0);
+        initialCreditsService.getUserInitialCreditsLimit(currentUser), 100.0);
   }
 
   @Test
   public void maybeSetDollarLimitOverride_false() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
     assertThat(initialCreditsService.maybeSetDollarLimitOverride(user, 100.0)).isFalse();
     verify(mockUserServiceAuditor, never())
-        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 100.0);
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 100.0);
 
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 200.0;
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 200.0);
 
     assertThat(initialCreditsService.maybeSetDollarLimitOverride(user, 200.0)).isFalse();
     verify(mockUserServiceAuditor, never())
-        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 200.0);
   }
 
   @Test
   public void maybeSetDollarLimitOverride_above_usage() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 150.0);
@@ -415,8 +413,8 @@ public class InitialCreditsServiceTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    assertThat(initialCreditsService.getCachedFreeTierUsage(user)).isNull();
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 100.0);
+    assertThat(initialCreditsService.getCachedInitialCreditsUsage(user)).isNull();
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 100.0);
 
     commitTransaction();
 
@@ -428,12 +426,11 @@ public class InitialCreditsServiceTest {
             argThat(new MapMatcher(Map.of(user.getUserId(), 150.0))));
 
     assertSingleWorkspaceTestDbState(user, workspace, 150.0);
-    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user), 150.0);
+    assertWithinBillingTolerance(initialCreditsService.getCachedInitialCreditsUsage(user), 150.0);
 
     initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
-    verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
+    verify(mockUserServiceAuditor).fireSetInitialCreditsOverride(user.getUserId(), null, 200.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, 150.0);
 
     initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
@@ -444,7 +441,7 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void setFreeTierDollarOverride_under_usage() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 300.0);
@@ -454,8 +451,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    assertThat(initialCreditsService.getCachedFreeTierUsage(user)).isNull();
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 100.0);
+    assertThat(initialCreditsService.getCachedInitialCreditsUsage(user)).isNull();
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 100.0);
 
     initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
     verify(taskQueueService)
@@ -464,19 +461,17 @@ public class InitialCreditsServiceTest {
             argThat(new MapMatcher(Map.of(user.getUserId(), 0.0d))),
             argThat(new MapMatcher(Map.of(user.getUserId(), 300.0))));
     assertSingleWorkspaceTestDbState(user, workspace, 300.0);
-    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user), 300.0);
+    assertWithinBillingTolerance(initialCreditsService.getCachedInitialCreditsUsage(user), 300.0);
 
     initialCreditsService.maybeSetDollarLimitOverride(user, 200.0);
-    verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), 200.0);
+    verify(mockUserServiceAuditor).fireSetInitialCreditsOverride(user.getUserId(), null, 200.0);
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, 300.0);
 
     initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
     assertSingleWorkspaceTestDbState(user, workspace, 300.0);
 
-    verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
+    verify(mockUserServiceAuditor).fireSetInitialCreditsOverride(user.getUserId(), null, 200.0);
   }
 
   @Test
@@ -487,7 +482,7 @@ public class InitialCreditsServiceTest {
     final double cost2 = 234.56;
     final double sum = cost1 + cost2;
 
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = sum - 0.01;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = sum - 0.01;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(proj1, cost1);
@@ -523,7 +518,7 @@ public class InitialCreditsServiceTest {
     final double cost1 = 123.45;
     final double cost2 = 234.56;
 
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = Math.min(cost1, cost2) - 0.01;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = Math.min(cost1, cost2) - 0.01;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(proj1, cost1);
@@ -558,7 +553,7 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void checkInitialCreditsUsage_dbUpdate() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
 
@@ -603,7 +598,7 @@ public class InitialCreditsServiceTest {
   // Regression test coverage for RW-8328.
   @Test
   public void checkInitialCreditsUsage_singleAlertForExhaustedAndByoBilling() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
 
@@ -627,25 +622,25 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void getUserFreeTierDollarLimit_default() {
+  public void getUserInitialCreditsLimit_default() {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
     commitTransaction();
 
     final double initialFreeCreditsDollarLimit = 1.0;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = initialFreeCreditsDollarLimit;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = initialFreeCreditsDollarLimit;
     assertWithinBillingTolerance(
-        initialCreditsService.getUserFreeTierDollarLimit(user), initialFreeCreditsDollarLimit);
+        initialCreditsService.getUserInitialCreditsLimit(user), initialFreeCreditsDollarLimit);
 
     final double fractionalFreeCreditsDollarLimit = 123.456;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = fractionalFreeCreditsDollarLimit;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = fractionalFreeCreditsDollarLimit;
     assertWithinBillingTolerance(
-        initialCreditsService.getUserFreeTierDollarLimit(user), fractionalFreeCreditsDollarLimit);
+        initialCreditsService.getUserInitialCreditsLimit(user), fractionalFreeCreditsDollarLimit);
   }
 
   @Test
-  public void getUserFreeTierDollarLimit_override() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 123.456;
+  public void getUserInitialCreditsLimit_override() {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 123.456;
 
     DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
@@ -653,23 +648,21 @@ public class InitialCreditsServiceTest {
 
     final double limit1 = 100.0;
     initialCreditsService.maybeSetDollarLimitOverride(user, limit1);
-    verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, limit1);
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), limit1);
+    verify(mockUserServiceAuditor).fireSetInitialCreditsOverride(user.getUserId(), null, limit1);
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), limit1);
 
     final double limit2 = 200.0;
 
     user = userDao.findUserByUserId(user.getUserId());
 
     initialCreditsService.maybeSetDollarLimitOverride(user, limit2);
-    verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(user.getUserId(), limit1, limit2);
-    assertWithinBillingTolerance(initialCreditsService.getUserFreeTierDollarLimit(user), limit2);
+    verify(mockUserServiceAuditor).fireSetInitialCreditsOverride(user.getUserId(), limit1, limit2);
+    assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), limit2);
   }
 
   @Test
   public void getUserCachedFreeTierUsage() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
@@ -684,13 +677,13 @@ public class InitialCreditsServiceTest {
     commitTransaction();
 
     // we have not yet had a chance to cache this usage
-    assertThat(initialCreditsService.getCachedFreeTierUsage(user1)).isNull();
-    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isTrue();
+    assertThat(initialCreditsService.getCachedInitialCreditsUsage(user1)).isNull();
+    assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isTrue();
 
     initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user1), allBQCosts);
 
-    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user1), 100.01);
-    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isFalse();
+    assertWithinBillingTolerance(initialCreditsService.getCachedInitialCreditsUsage(user1), 100.01);
+    assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isFalse();
 
     TestTransaction.start();
     createWorkspace(user1, "another project");
@@ -700,32 +693,35 @@ public class InitialCreditsServiceTest {
         ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0, "another project", 200.0);
 
     // we have not yet cached the new workspace costs
-    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user1), 100.01);
+    assertWithinBillingTolerance(initialCreditsService.getCachedInitialCreditsUsage(user1), 100.01);
 
     initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user1), costs);
     final double expectedTotalCachedFreeTierUsage = 1000.0 + 200.0;
     assertWithinBillingTolerance(
-        initialCreditsService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
+        initialCreditsService.getCachedInitialCreditsUsage(user1),
+        expectedTotalCachedFreeTierUsage);
 
     initialCreditsService.checkInitialCreditsUsageForUsers(
         Sets.newHashSet(user1, user2), ImmutableMap.of("project 3", user2Costs));
 
     assertWithinBillingTolerance(
-        initialCreditsService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
-    assertWithinBillingTolerance(initialCreditsService.getCachedFreeTierUsage(user2), user2Costs);
-    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user2)).isFalse();
+        initialCreditsService.getCachedInitialCreditsUsage(user1),
+        expectedTotalCachedFreeTierUsage);
+    assertWithinBillingTolerance(
+        initialCreditsService.getCachedInitialCreditsUsage(user2), user2Costs);
+    assertThat(initialCreditsService.userHasRemainingInitialCredits(user2)).isFalse();
   }
 
   @Test
   public void userHasRemainingFreeTierCredits_newUser() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     final DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
-    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isTrue();
+    assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isTrue();
   }
 
   @Test
-  public void userHasRemainingFreeTierCredits() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+  public void userHasRemainingInitialCredits() {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     final DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user1, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -736,21 +732,21 @@ public class InitialCreditsServiceTest {
     Map<String, Double> allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 99.99);
 
     initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user1), allBQCosts);
-    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isTrue();
+    assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isTrue();
 
     // 100.01 > 100.0
     allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
     initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user1), allBQCosts);
-    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isFalse();
+    assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isFalse();
 
     // 100.01 < 200.0
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
-    assertThat(initialCreditsService.userHasRemainingFreeTierCredits(user1)).isTrue();
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 200.0;
+    assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isTrue();
   }
 
   @Test
   public void test_disableOnlyFreeTierWorkspaces() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     Map<String, Double> allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
 
@@ -788,7 +784,7 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     Map<String, Double> allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 50.0);
 
     TestTransaction.start();
@@ -816,7 +812,7 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     Map<String, Double> allBQCosts = new HashMap<>();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 50.0);
 
@@ -1139,7 +1135,7 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void test_checkInitialCreditsExtensionEligibility_noRemainingCredits() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     user.setUserInitialCreditsExpiration(
@@ -1156,7 +1152,7 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void test_checkInitialCreditsExtensionEligibility_hasRemainingCredits() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     user.setUserInitialCreditsExpiration(

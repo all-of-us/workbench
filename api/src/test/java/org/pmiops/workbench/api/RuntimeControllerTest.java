@@ -256,7 +256,7 @@ public class RuntimeControllerTest {
   @BeforeEach
   public void setUp() throws Exception {
     config = WorkbenchConfig.createEmptyConfig();
-    config.billing.accountId = "free-tier";
+    config.billing.accountId = "initial-credits";
     config.firecloud.leoBaseUrl = LEONARDO_URL;
     config.firecloud.gceVmZones = ImmutableList.of("us-central1-a", "us-central1-b");
     config.server.apiBaseUrl = API_BASE_URL;

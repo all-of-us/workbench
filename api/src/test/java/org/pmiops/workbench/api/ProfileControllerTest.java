@@ -177,8 +177,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_DUCC_VERSION = 27; // arbitrary for test
-  private static final String AOU_TOS_NOT_ACCEPTED_ERROR_MESSAGE =
-      "No Terms of Service acceptance recorded for user ID";
   private CreateAccountRequest createAccountRequest;
   private User googleUser;
   private static DbUser dbUser;
@@ -1546,7 +1544,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void test_updateAccountProperties_free_tier_quota() {
     createAccountAndDbUserWithAffiliation();
 
-    final Double originalQuota = dbUser.getFreeTierCreditsLimitDollarsOverride();
+    final Double originalQuota = dbUser.getInitialCreditsLimitOverride();
     final Double newQuota = 123.4;
 
     final AccountPropertyUpdate request =
@@ -1556,7 +1554,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
 
     verify(mockUserServiceAuditor)
-        .fireSetFreeTierDollarLimitOverride(dbUser.getUserId(), originalQuota, newQuota);
+        .fireSetInitialCreditsOverride(dbUser.getUserId(), originalQuota, newQuota);
   }
 
   @Test
@@ -1570,7 +1568,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileService.updateAccountProperties(request);
 
     verify(mockUserServiceAuditor, never())
-        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
   }
 
   // don't set an override if the value to set is equal to the system default
@@ -1578,31 +1576,31 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void test_updateAccountProperties_free_tier_quota_no_override() {
-    config.billing.defaultFreeCreditsDollarLimit = 123.45;
+    config.billing.defaultInitialCreditsDollarLimit = 123.45;
 
     final Profile original = createAccountAndDbUserWithAffiliation();
     assertThat(original.getFreeTierDollarQuota()).isWithin(0.01).of(123.45);
 
     // update the default - the user's profile also updates
 
-    config.billing.defaultFreeCreditsDollarLimit = 234.56;
+    config.billing.defaultInitialCreditsDollarLimit = 234.56;
     assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
         .isWithin(0.01)
         .of(234.56);
 
-    // setting a Free Credits Limit equal to the default will not override
+    // setting an initial credits limit equal to the default will not override
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
             .username(FULL_USER_NAME)
-            .freeCreditsLimit(config.billing.defaultFreeCreditsDollarLimit);
+            .freeCreditsLimit(config.billing.defaultInitialCreditsDollarLimit);
     profileService.updateAccountProperties(request);
     verify(mockUserServiceAuditor, never())
-        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
 
     // the user's profile continues to track default changes
 
-    config.billing.defaultFreeCreditsDollarLimit = 345.67;
+    config.billing.defaultInitialCreditsDollarLimit = 345.67;
     assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
         .isWithin(0.01)
         .of(345.67);
