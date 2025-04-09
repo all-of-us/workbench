@@ -168,11 +168,11 @@ public class UserServiceTest {
                         ChronoUnit.DAYS)))
             .setExtensionTime(null);
 
-    DbUser user = new DbUser();
-    user.setUsername(USERNAME);
-    user.setUserInitialCreditsExpiration(initialCreditsExpiration);
-    user = userDao.save(user);
-    providedDbUser = user;
+    providedDbUser =
+        userDao.save(
+            new DbUser()
+                .setUsername(USERNAME)
+                .setUserInitialCreditsExpiration(initialCreditsExpiration));
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = accessTierDao.save(createRegisteredTier());
@@ -180,9 +180,9 @@ public class UserServiceTest {
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
-    when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
+    when(mockInstitutionService.getByUser(providedDbUser)).thenReturn(Optional.of(institution));
     when(mockInstitutionService.validateInstitutionalEmail(
-            institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME))
+            institution, providedDbUser.getContactEmail(), REGISTERED_TIER_SHORT_NAME))
         .thenReturn(true);
   }
 
