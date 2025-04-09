@@ -36,6 +36,12 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
       InitialCreditsService.class
     })
 public interface ProfileMapper {
+  // DEPRECATED. Use initialCreditsUsage.
+  @Mapping(target = "freeTierUsage", source = "initialCreditsUsage")
+  @Mapping(target = "initialCreditsUsage", source = "initialCreditsUsage")
+  // DEPRECATED. Use initialCreditsLimit.
+  @Mapping(target = "freeTierDollarQuota", source = "initialCreditsLimit")
+  @Mapping(target = "initialCreditsLimit", source = "initialCreditsLimit")
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
   @Mapping(source = "latestTermsOfService.aouAgreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
@@ -63,8 +69,8 @@ public interface ProfileMapper {
       @Context InitialCreditsService initialCreditsService,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
       DbUserTermsOfService latestTermsOfService,
-      Double freeTierUsage,
-      Double freeTierDollarQuota,
+      Double initialCreditsUsage,
+      Double initialCreditsLimit,
       List<String> accessTierShortNames,
       List<UserTierEligibility> tierEligibilities,
       ProfileAccessModules accessModules,

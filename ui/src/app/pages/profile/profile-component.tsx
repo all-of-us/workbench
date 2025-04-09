@@ -554,8 +554,8 @@ export const ProfileComponent = fp.flow(
                   <hr style={{ ...styles.verticalLine }} />
                   {currentProfile && (
                     <InitialCreditsPanel
-                      freeTierUsage={currentProfile.freeTierUsage}
-                      freeTierDollarQuota={currentProfile.freeTierDollarQuota}
+                      initialCreditsUsage={currentProfile.initialCreditsUsage}
+                      initialCreditsLimit={currentProfile.initialCreditsLimit}
                       expirationDate={
                         currentProfile.initialCreditsExpirationEpochMillis
                       }

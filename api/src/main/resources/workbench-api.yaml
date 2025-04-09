@@ -8775,9 +8775,17 @@ components:
         address:
           $ref: '#/components/schemas/Address'
         freeTierUsage:
+          description: DEPRECATED in favor of initialCreditsUsage
           type: number
           format: double
         freeTierDollarQuota:
+          description: DEPRECATED in favor of initialCreditsLimit
+          type: number
+          format: double
+        initialCreditsUsage:
+          type: number
+          format: double
+        initialCreditsLimit:
           type: number
           format: double
         latestTermsOfServiceVersion:

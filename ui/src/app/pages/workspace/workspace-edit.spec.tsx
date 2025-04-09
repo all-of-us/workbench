@@ -1032,7 +1032,7 @@ describe(WorkspaceEdit.name, () => {
       ...profileStore.get(),
       profile: {
         ...profileStore.get().profile,
-        freeTierUsage: undefined,
+        initialCreditsUsage: undefined,
       },
     });
 

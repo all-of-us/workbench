@@ -419,13 +419,14 @@ export const WorkspaceEdit = fp.flow(
     formatFreeTierBillingAccountName(): string {
       const {
         profileState: {
-          profile: { freeTierDollarQuota, freeTierUsage },
+          profile: { initialCreditsLimit, initialCreditsUsage },
         },
       } = this.props;
 
-      const freeTierUsageInNumber = freeTierUsage ?? 0;
+      const initialCreditsUsageInNumber = initialCreditsUsage ?? 0;
 
-      const initialCreditsBalance = freeTierDollarQuota - freeTierUsageInNumber;
+      const initialCreditsBalance =
+        initialCreditsLimit - initialCreditsUsageInNumber;
       return (
         'Use All of Us initial credits - ' +
         formatInitialCreditsUSD(initialCreditsBalance) +

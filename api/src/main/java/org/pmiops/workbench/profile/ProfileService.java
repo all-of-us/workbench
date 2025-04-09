@@ -121,8 +121,9 @@ public class ProfileService {
     final DbUser user =
         userService.findUserWithAuthoritiesAndPageVisits(userLite.getUserId()).orElse(userLite);
 
-    final @Nullable Double freeTierUsage = initialCreditsService.getCachedInitialCreditsUsage(user);
-    final @Nullable Double freeTierDollarQuota =
+    final @Nullable Double initialCreditsUsage =
+        initialCreditsService.getCachedInitialCreditsUsage(user);
+    final @Nullable Double initialCreditsLimit =
         initialCreditsService.getUserInitialCreditsLimit(user);
     final @Nullable VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         verifiedInstitutionalAffiliationDao
@@ -150,8 +151,8 @@ public class ProfileService {
         initialCreditsService,
         verifiedInstitutionalAffiliation,
         latestTermsOfService,
-        freeTierUsage,
-        freeTierDollarQuota,
+        initialCreditsUsage,
+        initialCreditsLimit,
         accessTierShortNames,
         userTierEligibilities,
         accessModules,

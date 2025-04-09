@@ -156,13 +156,6 @@ export const getInitialCreditLimitOptions = (
   }));
 };
 
-export const getInitialCreditsUsage = (profile: Profile): string => {
-  const { freeTierDollarQuota, freeTierUsage } = profile;
-  return `${formatInitialCreditsUSD(
-    freeTierUsage
-  )} used of ${formatInitialCreditsUSD(freeTierDollarQuota)} limit`;
-};
-
 // returns the updated profile value only if it has changed
 export const getUpdatedProfileValue = (
   oldProfile: Profile,
@@ -321,7 +314,7 @@ export const updateAccountProperties = async (
     accessBypassRequests,
     accountDisabledStatus,
     freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, [
-      'freeTierDollarQuota',
+      'initialCreditsLimit',
     ]),
     contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'contactEmail',
