@@ -595,6 +595,7 @@ export const RuntimeConfigurationPanel = ({
 }: RuntimeConfigurationPanelProps) => {
   const workspace = useCurrentWorkspace();
   const { namespace } = workspace;
+  // This initializes the runtime and disk stores, and isLoaded represents the runtime and disk being loaded.
   const { isLoaded } = useRuntimeAndDiskStores(namespace);
 
   if (!isLoaded) {
