@@ -199,7 +199,7 @@ public class UserServiceTest {
     userService.syncEraCommonsStatus();
 
     DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(DbAccessModuleName.ERA_COMMONS, retrievedUser, null);
+    assertModuleCompletionNull(DbAccessModuleName.ERA_COMMONS, retrievedUser);
   }
 
   @Test
@@ -256,7 +256,7 @@ public class UserServiceTest {
     googleUser.setPrimaryEmail(USERNAME);
     googleUser.setIsEnrolledIn2Sv(true);
 
-    when(mockDirectoryService.getUserOrThrow(USERNAME)).thenReturn(googleUser);
+    when(mockDirectoryService.getUser(USERNAME)).thenReturn(Optional.of(googleUser));
     userService.syncTwoFactorAuthStatus();
     // twoFactorAuthCompletionTime should now be set
     DbUser user = userDao.findUserByUsername(USERNAME);
@@ -273,8 +273,14 @@ public class UserServiceTest {
     // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
     googleUser.setIsEnrolledIn2Sv(false);
     userService.syncTwoFactorAuthStatus();
-    user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser, null);
+    assertModuleCompletionNull(DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser);
+  }
+
+  @Test
+  public void testSyncTwoFactorAuthStatusNotFound() {
+    when(mockDirectoryService.getUser(USERNAME)).thenReturn(Optional.empty());
+    assertDoesNotThrow(() -> userService.syncTwoFactorAuthStatus());
+    assertModuleCompletionNull(DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser);
   }
 
   @Test
@@ -700,6 +706,10 @@ public class UserServiceTest {
   private void assertModuleCompletionEqual(
       DbAccessModuleName moduleName, DbUser user, Timestamp timestamp) {
     assertThat(getModuleCompletionTime(moduleName, user)).isEqualTo(timestamp);
+  }
+
+  private void assertModuleCompletionNull(DbAccessModuleName moduleName, DbUser user) {
+    assertThat(getModuleCompletionTime(moduleName, user)).isNull();
   }
 
   private Timestamp getModuleCompletionTime(DbAccessModuleName moduleName, DbUser user) {
