@@ -28,10 +28,9 @@ import { mockUseStore } from 'testing/utils';
 
 import { LeoRuntimeInitializer } from './leo-runtime-initializer';
 import { DATAPROC_MIN_DISK_SIZE_GB } from './machines';
-import { useCustomRuntime, useRuntimeAndDiskStores } from './runtime-hooks';
+import { useCustomRuntime } from './runtime-hooks';
 import * as runtimeHooks from './runtime-hooks';
 import { runtimeDiskStore, runtimeStore } from './stores';
-import * as useStoreModule from './stores';
 
 describe(useCustomRuntime.name, () => {
   let disksApiStub: DisksApiStub;
