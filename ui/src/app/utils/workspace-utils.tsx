@@ -19,6 +19,7 @@ export const isValidBilling = (workspace: Workspace): boolean => {
   const isExpired =
     enableInitialCreditsExpiration &&
     workspace?.initialCredits.expirationEpochMillis < Date.now();
+
   return (
     !isInitialCredits ||
     (isInitialCredits &&

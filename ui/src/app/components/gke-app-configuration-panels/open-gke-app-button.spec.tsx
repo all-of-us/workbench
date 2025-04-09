@@ -94,6 +94,7 @@ describe(OpenGkeAppButton.name, () => {
         userApp,
         workspace: {
           ...workspaceStubs[0],
+          billingAccountName: `billingAccounts/${defaultServerConfig.initialCreditsBillingAccountId}`,
           initialCredits: { exhausted: true },
         },
       });
