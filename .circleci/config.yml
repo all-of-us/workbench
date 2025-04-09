@@ -278,7 +278,17 @@ commands:
             if [ -n "$JIRA_ISSUE_KEY" ]; then
               echo "Created JIRA issue: $JIRA_ISSUE_KEY"
               echo "JIRA URL: https://precisionmedicineinitiative.atlassian.net/browse/${JIRA_ISSUE_KEY}"
+              # Save the JIRA key to a file
+              echo $JIRA_ISSUE_KEY > /tmp/workspace/jira-env.sh
+            else
+              echo "ERROR: JIRA_ISSUE_KEY not found or empty!"
+              echo "A JIRA issue is required for this deployment."
+              exit 1
             fi
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - jira-env.sh
 
   halt-test-check:
     description: "Exiting job because code in the following paths have not changed: << parameters.dir_names >> directories"
@@ -668,11 +678,24 @@ jobs:
     machine:
       image: default # latest stable version
     steps:
+    - attach_workspace:
+        at: /tmp/workspace
+    - run:
+        name: Load JIRA issue key
+        command: |
+          if [ -f /tmp/workspace/jira-env.sh ]; then
+            source /tmp/workspace/jira-env.sh
+            echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
+          else
+            echo "ERROR: jira-env.sh not found"
+            echo "This file is required for this deployment. It contains the Jira issue key associated with this release"
+            exit 1
+          fi
     - run:
         name: Comment on Jira
         command: |
           curl --request POST \
-            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
+            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
             --header 'accept: application/json' \
             --header "authorization: Basic ${JIRA_KEY}" \
             --header 'content-type: application/json' \
@@ -763,7 +786,6 @@ jobs:
                 {
                   "content": [
                     {
-  
                       "marks": [{"type": "link", "attrs": {"href": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'"}}],
                       "text": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'",
                       "type": "text"
@@ -781,6 +803,19 @@ jobs:
     machine:
       image: default # latest stable version
     steps:
+    - attach_workspace:
+        at: /tmp/workspace
+    - run:
+        name: Load JIRA issue key
+        command: |
+          if [ -f /tmp/workspace/jira-env.sh ]; then
+            source /tmp/workspace/jira-env.sh
+            echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
+          else
+            echo "ERROR: jira-env.sh not found"
+            echo "This file is required for this deployment. It contains the Jira issue key associated with this release"
+            exit 1
+          fi
     - run:
         name: Get Multiple Approvers
         command: |
@@ -833,7 +868,7 @@ jobs:
         name: Comment on Jira
         command: |
           curl --request POST \
-            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/RW-11491/comment \
+            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
             --header 'accept: application/json' \
             --header "authorization: Basic ${JIRA_KEY}" \
             --header 'content-type: application/json' \
