@@ -795,7 +795,7 @@ jobs:
       image: default # latest stable version
     steps:
     - attach_workspace:
-        at: /tmp/workspace
+        at: ~/workbench
     - run:
         name: Load JIRA issue key
         command: |
