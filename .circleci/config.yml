@@ -705,15 +705,6 @@ jobs:
                 {
                   "content": [
                     {
-                      "text": "This is a test. ",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                },
-                {
-                  "content": [
-                    {
                       "text": "Requesting change approval for this release of the Workbench to production. 1 security and 1 business approval are needed for release",
                       "type": "text"
                     }
@@ -875,15 +866,6 @@ jobs:
             --data '{
             "body": {
               "content": [
-                {
-                  "content": [
-                    {
-                      "text": "This is a test. ",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                },
                 {
                   "content": [
                     {
