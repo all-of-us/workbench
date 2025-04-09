@@ -1,5 +1,4 @@
 import {
-  BillingStatus,
   RecentWorkspace,
   RecentWorkspaceResponse,
   SpecificPopulationEnum,
@@ -59,7 +58,6 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
       reasonForAllOfUs: '',
     },
     billingAccountName: 'billing-account',
-    billingStatus: BillingStatus.ACTIVE,
     adminLocked: false,
     initialCredits: {
       exhausted: false,

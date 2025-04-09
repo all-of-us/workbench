@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import { BillingStatus } from 'generated/fetch';
-
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
@@ -15,6 +13,7 @@ import { userAppsStore, useStore } from 'app/utils/stores';
 import { openAppOrConfigPanel } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
+import { isValidBilling } from 'app/utils/workspace-utils';
 
 import { AppSelectorModal } from './app-selector-modal';
 
@@ -44,7 +43,7 @@ export const AppSelector = (props: AppSelectorProps) => {
   const [visibleModal, setVisibleModal] = useState(VisibleModal.None);
 
   const canCreateApps =
-    workspace.billingStatus === BillingStatus.ACTIVE &&
+    isValidBilling(workspace) &&
     WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
 
   const onClose = () => {

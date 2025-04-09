@@ -163,7 +163,6 @@ export const CreateGkeApp = ({
     config: { enableGKEAppMachineTypeChoice },
   } = useStore(serverConfigStore);
   const { profile } = profileState;
-  const { billingStatus } = workspace;
 
   const defaultCreateRequest = defaultAppRequest[appType];
 
@@ -494,13 +493,13 @@ export const CreateGkeApp = ({
         {isInteractiveUserApp(app?.appType) &&
         app?.status === AppStatus.RUNNING ? (
           <OpenGkeAppButton
-            {...{ billingStatus, workspace, onClose }}
+            {...{ workspace, onClose }}
             userApp={app}
             style={openOrCreateButtonStyle}
           />
         ) : (
           <CreateGkeAppButton
-            {...{ billingStatus, createAppRequest, workspace }}
+            {...{ createAppRequest, workspace }}
             existingApp={app}
             existingDisk={disk}
             username={profile.username}

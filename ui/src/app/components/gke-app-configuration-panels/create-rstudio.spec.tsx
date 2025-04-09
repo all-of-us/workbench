@@ -7,6 +7,7 @@ import { AppsApi } from 'generated/fetch';
 
 import { render, screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { MILLIS_PER_DAY } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -29,6 +30,11 @@ export const defaultProps: CommonCreateGkeAppProps = {
     accessLevel: WorkspaceAccessLevel.WRITER,
     billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+    initialCredits: {
+      exhausted: false,
+      expirationBypassed: false,
+      expirationEpochMillis: Date.now() + MILLIS_PER_DAY,
+    },
   },
   profileState: {
     profile: ProfileStubVariables.PROFILE_STUB,

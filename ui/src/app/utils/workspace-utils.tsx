@@ -1,8 +1,4 @@
-import {
-  BillingStatus,
-  FeaturedWorkspaceCategory,
-  Workspace,
-} from 'generated/fetch';
+import { FeaturedWorkspaceCategory, Workspace } from 'generated/fetch';
 
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -21,13 +17,15 @@ export const isValidBilling = (workspace: Workspace): boolean => {
   const enableInitialCreditsExpiration =
     serverConfigStore.get().config.enableInitialCreditsExpiration;
   const isExpired =
+    enableInitialCreditsExpiration &&
     workspace?.initialCredits.expirationEpochMillis < Date.now();
-  return enableInitialCreditsExpiration
-    ? !isInitialCredits ||
-        (isInitialCredits &&
-          !workspace.initialCredits.exhausted &&
-          (!isExpired || workspace.initialCredits.expirationBypassed))
-    : workspace.billingStatus === BillingStatus.ACTIVE;
+
+  return (
+    !isInitialCredits ||
+    (isInitialCredits &&
+      !workspace.initialCredits.exhausted &&
+      (!isExpired || workspace.initialCredits.expirationBypassed))
+  );
 };
 
 export const isCommunityWorkspace = (workspace: Workspace): boolean => {

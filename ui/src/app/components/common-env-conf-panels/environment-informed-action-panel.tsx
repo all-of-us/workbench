@@ -1,13 +1,7 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 
-import {
-  AppStatus,
-  BillingStatus,
-  Profile,
-  RuntimeStatus,
-  Workspace,
-} from 'generated/fetch';
+import { AppStatus, Profile, RuntimeStatus, Workspace } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
@@ -17,7 +11,10 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { formatUsd } from 'app/utils/numbers';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
-import { isUsingInitialCredits } from 'app/utils/workspace-utils';
+import {
+  isUsingInitialCredits,
+  isValidBilling,
+} from 'app/utils/workspace-utils';
 
 import { EnvironmentCostEstimator } from './environment-cost-estimator';
 import { StartStopEnvironmentButton } from './start-stop-environment-button';
@@ -116,7 +113,7 @@ export const EnvironmentInformedActionPanel = ({
         {appType === UIAppType.JUPYTER && (
           <StartStopEnvironmentButton
             {...{ status, appType, onPause, onResume }}
-            disabled={workspace.billingStatus === BillingStatus.INACTIVE}
+            disabled={!isValidBilling(workspace)}
             disabledTooltip={BILLING_ACCOUNT_DISABLED_TOOLTIP}
           />
         )}

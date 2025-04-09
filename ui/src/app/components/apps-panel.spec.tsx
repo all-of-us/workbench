@@ -2,12 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import {
-  AppsApi,
-  BillingStatus,
-  NotebooksApi,
-  RuntimeApi,
-} from 'generated/fetch';
+import { AppsApi, NotebooksApi, RuntimeApi } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
@@ -158,7 +153,6 @@ describe(AppsPanel.name, () => {
     appsStub.listAppsResponse = [];
     workspaceStub = {
       ...workspaceDataStub,
-      billingStatus: BillingStatus.ACTIVE,
       billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
     };
     runtimeStore.set({
@@ -264,17 +258,6 @@ describe(AppsPanel.name, () => {
     await component();
 
     await expectExpandableApp(user, 'Jupyter');
-  });
-
-  it('should disable apps when initial credit expiration is enabled and billing is inactive', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableInitialCreditsExpiration: false },
-    });
-    workspaceStub.billingStatus = BillingStatus.INACTIVE;
-
-    await component();
-
-    await expectAppsInAppsPanelToBeDisabled(user);
   });
 
   it('should show unexpanded apps by default', async () => {

@@ -1,30 +1,30 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 
-import { BillingStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
+import { UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { useNavigation } from 'app/utils/navigation';
 import { appTypeToString, openAppInIframe } from 'app/utils/user-apps-utils';
+import { isValidBilling } from 'app/utils/workspace-utils';
 
 export interface OpenGkeAppButtonProps {
   userApp: UserAppEnvironment;
-  billingStatus: BillingStatus;
   workspace: Workspace;
   onClose: () => void;
   style?: CSSProperties;
 }
 export function OpenGkeAppButton({
   userApp,
-  billingStatus,
-  workspace: { namespace, terraName },
+  workspace,
   onClose,
   style,
 }: OpenGkeAppButtonProps) {
+  const { namespace, terraName } = workspace;
   const [navigate] = useNavigation();
 
-  const openEnabled = billingStatus === BillingStatus.ACTIVE;
+  const openEnabled = isValidBilling(workspace);
   const appTypeString = appTypeToString[userApp.appType];
 
   const tooltip =
