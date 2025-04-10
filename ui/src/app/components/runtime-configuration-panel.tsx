@@ -15,6 +15,7 @@ import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import {
   summarizeErrors,
+  useCurrentWorkspace,
   WithCdrVersions,
   withCdrVersions,
   WithCurrentWorkspace,
@@ -38,7 +39,11 @@ import {
   diffsToUpdateMessaging,
   getAnalysisConfigDiffs,
 } from 'app/utils/runtime-diffs';
-import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
+import {
+  useCustomRuntime,
+  useRuntimeAndDiskStores,
+  useRuntimeStatus,
+} from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   canUpdateRuntime,
@@ -48,7 +53,6 @@ import {
 import {
   ProfileStore,
   runtimeDiskStore,
-  runtimeStore,
   serverConfigStore,
   useStore,
 } from 'app/utils/stores';
@@ -259,7 +263,8 @@ export interface RuntimeConfigurationPanelProps {
   creatorInitialCreditsRemaining?: number;
   profileState: ProfileStore;
 }
-export const RuntimeConfigurationPanel = fp.flow(
+
+const RuntimeConfigurationPanelContent = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )(
@@ -274,7 +279,6 @@ export const RuntimeConfigurationPanel = fp.flow(
   }: RuntimeConfigurationPanelProps &
     WithCdrVersions &
     WithCurrentWorkspace) => {
-    const { runtimeLoaded } = useStore(runtimeStore);
     const { gcePersistentDisk } = useStore(runtimeDiskStore);
     const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
       namespace,
@@ -291,7 +295,7 @@ export const RuntimeConfigurationPanel = fp.flow(
     });
 
     // Prioritize the "pendingRuntime", if any. When an update is pending, we want
-    // to render the target runtime details, which  may not match the current runtime.
+    // to render the target runtime details, which may not match the current runtime.
     const existingAnalysisConfig = toAnalysisConfig(
       pendingRuntime || currentRuntime || ({} as Partial<Runtime>),
       gcePersistentDisk
@@ -387,10 +391,6 @@ export const RuntimeConfigurationPanel = fp.flow(
       } else {
         runtimeCannotBeUpdatedExplanation = `Runtime cannot be updated, because it is in the ${runtimeStatus} state.`;
       }
-    }
-
-    if (!runtimeLoaded) {
-      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
     }
 
     return (
@@ -586,3 +586,30 @@ export const RuntimeConfigurationPanel = fp.flow(
     );
   }
 );
+
+export const RuntimeConfigurationPanel = ({
+  profileState,
+  onClose = () => {},
+  initialPanelContent,
+  creatorInitialCreditsRemaining,
+}: RuntimeConfigurationPanelProps) => {
+  const workspace = useCurrentWorkspace();
+  const { namespace } = workspace;
+  // This initializes the runtime and disk stores, and isLoaded represents the runtime and disk being loaded.
+  const { isLoaded } = useRuntimeAndDiskStores(namespace);
+
+  if (!isLoaded) {
+    return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
+  }
+
+  return (
+    <RuntimeConfigurationPanelContent
+      {...{
+        onClose,
+        profileState,
+        creatorInitialCreditsRemaining,
+        initialPanelContent,
+      }}
+    />
+  );
+};

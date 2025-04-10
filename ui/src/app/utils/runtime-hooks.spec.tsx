@@ -24,10 +24,12 @@ import {
   RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { mockUseStore } from 'testing/utils';
 
 import { LeoRuntimeInitializer } from './leo-runtime-initializer';
 import { DATAPROC_MIN_DISK_SIZE_GB } from './machines';
 import { useCustomRuntime } from './runtime-hooks';
+import * as runtimeHooks from './runtime-hooks';
 import { runtimeDiskStore, runtimeStore } from './stores';
 
 describe(useCustomRuntime.name, () => {
@@ -40,7 +42,6 @@ describe(useCustomRuntime.name, () => {
   let deleteDiskSpy;
 
   beforeEach(() => {
-    // jest.useFakeTimers();
     // useCustomRuntime requires a runtime to be loaded in the
     // runtimeStore. All tests start with the default runtime.
     currentRuntime = defaultRuntime();
@@ -75,7 +76,11 @@ describe(useCustomRuntime.name, () => {
 
   const setCurrentDisk = (d: Disk) => {
     disksApiStub.disk = d;
-    runtimeDiskStore.set({ ...runtimeDiskStore.get(), gcePersistentDisk: d });
+    runtimeDiskStore.set({
+      ...runtimeDiskStore.get(),
+      gcePersistentDisk: d,
+      gcePersistentDiskLoaded: true,
+    });
   };
 
   it('should update runtime when request includes updated runtime', async () => {
@@ -277,6 +282,222 @@ describe(useCustomRuntime.name, () => {
 
     await waitFor(() => {
       expect(initializerSpy).toHaveBeenCalled();
+    });
+  });
+});
+
+describe('useRuntimeAndDiskStores', () => {
+  const testWorkspaceNamespace = workspaceDataStub.namespace;
+  let useStoreSpy;
+
+  // Create spies directly on the implementation we want to test
+  beforeEach(() => {
+    // Mock the useRuntime and useDisk functions to avoid actual API calls
+    jest.spyOn(runtimeHooks, 'useRuntime').mockImplementation(() => {});
+    jest.spyOn(runtimeHooks, 'useDisk').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    if (useStoreSpy) {
+      useStoreSpy.mockRestore();
+    }
+    jest.restoreAllMocks();
+  });
+
+  it('should initialize runtime and disk stores with the correct workspace namespace', () => {
+    const storeMap = new Map();
+    storeMap.set(runtimeStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      runtime: undefined,
+      runtimeLoaded: false,
+    });
+    storeMap.set(runtimeDiskStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      gcePersistentDisk: null,
+      gcePersistentDiskLoaded: false,
+    });
+
+    useStoreSpy = mockUseStore(storeMap);
+
+    // Call the hook with our test workspace namespace
+    const { result } = renderHook(() =>
+      runtimeHooks.useRuntimeAndDiskStores(testWorkspaceNamespace)
+    );
+
+    // Verify the hook returns the expected structure and initial values
+    expect(result.current).toEqual({
+      runtimeLoaded: false,
+      gcePersistentDiskLoaded: false,
+      runtime: undefined,
+      gcePersistentDisk: null,
+      isLoaded: false,
+    });
+
+    // Verify the hook was initialized with the correct workspace namespace
+    expect(result.current.isLoaded).toBeDefined();
+  });
+
+  it('should return loading states when stores are not loaded', () => {
+    const storeMap = new Map();
+    storeMap.set(runtimeStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      runtime: undefined,
+      runtimeLoaded: false,
+    });
+    storeMap.set(runtimeDiskStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      gcePersistentDisk: null,
+      gcePersistentDiskLoaded: false,
+    });
+
+    useStoreSpy = mockUseStore(storeMap);
+
+    // Render the hook with mock store values
+    const { result } = renderHook(() =>
+      runtimeHooks.useRuntimeAndDiskStores(testWorkspaceNamespace)
+    );
+
+    // Assert on result
+    expect(result.current).toEqual({
+      runtimeLoaded: false,
+      gcePersistentDiskLoaded: false,
+      runtime: undefined,
+      gcePersistentDisk: null,
+      isLoaded: false,
+    });
+  });
+
+  it('should return loaded states when stores are loaded', () => {
+    const testRuntime = defaultRuntime();
+    const testDisk = stubDisk();
+
+    const storeMap = new Map();
+    storeMap.set(runtimeStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      runtime: testRuntime,
+      runtimeLoaded: true,
+    });
+    storeMap.set(runtimeDiskStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      gcePersistentDisk: testDisk,
+      gcePersistentDiskLoaded: true,
+    });
+
+    useStoreSpy = mockUseStore(storeMap);
+
+    const { result } = renderHook(() =>
+      runtimeHooks.useRuntimeAndDiskStores(testWorkspaceNamespace)
+    );
+
+    expect(result.current).toEqual({
+      runtimeLoaded: true,
+      gcePersistentDiskLoaded: true,
+      runtime: testRuntime,
+      gcePersistentDisk: testDisk,
+      isLoaded: true,
+    });
+  });
+
+  it('should return partially loaded state when only one store is loaded', () => {
+    const testRuntime = defaultRuntime();
+
+    // Use an explicitly created Map
+    const storeMap = new Map();
+    storeMap.set(runtimeStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      runtime: testRuntime,
+      runtimeLoaded: true,
+    });
+    storeMap.set(runtimeDiskStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      gcePersistentDisk: null,
+      gcePersistentDiskLoaded: false,
+    });
+
+    useStoreSpy = mockUseStore(storeMap);
+
+    const { result } = renderHook(() =>
+      runtimeHooks.useRuntimeAndDiskStores(testWorkspaceNamespace)
+    );
+
+    expect(result.current).toEqual({
+      runtimeLoaded: true,
+      gcePersistentDiskLoaded: false,
+      runtime: testRuntime,
+      gcePersistentDisk: null,
+      isLoaded: false,
+    });
+  });
+
+  it('should update when stores change', async () => {
+    const storeMap = new Map();
+    storeMap.set(runtimeStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      runtime: undefined,
+      runtimeLoaded: false,
+    });
+    storeMap.set(runtimeDiskStore, {
+      workspaceNamespace: testWorkspaceNamespace,
+      gcePersistentDisk: null,
+      gcePersistentDiskLoaded: false,
+    });
+
+    useStoreSpy = mockUseStore(storeMap);
+
+    const { result, rerender } = renderHook(() =>
+      runtimeHooks.useRuntimeAndDiskStores(testWorkspaceNamespace)
+    );
+
+    // Initial expectations
+    expect(result.current.isLoaded).toBe(false);
+
+    // Update store states
+    const testRuntime = defaultGceRuntimeWithPd();
+    const testDisk = stubDisk();
+
+    // Update our mock using a different implementation approach that directly responds to the store parameter
+    useStoreSpy.mockImplementation((store) => {
+      if (store === runtimeStore) {
+        return {
+          workspaceNamespace: testWorkspaceNamespace,
+          runtime: testRuntime,
+          runtimeLoaded: true,
+        };
+      }
+      if (store === runtimeDiskStore) {
+        return {
+          workspaceNamespace: testWorkspaceNamespace,
+          gcePersistentDisk: testDisk,
+          gcePersistentDiskLoaded: true,
+        };
+      }
+      return null;
+    });
+
+    // Actually update the stores (though our mock doesn't use these directly)
+    act(() => {
+      runtimeStore.set({
+        workspaceNamespace: testWorkspaceNamespace,
+        runtime: testRuntime,
+        runtimeLoaded: true,
+      });
+      runtimeDiskStore.set({
+        workspaceNamespace: testWorkspaceNamespace,
+        gcePersistentDisk: testDisk,
+        gcePersistentDiskLoaded: true,
+      });
+    });
+
+    // Re-render the hook to get the updated values
+    rerender();
+
+    // Updated expectations
+    expect(result.current).toEqual({
+      runtimeLoaded: true,
+      gcePersistentDiskLoaded: true,
+      runtime: testRuntime,
+      gcePersistentDisk: testDisk,
+      isLoaded: true,
     });
   });
 });

@@ -119,6 +119,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
         runtimeDiskStore.set({
           workspaceNamespace: null,
           gcePersistentDisk: null,
+          gcePersistentDiskLoaded: false,
         }),
       async () => {
         let gcePersistentDisk: Disk = null;
@@ -139,6 +140,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
           runtimeDiskStore.set({
             workspaceNamespace: currentWorkspaceNamespace,
             gcePersistentDisk,
+            gcePersistentDiskLoaded: true,
           });
         }
       }
@@ -438,5 +440,33 @@ export const withRuntimeStore = () => (WrappedComponent) => {
     useDisk(value.workspaceNamespace);
 
     return <WrappedComponent {...props} runtimeStore={value} />;
+  };
+};
+
+/**
+ * Hook that initializes the runtime and disk stores and returns their loading states.
+ * Use this to show loading indicators while runtime and disk data are being fetched.
+ *
+ * @param workspaceNamespace - The namespace of the workspace
+ * @returns Object containing loading states for runtime and disk
+ */
+export const useRuntimeAndDiskStores = (workspaceNamespace: string) => {
+  // Initialize runtime and disk stores
+  useRuntime(workspaceNamespace);
+  useDisk(workspaceNamespace);
+
+  // Get current loading states
+  const { runtimeLoaded, runtime } = useStore(runtimeStore);
+  const { gcePersistentDiskLoaded, gcePersistentDisk } =
+    useStore(runtimeDiskStore);
+
+  return {
+    runtimeLoaded,
+    gcePersistentDiskLoaded,
+    // Also return the actual data for convenience
+    runtime,
+    gcePersistentDisk,
+    // Helper to check if everything is loaded
+    isLoaded: runtimeLoaded && gcePersistentDiskLoaded,
   };
 };
