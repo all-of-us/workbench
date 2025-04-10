@@ -2,12 +2,7 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
-import {
-  Disk,
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-} from 'generated/fetch';
+import { Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
@@ -24,7 +19,6 @@ import {
 import {
   AnalysisConfig,
   fromAnalysisConfig,
-  maybeWithPersistentDisk,
   toAnalysisConfig,
   withAnalysisConfigDefaults,
 } from 'app/utils/analysis-config';
@@ -44,7 +38,6 @@ import {
   useRuntimeAndDiskStores,
   useRuntimeStatus,
 } from 'app/utils/runtime-hooks';
-import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   canUpdateRuntime,
   isVisible,
@@ -76,11 +69,6 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 
 const { useState, useEffect } = React;
 
-interface DeriveCurrentRuntimeProps {
-  crFromCustomRuntimeHook: Runtime;
-  gcePersistentDisk: Disk;
-}
-
 interface CCProps {
   pendingRuntime: Runtime;
   currentRuntime: Runtime;
@@ -100,20 +88,6 @@ export const createOrCustomize = ({
       currentRuntime === null ||
         currentRuntime === undefined ||
         runtimeStatus === RuntimeStatus.UNKNOWN,
-      () => PanelContent.Create,
-    ],
-    [
-      // General Analysis consist of GCE + PD. Display create page only if
-      // 1) currentRuntime + pd both are deleted and
-      // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
-      currentRuntime?.status === RuntimeStatus.DELETED &&
-        !currentRuntime?.gceWithPdConfig &&
-        (
-          [
-            RuntimeConfigurationType.GENERAL_ANALYSIS,
-            RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-          ] as Array<RuntimeConfigurationType>
-        ).includes(currentRuntime?.configurationType),
       () => PanelContent.Create,
     ],
     () => PanelContent.Customize
