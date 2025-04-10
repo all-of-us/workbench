@@ -416,7 +416,7 @@ export const WorkspaceEdit = fp.flow(
       history.back();
     }
 
-    formatFreeTierBillingAccountName(): string {
+    formatInitialCreditsBillingAccountName(): string {
       const {
         profileState: {
           profile: { initialCreditsLimit, initialCreditsUsage },
@@ -433,13 +433,13 @@ export const WorkspaceEdit = fp.flow(
     }
 
     async initialBillingAccountLoad() {
-      const freeTierBillingAccount: BillingAccount = {
+      const initialCreditsAccount: BillingAccount = {
         name:
           'billingAccounts/' +
           serverConfigStore.get().config.initialCreditsBillingAccountId,
         freeTier: true,
         open: true,
-        displayName: this.formatFreeTierBillingAccountName(),
+        displayName: this.formatInitialCreditsBillingAccountName(),
       };
       // If user hasn't granted GCP billing scope to workbench, we can not fetch billing account from Google
       // or fetch user's available billing accounts.
@@ -454,11 +454,11 @@ export const WorkspaceEdit = fp.flow(
           this.setState((prevState) =>
             fp.set(
               ['workspace', 'billingAccountName'],
-              freeTierBillingAccount.name,
+              initialCreditsAccount.name,
               prevState
             )
           );
-          this.setState({ billingAccounts: [freeTierBillingAccount] });
+          this.setState({ billingAccounts: [initialCreditsAccount] });
         } else if (this.isMode(WorkspaceEditMode.Edit)) {
           // If the user hasn't grant billing scope to workbench yet, keep the server's current value for
           // billingAccountName and add a shim entry into billingAccounts so the dropdown entry is not empty.
@@ -467,9 +467,9 @@ export const WorkspaceEdit = fp.flow(
           // is the same as what is currently stored.
           if (
             this.props.workspace.billingAccountName ===
-            freeTierBillingAccount.name
+            initialCreditsAccount.name
           ) {
-            this.setState({ billingAccounts: [freeTierBillingAccount] });
+            this.setState({ billingAccounts: [initialCreditsAccount] });
           } else {
             this.setState({
               billingAccounts: [
@@ -497,7 +497,7 @@ export const WorkspaceEdit = fp.flow(
         if (b.freeTier) {
           return {
             ...b,
-            displayName: this.formatFreeTierBillingAccountName(),
+            displayName: this.formatInitialCreditsBillingAccountName(),
           };
         }
         return b;

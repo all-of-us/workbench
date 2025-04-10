@@ -1541,30 +1541,61 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_updateAccountProperties_free_tier_quota() {
+  public void test_updateAccountProperties_freeCreditsLimit() {
     createAccountAndDbUserWithAffiliation();
 
-    final Double originalQuota = dbUser.getInitialCreditsLimitOverride();
-    final Double newQuota = 123.4;
+    final Double originalLimit = dbUser.getInitialCreditsLimitOverride();
+    final Double newLimit = 123.4;
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(FULL_USER_NAME).freeCreditsLimit(newQuota);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).freeCreditsLimit(newLimit);
 
     final Profile retrieved = profileService.updateAccountProperties(request);
-    assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
+    assertThat(retrieved.getInitialCreditsLimit()).isWithin(0.01).of(newLimit);
 
     verify(mockUserServiceAuditor)
-        .fireSetInitialCreditsOverride(dbUser.getUserId(), originalQuota, newQuota);
+        .fireSetInitialCreditsOverride(dbUser.getUserId(), originalLimit, newLimit);
   }
 
   @Test
-  public void test_updateAccountProperties_free_tier_quota_no_change() {
+  public void test_updateAccountProperties_initialCreditsLimit() {
+    createAccountAndDbUserWithAffiliation();
+
+    final Double originalLimit = dbUser.getInitialCreditsLimitOverride();
+    final Double newLimit = 123.4;
+
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(FULL_USER_NAME).initialCreditsLimit(newLimit);
+
+    final Profile retrieved = profileService.updateAccountProperties(request);
+    assertThat(retrieved.getInitialCreditsLimit()).isWithin(0.01).of(newLimit);
+
+    verify(mockUserServiceAuditor)
+        .fireSetInitialCreditsOverride(dbUser.getUserId(), originalLimit, newLimit);
+  }
+
+  @Test
+  public void test_updateAccountProperties_freeCreditsLimit_no_change() {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
             .username(FULL_USER_NAME)
-            .freeCreditsLimit(original.getFreeTierDollarQuota());
+            .freeCreditsLimit(original.getInitialCreditsLimit());
+    profileService.updateAccountProperties(request);
+
+    verify(mockUserServiceAuditor, never())
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
+  }
+
+  @Test
+  public void test_updateAccountProperties_initialCreditsLimit_no_change() {
+    final Profile original = createAccountAndDbUserWithAffiliation();
+
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
+            .username(FULL_USER_NAME)
+            .initialCreditsLimit(original.getInitialCreditsLimit());
     profileService.updateAccountProperties(request);
 
     verify(mockUserServiceAuditor, never())
@@ -1575,16 +1606,16 @@ public class ProfileControllerTest extends BaseControllerTest {
   // and observe that the user's limit tracks with the default
 
   @Test
-  public void test_updateAccountProperties_free_tier_quota_no_override() {
+  public void test_updateAccountProperties_freeCreditsLimit_no_override() {
     config.billing.defaultInitialCreditsDollarLimit = 123.45;
 
     final Profile original = createAccountAndDbUserWithAffiliation();
-    assertThat(original.getFreeTierDollarQuota()).isWithin(0.01).of(123.45);
+    assertThat(original.getInitialCreditsLimit()).isWithin(0.01).of(123.45);
 
     // update the default - the user's profile also updates
 
     config.billing.defaultInitialCreditsDollarLimit = 234.56;
-    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
+    assertThat(profileService.getProfile(dbUser).getInitialCreditsLimit())
         .isWithin(0.01)
         .of(234.56);
 
@@ -1601,7 +1632,39 @@ public class ProfileControllerTest extends BaseControllerTest {
     // the user's profile continues to track default changes
 
     config.billing.defaultInitialCreditsDollarLimit = 345.67;
-    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
+    assertThat(profileService.getProfile(dbUser).getInitialCreditsLimit())
+        .isWithin(0.01)
+        .of(345.67);
+  }
+
+  @Test
+  public void test_updateAccountProperties_initialCreditsLimit_no_override() {
+    config.billing.defaultInitialCreditsDollarLimit = 123.45;
+
+    final Profile original = createAccountAndDbUserWithAffiliation();
+    assertThat(original.getInitialCreditsLimit()).isWithin(0.01).of(123.45);
+
+    // update the default - the user's profile also updates
+
+    config.billing.defaultInitialCreditsDollarLimit = 234.56;
+    assertThat(profileService.getProfile(dbUser).getInitialCreditsLimit())
+        .isWithin(0.01)
+        .of(234.56);
+
+    // setting an initial credits limit equal to the default will not override
+
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
+            .username(FULL_USER_NAME)
+            .initialCreditsLimit(config.billing.defaultInitialCreditsDollarLimit);
+    profileService.updateAccountProperties(request);
+    verify(mockUserServiceAuditor, never())
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
+
+    // the user's profile continues to track default changes
+
+    config.billing.defaultInitialCreditsDollarLimit = 345.67;
+    assertThat(profileService.getProfile(dbUser).getInitialCreditsLimit())
         .isWithin(0.01)
         .of(345.67);
   }

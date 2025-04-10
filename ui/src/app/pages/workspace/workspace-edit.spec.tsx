@@ -1024,8 +1024,9 @@ describe(WorkspaceEdit.name, () => {
     ).toBeInTheDocument();
   });
 
-  it('should show free tier user account correctly when usage is undefined', async () => {
-    const freeTierRegex = /use all of us initial credits \- \$34\.56 left/i;
+  it('should show initial credits billing account correctly when usage is undefined', async () => {
+    const initialCreditsRegex =
+      /use all of us initial credits \- \$34\.56 left/i;
     mockHasBillingScope.mockImplementation(() => true);
     workspaceEditMode = WorkspaceEditMode.Create;
     profileStore.set({
@@ -1038,14 +1039,16 @@ describe(WorkspaceEdit.name, () => {
 
     renderComponent();
 
-    expect(await screen.findByDisplayValue(freeTierRegex)).toBeInTheDocument();
+    expect(
+      await screen.findByDisplayValue(initialCreditsRegex)
+    ).toBeInTheDocument();
 
     // Need to open the dropdown to view the billing options
     await user.click(screen.getByTestId('billing-dropdown'));
 
     expect(
       screen.getAllByRole('option', {
-        name: freeTierRegex,
+        name: initialCreditsRegex,
         hidden: true,
       })[0]
     ).toBeInTheDocument();
