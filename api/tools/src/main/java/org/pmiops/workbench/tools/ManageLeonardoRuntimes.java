@@ -160,8 +160,7 @@ public class ManageLeonardoRuntimes {
     }
   }
 
-  private void listRuntimes(
-      String apiUrl, Optional<String> googleProjectId, OutputFormat fmt)
+  private void listRuntimes(String apiUrl, Optional<String> googleProjectId, OutputFormat fmt)
       throws IOException, ApiException {
     RuntimesApi api = newApiClient(apiUrl);
 
