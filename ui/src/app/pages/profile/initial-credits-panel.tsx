@@ -13,8 +13,8 @@ import { supportUrls } from 'app/utils/zendesk';
 import { styles } from './profile-styles';
 
 interface Props {
-  freeTierUsage: number;
-  freeTierDollarQuota: number;
+  initialCreditsUsage: number;
+  initialCreditsLimit: number;
   eligibleForExtension: boolean;
   expirationDate: number;
   updateInitialCredits: Function;
@@ -25,8 +25,8 @@ export const InitialCreditsPanel = (props: Props) => {
   const {
     eligibleForExtension,
     expirationDate,
-    freeTierUsage,
-    freeTierDollarQuota,
+    initialCreditsUsage,
+    initialCreditsLimit,
     updateInitialCredits,
   } = props;
 
@@ -48,11 +48,11 @@ export const InitialCreditsPanel = (props: Props) => {
         </FlexColumn>
         <FlexColumn style={{ flex: 1, alignItems: 'flex-end' }}>
           <div style={{ fontWeight: 600 }}>
-            {formatInitialCreditsUSD(freeTierUsage)}
+            {formatInitialCreditsUSD(initialCreditsUsage)}
           </div>
           <div style={{ fontWeight: 600 }}>
             {formatInitialCreditsUSD(
-              freeTierDollarQuota - (freeTierUsage ?? 0)
+              initialCreditsLimit - (initialCreditsUsage ?? 0)
             )}
           </div>
           {expirationDate && (

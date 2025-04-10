@@ -123,8 +123,8 @@ describe('AdminUserProfile', () => {
 
       const username = 'some-email@yahoo.com';
 
-      const freeTierUsage = 543.21;
-      const freeTierDollarQuota = 678.99;
+      const initialCreditsUsage = 543.21;
+      const initialCreditsLimit = 678.99;
       const creditUsageText = '$543.21';
       const creditLimitText = '$678.99';
       const initialCreditsExpirationEpochMillis = Date.now();
@@ -140,8 +140,8 @@ describe('AdminUserProfile', () => {
         username,
         givenName,
         familyName,
-        freeTierUsage,
-        freeTierDollarQuota,
+        initialCreditsUsage,
+        initialCreditsLimit,
         initialCreditsExpirationEpochMillis,
       });
 
@@ -584,11 +584,11 @@ describe('AdminUserProfile', () => {
     const initialCreditsDropdown = getDropdown('initial-credits-dropdown');
 
     expect(initialCreditsDropdown.value).toEqual(
-      TARGET_USER_PROFILE.freeTierDollarQuota.toString()
+      TARGET_USER_PROFILE.initialCreditsLimit.toString()
     );
 
     const newLimit = 800.0;
-    expect(newLimit).not.toEqual(TARGET_USER_PROFILE.freeTierDollarQuota); // sanity check
+    expect(newLimit).not.toEqual(TARGET_USER_PROFILE.initialCreditsLimit); // sanity check
 
     await user.click(initialCreditsDropdown);
     await user.click(screen.getByText(`\$${newLimit.toFixed(2)}`));

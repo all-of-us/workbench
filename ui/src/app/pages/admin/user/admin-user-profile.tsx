@@ -271,12 +271,12 @@ const InitialCreditsCard = ({
               >
                 <div style={styles.label}>Usage</div>
                 <div style={styles.value}>
-                  {formatInitialCreditsUSD(updatedProfile.freeTierUsage)}
+                  {formatInitialCreditsUSD(updatedProfile.initialCreditsUsage)}
                 </div>
               </div>
               <InitialCreditsDropdown
-                currentLimit={updatedProfile.freeTierDollarQuota}
-                previousLimit={oldProfile.freeTierDollarQuota}
+                currentLimit={updatedProfile.initialCreditsLimit}
+                previousLimit={oldProfile.initialCreditsLimit}
                 highlightOnChange
                 onChange={(event) => onChangeInitialCreditsLimit(event.value)}
                 label='Limit'
@@ -729,8 +729,8 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                 </FlexRow>
               </FlexColumn>
               <InitialCreditsCard
-                onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
-                  updateProfile({ freeTierDollarQuota })
+                onChangeInitialCreditsLimit={(initialCreditsLimit: number) =>
+                  updateProfile({ initialCreditsLimit })
                 }
                 onChangeInitialCreditBypass={(bypass: boolean) =>
                   updateProfile({ initialCreditsExpirationBypassed: bypass })
