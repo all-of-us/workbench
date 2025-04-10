@@ -694,6 +694,7 @@ jobs:
     - run:
         name: Comment on Jira
         command: |
+          echo JIRA ISSUE KEY: ${JIRA_ISSUE_KEY:-"Jira issue key is missing"}
           curl --request POST \
             --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
             --header 'accept: application/json' \
