@@ -300,7 +300,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public List<LeonardoListRuntimeResponse> listRuntimesAsService() {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     return legacyLeonardoRetryHandler.run(
-        (context) -> runtimesApi.listRuntimes(/* labels */ null, /* includeDeleted */ false));
+        (context) -> runtimesApi.listRuntimes(/* labels */ null));
   }
 
   @Override
@@ -355,7 +355,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         legacyLeonardoRetryHandler.run(
             (context) ->
                 runtimesApiAsService.listRuntimes(
-                    LEONARDO_LABEL_CREATED_BY + "=" + userEmail, false));
+                    LEONARDO_LABEL_CREATED_BY + "=" + userEmail));
 
     // Only the runtime creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.

@@ -161,7 +161,7 @@ public class ManageLeonardoRuntimes {
   }
 
   private void listRuntimes(
-      String apiUrl, boolean includeDeleted, Optional<String> googleProjectId, OutputFormat fmt)
+      String apiUrl, Optional<String> googleProjectId, OutputFormat fmt)
       throws IOException, ApiException {
     RuntimesApi api = newApiClient(apiUrl);
 
@@ -169,7 +169,7 @@ public class ManageLeonardoRuntimes {
     if (googleProjectId.isPresent()) {
       runtimes = api.listRuntimesByProject(googleProjectId.get(), null);
     } else {
-      runtimes = api.listRuntimes(null, includeDeleted);
+      runtimes = api.listRuntimes(null);
     }
     printFormatted(runtimes, fmt);
   }
@@ -220,7 +220,7 @@ public class ManageLeonardoRuntimes {
 
     AtomicInteger deleted = new AtomicInteger();
     RuntimesApi api = newApiClient(apiUrl);
-    api.listRuntimes(null, false).stream()
+    api.listRuntimes(null).stream()
         .sorted(Comparator.comparing(LeonardoListRuntimeResponse::getRuntimeName))
         .filter(
             (r) -> {
@@ -282,7 +282,6 @@ public class ManageLeonardoRuntimes {
           }
           listRuntimes(
               args[0],
-              Boolean.parseBoolean(args[1]),
               Optional.of(args[2]).filter(p -> !p.isEmpty()),
               OutputFormat.valueOf(args[3]));
           return;
