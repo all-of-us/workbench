@@ -36,7 +36,7 @@ const defaultProps: CreatePanelProps = {
   profile: ProfileStubVariables.PROFILE_STUB,
   workspace: buildWorkspaceStub(),
   analysisConfig: defaultAnalysisConfig,
-  creatorFreeCreditsRemaining: 0,
+  creatorInitialCreditsRemaining: 0,
   runtimeStatus: RuntimeStatus.RUNNING,
   runtimeCanBeCreated: true,
   setPanelContent,

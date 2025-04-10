@@ -1,17 +1,19 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
 
 import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
 
-import { render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
@@ -20,21 +22,21 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 const FIRST_DATA_ROW_NUMBER = 2;
 
 const component = async () =>
-  render(
-    <MemoryRouter>
-      <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
-    </MemoryRouter>
+  renderWithRouter(
+    <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
   );
 describe(AppFilesList.name, () => {
   let workspacesApiStub: WorkspacesApiStub;
   let notebooksApiStub: NotebooksApiStub;
-  let user;
+  let user: UserEvent;
+
   beforeEach(() => {
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
     notebooksApiStub = new NotebooksApiStub();
     registerApiClient(NotebooksApi, notebooksApiStub);
     user = userEvent.setup();
+    serverConfigStore.set({ config: defaultServerConfig });
   });
 
   it('should render new Analysis tab', async () => {

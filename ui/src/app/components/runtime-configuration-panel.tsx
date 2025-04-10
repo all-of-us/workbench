@@ -15,6 +15,7 @@ import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import {
   summarizeErrors,
+  useCurrentWorkspace,
   WithCdrVersions,
   withCdrVersions,
   WithCurrentWorkspace,
@@ -38,7 +39,11 @@ import {
   diffsToUpdateMessaging,
   getAnalysisConfigDiffs,
 } from 'app/utils/runtime-diffs';
-import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
+import {
+  useCustomRuntime,
+  useRuntimeAndDiskStores,
+  useRuntimeStatus,
+} from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   canUpdateRuntime,
@@ -48,7 +53,6 @@ import {
 import {
   ProfileStore,
   runtimeDiskStore,
-  runtimeStore,
   serverConfigStore,
   useStore,
 } from 'app/utils/stores';
@@ -149,7 +153,7 @@ const diskSizeValidatorWithMessage = (
 
 interface ErrorsWarningsProps {
   usingInitialCredits: boolean;
-  creatorFreeCreditsRemaining?: number;
+  creatorInitialCreditsRemaining?: number;
   analysisConfig: AnalysisConfig;
 }
 interface ErrorsWarningsResult {
@@ -158,7 +162,7 @@ interface ErrorsWarningsResult {
 }
 export const getErrorsAndWarnings = ({
   usingInitialCredits,
-  creatorFreeCreditsRemaining = 0,
+  creatorInitialCreditsRemaining = 0,
   analysisConfig,
 }: ErrorsWarningsProps): ErrorsWarningsResult => {
   const costErrorsAsWarnings =
@@ -168,8 +172,8 @@ export const getErrorsAndWarnings = ({
     // use. Allow them to provision a larger runtime (still warn them). Block them if they get below
     // the default amount of free credits because (1) this can result in overspend and (2) we have
     // easy access to remaining credits, and not the creator's quota.
-    creatorFreeCreditsRemaining >
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit;
+    creatorInitialCreditsRemaining >
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit;
 
   const runningCostValidatorWithMessage = () => {
     const maxRunningCost = usingInitialCredits ? 25 : 150;
@@ -242,10 +246,11 @@ export const getErrorsAndWarnings = ({
 export interface RuntimeConfigurationPanelProps {
   onClose?: () => void;
   initialPanelContent?: PanelContent;
-  creatorFreeCreditsRemaining?: number;
+  creatorInitialCreditsRemaining?: number;
   profileState: ProfileStore;
 }
-export const RuntimeConfigurationPanel = fp.flow(
+
+const RuntimeConfigurationPanelContent = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )(
@@ -256,11 +261,10 @@ export const RuntimeConfigurationPanel = fp.flow(
     profileState: { profile },
     onClose = () => {},
     initialPanelContent,
-    creatorFreeCreditsRemaining,
+    creatorInitialCreditsRemaining,
   }: RuntimeConfigurationPanelProps &
     WithCdrVersions &
     WithCurrentWorkspace) => {
-    const { runtimeLoaded } = useStore(runtimeStore);
     const { gcePersistentDisk } = useStore(runtimeDiskStore);
     const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
       namespace,
@@ -270,7 +274,7 @@ export const RuntimeConfigurationPanel = fp.flow(
       useCustomRuntime(namespace, gcePersistentDisk);
 
     // Prioritize the "pendingRuntime", if any. When an update is pending, we want
-    // to render the target runtime details, which  may not match the current runtime.
+    // to render the target runtime details, which may not match the current runtime.
     const existingAnalysisConfig = toAnalysisConfig(
       pendingRuntime || currentRuntime || ({} as Partial<Runtime>),
       gcePersistentDisk
@@ -310,7 +314,7 @@ export const RuntimeConfigurationPanel = fp.flow(
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
       {
         usingInitialCredits: isUsingInitialCredits(workspace),
-        creatorFreeCreditsRemaining,
+        creatorInitialCreditsRemaining,
         analysisConfig,
       }
     );
@@ -368,10 +372,6 @@ export const RuntimeConfigurationPanel = fp.flow(
       }
     }
 
-    if (!runtimeLoaded) {
-      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
-    }
-
     return (
       <div id='runtime-panel'>
         {[PanelContent.Create, PanelContent.Customize].includes(
@@ -391,7 +391,7 @@ export const RuntimeConfigurationPanel = fp.flow(
               <CreatePanel
                 {...{
                   analysisConfig,
-                  creatorFreeCreditsRemaining,
+                  creatorInitialCreditsRemaining,
                   onClose,
                   profile,
                   requestAnalysisConfig,
@@ -482,7 +482,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                 {...{
                   analysisConfig,
                   attachedPdExists,
-                  creatorFreeCreditsRemaining,
+                  creatorInitialCreditsRemaining,
                   currentRuntime,
                   environmentChanged,
                   errorMessageContent,
@@ -565,3 +565,30 @@ export const RuntimeConfigurationPanel = fp.flow(
     );
   }
 );
+
+export const RuntimeConfigurationPanel = ({
+  profileState,
+  onClose = () => {},
+  initialPanelContent,
+  creatorInitialCreditsRemaining,
+}: RuntimeConfigurationPanelProps) => {
+  const workspace = useCurrentWorkspace();
+  const { namespace } = workspace;
+  // This initializes the runtime and disk stores, and isLoaded represents the runtime and disk being loaded.
+  const { isLoaded } = useRuntimeAndDiskStores(namespace);
+
+  if (!isLoaded) {
+    return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
+  }
+
+  return (
+    <RuntimeConfigurationPanelContent
+      {...{
+        onClose,
+        profileState,
+        creatorInitialCreditsRemaining,
+        initialPanelContent,
+      }}
+    />
+  );
+};

@@ -148,6 +148,7 @@ const updateRuntimeStores = async ({
   runtimeDiskStore.set({
     workspaceNamespace,
     gcePersistentDisk: undefined,
+    gcePersistentDiskLoaded: false,
   });
   runtimeStore.set({
     workspaceNamespace,

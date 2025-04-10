@@ -7137,8 +7137,12 @@ components:
           default: false
         defaultFreeCreditsDollarLimit:
           type: number
-          description: The default dollar amount of free credits allotted to each
-            user
+          description: DEPRECATED in favor of defaultInitialCreditsDollarLimit.
+            The default dollar amount of initial credits allotted to each user
+          format: double
+        defaultInitialCreditsDollarLimit:
+          type: number
+          description: The default dollar amount of initial credits allotted to each user
           format: double
         enableEventDateModifier:
           type: boolean
@@ -7173,7 +7177,11 @@ components:
           description: The URL that can sign out RAS login session.
         freeTierBillingAccountId:
           type: string
-          description: The free tier billing account id
+          description: DEPRECATED in favor of initialCreditsBillingAccountId.
+            The initial credits billing account id
+        initialCreditsBillingAccountId:
+          type: string
+          description: The initial credits billing account id
         accessModules:
           type: array
           items:
@@ -9602,6 +9610,11 @@ components:
         - BEFORE_LOGIN
         - AFTER_LOGIN
     StatusAlert:
+      required:
+      - message
+      - title
+      - alertLocation
+      - startTimeEpochMillis
       type: object
       properties:
         statusAlertId:
@@ -9621,6 +9634,14 @@ components:
           description: A URL linking to an incident report where users can read more
         alertLocation:
           $ref: '#/components/schemas/StatusAlertLocation'
+        startTimeEpochMillis:
+          type: integer
+          description: Start time for when this alert should be shown, in milliseconds since epoch. Null starts immediately.
+          format: int64
+        endTimeEpochMillis:
+          type: integer
+          description: End time for when this alert should no longer be shown, in milliseconds since epoch. Null means it never expires.
+          format: int64
     SumologicEgressEventRequest:
       type: object
       properties:

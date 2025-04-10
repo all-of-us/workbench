@@ -146,7 +146,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     } catch (ApiException ex) {
       log.severe(
           String.format(
-              "Error while sending researcher data to RDR for user IDs [%s]: %s",
+              "Error while sending researcher data to RDR for user IDs %s: %s",
               userIds, ex.getResponseBody()));
       throw new ServerErrorException(ex);
     }
@@ -201,7 +201,8 @@ public class RdrExportServiceImpl implements RdrExportService {
     } catch (ApiException ex) {
       log.severe(
           String.format(
-              "Error while sending workspace data to RDR for workspace IDs: %s", workspaceIds));
+              "Error while sending workspace data to RDR for workspace IDs %s: %s",
+              workspaceIds, ex.getResponseBody()));
       throw new ServerErrorException(ex);
     }
   }

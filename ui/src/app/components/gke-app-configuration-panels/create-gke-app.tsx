@@ -122,7 +122,7 @@ export interface CreateGkeAppProps {
   userApps: UserAppEnvironment[];
   appType: AppType;
   onClose: () => void;
-  creatorFreeCreditsRemaining: number | null;
+  creatorInitialCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
   disk: Disk | undefined;
@@ -148,7 +148,7 @@ export const CreateGkeApp = ({
   userApps,
   appType,
   onClose,
-  creatorFreeCreditsRemaining,
+  creatorInitialCreditsRemaining,
   workspace,
   profileState,
   disk,
@@ -163,7 +163,6 @@ export const CreateGkeApp = ({
     config: { enableGKEAppMachineTypeChoice },
   } = useStore(serverConfigStore);
   const { profile } = profileState;
-  const { billingStatus } = workspace;
 
   const defaultCreateRequest = defaultAppRequest[appType];
 
@@ -305,7 +304,7 @@ export const CreateGkeApp = ({
       <div style={{ ...styles.controlSection }}>
         <EnvironmentInformedActionPanel
           {...{
-            creatorFreeCreditsRemaining,
+            creatorInitialCreditsRemaining,
             profile,
             workspace,
           }}
@@ -494,13 +493,13 @@ export const CreateGkeApp = ({
         {isInteractiveUserApp(app?.appType) &&
         app?.status === AppStatus.RUNNING ? (
           <OpenGkeAppButton
-            {...{ billingStatus, workspace, onClose }}
+            {...{ workspace, onClose }}
             userApp={app}
             style={openOrCreateButtonStyle}
           />
         ) : (
           <CreateGkeAppButton
-            {...{ billingStatus, createAppRequest, workspace }}
+            {...{ createAppRequest, workspace }}
             existingApp={app}
             existingDisk={disk}
             username={profile.username}

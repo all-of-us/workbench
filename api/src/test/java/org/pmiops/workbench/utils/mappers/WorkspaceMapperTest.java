@@ -216,7 +216,7 @@ public class WorkspaceMapperTest {
             .setGoogleProject(GOOGLE_PROJECT);
 
     workbenchConfig = createEmptyConfig();
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
   }
 

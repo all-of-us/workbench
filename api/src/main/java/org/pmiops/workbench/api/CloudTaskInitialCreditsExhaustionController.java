@@ -120,7 +120,7 @@ public class CloudTaskInitialCreditsExhaustionController
       Map<Long, Double> liveCostByCreator,
       Set<DbUser> newlyExhaustedUsers) {
     final List<Double> costThresholdsInDescOrder =
-        workbenchConfig.get().billing.freeTierCostAlertThresholds;
+        workbenchConfig.get().billing.initialCreditsCostAlertThresholds;
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
     Map<Long, DbUser> usersCache =
@@ -183,7 +183,7 @@ public class CloudTaskInitialCreditsExhaustionController
                         e.getValue(),
                         Math.max(
                             dbCostByCreator.get(e.getKey()), liveCostByCreator.get(e.getKey())),
-                        workbenchConfig.get().billing.defaultFreeCreditsDollarLimit))
+                        workbenchConfig.get().billing.defaultInitialCreditsDollarLimit))
             .map(Map.Entry::getValue)
             .collect(Collectors.toSet());
 
@@ -272,7 +272,7 @@ public class CloudTaskInitialCreditsExhaustionController
 
     final double limit =
         getUserInitialCreditsLimit(
-            user, workbenchConfig.get().billing.defaultFreeCreditsDollarLimit);
+            user, workbenchConfig.get().billing.defaultInitialCreditsDollarLimit);
     final double remainingBalance = limit - currentCost;
 
     // this shouldn't happen, but it did (RW-4678)

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.google;
 
 import com.google.api.services.directory.model.User;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -29,12 +28,6 @@ public interface DirectoryService {
    * org.pmiops.workbench.exceptions.NotFoundException} if not found.
    */
   User getUserOrThrow(String username);
-
-  /**
-   * Returns a mapping of researcher username (e.g. foo@researchallofus.org) to that user's 2FA
-   * enablement status in Gsuite.
-   */
-  Map<String, Boolean> getAllTwoFactorAuthStatuses();
 
   /** Looks up a user by username and returns their stored contact email address, if available. */
   Optional<String> getContactEmail(String username);

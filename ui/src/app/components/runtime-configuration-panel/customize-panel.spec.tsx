@@ -60,7 +60,7 @@ const defaultProps: CustomizePanelProps = {
   allowDataproc: true,
   analysisConfig: defaultAnalysisConfig,
   attachedPdExists: true,
-  creatorFreeCreditsRemaining: 0,
+  creatorInitialCreditsRemaining: 0,
   currentRuntime: defaultGceRuntimeWithPd(),
   environmentChanged: false,
   errorMessageContent: [],

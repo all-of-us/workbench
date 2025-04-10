@@ -59,6 +59,7 @@ describe('runtime-utils', () => {
     runtimeDiskStore.set({
       workspaceNamespace,
       gcePersistentDisk: undefined,
+      gcePersistentDiskLoaded: true,
     });
     jest.useFakeTimers();
   });

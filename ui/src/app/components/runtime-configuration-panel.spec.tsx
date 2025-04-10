@@ -351,8 +351,8 @@ describe(getErrorsAndWarnings.name, () => {
 
   it('should show a cost warning when the user has enough remaining initial credits', () => {
     const usingInitialCredits = true;
-    const creatorFreeCreditsRemaining =
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit + 1;
+    const creatorInitialCreditsRemaining =
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit + 1;
 
     // want a running cost over $25/hr
 
@@ -364,7 +364,7 @@ describe(getErrorsAndWarnings.name, () => {
       'Your runtime is expensive. Are you sure you wish to proceed?';
 
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
-      { usingInitialCredits, analysisConfig, creatorFreeCreditsRemaining }
+      { usingInitialCredits, analysisConfig, creatorInitialCreditsRemaining }
     );
 
     expect(errorMessageContent).toEqual([]);
@@ -374,8 +374,8 @@ describe(getErrorsAndWarnings.name, () => {
 
   it('should show a cost error when the user does not have enough remaining initial credits', () => {
     const usingInitialCredits = true;
-    const creatorFreeCreditsRemaining =
-      serverConfigStore.get().config.defaultFreeCreditsDollarLimit - 1;
+    const creatorInitialCreditsRemaining =
+      serverConfigStore.get().config.defaultInitialCreditsDollarLimit - 1;
 
     // want a running cost over $25/hr
 
@@ -387,7 +387,7 @@ describe(getErrorsAndWarnings.name, () => {
       'Your runtime is too expensive. To proceed using free credits, reduce your running costs below'; // $cost
 
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
-      { usingInitialCredits, analysisConfig, creatorFreeCreditsRemaining }
+      { usingInitialCredits, analysisConfig, creatorInitialCreditsRemaining }
     );
 
     expect(warningMessageContent).toEqual([]);
@@ -462,6 +462,7 @@ describe('RuntimeConfigurationPanel', () => {
   const runtimeDiskStoreStub = {
     workspaceNamespace: workspaceStubs[0].namespace,
     gcePersistentDisk: null,
+    gcePersistentDiskLoaded: true,
   };
   runtimeDiskStore.set(runtimeDiskStoreStub);
 
@@ -690,7 +691,7 @@ describe('RuntimeConfigurationPanel', () => {
       },
       accessLevel: WorkspaceAccessLevel.WRITER,
       billingAccountName:
-        'billingAccounts/' + defaultServerConfig.freeTierBillingAccountId,
+        'billingAccounts/' + defaultServerConfig.initialCreditsBillingAccountId,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       googleProject: runtimeApiStub.runtime.googleProject,
     });
@@ -704,7 +705,18 @@ describe('RuntimeConfigurationPanel', () => {
     runtimeDiskStore.set({
       workspaceNamespace: workspace.namespace,
       gcePersistentDisk: null,
+      gcePersistentDiskLoaded: true,
     });
+
+    jest
+      .spyOn(runtimeHooks, 'useRuntimeAndDiskStores')
+      .mockImplementation(() => ({
+        runtimeLoaded: true,
+        gcePersistentDiskLoaded: true,
+        runtime: runtimeStore.get().runtime,
+        gcePersistentDisk: runtimeDiskStore.get().gcePersistentDisk,
+        isLoaded: true,
+      }));
 
     mockSetRuntimeRequest = jest.fn();
   });
@@ -729,10 +741,18 @@ describe('RuntimeConfigurationPanel', () => {
   };
 
   it('should show loading spinner while loading', async () => {
-    // simulate not done loading
-    runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
+    // Override the mock to simulate loading state
+    jest
+      .spyOn(runtimeHooks, 'useRuntimeAndDiskStores')
+      .mockImplementation(() => ({
+        runtimeLoaded: false,
+        gcePersistentDiskLoaded: false,
+        runtime: null,
+        gcePersistentDisk: null,
+        isLoaded: false,
+      }));
 
-    const { container } = component();
+    const { container, rerender } = component();
     expect(container).toBeInTheDocument();
 
     await waitFor(() =>
@@ -740,7 +760,23 @@ describe('RuntimeConfigurationPanel', () => {
       expect(screen.queryByLabelText('Please Wait')).toBeInTheDocument()
     );
 
-    runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: true });
+    // Now mock it as loaded
+    jest
+      .spyOn(runtimeHooks, 'useRuntimeAndDiskStores')
+      .mockImplementation(() => ({
+        runtimeLoaded: true,
+        gcePersistentDiskLoaded: true,
+        runtime: runtimeStore.get().runtime,
+        gcePersistentDisk: runtimeDiskStore.get().gcePersistentDisk,
+        isLoaded: true,
+      }));
+
+    // Use rerender instead of creating a new component
+    rerender(
+      <MemoryRouter>
+        <RuntimeConfigurationPanel {...defaultProps} />
+      </MemoryRouter>
+    );
 
     await waitFor(() =>
       expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()

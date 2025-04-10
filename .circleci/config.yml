@@ -204,6 +204,35 @@ commands:
           wip_id: "circleci-wip-staging"
           wip_provider_id: "circleci-oidc-prv-staging"
 
+  gcloud-auth-login-oidc-preprod:
+    description: "Activate CircleCI service account credential for the Preprod environment"
+    steps:
+    - gcloud-auth-login-oidc:
+        project_id: "589109405884"  # all-of-us-rw-preprod
+        wip_id: "circleci-wip-preprod"
+        wip_provider_id: "circleci-oidc-prv-preprod"
+        service_account: "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com"
+
+  deploy-to-preprod-command:
+    description: "Deploy API and UI to preprod App Engine"
+    steps:
+    - checkout-code
+    - attach_workspace:
+        at: .
+    - gcloud-auth-login-oidc-preprod
+    - run:
+        working_directory: ~/workbench/deploy
+        command: |
+          ./project.rb deploy \
+            --project all-of-us-rw-preprod \
+            --account "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com" \
+            --git-version "${CIRCLE_TAG}" \
+            --app-version "${CIRCLE_TAG}" \
+            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+            --key-file << pipeline.parameters.circle-service-account-key >> \
+            --promote
+        name: Deploy API and UI to all-of-us-rw-preprod App Engine
+
   deploy-to-stable-command:
     description: "Deploy API and UI to stable App Engine"
     steps:
@@ -243,6 +272,23 @@ commands:
               --key-file << pipeline.parameters.circle-service-account-key >> \
               --promote
           name: Deploy API and UI to all-of-us-rw-staging App Engine
+      - run:
+          name: Display JIRA issue
+          command: |
+            if [ -n "$JIRA_ISSUE_KEY" ]; then
+              echo "Created JIRA issue: $JIRA_ISSUE_KEY"
+              echo "JIRA URL: https://precisionmedicineinitiative.atlassian.net/browse/${JIRA_ISSUE_KEY}"
+              # Save the JIRA key to a file
+              echo $JIRA_ISSUE_KEY > ~/workbench/jira-env.sh
+            else
+              echo "ERROR: JIRA_ISSUE_KEY not found or empty!"
+              echo "A JIRA issue is required for this deployment."
+              exit 1
+            fi
+      - persist_to_workspace:
+          root: ~/workbench
+          paths:
+            - jira-env.sh
 
   halt-test-check:
     description: "Exiting job because code in the following paths have not changed: << parameters.dir_names >> directories"
@@ -628,6 +674,231 @@ jobs:
           command: |
             echo Hello Circle!
 
+  ask-for-approvals:
+    machine:
+      image: default # latest stable version
+    steps:
+    - attach_workspace:
+        at: ~/workbench
+    - run:
+        name: Load JIRA issue key
+        command: |
+          if [ -f ~/workbench/jira-env.sh ]; then
+            source ~/workbench/jira-env.sh
+            echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
+          else
+            echo "ERROR: jira-env.sh not found"
+            echo "This file is required for this deployment. It contains the Jira issue key associated with this release"
+            exit 1
+          fi
+    - run:
+        name: Comment on Jira
+        command: |
+          curl --request POST \
+            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
+            --header 'accept: application/json' \
+            --header "authorization: Basic ${JIRA_KEY}" \
+            --header 'content-type: application/json' \
+            --data '{
+            "body": {
+              "content": [
+                {
+                  "content": [
+                    {
+                      "text": "Requesting change approval for this release of the Workbench to production. 1 security and 1 business approval are needed for release",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "type": "mention",
+                      "attrs": {
+                        "id": "5b50af8f10d57114135ef067",
+                        "text": "Charissa Rotundo"
+                      }
+                    },
+                    {
+                      "text": " or ",
+                      "type": "text"
+                    },
+                    {
+                      "type": "mention",
+                      "attrs": {
+                        "id": "5ea1be1e61f0e70c11448011",
+                        "text": "Marcie Ansell"
+                      }
+                    },
+                    {
+                      "text": " (security)",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "type": "mention",
+                      "attrs": {
+                        "id": "557058:706ddbed-1979-4f5b-845e-29c4a92b3074",
+                        "text": "Asmita Gauchan"
+                      }
+                    },
+                    {
+                      "text": " or ",
+                      "type": "text"
+                    },
+                    {
+                      "type": "mention",
+                      "attrs": {
+                        "id": "61795b54062f4c0069b69057",
+                        "text": "Moira Dillon"
+                      }
+                    },
+                    {
+                      "text": " (business)",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "Please visit the link below to approve the release:",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "marks": [{"type": "link", "attrs": {"href": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'"}}],
+                      "text": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                }
+              ],
+              "type": "doc",
+              "version": 1
+            }
+          }'
+
+  document-approvals:
+    machine:
+      image: default # latest stable version
+    steps:
+    - attach_workspace:
+        at: ~/workbench
+    - run:
+        name: Load JIRA issue key
+        command: |
+          if [ -f ~/workbench/jira-env.sh ]; then
+            source ~/workbench/jira-env.sh
+            echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
+          else
+            echo "ERROR: jira-env.sh not found"
+            echo "This file is required for this deployment. It contains the Jira issue key associated with this release"
+            exit 1
+          fi
+    - run:
+        name: Get Multiple Approvers
+        command: |
+          # Get all jobs in the workflow
+          JOBS_RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+            "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
+          
+          echo "Jobs Response: $JOBS_RESPONSE"
+          
+          # Extract security approver ID
+          SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+            select(.name=="security-approval" and .type=="approval" and .status=="success") | 
+            .approved_by')
+          
+          # Extract business owner approver ID
+          BUSINESS_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+            select(.name=="business-owner-approval" and .type=="approval" and .status=="success") | 
+            .approved_by')
+          
+          echo "Security Approver ID: $SECURITY_APPROVER_ID"
+          echo "Business Approver ID: $BUSINESS_APPROVER_ID"
+          
+          # Get security approver details
+          if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
+            SECURITY_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
+              "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
+          
+            echo "Security User: $SECURITY_USER"
+          
+            SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name // .login')
+            echo "export SECURITY_APPROVER=\"$SECURITY_NAME\"" >> $BASH_ENV
+            echo "Security approved by: $SECURITY_NAME"
+          else
+            echo "No security approver found or information unavailable"
+          fi
+          
+          # Get business owner details
+          if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
+            BUSINESS_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
+              "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
+          
+            echo "Business Owner User: $BUSINESS_USER"
+            BUSINESS_NAME=$(echo $BUSINESS_USER | jq -r '.name // .login')
+            echo "export BUSINESS_APPROVER=\"$BUSINESS_NAME\"" >> $BASH_ENV
+            echo "Business approved by: $BUSINESS_NAME"
+          else
+            echo "No business approver found or information unavailable"
+          fi
+    - run:
+        name: Comment on Jira
+        command: |
+          curl --request POST \
+            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
+            --header 'accept: application/json' \
+            --header "authorization: Basic ${JIRA_KEY}" \
+            --header 'content-type: application/json' \
+            --data '{
+            "body": {
+              "content": [
+                {
+                  "content": [
+                    {
+                      "text": "This request has been approved by the following approvers:",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "Business Owner - '"${BUSINESS_APPROVER}"'",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                },
+                {
+                  "content": [
+                    {
+                      "text": "Security - '"${SECURITY_APPROVER}"'",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                }
+              ],
+              "type": "doc",
+              "version": 1
+            }
+          }'
+
   e2ev2-deploy-ui:
     machine:
       image: default # latest stable version
@@ -739,6 +1010,12 @@ jobs:
               --project all-of-us-workbench-test \
               --promote \
               --auth-token $TANAGRA_DEPLOY_TOKEN
+
+  deploy-to-preprod:
+    executor: workbench-executor
+    resource_class: large
+    steps:
+    - deploy-to-preprod-command
 
   deploy-to-stable:
     executor: workbench-executor
@@ -919,6 +1196,22 @@ jobs:
           key: v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
 
+  successful-business-owner-approval:
+    machine:
+      image: default # latest stable version
+    steps:
+      - run:
+          name: "Confirms successful business owner approval"
+          command: echo "Business Owner approval was successful"
+
+  successful-security-approval:
+    machine:
+      image: default # latest stable version
+    steps:
+      - run:
+          name: "Confirms successful security approval"
+          command: echo "Security approval was successful"
+
 workflows:
   build-test-deploy:
     jobs:
@@ -978,6 +1271,7 @@ workflows:
     jobs:
       - playground:
           <<: *filter-pr-branch
+
   e2ev2:
     jobs:
       - e2ev2-deploy-ui:
@@ -986,7 +1280,7 @@ workflows:
           requires:
             - e2ev2-deploy-ui
 
-  deploy-staging-and-stable:
+  deploy-to-higher-environments:
     jobs:
       - api-local-test:
           <<: *filter-release-tags
@@ -1026,6 +1320,41 @@ workflows:
           <<: *filter-release-tags
           requires:
             - deploy-to-staging
+      - ask-for-approvals:
+          <<: *filter-release-tags
+          requires:
+            - deploy-to-stable
+      - business-owner-approval:
+          <<: *filter-release-tags
+          type: approval
+          requires:
+            - ask-for-approvals
+      - security-approval:
+          <<: *filter-release-tags
+          type: approval
+          requires:
+            - ask-for-approvals
+      - successful-business-owner-approval:
+          requires:
+          - business-owner-approval
+          context:
+          - "Business Owners"
+          <<: *filter-release-tags
+      - successful-security-approval:
+          requires:
+          - security-approval
+          context:
+          - "Security"
+          <<: *filter-release-tags
+      - document-approvals:
+          requires:
+          - successful-business-owner-approval
+          - successful-security-approval
+          <<: *filter-release-tags
+      - deploy-to-preprod:
+          <<: *filter-release-tags
+          requires:
+           - document-approvals
 
   nightly-tests:
     triggers:

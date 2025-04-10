@@ -203,11 +203,13 @@ export const runtimeStore = atom<RuntimeStore>({
 export interface RuntimeDiskStore {
   workspaceNamespace: string | null | undefined;
   gcePersistentDisk: Disk | null | undefined;
+  gcePersistentDiskLoaded: boolean;
 }
 
 export const runtimeDiskStore = atom<RuntimeDiskStore>({
   workspaceNamespace: undefined,
   gcePersistentDisk: undefined,
+  gcePersistentDiskLoaded: false,
 });
 
 export interface StackdriverErrorReporterStore {

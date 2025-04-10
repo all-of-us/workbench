@@ -138,7 +138,6 @@ export function convertToResource(
     accessTierShortName,
     adminLocked,
     cdrVersionId,
-    billingStatus,
   } = workspace;
   return {
     workspaceNamespace: namespace,
@@ -146,7 +145,6 @@ export function convertToResource(
     permission: WorkspaceAccessLevel[accessLevel],
     accessTierShortName,
     cdrVersionId,
-    workspaceBillingStatus: billingStatus,
     cohort:
       resourceType === ResourceType.COHORT ? (inputResource as Cohort) : null,
     cohortReview:
@@ -166,6 +164,9 @@ export function convertToResource(
     lastModifiedEpochMillis: inputResource.lastModifiedTime,
     lastModifiedBy: inputResource.lastModifiedBy,
     adminLocked,
+
+    // deprecated and will be removed soon
+    workspaceBillingStatus: undefined,
   };
 }
 

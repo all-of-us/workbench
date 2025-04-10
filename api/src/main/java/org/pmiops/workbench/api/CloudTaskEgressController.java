@@ -26,7 +26,7 @@ public class CloudTaskEgressController implements CloudTaskEgressApiDelegate {
 
   @Override
   public ResponseEntity<Void> processEgressEvent(ProcessEgressEventRequest request) {
-    if (request.isIsVwbEgressEvent()) {
+    if (Boolean.TRUE.equals(request.isIsVwbEgressEvent())) {
       vwbEgressRemediationService.remediateEgressEvent(request.getEventId());
     } else {
       sumologicEgressRemediationService.remediateEgressEvent(request.getEventId());

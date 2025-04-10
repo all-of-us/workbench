@@ -7,6 +7,7 @@ import { AppsApi } from 'generated/fetch';
 
 import { render, screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { MILLIS_PER_DAY } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -20,15 +21,20 @@ import { CommonCreateGkeAppProps } from './create-gke-app';
 import { CreateRStudio } from './create-rstudio';
 
 const onClose = jest.fn();
-const freeTierBillingAccountId = 'freetier';
+const initialCreditsBillingAccountId = 'initial-credits';
 export const defaultProps: CommonCreateGkeAppProps = {
   onClose,
-  creatorFreeCreditsRemaining: null,
+  creatorInitialCreditsRemaining: null,
   workspace: {
     ...workspaceStubs[0],
     accessLevel: WorkspaceAccessLevel.WRITER,
-    billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+    billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+    initialCredits: {
+      exhausted: false,
+      expirationBypassed: false,
+      expirationEpochMillis: Date.now() + MILLIS_PER_DAY,
+    },
   },
   profileState: {
     profile: ProfileStubVariables.PROFILE_STUB,
@@ -56,8 +62,8 @@ describe(CreateRStudio.name, () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        freeTierBillingAccountId: freeTierBillingAccountId,
-        defaultFreeCreditsDollarLimit: 100.0,
+        initialCreditsBillingAccountId,
+        defaultInitialCreditsDollarLimit: 100.0,
         gsuiteDomain: '',
       },
     });

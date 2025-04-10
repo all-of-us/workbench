@@ -41,7 +41,7 @@ export const ConfigurationPanel = fp.flow(
     profileState: ProfileStore;
   }) => {
     const { namespace, terraName } = workspace;
-    const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] =
+    const [creatorInitialCreditsRemaining, setCreatorInitialCreditsRemaining] =
       useState(null);
 
     useEffect(() => {
@@ -53,7 +53,7 @@ export const ConfigurationPanel = fp.flow(
             terraName,
             { signal: aborter.signal }
           );
-        setCreatorFreeCreditsRemaining(freeCreditsRemaining);
+        setCreatorInitialCreditsRemaining(freeCreditsRemaining);
       };
 
       fetchFreeCredits();
@@ -71,7 +71,7 @@ export const ConfigurationPanel = fp.flow(
             () => (
               <div>
                 <RuntimeConfigurationPanel
-                  {...{ onClose, profileState, creatorFreeCreditsRemaining }}
+                  {...{ onClose, profileState, creatorInitialCreditsRemaining }}
                   initialPanelContent={runtimeConfPanelInitialState}
                 />
               </div>
@@ -81,7 +81,7 @@ export const ConfigurationPanel = fp.flow(
             <GKEAppConfigurationPanel
               {...{
                 onClose,
-                creatorFreeCreditsRemaining,
+                creatorInitialCreditsRemaining,
                 workspace,
                 profileState,
               }}

@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.OfflineBatchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -140,28 +141,23 @@ public class TaskQueueService {
   }
 
   public void groupAndPushAuditProjectsTasks(List<Long> userIds) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    createAndPushAll(userIds, workbenchConfig.offlineBatch.usersPerAuditTask, AUDIT_PROJECTS);
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
+    createAndPushAll(userIds, config.usersPerAuditTask, AUDIT_PROJECTS);
   }
 
   public void groupAndPushInitialCreditsUsage(List<Long> userIds) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    createAndPushAll(
-        userIds, workbenchConfig.billing.freeTierCronUserBatchSize, INITIAL_CREDITS_USAGE);
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
+    createAndPushAll(userIds, config.usersPerCheckInitialCreditsUsageTask, INITIAL_CREDITS_USAGE);
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    return createAndPushAll(
-        userIds, workbenchConfig.offlineBatch.usersPerSynchronizeAccessTask, SYNCHRONIZE_ACCESS);
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
+    return createAndPushAll(userIds, config.usersPerSynchronizeAccessTask, SYNCHRONIZE_ACCESS);
   }
 
   public void groupAndPushAccessExpirationEmailTasks(List<Long> userIds) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    createAndPushAll(
-        userIds,
-        workbenchConfig.offlineBatch.usersPerAccessExpirationEmailTask,
-        ACCESS_EXPIRATION_EMAIL);
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
+    createAndPushAll(userIds, config.usersPerAccessExpirationEmailTask, ACCESS_EXPIRATION_EMAIL);
   }
 
   private int getDeleteWorkspacesBatchSize() throws BadRequestException {
@@ -185,10 +181,10 @@ public class TaskQueueService {
   }
 
   public void groupAndPushDeleteWorkspaceEnvironmentTasks(List<String> workspaceNamespaces) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
     createAndPushAll(
         workspaceNamespaces,
-        workbenchConfig.offlineBatch.workspacesPerDeleteWorkspaceEnvironmentsTask,
+        config.workspacesPerDeleteWorkspaceEnvironmentsTask,
         DELETE_UNSHARED_WORKSPACE_ENVIRONMENTS);
   }
 
@@ -230,21 +226,21 @@ public class TaskQueueService {
             .liveCostByCreator(liveCostByCreator));
   }
 
-  public List<String> groupAndPushCheckInitialCreditExpirationTasks(List<Long> userIds) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+  public List<String> groupAndPushCheckInitialCreditsExpirationTasks(List<Long> userIds) {
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
     return createAndPushAll(
-        userIds,
-        workbenchConfig.offlineBatch.usersPerCheckInitialCreditsExpirationTask,
-        INITIAL_CREDITS_EXPIRATION);
+        userIds, config.usersPerCheckInitialCreditsExpirationTask, INITIAL_CREDITS_EXPIRATION);
   }
 
   public void groupAndPushCheckPersistentDiskTasks(List<Disk> disks) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    createAndPushAll(
-        disks, workbenchConfig.offlineBatch.disksPerCheckPersistentDiskTask, PERSISTENT_DISKS);
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
+    createAndPushAll(disks, config.disksPerCheckPersistentDiskTask, PERSISTENT_DISKS);
   }
 
   public void pushVwbPodCreationTask(String email) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBUserAndPodCreation) {
+      return;
+    }
     createAndPushTaskWithBearerToken(
         VWB_POD_CREATION, new CreateVwbPodTaskRequest().userName(email));
   }
