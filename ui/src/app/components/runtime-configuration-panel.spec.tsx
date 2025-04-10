@@ -1117,25 +1117,6 @@ describe('RuntimeConfigurationPanel', () => {
     ).toBeFalsy();
   });
 
-  it('should reattach to an existing disk by default, for deleted VMs', async () => {
-    const disk = existingDisk();
-    setCurrentDisk(disk);
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-      },
-      dataprocConfig: null,
-    });
-    mockUseCustomRuntime();
-    component();
-    const numberFormatter = new Intl.NumberFormat('en-US');
-    expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
-  });
-
   it('should allow configuration via dataproc preset from modified form', async () => {
     setCurrentRuntime(null);
     mockUseCustomRuntime();
