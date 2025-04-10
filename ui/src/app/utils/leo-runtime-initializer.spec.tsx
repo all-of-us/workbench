@@ -1,5 +1,4 @@
 import {
-  PersistentDiskRequest,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus,
@@ -21,7 +20,6 @@ import {
   LeoRuntimeInitializerOptions,
   throwRuntimeNotFound,
 } from 'app/utils/leo-runtime-initializer';
-import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
 import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
 import { setImmediate } from 'timers';
@@ -32,7 +30,6 @@ import {
   defaultDataprocConfig,
   defaultDataProcRuntime,
   defaultGceRuntimeWithPd,
-  defaultRuntime,
   RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
 
