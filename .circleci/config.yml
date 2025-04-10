@@ -279,7 +279,7 @@ commands:
               echo "Created JIRA issue: $JIRA_ISSUE_KEY"
               echo "JIRA URL: https://precisionmedicineinitiative.atlassian.net/browse/${JIRA_ISSUE_KEY}"
               # Save the JIRA key to a file
-              echo $JIRA_ISSUE_KEY > ~/workbench/jira-env.sh
+              echo "export JIRA_ISSUE_KEY=\"$JIRA_ISSUE_KEY\"" > ~/workbench/jira-env.sh
             else
               echo "ERROR: JIRA_ISSUE_KEY not found or empty!"
               echo "A JIRA issue is required for this deployment."
