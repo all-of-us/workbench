@@ -12244,8 +12244,11 @@ components:
           description: The full system-assigned ID of a user, including email domain
         freeCreditsLimit:
           type: number
-          description: When set, overrides the default free credits dollar limit for
-            this user.
+          description: DEPRECATED.  Use initialCreditsLimit.
+          format: double
+        initialCreditsLimit:
+          type: number
+          description: When set, overrides the default initial credits (dollar) limit for this user.
           format: double
         contactEmail:
           type: string

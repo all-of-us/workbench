@@ -534,7 +534,11 @@ public class ProfileService {
     final DbUser dbUser = userService.getByUsernameOrThrow(request.getUsername());
     final Profile originalProfile = getProfile(dbUser);
 
+    // Support the deprecated field until a release has passed, ensuring the UI has been updated.
     Optional.ofNullable(request.getFreeCreditsLimit())
+        .ifPresent(newLimit -> initialCreditsService.maybeSetDollarLimitOverride(dbUser, newLimit));
+
+    Optional.ofNullable(request.getInitialCreditsLimit())
         .ifPresent(newLimit -> initialCreditsService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
     request

@@ -1541,7 +1541,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_updateAccountProperties_free_tier_limit() {
+  public void test_updateAccountProperties_freeCreditsLimit() {
     createAccountAndDbUserWithAffiliation();
 
     final Double originalLimit = dbUser.getInitialCreditsLimitOverride();
@@ -1558,7 +1558,24 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_updateAccountProperties_free_tier_quota_no_change() {
+  public void test_updateAccountProperties_initialCreditsLimit() {
+    createAccountAndDbUserWithAffiliation();
+
+    final Double originalLimit = dbUser.getInitialCreditsLimitOverride();
+    final Double newLimit = 123.4;
+
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(FULL_USER_NAME).initialCreditsLimit(newLimit);
+
+    final Profile retrieved = profileService.updateAccountProperties(request);
+    assertThat(retrieved.getInitialCreditsLimit()).isWithin(0.01).of(newLimit);
+
+    verify(mockUserServiceAuditor)
+        .fireSetInitialCreditsOverride(dbUser.getUserId(), originalLimit, newLimit);
+  }
+
+  @Test
+  public void test_updateAccountProperties_freeCreditsLimit_no_change() {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     final AccountPropertyUpdate request =
@@ -1571,11 +1588,25 @@ public class ProfileControllerTest extends BaseControllerTest {
         .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
   }
 
+  @Test
+  public void test_updateAccountProperties_initialCreditsLimit_no_change() {
+    final Profile original = createAccountAndDbUserWithAffiliation();
+
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
+            .username(FULL_USER_NAME)
+            .initialCreditsLimit(original.getInitialCreditsLimit());
+    profileService.updateAccountProperties(request);
+
+    verify(mockUserServiceAuditor, never())
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
+  }
+
   // don't set an override if the value to set is equal to the system default
   // and observe that the user's limit tracks with the default
 
   @Test
-  public void test_updateAccountProperties_free_tier_quota_no_override() {
+  public void test_updateAccountProperties_freeCreditsLimit_no_override() {
     config.billing.defaultInitialCreditsDollarLimit = 123.45;
 
     final Profile original = createAccountAndDbUserWithAffiliation();
@@ -1594,6 +1625,38 @@ public class ProfileControllerTest extends BaseControllerTest {
         new AccountPropertyUpdate()
             .username(FULL_USER_NAME)
             .freeCreditsLimit(config.billing.defaultInitialCreditsDollarLimit);
+    profileService.updateAccountProperties(request);
+    verify(mockUserServiceAuditor, never())
+        .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
+
+    // the user's profile continues to track default changes
+
+    config.billing.defaultInitialCreditsDollarLimit = 345.67;
+    assertThat(profileService.getProfile(dbUser).getInitialCreditsLimit())
+        .isWithin(0.01)
+        .of(345.67);
+  }
+
+  @Test
+  public void test_updateAccountProperties_initialCreditsLimit_no_override() {
+    config.billing.defaultInitialCreditsDollarLimit = 123.45;
+
+    final Profile original = createAccountAndDbUserWithAffiliation();
+    assertThat(original.getInitialCreditsLimit()).isWithin(0.01).of(123.45);
+
+    // update the default - the user's profile also updates
+
+    config.billing.defaultInitialCreditsDollarLimit = 234.56;
+    assertThat(profileService.getProfile(dbUser).getInitialCreditsLimit())
+        .isWithin(0.01)
+        .of(234.56);
+
+    // setting an initial credits limit equal to the default will not override
+
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
+            .username(FULL_USER_NAME)
+            .initialCreditsLimit(config.billing.defaultInitialCreditsDollarLimit);
     profileService.updateAccountProperties(request);
     verify(mockUserServiceAuditor, never())
         .fireSetInitialCreditsOverride(anyLong(), anyDouble(), anyDouble());
