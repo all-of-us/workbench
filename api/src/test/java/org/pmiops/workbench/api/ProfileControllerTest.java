@@ -1541,20 +1541,20 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_updateAccountProperties_free_tier_quota() {
+  public void test_updateAccountProperties_free_tier_limit() {
     createAccountAndDbUserWithAffiliation();
 
-    final Double originalQuota = dbUser.getInitialCreditsLimitOverride();
-    final Double newQuota = 123.4;
+    final Double originalLimit = dbUser.getInitialCreditsLimitOverride();
+    final Double newLimit = 123.4;
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(FULL_USER_NAME).freeCreditsLimit(newQuota);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).freeCreditsLimit(newLimit);
 
     final Profile retrieved = profileService.updateAccountProperties(request);
-    assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
+    assertThat(retrieved.getInitialCreditsLimit()).isWithin(0.01).of(newLimit);
 
     verify(mockUserServiceAuditor)
-        .fireSetInitialCreditsOverride(dbUser.getUserId(), originalQuota, newQuota);
+        .fireSetInitialCreditsOverride(dbUser.getUserId(), originalLimit, newLimit);
   }
 
   @Test
@@ -1564,7 +1564,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
             .username(FULL_USER_NAME)
-            .freeCreditsLimit(original.getFreeTierDollarQuota());
+            .freeCreditsLimit(original.getInitialCreditsLimit());
     profileService.updateAccountProperties(request);
 
     verify(mockUserServiceAuditor, never())
@@ -1579,12 +1579,12 @@ public class ProfileControllerTest extends BaseControllerTest {
     config.billing.defaultInitialCreditsDollarLimit = 123.45;
 
     final Profile original = createAccountAndDbUserWithAffiliation();
-    assertThat(original.getFreeTierDollarQuota()).isWithin(0.01).of(123.45);
+    assertThat(original.getInitialCreditsLimit()).isWithin(0.01).of(123.45);
 
     // update the default - the user's profile also updates
 
     config.billing.defaultInitialCreditsDollarLimit = 234.56;
-    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
+    assertThat(profileService.getProfile(dbUser).getInitialCreditsLimit())
         .isWithin(0.01)
         .of(234.56);
 
@@ -1601,7 +1601,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // the user's profile continues to track default changes
 
     config.billing.defaultInitialCreditsDollarLimit = 345.67;
-    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
+    assertThat(profileService.getProfile(dbUser).getInitialCreditsLimit())
         .isWithin(0.01)
         .of(345.67);
   }
