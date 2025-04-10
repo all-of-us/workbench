@@ -68,7 +68,6 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import {
   createOrCustomize,
-  deriveCurrentRuntime,
   getErrorsAndWarnings,
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,
@@ -78,37 +77,6 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 const setup = () => {
   serverConfigStore.set({ config: defaultServerConfig });
 };
-
-describe(deriveCurrentRuntime.name, () => {
-  beforeEach(() => {
-    setup();
-  });
-  it('returns an undefined runtime if the inputs are undefined', () => {
-    const expected = undefined;
-
-    expect(
-      deriveCurrentRuntime({
-        crFromCustomRuntimeHook: undefined,
-        gcePersistentDisk: undefined,
-      })
-    ).toEqual(expected);
-  });
-
-  describe.each([
-    ['GCE', defaultGceRuntime()],
-    ['GCE with PD', defaultGceRuntimeWithPd()],
-    ['DataProc', defaultDataProcRuntime()],
-  ])('%s', (desc, runtime) => {
-    it(`returns a ${desc} runtime from the hook`, () => {
-      expect(
-        deriveCurrentRuntime({
-          crFromCustomRuntimeHook: runtime,
-          gcePersistentDisk: undefined,
-        })
-      ).toEqual(runtime);
-    });
-  });
-});
 
 describe(createOrCustomize.name, () => {
   beforeEach(() => {
