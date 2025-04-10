@@ -685,7 +685,7 @@ jobs:
         command: |
           if [ -f ~/workbench/jira-env.sh ]; then
             source ~/workbench/jira-env.sh
-            echo "export JIRA_ISSUE_KEY=\"JIRA_ISSUE_KEY\"" >> $BASH_ENV
+            echo "export JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $BASH_ENV
             source $BASH_ENV
             echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
           else
@@ -804,7 +804,7 @@ jobs:
         command: |
           if [ -f ~/workbench/jira-env.sh ]; then
             source ~/workbench/jira-env.sh
-            echo "export JIRA_ISSUE_KEY=\"JIRA_ISSUE_KEY\"" >> $BASH_ENV
+            echo "export JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $BASH_ENV
             source $BASH_ENV
             echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
           else
