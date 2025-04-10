@@ -14,7 +14,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   AccessBypassRequest,
   AccessModule,
-  AccountDisabledStatus,
   AccountPropertyUpdate,
   InstitutionalRole,
   Profile,
@@ -293,36 +292,27 @@ export const updateAccountProperties = async (
   updatedProfile: Profile,
   accessBypassRequests?: AccessBypassRequest[]
 ): Promise<Profile> => {
-  const { username, initialCreditsExpirationBypassed } = updatedProfile;
-
-  const updateDisabledMaybe: boolean = getUpdatedProfileValue(
-    oldProfile,
-    updatedProfile,
-    ['disabled']
-  );
-
-  const accountDisabledStatus: AccountDisabledStatus =
-    updateDisabledMaybe === undefined
-      ? undefined
-      : {
-          disabled: updateDisabledMaybe, // play with null later
-        };
+  const { username } = updatedProfile;
 
   // only set these fields if they have changed (except username which we always want)
   const request: AccountPropertyUpdate = {
     username,
     accessBypassRequests,
-    accountDisabledStatus,
-    freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, [
+    disabled: getUpdatedProfileValue(oldProfile, updatedProfile, ['disabled']),
+    initialCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'initialCreditsLimit',
     ]),
+    initialCreditsExpirationBypassed: getUpdatedProfileValue(
+      oldProfile,
+      updatedProfile,
+      ['initialCreditsExpirationBypassed']
+    ),
     contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'contactEmail',
     ])?.trim(),
     affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'verifiedInstitutionalAffiliation',
     ]),
-    initialCreditsExpirationBypassed,
   };
 
   return userAdminApi().updateAccountProperties(request);

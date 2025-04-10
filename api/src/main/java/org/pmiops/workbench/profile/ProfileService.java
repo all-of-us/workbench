@@ -545,23 +545,29 @@ public class ProfileService {
         .getAccessBypassRequests()
         .forEach(bypass -> accessModuleService.updateBypassTime(dbUser.getUserId(), bypass));
 
-    // refetch from the DB
+    // refetch from the DB - the previous requests may have updated the user
     Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));
+
+    // don't update if this field is not set (null) in the request
+    Boolean bypassExpiration = request.isInitialCreditsExpirationBypassed();
+    if (configProvider.get().featureFlags.enableInitialCreditsExpiration
+        && bypassExpiration != null) {
+      updatedProfile.setInitialCreditsExpirationBypassed(bypassExpiration);
+    }
+
     Optional.ofNullable(request.getContactEmail()).ifPresent(updatedProfile::setContactEmail);
     Optional.ofNullable(request.getAffiliation())
         .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
+    // Support the deprecated field until a release has passed, ensuring the UI has been updated.
     Optional.ofNullable(request.getAccountDisabledStatus())
         .map(AccountDisabledStatus::isDisabled)
         .ifPresent(updatedProfile::setDisabled);
-
-    boolean enableInitialCreditsExpiration =
-        configProvider.get().featureFlags.enableInitialCreditsExpiration;
-    if (enableInitialCreditsExpiration) {
-      updatedProfile.setInitialCreditsExpirationBypassed(
-          request.isInitialCreditsExpirationBypassed());
+    Boolean disabled = request.isDisabled();
+    if (disabled != null) {
+      updatedProfile.setDisabled(disabled);
     }
-    updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
+    updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
     return getProfile(dbUser);
   }
 }

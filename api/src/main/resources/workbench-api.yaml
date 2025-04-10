@@ -12242,13 +12242,13 @@ components:
         username:
           type: string
           description: The full system-assigned ID of a user, including email domain
+        disabled:
+          type: boolean
+          description: When set to true, the user will be disabled.  When set to false, the user
+            will be re-enabled.
         freeCreditsLimit:
           type: number
           description: DEPRECATED.  Use initialCreditsLimit.
-          format: double
-        initialCreditsLimit:
-          type: number
-          description: When set, overrides the default initial credits (dollar) limit for this user.
           format: double
         contactEmail:
           type: string
@@ -12261,12 +12261,17 @@ components:
           description: Updates the user's bypass status for the given access modules.
           items:
             $ref: '#/components/schemas/AccessBypassRequest'
-        accountDisabledStatus:
-          $ref: '#/components/schemas/AccountDisabledStatus'
+        initialCreditsLimit:
+          type: number
+          description: When set, overrides the default initial credits (dollar) limit for this user.
+          format: double
         initialCreditsExpirationBypassed:
           type: boolean
-          description: When set to true, the user will not be required to spend their
-            initial credits within the expiration period.
+          description: When set to true, the user will not be required to spend their initial
+            credits within the expiration period.  When set to false, removes this bypass.
+        accountDisabledStatus:
+          description: DEPRECATED.  Use disabled.
+          $ref: '#/components/schemas/AccountDisabledStatus'
       description: |
         A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page. Updates to the contact email or the institutional affiliation will be rejected if they do not validate.
     AccessReason:
