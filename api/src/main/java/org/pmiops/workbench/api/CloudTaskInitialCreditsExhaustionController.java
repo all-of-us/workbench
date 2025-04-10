@@ -27,7 +27,6 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.utils.CostComparisonUtils;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -53,8 +52,7 @@ public class CloudTaskInitialCreditsExhaustionController
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfig,
       UserDao userDao,
-      WorkspaceDao workspaceDao,
-      WorkspaceService workspaceService) {
+      WorkspaceDao workspaceDao) {
     this.initialCreditsService = initialCreditsService;
     this.leonardoApiClient = leonardoApiClient;
     this.mailService = mailService;
