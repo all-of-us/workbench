@@ -85,7 +85,7 @@ public class DbWorkspace {
   private String anticipatedFindings;
   private String scientificApproach;
 
-  private Set<Short> disseminateResearchSet = new HashSet<Short>();
+  private Set<Short> disseminateResearchSet = new HashSet<>();
   private String disseminateResearchOther;
   private Set<Short> researchOutcomeSet = new HashSet<>();
 
@@ -98,7 +98,6 @@ public class DbWorkspace {
   private String adminLockedReason;
 
   private boolean initialCreditsExhausted;
-  private boolean initialCreditsExpired;
 
   private DbFeaturedCategory featuredCategory;
   private boolean usesTanagra;
