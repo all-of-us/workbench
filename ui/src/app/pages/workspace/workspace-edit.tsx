@@ -423,10 +423,8 @@ export const WorkspaceEdit = fp.flow(
         },
       } = this.props;
 
-      const initialCreditsUsageInNumber = initialCreditsUsage ?? 0;
-
-      const initialCreditsBalance =
-        initialCreditsLimit - initialCreditsUsageInNumber;
+      const initialCreditsBalance: number =
+        initialCreditsLimit - (initialCreditsUsage ?? 0);
       return (
         'Use All of Us initial credits - ' +
         formatInitialCreditsUSD(initialCreditsBalance) +
