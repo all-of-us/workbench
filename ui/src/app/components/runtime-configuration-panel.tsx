@@ -2,12 +2,7 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
-import {
-  Disk,
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-} from 'generated/fetch';
+import { Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
@@ -24,7 +19,6 @@ import {
 import {
   AnalysisConfig,
   fromAnalysisConfig,
-  maybeWithPersistentDisk,
   toAnalysisConfig,
   withAnalysisConfigDefaults,
 } from 'app/utils/analysis-config';
@@ -44,7 +38,6 @@ import {
   useRuntimeAndDiskStores,
   useRuntimeStatus,
 } from 'app/utils/runtime-hooks';
-import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   canUpdateRuntime,
   isVisible,
@@ -76,25 +69,6 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 
 const { useState, useEffect } = React;
 
-interface DeriveCurrentRuntimeProps {
-  crFromCustomRuntimeHook: Runtime;
-  gcePersistentDisk: Disk;
-}
-export const deriveCurrentRuntime = ({
-  crFromCustomRuntimeHook,
-  gcePersistentDisk,
-}: DeriveCurrentRuntimeProps): Runtime =>
-  // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-  crFromCustomRuntimeHook &&
-  crFromCustomRuntimeHook.status === RuntimeStatus.DELETED
-    ? applyPresetOverride(
-        // The attached disk information is lost for deleted runtimes. In any case,
-        // by default we want to offer that the user reattach their existing disk,
-        // if any and if the configuration allows it.
-        maybeWithPersistentDisk(crFromCustomRuntimeHook, gcePersistentDisk)
-      )
-    : crFromCustomRuntimeHook;
-
 interface CCProps {
   pendingRuntime: Runtime;
   currentRuntime: Runtime;
@@ -114,20 +88,6 @@ export const createOrCustomize = ({
       currentRuntime === null ||
         currentRuntime === undefined ||
         runtimeStatus === RuntimeStatus.UNKNOWN,
-      () => PanelContent.Create,
-    ],
-    [
-      // General Analysis consist of GCE + PD. Display create page only if
-      // 1) currentRuntime + pd both are deleted and
-      // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
-      currentRuntime?.status === RuntimeStatus.DELETED &&
-        !currentRuntime?.gceWithPdConfig &&
-        (
-          [
-            RuntimeConfigurationType.GENERAL_ANALYSIS,
-            RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-          ] as Array<RuntimeConfigurationType>
-        ).includes(currentRuntime?.configurationType),
       () => PanelContent.Create,
     ],
     () => PanelContent.Customize
@@ -284,15 +244,8 @@ const RuntimeConfigurationPanelContent = fp.flow(
       namespace,
       googleProject
     );
-    const [
-      { currentRuntime: crFromCustomRuntimeHook, pendingRuntime },
-      setRuntimeRequest,
-    ] = useCustomRuntime(namespace, gcePersistentDisk);
-
-    const currentRuntime = deriveCurrentRuntime({
-      crFromCustomRuntimeHook,
-      gcePersistentDisk,
-    });
+    const [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
+      useCustomRuntime(namespace, gcePersistentDisk);
 
     // Prioritize the "pendingRuntime", if any. When an update is pending, we want
     // to render the target runtime details, which may not match the current runtime.

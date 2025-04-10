@@ -39,7 +39,7 @@ export const RuntimeStatusIndicator = fp.flow(
     const { runtime, loadingError } = useStore(runtimeStore);
     let status = runtime?.status;
     if (
-      (!status || status === RuntimeStatus.DELETED) &&
+      !status &&
       compoundRuntimeOps &&
       workspaceNamespace in compoundRuntimeOps
     ) {
