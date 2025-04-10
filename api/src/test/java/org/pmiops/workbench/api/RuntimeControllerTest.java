@@ -526,11 +526,9 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_noGetRuntime_emptyListRuntimes() throws ApiException {
+  public void testGetRuntime_noGetRuntime() throws ApiException {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null))
-        .thenReturn(Collections.emptyList());
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
