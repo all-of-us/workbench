@@ -278,7 +278,7 @@ commands:
             if [ -n "$JIRA_ISSUE_KEY" ]; then
               echo "Created JIRA issue: $JIRA_ISSUE_KEY"
               echo "JIRA URL: https://precisionmedicineinitiative.atlassian.net/browse/${JIRA_ISSUE_KEY}"
-              # Save the JIRA key to a file
+              # Save a micro-script whose purpose is to export the saved JIRA key into the environment
               echo "export JIRA_ISSUE_KEY=\"$JIRA_ISSUE_KEY\"" > ~/workbench/jira-env.sh
             else
               echo "ERROR: JIRA_ISSUE_KEY not found or empty!"
