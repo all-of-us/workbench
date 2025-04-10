@@ -2,6 +2,7 @@ package org.pmiops.workbench.initialcredits;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
+import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
@@ -247,8 +248,8 @@ public class InitialCreditsService {
       user = userDao.save(user.setInitialCreditsLimitOverride(newDollarLimit));
 
       if (userHasRemainingInitialCredits(user)) {
-        // may be redundant: enable anyway
-        setAllToUnexhausted(user);
+        // may be redundant: clear exhaustion anyway
+        updateInitialCreditsExhaustion(user, false);
       }
 
       userServiceAuditor.fireSetInitialCreditsOverride(
@@ -510,13 +511,11 @@ public class InitialCreditsService {
     return findWorkspaceInitialCreditsUsagesThatWereNotRecentlyUpdated(allCostsInDbForUsers);
   }
 
-  private void setAllToUnexhausted(final DbUser user) {
+  public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
     workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            ws ->
-                BillingUtils.isInitialCredits(
-                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .forEach(ws -> workspaceDao.save(ws.setInitialCreditsExhausted(false)));
+        .filter(ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .map(ws -> ws.setInitialCreditsExhausted(exhausted))
+        .forEach(workspaceDao::save);
   }
 
   /**
