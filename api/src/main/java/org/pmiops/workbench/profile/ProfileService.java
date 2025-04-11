@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
@@ -252,7 +253,7 @@ public class ProfileService {
         .ifPresent(
             isNowBypassed -> {
               if (enableInitialCreditsExpiration
-                  && previousProfile.isInitialCreditsExpirationBypassed() != isNowBypassed) {
+                  && !Objects.equals(previousProfile.isInitialCreditsExpirationBypassed(), isNowBypassed)) {
                 initialCreditsService.setInitialCreditsExpirationBypassed(user, isNowBypassed);
               }
             });
@@ -494,6 +495,9 @@ public class ProfileService {
       throw new BadRequestException("Changing Verified Institutional Affiliation is not supported");
     }
     if (fieldChanged(diff, "disabled")) {
+      throw new BadRequestException("Users cannot modify their disabled status");
+    }
+    if (fieldChanged(diff, "duccSignedVersion,initialCreditsLimit,latestTermsOfServiceVersion,initialCreditsExpirationEpochMillis,initialCreditsExtensionEpochMillis,initialCreditsExpirationBypassed,eligibleForInitialCreditsExtension")) {
       throw new BadRequestException("Users cannot modify their disabled status");
     }
   }
