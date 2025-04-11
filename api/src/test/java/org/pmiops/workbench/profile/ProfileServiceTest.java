@@ -16,10 +16,13 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -73,6 +76,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @DataJpaTest
 public class ProfileServiceTest {
@@ -708,6 +712,42 @@ public class ProfileServiceTest {
     TestMockFactory.assertEqualDemographicSurveys(
         profileService.getProfile(targetUser).getDemographicSurveyV2(),
         updatedProfile.getDemographicSurveyV2());
+  }
+
+  private static Stream<Arguments> disallowedUserProfileChanges() {
+    // keep in sync with DISALLOWED_USER_PROFILE_CHANGES
+    // note: "username", "contactEmail", and "verifiedInstitutionalAffiliation"
+    // are well-covered by other tests
+    return Stream.of(
+        Arguments.of("duccSignedVersion", 1),
+        Arguments.of("latestTermsOfServiceVersion", 2),
+        Arguments.of("eligibleForInitialCreditsExtension", true),
+        Arguments.of("initialCreditsExpirationBypassed", true),
+        Arguments.of("initialCreditsExpirationEpochMillis", Long.valueOf(1)),
+        Arguments.of("initialCreditsExtensionEpochMillis", Long.valueOf(1)),
+        Arguments.of("initialCreditsLimit", 10000.0));
+  }
+
+  @ParameterizedTest(name = "updateProfile_disallowed({0})")
+  @MethodSource("disallowedUserProfileChanges")
+  public void updateProfile_user_disallowed(String testFieldStr, Object testFieldValue) {
+    Profile previousProfile = createValidProfile();
+    Profile updatedProfile = createValidProfile();
+
+    ReflectionTestUtils.setField(updatedProfile, testFieldStr, testFieldValue);
+
+    DbUser targetUser =
+        userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    BadRequestException e =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                profileService.updateProfile(
+                    targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile));
+    assertThat(e.getMessage()).contains(testFieldStr);
   }
 
   @Test

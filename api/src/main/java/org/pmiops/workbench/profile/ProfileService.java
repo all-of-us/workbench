@@ -54,6 +54,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
+  public static final List<String> DISALLOWED_USER_PROFILE_CHANGES =
+      List.of(
+          "disabled",
+          "username",
+          "contactEmail",
+          "verifiedInstitutionalAffiliation",
+          "duccSignedVersion",
+          "latestTermsOfServiceVersion",
+          "eligibleForInitialCreditsExtension",
+          "initialCreditsExpirationBypassed",
+          "initialCreditsExpirationEpochMillis",
+          "initialCreditsExtensionEpochMillis",
+          "initialCreditsLimit");
+
   private final AccessModuleService accessModuleService;
   private final AccessTierService accessTierService;
   private final AddressMapper addressMapper;
@@ -253,7 +267,8 @@ public class ProfileService {
         .ifPresent(
             isNowBypassed -> {
               if (enableInitialCreditsExpiration
-                  && !Objects.equals(previousProfile.isInitialCreditsExpirationBypassed(), isNowBypassed)) {
+                  && !Objects.equals(
+                      previousProfile.isInitialCreditsExpirationBypassed(), isNowBypassed)) {
                 initialCreditsService.setInitialCreditsExpirationBypassed(user, isNowBypassed);
               }
             });
@@ -483,23 +498,12 @@ public class ProfileService {
   }
 
   private void validateChangesAllowedByUser(Diff diff) {
-    if (fieldChanged(diff, "username")) {
-      // See RW-1488.
-      throw new BadRequestException("Changing username is not supported");
-    }
-    if (fieldChanged(diff, "contactEmail")) {
-      // See RW-1488.
-      throw new BadRequestException("Changing contact email is not currently supported");
-    }
-    if (fieldChanged(diff, "verifiedInstitutionalAffiliation")) {
-      throw new BadRequestException("Changing Verified Institutional Affiliation is not supported");
-    }
-    if (fieldChanged(diff, "disabled")) {
-      throw new BadRequestException("Users cannot modify their disabled status");
-    }
-    if (fieldChanged(diff, "duccSignedVersion,initialCreditsLimit,latestTermsOfServiceVersion,initialCreditsExpirationEpochMillis,initialCreditsExtensionEpochMillis,initialCreditsExpirationBypassed,eligibleForInitialCreditsExtension")) {
-      throw new BadRequestException("Users cannot modify their disabled status");
-    }
+    DISALLOWED_USER_PROFILE_CHANGES.forEach(
+        field -> {
+          if (fieldChanged(diff, field)) {
+            throw new BadRequestException("Users cannot modify Profile field " + field);
+          }
+        });
   }
 
   private void validateChangesAllowedByAdmin(Diff diff) {
