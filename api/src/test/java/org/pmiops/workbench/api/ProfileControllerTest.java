@@ -833,7 +833,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
     profileController.updateProfile(profile);
-    profileController.submitDUCC(CURRENT_DUCC_VERSION, "O.O.");
+    profile = profileController.submitDUCC(CURRENT_DUCC_VERSION, "O.O.").getBody();
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
@@ -848,7 +848,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     String familyName1 = profile.getFamilyName();
     String initials1 = "AAA";
 
-    profileController.submitDUCC(CURRENT_DUCC_VERSION, initials1);
+    profile = profileController.submitDUCC(CURRENT_DUCC_VERSION, initials1).getBody();
     DbUserCodeOfConductAgreement duccAgreement = dbUser.getDuccAgreement();
     assertThat(duccAgreement.isUserNameOutOfDate()).isFalse();
     assertThat(duccAgreement.getUserGivenName()).isEqualTo(givenName1);
@@ -1542,7 +1542,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void test_updateAccountProperties_free_tier_quota() {
-    createAccountAndDbUserWithAffiliation();
+    boolean grantAdminAuthority = true;
+    createAccountAndDbUserWithAffiliation(grantAdminAuthority);
 
     final Double originalQuota = dbUser.getInitialCreditsLimitOverride();
     final Double newQuota = 123.4;

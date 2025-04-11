@@ -8,13 +8,12 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
-import org.javers.core.diff.changetype.PropertyChange;
+import org.javers.core.diff.changetype.ValueChange;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -267,8 +266,7 @@ public class ProfileService {
         .ifPresent(
             isNowBypassed -> {
               if (enableInitialCreditsExpiration
-                  && !Objects.equals(
-                      previousProfile.isInitialCreditsExpirationBypassed(), isNowBypassed)) {
+                  && previousProfile.isInitialCreditsExpirationBypassed() != isNowBypassed) {
                 initialCreditsService.setInitialCreditsExpirationBypassed(user, isNowBypassed);
               }
             });
@@ -419,8 +417,8 @@ public class ProfileService {
   private List<Change> getChangesWithPrefix(final @Nonnull Diff diff, final String pathPrefix) {
     return diff.getChanges(
         change ->
-            change instanceof PropertyChange propertyChange
-                && propertyChange.getPropertyNameWithPath().startsWith(pathPrefix));
+            change instanceof ValueChange valueChange
+                && valueChange.getPropertyNameWithPath().startsWith(pathPrefix));
   }
 
   /**
@@ -561,8 +559,8 @@ public class ProfileService {
     boolean enableInitialCreditsExpiration =
         configProvider.get().featureFlags.enableInitialCreditsExpiration;
     if (enableInitialCreditsExpiration) {
-      updatedProfile.setInitialCreditsExpirationBypassed(
-          request.isInitialCreditsExpirationBypassed());
+      Optional.ofNullable(request.isInitialCreditsExpirationBypassed())
+          .ifPresent(updatedProfile::setInitialCreditsExpirationBypassed);
     }
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
