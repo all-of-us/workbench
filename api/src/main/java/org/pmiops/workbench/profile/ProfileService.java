@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
-import org.javers.core.diff.changetype.PropertyChange;
+import org.javers.core.diff.changetype.ValueChange;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -53,6 +53,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
+  public static final List<String> DISALLOWED_USER_PROFILE_CHANGES =
+      List.of(
+          "disabled",
+          "username",
+          "contactEmail",
+          "verifiedInstitutionalAffiliation",
+          "duccSignedVersion",
+          "latestTermsOfServiceVersion",
+          "eligibleForInitialCreditsExtension",
+          "initialCreditsExpirationBypassed",
+          "initialCreditsExpirationEpochMillis",
+          "initialCreditsExtensionEpochMillis",
+          "initialCreditsLimit");
+
   private final AccessModuleService accessModuleService;
   private final AccessTierService accessTierService;
   private final AddressMapper addressMapper;
@@ -403,8 +417,8 @@ public class ProfileService {
   private List<Change> getChangesWithPrefix(final @Nonnull Diff diff, final String pathPrefix) {
     return diff.getChanges(
         change ->
-            change instanceof PropertyChange propertyChange
-                && propertyChange.getPropertyNameWithPath().startsWith(pathPrefix));
+            change instanceof ValueChange valueChange
+                && valueChange.getPropertyNameWithPath().startsWith(pathPrefix));
   }
 
   /**
@@ -482,20 +496,12 @@ public class ProfileService {
   }
 
   private void validateChangesAllowedByUser(Diff diff) {
-    if (fieldChanged(diff, "username")) {
-      // See RW-1488.
-      throw new BadRequestException("Changing username is not supported");
-    }
-    if (fieldChanged(diff, "contactEmail")) {
-      // See RW-1488.
-      throw new BadRequestException("Changing contact email is not currently supported");
-    }
-    if (fieldChanged(diff, "verifiedInstitutionalAffiliation")) {
-      throw new BadRequestException("Changing Verified Institutional Affiliation is not supported");
-    }
-    if (fieldChanged(diff, "disabled")) {
-      throw new BadRequestException("Users cannot modify their disabled status");
-    }
+    DISALLOWED_USER_PROFILE_CHANGES.forEach(
+        field -> {
+          if (fieldChanged(diff, field)) {
+            throw new BadRequestException("Users cannot modify Profile field " + field);
+          }
+        });
   }
 
   private void validateChangesAllowedByAdmin(Diff diff) {
@@ -553,8 +559,8 @@ public class ProfileService {
     boolean enableInitialCreditsExpiration =
         configProvider.get().featureFlags.enableInitialCreditsExpiration;
     if (enableInitialCreditsExpiration) {
-      updatedProfile.setInitialCreditsExpirationBypassed(
-          request.isInitialCreditsExpirationBypassed());
+      Optional.ofNullable(request.isInitialCreditsExpirationBypassed())
+          .ifPresent(updatedProfile::setInitialCreditsExpirationBypassed);
     }
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
