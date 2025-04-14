@@ -288,9 +288,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       RuntimeConfigurationType runtimeConfigurationType) {
     if (runtimeConfigurationType != null) {
       return Collections.singletonMap(
-          LEONARDO_LABEL_AOU_CONFIG,
-          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
-              runtimeConfigurationType));
+          LEONARDO_LABEL_AOU_CONFIG, leonardoMapper.toConfigurationLabel(runtimeConfigurationType));
     } else {
       return new HashMap<>();
     }

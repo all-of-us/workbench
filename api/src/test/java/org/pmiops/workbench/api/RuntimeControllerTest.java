@@ -10,11 +10,15 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.GENERAL_ANALYSIS;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.HAIL_GENOMIC_ANALYSIS;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.USER_OVERRIDE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.getRuntimeConfigurationLabel;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.cloud.Date;
@@ -495,7 +499,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_defaultLabel_hail() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "preset-hail-genomic-analysis"));
+    testLeoRuntime.setLabels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, HAIL_GENOMIC_ANALYSIS));
 
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
@@ -506,7 +510,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_defaultLabel_generalAnalysis() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"));
+    testLeoRuntime.setLabels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, GENERAL_ANALYSIS));
 
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
@@ -517,7 +521,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_overrideLabel() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "user-override"));
+    testLeoRuntime.setLabels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE));
 
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
@@ -553,7 +557,7 @@ public class RuntimeControllerTest {
                     .runtimeName("expected-runtime")
                     .status(LeonardoRuntimeStatus.CREATING)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE))));
 
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
@@ -575,7 +579,7 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
                     .runtimeConfig(leoDataprocConfig)
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
@@ -592,7 +596,7 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeConfig(leoGceConfig)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE))));
 
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
@@ -623,7 +627,7 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeConfig(dataprocRuntimeConfig)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE))));
 
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
@@ -650,11 +654,11 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeName("expected-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE)),
                 new LeonardoListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("expected-runtime");
@@ -672,10 +676,10 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeName("expected-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE)),
                 new LeonardoListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("expected-runtime");
@@ -693,11 +697,11 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeName("expected-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE)),
                 new LeonardoListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(null))
-                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("expected-runtime");
@@ -715,11 +719,11 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeName("expected-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE)),
                 new LeonardoListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(""))
-                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("expected-runtime");
@@ -738,11 +742,11 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeName("override-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, USER_OVERRIDE)),
                 new LeonardoListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
@@ -763,7 +767,7 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
@@ -780,7 +784,7 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeName("preset-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
-                    .labels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"))));
+                    .labels(ImmutableMap.of(LEONARDO_LABEL_AOU_CONFIG, GENERAL_ANALYSIS))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("preset-runtime");
@@ -1092,8 +1096,8 @@ public class RuntimeControllerTest {
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("preset-hail-genomic-analysis");
+    assertThat(getRuntimeConfigurationLabel(createRuntimeRequest.getLabels()))
+        .isEqualTo(HAIL_GENOMIC_ANALYSIS);
   }
 
   @Test
@@ -1112,8 +1116,8 @@ public class RuntimeControllerTest {
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("preset-general-analysis");
+    assertThat(getRuntimeConfigurationLabel(createRuntimeRequest.getLabels()))
+        .isEqualTo(GENERAL_ANALYSIS);
   }
 
   @Test
@@ -1132,8 +1136,8 @@ public class RuntimeControllerTest {
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("user-override");
+    assertThat(getRuntimeConfigurationLabel(createRuntimeRequest.getLabels()))
+        .isEqualTo(USER_OVERRIDE);
   }
 
   @Test
@@ -1364,8 +1368,7 @@ public class RuntimeControllerTest {
         .isEqualTo(
             Collections.singletonMap(
                 LEONARDO_LABEL_AOU_CONFIG,
-                LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
-                    RuntimeConfigurationType.USEROVERRIDE)));
+                leonardoMapper.toConfigurationLabel(RuntimeConfigurationType.USEROVERRIDE)));
   }
 
   @Test

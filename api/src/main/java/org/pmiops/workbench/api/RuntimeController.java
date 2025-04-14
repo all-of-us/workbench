@@ -1,17 +1,16 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.hasValidRuntimeConfigurationLabel;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -29,7 +28,6 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResp
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
@@ -140,13 +138,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     LeonardoListRuntimeResponse mostRecentRuntime =
         mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
 
-    Map<String, String> runtimeLabels =
-        LeonardoLabelHelper.toLabelMap(mostRecentRuntime.getLabels());
-
-    if (runtimeLabels != null
-        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-            .values()
-            .contains(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
+    if (hasValidRuntimeConfigurationLabel(mostRecentRuntime.getLabels())) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntimeWithoutDisk(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
