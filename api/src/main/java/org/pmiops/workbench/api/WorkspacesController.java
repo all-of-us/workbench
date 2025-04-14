@@ -707,13 +707,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
       }
-      final DbUser invitedUser = userDao.findUserByUsername(role.getEmail());
+      final DbUser invitedUser = userDao.findUserByUsername(role.getUserName());
       if (invitedUser == null) {
-        throw new BadRequestException(String.format("User %s doesn't exist", role.getEmail()));
+        throw new BadRequestException(String.format("User %s doesn't exist", role.getUserName()));
       }
 
       aclStringsByUserIdBuilder.put(invitedUser.getUserId(), role.getRole().toString());
-      shareRolesMapBuilder.put(role.getEmail(), role.getRole());
+      shareRolesMapBuilder.put(role.getUserName(), role.getRole());
     }
     final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
 
@@ -737,9 +737,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                   u ->
                       (WorkspaceAccessLevel.OWNER.equals(u.getRole())
                               || WorkspaceAccessLevel.WRITER.equals(u.getRole()))
-                          && !finalWorkflowUsers.contains(u.getEmail())
-                          && !u.getEmail().equals(currentUser.getUsername()))
-              .map(UserRole::getEmail)
+                          && !finalWorkflowUsers.contains(u.getUserName())
+                          && !u.getUserName().equals(currentUser.getUsername()))
+              .map(UserRole::getUserName)
               .collect(Collectors.toList());
       List<String> failedRevocations =
           iamService.revokeWorkflowRunnerRoleForUsers(

@@ -235,7 +235,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                 .map(
                     userRole ->
                         new RdrWorkspaceUser()
-                            .userId((int) userMap.get(userRole.getEmail()).getUserId())
+                            .userId((int) userMap.get(userRole.getUserName()).getUserId())
                             .role(
                                 RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()))
                             .status(RdrWorkspaceUser.StatusEnum.ACTIVE))

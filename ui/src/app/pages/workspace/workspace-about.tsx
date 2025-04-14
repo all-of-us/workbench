@@ -420,7 +420,7 @@ export const WorkspaceAbout = fp.flow(
               <React.Fragment>
                 {workspaceUserRoles.map((user, i) => (
                   <div key={i} data-test-id={'workspaceUser-' + i}>
-                    {user.role + ' : ' + user.email}
+                    {user.role + ' : ' + user.userName}
                   </div>
                 ))}
               </React.Fragment>

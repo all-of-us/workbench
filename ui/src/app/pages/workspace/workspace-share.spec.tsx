@@ -10,7 +10,7 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   registerApiClient,
   workspacesApi,
@@ -30,7 +30,7 @@ import { WorkspaceShare, WorkspaceShareProps } from './workspace-share';
 
 describe(WorkspaceShare.name, () => {
   let props: WorkspaceShareProps;
-  let user;
+  let user: UserEvent;
 
   const component = () => {
     return render(<WorkspaceShare {...props} />);
@@ -38,41 +38,37 @@ describe(WorkspaceShare.name, () => {
   const harry: User = {
     givenName: 'Harry',
     familyName: 'Potter',
-    email: 'harry.potter@hogwarts.edu',
+    userName: 'harry.potter@hogwarts.edu',
   };
   const harryRole: UserRole = {
     ...harry,
-    email: harry.email,
     role: WorkspaceAccessLevel.OWNER,
   };
   const hermione: User = {
     givenName: 'Hermione',
     familyName: 'Granger',
-    email: 'hermione.granger@hogwarts.edu',
+    userName: 'hermione.granger@hogwarts.edu',
   };
   const hermioneRole: UserRole = {
     ...hermione,
-    email: hermione.email,
     role: WorkspaceAccessLevel.WRITER,
   };
   const ron: User = {
     givenName: 'Ronald',
     familyName: 'Weasley',
-    email: 'ron.weasley@hogwarts.edu',
+    userName: 'ron.weasley@hogwarts.edu',
   };
   const ronRole: UserRole = {
     ...ron,
-    email: ron.email,
     role: WorkspaceAccessLevel.READER,
   };
   const luna: User = {
     givenName: 'Luna',
     familyName: 'Lovegood',
-    email: 'luna.lovegood@hogwarts.edu',
+    userName: 'luna.lovegood@hogwarts.edu',
   };
   const lunaRole: UserRole = {
     ...luna,
-    email: luna.email,
     role: WorkspaceAccessLevel.NO_ACCESS,
   };
 
@@ -86,14 +82,14 @@ describe(WorkspaceShare.name, () => {
   const tomRiddleDiaryUserRoles = [harryRole, hermioneRole, ronRole];
 
   const getUserRoleDropdownLabel = (desiredUser: User) => {
-    return `Role selector for ${desiredUser.email}`;
+    return `Role selector for ${desiredUser.userName}`;
   };
 
   const getAddCollaboratorLabel = (desiredUser: User) => {
-    return `Button to add ${desiredUser.email} as a collaborator`;
+    return `Button to add ${desiredUser.userName} as a collaborator`;
   };
   const getRemoveCollaboratorLabel = (desiredUser: User) => {
-    return `Button to remove ${desiredUser.email} as a collaborator`;
+    return `Button to remove ${desiredUser.userName} as a collaborator`;
   };
 
   const addUser = async (userToAdd: User) => {
@@ -155,7 +151,7 @@ describe(WorkspaceShare.name, () => {
       expectedUsers.map((u) => u.givenName + ' ' + u.familyName)
     );
     expect(collabUserEmails.map((el) => el.textContent)).toEqual(
-      expectedUsers.map((u) => u.email)
+      expectedUsers.map((u) => u.userName)
     );
   });
 
@@ -253,7 +249,7 @@ describe(WorkspaceShare.name, () => {
     );
     await user.click(hermoineRoleDropdown);
     await user.click(
-      screen.getByLabelText(`Select Owner role for ${hermione.email}`)
+      screen.getByLabelText(`Select Owner role for ${hermione.userName}`)
     );
 
     const spy = jest.spyOn(workspacesApi(), 'shareWorkspacePatch');

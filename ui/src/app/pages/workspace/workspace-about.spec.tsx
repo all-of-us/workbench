@@ -112,7 +112,7 @@ describe('WorkspaceAbout', () => {
     await waitForNoSpinner();
     userRolesStub.forEach((role, i) => {
       const userRoleText = screen.getByTestId('workspaceUser-' + i).textContent;
-      expect(userRoleText).toContain(role.email);
+      expect(userRoleText).toContain(role.userName);
       expect(userRoleText).toContain(role.role.toString());
     });
   });

@@ -62,11 +62,7 @@ public class EgressEventServiceTest {
   @Autowired private LeonardoApiClient leonardoApiClient;
 
   private static final User USER_1 =
-      new User()
-          .givenName("Fredward")
-          .familyName("Fredrickson")
-          .userName("fred@aou.biz")
-          .email("freddie@fred.fred.fred.ca");
+      new User().givenName("Fredward").familyName("Fredrickson").userName("fred@aou.biz");
   private DbUser dbUser1;
 
   private static final WorkspaceUserAdminView ADMIN_VIEW_1 =
@@ -79,11 +75,7 @@ public class EgressEventServiceTest {
                   "2018-08-30T01:20+02:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
   private static final User USER_2 =
-      new User()
-          .givenName("Theororathy")
-          .familyName("Kim")
-          .userName("theodorothy@aou.biz")
-          .email("theodorothy@fred.fred.fred.org");
+      new User().givenName("Theororathy").familyName("Kim").userName("theodorothy@aou.biz");
   private DbUser dbUser2;
 
   private static final WorkspaceUserAdminView ADMIN_VIEW_2 =
@@ -354,7 +346,6 @@ public class EgressEventServiceTest {
     result.setGivenName(userModel.getGivenName());
     result.setFamilyName(userModel.getFamilyName());
     result.setUsername(userModel.getUserName());
-    result.setContactEmail(userModel.getEmail());
     result.setCreationTime(Timestamp.from(adminView.getUserAccountCreatedTime().toInstant()));
     return result;
   }

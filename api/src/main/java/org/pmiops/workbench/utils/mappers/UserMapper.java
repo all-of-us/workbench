@@ -12,20 +12,25 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
     config = MapStructConfig.class,
     uses = {CommonMappers.class, FirecloudMapper.class})
 public interface UserMapper {
+  // used internally by the generated implementation of toWorkspaceUserAdminView()
+  @Mapping(target = "userName", source = "username")
+  User mapperInternalToUser(DbUser user);
+
+  // used internally by the generated implementation of toPartialWorkspaceUserAdminView()
+  User mapperInternalToUser(UserRole userRole);
+
   @Mapping(source = "acl", target = "role")
   @Mapping(source = "user.username", target = "email")
+  @Mapping(source = "user.username", target = "userName")
   UserRole toApiUserRole(DbUser user, RawlsWorkspaceAccessEntry acl);
-
-  @Mapping(source = "contactEmail", target = "email")
-  @Mapping(source = "userRole.email", target = "userName")
-  User toApiUser(UserRole userRole, String contactEmail);
-
-  @Mapping(source = "contactEmail", target = "email")
-  @Mapping(source = "username", target = "userName")
-  User toApiUser(DbUser dbUser);
 
   @Mapping(source = "dbUser.userId", target = "userDatabaseId")
   @Mapping(source = "dbUser.creationTime", target = "userAccountCreatedTime")
   @Mapping(source = "dbUser", target = "userModel")
   WorkspaceUserAdminView toWorkspaceUserAdminView(DbUser dbUser, UserRole userRole);
+
+  @Mapping(target = "userModel", source = "userRole")
+  @Mapping(target = "userDatabaseId", ignore = true)
+  @Mapping(target = "userAccountCreatedTime", ignore = true)
+  WorkspaceUserAdminView toPartialWorkspaceUserAdminView(UserRole userRole);
 }

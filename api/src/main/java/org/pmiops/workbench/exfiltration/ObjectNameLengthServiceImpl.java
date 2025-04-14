@@ -127,7 +127,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
         final List<UserRole> workspaceOwners = getWorkspaceOwnersOrWriters(workspace);
         final Set<DbUser> activeUsers =
             userService.findActiveUsersByUsernames(
-                workspaceOwners.stream().map(UserRole::getEmail).collect(Collectors.toList()));
+                workspaceOwners.stream().map(UserRole::getUserName).collect(Collectors.toList()));
 
         maybeAlertUsers(bucketAuditEntry, workspace, activeUsers);
       }

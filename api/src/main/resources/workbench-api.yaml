@@ -7580,11 +7580,16 @@ components:
           format: double
     UserRole:
       required:
-      - email
+      - userName
+      - givenName
+      - familyName
       - role
       type: object
       properties:
         email:
+          type: string
+          description: Username of the user (DEPRECATED in favor of userName)
+        userName:
           type: string
           description: Username of the user
         givenName:
@@ -9463,10 +9468,11 @@ components:
           format: int32
     User:
       type: object
+      required:
+      - userName
+      - givenName
+      - familyName
       properties:
-        email:
-          type: string
-          description: researchallofus email address (deprecated in favor of userName)
         userName:
           type: string
           description: Unique researchallofus username (a Google account email)

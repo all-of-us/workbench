@@ -168,11 +168,11 @@ public class TestMockFactory {
   }
 
   public static RawlsWorkspaceDetails createTerraWorkspace(
-      String namespace, String terraName, String creator) {
+      String namespace, String terraName, String creatorUsername) {
     return new RawlsWorkspaceDetails()
         .namespace(namespace)
         .name(terraName)
-        .createdBy(creator)
+        .createdBy(creatorUsername)
         .workspaceId(WORKSPACE_TERRA_UUID)
         .bucketName(WORKSPACE_BUCKET_NAME)
         .googleProject(DEFAULT_GOOGLE_PROJECT);

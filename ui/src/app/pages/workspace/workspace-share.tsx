@@ -287,12 +287,12 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
     removeCollaborator(user: UserRole): void {
       // remove from userRoles if it exists
       const userRoles = this.state.userRoles.filter(
-        ({ email }) => user.email !== email
+        ({ userName }) => user.userName !== userName
       );
 
       // may or may not exist in the changeset (may have been added previously)
       const userRolesToChange = this.state.userRolesToChange
-        .filter(({ email }) => user.email !== email)
+        .filter(({ userName }) => user.userName !== userName)
         .concat({
           ...user,
           role: WorkspaceAccessLevel.NO_ACCESS,
@@ -306,9 +306,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
 
     addCollaborator(user: User): void {
       const userRole: UserRole = {
-        givenName: user.givenName,
-        familyName: user.familyName,
-        email: user.email,
+        ...user,
         role: WorkspaceAccessLevel.READER,
       };
 
@@ -319,7 +317,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
 
       // may or may not exist in the changeset (may have been set to NOACCESS previously)
       const userRolesToChange = this.state.userRolesToChange
-        .filter(({ email }) => user.email !== email)
+        .filter(({ userName }) => user.userName !== userName)
         .concat(userRole);
 
       this.setState({
@@ -352,7 +350,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
           }
           response.users = fp.differenceWith(
             (a, b) => {
-              return a.email === b.email;
+              return a.userName === b.userName;
             },
             response.users,
             this.state.userRoles
@@ -367,12 +365,12 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
 
     setRole(e, user: UserRole): void {
       const userRoles = fp.map((u) => {
-        return u.email === user.email ? { ...u, role: e } : u;
+        return u.userName === user.userName ? { ...u, role: e } : u;
       }, this.state.userRoles);
 
       // may or may not already exist in the changeset
       const userRolesToChange = this.state.userRolesToChange
-        .filter(({ email }) => user.email !== email)
+        .filter(({ userName }) => user.userName !== userName)
         .concat({ ...user, role: e });
 
       this.setState({
@@ -547,7 +545,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                     >
                       {this.state.autocompleteUsers.map((user) => {
                         return (
-                          <div key={user.email}>
+                          <div key={user.userName}>
                             <div style={styles.wrapper}>
                               <div style={styles.box}>
                                 <h5 style={styles.userName}>
@@ -557,14 +555,14 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                   data-test-id='user-email'
                                   style={styles.userName}
                                 >
-                                  {user.email}
+                                  {user.userName}
                                 </div>
                               </div>
                               <div style={styles.collaboratorIcon}>
                                 <ClrIcon
                                   shape='plus-circle'
-                                  data-test-id={'add-collab-' + user.email}
-                                  aria-label={`Button to add ${user.email} as a collaborator`}
+                                  data-test-id={'add-collab-' + user.userName}
+                                  aria-label={`Button to add ${user.userName} as a collaborator`}
                                   style={{ height: '21px', width: '21px' }}
                                   onClick={() => {
                                     this.addCollaborator(user);
@@ -607,7 +605,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                   >
                     {this.state.userRoles.map((user, i) => {
                       return (
-                        <div key={user.email}>
+                        <div key={user.userName}>
                           <div
                             data-test-id='collab-user-row'
                             style={styles.wrapper}
@@ -626,7 +624,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                 data-test-id='collab-user-email'
                                 style={styles.userName}
                               >
-                                {user.email}
+                                {user.userName}
                               </div>
                               {/* Minimally, the z-index must be higher than that of the
                         modal. See https://react-select.com/advanced#portaling */}
@@ -642,38 +640,38 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                   'popup-root'
                                 )}
                                 isDisabled={
-                                  user.email ===
+                                  user.userName ===
                                   this.props.profileState.profile.username
                                 }
                                 classNamePrefix={this.cleanClassNameForSelect(
-                                  user.email
+                                  user.userName
                                 )}
-                                data-test-id={user.email + '-user-role'}
+                                data-test-id={user.userName + '-user-role'}
                                 onChange={(e) => this.setRole(e, user)}
                                 options={UserRoleOptions}
                                 formatOptionLabel={({ label }, {}) => {
                                   return (
                                     <div
-                                      aria-label={`Select ${label} role for ${user.email}`}
+                                      aria-label={`Select ${label} role for ${user.userName}`}
                                     >
                                       {label}
                                     </div>
                                   );
                                 }}
-                                aria-label={`Role selector for ${user.email}`}
+                                aria-label={`Role selector for ${user.userName}`}
                               />
                             </div>
                             <div style={styles.box}>
                               <div style={styles.collaboratorIcon}>
                                 {this.hasPermission &&
-                                  user.email !==
+                                  user.userName !==
                                     this.props.profileState.profile
                                       .username && (
                                     <ClrIcon
                                       data-test-id={
-                                        'remove-collab-' + user.email
+                                        'remove-collab-' + user.userName
                                       }
-                                      aria-label={`Button to remove ${user.email} as a collaborator`}
+                                      aria-label={`Button to remove ${user.userName} as a collaborator`}
                                       shape='minus-circle'
                                       style={{ height: '21px', width: '21px' }}
                                       onClick={() =>

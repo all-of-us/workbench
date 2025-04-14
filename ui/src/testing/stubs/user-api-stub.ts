@@ -30,8 +30,8 @@ export class UserApiStub extends UserApi {
       } else {
         usersToReturn.push({
           familyName: 'User4',
-          email: 'sampleuser4@fake-research-aou.org',
           givenName: 'Sample',
+          userName: 'sampleuser4@fake-research-aou.org',
         } as User);
       }
       const userResponse: UserResponse = {
