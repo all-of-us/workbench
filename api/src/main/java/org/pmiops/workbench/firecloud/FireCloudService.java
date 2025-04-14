@@ -61,9 +61,9 @@ public interface FireCloudService {
   int NUM_RANDOM_CHARS = 20;
   String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
-  static String toFirecloudName(String workbenchName) {
+  static String toFirecloudName(String workbenchDisplayName) {
     // Derive a firecloud-compatible name from the provided name.
-    String strippedName = workbenchName.toLowerCase().replaceAll("[^0-9a-z]", "");
+    String strippedName = workbenchDisplayName.toLowerCase().replaceAll("[^0-9a-z]", "");
     // If the stripped name has no chars, generate a random name.
     if (strippedName.isEmpty()) {
       strippedName = RandomUtils.generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);

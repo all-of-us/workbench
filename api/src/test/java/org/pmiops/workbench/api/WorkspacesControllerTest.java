@@ -57,7 +57,6 @@ import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -92,12 +91,9 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -117,7 +113,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
@@ -195,7 +190,6 @@ import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
-import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -268,7 +262,6 @@ public class WorkspacesControllerTest {
   @Autowired AccessTierDao accessTierDao;
   @Autowired BigQueryService bigQueryService;
   @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewController cohortReviewController;
@@ -276,7 +269,6 @@ public class WorkspacesControllerTest {
   @Autowired CohortsController cohortsController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Autowired ConceptSetDao conceptSetDao;
-  @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
   @Autowired DataSetController dataSetController;
   @Autowired DataSetDao dataSetDao;
@@ -284,23 +276,15 @@ public class WorkspacesControllerTest {
   @Autowired FakeClock fakeClock;
   @Autowired FireCloudService fireCloudService;
   @Autowired FirecloudMapper firecloudMapper;
-  @Autowired ObjectNameLengthService objectNameLengthService;
   @Autowired UserDao userDao;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
-  @Autowired WorkspaceAdminService workspaceAdminService;
   @Autowired WorkspaceAuditor mockWorkspaceAuditor;
-  @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspacesController workspacesController;
-  @Autowired FeaturedWorkspaceDao featuredWorkspaceDao;
   @Autowired WorkspaceServiceFactory workspaceServiceFactory;
 
-  @MockBean AccessTierService accessTierService;
-  @MockBean BucketAuditQueryService bucketAuditQueryService;
+  @MockBean AccessTierService mockAccessTierService;
   @MockBean CloudBillingClient mockCloudBillingClient;
-  @MockBean CohortBuilderService cohortBuilderService;
-  @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockBean CohortBuilderService mockCohortBuilderService;
   @MockBean FireCloudService mockFireCloudService;
   @MockBean InitialCreditsService mockInitialCreditsService;
   @MockBean IamService mockIamService;
@@ -376,6 +360,7 @@ public class WorkspacesControllerTest {
     CohortBuilderService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
+    FeaturedWorkspaceMapper.class,
     FireCloudService.class,
     GenomicExtractionService.class,
     InitialCreditsService.class,
@@ -414,11 +399,11 @@ public class WorkspacesControllerTest {
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     registeredTier = accessTierDao.save(createRegisteredTier());
 
-    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
+    when(mockCohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
-    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
+    when(mockAccessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(List.of(AccessTierService.REGISTERED_TIER_SHORT_NAME));
-    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
+    when(mockAccessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
 
     cdrVersion = createDefaultCdrVersion(1);
     accessTierDao.save(cdrVersion.getAccessTier());
@@ -664,7 +649,6 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
     assertThat(retrievedWorkspace.getCreatorUser().getUserName()).isEqualTo(LOGGED_IN_USER_EMAIL);
-    assertThat(retrievedWorkspace.getName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getDisplayName()).isEqualTo(testWorkspaceDisplayName);
     assertThat(retrievedWorkspace.getTerraName()).isEqualTo(testWorkspaceTerraName);
     assertThat(retrievedWorkspace.getResearchPurpose().isDiseaseFocusedResearch()).isTrue();
@@ -955,7 +939,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspaceAsync_and_process() {
-    Workspace workspace = createWorkspace().name("a new name for this test");
+    Workspace workspace = createWorkspace().displayName("a new name for this test");
 
     WorkspaceOperation operation = workspacesController.createWorkspaceAsync(workspace).getBody();
     WorkspaceOperation operation2 =
@@ -971,7 +955,7 @@ public class WorkspacesControllerTest {
     assertThat(operation3.getId()).isEqualTo(operation.getId());
     assertThat(operation3.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
     assertThat(operation3.getWorkspace()).isNotNull();
-    assertThat(operation3.getWorkspace().getName()).isEqualTo(workspace.getName());
+    assertThat(operation3.getWorkspace().getDisplayName()).isEqualTo(workspace.getDisplayName());
   }
 
   @Test
@@ -1014,7 +998,7 @@ public class WorkspacesControllerTest {
 
     Workspace workspace =
         createWorkspace()
-            .name("nospacesallowed")
+            .displayName("nospacesallowed")
             .terraName("nospacesallowed")
             .namespace("and finally a unique namespace");
     CloneWorkspaceRequest request =
@@ -1049,7 +1033,7 @@ public class WorkspacesControllerTest {
     assertThat(operation3.getId()).isEqualTo(operation.getId());
     assertThat(operation3.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
     assertThat(operation3.getWorkspace()).isNotNull();
-    assertThat(operation3.getWorkspace().getName()).isEqualTo(workspace.getName());
+    assertThat(operation3.getWorkspace().getDisplayName()).isEqualTo(workspace.getDisplayName());
   }
 
   @Test
@@ -1109,8 +1093,8 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, times(1))
         .updateBillingAccount(ws.getNamespace(), ws.getBillingAccountName());
 
-    ws.setName("updated-name");
     ws.setDisplayName("updated-name");
+    ws.setTerraName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName("update-billing-account");
     request.setWorkspace(ws);
@@ -1124,8 +1108,8 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, times(1))
         .updateBillingAccount(ws.getNamespace(), "update-billing-account");
 
-    ws.setName("updated-name2");
     ws.setDisplayName("updated-name2");
+    ws.setTerraName("updated-name2");
     updated =
         workspacesController
             .updateWorkspace(ws.getNamespace(), ws.getTerraName(), request)
@@ -1237,7 +1221,7 @@ public class WorkspacesControllerTest {
         () -> {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
+          ws.setDisplayName("updated-name");
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
           stubGetWorkspace(
@@ -1256,7 +1240,7 @@ public class WorkspacesControllerTest {
         () -> {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
+          ws.setDisplayName("updated-name");
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
           stubGetWorkspace(
@@ -1275,7 +1259,7 @@ public class WorkspacesControllerTest {
         () -> {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
+          ws.setDisplayName("updated-name");
           ws.setAccessTierShortName("new tier");
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
@@ -1293,7 +1277,7 @@ public class WorkspacesControllerTest {
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(
               new Workspace()
-                  .name("updated-name")
+                  .displayName("updated-name")
                   .billingAccountName("billing-account")
                   .accessTierShortName(ws.getAccessTierShortName())
                   .etag(ws.getEtag()));
@@ -1301,7 +1285,7 @@ public class WorkspacesControllerTest {
           // Still using the initial now-stale etag; this should throw.
           request.setWorkspace(
               new Workspace()
-                  .name("updated-name2")
+                  .displayName("updated-name2")
                   .billingAccountName("billing-account")
                   .accessTierShortName(ws.getAccessTierShortName())
                   .etag(ws.getEtag()));
@@ -1319,7 +1303,7 @@ public class WorkspacesControllerTest {
     for (String etag : cases) {
       try {
         UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-        request.setWorkspace(new Workspace().name("updated-name").etag(etag));
+        request.setWorkspace(new Workspace().displayName("updated-name").etag(etag));
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         fail(String.format("expected BadRequestException for etag: %s", etag));
       } catch (BadRequestException e) {
@@ -1359,7 +1343,6 @@ public class WorkspacesControllerTest {
         ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -1401,7 +1384,7 @@ public class WorkspacesControllerTest {
         .that(clonedWorkspace)
         .isEqualTo(retrievedWorkspace);
 
-    assertThat(clonedWorkspace.getName()).isEqualTo(modWorkspace.getName());
+    assertThat(clonedWorkspace.getDisplayName()).isEqualTo(modWorkspace.getDisplayName());
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
@@ -1417,7 +1400,6 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -1454,7 +1436,6 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -1492,7 +1473,6 @@ public class WorkspacesControllerTest {
           altCdrVersion.setAccessTier(altAccessTier);
           altCdrVersion = cdrVersionDao.save(altCdrVersion);
           final Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("Cloned");
           modWorkspace.setDisplayName("Cloned");
           modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
@@ -1735,7 +1715,6 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -1918,7 +1897,6 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -2019,7 +1997,6 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -2160,7 +2137,6 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("Cloned");
     modWorkspace.setDisplayName("Cloned");
     modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
@@ -2196,7 +2172,6 @@ public class WorkspacesControllerTest {
 
     Workspace modWorkspace =
         new Workspace()
-            .name("Cloned")
             .displayName("Cloned")
             .terraName("cloned")
             .namespace("cloned-ns")
@@ -2224,7 +2199,7 @@ public class WorkspacesControllerTest {
           Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
           Workspace modWorkspace =
               new Workspace()
-                  .name("cloned")
+                  .displayName("cloned")
                   .namespace("cloned-ns")
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId("bad-cdr-version-id");
@@ -2246,7 +2221,7 @@ public class WorkspacesControllerTest {
           Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
           Workspace modWorkspace =
               new Workspace()
-                  .name("cloned")
+                  .displayName("cloned")
                   .namespace("cloned-ns")
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId("100");
@@ -2268,7 +2243,7 @@ public class WorkspacesControllerTest {
           Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
           Workspace modWorkspace =
               new Workspace()
-                  .name("cloned")
+                  .displayName("cloned")
                   .namespace("cloned-ns")
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId(archivedCdrVersionId);
@@ -2385,7 +2360,7 @@ public class WorkspacesControllerTest {
             .workspace(
                 new Workspace()
                     .namespace("cloned-ns")
-                    .name("cloned")
+                    .displayName("cloned")
                     .researchPurpose(originalWorkspace.getResearchPurpose())
                     .billingAccountName("billing-account")
                     .cdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId())));
@@ -2418,7 +2393,6 @@ public class WorkspacesControllerTest {
           workspace = workspacesController.createWorkspace(workspace).getBody();
           CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("Cloned");
           modWorkspace.setDisplayName("Cloned");
           modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
@@ -2447,7 +2421,6 @@ public class WorkspacesControllerTest {
               .thenThrow(new NotFoundException());
           CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("Cloned");
           modWorkspace.setDisplayName("Cloned");
           modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
@@ -2507,15 +2480,16 @@ public class WorkspacesControllerTest {
     stubFcUpdateWorkspaceACL();
 
     String namespace = "namespace";
-    String name = "name";
-    stubGetWorkspace(namespace, name, currentUser.getUsername(), WorkspaceAccessLevel.WRITER);
+    String terraName = "name";
+    stubGetWorkspace(namespace, terraName, currentUser.getUsername(), WorkspaceAccessLevel.WRITER);
 
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag("etag");
 
     assertThrows(
         ForbiddenException.class,
-        () -> workspacesController.shareWorkspacePatch(namespace, name, shareWorkspaceRequest));
+        () ->
+            workspacesController.shareWorkspacePatch(namespace, terraName, shareWorkspaceRequest));
   }
 
   @Test
@@ -2897,7 +2871,7 @@ public class WorkspacesControllerTest {
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
     assertThat(recentWorkspace.getWorkspace().getNamespace())
         .isEqualTo(dbWorkspace.getWorkspaceNamespace());
-    assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
+    assertThat(recentWorkspace.getWorkspace().getDisplayName()).isEqualTo(dbWorkspace.getName());
   }
 
   @Test
