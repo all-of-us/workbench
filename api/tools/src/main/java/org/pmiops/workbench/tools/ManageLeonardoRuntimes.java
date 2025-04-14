@@ -72,6 +72,8 @@ public class ManageLeonardoRuntimes {
       ImmutableList.of("api_url", "service_account", "runtime_id");
   private static final List<String> DELETE_ARG_NAMES =
       ImmutableList.of("api_url", "min_age", "ids", "dry_run");
+  private static final List<String> LIST_ARG_NAMES =
+      ImmutableList.of("api_url", "google_project_Id", "fmt");
   private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private static Set<String> commaDelimitedStringToSet(String str) {
@@ -276,13 +278,13 @@ public class ManageLeonardoRuntimes {
           return;
 
         case "list":
-          if (args.length != 4) {
-            throw new IllegalArgumentException("Expected 4 args. Got " + Arrays.asList(args));
+          if (args.length != LIST_ARG_NAMES.size()) {
+            throw new IllegalArgumentException(String.format("Expected %d args %s. Got %s", LIST_ARG_NAMES.size(), LIST_ARG_NAMES, Arrays.asList(args)));
           }
           listRuntimes(
               args[0],
-              Optional.of(args[2]).filter(p -> !p.isEmpty()),
-              OutputFormat.valueOf(args[3]));
+              Optional.of(args[1]).filter(p -> !p.isEmpty()),
+              OutputFormat.valueOf(args[2]));
           return;
 
         case "delete":

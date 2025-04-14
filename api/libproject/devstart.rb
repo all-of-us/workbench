@@ -2174,16 +2174,10 @@ def list_runtimes(cmd_name, *args)
       ->(opts, v) { opts.google_project = v},
       "Optionally filter by google project")
   op.add_option(
-      "--include-deleted",
-      ->(opts, _) { opts.include_deleted = true },
-      "Whether to include deleted runtimes in the results; typically should only be used in " +
-      "combination with --google-project, otherwise this could be very slow")
-  op.add_option(
       "--format [format]",
       ->(opts, v) { opts.format = v },
       "JSON or TABULAR, defaults to TABULAR (summary)")
   op.opts.google_project = ""
-  op.opts.include_deleted = false
   op.opts.format = "TABULAR"
 
   op.add_validator ->(opts) {
@@ -2199,7 +2193,7 @@ def list_runtimes(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do
     common = Common.new
     common.run_inline %W{
-      ./gradlew manageLeonardoRuntimes -PappArgs=['list','#{api_url}','#{op.opts.include_deleted}','#{op.opts.google_project}','#{op.opts.format}']
+      ./gradlew manageLeonardoRuntimes -PappArgs=['list','#{api_url}','#{op.opts.google_project}','#{op.opts.format}']
     }
   end
 end
