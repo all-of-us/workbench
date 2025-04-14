@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -54,24 +55,24 @@ public class VerifiedInstitutionalAffiliationMapperTest {
   }
 
   @Test
-  public void test_setDbInstitution() {
+  public void test_toDbInstitution() {
     final VerifiedInstitutionalAffiliation source =
         new VerifiedInstitutionalAffiliation().institutionShortName(testInstitution.getShortName());
-    final DbVerifiedInstitutionalAffiliation target = new DbVerifiedInstitutionalAffiliation();
 
-    mapper.setDbInstitution(target, source, institutionService);
-
-    assertThat(target.getInstitution().getShortName()).isEqualTo(testInstitution.getShortName());
+    DbInstitution result =
+        mapper.toDbInstitution(source.getInstitutionShortName(), institutionService);
+    assertThat(result).isNotNull();
+    assertThat(result.getShortName()).isEqualTo(testInstitution.getShortName());
   }
 
   @Test
-  public void test_setDbInstitution_missing() {
+  public void test_toDbInstitution_missing() {
     final VerifiedInstitutionalAffiliation source =
         new VerifiedInstitutionalAffiliation().institutionShortName("not in DB");
-    final DbVerifiedInstitutionalAffiliation target = new DbVerifiedInstitutionalAffiliation();
 
     assertThrows(
-        NotFoundException.class, () -> mapper.setDbInstitution(target, source, institutionService));
+        NotFoundException.class,
+        () -> mapper.toDbInstitution(source.getInstitutionShortName(), institutionService));
   }
 
   @Test

@@ -15,7 +15,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
@@ -229,10 +228,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "vwbWorkspace", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
-
-  default String cdrVersionId(CdrVersion cdrVersion) {
-    return String.valueOf(cdrVersion.getCdrVersionId());
-  }
 
   TestUserWorkspace toTestUserWorkspace(Workspace workspace, String username);
 
