@@ -184,8 +184,6 @@ public class WorkspaceMapperTest {
             .setCreationTime(DB_CREATION_TIMESTAMP)
             .setLastModifiedTime(DB_CREATION_TIMESTAMP)
             .setCohorts(Collections.emptySet())
-            .setConceptSets(Collections.emptySet())
-            .setDataSets(Collections.emptySet())
             .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
             .setDiseaseFocusedResearch(true)
             .setDiseaseOfFocus("leukemia")
