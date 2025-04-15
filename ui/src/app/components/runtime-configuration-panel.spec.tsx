@@ -1117,6 +1117,15 @@ describe('RuntimeConfigurationPanel', () => {
     ).toBeFalsy();
   });
 
+  it('should reattach to an existing disk by default, for deleted VMs', async () => {
+    const disk = existingDisk();
+    setCurrentDisk(disk);
+    setCurrentRuntime(undefined);
+    mockUseCustomRuntime();
+    component();
+    expect(screen.getByText(/1000 gb disk/i)).toBeInTheDocument();
+  });
+
   it('should allow configuration via dataproc preset from modified form', async () => {
     setCurrentRuntime(null);
     mockUseCustomRuntime();
