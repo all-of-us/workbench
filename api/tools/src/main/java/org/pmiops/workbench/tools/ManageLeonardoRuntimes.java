@@ -279,7 +279,10 @@ public class ManageLeonardoRuntimes {
 
         case "list":
           if (args.length != LIST_ARG_NAMES.size()) {
-            throw new IllegalArgumentException(String.format("Expected %d args %s. Got %s", LIST_ARG_NAMES.size(), LIST_ARG_NAMES, Arrays.asList(args)));
+            throw new IllegalArgumentException(
+                String.format(
+                    "Expected %d args %s. Got %s",
+                    LIST_ARG_NAMES.size(), LIST_ARG_NAMES, Arrays.asList(args)));
           }
           listRuntimes(
               args[0],
