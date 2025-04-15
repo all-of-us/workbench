@@ -9409,6 +9409,10 @@ components:
           type: boolean
           description: Whether the requested email address is a valid member of the
             institution.
+        existingAccount:
+          type: boolean
+          description: Whether the requested email address already has an existing
+            account.
     WorkspaceResponse:
       required:
       - accessLevel
