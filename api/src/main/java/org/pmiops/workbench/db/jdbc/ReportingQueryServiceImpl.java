@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.jdbc;
 
-import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.degreeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
@@ -19,6 +18,8 @@ import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.base.Strings;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +29,6 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.BillingStatus;
@@ -53,6 +53,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingQueryServiceImpl implements ReportingQueryService {
+
+  private static final BiMap<BillingStatus, Short> CLIENT_TO_STORAGE_BILLING_STATUS =
+      ImmutableBiMap.<BillingStatus, Short>builder()
+          .put(BillingStatus.ACTIVE, (short) 0)
+          .put(BillingStatus.INACTIVE, (short) 1)
+          .build();
+
   private final JdbcTemplate jdbcTemplate;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
@@ -64,6 +71,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     this.jdbcTemplate = jdbcTemplate;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.bigQueryService = bigQueryService;
+  }
+
+  private static BillingStatus billingStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_BILLING_STATUS.inverse().get(s);
+  }
+
+  private static Short billingStatusToStorage(BillingStatus s) {
+    return CLIENT_TO_STORAGE_BILLING_STATUS.get(s);
   }
 
   @Override
@@ -552,8 +567,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         sql,
         new Object[] {
           workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
-          DbStorageEnums.billingStatusToStorage(BillingStatus.INACTIVE),
-          DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE),
+          billingStatusToStorage(BillingStatus.INACTIVE),
+          billingStatusToStorage(BillingStatus.ACTIVE),
           workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
           limit,
           offset

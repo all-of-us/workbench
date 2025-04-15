@@ -7507,7 +7507,6 @@ components:
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
-        billingStatus: ACTIVE
         cdrVersionId: "2"
         creationTime: 1588097211621
         creator: user@aou-domain.org
