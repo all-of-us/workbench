@@ -170,7 +170,7 @@
     "usersPerCheckInitialCreditsUsageTask": 100,
     "usersPerCheckInitialCreditsExpirationTask": 50,
     "usersPerAccessExpirationEmailTask": 500,
-    "workspacesPerDeleteWorkspaceEnvironmentsTask": 50,
+    "workspacesPerDeleteWorkspaceEnvironmentsTask": 10,
     "disksPerCheckPersistentDiskTask": 500
   },
   "egressAlertRemediationPolicy": {
