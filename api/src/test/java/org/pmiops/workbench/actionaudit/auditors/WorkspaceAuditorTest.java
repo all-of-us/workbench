@@ -35,7 +35,6 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
@@ -129,7 +128,6 @@ public class WorkspaceAuditorTest {
             .googleBucketName("bucket o' science")
             .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
             .researchPurpose(researchPurpose1)
-            .billingStatus(BillingStatus.ACTIVE)
             .creationTime(now)
             .lastModifiedTime(now);
 
@@ -315,7 +313,6 @@ public class WorkspaceAuditorTest {
         .googleBucketName(in.getGoogleBucketName())
         .accessTierShortName(in.getAccessTierShortName())
         .researchPurpose(in.getResearchPurpose())
-        .billingStatus(in.getBillingStatus())
         .creationTime(in.getCreationTime())
         .lastModifiedTime(in.getLastModifiedTime());
   }

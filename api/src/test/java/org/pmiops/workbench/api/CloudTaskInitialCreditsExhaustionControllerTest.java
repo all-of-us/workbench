@@ -25,17 +25,11 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.cohorts.CohortCloningService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
@@ -45,8 +39,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.CloudBillingClient;
-import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.initialcredits.WorkspaceInitialCreditUsageService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -55,12 +47,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
-import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -98,27 +85,14 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   @Import({
     CloudTaskInitialCreditsExhaustionController.class,
     InitialCreditsService.class,
-    WorkspaceServiceImpl.class,
   })
   @MockBean({
-    AccessTierService.class,
-    BillingProjectAuditor.class,
-    CloudBillingClient.class,
-    CohortCloningService.class,
-    ConceptSetService.class,
-    DataSetService.class,
-    FeaturedWorkspaceMapper.class,
     FireCloudService.class,
-    FirecloudMapper.class,
-    ImpersonatedWorkspaceService.class,
     InstitutionService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,
-    UserMapper.class,
-    UserService.class,
     UserServiceAuditor.class,
-    WorkspaceAuthService.class,
     WorkspaceInitialCreditUsageService.class,
     WorkspaceMapper.class,
   })

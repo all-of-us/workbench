@@ -90,8 +90,6 @@ public interface WorkspaceService {
   void cloneTanagraFeatureSet(
       FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace);
 
-  void updateInitialCreditsExhaustion(DbUser user, boolean exhausted);
-
   void publishCommunityWorkspace(DbWorkspace workspace);
 
   List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace);

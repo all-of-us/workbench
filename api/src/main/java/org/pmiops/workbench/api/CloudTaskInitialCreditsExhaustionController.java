@@ -22,11 +22,11 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.utils.CostComparisonUtils;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -39,26 +39,26 @@ public class CloudTaskInitialCreditsExhaustionController
   private static final Logger logger =
       LoggerFactory.getLogger(CloudTaskInitialCreditsExhaustionController.class);
 
+  private final InitialCreditsService initialCreditsService;
   private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfig;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
-  private final WorkspaceService workspaceService;
 
   CloudTaskInitialCreditsExhaustionController(
+      InitialCreditsService initialCreditsService,
       LeonardoApiClient leonardoApiClient,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfig,
       UserDao userDao,
-      WorkspaceDao workspaceDao,
-      WorkspaceService workspaceService) {
+      WorkspaceDao workspaceDao) {
+    this.initialCreditsService = initialCreditsService;
     this.leonardoApiClient = leonardoApiClient;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfig = workbenchConfig;
     this.workspaceDao = workspaceDao;
-    this.workspaceService = workspaceService;
   }
 
   @SuppressWarnings("unchecked")
@@ -102,7 +102,7 @@ public class CloudTaskInitialCreditsExhaustionController
         user -> {
           logger.info(
               "handleExhaustedUsers: handling user with exhausted credits {}", user.getUsername());
-          workspaceService.updateInitialCreditsExhaustion(user, true);
+          initialCreditsService.updateInitialCreditsExhaustion(user, true);
           // delete apps and runtimes
           deleteAppsAndRuntimesInInitialCreditsWorkspaces(user);
           try {

@@ -635,17 +635,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
-    workspaceDao.findAllByCreator(user).stream()
-        .filter(ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .forEach(
-            ws -> {
-              ws.setInitialCreditsExhausted(exhausted);
-              workspaceDao.save(ws);
-            });
-  }
-
-  @Override
   public void publishCommunityWorkspace(DbWorkspace dbWorkspace) {
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)

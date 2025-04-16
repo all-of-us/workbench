@@ -200,11 +200,6 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
-    logger.warn("updateInitialCreditsExhaustion not implemented in VWB");
-  }
-
-  @Override
   public void publishCommunityWorkspace(DbWorkspace workspace) {
     logger.warn("publishCommunityWorkspace not implemented in VWB");
   }

@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.Disability;
@@ -102,21 +101,6 @@ public final class DbStorageEnums {
 
   public static Short authorityToStorage(Authority authority) {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
-  }
-
-  // BillingStatus
-  private static final BiMap<BillingStatus, Short> CLIENT_TO_STORAGE_BILLING_STATUS =
-      ImmutableBiMap.<BillingStatus, Short>builder()
-          .put(BillingStatus.ACTIVE, (short) 0)
-          .put(BillingStatus.INACTIVE, (short) 1)
-          .build();
-
-  public static BillingStatus billingStatusFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_BILLING_STATUS.inverse().get(s);
-  }
-
-  public static Short billingStatusToStorage(BillingStatus s) {
-    return CLIENT_TO_STORAGE_BILLING_STATUS.get(s);
   }
 
   // CohortStatus
