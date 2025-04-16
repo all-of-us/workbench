@@ -299,26 +299,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesAsService() {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
-    return legacyLeonardoRetryHandler.run(
-        (context) -> runtimesApi.listRuntimes(/* labels */ null, /* includeDeleted */ false));
+    return legacyLeonardoRetryHandler.run((context) -> runtimesApi.listRuntimes(/* labels */ null));
   }
 
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     return legacyLeonardoRetryHandler.run(
-        (context) ->
-            runtimesApi.listRuntimesByProject(
-                googleProject, /* labels */ null, /* includeDeleted */ false));
-  }
-
-  @Override
-  public List<LeonardoListRuntimeResponse> listRuntimesByProject(
-      String googleProject, boolean includeDeleted) {
-    RuntimesApi runtimesApi = runtimesApiProvider.get();
-    return legacyLeonardoRetryHandler.run(
-        (context) ->
-            runtimesApi.listRuntimesByProject(googleProject, /* labels */ null, includeDeleted));
+        (context) -> runtimesApi.listRuntimesByProject(googleProject, /* labels */ null));
   }
 
   @Override
@@ -365,8 +353,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     List<LeonardoListRuntimeResponse> runtimes =
         legacyLeonardoRetryHandler.run(
             (context) ->
-                runtimesApiAsService.listRuntimes(
-                    LEONARDO_LABEL_CREATED_BY + "=" + userEmail, false));
+                runtimesApiAsService.listRuntimes(LEONARDO_LABEL_CREATED_BY + "=" + userEmail));
 
     // Only the runtime creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.
@@ -415,7 +402,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   }
                   return true;
                 })
-            .collect(Collectors.toList());
+            .toList();
     if (results.contains(false)) {
       throw new ServerErrorException("failed to stop all user runtimes, see logs for details");
     }
@@ -779,7 +766,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   }
                   return true;
                 })
-            .collect(Collectors.toList());
+            .toList();
     if (results.contains(false)) {
       throw new ServerErrorException("failed to stop all user runtimes, see logs for details");
     }

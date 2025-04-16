@@ -68,7 +68,6 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import {
   createOrCustomize,
-  deriveCurrentRuntime,
   getErrorsAndWarnings,
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,
@@ -78,213 +77,6 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 const setup = () => {
   serverConfigStore.set({ config: defaultServerConfig });
 };
-
-describe(deriveCurrentRuntime.name, () => {
-  beforeEach(() => {
-    setup();
-  });
-  it('returns an undefined runtime if the inputs are undefined', () => {
-    const expected = undefined;
-
-    expect(
-      deriveCurrentRuntime({
-        crFromCustomRuntimeHook: undefined,
-        gcePersistentDisk: undefined,
-      })
-    ).toEqual(expected);
-  });
-
-  describe.each([
-    ['GCE', defaultGceRuntime()],
-    ['GCE with PD', defaultGceRuntimeWithPd()],
-    ['DataProc', defaultDataProcRuntime()],
-  ])('%s', (desc, runtime) => {
-    it(`returns a ${desc} runtime from the hook if it is not DELETED`, () => {
-      // sanity check
-      expect(runtime.status).not.toEqual(RuntimeStatus.DELETED);
-      expect(
-        deriveCurrentRuntime({
-          crFromCustomRuntimeHook: runtime,
-          gcePersistentDisk: undefined,
-        })
-      ).toEqual(runtime);
-    });
-
-    it(`returns a ${desc} runtime from the hook if it is DELETED and config type USER_OVERRIDE`, () => {
-      const testRuntime = {
-        ...runtime,
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.USER_OVERRIDE,
-      };
-
-      expect(
-        deriveCurrentRuntime({
-          crFromCustomRuntimeHook: testRuntime,
-          gcePersistentDisk: undefined,
-        })
-      ).toEqual(testRuntime);
-    });
-  });
-
-  it(
-    'converts a GCE runtime from the hook to the GCE-with-PD preset if: ' +
-      'it is DELETED and config type GENERAL_ANALYSIS, ' +
-      'and there is no PD',
-    () => {
-      const runtime = {
-        ...defaultGceRuntime(),
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      };
-
-      const expectedGceWithPdConfig = {
-        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
-        persistentDisk: {
-          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-            .persistentDisk,
-          name: undefined, // cleared by applyPresetOverride()
-        },
-      };
-
-      const currentRuntime = deriveCurrentRuntime({
-        crFromCustomRuntimeHook: runtime,
-        gcePersistentDisk: undefined,
-      });
-
-      expect(currentRuntime.gceConfig).toBeFalsy();
-      expect(currentRuntime.gceWithPdConfig).toEqual(expectedGceWithPdConfig);
-      expect(currentRuntime.dataprocConfig).toBeFalsy();
-    }
-  );
-
-  it(
-    'converts a GCE runtime from the hook to the GCE-with-PD preset if: ' +
-      'it is DELETED and config type GENERAL_ANALYSIS, ' +
-      'and there is a PD',
-    () => {
-      const runtime = {
-        ...defaultGceRuntime(),
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      };
-
-      const disk = { ...stubDisk(), name: 'whatever' };
-
-      const expectedGceWithPdConfig = {
-        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
-        persistentDisk: {
-          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-            .persistentDisk,
-          name: disk.name,
-        },
-      };
-
-      const currentRuntime = deriveCurrentRuntime({
-        crFromCustomRuntimeHook: runtime,
-        gcePersistentDisk: disk,
-      });
-
-      expect(currentRuntime.gceConfig).toBeFalsy();
-      expect(currentRuntime.gceWithPdConfig).toEqual(expectedGceWithPdConfig);
-      expect(currentRuntime.dataprocConfig).toBeFalsy();
-    }
-  );
-
-  it(
-    'converts the GCE-with-PD runtime from the hook to the preset if: ' +
-      'it is DELETED and config type GENERAL_ANALYSIS, ' +
-      'and there is a PD',
-    () => {
-      const runtimeDiskName = 'something';
-      const pdName = 'something else';
-
-      const runtime = {
-        ...defaultGceRuntimeWithPd(),
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-        gceWithPdConfig: {
-          ...defaultGceRuntimeWithPd().gceWithPdConfig,
-          persistentDisk: {
-            ...defaultGceRuntimeWithPd().gceWithPdConfig.persistentDisk,
-            name: runtimeDiskName,
-          },
-        },
-      };
-
-      const disk = { ...stubDisk(), name: pdName };
-
-      const expectedGceWithPdConfig = {
-        ...runtime.gceWithPdConfig,
-        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
-        persistentDisk: {
-          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-            .persistentDisk,
-          name: runtimeDiskName, // keeps original disk, does NOT attach a different one
-        },
-      };
-
-      const currentRuntime = deriveCurrentRuntime({
-        crFromCustomRuntimeHook: runtime,
-        gcePersistentDisk: disk,
-      });
-
-      expect(currentRuntime.gceConfig).toBeFalsy();
-      expect(currentRuntime.gceWithPdConfig).toEqual(expectedGceWithPdConfig);
-      expect(currentRuntime.dataprocConfig).toBeFalsy();
-    }
-  );
-
-  it(
-    'converts the GCE-with-PD runtime from the hook to the preset if: ' +
-      'it is DELETED and config type GENERAL_ANALYSIS, ' +
-      'and there is no PD',
-    () => {
-      const runtime = {
-        ...defaultGceRuntimeWithPd(),
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      };
-
-      const expectedGceWithPdConfig = {
-        ...runtime.gceWithPdConfig,
-        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
-        persistentDisk: {
-          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-            .persistentDisk,
-          name: runtime.gceWithPdConfig.persistentDisk.name,
-        },
-      };
-
-      const currentRuntime = deriveCurrentRuntime({
-        crFromCustomRuntimeHook: runtime,
-        gcePersistentDisk: undefined,
-      });
-
-      expect(currentRuntime.gceConfig).toBeFalsy();
-      expect(currentRuntime.gceWithPdConfig).toEqual(expectedGceWithPdConfig);
-      expect(currentRuntime.dataprocConfig).toBeFalsy();
-    }
-  );
-
-  it('converts the Dataproc runtime from the hook to the preset if it is DELETED and config type HAIL_GENOMIC_ANALYSIS', () => {
-    const runtime = {
-      ...defaultDataProcRuntime(),
-      status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-    };
-
-    const currentRuntime = deriveCurrentRuntime({
-      crFromCustomRuntimeHook: runtime,
-      gcePersistentDisk: undefined,
-    });
-
-    expect(currentRuntime.gceConfig).toBeFalsy();
-    expect(currentRuntime.gceWithPdConfig).toBeFalsy();
-    expect(currentRuntime.dataprocConfig).toEqual(
-      runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
-    );
-  });
-});
 
 describe(createOrCustomize.name, () => {
   beforeEach(() => {
@@ -304,24 +96,6 @@ describe(createOrCustomize.name, () => {
     ['null', null, undefined],
     ['undefined', undefined, undefined],
     ['UNKNOWN', defaultRuntime(), RuntimeStatus.UNKNOWN],
-    [
-      'DELETED GCE GENERAL_ANALYSIS', // not GCE with PD
-      {
-        ...defaultGceRuntime(),
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      },
-      RuntimeStatus.DELETED, // not used here, but let's be consistent
-    ],
-    [
-      'DELETED HAIL_GENOMIC_ANALYSIS',
-      {
-        ...defaultDataProcRuntime(),
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-      },
-      RuntimeStatus.DELETED, // not used here, but let's be consistent
-    ],
   ])(
     'it returns Create for a %s runtime',
     (desc, currentRuntime, runtimeStatus) => {
@@ -1036,103 +810,6 @@ describe('RuntimeConfigurationPanel', () => {
     expectButtonElementEnabled(button);
   });
 
-  it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
-    // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
-    // we should ignore the other runtime config values that were delivered with the getRuntime response
-    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-        diskSize: 1000,
-      },
-    });
-
-    mockUseCustomRuntime();
-
-    component();
-
-    await clickExpectedButton('Create');
-    await waitFor(async () => {
-      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-    });
-
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .gceConfig
-    ).toBeUndefined();
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .gceWithPdConfig.machineType
-    ).toBe(
-      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-        .machineType
-    );
-
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .gceWithPdConfig.persistentDisk.size
-    ).toBe(
-      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-        .persistentDisk.size
-    );
-  });
-
-  it(
-    'should create runtime with preset values instead of getRuntime values if ' +
-      'configurationType is HailGenomicsAnalysis',
-    async () => {
-      // In the case where the user's latest runtime is a preset (HailGenomicsAnalysis in this case)
-      // we should ignore the other runtime config values that were delivered with the getRuntime response
-      // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-
-      setCurrentRuntime({
-        ...runtimeApiStub.runtime,
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-        gceConfig: null,
-        gceWithPdConfig: null,
-        dataprocConfig: {
-          ...defaultDataprocConfig(),
-          masterMachineType: 'n1-standard-16',
-          masterDiskSize: 999,
-          workerDiskSize: 444,
-          numberOfWorkers: 5,
-        },
-      });
-
-      mockUseCustomRuntime();
-      component();
-
-      await clickExpectedButton('Create');
-
-      await waitFor(async () => {
-        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-      });
-
-      const {
-        masterMachineType,
-        masterDiskSize,
-        workerDiskSize,
-        numberOfWorkers,
-      } =
-        mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-          .dataprocConfig;
-
-      expect(
-        runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
-      ).toMatchObject({
-        masterMachineType,
-        masterDiskSize,
-        workerDiskSize,
-        numberOfWorkers,
-      });
-    }
-  );
-
   it('should allow creation when runtime has error status', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
@@ -1265,18 +942,6 @@ describe('RuntimeConfigurationPanel', () => {
     const button = screen.getByRole('button', { name: 'Next' });
     expect(button).toBeInTheDocument();
     expectButtonElementDisabled(button);
-  });
-
-  it('should show create button if runtime is deleted', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-    });
-    mockUseCustomRuntime();
-    component();
-    const button = screen.getByRole('button', { name: 'Create' });
-    expect(button).toBeInTheDocument();
-    expectButtonElementEnabled(button);
   });
 
   it('should allow runtime deletion', async () => {
@@ -1452,59 +1117,13 @@ describe('RuntimeConfigurationPanel', () => {
     ).toBeFalsy();
   });
 
-  it(
-    'should set runtime preset values in customize panel instead of getRuntime values ' +
-      'if configurationType is GeneralAnalysis',
-    async () => {
-      const customMachineType = 'n1-standard-16';
-      const customDiskSize = 1000;
-      const currentRuntime = {
-        ...runtimeApiStub.runtime,
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-        gceConfig: {
-          ...defaultGceConfig(),
-          machineType: customMachineType,
-          diskSize: customDiskSize,
-        },
-        dataprocConfig: null,
-      };
-      setCurrentRuntime(currentRuntime);
-      mockUseCustomRuntime();
-
-      // show that the preset values do not match the existing runtime
-
-      const { machineType, persistentDisk } =
-        runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig;
-
-      expect(customMachineType).not.toEqual(machineType);
-      expect(customDiskSize).not.toEqual(persistentDisk.size);
-      const { container } = component();
-
-      expect(getMainRam(container)).toEqual(
-        findMachineByName(machineType).memory.toString()
-      );
-      expect(getDetachableDiskValue()).toEqual(persistentDisk.size.toString());
-    }
-  );
-
   it('should reattach to an existing disk by default, for deleted VMs', async () => {
     const disk = existingDisk();
     setCurrentDisk(disk);
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-      },
-      dataprocConfig: null,
-    });
+    setCurrentRuntime(undefined);
     mockUseCustomRuntime();
     component();
-    const numberFormatter = new Intl.NumberFormat('en-US');
-    expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
+    expect(screen.getByText(/1000 gb disk/i)).toBeInTheDocument();
   });
 
   it('should allow configuration via dataproc preset from modified form', async () => {
@@ -1634,62 +1253,6 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getMainCpu(container)).toBe('2');
     expect(getMainRam(container)).toBe('7.5');
   });
-
-  it(
-    'should set runtime preset values in customize panel instead of getRuntime values ' +
-      'if configurationType is HailGenomicsAnalysis',
-    async () => {
-      const customMasterMachineType = 'n1-standard-16';
-      const customMasterDiskSize = 999;
-      const customWorkerDiskSize = 444;
-      const customNumberOfWorkers = 5;
-      setCurrentRuntime({
-        ...runtimeApiStub.runtime,
-        status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-        gceConfig: null,
-        gceWithPdConfig: null,
-        dataprocConfig: {
-          ...defaultDataprocConfig(),
-          masterMachineType: customMasterMachineType,
-          masterDiskSize: customMasterDiskSize,
-          workerDiskSize: customWorkerDiskSize,
-          numberOfWorkers: customNumberOfWorkers,
-        },
-      });
-
-      // show that the preset values do not match the existing runtime
-
-      const {
-        masterMachineType,
-        masterDiskSize,
-        workerDiskSize,
-        numberOfWorkers,
-      } = runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig;
-
-      expect(customMasterMachineType).not.toEqual(masterMachineType);
-      expect(customMasterDiskSize).not.toEqual(masterDiskSize);
-      expect(customWorkerDiskSize).not.toEqual(workerDiskSize);
-      expect(customNumberOfWorkers).not.toEqual(numberOfWorkers);
-
-      mockUseCustomRuntime();
-
-      const { container } = component();
-
-      await clickExpectedButton('Customize');
-
-      expect(getMainCpu(container)).toEqual(
-        findMachineByName(masterMachineType).cpu.toString()
-      );
-      expect(getMainRam(container)).toEqual(
-        findMachineByName(masterMachineType).memory.toString()
-      );
-
-      expect(getMasterDiskValue()).toEqual(masterDiskSize.toString());
-      expect(getWorkerDiskValue()).toEqual(workerDiskSize.toString());
-      expect(getNumOfWorkersValue()).toEqual(numberOfWorkers.toString());
-    }
-  );
 
   it('should warn user about re-creation if there are updates that require one - increase disk size', async () => {
     mockUseCustomRuntime();

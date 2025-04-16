@@ -150,10 +150,7 @@ export enum SparkConsolePath {
 // should we show the runtime in the UI (in most situations)?
 // Note: we do make users aware of ERROR runtimes in some situations
 export const isVisible = (status: RuntimeStatus) =>
-  status &&
-  !(
-    [RuntimeStatus.DELETED, RuntimeStatus.ERROR] as Array<RuntimeStatus>
-  ).includes(status);
+  status && status !== RuntimeStatus.ERROR;
 
 // can the user delete the runtime?
 // matches deletableStatuses in https://github.com/DataBiosphere/leonardo/blob/7bb268a685bf90f5a2dcbb0f751e5bb786525abe/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala

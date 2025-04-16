@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
@@ -11,9 +10,7 @@ import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,15 +18,12 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
@@ -40,7 +34,6 @@ import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
-import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -92,19 +85,16 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     String googleProject = dbWorkspace.getGoogleProject();
-    try {
-      LeonardoGetRuntimeResponse leoRuntimeResponse =
-          leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
-      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
-        log.warning(
-            String.format(
-                "Observed Leonardo runtime with unexpected error status:\n%s",
-                formatRuntimeErrors(leoRuntimeResponse.getErrors())));
-      }
-      return ResponseEntity.ok(leonardoMapper.toApiRuntime(leoRuntimeResponse));
-    } catch (NotFoundException e) {
-      return ResponseEntity.ok(getOverrideFromListRuntimes(googleProject));
+
+    LeonardoGetRuntimeResponse leoRuntimeResponse =
+        leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
+    if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+      log.warning(
+          String.format(
+              "Observed Leonardo runtime with unexpected error status:\n%s",
+              formatRuntimeErrors(leoRuntimeResponse.getErrors())));
     }
+    return ResponseEntity.ok(leonardoMapper.toApiRuntime(leoRuntimeResponse));
   }
 
   private String formatRuntimeErrors(@Nullable List<LeonardoClusterError> errors) {
@@ -114,55 +104,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     return errors.stream()
         .map(err -> String.format("error %d: %s", err.getErrorCode(), err.getErrorMessage()))
         .collect(Collectors.joining("\n"));
-  }
-
-  private Runtime getOverrideFromListRuntimes(String googleProject) {
-    Optional<LeonardoListRuntimeResponse> mostRecentRuntimeMaybe =
-        leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
-            .min(
-                (a, b) -> {
-                  String aCreatedDate, bCreatedDate;
-                  if (a.getAuditInfo() == null || a.getAuditInfo().getCreatedDate() == null) {
-                    aCreatedDate = "";
-                  } else {
-                    aCreatedDate = a.getAuditInfo().getCreatedDate();
-                  }
-
-                  if (b.getAuditInfo() == null || b.getAuditInfo().getCreatedDate() == null) {
-                    bCreatedDate = "";
-                  } else {
-                    bCreatedDate = b.getAuditInfo().getCreatedDate();
-                  }
-
-                  return bCreatedDate.compareTo(aCreatedDate);
-                });
-
-    LeonardoListRuntimeResponse mostRecentRuntime =
-        mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
-
-    Map<String, String> runtimeLabels =
-        LeonardoLabelHelper.toLabelMap(mostRecentRuntime.getLabels());
-
-    if (runtimeLabels != null
-        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-            .values()
-            .contains(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
-      try {
-        Runtime runtime = leonardoMapper.toApiRuntimeWithoutDisk(mostRecentRuntime);
-        if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
-          log.warning(
-              "Runtimes returned from ListRuntimes should be DELETED but found "
-                  + runtime.getStatus());
-        }
-        return runtime.status(RuntimeStatus.DELETED);
-      } catch (RuntimeException e) {
-        log.warning(
-            "RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping "
-                + e.toString());
-      }
-    }
-
-    throw new NotFoundException();
   }
 
   @Override

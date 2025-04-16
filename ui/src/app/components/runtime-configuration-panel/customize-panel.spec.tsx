@@ -430,11 +430,10 @@ describe(CustomizePanel.name, () => {
   // MachineSelector, GpuConfigSelector, DataProcConfigSelector, the autopause Dropdown, DiskSelector, and
   // Delete Environment in CustomizePanelFooter.
   // The runtime-compute Dropdown has similar logic, but only when allowDataproc is also true
-
   it('enables the PresetSelector when no runtimeExists, regardless of runtimeStatus', async () => {
     await component({
       runtimeExists: false,
-      runtimeStatus: RuntimeStatus.DELETED,
+      runtimeStatus: undefined,
     });
     const dropdown = screen.queryByLabelText('Recommended environments');
     expect(dropdown).toBeInTheDocument();
