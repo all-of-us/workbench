@@ -8953,6 +8953,14 @@ components:
       - Deleting
       - Deleted
       - Unknown
+    RuntimeConfigurationType:
+      type: string
+      description: |
+        Deprecated. The configuration type for this runtime. Namely, whether there was a user override of a specific cloud service type, or whether one of the preset system defaults was used. This distinction is meaningful for display purposes, and allows the user to pickup natural upgrades to the default configuration.
+      enum:
+      - UserOverride
+      - GeneralAnalysis
+      - HailGenomicAnalysis
     Runtime:
       type: object
       properties:
@@ -8977,6 +8985,8 @@ components:
           type: string
           description: The tool docker image to install. May be Dockerhub or GCR.
             If not set, a default Jupyter image will be installed.
+        configurationType:
+          $ref: '#/components/schemas/RuntimeConfigurationType'
         gceConfig:
           $ref: '#/components/schemas/GceConfig'
         gceWithPdConfig:
