@@ -40,20 +40,6 @@ export interface AnalysisConfig {
   zone?: string;
 }
 
-// Returns true if two runtimes are equivalent in terms of the fields which are
-// affected by runtime presets.
-const presetEquals = (a: Runtime, b: Runtime): boolean => {
-  const strip = fp.flow(
-    // In the future, things like toolDockerImage and autopause may be considerations.
-    // With https://precisionmedicineinitiative.atlassian.net/browse/RW-9167, general analysis
-    // should have persistent disk
-    fp.pick(['gceWithPdConfig', 'dataprocConfig']),
-    // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
-    fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs'])
-  );
-  return fp.isEqual(strip(a), strip(b));
-};
-
 export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
   const {
     autopauseThreshold,
