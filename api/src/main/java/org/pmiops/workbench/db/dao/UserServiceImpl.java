@@ -765,6 +765,19 @@ public class UserServiceImpl implements UserService {
     maybeSendAccessTierExpirationEmail(user, CONTROLLED_TIER_SHORT_NAME);
   }
 
+  /**
+   * Check if a user has an existing account before creating a new account.
+   *
+   * <p>Will allow AoU operational users to create a duplicate account
+   */
+  @Override
+  public boolean hasExistingAccount(String contactEmail) {
+    if (userDao.findUsersByContactEmail(contactEmail).isEmpty()) {
+      return false;
+    }
+    return userDao.findOpsUsersByContactEmail(contactEmail).isEmpty();
+  }
+
   @Override
   public void signOut(DbUser user) {
     directoryService.signOut(user.getUsername());

@@ -179,4 +179,6 @@ public interface UserService {
   void signOut(DbUser user);
 
   boolean isServiceAccount(DbUser user);
+
+  boolean hasExistingAccount(String contactEmail);
 }

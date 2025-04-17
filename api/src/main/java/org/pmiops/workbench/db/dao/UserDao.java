@@ -33,6 +33,19 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   DbUser findUserByUserId(long userId);
 
+  List<DbUser> findUsersByContactEmail(String contactEmail);
+
+  @Query(
+      value =
+          "select u.* "
+              + "from user u "
+              + "join user_verified_institutional_affiliation uvia on (u.user_id = uvia.user_id) "
+              + "join institution i on (uvia.institution_id = i.institution_id) "
+              + "where i.short_name = 'AouOps' "
+              + "and u.contact_email = :contactEmail",
+      nativeQuery = true)
+  List<DbUser> findOpsUsersByContactEmail(@Param("contactEmail") String contactEmail);
+
   List<DbUser> findUsersByUserIdIn(List<Long> userIds);
 
   @Query("SELECT user.id FROM DbUser user")

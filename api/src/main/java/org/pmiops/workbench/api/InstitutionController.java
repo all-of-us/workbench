@@ -6,6 +6,7 @@ import jakarta.inject.Provider;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -25,15 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class InstitutionController implements InstitutionApiDelegate {
 
   private final InstitutionService institutionService;
+  private final UserService userService;
   private final Provider<DbUser> userProvider;
   private final AccessSyncService accessSyncService;
 
   @Autowired
   InstitutionController(
       final InstitutionService institutionService,
+      final UserService userService,
       final Provider<DbUser> userProvider,
       final AccessSyncService accessSyncService) {
     this.institutionService = institutionService;
+    this.userService = userService;
     this.userProvider = userProvider;
     this.accessSyncService = accessSyncService;
   }
@@ -94,13 +98,18 @@ public class InstitutionController implements InstitutionApiDelegate {
   @Override
   public ResponseEntity<CheckEmailResponse> checkEmail(
       final String shortName, final CheckEmailRequest request) {
-    return ResponseEntity.ok(
+    CheckEmailResponse checkEmailResponse =
         new CheckEmailResponse()
             .validMember(
                 institutionService.validateInstitutionalEmail(
                     getInstitutionImpl(shortName),
                     request.getContactEmail(),
-                    REGISTERED_TIER_SHORT_NAME)));
+                    REGISTERED_TIER_SHORT_NAME));
+    if (checkEmailResponse.isValidMember()) {
+      checkEmailResponse.setExistingAccount(
+          userService.hasExistingAccount(request.getContactEmail()));
+    }
+    return ResponseEntity.ok(checkEmailResponse);
   }
 
   @Override
