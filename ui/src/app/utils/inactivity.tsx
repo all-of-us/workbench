@@ -23,15 +23,6 @@ export const getLastActiveEpochMillis = (): number | undefined => {
 };
 
 /**
- * start tracking last active timestamp
- */
-export const startLastActive = (): void => {
-  console.log('START');
-  setLastActiveNow();
-};
-
-
-/**
  * will update last active timestamp as long as startLastActive has been called, and clearLastActive has not been called yet.
  * @param epochMillis
  */
@@ -52,6 +43,14 @@ export const setLastActive = (epochMillis: number): void => {
  * will update last active timestamp to "now" as long as startLastActive has been called, and clearLastActive has not been called yet.
  */
 export const setLastActiveNow = () => setLastActive(Date.now());
+
+/**
+ * start tracking last active timestamp
+ */
+export const startLastActive = (): void => {
+  console.log('START');
+  setLastActiveNow();
+};
 
 /**
  * stop tracking last active timestamp
