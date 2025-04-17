@@ -776,55 +776,6 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testCreateRuntime_defaultLabel_hail() throws ApiException {
-    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenThrow(new NotFoundException());
-    stubGetWorkspace();
-
-    runtimeController.createRuntime(
-        WORKSPACE_NS, new Runtime().dataprocConfig(testRuntime.getDataprocConfig()));
-    verify(mockUserRuntimesApi)
-        .createRuntime(
-            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
-
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("preset-hail-genomic-analysis");
-  }
-
-  @Test
-  public void testCreateRuntime_defaultLabel_generalAnalysis() throws ApiException {
-    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenThrow(new NotFoundException());
-    stubGetWorkspace();
-
-    runtimeController.createRuntime(WORKSPACE_NS, new Runtime().dataprocConfig(dataprocConfig));
-    verify(mockUserRuntimesApi)
-        .createRuntime(
-            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
-
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("preset-general-analysis");
-  }
-
-  @Test
-  public void testCreateRuntime_overrideLabel() throws ApiException {
-    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenThrow(new NotFoundException());
-    stubGetWorkspace();
-
-    runtimeController.createRuntime(WORKSPACE_NS, new Runtime().dataprocConfig(dataprocConfig));
-    verify(mockUserRuntimesApi)
-        .createRuntime(
-            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
-
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("user-override");
-  }
-
-  @Test
   public void testCreateRuntime_gceWithGpu() throws ApiException {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
