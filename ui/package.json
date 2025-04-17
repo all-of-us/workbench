@@ -2,6 +2,7 @@
   "name": "aou-ui",
   "version": "0.0.2",
   "license": "BSD",
+  "packageManager": "yarn@1.22.19",
   "scripts": {
     "build-terra-deps": "./src/terraui/build.sh",
     "deps": "./src/deps/deps.sh",

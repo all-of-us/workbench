@@ -22,16 +22,43 @@ export const getLastActiveEpochMillis = (): number | undefined => {
   return lastActive && parseInt(lastActive, 10);
 };
 
+/**
+ * start tracking last active timestamp
+ */
+export const startLastActive = (): void => {
+  console.log("START");
+  setLastActiveNow();
+}
+
+
+/**
+ * will update last active timestamp as long as startLastActive has been called, and clearLastActive has not been called yet.
+ * @param epochMillis
+ */
 export const setLastActive = (epochMillis: number): void => {
-  window.localStorage.setItem(
-    INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
-    epochMillis.toString()
-  );
+  // only update last active timestamp if we have started tracking (empty value means we haven't started)
+  if (getLastActiveEpochMillis()) {
+    console.log('ACTIVE: ' + epochMillis);
+    window.localStorage.setItem(
+      INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
+      epochMillis.toString()
+    );
+  } else {
+    console.log("IGNORE: " + epochMillis);
+  }
 };
 
+/**
+ * will update last active timestamp to "now" as long as startLastActive has been called, and clearLastActive has not been called yet.
+ * @param epochMillis
+ */
 export const setLastActiveNow = () => setLastActive(Date.now());
 
+/**
+ * stop tracking last active timestamp
+ */
 export const clearLastActive = (): void => {
+  console.log("CLEAR");
   window.localStorage.removeItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
   );

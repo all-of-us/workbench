@@ -12,7 +12,8 @@ import {
   getLastActiveEpochMillis,
   INACTIVITY_CONFIG,
   setLastActiveNow,
-} from 'app/utils/inactivity';
+  startLastActive
+} from "app/utils/inactivity";
 import { authStore, profileStore, useStore } from 'app/utils/stores';
 
 const { useEffect } = React;
@@ -124,7 +125,7 @@ export const InactivityMonitor = () => {
         startInactivityTimers();
       };
 
-      setLastActiveNow();
+      startLastActive();
       resetTimers();
 
       // setTimeout does not necessary track real wall-time. Periodically
