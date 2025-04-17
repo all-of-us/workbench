@@ -37,6 +37,7 @@ import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   checkInstitutionalEmail,
+  DuplicateEmailErrorMessage,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 import { notTooLong } from 'app/utils/validators';
@@ -71,7 +72,9 @@ validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
   if (value == null) {
     return '^Institutional membership check has not completed';
   }
-  if (value?.validMember) {
+  if (value?.existingAccount) {
+    return '^An account already exists with this email address ';
+  } else if (value?.validMember) {
     return null;
   } else {
     return '^Email address is not a member of the selected institution';
@@ -221,7 +224,7 @@ export class AccountCreationInstitution extends React.Component<
       return undefined;
     }
 
-    return checkEmailResponse.validMember;
+    return checkEmailResponse.validMember && !checkEmailResponse.existingAccount;
   }
 
   updateContactEmail(contactEmail: string) {
@@ -253,6 +256,12 @@ export class AccountCreationInstitution extends React.Component<
     if (!checkEmailResponse && !checkEmailError) {
       return '';
     }
+
+    // Show an error message if there is already an account with this email
+    if (checkEmailResponse?.existingAccount) {
+      return <DuplicateEmailErrorMessage />;
+    }
+
     // No error if the institution check was successful.
     if (checkEmailResponse?.validMember) {
       return '';

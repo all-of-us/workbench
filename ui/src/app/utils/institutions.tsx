@@ -67,6 +67,14 @@ const EmailDomainMismatchErrorMessage = () => {
   );
 };
 
+export const DuplicateEmailErrorMessage = () => {
+  return (
+    <div data-test-id='email-error-message' style={{ color: colors.danger }}>
+      An account already exists with this email
+    </div>
+  );
+};
+
 export const getEmailValidationErrorMessage = (
   institution: PublicInstitutionDetails
 ) => {
