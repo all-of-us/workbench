@@ -224,7 +224,9 @@ export class AccountCreationInstitution extends React.Component<
       return undefined;
     }
 
-    return checkEmailResponse.validMember && !checkEmailResponse.existingAccount;
+    return (
+      checkEmailResponse.validMember && !checkEmailResponse.existingAccount
+    );
   }
 
   updateContactEmail(contactEmail: string) {
