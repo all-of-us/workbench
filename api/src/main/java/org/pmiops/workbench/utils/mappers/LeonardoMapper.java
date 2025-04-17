@@ -155,6 +155,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "configurationType", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -169,6 +170,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "configurationType", ignore = true)
   Runtime toApiRuntimeWithoutDisk(LeonardoListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(LeonardoClusterError err);
