@@ -11,7 +11,6 @@ public class LeonardoLabelHelper {
   private LeonardoLabelHelper() {}
 
   public static final String LEONARDO_LABEL_AOU = "all-of-us";
-  public static final String LEONARDO_LABEL_AOU_CONFIG = "all-of-us-config";
   public static final String LEONARDO_LABEL_CREATED_BY = "created-by";
   public static final String LEONARDO_LABEL_APP_TYPE = "aou-app-type";
 
