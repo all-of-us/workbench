@@ -4,7 +4,6 @@ import {
   DiskType,
   Runtime,
   RuntimeApi,
-  RuntimeConfigurationType,
   RuntimeStatus,
 } from 'generated/fetch';
 
@@ -185,7 +184,6 @@ describe(useCustomRuntime.name, () => {
     currentRuntime = {
       ...defaultRuntime(),
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {

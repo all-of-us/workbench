@@ -5,7 +5,6 @@ import {
   GceWithPdConfig,
   Runtime,
   RuntimeApi,
-  RuntimeConfigurationType,
   RuntimeLocalizeResponse,
   RuntimeStatus,
 } from 'generated/fetch';
@@ -50,7 +49,6 @@ const runtimeDefaults: Runtime = {
   status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
-  configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
   errors: [],
 };
 
@@ -67,7 +65,6 @@ export const defaultGceRuntimeWithPd = (): Runtime => ({
 export const defaultDataProcRuntime = (): Runtime => ({
   ...runtimeDefaults,
   dataprocConfig: defaultDataprocConfig(),
-  configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
 });
 
 export const defaultRuntime = defaultGceRuntime;

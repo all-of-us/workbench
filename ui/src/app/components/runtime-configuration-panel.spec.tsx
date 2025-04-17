@@ -10,7 +10,6 @@ import {
   GpuConfig,
   Runtime,
   RuntimeApi,
-  RuntimeConfigurationType,
   RuntimeStatus,
   WorkspaceAccessLevel,
   WorkspacesApi,
@@ -459,7 +458,6 @@ describe('RuntimeConfigurationPanel', () => {
     return {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceWithPdConfig: {
         machineType: 'n1-standard-16',
         persistentDisk: {
@@ -815,7 +813,6 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.ERROR,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -835,7 +832,6 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.ERROR,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -867,11 +863,6 @@ describe('RuntimeConfigurationPanel', () => {
     await waitFor(async () => {
       expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
     });
-
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .configurationType
-    ).toEqual(RuntimeConfigurationType.USER_OVERRIDE);
 
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
@@ -918,10 +909,6 @@ describe('RuntimeConfigurationPanel', () => {
       expect(mockSetRuntimeRequest).toHaveBeenCalled();
     });
 
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .configurationType
-    ).toEqual(RuntimeConfigurationType.USER_OVERRIDE);
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .dataprocConfig
@@ -996,7 +983,6 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
       gceWithPdConfig: null,
@@ -1017,7 +1003,6 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.STOPPED,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
       gceWithPdConfig: null,
@@ -1065,10 +1050,6 @@ describe('RuntimeConfigurationPanel', () => {
     await waitFor(async () => {
       expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
     });
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .configurationType
-    ).toEqual(RuntimeConfigurationType.GENERAL_ANALYSIS);
 
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
@@ -1103,10 +1084,6 @@ describe('RuntimeConfigurationPanel', () => {
     await waitFor(async () => {
       expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
     });
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .configurationType
-    ).toEqual(RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS);
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .dataprocConfig
@@ -1149,11 +1126,6 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .configurationType
-    ).toEqual(RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS);
-
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .dataprocConfig
     ).toEqual(runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig);
 
@@ -1179,11 +1151,6 @@ describe('RuntimeConfigurationPanel', () => {
     await waitFor(async () => {
       expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
     });
-
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .configurationType
-    ).toEqual(RuntimeConfigurationType.USER_OVERRIDE);
   });
 
   it('should tag as preset if configuration matches', async () => {
@@ -1203,10 +1170,6 @@ describe('RuntimeConfigurationPanel', () => {
     await waitFor(async () => {
       expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
     });
-    expect(
-      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
-        .configurationType
-    ).toEqual(RuntimeConfigurationType.GENERAL_ANALYSIS);
   });
 
   it('should restrict memory options by cpu', async () => {
@@ -1282,7 +1245,6 @@ describe('RuntimeConfigurationPanel', () => {
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
     });
     mockUseCustomRuntime();
     component();
@@ -1312,7 +1274,6 @@ describe('RuntimeConfigurationPanel', () => {
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
     });
     mockUseCustomRuntime();
     component();
@@ -1613,7 +1574,6 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
@@ -1733,7 +1693,6 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.STOPPED,
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: defaultGceConfig(),
       dataprocConfig: null,
     });
@@ -1929,7 +1888,6 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.STOPPED,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),

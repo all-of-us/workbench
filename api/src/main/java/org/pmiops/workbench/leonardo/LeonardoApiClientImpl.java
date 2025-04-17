@@ -6,7 +6,6 @@ import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.WORKSPACE_
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
@@ -19,8 +18,6 @@ import com.google.common.collect.ImmutableMap;
 import jakarta.inject.Provider;
 import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -59,7 +56,6 @@ import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
@@ -165,7 +161,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .put(LEONARDO_LABEL_CREATED_BY, userEmail)
             .put(LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace)
             .put(LEONARDO_LABEL_WORKSPACE_NAME, workspaceName)
-            .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
     LeonardoCreateRuntimeRequest createRuntimeRequest =
@@ -261,9 +256,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public void updateRuntime(Runtime runtime) {
-    Map<String, String> runtimeLabels =
-        buildRuntimeConfigurationLabels(runtime.getConfigurationType());
-
     legacyLeonardoRetryHandler.run(
         (context) -> {
           runtimesApiProvider
@@ -278,22 +270,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                               ? buildUpdateDataProcConfig(runtime)
                               : buildUpdateGCEConfig(runtime))
                       .autopause(runtime.getAutopauseThreshold() != null)
-                      .autopauseThreshold(runtime.getAutopauseThreshold())
-                      .labelsToUpsert(runtimeLabels));
+                      .autopauseThreshold(runtime.getAutopauseThreshold()));
           return null;
         });
-  }
-
-  private Map<String, String> buildRuntimeConfigurationLabels(
-      RuntimeConfigurationType runtimeConfigurationType) {
-    if (runtimeConfigurationType != null) {
-      return Collections.singletonMap(
-          LEONARDO_LABEL_AOU_CONFIG,
-          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
-              runtimeConfigurationType));
-    } else {
-      return new HashMap<>();
-    }
   }
 
   @Override

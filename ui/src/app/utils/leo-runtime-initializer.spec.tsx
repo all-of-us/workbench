@@ -1,8 +1,4 @@
-import {
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-} from 'generated/fetch';
+import { Runtime, RuntimeStatus } from 'generated/fetch';
 import { RuntimeApi } from 'generated/fetch';
 
 import { expect } from '@jest/globals';
@@ -45,7 +41,6 @@ const baseRuntime: Runtime = {
   status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'docker',
-  configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
 };
 
 const workspaceNamespace = 'aou-rw-12345';

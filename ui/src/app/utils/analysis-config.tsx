@@ -7,7 +7,6 @@ import {
   GpuConfig,
   PersistentDiskRequest,
   Runtime,
-  RuntimeConfigurationType,
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
@@ -95,16 +94,6 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
       zone,
     };
   }
-
-  // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-  runtime.configurationType =
-    fp.get(
-      'runtimeTemplate.configurationType',
-      fp.find(
-        ({ runtimeTemplate }) => presetEquals(runtime, runtimeTemplate),
-        runtimePresets()
-      )
-    ) || RuntimeConfigurationType.USER_OVERRIDE;
 
   return runtime;
 };
