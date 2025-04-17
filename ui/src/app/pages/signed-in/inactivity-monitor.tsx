@@ -12,8 +12,8 @@ import {
   getLastActiveEpochMillis,
   INACTIVITY_CONFIG,
   setLastActiveNow,
-  startLastActive
-} from "app/utils/inactivity";
+  startLastActive,
+} from 'app/utils/inactivity';
 import { authStore, profileStore, useStore } from 'app/utils/stores';
 
 const { useEffect } = React;
