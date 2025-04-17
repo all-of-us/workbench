@@ -4,7 +4,7 @@ import { cond } from '@terra-ui-packages/core-utils';
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import { isAbortError, reportError } from 'app/utils/errors';
-import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
+import { runtimePresets } from 'app/utils/runtime-presets';
 import { runtimeDiskStore, runtimeStore } from 'app/utils/stores';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
@@ -91,9 +91,7 @@ export const throwRuntimeNotFound = (
       },
     ],
     // no current or deleted runtime exists, so we default to the general analysis runtime template
-    [!currentRuntime, () => runtimePresets().generalAnalysis.runtimeTemplate],
-    // a current runtime exists, so we use it plus any preset overrides if appropriate
-    [!!currentRuntime, () => applyPresetOverride(currentRuntime)]
+    [!currentRuntime, () => runtimePresets().generalAnalysis.runtimeTemplate]
   );
 
   throw new InitialRuntimeNotFoundError(defaultRuntime);

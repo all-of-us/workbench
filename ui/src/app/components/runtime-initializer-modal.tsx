@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import { Runtime } from 'generated/fetch';
 
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -52,11 +52,8 @@ export const RuntimeInitializerModal = ({
       <ModalBody>
         <WarningMessage iconPosition='top'>
           Continuing with this action requires a cloud analysis environment,
-          which will be charged to this workspace.&nbsp;
-          {defaultRuntime.configurationType ===
-          RuntimeConfigurationType.GENERAL_ANALYSIS
-            ? 'Would you like to continue with this default environment?'
-            : 'Would you like to continue with your most recently used environment settings in this workspace?'}
+          which will be charged to this workspace. Would you like to continue
+          with this default environment?'
         </WarningMessage>
         <EnvironmentCostEstimator
           analysisConfig={defaultAnalysisConfig}

@@ -1,8 +1,4 @@
-import {
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-} from 'generated/fetch';
+import { Runtime, RuntimeStatus } from 'generated/fetch';
 import { RuntimeApi } from 'generated/fetch';
 
 import { expect } from '@jest/globals';
@@ -24,14 +20,8 @@ import { serverConfigStore } from 'app/utils/stores';
 import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
 import { setImmediate } from 'timers';
 
-import { stubDisk } from 'testing/stubs/disks-api-stub';
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
-import {
-  defaultDataprocConfig,
-  defaultDataProcRuntime,
-  defaultGceRuntimeWithPd,
-  RuntimeApiStub,
-} from 'testing/stubs/runtime-api-stub';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
 import { runtimePresets } from './runtime-presets';
 
@@ -45,7 +35,6 @@ const baseRuntime: Runtime = {
   status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'docker',
-  configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
 };
 
 const workspaceNamespace = 'aou-rw-12345';
@@ -318,102 +307,4 @@ describe(throwRuntimeNotFound.name, () => {
       );
     }
   });
-
-  it('should apply a preset override if targetRuntime does not exist but currentRuntime exists', () => {
-    const currentRuntime = {
-      ...defaultGceRuntimeWithPd(),
-      gceWithPdConfig: {
-        ...defaultGceRuntimeWithPd().gceWithPdConfig,
-        machineType: 'n1-standard-2',
-      },
-    };
-    const gcePersistentDisk = undefined;
-
-    // preconditions check to ensure test validity
-    expect(currentRuntime.dataprocConfig).toBeFalsy();
-    expect(currentRuntime.gceConfig).toBeFalsy();
-    expect(currentRuntime.gceWithPdConfig).toBeTruthy();
-
-    // an arbitrary non-PD field - later we see that this has been overridden by the preset
-    expect(currentRuntime.gceWithPdConfig.machineType).not.toEqual(
-      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-        .machineType
-    );
-    // an arbitrary PD field besides name differs - later we see that this has been overridden by the preset
-    expect(currentRuntime.gceWithPdConfig.persistentDisk.size).not.toEqual(
-      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-        .persistentDisk.size
-    );
-    // later we see that the name field has NOT been overridden by the preset
-    expect(currentRuntime.gceWithPdConfig.persistentDisk.name).not.toEqual(
-      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-        .persistentDisk.name
-    );
-
-    // now begin actual test
-
-    try {
-      const callSucceeded = true;
-      throwRuntimeNotFound(currentRuntime, gcePersistentDisk);
-      expect(callSucceeded).toBeFalsy();
-    } catch (e) {
-      expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
-
-      const runtimePresetConfigWithOriginalName = {
-        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
-        persistentDisk: {
-          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
-            .persistentDisk,
-          name: currentRuntime.gceWithPdConfig.persistentDisk.name,
-        },
-      };
-      expect(e.defaultRuntime.gceWithPdConfig).toEqual(
-        runtimePresetConfigWithOriginalName
-      );
-    }
-  });
-
-  it(
-    'should apply a preset override when: ' +
-      'targetRuntime does not exist, currentRuntime exists, currentRuntime is DataProc, currentRuntime is DELETED',
-    () => {
-      const currentRuntime = {
-        ...defaultDataProcRuntime(),
-        dataprocConfig: {
-          ...defaultDataprocConfig(),
-          masterMachineType: 'n1-standard-8',
-        },
-      };
-      const gcePersistentDisk = stubDisk();
-
-      // preconditions check to ensure test validity
-
-      expect(currentRuntime.dataprocConfig).toBeTruthy();
-      expect(currentRuntime.gceConfig).toBeFalsy();
-      expect(currentRuntime.gceWithPdConfig).toBeFalsy();
-
-      // an arbitrary field - later we see that this DataProc field has been overridden by the preset GCE With PD field
-      expect(currentRuntime.dataprocConfig.masterMachineType).not.toEqual(
-        runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
-          .masterMachineType
-      );
-
-      // now begin actual test
-
-      try {
-        const callSucceeded = true;
-        throwRuntimeNotFound(currentRuntime, gcePersistentDisk);
-        expect(callSucceeded).toBeFalsy();
-      } catch (e) {
-        expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
-
-        expect(e.defaultRuntime.dataprocConfig).toBeTruthy();
-        expect(e.defaultRuntime.gceConfig).toBeFalsy();
-        expect(e.defaultRuntime.gceWithPdConfig).toBeFalsy();
-        expect(e.defaultRuntime.dataprocConfig).toEqual(
-          runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
-        );
-      }
-    }
-  );
 });

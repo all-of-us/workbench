@@ -1,7 +1,5 @@
 package org.pmiops.workbench.utils.mappers;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
 import jakarta.annotation.Nullable;
 import java.util.List;
@@ -47,20 +45,12 @@ import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UserAppEnvironment;
 
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
-
-  BiMap<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
-      ImmutableBiMap.of(
-          RuntimeConfigurationType.USEROVERRIDE, "user-override",
-          RuntimeConfigurationType.GENERALANALYSIS, "preset-general-analysis",
-          RuntimeConfigurationType.HAILGENOMICANALYSIS, "preset-hail-genomic-analysis");
-
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
   @Mapping(target = "properties", ignore = true)
@@ -161,14 +151,11 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "legacy_cloudContextToGoogleProject")
-  @Mapping(
-      target = "configurationType",
-      source = "labels",
-      qualifiedByName = "mapRuntimeConfigurationLabels")
   // these 3 set by getRuntimeAfterMapper()
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "configurationType", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -176,10 +163,6 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "legacy_cloudContextToGoogleProject")
-  @Mapping(
-      target = "configurationType",
-      source = "labels",
-      qualifiedByName = "mapRuntimeConfigurationLabels")
   @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(target = "toolDockerImage", ignore = true)
   @Mapping(target = "errors", ignore = true)
@@ -187,6 +170,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "configurationType", ignore = true)
   Runtime toApiRuntimeWithoutDisk(LeonardoListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(LeonardoClusterError err);
@@ -259,21 +243,6 @@ public interface LeonardoMapper {
                     String.format(
                         "Missing app type labels for app %s in Google Project %s with labels %s",
                         app.getAppName(), toGoogleProject(app.getCloudContext()), appLabels)));
-  }
-
-  @Named("mapRuntimeConfigurationLabels")
-  default RuntimeConfigurationType mapRuntimeConfigurationLabels(Object runtimeLabelsObj) {
-    final Map<String, String> runtimeLabels = LeonardoLabelHelper.toLabelMap(runtimeLabelsObj);
-    if (runtimeLabels == null
-        || runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG) == null) {
-      // If there's no label, fall back onto the old behavior where every Runtime was created with a
-      // default Dataproc config
-      return RuntimeConfigurationType.HAILGENOMICANALYSIS;
-    } else {
-      return RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-          .inverse()
-          .get(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG));
-    }
   }
 
   default void mapRuntimeConfig(
