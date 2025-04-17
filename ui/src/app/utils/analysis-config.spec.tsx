@@ -7,7 +7,6 @@ import {
   Runtime,
 } from 'generated/fetch';
 
-import defaultServerConfig from 'testing/default-server-config';
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataprocConfig,
@@ -34,7 +33,6 @@ import {
 } from './machines';
 import { runtimePresets } from './runtime-presets';
 import { DiskConfig } from './runtime-utils';
-import { serverConfigStore } from './stores';
 
 describe(maybeWithPersistentDisk.name, () => {
   it('returns the existing runtime when dataproc', () => {
@@ -264,41 +262,6 @@ describe(fromAnalysisConfig.name, () => {
     expect(runtime.gceConfig.machineType).toEqual(testConfig.machine.name);
     expect(runtime.gceConfig.gpuConfig).toEqual(testConfig.gpuConfig);
   });
-
-  const generalTemplate = runtimePresets().generalAnalysis.runtimeTemplate;
-  const testConfigForGeneralPreset = {
-    ...defaultAnalysisConfig,
-
-    computeType: ComputeType.Standard,
-
-    gpuConfig: generalTemplate.gceWithPdConfig.gpuConfig,
-
-    // overridden fields for gceWithPdConfig
-    diskConfig: {
-      ...defaultAnalysisConfig.diskConfig,
-      size: generalTemplate.gceWithPdConfig.persistentDisk.size,
-      detachableType: generalTemplate.gceWithPdConfig.persistentDisk.diskType,
-      existingDiskName: generalTemplate.gceWithPdConfig.persistentDisk.name,
-    },
-  };
-
-  const hailTemplate = runtimePresets().hailAnalysis.runtimeTemplate;
-  const testConfigForHailPreset = {
-    ...defaultAnalysisConfig,
-
-    computeType: ComputeType.Dataproc,
-    dataprocConfig: hailTemplate.dataprocConfig,
-
-    // overridden fields for dataproc
-    machine: {
-      ...defaultAnalysisConfig.machine,
-      name: hailTemplate.dataprocConfig.masterMachineType,
-    },
-    diskConfig: {
-      ...defaultAnalysisConfig.diskConfig,
-      size: hailTemplate.dataprocConfig.masterDiskSize,
-    },
-  };
 });
 
 describe(toAnalysisConfig.name, () => {

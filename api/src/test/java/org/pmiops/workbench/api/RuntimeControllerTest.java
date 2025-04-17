@@ -10,7 +10,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
@@ -19,7 +18,6 @@ import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.sql.Timestamp;
@@ -100,7 +98,6 @@ import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.GpuConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeStatus;
@@ -317,7 +314,6 @@ public class RuntimeControllerTest {
     testRuntime =
         new Runtime()
             .runtimeName(getRuntimeName())
-            .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
             .googleProject(GOOGLE_PROJECT_ID)
             .status(RuntimeStatus.DELETING)
             .toolDockerImage(TOOL_DOCKER_IMAGE)
@@ -479,50 +475,6 @@ public class RuntimeControllerTest {
         .thenReturn(testLeoRuntime);
 
     runtimeController.getRuntime(WORKSPACE_NS);
-  }
-
-  @Test
-  public void testGetRuntime_noLabel() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of());
-
-    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime);
-
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
-        .isEqualTo(RuntimeConfigurationType.HAILGENOMICANALYSIS);
-  }
-
-  @Test
-  public void testGetRuntime_defaultLabel_hail() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "preset-hail-genomic-analysis"));
-
-    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime);
-
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
-        .isEqualTo(RuntimeConfigurationType.HAILGENOMICANALYSIS);
-  }
-
-  @Test
-  public void testGetRuntime_defaultLabel_generalAnalysis() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"));
-
-    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime);
-
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
-        .isEqualTo(RuntimeConfigurationType.GENERALANALYSIS);
-  }
-
-  @Test
-  public void testGetRuntime_overrideLabel() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "user-override"));
-
-    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime);
-
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
-        .isEqualTo(RuntimeConfigurationType.USEROVERRIDE);
   }
 
   @Test
@@ -830,10 +782,7 @@ public class RuntimeControllerTest {
     stubGetWorkspace();
 
     runtimeController.createRuntime(
-        WORKSPACE_NS,
-        new Runtime()
-            .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
-            .dataprocConfig(testRuntime.getDataprocConfig()));
+        WORKSPACE_NS, new Runtime().dataprocConfig(testRuntime.getDataprocConfig()));
     verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -849,11 +798,7 @@ public class RuntimeControllerTest {
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
-    runtimeController.createRuntime(
-        WORKSPACE_NS,
-        new Runtime()
-            .configurationType(RuntimeConfigurationType.GENERALANALYSIS)
-            .dataprocConfig(dataprocConfig));
+    runtimeController.createRuntime(WORKSPACE_NS, new Runtime().dataprocConfig(dataprocConfig));
     verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -869,11 +814,7 @@ public class RuntimeControllerTest {
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
-    runtimeController.createRuntime(
-        WORKSPACE_NS,
-        new Runtime()
-            .configurationType(RuntimeConfigurationType.USEROVERRIDE)
-            .dataprocConfig(dataprocConfig));
+    runtimeController.createRuntime(WORKSPACE_NS, new Runtime().dataprocConfig(dataprocConfig));
     verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -1088,11 +1029,7 @@ public class RuntimeControllerTest {
 
     runtimeController.updateRuntime(
         WORKSPACE_NS,
-        new UpdateRuntimeRequest()
-            .runtime(
-                new Runtime()
-                    .configurationType(RuntimeConfigurationType.USEROVERRIDE)
-                    .dataprocConfig(dataprocConfig)));
+        new UpdateRuntimeRequest().runtime(new Runtime().dataprocConfig(dataprocConfig)));
     verify(mockUserRuntimesApi)
         .updateRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), updateRuntimeRequestCaptor.capture());
@@ -1106,13 +1043,6 @@ public class RuntimeControllerTest {
         .isEqualTo(dataprocConfig.getMasterMachineType());
     assertThat(actualRuntimeConfig.getMasterDiskSize())
         .isEqualTo(dataprocConfig.getMasterDiskSize());
-
-    assertThat(updateRuntimeRequestCaptor.getValue().getLabelsToUpsert())
-        .isEqualTo(
-            Collections.singletonMap(
-                LEONARDO_LABEL_AOU_CONFIG,
-                LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
-                    RuntimeConfigurationType.USEROVERRIDE)));
   }
 
   @Test
