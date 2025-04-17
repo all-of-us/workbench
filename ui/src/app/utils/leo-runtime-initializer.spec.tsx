@@ -20,14 +20,8 @@ import { serverConfigStore } from 'app/utils/stores';
 import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
 import { setImmediate } from 'timers';
 
-import { stubDisk } from 'testing/stubs/disks-api-stub';
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
-import {
-  defaultDataprocConfig,
-  defaultDataProcRuntime,
-  defaultGceRuntimeWithPd,
-  RuntimeApiStub,
-} from 'testing/stubs/runtime-api-stub';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
 import { runtimePresets } from './runtime-presets';
 
