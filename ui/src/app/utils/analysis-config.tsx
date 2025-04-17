@@ -1,5 +1,3 @@
-import * as fp from 'lodash/fp';
-
 import {
   DataprocConfig,
   Disk,
