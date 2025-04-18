@@ -76,7 +76,6 @@ profiles {
       google.batch.usePrivateAddress = true
       google.batch.copyImage = "gcr.io/google.com/cloudsdktool/cloud-sdk:alpine"
       google.batch.bootDiskSize = "20.GB"
-      google.batch.noExternalIpAddress = true
   }
 }
 EOF
