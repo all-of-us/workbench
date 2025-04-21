@@ -41,6 +41,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
@@ -56,6 +57,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.GeneralDiscoverySource;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -104,6 +106,7 @@ public class UserServiceTest {
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   // use a SpyBean when we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
@@ -682,6 +685,33 @@ public class UserServiceTest {
     // former tier members are excluded
     assertThat(userService.getAllUserIdsWithCurrentTierAccess())
         .containsExactly(rtUser.getUserId(), ctUser.getUserId());
+  }
+
+  @Test
+  public void testHasExistingAccount() {
+    String contactEmail = "contact@test.com";
+    // No existing account for this email
+    assertThat(userService.hasExistingAccount(contactEmail)).isFalse();
+
+    DbUser testUser =
+        userDao.save(new DbUser().setUserId(1).setUsername("test").setContactEmail(contactEmail));
+    // Account already exists for this email, returns true
+    assertThat(userService.hasExistingAccount(contactEmail)).isTrue();
+
+    DbInstitution testInstitution =
+        institutionDao.save(
+            new DbInstitution()
+                .setInstitutionId(2)
+                .setDisplayName("Test Operational Institution")
+                .setShortName("AouOps"));
+    verifiedInstitutionalAffiliationDao.save(
+        new DbVerifiedInstitutionalAffiliation()
+            .setVerifiedInstitutionalAffiliationId(3)
+            .setInstitution(testInstitution)
+            .setUser(testUser)
+            .setInstitutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL));
+    // Account already exists for this email but the user is an ops user, returns false
+    assertThat(userService.hasExistingAccount(contactEmail)).isFalse();
   }
 
   private DbUser createUserWithSpecifiedInitialCreditsExpiration(
