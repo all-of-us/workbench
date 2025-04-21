@@ -221,7 +221,7 @@ export const CriteriaSearch = fp.flow(
         conceptSearchTerms,
       } = this.props;
       return (
-        (domain === Domain.VISIT ||
+        ((source === 'cohort' && domain === Domain.VISIT) ||
           (source === 'cohort' && domain === Domain.PHYSICAL_MEASUREMENT) ||
           (source === 'cohort' && domain === Domain.SURVEY)) &&
         !conceptSearchTerms
