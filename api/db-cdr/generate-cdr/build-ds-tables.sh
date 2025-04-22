@@ -8,6 +8,8 @@ export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
 export DOMAIN=$3       # specific domain table to build
 
+TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
+
 function do_ds_condition_occurrence(){
   echo "ds_condition_occurrence - inserting data"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
@@ -260,7 +262,7 @@ function do_fitbit() {
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_activity_summary\`
       (date, activity_calories, calories_bmr, calories_out, elevation, fairly_active_minutes, floors,
       lightly_active_minutes, marginal_calories, sedentary_minutes, steps, very_active_minutes, person_id)
-  SELECT date, activity_calories, calories_bmr, calories_out, elevation, fairly_active_minutes, floors,
+  SELECT date, activity_calories, calories_bmr, calories_out, elevation, fairly_active_minutes, SAFE_CAST(floors AS INT64) AS floors,
       lightly_active_minutes, marginal_calories, sedentary_minutes, steps, very_active_minutes, person_id
   FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
   FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`)
@@ -351,6 +353,9 @@ function do_COPE_and_PFHH(){
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
   
+if [[ "$TABLE_LIST" == *"emorecog"* ]]
+then
+  
   echo "ds_emorecog_metadata - inserting data for emorecog metadata"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_emorecog_metadata\`
@@ -434,6 +439,8 @@ function do_COPE_and_PFHH(){
      (sitting_id, person_id, src_id, link_id, trial_id, trial_type, type_num, delay_time, delay_time_days, response, present_amount, future_amount, catch_correct, current_k, reaction_time, state, repeated, trial_timestamp)
   SELECT sitting_id, person_id, src_id, link_id, trial_id, trial_type, type_num, delay_time, delay_time_days, response, present_amount, future_amount, catch_correct, current_k, reaction_time, state, repeated, trial_timestamp
   FROM \`$BQ_PROJECT.$BQ_DATASET.delaydiscounting\` CROSS JOIN UNNEST(trial_data)"
+fi
+
 }
 
 function do_PFHH(){
