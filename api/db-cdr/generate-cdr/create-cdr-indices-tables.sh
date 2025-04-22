@@ -70,6 +70,12 @@ do
       else
         echo "Keeping existing table: $table_name"
       fi
+    elif [[ "$table_name" == ds_emorecog* ]] || [[ "$table_name" == ds_flanker* ]] || [[ "$table_name" == ds_gradcpt* ]] || [[ "$table_name" == ds_delaydiscounting* ]]; then
+      if [[ "$TABLE_LIST"  == *"emorecog"* ]]; then
+        deleteAndCreateTable "$table_name"
+      else
+        echo "Skipping table $table_name"
+      fi
     else
       deleteAndCreateTable "$table_name"
     fi
