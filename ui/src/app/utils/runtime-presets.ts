@@ -1,6 +1,4 @@
-import * as fp from 'lodash/fp';
-
-import { DiskType, Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import { DiskType, Runtime } from 'generated/fetch';
 
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -22,7 +20,6 @@ export const runtimePresets = (): {
     generalAnalysis: {
       displayName: 'General Analysis',
       runtimeTemplate: {
-        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
         autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
         // TODO: Support specifying toolDockerImage here.
         gceWithPdConfig: {
@@ -41,7 +38,6 @@ export const runtimePresets = (): {
     hailAnalysis: {
       displayName: 'Hail Genomics Analysis',
       runtimeTemplate: {
-        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
         autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
         dataprocConfig: {
           masterMachineType: DEFAULT_MACHINE_NAME,
@@ -54,39 +50,4 @@ export const runtimePresets = (): {
       },
     },
   };
-};
-
-export const applyPresetOverride = (runtime) => {
-  if (!runtime) {
-    return runtime;
-  }
-  const presets = runtimePresets();
-  const runtimePresetKey = fp
-    .keys(presets)
-    .find(
-      (key) =>
-        presets[key].runtimeTemplate.configurationType ===
-        runtime.configurationType
-    );
-
-  if (runtimePresetKey) {
-    const { gceConfig, gceWithPdConfig, dataprocConfig } =
-      presets[runtimePresetKey].runtimeTemplate;
-
-    return {
-      ...runtime,
-      gceConfig,
-      // restore the original PD name, which will cause a creation request to attach it to the new runtime
-      gceWithPdConfig:
-        gceWithPdConfig &&
-        fp.set(
-          ['persistentDisk', 'name'],
-          runtime.gceWithPdConfig?.persistentDisk?.name,
-          gceWithPdConfig
-        ),
-      dataprocConfig,
-    };
-  }
-
-  return runtime;
 };

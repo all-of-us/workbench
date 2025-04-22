@@ -8956,7 +8956,7 @@ components:
     RuntimeConfigurationType:
       type: string
       description: |
-        The configuration type for this runtime. Namely, whether there was a user override of a specific cloud service type, or whether one of the preset system defaults was used. This distinction is meaningful for display purposes, and allows the user to pickup natural upgrades to the default configuration.
+        Deprecated. The configuration type for this runtime. Namely, whether there was a user override of a specific cloud service type, or whether one of the preset system defaults was used. This distinction is meaningful for display purposes, and allows the user to pickup natural upgrades to the default configuration.
       enum:
       - UserOverride
       - GeneralAnalysis
@@ -8981,12 +8981,12 @@ components:
           description: The number of minutes of idle time to elapse before the cluster
             is autopaused. If autopause is set to false, this value is disregarded.
             A value of 0 is equivalent to autopause being turned off.
-        configurationType:
-          $ref: '#/components/schemas/RuntimeConfigurationType'
         toolDockerImage:
           type: string
           description: The tool docker image to install. May be Dockerhub or GCR.
             If not set, a default Jupyter image will be installed.
+        configurationType:
+          $ref: '#/components/schemas/RuntimeConfigurationType'
         gceConfig:
           $ref: '#/components/schemas/GceConfig'
         gceWithPdConfig:

@@ -1,5 +1,3 @@
-import * as fp from 'lodash/fp';
-
 import {
   DataprocConfig,
   Disk,
@@ -7,7 +5,6 @@ import {
   GpuConfig,
   PersistentDiskRequest,
   Runtime,
-  RuntimeConfigurationType,
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
@@ -40,20 +37,6 @@ export interface AnalysisConfig {
   numNodes?: number;
   zone?: string;
 }
-
-// Returns true if two runtimes are equivalent in terms of the fields which are
-// affected by runtime presets.
-const presetEquals = (a: Runtime, b: Runtime): boolean => {
-  const strip = fp.flow(
-    // In the future, things like toolDockerImage and autopause may be considerations.
-    // With https://precisionmedicineinitiative.atlassian.net/browse/RW-9167, general analysis
-    // should have persistent disk
-    fp.pick(['gceWithPdConfig', 'dataprocConfig']),
-    // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
-    fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs'])
-  );
-  return fp.isEqual(strip(a), strip(b));
-};
 
 export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
   const {
@@ -95,16 +78,6 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
       zone,
     };
   }
-
-  // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-  runtime.configurationType =
-    fp.get(
-      'runtimeTemplate.configurationType',
-      fp.find(
-        ({ runtimeTemplate }) => presetEquals(runtime, runtimeTemplate),
-        runtimePresets()
-      )
-    ) || RuntimeConfigurationType.USER_OVERRIDE;
 
   return runtime;
 };

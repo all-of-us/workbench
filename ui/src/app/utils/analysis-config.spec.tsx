@@ -5,10 +5,8 @@ import {
   GpuConfig,
   PersistentDiskRequest,
   Runtime,
-  RuntimeConfigurationType,
 } from 'generated/fetch';
 
-import defaultServerConfig from 'testing/default-server-config';
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataprocConfig,
@@ -35,7 +33,6 @@ import {
 } from './machines';
 import { runtimePresets } from './runtime-presets';
 import { DiskConfig } from './runtime-utils';
-import { serverConfigStore } from './stores';
 
 describe(maybeWithPersistentDisk.name, () => {
   it('returns the existing runtime when dataproc', () => {
@@ -88,7 +85,6 @@ describe(maybeWithPersistentDisk.name, () => {
     expect(newRuntime.status).toEqual(runtime.status);
     expect(newRuntime.createdDate).toEqual(runtime.createdDate);
     expect(newRuntime.toolDockerImage).toEqual(runtime.toolDockerImage);
-    expect(newRuntime.configurationType).toEqual(runtime.configurationType);
 
     // fields copied from the disk
     expect(newRuntime.gceWithPdConfig.persistentDisk.size).toEqual(disk.size);
@@ -265,84 +261,6 @@ describe(fromAnalysisConfig.name, () => {
     expect(runtime.autopauseThreshold).toEqual(testConfig.autopauseThreshold);
     expect(runtime.gceConfig.machineType).toEqual(testConfig.machine.name);
     expect(runtime.gceConfig.gpuConfig).toEqual(testConfig.gpuConfig);
-  });
-
-  const generalTemplate = runtimePresets().generalAnalysis.runtimeTemplate;
-  const testConfigForGeneralPreset = {
-    ...defaultAnalysisConfig,
-
-    computeType: ComputeType.Standard,
-
-    gpuConfig: generalTemplate.gceWithPdConfig.gpuConfig,
-
-    // overridden fields for gceWithPdConfig
-    diskConfig: {
-      ...defaultAnalysisConfig.diskConfig,
-      size: generalTemplate.gceWithPdConfig.persistentDisk.size,
-      detachableType: generalTemplate.gceWithPdConfig.persistentDisk.diskType,
-      existingDiskName: generalTemplate.gceWithPdConfig.persistentDisk.name,
-    },
-  };
-
-  it('should populate the configuration type for the generalAnalysis preset', () => {
-    serverConfigStore.set({ config: defaultServerConfig });
-    const runtime = fromAnalysisConfig(testConfigForGeneralPreset);
-    expect(runtime.configurationType).toEqual(
-      generalTemplate.configurationType
-    );
-  });
-
-  it('should populate the configuration type USER_OVERRIDE for a deviation from the generalAnalysis preset', () => {
-    const testConfig = {
-      ...testConfigForGeneralPreset,
-      // preset gpuConfig is null
-      gpuConfig: {
-        gpuType: 'something',
-        numOfGpus: 1,
-      },
-    };
-    const runtime = fromAnalysisConfig(testConfig);
-    expect(runtime.configurationType).toEqual(
-      RuntimeConfigurationType.USER_OVERRIDE
-    );
-  });
-
-  const hailTemplate = runtimePresets().hailAnalysis.runtimeTemplate;
-  const testConfigForHailPreset = {
-    ...defaultAnalysisConfig,
-
-    computeType: ComputeType.Dataproc,
-    dataprocConfig: hailTemplate.dataprocConfig,
-
-    // overridden fields for dataproc
-    machine: {
-      ...defaultAnalysisConfig.machine,
-      name: hailTemplate.dataprocConfig.masterMachineType,
-    },
-    diskConfig: {
-      ...defaultAnalysisConfig.diskConfig,
-      size: hailTemplate.dataprocConfig.masterDiskSize,
-    },
-  };
-
-  it('should populate the configuration type for the hailAnalysis preset', () => {
-    const runtime = fromAnalysisConfig(testConfigForHailPreset);
-    expect(runtime.configurationType).toEqual(hailTemplate.configurationType);
-  });
-
-  it('should populate the configuration type USER_OVERRIDE for a deviation from the hailAnalysis preset', () => {
-    const testConfig = {
-      ...testConfigForHailPreset,
-      dataprocConfig: {
-        ...testConfigForHailPreset.dataprocConfig,
-        numberOfWorkers:
-          testConfigForHailPreset.dataprocConfig.numberOfWorkers + 1,
-      },
-    };
-    const runtime = fromAnalysisConfig(testConfig);
-    expect(runtime.configurationType).toEqual(
-      RuntimeConfigurationType.USER_OVERRIDE
-    );
   });
 });
 
