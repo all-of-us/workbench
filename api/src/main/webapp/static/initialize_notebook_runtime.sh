@@ -60,7 +60,7 @@ if [ ! -f "${nextflow_config}" ]; then
   sudo -E -u jupyter mkdir /home/jupyter/.nextflow
   cat <<EOF | sudo -E -u jupyter tee "${nextflow_config}"
 profiles {
-   gls {
+  gls {
        process.executor = "google-lifesciences"
        process.container = "gcr.io/google-containers/ubuntu-slim:0.14"
        workDir = "${WORKSPACE_BUCKET}/workflows/nextflow-scratch"
