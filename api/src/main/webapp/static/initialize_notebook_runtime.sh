@@ -61,20 +61,20 @@ if [ ! -f "${nextflow_config}" ]; then
   cat <<EOF | sudo -E -u jupyter tee "${nextflow_config}"
 profiles {
    gls {
-        process.executor = "google-lifesciences"
-        process.container = "gcr.io/google-containers/ubuntu-slim:0.14"
-        workDir = "${WORKSPACE_BUCKET}/workflows/nextflow-scratch"
-        google.location = "us-central1"
-        google.zone = "us-central1-a"
-        google.project = "${GOOGLE_PROJECT}"
-        google.enableRequesterPaysBuckets = true
-        google.lifeSciences.debug = true
-        google.lifeSciences.serviceAccountEmail = "${PET_SA_EMAIL}"
-        google.lifeSciences.network = "network"
-        google.lifeSciences.subnetwork = "subnetwork"
-        google.lifeSciences.usePrivateAddress = false
-        google.lifeSciences.copyImage = "gcr.io/google.com/cloudsdktool/cloud-sdk:alpine"
-        google.lifeSciences.bootDiskSize = "20.GB"
+       process.executor = "google-lifesciences"
+       process.container = "gcr.io/google-containers/ubuntu-slim:0.14"
+       workDir = "${WORKSPACE_BUCKET}/workflows/nextflow-scratch"
+       google.location = "us-central1"
+       google.zone = "us-central1-a"
+       google.project = "${GOOGLE_PROJECT}"
+       google.enableRequesterPaysBuckets = true
+       google.lifeSciences.debug = true
+       google.lifeSciences.serviceAccountEmail = "${PET_SA_EMAIL}"
+       google.lifeSciences.network = "network"
+       google.lifeSciences.subnetwork = "subnetwork"
+       google.lifeSciences.usePrivateAddress = false
+       google.lifeSciences.copyImage = "gcr.io/google.com/cloudsdktool/cloud-sdk:alpine"
+       google.lifeSciences.bootDiskSize = "20.GB"
   }
 
   gcb {
