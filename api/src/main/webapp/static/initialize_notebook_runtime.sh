@@ -76,6 +76,24 @@ profiles {
       google.lifeSciences.copyImage = "gcr.io/google.com/cloudsdktool/cloud-sdk:alpine"
       google.lifeSciences.bootDiskSize = "20.GB"
   }
+
+  gcb {
+      process.executor = "google-batch"
+      process.container = "gcr.io/google-containers/ubuntu-slim:0.14"
+      workDir = "${WORKSPACE_BUCKET}/workflows/nextflow-scratch"
+
+      google.location = "us-central1"
+      google.zone = "us-central1-a"
+      google.project = "${GOOGLE_PROJECT}"
+      google.enableRequesterPaysBuckets = true
+      google.batch.debug = true
+      google.batch.serviceAccountEmail = "${PET_SA_EMAIL}"
+      google.batch.network = "global/networks/network"
+      google.batch.subnetwork = "regions/us-central1/subnetworks/subnetwork"
+      google.batch.usePrivateAddress = true
+      google.batch.copyImage = "gcr.io/google.com/cloudsdktool/cloud-sdk:alpine"
+      google.batch.bootDiskSize = "20.GB"
+  }
 }
 EOF
 fi
