@@ -12,7 +12,6 @@ import org.pmiops.workbench.model.ReportingWorkspace;
 public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<ReportingWorkspace> {
   ACCESS_TIER_SHORT_NAME("access_tier_short_name", ReportingWorkspace::getAccessTierShortName),
   BILLING_ACCOUNT_TYPE("billing_account_type", w -> enumToString(w.getBillingAccountType())),
-  BILLING_STATUS("billing_status", w -> enumToString(w.getBillingStatus())),
   CDR_VERSION_ID("cdr_version_id", ReportingWorkspace::getCdrVersionId),
   CREATION_TIME("creation_time", w -> toInsertRowString(w.getCreationTime())),
   CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId),

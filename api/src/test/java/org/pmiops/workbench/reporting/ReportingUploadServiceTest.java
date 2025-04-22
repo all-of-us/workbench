@@ -30,7 +30,6 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -325,7 +324,5 @@ public class ReportingUploadServiceTest {
     assertThat(insertAllRequest.getRows()).hasSize(1);
     final Map<String, Object> content = insertAllRequest.getRows().get(0).getContent();
     assertThat(content).hasSize(2);
-    assertThat(content.getOrDefault("billing_status", BillingStatus.INACTIVE))
-        .isEqualTo(BillingStatus.INACTIVE);
   }
 }
