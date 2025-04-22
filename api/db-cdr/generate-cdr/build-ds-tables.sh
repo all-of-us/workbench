@@ -8,8 +8,6 @@ export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
 export DOMAIN=$3       # specific domain table to build
 
-TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
-
 function do_ds_condition_occurrence(){
   echo "ds_condition_occurrence - inserting data"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
@@ -353,6 +351,8 @@ function do_COPE_and_PFHH(){
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
   
+TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
+
 if [[ "$TABLE_LIST" == *"emorecog"* ]]
 then
   
