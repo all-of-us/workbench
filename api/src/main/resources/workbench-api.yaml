@@ -9564,15 +9564,6 @@ components:
           type: integer
           description: The time when the lock will expire, in ms from the Unix epoch
           format: int64
-    BillingStatus:
-      type: string
-      description: Is the billing account associated with this workspace available
-        to incur costs?  For a free tier project, this indicates whether a user has
-        an available balance in their quota.  For a user-provided billing account,
-        this corresponds to whether payment is valid and up to date.
-      enum:
-      - ACTIVE
-      - INACTIVE
     BillingAccountType:
       type: string
       description: Whether a billing project is provided by the Researcher Workbench
@@ -12502,8 +12493,6 @@ components:
             e.g. 'registered'
         billingAccountType:
           $ref: '#/components/schemas/BillingAccountType'
-        billingStatus:
-          $ref: '#/components/schemas/BillingStatus'
         cdrVersionId:
           type: integer
           description: Foreign key into CDR table.

@@ -18,8 +18,6 @@ import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.base.Strings;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +29,6 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.model.AppType;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
@@ -53,13 +50,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingQueryServiceImpl implements ReportingQueryService {
-
-  private static final BiMap<BillingStatus, Short> CLIENT_TO_STORAGE_BILLING_STATUS =
-      ImmutableBiMap.<BillingStatus, Short>builder()
-          .put(BillingStatus.ACTIVE, (short) 0)
-          .put(BillingStatus.INACTIVE, (short) 1)
-          .build();
-
   private final JdbcTemplate jdbcTemplate;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
@@ -71,14 +61,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     this.jdbcTemplate = jdbcTemplate;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.bigQueryService = bigQueryService;
-  }
-
-  private static BillingStatus billingStatusFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_BILLING_STATUS.inverse().get(s);
-  }
-
-  private static Short billingStatusToStorage(BillingStatus s) {
-    return CLIENT_TO_STORAGE_BILLING_STATUS.get(s);
   }
 
   @Override
@@ -506,17 +488,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         "SELECT \n"
             + "  a.short_name AS access_tier_short_name,\n"
             + "  billing_account_name,\n"
-            + "  CASE \n"
-            + "    WHEN (w.billing_account_name = ? AND\n"
-            + "      (uvia.institution_id IS NULL OR\n"
-            + "      w.initial_credits_exhausted = 1 OR\n"
-            + "      (uice.expiration_time IS NOT NULL AND\n"
-            + "        uice.expiration_time <= CURRENT_TIMESTAMP AND\n"
-            + "        uice.bypassed = 0 AND\n"
-            + "        i.bypass_initial_credits_expiration = 0))) \n"
-            + "    THEN ? \n"
-            + "    ELSE ? \n"
-            + "  END AS billing_status,\n"
             + "  w.cdr_version_id AS cdr_version_id,\n"
             + "  w.creation_time AS creation_time,\n"
             + "  creator_id,\n"
@@ -554,32 +525,18 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  LEFT JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
             // most workspaces are not Featured
             + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
-            // not all users have initial credits expiration entries
-            + "  LEFT OUTER JOIN user_initial_credits_expiration uice ON uice.user_id = creator_id\n"
-            // some users don't have institutional affiliations
-            + "  LEFT JOIN user_verified_institutional_affiliation uvia ON w.creator_id = uvia.user_id\n"
-            + "  LEFT JOIN institution i ON uvia.institution_id = i.institution_id\n"
             + "WHERE active_status = ? \n"
             + "ORDER BY w.workspace_id\n"
             + "LIMIT ? \n"
             + "OFFSET ?";
     return jdbcTemplate.query(
         sql,
-        new Object[] {
-          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
-          billingStatusToStorage(BillingStatus.INACTIVE),
-          billingStatusToStorage(BillingStatus.ACTIVE),
-          workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
-          limit,
-          offset
-        },
         (rs, unused) ->
             new ReportingWorkspace()
                 .accessTierShortName(rs.getString("access_tier_short_name"))
                 .billingAccountType(
                     getBillingAccountType(
                         rs.getString("billing_account_name"), workbenchConfigProvider.get()))
-                .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))
                 .cdrVersionId(rs.getLong("cdr_version_id"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .creatorId(rs.getLong("creator_id"))
@@ -610,7 +567,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
                 .workspaceId(rs.getLong("workspace_id"))
-                .workspaceNamespace(rs.getString("workspace_namespace")));
+                .workspaceNamespace(rs.getString("workspace_namespace")),
+        workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
+        limit,
+        offset);
   }
 
   @Override

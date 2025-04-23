@@ -17,7 +17,6 @@ import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -30,7 +29,6 @@ public class ReportingTestUtils {
   public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
       BillingAccountType.FREE_TIER;
   public static final String WORKSPACE__BILLING_ACCOUNT_ID = "free_tier";
-  public static final BillingStatus WORKSPACE__BILLING_STATUS = BillingStatus.ACTIVE;
   public static final Long WORKSPACE__CDR_VERSION_ID = 2L;
   public static final Timestamp WORKSPACE__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
@@ -106,7 +104,6 @@ public class ReportingTestUtils {
     return new ReportingWorkspace()
         .accessTierShortName(WORKSPACE__ACCESS_TIER_SHORT_NAME)
         .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
-        .billingStatus(WORKSPACE__BILLING_STATUS)
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)
         .creationTime(offsetDateTimeUtc(WORKSPACE__CREATION_TIME))
         .creatorId(WORKSPACE__CREATOR_ID)
