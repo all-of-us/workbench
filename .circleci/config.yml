@@ -217,7 +217,7 @@ commands:
     description: "Activate CircleCI service account credential for the Production environment"
     steps:
     - gcloud-auth-login-oidc:
-        project_id: "386258269133"  # all-of-us-rw-prod
+        project_id: "684273740878"  # all-of-us-rw-prod
         wip_id: "circleci-wip-prod"
         wip_provider_id: "circleci-oidc-prv-prod"
         service_account: "deploy@all-of-us-rw-prod.iam.gserviceaccount.com"
