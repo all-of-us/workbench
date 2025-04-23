@@ -313,10 +313,6 @@ def deploy(cmd_name, args)
   if create_ticket
     issue_key = jira_client.create_ticket(op.opts.project, from_version,
                               op.opts.git_version, op.opts.circle_url)
-
-    if create_ticket
-      issue_key = jira_client.create_ticket(op.opts.project, from_version,
-                                            op.opts.git_version, op.opts.circle_url)
       if issue_key
         # Export to $BASH_ENV for CircleCI to pick up
         File.open(ENV['BASH_ENV'] || "#{ENV['HOME']}/.bashrc", 'a') do |f|
