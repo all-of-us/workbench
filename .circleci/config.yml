@@ -213,6 +213,15 @@ commands:
         wip_provider_id: "circleci-oidc-prv-preprod"
         service_account: "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com"
 
+  gcloud-auth-login-oidc-prod:
+    description: "Activate CircleCI service account credential for the Production environment"
+    steps:
+    - gcloud-auth-login-oidc:
+        project_id: "684273740878"  # all-of-us-rw-prod
+        wip_id: "circleci-wip-prod"
+        wip_provider_id: "circleci-oidc-prv-prod"
+        service_account: "deploy@all-of-us-rw-prod.iam.gserviceaccount.com"
+
   deploy-to-preprod-command:
     description: "Deploy API and UI to preprod App Engine"
     steps:
@@ -252,6 +261,26 @@ commands:
             --key-file << pipeline.parameters.circle-service-account-key >> \
             --promote
         name: Deploy API and UI to all-of-us-rw-stable App Engine
+
+  deploy-to-prod-command:
+    description: "Deploy API and UI to production App Engine"
+    steps:
+    - checkout-code
+    - attach_workspace:
+        at: .
+    - gcloud-auth-login-oidc-prod
+    - run:
+        working_directory: ~/workbench/deploy
+        command: |
+          ./project.rb deploy \
+            --project all-of-us-rw-prod \
+            --account "deploy@all-of-us-rw-prod.iam.gserviceaccount.com" \
+            --git-version "${CIRCLE_TAG}" \
+            --app-version "${CIRCLE_TAG}" \
+            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+            --key-file << pipeline.parameters.circle-service-account-key >> \
+            --promote
+        name: Deploy API and UI to all-of-us-rw-prod App Engine
 
   deploy-to-staging-command:
     description: "Deploy API and UI to staging App Engine"
@@ -1022,6 +1051,12 @@ jobs:
     steps:
     - deploy-to-preprod-command
 
+  deploy-to-prod:
+    executor: workbench-executor
+    resource_class: large
+    steps:
+    - deploy-to-prod-command
+
   deploy-to-stable:
     executor: workbench-executor
     resource_class: large
@@ -1360,6 +1395,10 @@ workflows:
           <<: *filter-release-tags
           requires:
            - document-approvals
+      - deploy-to-prod:
+          <<: *filter-release-tags
+          requires:
+           - deploy-to-preprod
 
   nightly-tests:
     triggers:
