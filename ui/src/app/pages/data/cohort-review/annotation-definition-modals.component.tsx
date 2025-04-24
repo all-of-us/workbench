@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
+import { matchPath, RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
 
@@ -19,6 +19,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { cohortAnnotationDefinitionApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 

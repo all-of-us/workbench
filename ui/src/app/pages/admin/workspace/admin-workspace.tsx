@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 
 import {
@@ -22,6 +22,7 @@ import {
   renderIfAuthorized,
 } from 'app/utils/authorities';
 import { findCdrVersion } from 'app/utils/cdr-versions';
+import { withRouter } from 'app/utils/router-utils';
 import { cdrVersionStore, MatchParams, profileStore } from 'app/utils/stores';
 import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 

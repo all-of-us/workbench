@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Iframe from 'react-iframe';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { Profile, Runtime, RuntimeStatus } from 'generated/fetch';
@@ -28,6 +28,7 @@ import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 import { fetchAbortableRetry } from 'app/utils/retry';
+import { withRouter } from 'app/utils/router-utils';
 import { withRuntimeStore } from 'app/utils/runtime-hooks';
 import {
   ComputeSecuritySuspendedError,
