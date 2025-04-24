@@ -320,7 +320,6 @@ def deploy(cmd_name, args)
         end
         common.status "Exported JIRA_ISSUE_KEY=#{issue_key} to environment"
       end
-    end
   end
 end
 
