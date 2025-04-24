@@ -448,13 +448,6 @@ paths:
           schema:
             type: string
         - in: query
-          name: includeDeleted
-          description: Optional filter that includes any persistent disks with a Deleted status.
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - in: query
           name: includeLabels
           description: >
             Optional label keys of the labels returned in response. Example:
@@ -517,13 +510,6 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
-          name: includeDeleted
-          description: Optional filter that includes any persistent disks with a Deleted status.
-          required: false
-          schema:
-            type: boolean
-            default: false
         - in: query
           name: includeLabels
           description: >
@@ -748,13 +734,6 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
-          name: includeDeleted
-          description: Optional filter that includes any apps with a Deleted status.
-          required: false
-          schema:
-            type: boolean
-            default: false
         - in: query
           name: includeLabels
           description: >
