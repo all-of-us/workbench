@@ -217,7 +217,7 @@ export const SignedInRoutes = () => {
       <AppRoute exact path='/admin/user'>
         {' '}
         {/* included for backwards compatibility */}
-        <Redirect to={'/admin/users'} />
+        <Redirect to='/admin/users' />
       </AppRoute>
       <AppRoute
         exact
@@ -390,7 +390,7 @@ export const SignedInRoutes = () => {
         />
       </AppRoute>
       <AppRoute exact path='*'>
-        <Redirect to={'/not-found'} />
+        <Redirect to='/not-found' />
       </AppRoute>
     </Switch>
   );
