@@ -524,10 +524,7 @@ export const DataUserCodeOfConduct = fp.flow(
       )}
       {showSignaturePage && (
         <DuccSignaturePage
-          errors={errors}
-          submitting={submitting}
-          signatureState={signatureState}
-          username={username}
+          {...{ errors, submitting, signatureState, username }}
           fullName={givenName + ' ' + familyName}
           signedInitials={duccSignedInitials}
           signedDate={duccCompletionTimeEpochMillis}
