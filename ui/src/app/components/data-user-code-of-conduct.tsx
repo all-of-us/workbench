@@ -413,7 +413,6 @@ export const DataUserCodeOfConduct = fp.flow(
     duccCompletionTimeEpochMillis,
   } = profile;
 
-  const [name, setName] = useState('');
   const [initialMonitoring, setInitialMonitoring] = useState('');
   const [initialPublic, setInitialPublic] = useState('');
   const [initialAccess, setInitialAccess] = useState('');
