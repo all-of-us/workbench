@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CSSProperties, useState, useEffect } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
@@ -401,9 +401,17 @@ export const DataUserCodeOfConduct = fp.flow(
   withNavigation,
   withRouter
 )((props: Props) => {
-  const { profileState, signatureState, location, navigate, hideSpinner } = props;
+  const { profileState, signatureState, location, navigate, hideSpinner } =
+    props;
   const { profile } = profileState;
-  const { username, givenName, familyName, duccSignedInitials, duccSignedVersion, duccCompletionTimeEpochMillis } = profile;
+  const {
+    username,
+    givenName,
+    familyName,
+    duccSignedInitials,
+    duccSignedVersion,
+    duccCompletionTimeEpochMillis,
+  } = profile;
 
   const [name, setName] = useState('');
   const [initialMonitoring, setInitialMonitoring] = useState('');
@@ -415,7 +423,7 @@ export const DataUserCodeOfConduct = fp.flow(
 
   useEffect(() => {
     hideSpinner();
-  }, [hideSpinner]);
+  }, []);
 
   const submitCodeOfConductWithRenewal = fp.flow(
     withSuccessModal({
@@ -478,7 +486,7 @@ export const DataUserCodeOfConduct = fp.flow(
     signatureState === DuccSignatureState.SIGNED
       ? canRenderSignedDucc(duccSignedVersion)
       : page === DataUserCodeOfConductPage.CONTENT;
-      
+
   const showSignaturePage =
     signatureState === DuccSignatureState.SIGNED
       ? canRenderSignedDucc(duccSignedVersion)
