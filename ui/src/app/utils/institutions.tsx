@@ -8,6 +8,7 @@ import {
 } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
+import { SupportMailto } from 'app/components/support';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
@@ -70,7 +71,8 @@ const EmailDomainMismatchErrorMessage = () => {
 export const DuplicateEmailErrorMessage = () => {
   return (
     <div data-test-id='email-error-message' style={{ color: colors.danger }}>
-      An account already exists with this email
+      An account already exists with this email. Please contact{' '}
+      <SupportMailto /> for further assistance.
     </div>
   );
 };
