@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
+import { CSSProperties, useState, useEffect } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
@@ -396,176 +396,140 @@ interface Props
   signatureState: DuccSignatureState;
 }
 
-interface State {
-  name: string;
-  initialMonitoring: string;
-  initialPublic: string;
-  initialAccess: string;
-  page: DataUserCodeOfConductPage;
-  submitting: boolean;
-  proceedDisabled: boolean;
-}
-
 export const DataUserCodeOfConduct = fp.flow(
   withUserProfile(),
   withNavigation,
   withRouter
-)(
-  class extends React.Component<Props, State> {
-    constructor(props) {
-      super(props);
-      this.state = {
-        name: '',
-        initialMonitoring: '',
-        initialPublic: '',
-        initialAccess: '',
-        page: DataUserCodeOfConductPage.CONTENT,
-        submitting: false,
-        proceedDisabled: true,
-      };
-    }
+)((props: Props) => {
+  const { profileState, signatureState, location, navigate, hideSpinner } = props;
+  const { profile } = profileState;
+  const { username, givenName, familyName, duccSignedInitials, duccSignedVersion, duccCompletionTimeEpochMillis } = profile;
 
-    submitCodeOfConductWithRenewal = fp.flow(
-      withSuccessModal({
-        title: 'Your agreement has been updated',
-        message:
-          'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () =>
-          this.props.navigate([DATA_ACCESS_REQUIREMENTS_PATH], {
-            queryParams: {
-              pageMode: DARPageMode.ANNUAL_RENEWAL,
-            },
-          }),
-      }),
-      withErrorModal({
-        title: 'Your agreement failed to update',
-        message: 'Please try submitting the agreement again.',
-      })
-    )(async (initials) => {
-      const profile = await profileApi().submitDUCC(
-        getLiveDUCCVersion(),
-        initials
-      );
-      this.props.profileState.updateCache(profile);
-    });
+  const [name, setName] = useState('');
+  const [initialMonitoring, setInitialMonitoring] = useState('');
+  const [initialPublic, setInitialPublic] = useState('');
+  const [initialAccess, setInitialAccess] = useState('');
+  const [page, setPage] = useState(DataUserCodeOfConductPage.CONTENT);
+  const [submitting, setSubmitting] = useState(false);
+  const [proceedDisabled, setProceedDisabled] = useState(true);
 
-    submitDataUserCodeOfConduct(initials) {
-      profileApi()
-        .submitDUCC(getLiveDUCCVersion(), initials)
-        .then((profile) => {
-          this.props.profileState.updateCache(profile);
-          history.back();
-        });
-    }
+  useEffect(() => {
+    hideSpinner();
+  }, [hideSpinner]);
 
-    componentDidMount() {
-      this.props.hideSpinner();
-    }
-
-    render() {
-      const {
-        profileState: {
-          profile: {
-            username,
-            givenName,
-            familyName,
-            duccSignedInitials,
-            duccSignedVersion,
-            duccCompletionTimeEpochMillis,
+  const submitCodeOfConductWithRenewal = fp.flow(
+    withSuccessModal({
+      title: 'Your agreement has been updated',
+      message:
+        'You will be redirected to the access renewal page upon closing this dialog.',
+      onDismiss: () =>
+        navigate([DATA_ACCESS_REQUIREMENTS_PATH], {
+          queryParams: {
+            pageMode: DARPageMode.ANNUAL_RENEWAL,
           },
-        },
-        signatureState,
-      } = this.props;
-      const {
-        proceedDisabled,
-        initialMonitoring,
-        initialPublic,
-        initialAccess,
-        page,
-        submitting,
-      } = this.state;
-      const errors = validate(
-        { initialMonitoring, initialPublic, initialAccess },
-        {
-          initialMonitoring: {
-            presence: { allowEmpty: false },
-            length: { maxiumum: 6 },
-          },
-          initialPublic: {
-            presence: { allowEmpty: false },
-            equality: { attribute: 'initialMonitoring' },
-          },
-          initialAccess: {
-            presence: { allowEmpty: false },
-            equality: { attribute: 'initialMonitoring' },
-          },
-        }
-      );
+        }),
+    }),
+    withErrorModal({
+      title: 'Your agreement failed to update',
+      message: 'Please try submitting the agreement again.',
+    })
+  )(async (initials) => {
+    const profile = await profileApi().submitDUCC(
+      getLiveDUCCVersion(),
+      initials
+    );
+    profileState.updateCache(profile);
+  });
 
-      const containerStyle: CSSProperties = {
-        ...styles.dataUserCodeOfConductPage,
-        // FlexColumn is appropriate styling only for the UNSIGNED case, due to iframe height styling conflicts
-        ...(signatureState === DuccSignatureState.UNSIGNED && flexStyle.column),
-      };
+  const submitDataUserCodeOfConduct = (initials) => {
+    profileApi()
+      .submitDUCC(getLiveDUCCVersion(), initials)
+      .then((profile) => {
+        profileState.updateCache(profile);
+        history.back();
+      });
+  };
 
-      const showContentPage =
-        signatureState === DuccSignatureState.SIGNED
-          ? canRenderSignedDucc(duccSignedVersion)
-          : page === DataUserCodeOfConductPage.CONTENT;
-      const showSignaturePage =
-        signatureState === DuccSignatureState.SIGNED
-          ? canRenderSignedDucc(duccSignedVersion)
-          : page === DataUserCodeOfConductPage.SIGNATURE;
-
-      return (
-        <div style={containerStyle}>
-          {signatureState === DuccSignatureState.SIGNED &&
-            !canRenderSignedDucc(duccSignedVersion) && (
-              <SignedVersionFailure {...{ duccSignedVersion }} />
-            )}
-          {showContentPage && (
-            <DuccContentPage
-              {...{ signatureState }}
-              versionToRender={
-                signatureState === DuccSignatureState.SIGNED
-                  ? duccSignedVersion
-                  : getLiveDUCCVersion()
-              }
-              buttonDisabled={proceedDisabled}
-              onLastPage={() => this.setState({ proceedDisabled: false })}
-              onClick={() =>
-                this.setState({ page: DataUserCodeOfConductPage.SIGNATURE })
-              }
-            />
-          )}
-          {showSignaturePage && (
-            <DuccSignaturePage
-              {...{ errors, submitting, signatureState, username }}
-              fullName={givenName + ' ' + familyName}
-              signedInitials={duccSignedInitials}
-              signedDate={duccCompletionTimeEpochMillis}
-              onChangeMonitoring={(v) =>
-                this.setState({ initialMonitoring: v })
-              }
-              onChangePublic={(v) => this.setState({ initialPublic: v })}
-              onChangeAccess={(v) => this.setState({ initialAccess: v })}
-              onBack={() =>
-                this.setState({ page: DataUserCodeOfConductPage.CONTENT })
-              }
-              onAccept={() => {
-                this.setState({ submitting: true });
-                // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
-                // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
-                AnalyticsTracker.Registration.AcceptDUCC();
-                wasReferredFromRenewal(this.props.location.search)
-                  ? this.submitCodeOfConductWithRenewal(initialMonitoring)
-                  : this.submitDataUserCodeOfConduct(initialMonitoring);
-                this.setState({ submitting: false });
-              }}
-            />
-          )}
-        </div>
-      );
+  const errors = validate(
+    { initialMonitoring, initialPublic, initialAccess },
+    {
+      initialMonitoring: {
+        presence: { allowEmpty: false },
+        length: { maxiumum: 6 },
+      },
+      initialPublic: {
+        presence: { allowEmpty: false },
+        equality: { attribute: 'initialMonitoring' },
+      },
+      initialAccess: {
+        presence: { allowEmpty: false },
+        equality: { attribute: 'initialMonitoring' },
+      },
     }
-  }
-);
+  );
+
+  const containerStyle: CSSProperties = {
+    ...styles.dataUserCodeOfConductPage,
+    // FlexColumn is appropriate styling only for the UNSIGNED case, due to iframe height styling conflicts
+    ...(signatureState === DuccSignatureState.UNSIGNED && flexStyle.column),
+  };
+
+  const showContentPage =
+    signatureState === DuccSignatureState.SIGNED
+      ? canRenderSignedDucc(duccSignedVersion)
+      : page === DataUserCodeOfConductPage.CONTENT;
+      
+  const showSignaturePage =
+    signatureState === DuccSignatureState.SIGNED
+      ? canRenderSignedDucc(duccSignedVersion)
+      : page === DataUserCodeOfConductPage.SIGNATURE;
+
+  const handleAccept = () => {
+    setSubmitting(true);
+    // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
+    // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
+    AnalyticsTracker.Registration.AcceptDUCC();
+    wasReferredFromRenewal(location.search)
+      ? submitCodeOfConductWithRenewal(initialMonitoring)
+      : submitDataUserCodeOfConduct(initialMonitoring);
+    setSubmitting(false);
+  };
+
+  return (
+    <div style={containerStyle}>
+      {signatureState === DuccSignatureState.SIGNED &&
+        !canRenderSignedDucc(duccSignedVersion) && (
+          <SignedVersionFailure duccSignedVersion={duccSignedVersion} />
+        )}
+      {showContentPage && (
+        <DuccContentPage
+          signatureState={signatureState}
+          versionToRender={
+            signatureState === DuccSignatureState.SIGNED
+              ? duccSignedVersion
+              : getLiveDUCCVersion()
+          }
+          buttonDisabled={proceedDisabled}
+          onLastPage={() => setProceedDisabled(false)}
+          onClick={() => setPage(DataUserCodeOfConductPage.SIGNATURE)}
+        />
+      )}
+      {showSignaturePage && (
+        <DuccSignaturePage
+          errors={errors}
+          submitting={submitting}
+          signatureState={signatureState}
+          username={username}
+          fullName={givenName + ' ' + familyName}
+          signedInitials={duccSignedInitials}
+          signedDate={duccCompletionTimeEpochMillis}
+          onChangeMonitoring={(v) => setInitialMonitoring(v)}
+          onChangePublic={(v) => setInitialPublic(v)}
+          onChangeAccess={(v) => setInitialAccess(v)}
+          onBack={() => setPage(DataUserCodeOfConductPage.CONTENT)}
+          onAccept={handleAccept}
+        />
+      )}
+    </div>
+  );
+});
