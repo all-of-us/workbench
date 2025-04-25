@@ -15,14 +15,18 @@ export const INACTIVITY_CONFIG = {
   MESSAGE_KEY: 'USER_ACTIVITY_DETECTED',
 };
 
-export const getLastActiveEpochMillis = (): number | undefined => {
+export const getLastActiveEpochMillis = (): number | null => {
   const lastActive: string = window.localStorage.getItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
   );
   return lastActive && parseInt(lastActive, 10);
 };
 
-const setLastActiveRaw = (epochMillis: number): void => {
+/**
+ * WARNING: intended for internal use and testing only
+ * @param epochMillis
+ */
+export const setLastActiveRaw = (epochMillis: number): void => {
   window.localStorage.setItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
     epochMillis.toString()
@@ -36,10 +40,7 @@ const setLastActiveRaw = (epochMillis: number): void => {
 export const setLastActive = (epochMillis: number): void => {
   // only update last active timestamp if we have started tracking (empty value means we haven't started)
   if (getLastActiveEpochMillis()) {
-    console.log('ACTIVE: ' + epochMillis);
     setLastActiveRaw(epochMillis);
-  } else {
-    console.log('IGNORE: ' + epochMillis);
   }
 };
 
@@ -52,7 +53,6 @@ export const setLastActiveNow = () => setLastActive(Date.now());
  * start tracking last active timestamp
  */
 export const startLastActive = (): void => {
-  console.log('START');
   setLastActiveRaw(Date.now());
 };
 
@@ -60,7 +60,6 @@ export const startLastActive = (): void => {
  * stop tracking last active timestamp
  */
 export const clearLastActive = (): void => {
-  console.log('CLEAR');
   window.localStorage.removeItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
   );

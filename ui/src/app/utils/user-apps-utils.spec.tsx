@@ -16,7 +16,11 @@ import { sidebarActiveIconStore } from 'app/utils/navigation';
 
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 
-import { getLastActiveEpochMillis, setLastActive } from './inactivity';
+import {
+  clearLastActive,
+  getLastActiveEpochMillis,
+  setLastActiveRaw,
+} from './inactivity';
 import { userAppsStore } from './stores';
 import * as userAppsUtils from './user-apps-utils';
 import { updateLastActive } from './user-apps-utils';
@@ -164,38 +168,59 @@ describe('User Apps Helper functions', () => {
 
 describe(updateLastActive.name, () => {
   it('does nothing when there are no userApps', () => {
+    // Arrange
     const lastActiveInUI = 123;
-    setLastActive(lastActiveInUI);
+    setLastActiveRaw(lastActiveInUI);
+
+    // Act
     updateLastActive([]);
+
+    // Assert
     expect(getLastActiveEpochMillis()).toEqual(lastActiveInUI);
   });
 
-  it('updates the last active value in local storage when local storage is empty', () => {
+  it('does not update the last active value in local storage when local storage is empty (tracking not started)', () => {
+    // Arrange
+    clearLastActive();
     const lastActiveInUserApp = 789654;
+
+    // Act
     updateLastActive([
       { dateAccessed: new Date(lastActiveInUserApp).toISOString() },
     ]);
-    expect(getLastActiveEpochMillis()).toEqual(lastActiveInUserApp);
+
+    // Assert
+    expect(getLastActiveEpochMillis()).toEqual(null);
   });
 
   it('does nothing when local storage has recorded more recent activity than userApps', () => {
+    // Arrange
     const lastActiveInUI = 12345;
-    setLastActive(lastActiveInUI);
+    setLastActiveRaw(lastActiveInUI);
+
+    // Act
     updateLastActive([
       { dateAccessed: new Date(10000).toISOString() },
       { dateAccessed: new Date(11000).toISOString() },
       { dateAccessed: new Date(12000).toISOString() },
     ]);
+
+    // Assert
     expect(getLastActiveEpochMillis()).toEqual(lastActiveInUI);
   });
 
   it('updates the last active value in local storage when the userApps have more recent activity', () => {
+    // Arrange
     const lastActiveInUI = 12345;
-    setLastActive(lastActiveInUI);
+    setLastActiveRaw(lastActiveInUI);
+
+    // Act
     updateLastActive([
       { dateAccessed: new Date(10000).toISOString() },
       { dateAccessed: new Date(13000).toISOString() },
     ]);
+
+    // Assert
     expect(getLastActiveEpochMillis()).toBeGreaterThan(lastActiveInUI);
     expect(getLastActiveEpochMillis()).toEqual(13000);
   });

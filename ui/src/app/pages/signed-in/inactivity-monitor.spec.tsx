@@ -4,7 +4,7 @@ import { environment } from 'environments/environment';
 import { render, waitFor } from '@testing-library/react';
 import { InactivityMonitor } from 'app/pages/signed-in/inactivity-monitor';
 import * as Authentication from 'app/utils/authentication';
-import { setLastActive } from 'app/utils/inactivity';
+import { setLastActive, setLastActiveRaw } from 'app/utils/inactivity';
 import { authStore, notificationStore, profileStore } from 'app/utils/stores';
 
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
@@ -15,6 +15,8 @@ const updateCache = jest.fn();
 
 describe(InactivityMonitor.name, () => {
   it('should show an error when signout fails', async () => {
+    // Arrange
+    setLastActiveRaw(1); // initial value so that later setLastActiveCall sets new value
     const signOutSpy = jest.spyOn(Authentication, 'signOut');
     signOutSpy.mockImplementation(() => {
       throw new Error();
@@ -33,9 +35,13 @@ describe(InactivityMonitor.name, () => {
     setLastActive(
       Date.now() - environment.inactivityTimeoutSecondsRt * 1000 - 1
     );
+    const initialNotifications = notificationStore.get();
 
-    expect(notificationStore.get()).toBeNull();
+    // Act
     render(<InactivityMonitor />);
+
+    // Assert
+    expect(initialNotifications).toBeNull();
     await waitFor(() => expect(notificationStore.get()).toBeTruthy());
   });
 });
