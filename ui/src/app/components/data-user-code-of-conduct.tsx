@@ -441,18 +441,18 @@ export const DataUserCodeOfConduct = fp.flow(
       message: 'Please try submitting the agreement again.',
     })
   )(async (initials) => {
-    const profile = await profileApi().submitDUCC(
+    const updatedProfile = await profileApi().submitDUCC(
       getLiveDUCCVersion(),
       initials
     );
-    profileState.updateCache(profile);
+    profileState.updateCache(updatedProfile);
   });
 
   const submitDataUserCodeOfConduct = (initials) => {
     profileApi()
       .submitDUCC(getLiveDUCCVersion(), initials)
-      .then((profile) => {
-        profileState.updateCache(profile);
+      .then((updatedProfile) => {
+        profileState.updateCache(updatedProfile);
         history.back();
       });
   };
