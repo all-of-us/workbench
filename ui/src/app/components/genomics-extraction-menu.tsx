@@ -98,15 +98,6 @@ export const GenomicsExtractionMenu = ({
             >
               Abort Extraction
             </MenuItem>
-            <hr style={styles.hr} />
-            <MenuItem
-              style={styles.menuItem}
-              faIcon={faTrash}
-              disabled
-              onClick={() => {}}
-            >
-              Delete Extract
-            </MenuItem>
           </React.Fragment>
         }
       >

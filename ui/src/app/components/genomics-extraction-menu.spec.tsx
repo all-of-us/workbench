@@ -70,7 +70,6 @@ describe(GenomicsExtractionMenu.name, () => {
     await waitFor(() => {
       expect(screen.getByText('View Path')).toBeInTheDocument();
       expect(screen.getByText('Abort Extraction')).toBeInTheDocument();
-      expect(screen.getByText('Delete Extract')).toBeInTheDocument();
     });
   });
 
@@ -239,20 +238,4 @@ describe(GenomicsExtractionMenu.name, () => {
       });
     }
   );
-
-  // always disabled - not implemented yet?
-  it('Disables clicking Delete Extract', async () => {
-    const user = userEvent.setup();
-    await component();
-
-    const menuTitle = screen.getByTitle('Genomic Extractions Action Menu');
-    const menuIcon = menuTitle.parentElement;
-
-    user.click(menuIcon);
-    await waitFor(() => {
-      const deleteExtractionMenuItem = screen.getByText('Delete Extract');
-      expect(deleteExtractionMenuItem).toBeInTheDocument();
-      expectMenuItemElementDisabled(deleteExtractionMenuItem);
-    });
-  });
 });
