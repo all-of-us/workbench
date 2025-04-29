@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { faBan, faEllipsisV, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faBan, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
