@@ -14,15 +14,21 @@ define([
         'is uploaded into the Workspace should be exclusively for the research purpose that was ' +
         'provided for this Workspace.'));
 
-    // notebook-list.js in the Jupyter UI serves the download and view button by using it's own
-    // jQuery click handler. We have no way of ordering our click handler ahead
-    // of it without digging into jQuery internals. Instead, we insert a span
-    // on top of the button to gain click priority.
-    $('.dynamic-buttons .download-button').empty().append(
-        '<span id="aou-download-button-overlay">Download</span>');
-    $('.dynamic-buttons .view-button').empty().append(
-        '<span id="aou-view-button-overlay">View</span>');
+    // Function to check if user affirmed the download policy and stop propagation if not
+    function handlePolicyAffirmation(event) {
+      const affirmed = downloadPolicyPopUp();
+      if (!affirmed) {
+        event.stopPropagation();
+      }
+    }
 
+    // notebook-list.js in the Jupyter UI serves the download and view button by using it's own
+    // jQuery click handler. We have no way of ensuring that our click handler is ahead
+    // of it without digging into jQuery internals, however using an event listener with event capturing
+    // seems to work.
+    document.querySelector('.download-button').addEventListener('click', function(e) {
+      handlePolicyAffirmation(e);
+    }, true);
 
     function downloadPolicyPopUp() {
       var affirm =  prompt(
@@ -35,16 +41,11 @@ define([
       return !!affirm && 'affirm' === affirm.replace(/\W/g, '').toLowerCase()
     }
 
-
-    $('#aou-download-button-overlay').click(() => {
-      return downloadPolicyPopUp();
-    });
-
     const viewableFileExtenstions = ['ipynb', 'txt', 'sh'];
     // Clicking the view button will
     // 1) Open All Jupyter, text or shell files in a new tab.
     // 2) Display a download policy prompt for all other files as they will be downloaded
-    $('#aou-view-button-overlay').click(() => {
+    document.querySelector('.dynamic-buttons .view-button').addEventListener('click', function(e) {
       var openInANewTab = true;
       $('#notebook_list input:checked').each(function() {
         // Find the selected file name
@@ -53,16 +54,14 @@ define([
         var fileExt = fileName.substring( (fileName.lastIndexOf('.') +1) );
         if (viewableFileExtenstions.indexOf(fileExt) === -1) {
           openInANewTab = false;
-          return false;
         }
-       });
-      // If all selected Files are files that open in a new tab (ipynb, txt or sh), return now
-      if (!!openInANewTab) {
-        return true;
+      });
+      // Only show download dialog if some of the selected Files
+      // are not in the viewable file extensions list.
+      if(!openInANewTab) {
+        handlePolicyAffirmation(e);
       }
-
-      return downloadPolicyPopUp();
-    });
+    }, true);
   };
 
   return {
