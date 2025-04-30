@@ -141,7 +141,7 @@ public class LeonardoCustomEnvVarUtils {
                   Optional.ofNullable(cdrVersion.getWgsAcafThresholdVcfPath()))
               .put(
                   WGS_CLINVAR_MULTI_HAIL_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsClinvarSplitHailPath()))
+                  Optional.ofNullable(cdrVersion.getWgsClinvarMultiHailPath()))
               .put(
                   WGS_CLINVAR_SPLIT_HAIL_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getWgsClinvarSplitHailPath()))
