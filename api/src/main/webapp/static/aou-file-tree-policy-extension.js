@@ -41,7 +41,7 @@ define([
       return !!affirm && 'affirm' === affirm.replace(/\W/g, '').toLowerCase()
     }
 
-    const viewableFileExtenstions = ['ipynb', 'txt', 'sh'];
+    const viewableFileExtension = 'ipynb';
     // Clicking the view button will
     // 1) Open All Jupyter, text or shell files in a new tab.
     // 2) Display a download policy prompt for all other files as they will be downloaded
@@ -52,7 +52,7 @@ define([
         const elem = $(this).siblings().find($('.item_link .item_name'));
         const fileName = elem.text();
         var fileExt = fileName.substring( (fileName.lastIndexOf('.') +1) );
-        if (viewableFileExtenstions.indexOf(fileExt) === -1) {
+        if (viewableFileExtension !== fileExt) {
           openInANewTab = false;
         }
       });
