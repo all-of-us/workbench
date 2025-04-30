@@ -12,6 +12,7 @@ import {
   getLastActiveEpochMillis,
   INACTIVITY_CONFIG,
   setLastActiveNow,
+  startLastActive,
 } from 'app/utils/inactivity';
 import { authStore, profileStore, useStore } from 'app/utils/stores';
 
@@ -124,7 +125,7 @@ export const InactivityMonitor = () => {
         startInactivityTimers();
       };
 
-      setLastActiveNow();
+      startLastActive();
       resetTimers();
 
       // setTimeout does not necessary track real wall-time. Periodically

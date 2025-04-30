@@ -7,6 +7,7 @@ import { environment } from 'environments/environment';
 import { userApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker, setLoggedInState } from 'app/utils/analytics';
 import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from 'app/utils/cookies';
+import { clearLastActive } from 'app/utils/inactivity';
 import { navigateSignOut } from 'app/utils/navigation';
 import { authStore, serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
@@ -118,6 +119,7 @@ export const signOut = async (continuePath: string = '/login') => {
 
   sessionStorage.removeItem(DEMOGRAPHIC_SURVEY_SESSION_KEY);
   localStorage.removeItem(PRIVACY_WARNING_KEY);
+  clearLastActive();
 
   if (signOutApiCallSucceeded) {
     window.location.replace(continuePath);
