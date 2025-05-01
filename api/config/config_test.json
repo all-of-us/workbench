@@ -127,8 +127,8 @@
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": true,
-    "enableVWBUserAccessManagement": false,
-    "enableVWBUserAndPodCreation": false
+    "enableVWBUserAccessManagement": true,
+    "enableVWBUserAndPodCreation": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
