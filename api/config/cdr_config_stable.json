@@ -19,7 +19,7 @@
       "authDomainGroupEmail": "all-of-us-controlled-stable@firecloud.org",
       "datasetsBucket": "gs://fc-aou-stable-datasets-controlled/",
       "enableUserWorkflows": true,
-      "vwbTierGroupName": "aou-stable-rt"
+      "vwbTierGroupName": "aou-stable-ct"
     }
   ],
   "cdrVersions": [
