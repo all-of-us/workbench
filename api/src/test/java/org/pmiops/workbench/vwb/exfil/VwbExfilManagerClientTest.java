@@ -15,7 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import({ExfilManagerClient.class, ExfilManagerRetryHandler.class})
 @SpringJUnitConfig
-public class VwbSamClientTest {
+public class VwbExfilManagerClientTest {
   @Autowired private ExfilManagerClient exfilManagerClient;
 
   @MockBean ExfilManagerRetryHandler exfilManagerRetryHandler;

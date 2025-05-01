@@ -11,7 +11,6 @@ import jakarta.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.vwb.sam.VwbSamClient;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
