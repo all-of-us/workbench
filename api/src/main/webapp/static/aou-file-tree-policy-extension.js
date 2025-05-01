@@ -54,6 +54,7 @@ define([
         var fileExt = fileName.substring( (fileName.lastIndexOf('.') +1) );
         if (viewableFileExtension !== fileExt) {
           openInANewTab = false;
+          return false;
         }
       });
       // Only show download dialog if some of the selected Files
