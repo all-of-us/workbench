@@ -121,14 +121,14 @@ system {
 }
 
 backend {
-  default = "PAPIv2-beta"
+  default = "Batch"
   providers {
 
     # Disables the Local backend
     Local.config.root = "/dev/null"
 
-    PAPIv2-beta {
-      actor-factory = "cromwell.backend.google.pipelines.v2beta.PipelinesApiLifecycleActorFactory"
+    Batch {
+      actor-factory = "cromwell.backend.google.batch.GcpBatchLifecycleActorFactory"
 
       config {
         project = "${GOOGLE_PROJECT}"
@@ -136,18 +136,22 @@ backend {
         root = "${WORKSPACE_BUCKET}/workflows/cromwell-executions"
 
         virtual-private-cloud {
-          network-label-key = "vpc-network-name"
-          subnetwork-label-key = "vpc-subnetwork-name"
+          network-name = "global/networks/network"
+          subnetwork-name = "regions/us-central1/subnetworks/subnetwork"
           auth = "application_default"
         }
 
-        genomics {
+        batch {
           auth = "application_default"
           compute-service-account = "${PET_SA_EMAIL}"
-          endpoint-url = "https://lifesciences.googleapis.com/"
           location = "us-central1"
+          boot-disk-size = "20GB"
         }
 
+        default-runtime-attributes {
+          noAddress: true
+        }
+        
         filesystems {
           gcs {
             auth = "application_default"
