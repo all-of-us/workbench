@@ -1309,6 +1309,8 @@ workflows:
 
   playground:
     jobs:
+      - hold:
+          type: approval
       - playground:
           <<: *filter-pr-branch
 
