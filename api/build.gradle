@@ -962,6 +962,15 @@ task runGenomicExtraction(type: JavaExec) {
     }
 }
 
+task orphanedProjects(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    main = "org.pmiops.workbench.tools.OrphanedProjects"
+    systemProperties = commandLineSpringProperties
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
 dependencies {
     modules {
     module("org.aspectj:aspectjrt") { replacedBy("org.aspectj:aspectjweaver") }
