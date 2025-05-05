@@ -5,6 +5,9 @@ import { AppStatus, Profile, RuntimeStatus, Workspace } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
+import { EnvironmentCostEstimator } from 'app/components/common-env-conf-panels/environment-cost-estimator';
+import { StartStopEnvironmentButton } from 'app/components/common-env-conf-panels/start-stop-environment-button';
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -15,10 +18,6 @@ import {
   isUsingInitialCredits,
   isValidBilling,
 } from 'app/utils/workspace-utils';
-
-import { EnvironmentCostEstimator } from './environment-cost-estimator';
-import { StartStopEnvironmentButton } from './start-stop-environment-button';
-import { styles } from './styles';
 
 interface CostsDrawnFromProps {
   usingInitialCredits: boolean;
