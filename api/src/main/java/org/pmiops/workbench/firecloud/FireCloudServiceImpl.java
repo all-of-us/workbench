@@ -36,8 +36,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
+import org.pmiops.workbench.lab.notebooks.NotebookUtils;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.RawlsRetryHandler;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
@@ -464,8 +464,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           e,
           () ->
               String.format(
-                  "Exception encountered retrieving workspace with DbWorkspace %s",
-                  dbWorkspace.toString()));
+                  "Exception encountered retrieving workspace with DbWorkspace %s", dbWorkspace));
       return Optional.empty();
     }
   }
