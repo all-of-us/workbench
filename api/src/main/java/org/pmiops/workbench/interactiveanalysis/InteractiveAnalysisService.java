@@ -24,7 +24,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.workspaces.WorkspaceService;

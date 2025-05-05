@@ -32,7 +32,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapper;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;

@@ -60,7 +60,7 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.ResourceTypeRequest;
 import org.pmiops.workbench.model.TanagraGenomicDataRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
