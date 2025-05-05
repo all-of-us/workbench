@@ -118,7 +118,10 @@ public class DbWorkspace {
     return workspaceId;
   }
 
-  public DbWorkspace setWorkspaceId(long workspaceId) {
+  // Hibernate requires this method to exist, but the @GeneratedValue annotation means that we
+  // cannot specify the ID when creating a new entity - doing so is an error.  If we want to refer
+  // to an existing entity, retrieve it from the database.
+  private DbWorkspace setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
     return this;
   }
