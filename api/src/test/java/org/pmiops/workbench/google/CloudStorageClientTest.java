@@ -15,9 +15,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.lab.notebooks.NotebookUtils;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
-import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -51,7 +51,7 @@ public class CloudStorageClientTest {
   @Test
   public void testBlobToFileDetail() {
     String notebookPath = NotebookUtils.withNotebookPath("nb1.ipynb");
-    Long notebookSize = 500l;
+    Long notebookSize = 500L;
     Long updateTime = Instant.now().getEpochSecond();
     String bucketName = "bucket";
 

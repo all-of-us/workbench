@@ -26,6 +26,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.AdminLockingRequest;
@@ -35,7 +36,6 @@ import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -156,7 +156,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_noRequestDate() {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
-    adminLockingRequest.setRequestDateInMillis(0l);
+    adminLockingRequest.setRequestDateInMillis(0L);
     adminLockingRequest.setRequestReason("Some reason to lock");
     assertThrows(
         BadRequestException.class,
@@ -168,7 +168,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_noRequestReason() {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
-    adminLockingRequest.setRequestDateInMillis(23456l);
+    adminLockingRequest.setRequestDateInMillis(23456L);
     adminLockingRequest.setRequestReason("");
     assertThrows(
         BadRequestException.class,
@@ -204,7 +204,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_correctAdminLockingRequest() {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
-    adminLockingRequest.setRequestDateInMillis(654321l);
+    adminLockingRequest.setRequestDateInMillis(654321L);
     adminLockingRequest.setRequestReason("Some reason for Locking Workspace");
     workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
     verify(mockWorkspaceAdminService).setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
@@ -213,7 +213,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_lockingReason_lessThan10() {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
-    adminLockingRequest.setRequestDateInMillis(654321l);
+    adminLockingRequest.setRequestDateInMillis(654321L);
     adminLockingRequest.setRequestReason("Something");
     assertThrows(
         BadRequestException.class,
@@ -225,7 +225,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_lockingReason_moreThanAllowed() {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
-    adminLockingRequest.setRequestDateInMillis(654321l);
+    adminLockingRequest.setRequestDateInMillis(654321L);
     // Send locking Reason of length 4001
     adminLockingRequest.setRequestReason(StringUtils.repeat("abcd", 1000) + "1");
     assertThrows(
@@ -238,7 +238,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_lockingReason_exactCharacter() {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
-    adminLockingRequest.setRequestDateInMillis(654321l);
+    adminLockingRequest.setRequestDateInMillis(654321L);
     // Send locking Reason of length 4000
     adminLockingRequest.setRequestReason(StringUtils.repeat("abcd", 1000));
     workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);

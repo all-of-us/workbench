@@ -21,9 +21,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.AppType;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
@@ -61,7 +61,7 @@ public class InteractiveAnalysisServiceTest {
     }
   }
 
-  private static WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
+  private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
   private static DbUser user;
   private String aouConfigDataUri;
 

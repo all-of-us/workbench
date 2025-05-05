@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.lab.notebooks;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -383,7 +383,7 @@ public class NotebooksServiceTest {
   public void testGetNotebookContents() {
     JSONObject expectedResult = new JSONObject();
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
-    when(mockBlob.getSize()).thenReturn(1l);
+    when(mockBlob.getSize()).thenReturn(1L);
     when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(expectedResult);
 
     JSONObject actualResult = notebooksService.getNotebookContents(BUCKET_NAME, "notebookName");
@@ -424,7 +424,7 @@ public class NotebooksServiceTest {
         WorkspaceAccessLevel.OWNER);
     when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(notebookFile);
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
-    when(mockBlob.getSize()).thenReturn(1l);
+    when(mockBlob.getSize()).thenReturn(1L);
 
     KernelTypeEnum kernelType =
         notebooksService.getNotebookKernel(
@@ -865,7 +865,7 @@ public class NotebooksServiceTest {
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
 
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
-    when(mockBlob.getSize()).thenReturn(1l);
+    when(mockBlob.getSize()).thenReturn(1L);
     when(mockBlob.getContent()).thenReturn(new byte[10]);
   }
 }

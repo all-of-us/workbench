@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.lab.notebooks;
 
 import com.google.cloud.storage.Blob;
 import java.util.List;

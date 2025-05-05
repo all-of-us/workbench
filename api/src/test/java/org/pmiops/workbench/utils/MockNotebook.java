@@ -7,8 +7,8 @@ import com.google.cloud.storage.Blob;
 import java.util.HashSet;
 import java.util.Set;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.lab.notebooks.NotebookUtils;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.notebooks.NotebookUtils;
 
 public class MockNotebook {
   public Blob blob;
