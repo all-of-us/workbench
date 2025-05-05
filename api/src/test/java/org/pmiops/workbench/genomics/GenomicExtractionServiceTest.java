@@ -206,7 +206,6 @@ public class GenomicExtractionServiceTest {
     targetWorkspace =
         workspaceDao.save(
             new DbWorkspace()
-                .setWorkspaceId(2)
                 .setWorkspaceNamespace("target-ws-namespace")
                 .setFirecloudName("target-ws-fc-name")
                 .setName("target-ws-name")

@@ -97,10 +97,7 @@ public class FeaturedWorkspaceTest {
   void mockFeaturedWorkspaces(
       String namespace, DbFeaturedCategory dbFeaturedCategory, String firecloudUuid) {
     DbWorkspace mockDbWorkspace =
-        new DbWorkspace()
-            .setWorkspaceNamespace(namespace)
-            .setWorkspaceId(1)
-            .setFirecloudUuid(firecloudUuid);
+        new DbWorkspace().setWorkspaceNamespace(namespace).setFirecloudUuid(firecloudUuid);
 
     DbFeaturedWorkspace dbFeaturedWorkspace =
         new DbFeaturedWorkspace().setWorkspace(mockDbWorkspace).setCategory(dbFeaturedCategory);

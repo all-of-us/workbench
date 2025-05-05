@@ -142,7 +142,6 @@ public class UserMetricsControllerTest {
     dbWorkspace1 =
         workspaceDao.save(
             new DbWorkspace()
-                .setWorkspaceId(1L)
                 .setWorkspaceNamespace("workspaceNamespace1")
                 .setFirecloudName("firecloudname1")
                 .setCdrVersion(dbCdrVersion));
@@ -150,7 +149,6 @@ public class UserMetricsControllerTest {
     dbWorkspace2 =
         workspaceDao.save(
             new DbWorkspace()
-                .setWorkspaceId(2L)
                 .setWorkspaceNamespace("workspaceNamespace2")
                 .setFirecloudName("firecloudName2")
                 .setCdrVersion(dbCdrVersion));

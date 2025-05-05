@@ -117,17 +117,13 @@ public class CohortAnnotationDefinitionControllerTest {
         new CohortAnnotationDefinitionController(
             cohortAnnotationDefinitionService, cohortReviewService, workspaceAuthService);
 
-    workspace = new DbWorkspace();
-    workspace.setWorkspaceNamespace(NAMESPACE);
-    workspace.setFirecloudName(TERRA_NAME);
-    workspace.setWorkspaceId(1L);
-    workspaceDao.save(workspace);
+    workspace =
+        workspaceDao.save(
+            new DbWorkspace().setWorkspaceNamespace(NAMESPACE).setFirecloudName(TERRA_NAME));
 
-    workspace2 = new DbWorkspace();
-    workspace2.setWorkspaceNamespace(NAMESPACE2);
-    workspace2.setFirecloudName(TERRA_NAME2);
-    workspace2.setWorkspaceId(2L);
-    workspaceDao.save(workspace2);
+    workspace2 =
+        workspaceDao.save(
+            new DbWorkspace().setWorkspaceNamespace(NAMESPACE2).setFirecloudName(TERRA_NAME2));
 
     cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());

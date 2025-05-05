@@ -246,9 +246,7 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testUserLimit() {
-    DbWorkspace newWorkspace = new DbWorkspace();
-    newWorkspace.setWorkspaceId(2L);
-    workspaceDao.save(newWorkspace);
+    DbWorkspace newWorkspace = workspaceDao.save(new DbWorkspace());
 
     long rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(0);

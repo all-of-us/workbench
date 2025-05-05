@@ -260,7 +260,7 @@ public class WorkspaceServiceTest {
     dbWorkspace.setLastModifiedTime(nowTimestamp);
     dbWorkspace.setCreationTime(nowTimestamp);
     dbWorkspace.setName(name);
-    dbWorkspace.setWorkspaceId(dbId);
+    // dbWorkspace.setWorkspaceId(dbId);
     dbWorkspace.setWorkspaceNamespace(namespace);
     dbWorkspace.setWorkspaceActiveStatusEnum(activeStatus);
     dbWorkspace.setFirecloudName(name);
