@@ -9345,7 +9345,6 @@ components:
     AppLocalizeRequest:
       required:
       - fileNames
-      - playgroundMode
       type: object
       properties:
         fileNames:
