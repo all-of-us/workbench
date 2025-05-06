@@ -660,7 +660,7 @@ export const LeonardoAppLauncher = fp.flow(
           false,
           {
             notebookNames,
-            playgroundMode: this.isPlaygroundMode(),
+            playgroundMode: false,
           },
           { signal: this.pollAborter.signal }
         )

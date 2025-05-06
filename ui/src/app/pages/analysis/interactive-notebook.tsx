@@ -6,14 +6,12 @@ import { Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
-import { IconButton } from 'app/components/buttons';
-import { ClrIcon, PlaygroundIcon } from 'app/components/icons';
+import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EditComponentReact } from 'app/icons/edit';
-import { ConfirmPlaygroundModeModal } from 'app/pages/analysis/confirm-playground-mode-modal';
 import { NotebookInUseModal } from 'app/pages/analysis/notebook-in-use-modal';
 import { analysisTabName } from 'app/routing/utils';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
@@ -115,12 +113,10 @@ interface State {
   lastLockedBy: string;
   lockExpirationTime: number;
   showInUseModal: boolean;
-  showPlaygroundModeModal: boolean;
   userRequestedExecutableNotebook: boolean;
   runtimeInitializerDefault: Runtime;
   resolveRuntimeInitializer: (Runtime) => void;
   error: Error;
-  canPlayground: boolean;
 }
 
 export const InteractiveNotebook = fp.flow(
@@ -140,12 +136,10 @@ export const InteractiveNotebook = fp.flow(
         lastLockedBy: '',
         lockExpirationTime: 0,
         showInUseModal: false,
-        showPlaygroundModeModal: false,
         userRequestedExecutableNotebook: false,
         runtimeInitializerDefault: null,
         resolveRuntimeInitializer: null,
         error: null,
-        canPlayground: false,
       };
     }
 
@@ -189,8 +183,7 @@ export const InteractiveNotebook = fp.flow(
           terraName,
           nbName
         );
-        const { canPlayground } = getAppInfoFromFileName(nbName);
-        this.setState({ html, canPlayground });
+        this.setState({ html });
       } catch (e) {
         this.setState({ error: e });
       }
@@ -239,51 +232,14 @@ export const InteractiveNotebook = fp.flow(
       }
     }
 
-    private startPlaygroundMode() {
-      if (this.canStartRuntimes) {
-        this.runRuntime(() => {
-          this.navigatePlaygroundMode();
-        });
-      }
-    }
-
-    private onPlaygroundModeClick() {
-      if (!this.canStartRuntimes) {
-        return;
-      }
-      if (
-        Cookies.get(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN) ===
-        String(true)
-      ) {
-        this.startPlaygroundMode();
-      } else {
-        this.setState({ showPlaygroundModeModal: true });
-      }
-    }
-
-    private navigateOldNotebooksPage(playgroundMode: boolean) {
-      const queryParams = {
-        playgroundMode: playgroundMode,
-      };
-
-      this.props.navigate(
-        [
-          'workspaces',
-          this.props.match.params.ns,
-          this.props.match.params.terraName,
-          analysisTabName,
-          this.props.match.params.nbName,
-        ],
-        { queryParams: queryParams }
-      );
-    }
-
-    private navigatePlaygroundMode() {
-      this.navigateOldNotebooksPage(true);
-    }
-
-    private navigateEditMode() {
-      this.navigateOldNotebooksPage(false);
+    private navigateOldNotebooksPage() {
+      this.props.navigate([
+        'workspaces',
+        this.props.match.params.ns,
+        this.props.match.params.terraName,
+        analysisTabName,
+        this.props.match.params.nbName,
+      ]);
     }
 
     private get canWrite() {
@@ -357,12 +313,10 @@ export const InteractiveNotebook = fp.flow(
       const {
         lastLockedBy,
         showInUseModal,
-        showPlaygroundModeModal,
         userRequestedExecutableNotebook,
         runtimeInitializerDefault,
         resolveRuntimeInitializer,
         error,
-        canPlayground,
       } = this.state;
       const closeRuntimeInitializerModal = (r?: Runtime) => {
         resolveRuntimeInitializer(r);
@@ -380,7 +334,7 @@ export const InteractiveNotebook = fp.flow(
             {cond<React.ReactNode>(
               [
                 !!error &&
-                  // don't show executable buttons (Edit and Run/Playground) when notebooks cannot be executed
+                  // don't show executable button (Edit) when notebooks cannot be executed
                   (error instanceof ComputeSecuritySuspendedError ||
                     error instanceof RuntimeStatusError),
                 () => null,
@@ -419,45 +373,11 @@ export const InteractiveNotebook = fp.flow(
                       Edit {this.notebookInUse && '(In Use)'}
                     </div>
                   </TooltipTrigger>
-
-                  {canPlayground && (
-                    <TooltipTrigger
-                      content={
-                        this.billingLocked && ACTION_DISABLED_INVALID_BILLING
-                      }
-                    >
-                      <div
-                        style={this.buttonStyleObj}
-                        onClick={() => {
-                          AnalyticsTracker.Notebooks.Run();
-                          this.onPlaygroundModeClick();
-                        }}
-                      >
-                        <IconButton
-                          icon={PlaygroundIcon}
-                          disabled={!this.canStartRuntimes}
-                          style={styles.navBarIcon}
-                        />
-                        Run (Playground Mode)
-                      </div>
-                    </TooltipTrigger>
-                  )}
                 </div>
               )
             )}
           </div>
           <div style={styles.previewDiv}>{this.renderPreviewContents()}</div>
-          {showPlaygroundModeModal && (
-            <ConfirmPlaygroundModeModal
-              onCancel={() => {
-                this.setState({ showPlaygroundModeModal: false });
-              }}
-              onContinue={() => {
-                this.setState({ showPlaygroundModeModal: false });
-                this.startPlaygroundMode();
-              }}
-            />
-          )}
           {showInUseModal && (
             <NotebookInUseModal
               email={lastLockedBy}
@@ -466,10 +386,6 @@ export const InteractiveNotebook = fp.flow(
               }}
               onCopy={() => {
                 this.cloneNotebook();
-              }}
-              onPlaygroundMode={() => {
-                this.setState({ showInUseModal: false });
-                this.startPlaygroundMode();
               }}
             />
           )}
@@ -510,14 +426,14 @@ export const InteractiveNotebook = fp.flow(
           return (
             <NotebookFrameError errorMode={ErrorMode.INVALID}>
               Notebook is too large to display in preview mode, please use edit
-              mode or playground mode to view this notebook.
+              mode to view this notebook.
             </NotebookFrameError>
           );
         } else {
           return (
             <NotebookFrameError errorMode={ErrorMode.ERROR}>
               Failed to render preview due to an unknown error, please try
-              reloading or opening the notebook in edit or playground mode.
+              reloading or opening the notebook in edit.
             </NotebookFrameError>
           );
         }
@@ -546,7 +462,7 @@ export const InteractiveNotebook = fp.flow(
         if (!this.notebookInUse) {
           if (appType === UIAppType.JUPYTER) {
             this.runRuntime(() => {
-              this.navigateEditMode();
+              this.navigateOldNotebooksPage();
             });
           } else {
             openAppOrConfigPanel(ns, terraName, userApps, appType, navigate);

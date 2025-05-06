@@ -9318,7 +9318,6 @@ components:
     RuntimeLocalizeRequest:
       required:
       - notebookNames
-      - playgroundMode
       type: object
       properties:
         notebookNames:
@@ -9346,7 +9345,6 @@ components:
     AppLocalizeRequest:
       required:
       - fileNames
-      - playgroundMode
       type: object
       properties:
         fileNames:
