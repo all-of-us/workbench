@@ -95,7 +95,7 @@ public class EgressEventAuditorTest {
         .thenReturn(List.of(dbUser));
 
     dbWorkspace = new DbWorkspace();
-    dbWorkspace.setWorkspaceId(WORKSPACE_ID);
+    // dbWorkspace.setWorkspaceId(WORKSPACE_ID);
     dbWorkspace.setGoogleProject(GOOGLE_PROJECT);
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
