@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { Redirect } from 'react-router';
 import * as fp from 'lodash/fp';
 
 import { AuditAction, AuditLogEntry } from 'generated/fetch';
 
 import { AuditActionCardListView } from 'app/components/admin/audit-card-list-view';
-import { Navigate } from 'app/components/app-router';
 import {
   Button,
   StyledExternalLink,
@@ -106,7 +106,7 @@ const UserInput = ({
 
   return (
     <React.Fragment>
-      {subjectRequested && <Navigate to={getNextAuditPath(auditSubject)} />}
+      {subjectRequested && <Redirect to={getNextAuditPath(auditSubject)} />}
       <TextInputWithLabel
         containerStyle={{ display: 'inline-block' }}
         style={{ width: '22.5rem', margin: '1.5rem' }}

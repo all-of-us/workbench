@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableExpandedRows } from 'primereact/datatable';
@@ -29,6 +29,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams } from 'app/utils/stores';
 import moment from 'moment';
 

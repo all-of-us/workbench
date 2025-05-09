@@ -489,7 +489,7 @@ export const WorkspaceRoutes = () => {
         />
       </AppRoute>
       <AppRoute exact={false} path={`${path}`}>
-        <Redirect to={'/not-found'} />
+        <Redirect to='/not-found' />
       </AppRoute>
     </Switch>
   );

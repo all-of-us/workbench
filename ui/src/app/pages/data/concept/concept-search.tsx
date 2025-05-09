@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Prompt, RouteComponentProps, withRouter } from 'react-router';
+import { Prompt, RouteComponentProps } from 'react-router';
 import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
@@ -55,6 +55,7 @@ import {
   sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { nameValidationFormat } from 'app/utils/resources';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { Runtime, RuntimeStatus } from 'generated/fetch';
@@ -22,6 +22,7 @@ import { hasNewValidProps, reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
+import { withRouter } from 'app/utils/router-utils';
 import { withRuntimeStore } from 'app/utils/runtime-hooks';
 import {
   ComputeSecuritySuspendedError,

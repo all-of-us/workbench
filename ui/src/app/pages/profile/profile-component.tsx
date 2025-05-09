@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
@@ -47,6 +47,7 @@ import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
 import { convertAPIError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
+import { withRouter } from 'app/utils/router-utils';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import {
   CohortDefinition,
@@ -17,6 +17,7 @@ import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams } from 'app/utils/stores';
 
 const css = `

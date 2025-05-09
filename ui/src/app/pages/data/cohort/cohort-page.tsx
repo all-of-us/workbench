@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Prompt, RouteComponentProps, withRouter } from 'react-router';
+import { Prompt, RouteComponentProps } from 'react-router';
 import * as fp from 'lodash/fp';
 
 import { Cohort, CohortDefinition } from 'generated/fetch';
@@ -32,6 +32,7 @@ import {
   currentCohortStore,
   currentGroupCountsStore,
 } from 'app/utils/navigation';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 

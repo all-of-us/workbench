@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { Profile, WorkspaceResponseListResponse } from 'generated/fetch';
@@ -20,6 +20,7 @@ import { reactStyles, withUserProfile } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { fetchWithSystemErrorHandler } from 'app/utils/errors';
 import { NavigationProps, useNavigation } from 'app/utils/navigation';
+import { withRouter } from 'app/utils/router-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { supportUrls } from 'app/utils/zendesk';
 import analysisIcon from 'assets/images/analysis-icon.svg';

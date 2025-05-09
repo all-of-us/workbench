@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import Iframe from 'react-iframe';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { AppStatus } from 'generated/fetch';
@@ -15,6 +15,7 @@ import {
 import { analysisTabPath } from 'app/routing/utils';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams, userAppsStore, useStore } from 'app/utils/stores';
 
 interface Props

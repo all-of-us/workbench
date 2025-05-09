@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
 
@@ -30,6 +30,7 @@ import {
   getLiveDUCCVersion,
 } from 'app/utils/code-of-conduct';
 import { NavigationProps } from 'app/utils/navigation';
+import { withRouter } from 'app/utils/router-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 const styles = reactStyles({
