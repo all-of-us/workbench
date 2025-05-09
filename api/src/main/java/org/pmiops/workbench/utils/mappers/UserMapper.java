@@ -3,7 +3,11 @@ package org.pmiops.workbench.utils.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserDisabledEvent;
+import org.pmiops.workbench.db.model.DbUserDisabledEvent.DbUserDisabledStatus;
 import org.pmiops.workbench.model.User;
+import org.pmiops.workbench.model.UserDisabledEvent;
+import org.pmiops.workbench.model.UserDisabledStatus;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -28,4 +32,8 @@ public interface UserMapper {
   @Mapping(source = "dbUser.creationTime", target = "userAccountCreatedTime")
   @Mapping(source = "dbUser", target = "userModel")
   WorkspaceUserAdminView toWorkspaceUserAdminView(DbUser dbUser, UserRole userRole);
+
+  UserDisabledEvent toApiUserDisabledEvent(DbUserDisabledEvent disabledEvent);
+
+  DbUserDisabledStatus toDbStatus(UserDisabledStatus status);
 }

@@ -20,8 +20,10 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BatchSyncAccessRequest;
 import org.pmiops.workbench.model.BatchSyncAccessResponse;
 import org.pmiops.workbench.model.CreateEgressBypassWindowRequest;
+import org.pmiops.workbench.model.CreateUserDisabledEventRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListEgressBypassWindowResponse;
+import org.pmiops.workbench.model.ListUserDisabledEventsResponse;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
@@ -143,5 +145,25 @@ public class UserAdminController implements UserAdminApiDelegate {
     return ResponseEntity.ok(
         new ListEgressBypassWindowResponse()
             .bypassWindows(userAdminService.listAllEgressBypassWindows(userId)));
+  }
+
+  @Override
+  public ResponseEntity<Void> createUserDisabledEvent(
+      Long userId, CreateUserDisabledEventRequest request) {
+    userAdminService.createUserDisabledEvent(
+        userId,
+        request.getUpdatedBy(),
+        Instant.ofEpochMilli(request.getUpdateTime()),
+        request.getAdminComment(),
+        request.getStatus());
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<ListUserDisabledEventsResponse> listUserDisabledEvents(Long userId) {
+    return ResponseEntity.ok(
+        new ListUserDisabledEventsResponse()
+            .disabledEvents(userAdminService.listAllUserDisabledEvents(userId)));
   }
 }

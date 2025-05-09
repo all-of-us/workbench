@@ -6,10 +6,15 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.db.dao.UserDisabledEventDao;
 import org.pmiops.workbench.db.dao.UserEgressBypassWindowDao;
+import org.pmiops.workbench.db.model.DbUserDisabledEvent;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
 import org.pmiops.workbench.model.EgressBypassWindow;
+import org.pmiops.workbench.model.UserDisabledEvent;
+import org.pmiops.workbench.model.UserDisabledStatus;
 import org.pmiops.workbench.utils.mappers.EgressBypassWindowMapper;
+import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +23,21 @@ public class UserAdminService {
   private static final Integer BYPASS_PERIOD_IN_DAY = 2;
   private final UserEgressBypassWindowDao userEgressBypassWindowDao;
   private final EgressBypassWindowMapper egressBypassWindowMapper;
+  private final UserDisabledEventDao userDisabledEventDao;
+  private final UserMapper userMapper;
   private final Clock clock;
 
   @Autowired
   public UserAdminService(
       UserEgressBypassWindowDao userEgressBypassWindowDao,
       EgressBypassWindowMapper egressBypassWindowMapper,
+      UserDisabledEventDao userDisabledEventDao,
+      UserMapper userMapper,
       Clock clock) {
     this.userEgressBypassWindowDao = userEgressBypassWindowDao;
     this.egressBypassWindowMapper = egressBypassWindowMapper;
+    this.userDisabledEventDao = userDisabledEventDao;
+    this.userMapper = userMapper;
     this.clock = clock;
   }
 
@@ -52,6 +63,27 @@ public class UserAdminService {
   public List<EgressBypassWindow> listAllEgressBypassWindows(Long userId) {
     return userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(userId).stream()
         .map(egressBypassWindowMapper::toApiEgressBypassWindow)
+        .collect(Collectors.toList());
+  }
+
+  public void createUserDisabledEvent(
+      Long userId,
+      String updatedBy,
+      Instant updateTime,
+      String adminComment,
+      UserDisabledStatus status) {
+    userDisabledEventDao.save(
+        new DbUserDisabledEvent()
+            .setUserId(userId)
+            .setUpdatedBy(updatedBy)
+            .setUpdateTime(Timestamp.from(updateTime))
+            .setAdminComment(adminComment)
+            .setStatus(userMapper.toDbStatus(status)));
+  }
+
+  public List<UserDisabledEvent> listAllUserDisabledEvents(Long userId) {
+    return userDisabledEventDao.getByUserIdOrderByUpdateTimeDesc(userId).stream()
+        .map(userMapper::toApiUserDisabledEvent)
         .collect(Collectors.toList());
   }
 }

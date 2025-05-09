@@ -2405,6 +2405,51 @@ paths:
           description: success
           content: {}
       x-codegen-request-body-name: request
+  /v1/admin/users/{userId}/userDisabled:
+    get:
+      tags:
+        - userAdmin
+      description: |
+        List all of the user's disabled/enabled events
+      operationId: listUserDisabledEvents
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListUserDisabledEventsResponse'
+    post:
+      tags:
+        - userAdmin
+      description: |
+        Administrative API to add egress bypass window to allow user download files without  triggering egress alerts. Require SECURITY_ADMIN authority
+      operationId: createUserDisabledEvent
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateUserDisabledEventRequest'
+        required: false
+      responses:
+        204:
+          description: success
+          content: {}
+      x-codegen-request-body-name: request
   /v1/cron/deleteOldRuntimes:
     get:
       tags:
@@ -9903,6 +9948,56 @@ components:
           format: int64
         status:
           $ref: '#/components/schemas/EgressEventStatus'
+    CreateUserDisabledEventRequest:
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: |-
+            Unique integer ID for the user that was disabled
+          format: int64
+        updatedBy:
+          type: string
+          description: The username of the admin that made the update
+        updateTime:
+          type: integer
+          description: |
+            Timestamp when an admin disabled or enabled a user in milliseconds since the UNIX epoch
+          format: int64
+        adminComment:
+          type: string
+          description: Comment from the admin giving the reason the user was disabled
+        status:
+          $ref: '#/components/schemas/UserDisabledStatus'
+    ListUserDisabledEventsResponse:
+      type: object
+      properties:
+        disabledEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDisabledEvent'
+    UserDisabledEvent:
+      type: object
+      properties:
+        updatedBy:
+          type: string
+          description: The username of the admin that made the update
+        updateTime:
+          type: integer
+          description: |
+            Timestamp when an admin disabled or enabled a user in milliseconds since the UNIX epoch
+          format: int64
+        adminComment:
+          type: string
+          description: Comment from the admin giving the reason the user was disabled
+        status:
+          $ref: '#/components/schemas/UserDisabledStatus'
+    UserDisabledStatus:
+      type: string
+      description: Status for the user being disable or enabled
+      enum:
+        - DISABLED
+        - ENABLED
     ArrayOfLong:
       type: array
       items:
