@@ -621,7 +621,7 @@ dependencies {
     testImplementation "com.google.truth:truth:1.4.1"
     // 1.4.197+ results in a small number of test failures in CircleCI
     // 1.4.200+ results in a large number of test failures due to missing DB tables
-    testImplementation 'com.h2database:h2:1.4.196'
+    testImplementation 'com.h2database:h2:2.3.232'
     testImplementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     testImplementation 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
