@@ -527,9 +527,9 @@ export const DataUserCodeOfConduct = fp.flow(
           fullName={givenName + ' ' + familyName}
           signedInitials={duccSignedInitials}
           signedDate={duccCompletionTimeEpochMillis}
-          onChangeMonitoring={(v) => setInitialMonitoring(v)}
-          onChangePublic={(v) => setInitialPublic(v)}
-          onChangeAccess={(v) => setInitialAccess(v)}
+          onChangeMonitoring={setInitialMonitoring}
+          onChangePublic={setInitialPublic}
+          onChangeAccess={setInitialAccess}
           onBack={() => setPage(DataUserCodeOfConductPage.CONTENT)}
           onAccept={handleAccept}
         />
