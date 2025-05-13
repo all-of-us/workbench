@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
@@ -51,6 +51,7 @@ import {
   updateTierEmailDomains,
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';

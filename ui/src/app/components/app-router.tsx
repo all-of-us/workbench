@@ -8,7 +8,6 @@ import {
   Route,
   useLocation,
   useParams,
-  useRouteMatch,
 } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
@@ -25,11 +24,6 @@ export interface Guard {
   redirectPath?: string;
   renderBlocked?: () => React.ReactElement;
 }
-
-export const usePath = () => {
-  const { path } = useRouteMatch();
-  return path;
-};
 
 export const parseQueryParams = (search: string) => {
   return new URLSearchParams(search);
@@ -153,9 +147,4 @@ export const AppRoute = ({
       )}
     </Route>
   );
-};
-
-export const Navigate = ({ to }): React.ReactElement => {
-  const location = useLocation();
-  return <Redirect to={{ pathname: to, state: { from: location } }} />;
 };

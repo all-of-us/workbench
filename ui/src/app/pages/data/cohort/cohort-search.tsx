@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Toast } from 'primereact/toast';
 
@@ -43,6 +43,7 @@ import {
   currentCohortStore,
   sidebarActiveIconStore,
 } from 'app/utils/navigation';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams } from 'app/utils/stores';
 import arrowIcon from 'assets/icons/arrow-left-regular.svg';
 import { Subscription } from 'rxjs/Subscription';

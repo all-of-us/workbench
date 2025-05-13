@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
@@ -69,6 +69,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
 import { apiCallWithGatewayTimeoutRetries } from 'app/utils/retry';
+import { withRouter } from 'app/utils/router-utils';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';

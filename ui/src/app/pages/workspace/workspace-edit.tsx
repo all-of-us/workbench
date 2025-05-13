@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps } from 'react-router';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
@@ -100,6 +100,7 @@ import {
   SpecificPopulationItem,
   SpecificPopulationItems,
 } from 'app/utils/research-purpose-text';
+import { withRouter } from 'app/utils/router-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
