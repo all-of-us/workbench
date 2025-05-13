@@ -506,7 +506,7 @@ export const DataUserCodeOfConduct = fp.flow(
     <div style={containerStyle}>
       {signatureState === DuccSignatureState.SIGNED &&
         !canRenderSignedDucc(duccSignedVersion) && (
-          <SignedVersionFailure duccSignedVersion={duccSignedVersion} />
+          <SignedVersionFailure {...{ duccSignedVersion }} />
         )}
       {showContentPage && (
         <DuccContentPage
