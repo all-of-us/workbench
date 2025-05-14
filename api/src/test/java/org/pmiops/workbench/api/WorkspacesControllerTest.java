@@ -698,7 +698,6 @@ public class WorkspacesControllerTest {
             workspace.getNamespace(), registeredTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test
@@ -2498,7 +2497,6 @@ public class WorkspacesControllerTest {
     List<RawlsWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
-    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test

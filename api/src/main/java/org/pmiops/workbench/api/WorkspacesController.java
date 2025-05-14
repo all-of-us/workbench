@@ -719,36 +719,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
 
-    DbUser currentUser = userProvider.get();
-    // Revoke lifescience permission before asking Firecloud to remove users; after unsharing
-    // in Firecloud, we can no longer get the user's petSA from SAM using their credentials.
-    if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
-      List<String> finalWorkflowUsers =
-          aclsByEmail.entrySet().stream()
-              .filter(entry -> shouldGrantWorkflowRunnerAsService(currentUser, entry))
-              .map(Map.Entry::getKey)
-              .collect(Collectors.toList());
-
-      // Find the users who are owners or writers before share, but not in the new gain permission
-      // list
-      List<String> userLostPermission =
-          userRolesBeforeShare.stream()
-              .filter(
-                  u ->
-                      (WorkspaceAccessLevel.OWNER.equals(u.getRole())
-                              || WorkspaceAccessLevel.WRITER.equals(u.getRole()))
-                          && !finalWorkflowUsers.contains(u.getEmail())
-                          && !u.getEmail().equals(currentUser.getUsername()))
-              .map(UserRole::getEmail)
-              .collect(Collectors.toList());
-      List<String> failedRevocations =
-          iamService.revokeWorkflowRunnerRoleForUsers(
-              dbWorkspace.getGoogleProject(), userLostPermission);
-      if (!failedRevocations.isEmpty()) {
-        resp.setFailedWorkflowRevocations(failedRevocations);
-      }
-    }
-
     dbWorkspace = workspaceAuthService.patchWorkspaceAcl(dbWorkspace, aclsByEmail);
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
