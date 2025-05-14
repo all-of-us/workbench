@@ -68,13 +68,8 @@ export const NotebookSizeWarningModal = ({
             </div>
 
             <div style={{ marginTop: '1rem' }}>
-              You may proceed editing or running this notebook in playground
-              mode* but beware that you will incur cost and run the risk of your
-              compute being suspended.
-            </div>
-            <div style={{ marginTop: '1rem' }}>
-              *Playground mode allows users to run their notebooks but does not
-              save any changes.
+              You may proceed editing but beware that you will incur cost and
+              run the risk of your compute being suspended.
             </div>
           </WarningMessage>
         ) : (
@@ -82,16 +77,6 @@ export const NotebookSizeWarningModal = ({
         )}
       </ModalBody>
       <ModalFooter>
-        <Button
-          disabled={!notebookName}
-          type='secondary'
-          onClick={() => {
-            navigate(navigationPath, { queryParams: { playgroundMode: true } });
-          }}
-          style={{ marginRight: '1rem' }}
-        >
-          Run playground mode
-        </Button>
         <Button
           disabled={!notebookName}
           type='primary'
