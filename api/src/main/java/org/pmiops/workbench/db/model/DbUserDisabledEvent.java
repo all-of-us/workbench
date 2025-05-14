@@ -68,7 +68,7 @@ public class DbUserDisabledEvent {
     return this;
   }
 
-  @Column(name = "adminComment")
+  @Column(name = "admin_comment")
   public String getAdminComment() {
     return adminComment;
   }
