@@ -40,7 +40,6 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isValidBilling } from 'app/utils/workspace-utils';
-import Cookies from 'js-cookie';
 
 import {
   ErrorMode,
