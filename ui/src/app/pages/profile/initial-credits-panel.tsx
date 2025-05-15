@@ -1,9 +1,6 @@
 import * as React from 'react';
 
-import { Profile } from 'generated/fetch';
-
-import { Button, StyledExternalLink } from 'app/components/buttons';
-import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits-modal';
+import { StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { AoU } from 'app/components/text-wrappers';
 import { formatInitialCreditsUSD } from 'app/utils';
@@ -15,20 +12,10 @@ import { styles } from './profile-styles';
 interface Props {
   initialCreditsUsage: number;
   initialCreditsLimit: number;
-  eligibleForExtension: boolean;
   expirationDate: number;
-  updateInitialCredits: Function;
 }
 export const InitialCreditsPanel = (props: Props) => {
-  const [showExtendInitialCreditsModal, setShowExtendInitialCreditsModal] =
-    React.useState(false);
-  const {
-    eligibleForExtension,
-    expirationDate,
-    initialCreditsUsage,
-    initialCreditsLimit,
-    updateInitialCredits,
-  } = props;
+  const { expirationDate, initialCreditsUsage, initialCreditsLimit } = props;
 
   return (
     <div style={styles.initialCreditsBox}>
@@ -62,30 +49,6 @@ export const InitialCreditsPanel = (props: Props) => {
           )}
         </FlexColumn>
       </FlexRow>
-      {eligibleForExtension && (
-        <FlexRow>
-          <Button
-            type='primarySmall'
-            style={{ marginTop: '1rem' }}
-            onClick={() => setShowExtendInitialCreditsModal(true)}
-          >
-            Request credit extension
-          </Button>
-          {showExtendInitialCreditsModal && (
-            <ExtendInitialCreditsModal
-              onClose={(updatedProfile: Profile) => {
-                if (updatedProfile) {
-                  updateInitialCredits(
-                    updatedProfile.initialCreditsExpirationEpochMillis,
-                    updatedProfile.eligibleForInitialCreditsExtension
-                  );
-                }
-                setShowExtendInitialCreditsModal(false);
-              }}
-            />
-          )}
-        </FlexRow>
-      )}
       <FlexRow>
         <StyledExternalLink
           href={supportUrls.initialCredits}
