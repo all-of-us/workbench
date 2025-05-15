@@ -50,5 +50,4 @@ it('should display initial credits for a user without an expiration record', asy
   expect(
     screen.queryByText(`initial credits expiration date:`)
   ).not.toBeInTheDocument();
-  screen.logTestingPlaygroundURL();
 });
