@@ -1,5 +1,8 @@
 import { AdminUserListResponse, Profile, UserAdminApi } from 'generated/fetch';
-import { ListEgressBypassWindowResponse, ListUserDisabledEventsResponse } from 'generated/fetch';
+import {
+  ListEgressBypassWindowResponse,
+  ListUserDisabledEventsResponse,
+} from 'generated/fetch';
 
 import { ProfileStubVariables } from './profile-api-stub';
 
