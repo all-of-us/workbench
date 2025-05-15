@@ -20,7 +20,6 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BatchSyncAccessRequest;
 import org.pmiops.workbench.model.BatchSyncAccessResponse;
 import org.pmiops.workbench.model.CreateEgressBypassWindowRequest;
-import org.pmiops.workbench.model.CreateUserDisabledEventRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListEgressBypassWindowResponse;
 import org.pmiops.workbench.model.ListUserDisabledEventsResponse;

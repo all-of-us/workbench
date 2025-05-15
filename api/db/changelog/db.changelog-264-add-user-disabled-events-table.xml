@@ -26,7 +26,7 @@
       </column>
     </createTable>
     <addForeignKeyConstraint baseColumnNames="user_id"
-      baseTableName="user_disabled"
+      baseTableName="user_disabled_events"
       constraintName="fk_disabled_user_id"
       referencedColumnNames="user_id"
       referencedTableName="user" onDelete="CASCADE"/>
