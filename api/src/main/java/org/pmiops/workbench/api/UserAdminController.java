@@ -148,19 +148,6 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> createUserDisabledEvent(
-      Long userId, CreateUserDisabledEventRequest request) {
-    userAdminService.createUserDisabledEvent(
-        userId,
-        request.getUpdatedBy(),
-        Instant.ofEpochMilli(request.getUpdateTime()),
-        request.getAdminComment(),
-        request.getStatus());
-
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  @Override
   public ResponseEntity<ListUserDisabledEventsResponse> listUserDisabledEvents(Long userId) {
     return ResponseEntity.ok(
         new ListUserDisabledEventsResponse()

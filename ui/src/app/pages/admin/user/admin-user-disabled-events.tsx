@@ -10,21 +10,14 @@ import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import { displayDate } from 'app/utils/dates';
 
 export interface AdminUserDisabledEventsProps {
+  accountDisabledStatus: boolean;
   targetUserId: number;
 }
 
-const test = {
-  "causes": [],
-  "exceptionClass": "com.google.api.client.googleapis.json.GoogleJsonResponseException",
-  "message": "404 Not Found\nGET https://storage.googleapis.com/storage/v1/b/fc-secure-997918b9-c22b-46ff-b974-4950ce323afe?userProject=terra-vpc-sc-70f87eed\n{\n  \"code\": 404,\n  \"errors\": [\n    {\n      \"domain\": \"global\",\n      \"message\": \"The requested project was not found.\",\n      \"reason\": \"notFound\"\n    }\n  ],\n  \"message\": \"The requested project was not found.\"\n}",
-  "source": "rawls",
-  "stackTrace": [],
-  "timestamp": 1747253425086
-}
 export const AdminUserDisabledEvents = (
   props: AdminUserDisabledEventsProps
 ) => {
-  const { targetUserId } = props;
+  const { accountDisabledStatus, targetUserId } = props;
   const [disabledEventsList, setDisabledEventsList] = useState<
     UserDisabledEvent[]
   >([]);
@@ -35,7 +28,7 @@ export const AdminUserDisabledEvents = (
       .then((res) => setDisabledEventsList(res.disabledEvents));
   };
 
-  useEffect(loadDisabledEvents, []);
+  useEffect(loadDisabledEvents, [accountDisabledStatus]);
 
   return (
     <FlexRow style={{ minWidth: '100rem' }}>

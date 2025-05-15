@@ -8,11 +8,9 @@ import validate from 'validate.js';
 import {
   AccessBypassRequest,
   AccessModule,
-  CreateUserDisabledEventRequest,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
-  UserDisabledStatus,
   VerifiedInstitutionalAffiliation,
 } from 'generated/fetch';
 
@@ -33,7 +31,6 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
-import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import { badgeForTier } from 'app/utils/access-tiers';
@@ -643,29 +640,15 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     setBypassChangeRequests([...otherModuleRequests, accessBypassRequest]);
   };
 
-  const saveProfile = async (adminComment?: string) => {
+  const saveProfile = async (accountDisabledReason?: string) => {
     spinnerProps.showSpinner();
     const response = await updateAccountProperties(
       oldProfile,
       updatedProfile,
-      bypassChangeRequests
+      bypassChangeRequests,
+      accountDisabledReason
     );
-    if (oldProfile.disabled !== response.disabled) {
-      const userDisabledEventRequest: CreateUserDisabledEventRequest = {
-        userId: response.userId,
-        updatedBy: profile.username,
-        updateTime: Date.now(),
-        adminComment: adminComment ?? '',
-        status: response.disabled
-          ? UserDisabledStatus.DISABLED
-          : UserDisabledStatus.ENABLED,
-      };
-      await userAdminApi().createUserDisabledEvent(
-        response.userId,
-        userDisabledEventRequest
-      );
-      setShowAdminCommentModal(false);
-    }
+    setShowAdminCommentModal(false);
     setOldProfile(response);
     setUpdatedProfile(response);
     spinnerProps.hideSpinner();
@@ -874,7 +857,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           </FlexRow>
           <FlexRow>
             <AdminUserDisabledEvents
-              {...{ profile }}
+              accountDisabledStatus={oldProfile.disabled}
               targetUserId={updatedProfile.userId}
             />
           </FlexRow>
@@ -883,7 +866,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
       {showAdminCommentModal && (
         <AdminCommentModal
           onCancel={() => setShowAdminCommentModal(false)}
-          onSubmit={(comment) => saveProfile(comment)}
+          onSubmit={(disabledReason: string) => saveProfile(disabledReason)}
         />
       )}
     </FadeBox>

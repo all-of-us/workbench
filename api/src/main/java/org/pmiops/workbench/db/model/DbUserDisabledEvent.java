@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "user_disabled")
+@Table(name = "user_disabled_events")
 public class DbUserDisabledEvent {
 
   public enum DbUserDisabledStatus {

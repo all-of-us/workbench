@@ -291,7 +291,8 @@ export const profileNeedsUpdate = (
 export const updateAccountProperties = async (
   oldProfile: Profile,
   updatedProfile: Profile,
-  accessBypassRequests?: AccessBypassRequest[]
+  accessBypassRequests?: AccessBypassRequest[],
+  accountDisabledReason?: string
 ): Promise<Profile> => {
   const { username, initialCreditsExpirationBypassed } = updatedProfile;
 
@@ -313,6 +314,7 @@ export const updateAccountProperties = async (
     username,
     accessBypassRequests,
     accountDisabledStatus,
+    accountDisabledReason,
     freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'initialCreditsLimit',
     ]),

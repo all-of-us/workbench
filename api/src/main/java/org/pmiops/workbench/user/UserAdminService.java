@@ -66,21 +66,6 @@ public class UserAdminService {
         .collect(Collectors.toList());
   }
 
-  public void createUserDisabledEvent(
-      Long userId,
-      String updatedBy,
-      Instant updateTime,
-      String adminComment,
-      UserDisabledStatus status) {
-    userDisabledEventDao.save(
-        new DbUserDisabledEvent()
-            .setUserId(userId)
-            .setUpdatedBy(updatedBy)
-            .setUpdateTime(Timestamp.from(updateTime))
-            .setAdminComment(adminComment)
-            .setStatus(userMapper.toDbStatus(status)));
-  }
-
   public List<UserDisabledEvent> listAllUserDisabledEvents(Long userId) {
     return userDisabledEventDao.getByUserIdOrderByUpdateTimeDesc(userId).stream()
         .map(userMapper::toApiUserDisabledEvent)
