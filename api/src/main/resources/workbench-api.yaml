@@ -2405,7 +2405,7 @@ paths:
           description: success
           content: {}
       x-codegen-request-body-name: request
-  /v1/admin/users/{userId}/userDisabled:
+  /v1/admin/users/{userId}/userDisabledEvents:
     get:
       tags:
         - userAdmin
