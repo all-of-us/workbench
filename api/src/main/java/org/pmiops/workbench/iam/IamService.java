@@ -1,7 +1,6 @@
 package org.pmiops.workbench.iam;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.firecloud.ApiException;
 

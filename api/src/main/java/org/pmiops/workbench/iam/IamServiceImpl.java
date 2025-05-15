@@ -1,15 +1,11 @@
 package org.pmiops.workbench.iam;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.broadinstitute.dsde.workbench.client.sam.api.GoogleApi;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
-import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.sam.SamApiClientFactory;
 import org.pmiops.workbench.sam.SamRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +14,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class IamServiceImpl implements IamService {
 
-  private final CloudResourceManagerService cloudResourceManagerService;
   private final FirecloudApiClientFactory firecloudApiClientFactory;
   private final SamApiClientFactory samApiClientFactory;
   private final SamRetryHandler samRetryHandler;
 
   @Autowired
   public IamServiceImpl(
-      CloudResourceManagerService cloudResourceManagerService,
       FirecloudApiClientFactory firecloudApiClientFactory,
       SamApiClientFactory samApiClientFactory,
       SamRetryHandler samRetryHandler) {
-    this.cloudResourceManagerService = cloudResourceManagerService;
     this.firecloudApiClientFactory = firecloudApiClientFactory;
     this.samApiClientFactory = samApiClientFactory;
     this.samRetryHandler = samRetryHandler;

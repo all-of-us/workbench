@@ -862,12 +862,4 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         new WorkspaceCreatorFreeCreditsRemainingResponse()
             .freeCreditsRemaining(freeCreditsRemaining));
   }
-
-  /** Returns {@true} if the user is 1: workspace OWNER or WRITER; 2: NOT current logged in user */
-  private static boolean shouldGrantWorkflowRunnerAsService(
-      DbUser loggedInUser, Map.Entry<String, WorkspaceAccessLevel> userNameToAclMapEntry) {
-    return !userNameToAclMapEntry.getKey().equals(loggedInUser.getUsername())
-        && (WorkspaceAccessLevel.OWNER.equals(userNameToAclMapEntry.getValue())
-            || WorkspaceAccessLevel.WRITER.equals(userNameToAclMapEntry.getValue()));
-  }
 }
