@@ -187,8 +187,6 @@ export const AnalyticsTracker = {
     Delete: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Delete'),
     Preview: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Preview'),
     Edit: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Edit'),
-    Run: () =>
-      triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Run (Playground Mode)'),
   },
   Registration: {
     SignIn: () => triggerEvent('Registration', 'Click sign-in', 'Sign in'),

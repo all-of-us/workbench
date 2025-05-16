@@ -43,8 +43,8 @@ export class NotebookInUseModal extends React.Component<Props, State> {
             <span style={{ color: colors.accent }}> {this.props.email}</span>.
           </p>
           <p style={{ color: colors.primary }}>
-            You can make a copy, or run it in playground mode to explore and
-            execute its contents without saving any changes.
+            You can make a copy to explore and execute its contents without
+            saving any changes to the original.
           </p>
         </ModalBody>
         <ModalFooter style={{ alignItems: 'center' }}>

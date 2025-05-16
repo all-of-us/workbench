@@ -77,9 +77,7 @@ describe('Notebook Size Warning Modal', () => {
     ];
     await component();
     await user.click(findEditButton());
-    expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation, {
-      queryParams: { playgroundMode: false },
-    });
+    expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation);
   });
 
   it('should disable buttons (except close) and show a spinner when notebookName is null', async () => {

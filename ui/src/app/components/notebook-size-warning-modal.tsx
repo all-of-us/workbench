@@ -80,9 +80,7 @@ export const NotebookSizeWarningModal = ({
         <Button
           disabled={!notebookName}
           type='primary'
-          onClick={() =>
-            navigate(navigationPath, { queryParams: { playgroundMode: false } })
-          }
+          onClick={() => navigate(navigationPath)}
         >
           Edit file
         </Button>
