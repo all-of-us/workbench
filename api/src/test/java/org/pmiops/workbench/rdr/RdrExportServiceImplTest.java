@@ -188,7 +188,7 @@ public class RdrExportServiceImplTest {
         .setLastModifiedTime(FakeClockConfiguration.NOW)
         .setCreationTime(FakeClockConfiguration.NOW)
         .setName(name)
-        .setWorkspaceId(dbId)
+        // .setWorkspaceId(dbId)
         .setWorkspaceNamespace(namespace)
         .setWorkspaceActiveStatusEnum(activeStatus)
         .setFirecloudName(name)
