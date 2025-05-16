@@ -231,7 +231,7 @@ export const InteractiveNotebook = fp.flow(
       }
     }
 
-    private navigateOldNotebooksPage() {
+    private navigateEditMode() {
       this.props.navigate([
         'workspaces',
         this.props.match.params.ns,
@@ -461,7 +461,7 @@ export const InteractiveNotebook = fp.flow(
         if (!this.notebookInUse) {
           if (appType === UIAppType.JUPYTER) {
             this.runRuntime(() => {
-              this.navigateOldNotebooksPage();
+              this.navigateEditMode();
             });
           } else {
             openAppOrConfigPanel(ns, terraName, userApps, appType, navigate);
