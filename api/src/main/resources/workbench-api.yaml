@@ -9329,7 +9329,7 @@ components:
             type: string
         playgroundMode:
           type: boolean
-          description: Set to true if playgroundMode needed
+          description: DEPRECATED - Set to true if playgroundMode needed
           default: false
     RuntimeLocalizeResponse:
       required:
@@ -9356,7 +9356,7 @@ components:
             type: string
         playgroundMode:
           type: boolean
-          description: Set to true if playgroundMode needed
+          description: DEPRECATED - Set to true if playgroundMode needed
           default: false
         appType:
           $ref: '#/components/schemas/AppType'
