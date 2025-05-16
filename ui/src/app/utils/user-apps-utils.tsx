@@ -66,12 +66,10 @@ const localizeUserApp = (
   appName: string,
   appType: AppType,
   fileNames: Array<string>,
-  playgroundMode: boolean,
   localizeAllFile: boolean
 ) =>
   appsApi().localizeApp(namespace, appName, localizeAllFile, {
     fileNames,
-    playgroundMode,
     appType,
   });
 
@@ -121,7 +119,6 @@ const callLocalizeIfApplicable = (listAppsResponse: ListAppsResponse) => {
           app.appName,
           app.appType,
           [],
-          false,
           true
         )
     );
@@ -234,7 +231,6 @@ export const openAppInIframe = (
       userApp.appName,
       userApp.appType,
       localizeFileList,
-      false,
       false
     )
   );

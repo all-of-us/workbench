@@ -9339,7 +9339,6 @@ components:
     RuntimeLocalizeRequest:
       required:
       - notebookNames
-      - playgroundMode
       type: object
       properties:
         notebookNames:
@@ -9351,7 +9350,7 @@ components:
             type: string
         playgroundMode:
           type: boolean
-          description: Set to true if playgroundMode needed
+          description: DEPRECATED - Set to true if playgroundMode needed
           default: false
     RuntimeLocalizeResponse:
       required:
@@ -9367,7 +9366,6 @@ components:
     AppLocalizeRequest:
       required:
       - fileNames
-      - playgroundMode
       type: object
       properties:
         fileNames:
@@ -9379,7 +9377,7 @@ components:
             type: string
         playgroundMode:
           type: boolean
-          description: Set to true if playgroundMode needed
+          description: DEPRECATED - Set to true if playgroundMode needed
           default: false
         appType:
           $ref: '#/components/schemas/AppType'
