@@ -67,6 +67,6 @@ public class UserAdminService {
   public List<UserDisabledEvent> listAllUserDisabledEvents(Long userId) {
     return userDisabledEventDao.getByUserIdOrderByUpdateTimeDesc(userId).stream()
         .map(userMapper::toApiUserDisabledEvent)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

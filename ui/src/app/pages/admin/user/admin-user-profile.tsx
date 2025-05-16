@@ -642,13 +642,13 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const saveProfile = async (accountDisabledReason?: string) => {
     spinnerProps.showSpinner();
+    setShowAdminCommentModal(false);
     const response = await updateAccountProperties(
       oldProfile,
       updatedProfile,
       bypassChangeRequests,
       accountDisabledReason
     );
-    setShowAdminCommentModal(false);
     setOldProfile(response);
     setUpdatedProfile(response);
     spinnerProps.hideSpinner();

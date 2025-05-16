@@ -2410,7 +2410,7 @@ paths:
       tags:
         - userAdmin
       description: |
-        List all of the user's disabled/enabled events
+        List all of the user's disabled/enabled events. Requires ACCESS_CONTROL_ADMIN authority
       operationId: listUserDisabledEvents
       parameters:
         - name: userId

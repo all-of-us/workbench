@@ -147,6 +147,7 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<ListUserDisabledEventsResponse> listUserDisabledEvents(Long userId) {
     return ResponseEntity.ok(
         new ListUserDisabledEventsResponse()
