@@ -517,7 +517,7 @@ interface CompletionBannerProps {
 const CompletionBanner = ({ profile }: CompletionBannerProps) => {
   const enableInitialCreditsExpiration =
     serverConfigStore.get().config.enableInitialCreditsExpiration;
-  const { freeTierDollarQuota, freeTierUsage } = profile;
+  const { initialCreditsLimit, initialCreditsUsage } = profile;
   return (
     <FlexRow data-test-id='dar-completed' style={styles.completed}>
       <FlexColumn style={{ flex: 0.5 }}>
@@ -532,9 +532,9 @@ const CompletionBanner = ({ profile }: CompletionBannerProps) => {
             <>
               <div style={styles.completedText}>
                 You have{' $'}
-                {freeTierUsage
-                  ? freeTierDollarQuota - freeTierUsage
-                  : freeTierDollarQuota}{' '}
+                {initialCreditsUsage
+                  ? initialCreditsLimit - initialCreditsUsage
+                  : initialCreditsLimit}{' '}
                 in initial credits remaining. These credits expire on{' '}
                 {displayDateWithoutHours(
                   profile.initialCreditsExpirationEpochMillis

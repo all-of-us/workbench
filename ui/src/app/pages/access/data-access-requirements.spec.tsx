@@ -1921,8 +1921,8 @@ describe('DataAccessRequirements', () => {
               completionEpochMillis: 1,
             })),
           },
-          freeTierDollarQuota: 300,
-          freeTierUsage: 50,
+          initialCreditsLimit: 300,
+          initialCreditsUsage: 50,
           initialCreditsExpirationEpochMillis: oneYearFromNow(),
         },
         load,
@@ -1959,11 +1959,11 @@ describe('DataAccessRequirements', () => {
       ).toBeInTheDocument();
     });
 
-    it('should display full quota amount when freeTierUsage is null or undefined', () => {
+    it('should display full quota amount when initialCreditsUsage is null or undefined', () => {
       profileStore.set({
         profile: {
           ...profileStore.get().profile,
-          freeTierUsage: null,
+          initialCreditsUsage: null,
         },
         load,
         reload,
