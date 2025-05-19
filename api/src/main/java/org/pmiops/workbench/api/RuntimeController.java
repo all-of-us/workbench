@@ -258,7 +258,6 @@ public class RuntimeController implements RuntimeApiDelegate {
                     userProvider.get().getRuntimeName(),
                     appType,
                     body.getNotebookNames(),
-                    body.isPlaygroundMode(),
                     true,
                     localizeAllFiles)));
   }

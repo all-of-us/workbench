@@ -88,7 +88,6 @@ public class InteractiveAnalysisService {
       String appName,
       @Nullable AppType appType,
       List<String> fileNames,
-      boolean isPlayground,
       boolean isGceRuntime,
       boolean localizeAllFiles) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
@@ -122,15 +121,11 @@ public class InteractiveAnalysisService {
     String googleProjectId = dbWorkspace.getGoogleProject();
     // Use current dir if not Jupyter
     String editDir = isGceRuntime ? "workspaces/" + workspacePath : "";
-    // note: Playground Mode only applies to Jupyter
-    String playgroundDir = "workspaces_playground/" + workspacePath;
-    String targetDir = isPlayground ? playgroundDir : editDir;
 
     var storageLink =
         new StorageLink().cloudStorageDirectory(gcsNotebooksDir).localBaseDirectory(editDir);
 
     if (isGceRuntime) {
-      storageLink.localSafeModeBaseDirectory(playgroundDir);
       storageLink.setPattern(JUPYTER_DELOC_PATTERN);
       leonardoNotebooksClient.createStorageLinkForRuntime(googleProjectId, appName, storageLink);
     } else {
@@ -149,9 +144,6 @@ public class InteractiveAnalysisService {
     // Always localize config files; usually a no-op after the first call.
     Map<String, String> localizeMap = new HashMap<>();
 
-    // The Welder extension offers direct links to/from playground mode; write the AoU config file
-    // to both locations so notebooks will work in either directory.
-
     String aouConfigUri =
         aouConfigDataUri(
             firecloudWorkspace,
@@ -163,7 +155,7 @@ public class InteractiveAnalysisService {
     // becomes root directory.
     String aouConfigEditDir =
         editDir.isEmpty() ? AOU_CONFIG_FILENAME : editDir + "/" + AOU_CONFIG_FILENAME;
-    String localizeTargetDir = targetDir.isEmpty() ? "" : targetDir + "/";
+    String localizeTargetDir = editDir.isEmpty() ? "" : editDir + "/";
 
     localizeMap.put(aouConfigEditDir, aouConfigUri);
 
@@ -198,12 +190,11 @@ public class InteractiveAnalysisService {
     }
 
     if (isGceRuntime) {
-      localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
       leonardoNotebooksClient.localizeForRuntime(googleProjectId, appName, localizeMap);
     } else {
       leonardoNotebooksClient.localizeForApp(googleProjectId, appName, localizeMap);
     }
-    return targetDir;
+    return editDir;
   }
 
   @VisibleForTesting
