@@ -531,11 +531,9 @@ const CompletionBanner = ({ profile }: CompletionBannerProps) => {
           profile.initialCreditsExpirationEpochMillis && (
             <>
               <div style={styles.completedText}>
-                You have{' $'}
-                {initialCreditsUsage
+                You have ${initialCreditsUsage
                   ? initialCreditsLimit - initialCreditsUsage
-                  : initialCreditsLimit}{' '}
-                in initial credits remaining. These credits expire on{' '}
+                  : initialCreditsLimit} in initial credits remaining. These credits expire on{' '}
                 {displayDateWithoutHours(
                   profile.initialCreditsExpirationEpochMillis
                 )}
