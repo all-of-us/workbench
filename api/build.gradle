@@ -81,7 +81,7 @@ dependencyManagement {
         dependency group: 'org.springframework', name: 'spring-core', version: '6.2.4'
         // keep in sync with the plugin block above
         dependency group: 'org.springframework.boot', name: 'spring-boot', version: '3.2.12'
-        dependency group: 'org.springframework.security', name: 'spring-security', version: '6.4.4'
+        dependency group: 'org.springframework.security', name: 'spring-security', version: '6.4.5'
     }
 }
 
