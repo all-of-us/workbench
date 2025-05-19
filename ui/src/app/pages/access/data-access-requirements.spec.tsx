@@ -1030,8 +1030,6 @@ describe('DataAccessRequirements', () => {
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            // User not eligible for CT i.e user email doesnt match
-            // Institution's Controlled Tier email list
             eligible: false,
           },
         ],
@@ -1259,7 +1257,6 @@ describe('DataAccessRequirements', () => {
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
-        // no CT eligibility object
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
@@ -1915,7 +1912,6 @@ describe('DataAccessRequirements', () => {
       registerApiClient(InstitutionApi, new InstitutionApiStub());
       registerApiClient(ProfileApi, new ProfileApiStub());
 
-      // Set up a complete profile to ensure CompletionBanner appears
       profileStore.set({
         profile: {
           ...ProfileStubVariables.PROFILE_STUB,
@@ -1938,26 +1934,30 @@ describe('DataAccessRequirements', () => {
       serverConfigStore.set({
         config: {
           ...defaultServerConfig,
-          enableInitialCreditsExpiration: true
+          enableInitialCreditsExpiration: true,
         },
       });
     });
 
     it('should show remaining credits when initial credits feature is enabled', () => {
       component();
-      expect(screen.getByText(/You have \$250 in initial credits remaining/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/You have \$250 in initial credits remaining/)
+      ).toBeInTheDocument();
     });
 
     it('should show correct expiration date for credits', () => {
       const expirationDate = new Date(oneYearFromNow());
-      const formattedDate = expirationDate.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      const formattedDate = expirationDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
       });
-      
+
       component();
-      expect(screen.getByText(new RegExp(`These credits expire on ${formattedDate}`))).toBeInTheDocument();
+      expect(
+        screen.getByText(new RegExp(`These credits expire on ${formattedDate}`))
+      ).toBeInTheDocument();
     });
 
     it('should display full quota amount when freeTierUsage is null or undefined', () => {
@@ -1972,19 +1972,23 @@ describe('DataAccessRequirements', () => {
       });
 
       component();
-      expect(screen.getByText(/You have \$300 in initial credits remaining/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/You have \$300 in initial credits remaining/)
+      ).toBeInTheDocument();
     });
 
     it('should not show credit information when enableInitialCreditsExpiration is false', () => {
       serverConfigStore.set({
         config: {
           ...serverConfigStore.get().config,
-          enableInitialCreditsExpiration: false
+          enableInitialCreditsExpiration: false,
         },
       });
 
       component();
-      expect(screen.queryByText(/You have \$[0-9]+ in initial credits remaining/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/You have \$[0-9]+ in initial credits remaining/)
+      ).not.toBeInTheDocument();
     });
 
     it('should not show credit information when initialCreditsExpirationEpochMillis is not set', () => {
@@ -1999,8 +2003,9 @@ describe('DataAccessRequirements', () => {
       });
 
       component();
-      expect(screen.queryByText(/You have \$[0-9]+ in initial credits remaining/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/You have \$[0-9]+ in initial credits remaining/)
+      ).not.toBeInTheDocument();
     });
-
   });
 });
