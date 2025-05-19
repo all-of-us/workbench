@@ -1921,7 +1921,6 @@ describe('DataAccessRequirements', () => {
               completionEpochMillis: 1,
             })),
           },
-          // Default values for credits
           freeTierDollarQuota: 300,
           freeTierUsage: 50,
           initialCreditsExpirationEpochMillis: oneYearFromNow(),
