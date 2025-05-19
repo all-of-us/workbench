@@ -479,7 +479,7 @@ dependencies {
     // java.lang.NoSuchMethodError: 'void org.apache.hc.core5.http.impl.io.DefaultHttpRequestWriterFactory.<init>(org.apache.hc.core5.http.config.Http1Config)'
     implementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
     implementation 'commons-codec:commons-codec:1.17.0'
-    implementation 'com.auth0:java-jwt:4.4.0'
+    implementation 'com.auth0:java-jwt:4.5.0'
     implementation 'org.json:json:20250107'
 
 
