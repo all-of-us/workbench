@@ -38,6 +38,7 @@ buildscript {
         OPENTELEMETRY_SDK_VERSION = '1.48.0'
         OPENTELEMETRY_JAVA_VERSION = '2.16.0'
         OPENTELEMETRY_GOOGLE_VERSION = '0.34.0'
+        PROTOBUF_VERSION = '4.31.0'
         SPRINGFOX_VERSION = '3.0.0'
         SWAGGER_VERSION = '2.2.29'
     }
@@ -518,8 +519,9 @@ dependencies {
     implementation "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.37.0'
 
-    implementation 'com.google.protobuf:protobuf-java:3.25.5'
-    implementation 'com.google.protobuf:protobuf-java-util:3.25.5'
+    implementation "com.google.protobuf:protobuf-java:$project.ext.PROTOBUF_VERSION"
+    implementation "com.google.protobuf:protobuf-java-util:$project.ext.PROTOBUF_VERSION"
+
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
 
     implementation "org.hibernate.orm:hibernate-core:$project.ext.HIBERNATE_VERSION"
