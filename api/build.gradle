@@ -487,8 +487,8 @@ dependencies {
     // Assure compatible dependencies by using Bills of Materials (BOMs)
     // https://cloud.google.com/java/docs/bom
 
-    implementation platform('com.google.cloud:google-cloud-bom:0.233.0')
-    implementation platform('com.google.cloud:libraries-bom:26.52.0')
+    implementation platform('com.google.cloud:google-cloud-bom:0.241.0')
+    implementation platform('com.google.cloud:libraries-bom:26.60.0')
 
     // do not specify versions for these dependencies, because they are set by the BOM
 
