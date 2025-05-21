@@ -250,20 +250,18 @@ const InitialCreditsCard = ({
             )}
           <FlexColumn>
             {!institution?.institutionalInitialCreditsExpirationBypassed && (
-                <InitialCreditBypassSwitch
-                  currentlyBypassed={
-                    updatedProfile.initialCreditsExpirationBypassed
-                  }
-                  previouslyBypassed={
-                    oldProfile.initialCreditsExpirationBypassed
-                  }
-                  expirationEpochMillis={
-                    oldProfile.initialCreditsExpirationEpochMillis
-                  }
-                  onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
-                  label='Individual Expiration Bypass'
-                />
-              )}
+              <InitialCreditBypassSwitch
+                currentlyBypassed={
+                  updatedProfile.initialCreditsExpirationBypassed
+                }
+                previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
+                expirationEpochMillis={
+                  oldProfile.initialCreditsExpirationEpochMillis
+                }
+                onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
+                label='Individual Expiration Bypass'
+              />
+            )}
             <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
               <div
                 data-test-id='initial-credits-used'

@@ -491,34 +491,34 @@ export const WorkspaceAbout = fp.flow(
                     </div>
 
                     {!workspace.initialCredits.expirationBypassed && (
-                        <div style={{ ...styles.infoBox }}>
-                          <div style={styles.infoBoxHeader}>
-                            Workspace Initial Credit Expiration
-                          </div>
-                          <div style={{ fontSize: '0.75rem' }}>
-                            {this.workspaceInitialCreditsExpirationTime}
-                          </div>
-                          <TooltipTrigger
-                            content={initialCreditsExtensionTooltipContent}
+                      <div style={{ ...styles.infoBox }}>
+                        <div style={styles.infoBoxHeader}>
+                          Workspace Initial Credit Expiration
+                        </div>
+                        <div style={{ fontSize: '0.75rem' }}>
+                          {this.workspaceInitialCreditsExpirationTime}
+                        </div>
+                        <TooltipTrigger
+                          content={initialCreditsExtensionTooltipContent}
+                          disabled={
+                            isWorkspaceCreator &&
+                            profile.eligibleForInitialCreditsExtension
+                          }
+                        >
+                          <LinkButton
                             disabled={
-                              isWorkspaceCreator &&
-                              profile.eligibleForInitialCreditsExtension
+                              !isWorkspaceCreator ||
+                              !profile.eligibleForInitialCreditsExtension
+                            }
+                            onClick={() =>
+                              this.setState({ showExtensionModal: true })
                             }
                           >
-                            <LinkButton
-                              disabled={
-                                !isWorkspaceCreator ||
-                                !profile.eligibleForInitialCreditsExtension
-                              }
-                              onClick={() =>
-                                this.setState({ showExtensionModal: true })
-                              }
-                            >
-                              Request Extension
-                            </LinkButton>
-                          </TooltipTrigger>
-                        </div>
-                      )}
+                            Request Extension
+                          </LinkButton>
+                        </TooltipTrigger>
+                      </div>
+                    )}
                   </>
                 )}
             </div>

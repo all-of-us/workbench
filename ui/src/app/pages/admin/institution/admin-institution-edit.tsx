@@ -51,7 +51,7 @@ import {
   updateTierEmailDomains,
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
