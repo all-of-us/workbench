@@ -8,7 +8,6 @@ import { Cohort, CohortReview, ConceptSet } from 'generated/fetch';
 import { cond } from '@terra-ui-packages/core-utils';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBannerMaybe } from 'app/pages/workspace/invalid-billing-banner-maybe';
-import { OldInvalidBillingBanner } from 'app/pages/workspace/old-invalid-billing-banner';
 import {
   analysisTabName,
   analysisTabPath,
@@ -27,11 +26,9 @@ import {
   MatchParams,
   RouteDataStore,
   routeDataStore,
-  serverConfigStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { isValidBilling } from 'app/utils/workspace-utils';
 
 import { BreadcrumbType } from './breadcrumb-type';
 
