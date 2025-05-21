@@ -15,7 +15,6 @@ import {
 import { cond } from '@terra-ui-packages/core-utils';
 import {
   Button,
-  LinkButton,
   StyledExternalLink,
   StyledRouterLink,
 } from 'app/components/buttons';
@@ -39,7 +38,7 @@ import {
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
@@ -317,8 +316,6 @@ export const WorkspaceAbout = fp.flow(
       const notPublished = !featuredCategory;
       const isWorkspaceOwner =
         workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
-      const isWorkspaceCreator =
-        workspace?.creatorUser.userName === profile.username;
 
       const workspaceLocked = workspace?.adminLocked;
       // isWorkspaceOwner notPublished disabled
