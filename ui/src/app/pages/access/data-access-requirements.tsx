@@ -16,7 +16,7 @@ import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
 import {
   buildRasRedirectUrl,
   DARPageMode,
@@ -531,10 +531,12 @@ const CompletionBanner = ({ profile }: CompletionBannerProps) => {
           profile.initialCreditsExpirationEpochMillis && (
             <>
               <div style={styles.completedText}>
-                You have $
-                {initialCreditsUsage
-                  ? initialCreditsLimit - initialCreditsUsage
-                  : initialCreditsLimit}{' '}
+                You have{' '}
+                {formatInitialCreditsUSD(
+                  initialCreditsUsage
+                    ? initialCreditsLimit - initialCreditsUsage
+                    : initialCreditsLimit
+                )}{' '}
                 in initial credits remaining. These credits expire on{' '}
                 {displayDateWithoutHours(
                   profile.initialCreditsExpirationEpochMillis

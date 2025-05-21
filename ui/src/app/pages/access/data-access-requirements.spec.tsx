@@ -1941,7 +1941,7 @@ describe('DataAccessRequirements', () => {
     it('should show remaining credits when initial credits feature is enabled', () => {
       component();
       expect(
-        screen.getByText(/You have \$250 in initial credits remaining/)
+        screen.getByText(/You have \$250.00 in initial credits remaining/)
       ).toBeInTheDocument();
     });
 
@@ -1972,7 +1972,7 @@ describe('DataAccessRequirements', () => {
 
       component();
       expect(
-        screen.getByText(/You have \$300 in initial credits remaining/)
+        screen.getByText(/You have \$300.00 in initial credits remaining/)
       ).toBeInTheDocument();
     });
 
