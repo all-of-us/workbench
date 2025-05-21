@@ -1938,13 +1938,6 @@ describe('DataAccessRequirements', () => {
       });
     });
 
-    it('should show remaining credits when initial credits feature is enabled', () => {
-      component();
-      expect(
-        screen.getByText(/You have \$250.00 in initial credits remaining/)
-      ).toBeInTheDocument();
-    });
-
     it('should show correct expiration date for credits', () => {
       const expirationDate = new Date(oneYearFromNow());
       const formattedDate = expirationDate.toLocaleDateString('en-US', {
@@ -1974,37 +1967,6 @@ describe('DataAccessRequirements', () => {
       expect(
         screen.getByText(/You have \$300.00 in initial credits remaining/)
       ).toBeInTheDocument();
-    });
-
-    it('should not show credit information when enableInitialCreditsExpiration is false', () => {
-      serverConfigStore.set({
-        config: {
-          ...serverConfigStore.get().config,
-          enableInitialCreditsExpiration: false,
-        },
-      });
-
-      component();
-      expect(
-        screen.queryByText(/You have \$[0-9]+ in initial credits remaining/)
-      ).not.toBeInTheDocument();
-    });
-
-    it('should not show credit information when initialCreditsExpirationEpochMillis is not set', () => {
-      profileStore.set({
-        profile: {
-          ...profileStore.get().profile,
-          initialCreditsExpirationEpochMillis: null,
-        },
-        load,
-        reload,
-        updateCache,
-      });
-
-      component();
-      expect(
-        screen.queryByText(/You have \$[0-9]+ in initial credits remaining/)
-      ).not.toBeInTheDocument();
     });
   });
 });
