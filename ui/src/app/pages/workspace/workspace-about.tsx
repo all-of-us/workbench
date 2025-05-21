@@ -19,7 +19,6 @@ import {
   StyledExternalLink,
   StyledRouterLink,
 } from 'app/components/buttons';
-import { ExtendInitialCreditsModal } from 'app/components/extend-initial-credits-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -330,12 +329,6 @@ export const WorkspaceAbout = fp.flow(
       const publishButtonToolTipDisabled =
         isWorkspaceOwner && notPublished && !workspaceLocked;
 
-      const initialCreditsExtensionTooltipContent = isWorkspaceCreator
-        ? profile.eligibleForInitialCreditsExtension
-          ? ''
-          : 'You are not eligible to extend your initial credits.'
-        : `Contact your workspace creator, ${workspace.creatorUser.givenName} ${workspace.creatorUser.familyName},` +
-          ` to update this workspace's billing details.`;
       return (
         <div style={styles.mainPage}>
           <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
