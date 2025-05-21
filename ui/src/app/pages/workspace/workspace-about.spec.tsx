@@ -24,8 +24,6 @@ import {
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  expectTooltip,
-  expectTooltipAbsence,
   renderWithRouter,
   waitForNoSpinner,
 } from 'testing/react-test-helpers';
