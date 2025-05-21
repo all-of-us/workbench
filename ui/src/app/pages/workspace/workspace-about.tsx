@@ -57,7 +57,6 @@ interface WorkspaceState {
   workspaceInitialCreditsUsage: number;
   workspaceUserRoles: UserRole[];
   showPublishConsentModal: boolean;
-  showExtensionModal: boolean;
 }
 
 const styles = reactStyles({
@@ -199,7 +198,6 @@ export const WorkspaceAbout = fp.flow(
         workspaceInitialCreditsUsage: undefined,
         workspaceUserRoles: [],
         showPublishConsentModal: false,
-        showExtensionModal: false,
       };
     }
 
@@ -312,12 +310,8 @@ export const WorkspaceAbout = fp.flow(
         profileState: { profile },
         cdrVersionTiersResponse,
       } = this.props;
-      const {
-        workspaceUserRoles,
-        sharing,
-        showPublishConsentModal,
-        showExtensionModal,
-      } = this.state;
+      const { workspaceUserRoles, sharing, showPublishConsentModal } =
+        this.state;
 
       const { workspace } = this.props;
       const featuredCategory = workspace?.featuredCategory;
@@ -500,25 +494,6 @@ export const WorkspaceAbout = fp.flow(
                           <div style={{ fontSize: '0.75rem' }}>
                             {this.workspaceInitialCreditsExpirationTime}
                           </div>
-                          <TooltipTrigger
-                            content={initialCreditsExtensionTooltipContent}
-                            disabled={
-                              isWorkspaceCreator &&
-                              profile.eligibleForInitialCreditsExtension
-                            }
-                          >
-                            <LinkButton
-                              disabled={
-                                !isWorkspaceCreator ||
-                                !profile.eligibleForInitialCreditsExtension
-                              }
-                              onClick={() =>
-                                this.setState({ showExtensionModal: true })
-                              }
-                            >
-                              Request Extension
-                            </LinkButton>
-                          </TooltipTrigger>
                         </div>
                       )}
                   </>
@@ -624,28 +599,6 @@ export const WorkspaceAbout = fp.flow(
                 this.setState({ showPublishConsentModal: false });
               }}
               onCancel={() => this.setState({ showPublishConsentModal: false })}
-            />
-          )}
-          {showExtensionModal && (
-            <ExtendInitialCreditsModal
-              onClose={(updatedProfile: Profile) => {
-                if (updatedProfile) {
-                  profileStore.get().updateCache(updatedProfile);
-                  workspacesApi()
-                    .getWorkspace(workspace.namespace, workspace.terraName)
-                    .then((updatedWorkspace) => {
-                      currentWorkspaceStore.next({
-                        ...updatedWorkspace.workspace,
-                        accessLevel: updatedWorkspace.accessLevel,
-                      });
-                    })
-                    .finally(() =>
-                      this.setState({ showExtensionModal: false })
-                    );
-                } else {
-                  this.setState({ showExtensionModal: false });
-                }
-              }}
             />
           )}
         </div>
