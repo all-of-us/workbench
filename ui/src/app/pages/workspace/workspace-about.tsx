@@ -490,9 +490,7 @@ export const WorkspaceAbout = fp.flow(
                       </div>
                     </div>
 
-                    {serverConfigStore.get().config
-                      .enableInitialCreditsExpiration &&
-                      !workspace.initialCredits.expirationBypassed && (
+                    {!workspace.initialCredits.expirationBypassed && (
                         <div style={{ ...styles.infoBox }}>
                           <div style={styles.infoBoxHeader}>
                             Workspace Initial Credit Expiration

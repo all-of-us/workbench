@@ -314,25 +314,12 @@ export const Breadcrumb = fp.flow(
   withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
-  const enableInitialCreditsExpiration =
-    serverConfigStore.get().config.enableInitialCreditsExpiration;
-  const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
-    enableInitialCreditsExpiration
-  );
+  const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
+    useState(true);
 
   useEffect(() => {
-    // TODO: This is only needed for OldInvalidBillingBanner.
-    // Remove once initial credit expiration is live
-    if (!enableInitialCreditsExpiration) {
-      const newShowInvalidBillingBanner = !isValidBilling(props?.workspace);
-
-      if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
-        setShowInvalidBillingBanner(newShowInvalidBillingBanner);
-      }
-    } else {
-      // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
-      setShowInvalidBillingBanner(true);
-    }
+    // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
+    setShowInvalidBillingBanner(true);
   }, [props?.workspace]);
 
   const trail = (): Array<BreadcrumbData> => {
@@ -422,16 +409,11 @@ export const Breadcrumb = fp.flow(
 
   return (
     <>
-      {showInvalidBillingBanner &&
-        (enableInitialCreditsExpiration ? (
-          <InvalidBillingBannerMaybe
-            onClose={() => setShowInvalidBillingBanner(false)}
-          />
-        ) : (
-          <OldInvalidBillingBanner
-            onClose={() => setShowInvalidBillingBanner(false)}
-          />
-        ))}
+      {showInvalidBillingBanner && (
+        <InvalidBillingBannerMaybe
+          onClose={() => setShowInvalidBillingBanner(false)}
+        />
+      )}
       <div
         style={{
           marginLeft: '4.875rem',

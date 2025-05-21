@@ -667,9 +667,6 @@ export const AdminInstitutionEdit = fp.flow(
     }
 
     render() {
-      const {
-        config: { enableInitialCreditsExpiration },
-      } = serverConfigStore.get();
       const { institution, showOtherInstitutionTextBox, title } = this.state;
       const {
         displayName,
@@ -888,7 +885,7 @@ export const AdminInstitutionEdit = fp.flow(
                     )
                   }
                 />
-                {enableInitialCreditsExpiration && (
+                {
                   <div style={{ marginTop: '2.25rem' }}>
                     <CommonToggle
                       name='Initial Credits Expiration Bypass'
@@ -903,12 +900,12 @@ export const AdminInstitutionEdit = fp.flow(
                       checked={institution.bypassInitialCreditsExpiration}
                     />
                   </div>
-                )}
-                {enableInitialCreditsExpiration && (
+                }
+                {
                   <InstitutionExpirationBypassExplanation
                     bypassed={institution.bypassInitialCreditsExpiration}
                   />
-                )}
+                }
               </FlexColumn>
             </FlexRow>
             <SemiBoldHeader
