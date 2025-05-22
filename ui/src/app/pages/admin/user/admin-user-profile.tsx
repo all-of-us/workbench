@@ -231,24 +231,17 @@ const InitialCreditsCard = ({
   onChangeInitialCreditBypass,
   institution,
 }) => {
-  const {
-    config: { enableInitialCreditsExpiration },
-  } = serverConfigStore.get();
-
   return (
     <FlexColumn style={{ flex: 0 }}>
       <FlexRow style={styles.initialCreditsPanel}>
         <FlexColumn>
           <div style={styles.subHeader}>Initial credits</div>
-          {enableInitialCreditsExpiration && (
-            <InstitutionExpirationBypassExplanation
-              bypassed={
-                !!institution?.institutionalInitialCreditsExpirationBypassed
-              }
-            />
-          )}
-          {enableInitialCreditsExpiration &&
-            !institution?.institutionalInitialCreditsExpirationBypassed &&
+          <InstitutionExpirationBypassExplanation
+            bypassed={
+              !!institution?.institutionalInitialCreditsExpirationBypassed
+            }
+          />
+          {!institution?.institutionalInitialCreditsExpirationBypassed &&
             oldProfile.initialCreditsExtensionEpochMillis && (
               <p style={{ color: colors.primary, fontWeight: 500 }}>
                 User requested an extension on{' '}
@@ -256,22 +249,19 @@ const InitialCreditsCard = ({
               </p>
             )}
           <FlexColumn>
-            {enableInitialCreditsExpiration &&
-              !institution?.institutionalInitialCreditsExpirationBypassed && (
-                <InitialCreditBypassSwitch
-                  currentlyBypassed={
-                    updatedProfile.initialCreditsExpirationBypassed
-                  }
-                  previouslyBypassed={
-                    oldProfile.initialCreditsExpirationBypassed
-                  }
-                  expirationEpochMillis={
-                    oldProfile.initialCreditsExpirationEpochMillis
-                  }
-                  onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
-                  label='Individual Expiration Bypass'
-                />
-              )}
+            {!institution?.institutionalInitialCreditsExpirationBypassed && (
+              <InitialCreditBypassSwitch
+                currentlyBypassed={
+                  updatedProfile.initialCreditsExpirationBypassed
+                }
+                previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
+                expirationEpochMillis={
+                  oldProfile.initialCreditsExpirationEpochMillis
+                }
+                onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
+                label='Individual Expiration Bypass'
+              />
+            )}
             <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
               <div
                 data-test-id='initial-credits-used'

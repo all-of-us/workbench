@@ -8,7 +8,6 @@ import { Cohort, CohortReview, ConceptSet } from 'generated/fetch';
 import { cond } from '@terra-ui-packages/core-utils';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBannerMaybe } from 'app/pages/workspace/invalid-billing-banner-maybe';
-import { OldInvalidBillingBanner } from 'app/pages/workspace/old-invalid-billing-banner';
 import {
   analysisTabName,
   analysisTabPath,
@@ -27,11 +26,9 @@ import {
   MatchParams,
   RouteDataStore,
   routeDataStore,
-  serverConfigStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { isValidBilling } from 'app/utils/workspace-utils';
 
 import { BreadcrumbType } from './breadcrumb-type';
 
@@ -314,25 +311,12 @@ export const Breadcrumb = fp.flow(
   withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
-  const enableInitialCreditsExpiration =
-    serverConfigStore.get().config.enableInitialCreditsExpiration;
-  const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
-    enableInitialCreditsExpiration
-  );
+  const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
+    useState(true);
 
   useEffect(() => {
-    // TODO: This is only needed for OldInvalidBillingBanner.
-    // Remove once initial credit expiration is live
-    if (!enableInitialCreditsExpiration) {
-      const newShowInvalidBillingBanner = !isValidBilling(props?.workspace);
-
-      if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
-        setShowInvalidBillingBanner(newShowInvalidBillingBanner);
-      }
-    } else {
-      // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
-      setShowInvalidBillingBanner(true);
-    }
+    // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
+    setShowInvalidBillingBanner(true);
   }, [props?.workspace]);
 
   const trail = (): Array<BreadcrumbData> => {
@@ -422,16 +406,11 @@ export const Breadcrumb = fp.flow(
 
   return (
     <>
-      {showInvalidBillingBanner &&
-        (enableInitialCreditsExpiration ? (
-          <InvalidBillingBannerMaybe
-            onClose={() => setShowInvalidBillingBanner(false)}
-          />
-        ) : (
-          <OldInvalidBillingBanner
-            onClose={() => setShowInvalidBillingBanner(false)}
-          />
-        ))}
+      {showInvalidBillingBanner && (
+        <InvalidBillingBannerMaybe
+          onClose={() => setShowInvalidBillingBanner(false)}
+        />
+      )}
       <div
         style={{
           marginLeft: '4.875rem',
