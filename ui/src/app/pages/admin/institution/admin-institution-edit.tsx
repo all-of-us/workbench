@@ -885,27 +885,23 @@ export const AdminInstitutionEdit = fp.flow(
                     )
                   }
                 />
-                {
-                  <div style={{ marginTop: '2.25rem' }}>
-                    <CommonToggle
-                      name='Initial Credits Expiration Bypass'
-                      onToggle={(bypass) =>
-                        this.setState(
-                          fp.set(
-                            ['institution', 'bypassInitialCreditsExpiration'],
-                            bypass
-                          )
+                <div style={{ marginTop: '2.25rem' }}>
+                  <CommonToggle
+                    name='Initial Credits Expiration Bypass'
+                    onToggle={(bypass) =>
+                      this.setState(
+                        fp.set(
+                          ['institution', 'bypassInitialCreditsExpiration'],
+                          bypass
                         )
-                      }
-                      checked={institution.bypassInitialCreditsExpiration}
-                    />
-                  </div>
-                }
-                {
-                  <InstitutionExpirationBypassExplanation
-                    bypassed={institution.bypassInitialCreditsExpiration}
+                      )
+                    }
+                    checked={institution.bypassInitialCreditsExpiration}
                   />
-                }
+                </div>
+                <InstitutionExpirationBypassExplanation
+                  bypassed={institution.bypassInitialCreditsExpiration}
+                />
               </FlexColumn>
             </FlexRow>
             <SemiBoldHeader
