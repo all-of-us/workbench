@@ -272,6 +272,7 @@
   <include file="changelog/db.changelog-262-add-status-alert-time-range.xml"/>
   <include file="changelog/db.changelog-263-rm-workspace-billing-account-type.xml"/>
   <include file="changelog/db.changelog-264-add-user-disabled-events-table.xml"/>
+  <include file="changelog/db.changelog-265-add-unique-constraint-user-initial-credits-expiration.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
