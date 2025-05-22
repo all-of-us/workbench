@@ -680,8 +680,8 @@ tasks.withType(Test) {
         }
     }
     // As of Q1 2021, API unit tests need a larger heap due to memory retention across individual test cases.
-    // Bumping 2GB -> 4 GB in May 2025 for Spring Boot 3.3
-    maxHeapSize = "4g"
+    // May 2025: Bumping 2GB -> 3 GB for Spring Boot 3.3
+    maxHeapSize = "3g"
 }
 
 appengine {  // App Engine tasks configuration
