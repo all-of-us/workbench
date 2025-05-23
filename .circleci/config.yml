@@ -83,13 +83,13 @@ executors:
   # due to garbage collection timeout. This should be reassessed after upgrading to Junit 5. See RW-6460.
   api-unit-test-executor:
     <<: *workbench-executor
-    resource_class: large
+    resource_class: medium+
     environment:
       <<: *env-default
-      # The large machine has 8GB.  Increase the Java memory from the default 2G to 4G. This increase is possible for unit tests as they are run
-      # as a ~single-process workflow - in other cases using 4GB may starve other processes. For example,
+      # The medium+ machine has 6GB.  Increase the Java memory from the default 2G to 3G. This increase is possible for unit tests as they are run
+      # as a ~single-process workflow - in other cases using 3GB may starve other processes. For example,
       # this should not be used for the Local API integration test (which starts both a server, and a test process).
-      JAVA_TOOL_OPTIONS: -Xmx4g
+      JAVA_TOOL_OPTIONS: -Xmx3g
 
   # Default workbench environment plus MySQL database docker image
   db-executor:
