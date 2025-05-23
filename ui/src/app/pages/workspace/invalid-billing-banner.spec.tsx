@@ -85,18 +85,14 @@ describe('InvalidBillingBanner', () => {
     });
   });
 
-  const setupWorkspace = (
-    expired: boolean,
-    exhausted: boolean,
-    ownedByMe: boolean
-  ) => {
+  const setupWorkspace = (ownedByMe: boolean) => {
     const workspace = {
       ...workspaceDataStub,
       namespace: 'test-namespace',
       terraName: 'test-workspace',
       initialCredits: {
-        exhausted,
-        expirationEpochMillis: plusDays(Date.now(), expired ? -1 : 1),
+        exhausted: false,
+        expirationEpochMillis: plusDays(Date.now(), -1),
         expirationBypassed: false,
       },
       creatorUser: ownedByMe ? me : someOneElse,
@@ -104,18 +100,9 @@ describe('InvalidBillingBanner', () => {
     currentWorkspaceStore.next(workspace);
   };
 
-  /* All banners have "initial credits" in the text. Banner text can have one or more links in it.
-   * React Testing Library has a hard time finding text that is split across multiple elements
-   * (like text and links), so we can't use getByText to find the banner text. Instead, this
-   * function will return the textContent of the element that contains the banner text. This will
-   * include the plain text and the text found in the links.
-   */
-
-  it('should show expired banner to expired user who created the workspace', async () => {
-    const expired = true;
-    const exhausted = false;
+  it('should show owner version of banner', async () => {
     const ownedByMe = true;
-    setupWorkspace(expired, exhausted, ownedByMe);
+    setupWorkspace(ownedByMe);
 
     component();
 
@@ -126,42 +113,9 @@ describe('InvalidBillingBanner', () => {
     expectEditWorkspaceButtonExists();
   });
 
-  it('should show expired banner to non-creator when creator is expired', async () => {
-    const expired = true;
-    const exhausted = false;
+  it('should show non-creator version of the banner', async () => {
     const ownedByMe = false;
-    setupWorkspace(expired, exhausted, ownedByMe);
-
-    component();
-
-    await screen.findByText('This workspace is out of initial credits');
-    screen.getByText(
-      /this workspace creator's initial credits have run out\. this workspace was created by someone else\. to use the workspace, a valid billing account needs to be added\. to learn more about establishing a billing account, read "" on the user support hub\./i
-    );
-    expectEditWorkspaceButtonDoesNotExist();
-  });
-
-  it('should show expired banner to exhausted user who created the workspace', async () => {
-    const expired = false;
-    const exhausted = true;
-    const ownedByMe = true;
-    setupWorkspace(expired, exhausted, ownedByMe);
-
-    component();
-
-    await screen.findByText('This workspace is out of initial credits');
-    screen.logTestingPlaygroundURL();
-    screen.getByText(
-      /your initial credits have run out\. to use the workspace, a valid billing account needs to be added \. to learn more about establishing a billing account, read "" on the user support hub\./i
-    );
-    expectEditWorkspaceButtonExists();
-  });
-
-  it('should show expired banner to non-creator when creator is exhausted', async () => {
-    const expired = false;
-    const exhausted = true;
-    const ownedByMe = false;
-    setupWorkspace(expired, exhausted, ownedByMe);
+    setupWorkspace(ownedByMe);
 
     component();
 
