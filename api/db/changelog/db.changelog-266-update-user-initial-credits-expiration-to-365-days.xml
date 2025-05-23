@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="erollins" id="db.changelog-266-update-user-initial-credits-expiration-to-365-days">
+    <!-- Use database-agnostic function to add 365 days -->
+    <sql>
+      UPDATE user_initial_credits_expiration
+      SET expiration_time = credit_start_time + INTERVAL '365' DAY;
+    </sql>
+  </changeSet>
+</databaseChangeLog>
