@@ -82,7 +82,6 @@ describe('WorkspaceAbout', () => {
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
-        enableInitialCreditsExpiration: true,
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);

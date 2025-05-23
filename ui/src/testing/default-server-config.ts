@@ -75,7 +75,6 @@ const defaultServerConfig: ConfigResponse = {
   tanagraBaseUrl: 'https://test.fake-research-aou.org',
   enableGKEAppPausing: false,
   enableGKEAppMachineTypeChoice: false,
-  enableInitialCreditsExpiration: true,
   blockComplianceTraining: false,
   defaultGceVmZone: 'us-central1-a',
   gceVmZones: ['us-central1-a', 'us-central1-b'],

@@ -231,17 +231,17 @@ const InitialCreditsCard = ({
   onChangeInitialCreditBypass,
   institution,
 }) => {
+  const initialCreditExpirationBypassedViaInstitution =
+    !!institution?.institutionalInitialCreditsExpirationBypassed;
   return (
     <FlexColumn style={{ flex: 0 }}>
       <FlexRow style={styles.initialCreditsPanel}>
         <FlexColumn>
           <div style={styles.subHeader}>Initial credits</div>
           <InstitutionExpirationBypassExplanation
-            bypassed={
-              !!institution?.institutionalInitialCreditsExpirationBypassed
-            }
+            bypassed={initialCreditExpirationBypassedViaInstitution}
           />
-          {!institution?.institutionalInitialCreditsExpirationBypassed &&
+          {!initialCreditExpirationBypassedViaInstitution &&
             oldProfile.initialCreditsExtensionEpochMillis && (
               <p style={{ color: colors.primary, fontWeight: 500 }}>
                 User requested an extension on{' '}
@@ -249,7 +249,7 @@ const InitialCreditsCard = ({
               </p>
             )}
           <FlexColumn>
-            {!institution?.institutionalInitialCreditsExpirationBypassed && (
+            {!initialCreditExpirationBypassedViaInstitution && (
               <InitialCreditBypassSwitch
                 currentlyBypassed={
                   updatedProfile.initialCreditsExpirationBypassed
