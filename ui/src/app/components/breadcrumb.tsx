@@ -7,7 +7,7 @@ import { Cohort, CohortReview, ConceptSet } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
-import { InvalidBillingBannerMaybe } from 'app/pages/workspace/invalid-billing-banner-maybe';
+import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
 import {
   analysisTabName,
   analysisTabPath,
@@ -24,6 +24,7 @@ import {
 } from 'app/utils';
 import {
   MatchParams,
+  profileStore,
   RouteDataStore,
   routeDataStore,
   withStore,
@@ -296,6 +297,26 @@ const BreadcrumbLink = ({ href, ...props }) => {
   return <Link to={href} {...props} />;
 };
 
+const isInvalidBilling = (workspace, profile) => {
+  if (!workspace || !profile) {
+    return false;
+  }
+
+  const { creatorUser } = workspace;
+  const isExpired = workspace.initialCredits.expirationEpochMillis < Date.now();
+  const isExhausted = workspace.initialCredits.exhausted;
+
+  console.log('Expired:', isExpired);
+  console.log('Exhausted:', isExhausted);
+  console.log('Creator User:', creatorUser);
+
+  return (
+    creatorUser?.givenName &&
+    creatorUser?.familyName &&
+    (isExhausted || (!workspace.initialCredits.expirationBypassed && isExpired))
+  );
+};
+
 interface Props {
   workspace: WorkspaceData;
   cohort: Cohort;
@@ -311,13 +332,17 @@ export const Breadcrumb = fp.flow(
   withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
-  const [showInvalidBillingBanner, setShowInvalidBillingBanner] =
-    useState(true);
+  const { profile } = profileStore.get();
+  const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
+    isInvalidBilling(props.workspace, profile)
+  );
+
+  console.log('Show Invalid Billing Banner:', showInvalidBillingBanner);
 
   useEffect(() => {
     // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
-    setShowInvalidBillingBanner(true);
-  }, [props?.workspace]);
+    setShowInvalidBillingBanner(isInvalidBilling(props.workspace, profile));
+  }, [props?.workspace, profile]);
 
   const trail = (): Array<BreadcrumbData> => {
     const workspaceMatch = matchPath<MatchParams>(location.pathname, {
@@ -407,7 +432,9 @@ export const Breadcrumb = fp.flow(
   return (
     <>
       {showInvalidBillingBanner && (
-        <InvalidBillingBannerMaybe
+        <InvalidBillingBanner
+          profile={profile}
+          workspace={props.workspace}
           onClose={() => setShowInvalidBillingBanner(false)}
         />
       )}
