@@ -306,10 +306,6 @@ const isInvalidBilling = (workspace, profile) => {
   const isExpired = workspace.initialCredits.expirationEpochMillis < Date.now();
   const isExhausted = workspace.initialCredits.exhausted;
 
-  console.log('Expired:', isExpired);
-  console.log('Exhausted:', isExhausted);
-  console.log('Creator User:', creatorUser);
-
   return (
     creatorUser?.givenName &&
     creatorUser?.familyName &&
@@ -336,8 +332,6 @@ export const Breadcrumb = fp.flow(
   const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
     isInvalidBilling(props.workspace, profile)
   );
-
-  console.log('Show Invalid Billing Banner:', showInvalidBillingBanner);
 
   useEffect(() => {
     // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
