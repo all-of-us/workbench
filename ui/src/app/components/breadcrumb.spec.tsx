@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 
 import { WorkspacesApi } from 'generated/fetch';
 
-import { minusDays, plusDays } from '../utils/dates';
 import { render, screen } from '@testing-library/react';
 import { Breadcrumb, getTrail } from 'app/components/breadcrumb';
 import {
@@ -15,6 +14,7 @@ import {
   dataTabPath,
 } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { minusDays, plusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { profileStore, routeDataStore } from 'app/utils/stores';
 
@@ -39,7 +39,7 @@ jest.mock('react-dom', () => {
 // Mock the InvalidBillingBanner component
 jest.mock('app/pages/workspace/invalid-billing-banner', () => {
   return {
-    InvalidBillingBanner: (props) => (
+    InvalidBillingBanner: () => (
       <div data-testid='invalid-billing-banner'>
         Invalid Billing Banner (Mocked)
       </div>
