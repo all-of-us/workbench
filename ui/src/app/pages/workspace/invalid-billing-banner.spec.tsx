@@ -110,8 +110,8 @@ describe('InvalidBillingBanner', () => {
     screen.getByText(
       new RegExp(
         'your initial credits have run out\\. ' +
-        'to use the workspace, a valid billing account needs to be added \\. ' +
-        'to learn more about establishing a billing account, read "" on the user support hub\\.',
+          'to use the workspace, a valid billing account needs to be added \\. ' +
+          'to learn more about establishing a billing account, read "" on the user support hub\\.',
         'i'
       )
     );
@@ -127,10 +127,10 @@ describe('InvalidBillingBanner', () => {
     await screen.findByText('This workspace is out of initial credits');
     screen.getByText(
       new RegExp(
-        'this workspace creator\'s initial credits have run out\\. ' +
-        'this workspace was created by someone else\\. ' +
-        'to use the workspace, a valid billing account needs to be added\\. ' +
-        'to learn more about establishing a billing account, read "" on the user support hub\\.',
+        "this workspace creator's initial credits have run out\\. " +
+          'this workspace was created by someone else\\. ' +
+          'to use the workspace, a valid billing account needs to be added\\. ' +
+          'to learn more about establishing a billing account, read "" on the user support hub\\.',
         'i'
       )
     );
