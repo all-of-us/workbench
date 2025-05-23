@@ -315,7 +315,6 @@ export const WorkspaceAbout = fp.flow(
       const notPublished = !featuredCategory;
       const isWorkspaceOwner =
         workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
-      console.log('Test');
       const workspaceLocked = workspace?.adminLocked;
       // isWorkspaceOwner notPublished disabled
       // true            true         true
