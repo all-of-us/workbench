@@ -515,8 +515,6 @@ interface CompletionBannerProps {
   profile: Profile;
 }
 const CompletionBanner = ({ profile }: CompletionBannerProps) => {
-  const enableInitialCreditsExpiration =
-    serverConfigStore.get().config.enableInitialCreditsExpiration;
   const { initialCreditsLimit, initialCreditsUsage } = profile;
   return (
     <FlexRow data-test-id='dar-completed' style={styles.completed}>
@@ -527,48 +525,47 @@ const CompletionBanner = ({ profile }: CompletionBannerProps) => {
         <div style={styles.completedText}>
           Researcher Workbench data access is complete.
         </div>
-        {enableInitialCreditsExpiration &&
-          profile.initialCreditsExpirationEpochMillis && (
-            <>
-              <div style={styles.completedText}>
-                You have{' '}
-                {formatInitialCreditsUSD(
-                  initialCreditsUsage
-                    ? initialCreditsLimit - initialCreditsUsage
-                    : initialCreditsLimit
-                )}{' '}
-                in initial credits remaining. These credits expire on{' '}
-                {displayDateWithoutHours(
-                  profile.initialCreditsExpirationEpochMillis
-                )}
-                .
-              </div>
-              <div style={styles.completedText}>
-                You will need to set up a billing account before your initial
-                credits expire or are fully used in order to avoid a disruption
-                in service.
-              </div>
-              <div style={styles.completedText}>
-                You can learn more about{' '}
-                <LinkButton
-                  style={{ display: 'inline' }}
-                  onClick={() =>
-                    window.open(supportUrls.initialCredits, '_blank')
-                  }
-                >
-                  initial credits
-                </LinkButton>{' '}
-                and setting up your own{' '}
-                <LinkButton
-                  style={{ display: 'inline' }}
-                  onClick={() => window.open(supportUrls.billing, '_blank')}
-                >
-                  billing account
-                </LinkButton>{' '}
-                in the linked articles.
-              </div>
-            </>
-          )}
+        {profile.initialCreditsExpirationEpochMillis && (
+          <>
+            <div style={styles.completedText}>
+              You have{' '}
+              {formatInitialCreditsUSD(
+                initialCreditsUsage
+                  ? initialCreditsLimit - initialCreditsUsage
+                  : initialCreditsLimit
+              )}{' '}
+              in initial credits remaining. These credits expire on{' '}
+              {displayDateWithoutHours(
+                profile.initialCreditsExpirationEpochMillis
+              )}
+              .
+            </div>
+            <div style={styles.completedText}>
+              You will need to set up a billing account before your initial
+              credits expire or are fully used in order to avoid a disruption in
+              service.
+            </div>
+            <div style={styles.completedText}>
+              You can learn more about{' '}
+              <LinkButton
+                style={{ display: 'inline' }}
+                onClick={() =>
+                  window.open(supportUrls.initialCredits, '_blank')
+                }
+              >
+                initial credits
+              </LinkButton>{' '}
+              and setting up your own{' '}
+              <LinkButton
+                style={{ display: 'inline' }}
+                onClick={() => window.open(supportUrls.billing, '_blank')}
+              >
+                billing account
+              </LinkButton>{' '}
+              in the linked articles.
+            </div>
+          </>
+        )}
       </FlexColumn>
       <GetStartedButton style={{ marginLeft: 'auto' }} />
     </FlexRow>

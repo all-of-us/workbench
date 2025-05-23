@@ -1929,13 +1929,6 @@ describe('DataAccessRequirements', () => {
         reload,
         updateCache,
       });
-
-      serverConfigStore.set({
-        config: {
-          ...defaultServerConfig,
-          enableInitialCreditsExpiration: true,
-        },
-      });
     });
 
     it('should show correct expiration date for credits', () => {
