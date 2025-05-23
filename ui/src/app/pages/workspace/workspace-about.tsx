@@ -38,7 +38,6 @@ import {
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
@@ -316,7 +315,6 @@ export const WorkspaceAbout = fp.flow(
       const notPublished = !featuredCategory;
       const isWorkspaceOwner =
         workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
-
       const workspaceLocked = workspace?.adminLocked;
       // isWorkspaceOwner notPublished disabled
       // true            true         true
@@ -474,18 +472,16 @@ export const WorkspaceAbout = fp.flow(
                       </div>
                     </div>
 
-                    {serverConfigStore.get().config
-                      .enableInitialCreditsExpiration &&
-                      !workspace.initialCredits.expirationBypassed && (
-                        <div style={{ ...styles.infoBox }}>
-                          <div style={styles.infoBoxHeader}>
-                            Workspace Initial Credit Expiration
-                          </div>
-                          <div style={{ fontSize: '0.75rem' }}>
-                            {this.workspaceInitialCreditsExpirationTime}
-                          </div>
+                    {!workspace.initialCredits.expirationBypassed && (
+                      <div style={{ ...styles.infoBox }}>
+                        <div style={styles.infoBoxHeader}>
+                          Workspace Initial Credit Expiration
                         </div>
-                      )}
+                        <div style={{ fontSize: '0.75rem' }}>
+                          {this.workspaceInitialCreditsExpirationTime}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
             </div>

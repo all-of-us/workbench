@@ -14,10 +14,7 @@ export const isUsingInitialCredits = (workspace: Workspace): boolean => {
 
 export const isValidBilling = (workspace: Workspace): boolean => {
   const isInitialCredits = isUsingInitialCredits(workspace);
-  const enableInitialCreditsExpiration =
-    serverConfigStore.get().config.enableInitialCreditsExpiration;
   const isExpired =
-    enableInitialCreditsExpiration &&
     workspace?.initialCredits.expirationEpochMillis < Date.now();
 
   return (

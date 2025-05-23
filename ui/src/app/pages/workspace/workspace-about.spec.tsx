@@ -82,7 +82,6 @@ describe('WorkspaceAbout', () => {
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
-        enableInitialCreditsExpiration: true,
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);
@@ -322,29 +321,6 @@ describe('WorkspaceAbout', () => {
       screen.getByText(/workspace initial credit expiration/i)
     ).toBeInTheDocument();
     screen.getByText(/tue mar 17 1998/i);
-  });
-
-  it('should not see initial credit expiration date when enableInitialCreditsExpiration is false', async () => {
-    const initialCreditsBillingAccountId = 'initial-credits';
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.getValue(),
-      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
-      initialCredits: {
-        exhausted: false,
-        expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
-      },
-    });
-    serverConfigStore.set({
-      config: {
-        ...serverConfigStore.get().config,
-        initialCreditsBillingAccountId,
-        enableInitialCreditsExpiration: false,
-      },
-    });
-    component();
-    expect(
-      screen.queryByText(/workspace initial credit expiration/i)
-    ).not.toBeInTheDocument();
   });
 
   it('should not see initial credit expiration section when bypassed', async () => {
