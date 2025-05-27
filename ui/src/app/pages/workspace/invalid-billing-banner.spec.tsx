@@ -82,11 +82,6 @@ describe('InvalidBillingBanner', () => {
       ...workspaceDataStub,
       namespace: 'test-namespace',
       terraName: 'test-workspace',
-      initialCredits: {
-        exhausted: false,
-        expirationEpochMillis: plusDays(Date.now(), -1),
-        expirationBypassed: false,
-      },
       creatorUser: ownedByMe ? me : someOneElse,
     };
     currentWorkspaceStore.next(workspace);
