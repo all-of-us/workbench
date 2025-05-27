@@ -7,9 +7,15 @@ import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToApp
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Streams;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import com.sendgrid.helpers.mail.objects.Personalization;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
@@ -32,8 +38,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
@@ -44,14 +48,7 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
-import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
-import org.pmiops.workbench.mandrill.model.RecipientAddress;
-import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -724,8 +721,8 @@ public class MailServiceImpl implements MailService {
     return new StringSubstitutor(stringMap).replace(emailContent);
   }
 
-  private RecipientAddress validatedRecipient(
-      final String contactEmail, final RecipientType recipientType) {
+  private Email validatedRecipient(
+      final String contactEmail) {
     try {
       final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
       contactInternetAddress.validate();
@@ -733,9 +730,7 @@ public class MailServiceImpl implements MailService {
       throw new ServerErrorException(String.format("Email: %s is invalid.", contactEmail));
     }
 
-    final RecipientAddress toAddress = new RecipientAddress();
-    toAddress.email(contactEmail).type(recipientType);
-    return toAddress;
+    return new Email(contactEmail);
   }
 
   private void sendWithRetries(
@@ -764,91 +759,49 @@ public class MailServiceImpl implements MailService {
       String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
-    List<RecipientAddress> recipients =
-        Streams.concat(
-                toRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.TO)),
-                ccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.CC)),
-                bccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.BCC)))
-            .toList();
-    final MandrillMessage msg =
-        new MandrillMessage()
-            .to(recipients)
-            .html(htmlMessage)
-            .subject(subject)
-            .preserveRecipients(true)
-            .fromEmail(from);
+    Mail mail = new Mail();
+    Personalization personalization = new Personalization();
+    toRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addTo);
+    ccRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addCc);
+    bccRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addBcc);
 
-    String apiKey = cloudStorageClientProvider.get().readMandrillApiKey();
+
+    mail.addPersonalization(personalization);
+    mail.setFrom(new Email(from));
+    mail.setSubject(subject);
+    mail.addContent(new Content("text/html", htmlMessage));
+
+    SendGrid sg = new SendGrid(cloudStorageClientProvider.get().readSendgridApiKey());
+
+    Request request = new Request();
+    request.setMethod(Method.POST);
+    request.setEndpoint("mail/send");
+
     int retries = workbenchConfigProvider.get().mandrill.sendRetries;
-    MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
-    keyAndMessage.setKey(apiKey);
-    keyAndMessage.setMessage(msg);
     do {
       retries--;
-      Pair<Status, String> attempt = trySend(keyAndMessage);
-      Status status = Status.valueOf(attempt.getLeft().toString());
-      String defaultFailureMessage = String.format("Sending email failed: %s", attempt.getRight());
-      switch (status) {
-        case API_ERROR:
-          log.log(
-              Level.WARNING,
-              String.format(
-                  "Messaging Exception API_ERROR: Email '%s' not sent: %s",
-                  descriptionForLog, attempt.getRight()));
-          if (retries == 0) {
-            log.log(
-                Level.SEVERE,
-                String.format(
-                    "Messaging Exception API_ERROR: On Last Attempt! Email '%s' not sent: %s",
-                    descriptionForLog, attempt.getRight()));
-            throw new MessagingException(defaultFailureMessage);
-          }
-          break;
+      try {
+        request.setBody(mail.build());
+        sg.api(request);
 
-        case REJECTED:
-          String sentTo =
-              recipients.stream().map(RecipientAddress::getEmail).collect(Collectors.joining(", "));
+        log.log(Level.INFO, String.format("Email '%s' was sent.", descriptionForLog));
+        return;
+      } catch (IOException e) {
+        log.log(
+            Level.WARNING,
+            String.format(
+                "IO Exception: Email '%s' not sent: %s",
+                descriptionForLog, e.getMessage()));
+        if (retries == 0) {
           log.log(
               Level.SEVERE,
               String.format(
-                  "Messaging Exception REJECTED: Email '%s' not sent to %s: %s",
-                  descriptionForLog, sentTo, attempt.getRight()));
-          throw new MessagingException(defaultFailureMessage);
-
-        case SUCCESSFUL:
-          log.log(Level.INFO, String.format("Email '%s' was sent.", descriptionForLog));
-          return;
-
-        default:
-          if (retries == 0) {
-            log.log(
-                Level.SEVERE,
-                String.format(
-                    "Messaging Exception: Email '%s' was not sent. Default case.",
-                    descriptionForLog));
-            throw new MessagingException(defaultFailureMessage);
-          }
-      }
-    } while (retries > 0);
-  }
-
-  private Pair<Status, String> trySend(MandrillApiKeyAndMessage keyAndMessage) {
-    try {
-      MandrillMessageStatuses msgStatuses = mandrillApiProvider.get().send(keyAndMessage);
-      for (MandrillMessageStatus msgStatus : msgStatuses) {
-        if (msgStatus.getRejectReason() != null) {
-          return new ImmutablePair<>(Status.REJECTED, msgStatus.getRejectReason());
+                  "IO Exception: On Last Attempt! Email '%s' not sent: %s",
+                  descriptionForLog, e.getMessage()));
+          throw new MessagingException("Sending email failed", e);
         }
       }
-    } catch (ApiException e) {
-      return new ImmutablePair<>(
-          Status.API_ERROR,
-          String.format(
-              "Code: %s | Response: %s | Exception: %s", e.getCode(), e.getResponseBody(), e));
-    } catch (Exception e) {
-      return new ImmutablePair<>(Status.API_ERROR, e.toString());
-    }
-    return new ImmutablePair<>(Status.SUCCESSFUL, "");
+    } while (retries > 0);
   }
 
   private String getAllOfUsLogo() {

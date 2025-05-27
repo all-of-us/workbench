@@ -40,6 +40,12 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   }
 
   @Override
+  public String readSendgridApiKey() {
+    JSONObject sendgridKey = getCredentialsBucketJSON("tbd"); // todo: path? specified in RW-14859
+    return sendgridKey.getString("api-key");
+  }
+
+  @Override
   public JSONObject getAbsorbCredentials() {
     // Our Absorb credentials are for an "Admin" user, as outlined here:
     // https://support.absorblms.com/hc/en-us/articles/360053227673-Admin-Roles-Permissions

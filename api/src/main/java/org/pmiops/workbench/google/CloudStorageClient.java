@@ -13,6 +13,8 @@ public interface CloudStorageClient {
 
   String readMandrillApiKey();
 
+  String readSendgridApiKey();
+
   String getImageUrl(String image_name);
 
   /**
