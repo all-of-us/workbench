@@ -7,7 +7,7 @@ import { ProfileApi, User } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render } from '@testing-library/react';
-import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
+import { InvalidBillingBanner } from 'app/lab/pages/workspace/invalid-billing-banner';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';

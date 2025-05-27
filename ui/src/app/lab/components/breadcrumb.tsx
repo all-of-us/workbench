@@ -6,8 +6,8 @@ import * as fp from 'lodash/fp';
 import { Cohort, CohortReview, ConceptSet } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { InvalidBillingBanner } from 'app/lab/pages/workspace/invalid-billing-banner';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
-import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
 import {
   analysisTabName,
   analysisTabPath,

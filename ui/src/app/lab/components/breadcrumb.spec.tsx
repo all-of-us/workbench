@@ -37,7 +37,7 @@ jest.mock('react-dom', () => {
 });
 
 // Mock the InvalidBillingBanner component
-jest.mock('app/pages/workspace/invalid-billing-banner', () => {
+jest.mock('app/lab/pages/workspace/invalid-billing-banner', () => {
   return {
     InvalidBillingBanner: () => (
       <div data-testid='invalid-billing-banner'>
