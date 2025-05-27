@@ -335,7 +335,9 @@ export const Breadcrumb = fp.flow(
 
   useEffect(() => {
     // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
-    setShowInvalidBillingBanner(shouldShowInvalidBillingBanner(props.workspace, profile));
+    setShowInvalidBillingBanner(
+      shouldShowInvalidBillingBanner(props.workspace, profile)
+    );
   }, [props?.workspace, profile]);
 
   const trail = (): Array<BreadcrumbData> => {
