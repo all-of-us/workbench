@@ -1,6 +1,7 @@
 import { WorkspacesApi } from 'generated/fetch';
 
-import { getTrail } from 'app/components/breadcrumb';
+import { UIAppType } from 'app/components/apps-panel/utils';
+import { getTrail } from 'app/lab/components/breadcrumb';
 import {
   analysisTabName,
   analysisTabPath,
@@ -16,7 +17,6 @@ import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { UIAppType } from './apps-panel/utils';
 import { BreadcrumbType } from './breadcrumb-type';
 
 describe('getTrail', () => {
