@@ -297,7 +297,7 @@ const BreadcrumbLink = ({ href, ...props }) => {
   return <Link to={href} {...props} />;
 };
 
-const isInvalidBilling = (workspace, profile) => {
+const shouldShowInvalidBillingBanner = (workspace, profile) => {
   if (!workspace || !profile) {
     return false;
   }
@@ -330,12 +330,12 @@ export const Breadcrumb = fp.flow(
 )((props: Props) => {
   const { profile } = profileStore.get();
   const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
-    isInvalidBilling(props.workspace, profile)
+    shouldShowInvalidBillingBanner(props.workspace, profile)
   );
 
   useEffect(() => {
     // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
-    setShowInvalidBillingBanner(isInvalidBilling(props.workspace, profile));
+    setShowInvalidBillingBanner(shouldShowInvalidBillingBanner(props.workspace, profile));
   }, [props?.workspace, profile]);
 
   const trail = (): Array<BreadcrumbData> => {
