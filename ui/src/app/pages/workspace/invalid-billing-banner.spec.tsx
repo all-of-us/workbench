@@ -66,14 +66,6 @@ describe('InvalidBillingBanner', () => {
       screen.queryByRole('button', { name: /edit workspace/i })
     ).not.toBeInTheDocument();
 
-  beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('December 13, 2016 14:54:00'));
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
 
