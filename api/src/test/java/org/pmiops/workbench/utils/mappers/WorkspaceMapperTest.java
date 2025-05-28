@@ -168,7 +168,7 @@ public class WorkspaceMapperTest {
 
     sourceDbWorkspace =
         new DbWorkspace()
-            .setWorkspaceId(WORKSPACE_DB_ID)
+            //      .setWorkspaceId(WORKSPACE_DB_ID)
             .setVersion(WORKSPACE_VERSION)
             .setName(WORKSPACE_AOU_NAME)
             .setFirecloudName(WORKSPACE_FIRECLOUD_NAME)

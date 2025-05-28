@@ -89,7 +89,6 @@ public class ConceptSetServiceTest {
   private DbWorkspace mockWorkspace() {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setName("Target DbWorkspace");
-    workspace.setWorkspaceId(2);
     workspace = workspaceDao.save(workspace);
     return workspace;
   }

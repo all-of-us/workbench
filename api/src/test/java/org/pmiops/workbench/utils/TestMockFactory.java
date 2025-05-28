@@ -279,7 +279,7 @@ public class TestMockFactory {
   // TODO(jaycarlton) use  WorkspaceMapper.toDbWorkspace() once it's available RW 4803
   public static DbWorkspace createDbWorkspaceStub(Workspace workspace, long workspaceDbId) {
     DbWorkspace dbWorkspace = new DbWorkspace();
-    dbWorkspace.setWorkspaceId(workspaceDbId);
+    //   dbWorkspace.setWorkspaceId(workspaceDbId);
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
     // a.k.a. RawlsWorkspaceDetails.name

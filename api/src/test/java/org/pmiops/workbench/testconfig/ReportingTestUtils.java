@@ -167,7 +167,7 @@ public class ReportingTestUtils {
     workspace.setScientificApproach(WORKSPACE__RP_SCIENTIFIC_APPROACH);
     workspace.setSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
-    workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
+    // workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
     workspace.setWorkspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
     workspace.setBillingAccountName(fullBillingAccountName(WORKSPACE__BILLING_ACCOUNT_ID));
     workspace.setFeaturedCategory(
