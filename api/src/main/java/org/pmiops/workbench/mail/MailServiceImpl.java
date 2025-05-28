@@ -12,8 +12,6 @@ import com.google.common.io.Resources;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.AddressException;
-import jakarta.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
@@ -39,7 +37,6 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,16 +133,16 @@ public class MailServiceImpl implements MailService {
   // CT Steps
   private static final String CT_TRAINING = "Complete All of Us Controlled Tier Training";
 
-  private final Provider<MandrillApi> mandrillApiProvider;
+  private final Provider<SendGridMailSender> sendGridMailSenderProvider;
   private final Provider<CloudStorageClient> cloudStorageClientProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public MailServiceImpl(
-      Provider<MandrillApi> mandrillApiProvider,
+      Provider<SendGridMailSender> sendGridMailSenderProvider,
       Provider<CloudStorageClient> cloudStorageClientProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.mandrillApiProvider = mandrillApiProvider;
+    this.sendGridMailSenderProvider = sendGridMailSenderProvider;
     this.cloudStorageClientProvider = cloudStorageClientProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -732,9 +729,7 @@ public class MailServiceImpl implements MailService {
       String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
-    var mailSender = new SendGridMailSender(cloudStorageClientProvider.get(), workbenchConfigProvider.get());
-
-    mailSender.send(from, toRecipientEmails, ccRecipientEmails, bccRecipientEmails, subject, descriptionForLog, htmlMessage);
+    sendGridMailSenderProvider.get().send(from, toRecipientEmails, ccRecipientEmails, bccRecipientEmails, subject, descriptionForLog, htmlMessage);
   }
 
   private String getAllOfUsLogo() {
