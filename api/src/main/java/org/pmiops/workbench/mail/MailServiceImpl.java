@@ -9,13 +9,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
-import com.sendgrid.Method;
-import com.sendgrid.Request;
-import com.sendgrid.SendGrid;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
-import com.sendgrid.helpers.mail.objects.Personalization;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
@@ -34,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +35,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
@@ -144,12 +135,6 @@ public class MailServiceImpl implements MailService {
 
   // CT Steps
   private static final String CT_TRAINING = "Complete All of Us Controlled Tier Training";
-
-  private enum Status {
-    REJECTED,
-    API_ERROR,
-    SUCCESSFUL
-  }
 
   private final Provider<MandrillApi> mandrillApiProvider;
   private final Provider<CloudStorageClient> cloudStorageClientProvider;
@@ -721,18 +706,6 @@ public class MailServiceImpl implements MailService {
     return new StringSubstitutor(stringMap).replace(emailContent);
   }
 
-  private Email validatedRecipient(
-      final String contactEmail) {
-    try {
-      final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
-      contactInternetAddress.validate();
-    } catch (AddressException e) {
-      throw new ServerErrorException(String.format("Email: %s is invalid.", contactEmail));
-    }
-
-    return new Email(contactEmail);
-  }
-
   private void sendWithRetries(
       List<String> toRecipientEmails,
       List<String> ccRecipientEmails,
@@ -759,49 +732,9 @@ public class MailServiceImpl implements MailService {
       String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
-    Mail mail = new Mail();
-    Personalization personalization = new Personalization();
-    toRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addTo);
-    ccRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addCc);
-    bccRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addBcc);
+    var mailSender = new SendGridMailSender(cloudStorageClientProvider.get(), workbenchConfigProvider.get());
 
-
-    mail.addPersonalization(personalization);
-    mail.setFrom(new Email(from));
-    mail.setSubject(subject);
-    mail.addContent(new Content("text/html", htmlMessage));
-
-    SendGrid sg = new SendGrid(cloudStorageClientProvider.get().readSendgridApiKey());
-
-    Request request = new Request();
-    request.setMethod(Method.POST);
-    request.setEndpoint("mail/send");
-
-    int retries = workbenchConfigProvider.get().mandrill.sendRetries;
-    do {
-      retries--;
-      try {
-        request.setBody(mail.build());
-        sg.api(request);
-
-        log.log(Level.INFO, String.format("Email '%s' was sent.", descriptionForLog));
-        return;
-      } catch (IOException e) {
-        log.log(
-            Level.WARNING,
-            String.format(
-                "IO Exception: Email '%s' not sent: %s",
-                descriptionForLog, e.getMessage()));
-        if (retries == 0) {
-          log.log(
-              Level.SEVERE,
-              String.format(
-                  "IO Exception: On Last Attempt! Email '%s' not sent: %s",
-                  descriptionForLog, e.getMessage()));
-          throw new MessagingException("Sending email failed", e);
-        }
-      }
-    } while (retries > 0);
+    mailSender.send(from, toRecipientEmails, ccRecipientEmails, bccRecipientEmails, subject, descriptionForLog, htmlMessage);
   }
 
   private String getAllOfUsLogo() {
