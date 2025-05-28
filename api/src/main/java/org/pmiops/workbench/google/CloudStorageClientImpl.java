@@ -41,8 +41,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
   @Override
   public String readSendgridApiKey() {
-    JSONObject sendgridKey = getCredentialsBucketJSON("tbd"); // todo: path? specified in RW-14859
-    return sendgridKey.getString("api-key");
+    return getCredentialsBucketString("sendgrid-key.txt");
   }
 
   @Override
