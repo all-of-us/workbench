@@ -13,7 +13,7 @@ import {
   TerraJobStatus,
 } from 'generated/fetch';
 
-import { BreadcrumbType } from 'app/components/breadcrumb-type';
+import { BreadcrumbType } from 'app/lab/components/breadcrumb-type';
 import { dataSetApi, profileApi } from 'app/services/swagger-fetch-clients';
 import { Atom, atom } from 'app/utils/subscribable';
 import StackdriverErrorReporter from 'stackdriver-errors-js';

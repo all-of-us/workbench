@@ -6,7 +6,7 @@ import * as fp from 'lodash/fp';
 import { WorkspacesApi } from 'generated/fetch';
 
 import { render, screen } from '@testing-library/react';
-import { Breadcrumb, getTrail } from 'app/components/breadcrumb';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import {
   analysisTabName,
   analysisTabPath,
@@ -25,7 +25,7 @@ import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { UIAppType } from './apps-panel/utils';
+import { Breadcrumb, getTrail } from './breadcrumb';
 import { BreadcrumbType } from './breadcrumb-type';
 
 // Mock ReactDOM.createPortal since InvalidBillingBanner uses portals
@@ -37,7 +37,7 @@ jest.mock('react-dom', () => {
 });
 
 // Mock the InvalidBillingBanner component
-jest.mock('app/pages/workspace/invalid-billing-banner', () => {
+jest.mock('app/lab/pages/workspace/invalid-billing-banner', () => {
   return {
     InvalidBillingBanner: () => (
       <div data-testid='invalid-billing-banner'>
