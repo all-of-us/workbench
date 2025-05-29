@@ -25,10 +25,20 @@ public class SendGridMailSender implements MailSender {
   private final int maxRetries;
   private static final Logger log = Logger.getLogger(SendGridMailSender.class.getName());
 
-
   public SendGridMailSender(CloudStorageClient cloudStorageClient, WorkbenchConfig workbenchConfig) {
-    this.sendGrid = new SendGrid(cloudStorageClient.readSendgridApiKey());
+    this.sendGrid = createSendGrid(cloudStorageClient.readSendgridApiKey());
     this.maxRetries = workbenchConfig.mandrill.sendRetries;
+  }
+
+  /**
+   * Creates a SendGrid client with the provided API key.
+   * Protected for testability.
+   *
+   * @param apiKey the SendGrid API key
+   * @return a configured SendGrid client
+   */
+  protected SendGrid createSendGrid(String apiKey) {
+    return new SendGrid(apiKey);
   }
 
   @Override
@@ -81,7 +91,6 @@ public class SendGridMailSender implements MailSender {
     toRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addTo);
     ccRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addCc);
     bccRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addBcc);
-
 
     mail.addPersonalization(personalization);
     mail.setFrom(new Email(from));

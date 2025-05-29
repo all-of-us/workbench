@@ -25,7 +25,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.mandrill.ApiException;
-import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
@@ -51,7 +50,7 @@ public class MailServiceTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, MailServiceImpl.class})
-  @MockBean({CloudStorageClient.class, MandrillApi.class, SendGridMailSender.class})
+  @MockBean({CloudStorageClient.class, SendGridMailSender.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
