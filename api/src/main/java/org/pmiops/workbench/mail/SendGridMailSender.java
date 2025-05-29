@@ -25,14 +25,14 @@ public class SendGridMailSender implements MailSender {
   private final int maxRetries;
   private static final Logger log = Logger.getLogger(SendGridMailSender.class.getName());
 
-  public SendGridMailSender(CloudStorageClient cloudStorageClient, WorkbenchConfig workbenchConfig) {
+  public SendGridMailSender(
+      CloudStorageClient cloudStorageClient, WorkbenchConfig workbenchConfig) {
     this.sendGrid = createSendGrid(cloudStorageClient.readSendgridApiKey());
     this.maxRetries = workbenchConfig.mandrill.sendRetries;
   }
 
   /**
-   * Creates a SendGrid client with the provided API key.
-   * Protected for testability.
+   * Creates a SendGrid client with the provided API key. Protected for testability.
    *
    * @param apiKey the SendGrid API key
    * @return a configured SendGrid client
@@ -42,10 +42,18 @@ public class SendGridMailSender implements MailSender {
   }
 
   @Override
-  public void send(String from, List<String> toRecipientEmails, List<String> ccRecipientEmails,
-      List<String> bccRecipientEmails, String subject, String descriptionForLog, String htmlMessage)
+  public void send(
+      String from,
+      List<String> toRecipientEmails,
+      List<String> ccRecipientEmails,
+      List<String> bccRecipientEmails,
+      String subject,
+      String descriptionForLog,
+      String htmlMessage)
       throws MessagingException {
-    Mail mail = createMail(from, toRecipientEmails, ccRecipientEmails, bccRecipientEmails, subject, htmlMessage);
+    Mail mail =
+        createMail(
+            from, toRecipientEmails, ccRecipientEmails, bccRecipientEmails, subject, htmlMessage);
     Request request = new Request();
     request.setMethod(Method.POST);
     request.setEndpoint("mail/send");
@@ -53,7 +61,9 @@ public class SendGridMailSender implements MailSender {
     try {
       request.setBody(mail.build());
     } catch (IOException e) {
-      log.log(Level.SEVERE, String.format("Error building email '%s': %s", descriptionForLog, e.getMessage()));
+      log.log(
+          Level.SEVERE,
+          String.format("Error building email '%s': %s", descriptionForLog, e.getMessage()));
       throw new MessagingException("Building email failed", e);
     }
 
@@ -69,8 +79,7 @@ public class SendGridMailSender implements MailSender {
         log.log(
             Level.WARNING,
             String.format(
-                "Messaging Exception: Email '%s' not sent: %s",
-                descriptionForLog, e.getMessage()));
+                "Messaging Exception: Email '%s' not sent: %s", descriptionForLog, e.getMessage()));
         if (retries == 0) {
           log.log(
               Level.SEVERE,
@@ -81,11 +90,15 @@ public class SendGridMailSender implements MailSender {
         }
       }
     } while (retries > 0);
-
   }
 
-  Mail createMail(String from, List<String> toRecipientEmails,
-      List<String> ccRecipientEmails, List<String> bccRecipientEmails, String subject, String htmlMessage) {
+  Mail createMail(
+      String from,
+      List<String> toRecipientEmails,
+      List<String> ccRecipientEmails,
+      List<String> bccRecipientEmails,
+      String subject,
+      String htmlMessage) {
     Mail mail = new Mail();
     Personalization personalization = new Personalization();
     toRecipientEmails.stream().map(this::validatedRecipient).forEach(personalization::addTo);

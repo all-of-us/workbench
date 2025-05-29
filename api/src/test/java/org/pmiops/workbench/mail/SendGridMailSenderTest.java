@@ -39,11 +39,9 @@ public class SendGridMailSenderTest {
   private static final String HTML_CONTENT = "<p>Test content</p>";
   private static final String LOG_DESCRIPTION = "Test email";
 
-  @Mock
-  private CloudStorageClient mockCloudStorageClient;
+  @Mock private CloudStorageClient mockCloudStorageClient;
 
-  @Mock
-  private SendGrid mockSendGrid;
+  @Mock private SendGrid mockSendGrid;
 
   private SendGridMailSender sendGridMailSender;
 
@@ -60,13 +58,14 @@ public class SendGridMailSenderTest {
     workbenchConfig.mandrill.sendRetries = 3;
 
     // Create instance of SendGridMailSender with mocked dependencies
-    sendGridMailSender = new SendGridMailSender(mockCloudStorageClient, workbenchConfig) {
-      @Override
-      protected SendGrid createSendGrid(String apiKey) {
-          // Override to return our mock instead of creating a real SendGrid client
-          return mockSendGrid;
-      }
-    };
+    sendGridMailSender =
+        new SendGridMailSender(mockCloudStorageClient, workbenchConfig) {
+          @Override
+          protected SendGrid createSendGrid(String apiKey) {
+            // Override to return our mock instead of creating a real SendGrid client
+            return mockSendGrid;
+          }
+        };
   }
 
   @Test
@@ -74,7 +73,8 @@ public class SendGridMailSenderTest {
     Response mockResponse = mock(Response.class);
     when(mockSendGrid.api(any(Request.class))).thenReturn(mockResponse);
 
-    sendGridMailSender.send(FROM_EMAIL,
+    sendGridMailSender.send(
+        FROM_EMAIL,
         Collections.singletonList(TO_EMAIL),
         Collections.singletonList(CC_EMAIL),
         Collections.singletonList(BCC_EMAIL),
@@ -85,12 +85,16 @@ public class SendGridMailSenderTest {
     ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
     verify(mockSendGrid, times(1)).api(requestCaptor.capture());
 
-    String expectedBody = sendGridMailSender.createMail(FROM_EMAIL,
-        Collections.singletonList(TO_EMAIL),
-        Collections.singletonList(CC_EMAIL),
-        Collections.singletonList(BCC_EMAIL),
-        SUBJECT,
-        HTML_CONTENT).build();
+    String expectedBody =
+        sendGridMailSender
+            .createMail(
+                FROM_EMAIL,
+                Collections.singletonList(TO_EMAIL),
+                Collections.singletonList(CC_EMAIL),
+                Collections.singletonList(BCC_EMAIL),
+                SUBJECT,
+                HTML_CONTENT)
+            .build();
 
     Request capturedRequest = requestCaptor.getValue();
     assertEquals("POST", capturedRequest.getMethod().name());
@@ -100,9 +104,12 @@ public class SendGridMailSenderTest {
 
   @Test
   public void testSendEmail_retryFailures() throws IOException, MessagingException {
-    when(mockSendGrid.api(any(Request.class))).thenThrow(new IOException("SendGrid API error")).thenReturn(mock(Response.class));
+    when(mockSendGrid.api(any(Request.class)))
+        .thenThrow(new IOException("SendGrid API error"))
+        .thenReturn(mock(Response.class));
 
-    sendGridMailSender.send(FROM_EMAIL,
+    sendGridMailSender.send(
+        FROM_EMAIL,
         Collections.singletonList(TO_EMAIL),
         Collections.singletonList(CC_EMAIL),
         Collections.singletonList(BCC_EMAIL),
@@ -113,12 +120,16 @@ public class SendGridMailSenderTest {
     ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
     verify(mockSendGrid, times(2)).api(requestCaptor.capture());
 
-    String expectedBody = sendGridMailSender.createMail(FROM_EMAIL,
-        Collections.singletonList(TO_EMAIL),
-        Collections.singletonList(CC_EMAIL),
-        Collections.singletonList(BCC_EMAIL),
-        SUBJECT,
-        HTML_CONTENT).build();
+    String expectedBody =
+        sendGridMailSender
+            .createMail(
+                FROM_EMAIL,
+                Collections.singletonList(TO_EMAIL),
+                Collections.singletonList(CC_EMAIL),
+                Collections.singletonList(BCC_EMAIL),
+                SUBJECT,
+                HTML_CONTENT)
+            .build();
 
     Request capturedRequest = requestCaptor.getValue();
     assertEquals("POST", capturedRequest.getMethod().name());
@@ -130,27 +141,32 @@ public class SendGridMailSenderTest {
   public void testSendEmail_limitRetryFailures() throws IOException {
     when(mockSendGrid.api(any(Request.class))).thenThrow(new IOException("SendGrid API error"));
 
-    assertThrows(MessagingException.class, () -> {
-      sendGridMailSender.send(FROM_EMAIL,
-          Collections.singletonList(TO_EMAIL),
-          Collections.singletonList(CC_EMAIL),
-          Collections.singletonList(BCC_EMAIL),
-          SUBJECT,
-          LOG_DESCRIPTION,
-          HTML_CONTENT);
-    });
+    assertThrows(
+        MessagingException.class,
+        () -> {
+          sendGridMailSender.send(
+              FROM_EMAIL,
+              Collections.singletonList(TO_EMAIL),
+              Collections.singletonList(CC_EMAIL),
+              Collections.singletonList(BCC_EMAIL),
+              SUBJECT,
+              LOG_DESCRIPTION,
+              HTML_CONTENT);
+        });
 
     verify(mockSendGrid, times(3)).api(any(Request.class));
   }
 
   @Test
   public void testCreateMail_success() {
-    Mail mail = sendGridMailSender.createMail(FROM_EMAIL,
-        Collections.singletonList(TO_EMAIL),
-        Collections.singletonList(CC_EMAIL),
-        Collections.singletonList(BCC_EMAIL),
-        SUBJECT,
-        HTML_CONTENT);
+    Mail mail =
+        sendGridMailSender.createMail(
+            FROM_EMAIL,
+            Collections.singletonList(TO_EMAIL),
+            Collections.singletonList(CC_EMAIL),
+            Collections.singletonList(BCC_EMAIL),
+            SUBJECT,
+            HTML_CONTENT);
 
     assertEquals(FROM_EMAIL, mail.getFrom().getEmail());
     assertEquals(SUBJECT, mail.getSubject());
@@ -174,40 +190,50 @@ public class SendGridMailSenderTest {
   public void testCreateMail_invalidToEmail() {
     List<String> toEmails = Arrays.asList(TO_EMAIL, INVALID_EMAIL);
 
-    assertThrows(ServerErrorException.class, () -> {
-      sendGridMailSender.createMail(FROM_EMAIL, toEmails,
-          Collections.singletonList(CC_EMAIL),
-          Collections.singletonList(BCC_EMAIL),
-          SUBJECT,
-          HTML_CONTENT);
-    });
+    assertThrows(
+        ServerErrorException.class,
+        () -> {
+          sendGridMailSender.createMail(
+              FROM_EMAIL,
+              toEmails,
+              Collections.singletonList(CC_EMAIL),
+              Collections.singletonList(BCC_EMAIL),
+              SUBJECT,
+              HTML_CONTENT);
+        });
   }
 
   @Test
   public void testCreateMail_invalidCcEmail() {
     List<String> ccEmails = Arrays.asList(CC_EMAIL, INVALID_EMAIL);
 
-    assertThrows(ServerErrorException.class, () -> {
-      sendGridMailSender.createMail(FROM_EMAIL,
-          Collections.singletonList(TO_EMAIL),
-          ccEmails,
-          Collections.singletonList(BCC_EMAIL),
-          SUBJECT,
-          HTML_CONTENT);
-    });
+    assertThrows(
+        ServerErrorException.class,
+        () -> {
+          sendGridMailSender.createMail(
+              FROM_EMAIL,
+              Collections.singletonList(TO_EMAIL),
+              ccEmails,
+              Collections.singletonList(BCC_EMAIL),
+              SUBJECT,
+              HTML_CONTENT);
+        });
   }
 
   @Test
   public void testCreateMail_invalidBccEmail() {
     List<String> bccEmails = Arrays.asList(BCC_EMAIL, INVALID_EMAIL);
 
-    assertThrows(ServerErrorException.class, () -> {
-      sendGridMailSender.createMail(FROM_EMAIL,
-          Collections.singletonList(TO_EMAIL),
-          Collections.singletonList(CC_EMAIL),
-          bccEmails,
-          SUBJECT,
-          HTML_CONTENT);
-    });
+    assertThrows(
+        ServerErrorException.class,
+        () -> {
+          sendGridMailSender.createMail(
+              FROM_EMAIL,
+              Collections.singletonList(TO_EMAIL),
+              Collections.singletonList(CC_EMAIL),
+              bccEmails,
+              SUBJECT,
+              HTML_CONTENT);
+        });
   }
 }

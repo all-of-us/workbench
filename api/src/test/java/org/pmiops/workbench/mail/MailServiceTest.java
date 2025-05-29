@@ -24,7 +24,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
@@ -65,7 +64,7 @@ public class MailServiceTest {
   @Autowired private MailService mailService;
 
   @BeforeEach
-  public void setUp() throws ApiException {
+  public void setUp() {
     workbenchConfig = createWorkbenchConfig();
 
     when(mockCloudStorageClient.getImageUrl(any())).thenReturn("test_img");
@@ -76,14 +75,15 @@ public class MailServiceTest {
     mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.mandrill.fromEmail),
-        eq(Collections.singletonList(CONTACT_EMAIL)),
-        eq(Collections.emptyList()),
-        eq(Collections.emptyList()),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.mandrill.fromEmail),
+            eq(Collections.singletonList(CONTACT_EMAIL)),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains(FULL_USER_NAME);
@@ -99,14 +99,15 @@ public class MailServiceTest {
         "asdf@fake-research");
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.mandrill.fromEmail),
-        eq(Collections.singletonList("asdf@gmail.com")),
-        eq(Collections.emptyList()),
-        eq(Collections.emptyList()),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.mandrill.fromEmail),
+            eq(Collections.singletonList("asdf@gmail.com")),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     // tags should be escaped, email addresses shouldn't.
@@ -122,14 +123,15 @@ public class MailServiceTest {
     mailService.sendBillingSetupEmail(user, request);
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.mandrill.fromEmail),
-        eq(List.of(user.getContactEmail())),
-        eq(List.of(FROM_EMAIL)),
-        eq(Collections.emptyList()),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.mandrill.fromEmail),
+            eq(List.of(user.getContactEmail())),
+            eq(List.of(FROM_EMAIL)),
+            eq(Collections.emptyList()),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains(FULL_USER_NAME);
@@ -148,14 +150,15 @@ public class MailServiceTest {
     mailService.sendBillingSetupEmail(user, request);
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.mandrill.fromEmail),
-        eq(List.of(user.getContactEmail(), "test@carasoft.com")),
-        eq(List.of(FROM_EMAIL)),
-        eq(Collections.emptyList()),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.mandrill.fromEmail),
+            eq(List.of(user.getContactEmail(), "test@carasoft.com")),
+            eq(List.of(FROM_EMAIL)),
+            eq(Collections.emptyList()),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains(FULL_USER_NAME);
@@ -173,14 +176,15 @@ public class MailServiceTest {
         user, EgressRemediationAction.SUSPEND_COMPUTE, "Jupyter");
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
-        eq(Collections.singletonList(user.getContactEmail())),
-        eq(Collections.emptyList()),
-        eq(Collections.emptyList()),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("temporarily suspended");
@@ -198,14 +202,15 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
 
-    verify(sendGridMailSender, times(1)).send(eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
-        eq(Collections.singletonList(user.getContactEmail())),
-        eq(workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails),
-        eq(Collections.emptyList()),
-        any(),
-        any(),
-        htmlCaptor.capture()
-        );
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq(workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails),
+            eq(Collections.emptyList()),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("will remain disabled");
@@ -220,14 +225,15 @@ public class MailServiceTest {
     mailService.sendEgressRemediationEmailForVwb(user, EgressRemediationAction.SUSPEND_COMPUTE);
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
-        eq(Collections.singletonList(user.getContactEmail())),
-        eq(Collections.emptyList()),
-        eq(Collections.emptyList()),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("temporarily suspended");
@@ -254,14 +260,15 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
 
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.mandrill.fromEmail),
-        eq(Collections.emptyList()),
-        eq(Collections.emptyList()),
-        eq(Collections.singletonList(user.getContactEmail())),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.mandrill.fromEmail),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq(Collections.singletonList(user.getContactEmail())),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("123 GB");
@@ -291,14 +298,15 @@ public class MailServiceTest {
         20.0);
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.mandrill.fromEmail),
-        eq(Collections.emptyList()),
-        eq(Collections.emptyList()),
-        eq(Collections.singletonList(user.getContactEmail())),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.mandrill.fromEmail),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq(Collections.singletonList(user.getContactEmail())),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("123 GB");
@@ -317,14 +325,15 @@ public class MailServiceTest {
     mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1)).send(
-        eq(workbenchConfig.mandrill.fromEmail),
-        eq(Collections.singletonList(user.getContactEmail())),
-        eq(Collections.emptyList()),
-        eq(Collections.emptyList()),
-        any(),
-        any(),
-        htmlCaptor.capture());
+    verify(sendGridMailSender, times(1))
+        .send(
+            eq(workbenchConfig.mandrill.fromEmail),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            any(),
+            any(),
+            htmlCaptor.capture());
 
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains(surveyLink);

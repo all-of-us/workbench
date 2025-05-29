@@ -4,11 +4,13 @@ import jakarta.mail.MessagingException;
 import java.util.List;
 
 public interface MailSender {
-  void send(String from,
+  void send(
+      String from,
       List<String> toRecipientEmails,
       List<String> ccRecipientEmails,
       List<String> bccRecipientEmails,
       String subject,
       String descriptionForLog,
-      String htmlMessage) throws MessagingException;
+      String htmlMessage)
+      throws MessagingException;
 }

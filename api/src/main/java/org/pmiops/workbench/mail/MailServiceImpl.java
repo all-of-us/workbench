@@ -729,7 +729,16 @@ public class MailServiceImpl implements MailService {
       String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
-    sendGridMailSenderProvider.get().send(from, toRecipientEmails, ccRecipientEmails, bccRecipientEmails, subject, descriptionForLog, htmlMessage);
+    sendGridMailSenderProvider
+        .get()
+        .send(
+            from,
+            toRecipientEmails,
+            ccRecipientEmails,
+            bccRecipientEmails,
+            subject,
+            descriptionForLog,
+            htmlMessage);
   }
 
   private String getAllOfUsLogo() {
