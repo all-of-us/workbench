@@ -77,7 +77,7 @@ public class MailServiceTest {
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
         .send(
-            eq(workbenchConfig.mandrill.fromEmail),
+            eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.singletonList(CONTACT_EMAIL)),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
@@ -101,7 +101,7 @@ public class MailServiceTest {
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
         .send(
-            eq(workbenchConfig.mandrill.fromEmail),
+            eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.singletonList("asdf@gmail.com")),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
@@ -125,7 +125,7 @@ public class MailServiceTest {
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
         .send(
-            eq(workbenchConfig.mandrill.fromEmail),
+            eq(workbenchConfig.sendGrid.fromEmail),
             eq(List.of(user.getContactEmail())),
             eq(List.of(FROM_EMAIL)),
             eq(Collections.emptyList()),
@@ -152,7 +152,7 @@ public class MailServiceTest {
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
         .send(
-            eq(workbenchConfig.mandrill.fromEmail),
+            eq(workbenchConfig.sendGrid.fromEmail),
             eq(List.of(user.getContactEmail(), "test@carasoft.com")),
             eq(List.of(FROM_EMAIL)),
             eq(Collections.emptyList()),
@@ -262,7 +262,7 @@ public class MailServiceTest {
 
     verify(sendGridMailSender, times(1))
         .send(
-            eq(workbenchConfig.mandrill.fromEmail),
+            eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
             eq(Collections.singletonList(user.getContactEmail())),
@@ -300,7 +300,7 @@ public class MailServiceTest {
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
         .send(
-            eq(workbenchConfig.mandrill.fromEmail),
+            eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
             eq(Collections.singletonList(user.getContactEmail())),
@@ -327,7 +327,7 @@ public class MailServiceTest {
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
         .send(
-            eq(workbenchConfig.mandrill.fromEmail),
+            eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.singletonList(user.getContactEmail())),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
@@ -351,8 +351,8 @@ public class MailServiceTest {
 
   private WorkbenchConfig createWorkbenchConfig() {
     WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.mandrill.fromEmail = FROM_EMAIL;
-    workbenchConfig.mandrill.sendRetries = 3;
+    workbenchConfig.sendGrid.fromEmail = FROM_EMAIL;
+    workbenchConfig.sendGrid.sendRetries = 3;
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
     workbenchConfig.googleDirectoryService.gSuiteDomain = "research.org";
     workbenchConfig.admin.loginUrl = "http://localhost:4200/";

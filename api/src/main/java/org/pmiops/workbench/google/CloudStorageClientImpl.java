@@ -34,7 +34,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   }
 
   @Override
-  public String readSendgridApiKey() {
+  public String readSendGridApiKey() {
     return getCredentialsBucketString("sendgrid-key.txt");
   }
 

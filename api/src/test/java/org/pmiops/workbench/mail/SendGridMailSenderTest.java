@@ -25,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.SendGridConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudStorageClient;
 
@@ -50,12 +51,12 @@ public class SendGridMailSenderTest {
     MockitoAnnotations.openMocks(this);
 
     // Configure mock behavior
-    when(mockCloudStorageClient.readSendgridApiKey()).thenReturn(API_KEY);
+    when(mockCloudStorageClient.readSendGridApiKey()).thenReturn(API_KEY);
 
     // Configure retry settings
     WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-    workbenchConfig.mandrill = new WorkbenchConfig.MandrillConfig();
-    workbenchConfig.mandrill.sendRetries = 3;
+    workbenchConfig.sendGrid = new SendGridConfig();
+    workbenchConfig.sendGrid.sendRetries = 3;
 
     // Create instance of SendGridMailSender with mocked dependencies
     sendGridMailSender =

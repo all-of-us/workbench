@@ -27,8 +27,8 @@ public class SendGridMailSender implements MailSender {
 
   public SendGridMailSender(
       CloudStorageClient cloudStorageClient, WorkbenchConfig workbenchConfig) {
-    this.sendGrid = createSendGrid(cloudStorageClient.readSendgridApiKey());
-    this.maxRetries = workbenchConfig.mandrill.sendRetries;
+    this.sendGrid = createSendGrid(cloudStorageClient.readSendGridApiKey());
+    this.maxRetries = workbenchConfig.sendGrid.sendRetries;
   }
 
   /**

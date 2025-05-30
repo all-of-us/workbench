@@ -81,7 +81,7 @@
   "admin": {
     "loginUrl": "https:\/\/stable.fake-research-aou.org/login"
   },
-  "mandrill": {
+  "sendGrid": {
     "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },

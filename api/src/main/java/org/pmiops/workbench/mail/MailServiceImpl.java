@@ -353,7 +353,7 @@ public class MailServiceImpl implements MailService {
                 .put(EmailSubstitutionField.DISK_DELETE_INSTRUCTION, UNUSED_DISK_DELETE_HELP)
                 .build());
     sendWithRetries(
-        workbenchConfigProvider.get().mandrill.fromEmail,
+        workbenchConfigProvider.get().sendGrid.fromEmail,
         Collections.emptyList(),
         Collections.emptyList(),
         users.stream().map(DbUser::getContactEmail).toList(),
@@ -378,7 +378,7 @@ public class MailServiceImpl implements MailService {
     }
     sendWithRetries(
         receiptEmails,
-        Collections.singletonList(workbenchConfigProvider.get().mandrill.fromEmail),
+        Collections.singletonList(workbenchConfigProvider.get().sendGrid.fromEmail),
         "Request to set up Google Cloud Billing Account for All of Us Workbench",
         String.format(" User %s requests billing setup from Carasoft.", userForLogging(dbUser)),
         htmlMessage);
@@ -456,7 +456,7 @@ public class MailServiceImpl implements MailService {
   private void sendPublishUnpublishWorkspaceEmails(
       DbWorkspace workspace, List<DbUser> owners, String emailResource, String actionPresentTense)
       throws MessagingException {
-    final String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+    final String supportEmail = workbenchConfigProvider.get().sendGrid.fromEmail;
     final String presentTenseCapitalized = StringUtils.capitalize(actionPresentTense);
     final String pastTense = actionPresentTense.toLowerCase() + "ed";
 
@@ -504,7 +504,7 @@ public class MailServiceImpl implements MailService {
     WorkbenchConfig config = workbenchConfigProvider.get();
     List<String> ccSupportMaybe =
         config.featureFlags.ccSupportWhenAdminLocking
-            ? List.of(config.mandrill.fromEmail)
+            ? List.of(config.sendGrid.fromEmail)
             : Collections.emptyList();
 
     sendWithRetries(
@@ -649,7 +649,7 @@ public class MailServiceImpl implements MailService {
         .put(
             EmailSubstitutionField.USER_PHONE,
             HtmlEscapers.htmlEscaper().escape(request.getPhone()))
-        .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().mandrill.fromEmail)
+        .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().sendGrid.fromEmail)
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
         .put(
@@ -711,7 +711,7 @@ public class MailServiceImpl implements MailService {
       String htmlMessage)
       throws MessagingException {
     sendWithRetries(
-        workbenchConfigProvider.get().mandrill.fromEmail,
+        workbenchConfigProvider.get().sendGrid.fromEmail,
         toRecipientEmails,
         ccRecipientEmails,
         Collections.emptyList(),

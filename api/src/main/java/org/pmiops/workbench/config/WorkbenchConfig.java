@@ -23,7 +23,7 @@ public class WorkbenchConfig {
   public GoogleDirectoryServiceConfig googleDirectoryService;
   public ServerConfig server;
   public AdminConfig admin;
-  public MandrillConfig mandrill;
+  public SendGridConfig sendGrid;
   public AbsorbConfig absorb;
   public TanagraConfig tanagra;
   public ZendeskConfig zendesk;
@@ -62,7 +62,7 @@ public class WorkbenchConfig {
     config.firecloud = new FireCloudConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
-    config.mandrill = new MandrillConfig();
+    config.sendGrid = new SendGridConfig();
     config.absorb = new AbsorbConfig();
     config.offlineBatch = new OfflineBatchConfig();
     config.ras = new RasConfig();
@@ -242,7 +242,7 @@ public class WorkbenchConfig {
     public String loginUrl;
   }
 
-  public static class MandrillConfig {
+  public static class SendGridConfig {
     public String fromEmail;
     public int sendRetries;
   }
