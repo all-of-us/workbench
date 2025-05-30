@@ -138,6 +138,9 @@ public interface FireCloudService {
   /** Update billing account using APP's service account. */
   void updateBillingAccountAsService(String billingProjectName, String billingAccount);
 
+  /** Remove billing account from billing project using APP's service account. */
+  void removeBillingAccountFromBillingProjectAsService(String billingProjectName);
+
   /**
    * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.
    *
