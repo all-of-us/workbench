@@ -133,16 +133,16 @@ public class MailServiceImpl implements MailService {
   // CT Steps
   private static final String CT_TRAINING = "Complete All of Us Controlled Tier Training";
 
-  private final Provider<SendGridMailSender> sendGridMailSenderProvider;
+  private final Provider<MailSender> mailSenderProvider;
   private final Provider<CloudStorageClient> cloudStorageClientProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public MailServiceImpl(
-      Provider<SendGridMailSender> sendGridMailSenderProvider,
+      Provider<MailSender> mailSenderProvider,
       Provider<CloudStorageClient> cloudStorageClientProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.sendGridMailSenderProvider = sendGridMailSenderProvider;
+    this.mailSenderProvider = mailSenderProvider;
     this.cloudStorageClientProvider = cloudStorageClientProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -729,7 +729,7 @@ public class MailServiceImpl implements MailService {
       String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
-    sendGridMailSenderProvider
+    mailSenderProvider
         .get()
         .sendWithRetries(
             from,
