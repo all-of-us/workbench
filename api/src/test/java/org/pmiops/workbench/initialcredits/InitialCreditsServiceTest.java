@@ -28,6 +28,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,13 +187,15 @@ public class InitialCreditsServiceTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costUnderThreshold);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verifyNoInteractions(taskQueueService);
 
     // check that we alert for the 50% threshold
     double costOverThreshold = 50.5;
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -203,7 +206,8 @@ public class InitialCreditsServiceTest {
     costOverThreshold = 75.3;
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -216,7 +220,8 @@ public class InitialCreditsServiceTest {
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costToTriggerExpiration);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -245,12 +250,14 @@ public class InitialCreditsServiceTest {
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costUnderThreshold);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verifyNoInteractions(taskQueueService);
 
     // check that we detect the 30% threshold
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -260,7 +267,8 @@ public class InitialCreditsServiceTest {
     costOverThreshold = 65.01;
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -272,7 +280,8 @@ public class InitialCreditsServiceTest {
     final double costToTriggerExpiration = 100.01;
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costToTriggerExpiration);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -293,7 +302,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -317,7 +327,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -340,7 +351,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verifyNoInteractions(taskQueueService); // No tasks have been added to the queue
 
     assertSingleWorkspaceTestDbState(user, workspace, 49.99);
@@ -360,7 +372,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verifyNoInteractions(taskQueueService);
 
     assertSingleWorkspaceTestDbState(user, workspace, 49.99);
@@ -418,7 +431,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -433,7 +447,8 @@ public class InitialCreditsServiceTest {
     assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, 150.0);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     assertSingleWorkspaceTestDbState(user, workspace, 150.0);
   }
 
@@ -454,7 +469,8 @@ public class InitialCreditsServiceTest {
     assertThat(initialCreditsService.getCachedInitialCreditsUsage(user)).isNull();
     assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 100.0);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -468,7 +484,8 @@ public class InitialCreditsServiceTest {
     assertWithinBillingTolerance(initialCreditsService.getUserInitialCreditsLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, 300.0);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     assertSingleWorkspaceTestDbState(user, workspace, 300.0);
 
     verify(mockUserServiceAuditor).fireSetInitialCreditsOverride(user.getUserId(), null, 200.0);
@@ -494,7 +511,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -532,7 +550,7 @@ public class InitialCreditsServiceTest {
     commitTransaction();
 
     initialCreditsService.checkInitialCreditsUsageForUsers(
-        Sets.newHashSet(user1, user2), allBQCosts);
+        Sets.newHashSet(user1, user2), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user1.getUserId(), user2.getUserId()))),
@@ -562,7 +580,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -579,7 +598,8 @@ public class InitialCreditsServiceTest {
 
     // we do not alert again, but the cost field is updated in the DB
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService, times(1))
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -607,7 +627,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -680,7 +701,8 @@ public class InitialCreditsServiceTest {
     assertThat(initialCreditsService.getCachedInitialCreditsUsage(user1)).isNull();
     assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isTrue();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user1), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user1), allBQCosts, Collections.emptyMap());
 
     assertWithinBillingTolerance(initialCreditsService.getCachedInitialCreditsUsage(user1), 100.01);
     assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isFalse();
@@ -695,14 +717,17 @@ public class InitialCreditsServiceTest {
     // we have not yet cached the new workspace costs
     assertWithinBillingTolerance(initialCreditsService.getCachedInitialCreditsUsage(user1), 100.01);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user1), costs);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user1), costs, Collections.emptyMap());
     final double expectedTotalCachedFreeTierUsage = 1000.0 + 200.0;
     assertWithinBillingTolerance(
         initialCreditsService.getCachedInitialCreditsUsage(user1),
         expectedTotalCachedFreeTierUsage);
 
     initialCreditsService.checkInitialCreditsUsageForUsers(
-        Sets.newHashSet(user1, user2), ImmutableMap.of("project 3", user2Costs));
+        Sets.newHashSet(user1, user2),
+        ImmutableMap.of("project 3", user2Costs),
+        Collections.emptyMap());
 
     assertWithinBillingTolerance(
         initialCreditsService.getCachedInitialCreditsUsage(user1),
@@ -731,12 +756,14 @@ public class InitialCreditsServiceTest {
     // 99.99 < 100.0
     Map<String, Double> allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 99.99);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user1), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user1), allBQCosts, Collections.emptyMap());
     assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isTrue();
 
     // 100.01 > 100.0
     allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 100.01);
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user1), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user1), allBQCosts, Collections.emptyMap());
     assertThat(initialCreditsService.userHasRemainingInitialCredits(user1)).isFalse();
 
     // 100.01 < 200.0
@@ -762,7 +789,8 @@ public class InitialCreditsServiceTest {
 
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -793,11 +821,13 @@ public class InitialCreditsServiceTest {
     workspaceDao.save(workspace);
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
 
     allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 100.1);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),
@@ -822,7 +852,8 @@ public class InitialCreditsServiceTest {
     workspaceDao.save(workspace);
     commitTransaction();
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
 
     TestTransaction.start();
     DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT + "4");
@@ -832,7 +863,8 @@ public class InitialCreditsServiceTest {
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT + "4", 100.1);
 
-    initialCreditsService.checkInitialCreditsUsageForUsers(Sets.newHashSet(user), allBQCosts);
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), allBQCosts, Collections.emptyMap());
     verify(taskQueueService)
         .pushInitialCreditsExhaustionTask(
             argThat(new UserListMatcher(List.of(user.getUserId()))),

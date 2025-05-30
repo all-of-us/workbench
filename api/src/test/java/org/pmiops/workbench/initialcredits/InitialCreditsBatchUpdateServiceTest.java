@@ -11,6 +11,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.Schema;
 import com.google.common.base.Stopwatch;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -82,7 +83,7 @@ public class InitialCreditsBatchUpdateServiceTest {
     verify(mockWorkspaceDao, times(1)).getWorkspaceGoogleProjectsForCreators(List.of(1L, 2L, 3L));
 
     verify(mockInitialCreditsService)
-        .checkInitialCreditsUsageForUsers(mockDbUserSet, getUserCostMap());
+        .checkInitialCreditsUsageForUsers(mockDbUserSet, getUserCostMap(), Collections.emptyMap());
   }
 
   private void mockDbUsers() {

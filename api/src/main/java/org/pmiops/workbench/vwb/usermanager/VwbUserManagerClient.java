@@ -1,6 +1,7 @@
 package org.pmiops.workbench.vwb.usermanager;
 
 import jakarta.inject.Provider;
+import java.util.Optional;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.vwb.user.ApiException;
@@ -135,5 +136,20 @@ public class VwbUserManagerClient {
                   podId.toString());
           return null;
         });
+  }
+
+  /**
+   * Gets a pod by its ID.
+   *
+   * @param podId The ID of the pod to retrieve.
+   * @return The PodDescription for the specified pod ID.
+   */
+  public Optional<PodDescription> getPodById(String podId) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.debug("Getting pod by id {}", podId);
+    return Optional.ofNullable(
+        vwbUserManagerRetryHandler.run(
+            context ->
+                podApiProvider.get().getPod(organizationId, podId, PodAction.READ_METADATA)));
   }
 }

@@ -84,4 +84,19 @@ public class VwbUserService {
       return null;
     }
   }
+
+  /** getPod from VWB */
+  public String getBillingAccountForPod(String podId) {
+    return vwbUserManagerClient
+        .getPodById(podId)
+        .map(
+            podDescription ->
+                podDescription.getEnvironmentData().getEnvironmentDataGcp().getBillingAccountId())
+        .orElse("");
+  }
+
+  public boolean isInitialCreditsBillingAccount(
+      DbVwbUserPod pod, String initialCreditsBillingAccountName) {
+    return initialCreditsBillingAccountName.equals(getBillingAccountForPod(pod.getVwbPodId()));
+  }
 }
