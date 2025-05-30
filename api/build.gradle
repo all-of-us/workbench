@@ -192,7 +192,6 @@ swaggerSources {
     ])
     notebooks swagger3JavaClient("notebooks.yaml", "notebooks")
     jira swagger3JavaClient("jira.yaml", "jira")
-    mandrill swagger3JavaClient("mandrill.yaml", "mandrill")
     absorb swagger3JavaClient("absorb.yaml", "absorb")
     rdr swagger3JavaClient("rdr.yaml", "rdr", [
             '--model-name-prefix', 'Rdr'
@@ -483,7 +482,7 @@ dependencies {
     implementation 'com.auth0:java-jwt:4.5.0'
     implementation 'org.json:json:20250107'
 
-
+    implementation 'com.sendgrid:sendgrid-java:4.10.3'
     // Assure compatible dependencies by using Bills of Materials (BOMs)
     // https://cloud.google.com/java/docs/bom
 

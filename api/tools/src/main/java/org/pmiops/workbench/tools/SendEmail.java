@@ -8,7 +8,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.mail.MailServiceImpl;
-import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,6 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({
   MailServiceImpl.class,
-  MandrillApi.class,
 })
 
 /* example usage:

@@ -87,7 +87,7 @@
   "admin": {
     "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"
   },
-  "mandrill": {
+  "mail": {
     "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },

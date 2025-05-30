@@ -34,9 +34,8 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   }
 
   @Override
-  public String readMandrillApiKey() {
-    JSONObject mandrillKeys = getCredentialsBucketJSON("mandrill-keys.json");
-    return mandrillKeys.getString("api-key");
+  public String readSendGridApiKey() {
+    return getCredentialsBucketString("sendgrid-key.txt");
   }
 
   @Override

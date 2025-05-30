@@ -87,7 +87,7 @@
   "admin": {
     "loginUrl": "https:\/\/test.fake-research-aou.org/login"
   },
-  "mandrill": {
+  "mail": {
     "fromEmail": "testSupport@researchallofus.org",
     "sendRetries": 3
   },
