@@ -82,7 +82,7 @@
   "admin": {
     "loginUrl": "https:\/\/staging.fake-research-aou.org/login"
   },
-  "sendGrid": {
+  "mail": {
     "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },

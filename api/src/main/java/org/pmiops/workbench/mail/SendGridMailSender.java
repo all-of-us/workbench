@@ -37,7 +37,7 @@ public class SendGridMailSender implements MailSender {
   }
 
   private int getMaxRetries() {
-    return workbenchConfigProvider.get().sendGrid.sendRetries;
+    return workbenchConfigProvider.get().mail.sendRetries;
   }
 
   private SendGrid getSendGrid() {

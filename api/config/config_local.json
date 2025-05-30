@@ -87,7 +87,7 @@
   "admin": {
     "loginUrl": "http:\/\/localhost:4200/login"
   },
-  "sendGrid": {
+  "mail": {
     "fromEmail": "localSupport@researchallofus.org",
     "sendRetries": 3
   },
