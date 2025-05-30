@@ -76,7 +76,7 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.singletonList(CONTACT_EMAIL)),
             eq(Collections.emptyList()),
@@ -100,7 +100,7 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.singletonList("asdf@gmail.com")),
             eq(Collections.emptyList()),
@@ -124,7 +124,7 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.sendGrid.fromEmail),
             eq(List.of(user.getContactEmail())),
             eq(List.of(FROM_EMAIL)),
@@ -151,7 +151,7 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.sendGrid.fromEmail),
             eq(List.of(user.getContactEmail(), "test@carasoft.com")),
             eq(List.of(FROM_EMAIL)),
@@ -177,7 +177,7 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
             eq(Collections.singletonList(user.getContactEmail())),
             eq(Collections.emptyList()),
@@ -203,7 +203,7 @@ public class MailServiceTest {
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
 
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
             eq(Collections.singletonList(user.getContactEmail())),
             eq(workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails),
@@ -226,7 +226,7 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
             eq(Collections.singletonList(user.getContactEmail())),
             eq(Collections.emptyList()),
@@ -261,7 +261,7 @@ public class MailServiceTest {
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
 
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
@@ -299,7 +299,7 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
@@ -326,7 +326,7 @@ public class MailServiceTest {
 
     ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
     verify(sendGridMailSender, times(1))
-        .send(
+        .sendWithRetries(
             eq(workbenchConfig.sendGrid.fromEmail),
             eq(Collections.singletonList(user.getContactEmail())),
             eq(Collections.emptyList()),

@@ -58,7 +58,7 @@ public class SendGridMailSender implements MailSender {
   }
 
   @Override
-  public void send(
+  public void sendWithRetries(
       String from,
       List<String> toRecipientEmails,
       List<String> ccRecipientEmails,

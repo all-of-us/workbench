@@ -4,7 +4,7 @@ import jakarta.mail.MessagingException;
 import java.util.List;
 
 public interface MailSender {
-  void send(
+  void sendWithRetries(
       String from,
       List<String> toRecipientEmails,
       List<String> ccRecipientEmails,

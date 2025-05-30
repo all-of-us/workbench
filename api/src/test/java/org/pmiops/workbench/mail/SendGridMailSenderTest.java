@@ -74,7 +74,7 @@ public class SendGridMailSenderTest {
     Response mockResponse = mock(Response.class);
     when(mockSendGrid.api(any(Request.class))).thenReturn(mockResponse);
 
-    sendGridMailSender.send(
+    sendGridMailSender.sendWithRetries(
         FROM_EMAIL,
         Collections.singletonList(TO_EMAIL),
         Collections.singletonList(CC_EMAIL),
@@ -109,7 +109,7 @@ public class SendGridMailSenderTest {
         .thenThrow(new IOException("SendGrid API error"))
         .thenReturn(mock(Response.class));
 
-    sendGridMailSender.send(
+    sendGridMailSender.sendWithRetries(
         FROM_EMAIL,
         Collections.singletonList(TO_EMAIL),
         Collections.singletonList(CC_EMAIL),
@@ -145,7 +145,7 @@ public class SendGridMailSenderTest {
     assertThrows(
         MessagingException.class,
         () -> {
-          sendGridMailSender.send(
+          sendGridMailSender.sendWithRetries(
               FROM_EMAIL,
               Collections.singletonList(TO_EMAIL),
               Collections.singletonList(CC_EMAIL),

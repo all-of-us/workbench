@@ -731,7 +731,7 @@ public class MailServiceImpl implements MailService {
       throws MessagingException {
     sendGridMailSenderProvider
         .get()
-        .send(
+        .sendWithRetries(
             from,
             toRecipientEmails,
             ccRecipientEmails,
