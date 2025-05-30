@@ -14,6 +14,7 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Personalization;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -41,7 +42,8 @@ public class SendGridMailSenderTest {
   private static final String LOG_DESCRIPTION = "Test email";
 
   @Mock private CloudStorageClient mockCloudStorageClient;
-
+  @Mock private Provider<CloudStorageClient> mockCloudStorageClientProvider;
+  @Mock private Provider<WorkbenchConfig> mockWorkbenchConfigProvider;
   @Mock private SendGrid mockSendGrid;
 
   private SendGridMailSender sendGridMailSender;
@@ -50,20 +52,18 @@ public class SendGridMailSenderTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    // Configure mock behavior
+    when(mockCloudStorageClientProvider.get()).thenReturn(mockCloudStorageClient);
     when(mockCloudStorageClient.readSendGridApiKey()).thenReturn(API_KEY);
 
-    // Configure retry settings
     WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.sendGrid = new SendGridConfig();
     workbenchConfig.sendGrid.sendRetries = 3;
+    when(mockWorkbenchConfigProvider.get()).thenReturn(workbenchConfig);
 
-    // Create instance of SendGridMailSender with mocked dependencies
     sendGridMailSender =
-        new SendGridMailSender(mockCloudStorageClient, workbenchConfig) {
+        new SendGridMailSender(mockCloudStorageClientProvider, mockWorkbenchConfigProvider) {
           @Override
           protected SendGrid createSendGrid(String apiKey) {
-            // Override to return our mock instead of creating a real SendGrid client
             return mockSendGrid;
           }
         };

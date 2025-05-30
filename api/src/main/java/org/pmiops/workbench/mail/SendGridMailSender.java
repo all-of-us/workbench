@@ -7,6 +7,7 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
@@ -17,18 +18,33 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SendGridMailSender implements MailSender {
-  private final SendGrid sendGrid;
-  private final int maxRetries;
+  private SendGrid sendGrid;
+  private final Provider<CloudStorageClient> cloudStorageClientProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private static final Logger log = Logger.getLogger(SendGridMailSender.class.getName());
 
+  @Autowired
   public SendGridMailSender(
-      CloudStorageClient cloudStorageClient, WorkbenchConfig workbenchConfig) {
-    this.sendGrid = createSendGrid(cloudStorageClient.readSendGridApiKey());
-    this.maxRetries = workbenchConfig.sendGrid.sendRetries;
+      Provider<CloudStorageClient> cloudStorageClientProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.cloudStorageClientProvider = cloudStorageClientProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+  }
+
+  private int getMaxRetries() {
+    return workbenchConfigProvider.get().sendGrid.sendRetries;
+  }
+
+  private SendGrid getSendGrid() {
+    if (sendGrid == null) {
+      sendGrid = createSendGrid(cloudStorageClientProvider.get().readSendGridApiKey());
+    }
+    return sendGrid;
   }
 
   /**
@@ -67,11 +83,11 @@ public class SendGridMailSender implements MailSender {
       throw new MessagingException("Building email failed", e);
     }
 
-    int retries = maxRetries;
+    int retries = getMaxRetries();
     do {
       retries--;
       try {
-        sendGrid.api(request);
+        getSendGrid().api(request);
 
         log.log(Level.INFO, String.format("Email '%s' was sent.", descriptionForLog));
         return;
