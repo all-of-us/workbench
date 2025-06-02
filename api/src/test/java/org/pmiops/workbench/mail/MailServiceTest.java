@@ -81,7 +81,7 @@ public class MailServiceTest {
             eq(Collections.singletonList(CONTACT_EMAIL)),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
-            any(),
+            eq("Your new All of Us Researcher Workbench Account"),
             any(),
             htmlCaptor.capture());
 
@@ -105,7 +105,7 @@ public class MailServiceTest {
             eq(Collections.singletonList("asdf@gmail.com")),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
-            any(),
+            eq("Instructions from your institution on using the Researcher Workbench"),
             any(),
             htmlCaptor.capture());
 
@@ -129,7 +129,7 @@ public class MailServiceTest {
             eq(List.of(user.getContactEmail())),
             eq(List.of(FROM_EMAIL)),
             eq(Collections.emptyList()),
-            any(),
+            eq("Request to set up Google Cloud Billing Account for All of Us Workbench"),
             any(),
             htmlCaptor.capture());
 
@@ -156,7 +156,7 @@ public class MailServiceTest {
             eq(List.of(user.getContactEmail(), "test@carasoft.com")),
             eq(List.of(FROM_EMAIL)),
             eq(Collections.emptyList()),
-            any(),
+            eq("Request to set up Google Cloud Billing Account for All of Us Workbench"),
             any(),
             htmlCaptor.capture());
 
@@ -182,7 +182,7 @@ public class MailServiceTest {
             eq(Collections.singletonList(user.getContactEmail())),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
-            any(),
+            eq("[Response Required] AoU Researcher Workbench High Data Egress Alert"),
             any(),
             htmlCaptor.capture());
 
@@ -208,7 +208,7 @@ public class MailServiceTest {
             eq(Collections.singletonList(user.getContactEmail())),
             eq(workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails),
             eq(Collections.emptyList()),
-            any(),
+            eq("[Response Required] AoU Researcher Workbench High Data Egress Alert"),
             any(),
             htmlCaptor.capture());
 
@@ -231,7 +231,7 @@ public class MailServiceTest {
             eq(Collections.singletonList(user.getContactEmail())),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
-            any(),
+            eq("[Response Required] AoU Researcher Workbench High Data Egress Alert"),
             any(),
             htmlCaptor.capture());
 
@@ -266,7 +266,7 @@ public class MailServiceTest {
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
             eq(Collections.singletonList(user.getContactEmail())),
-            any(),
+            eq("Reminder - Unused Disk in your Workspace"),
             any(),
             htmlCaptor.capture());
 
@@ -304,7 +304,7 @@ public class MailServiceTest {
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
             eq(Collections.singletonList(user.getContactEmail())),
-            any(),
+            eq("Reminder - Unused Disk in your Workspace"),
             any(),
             htmlCaptor.capture());
 
@@ -331,7 +331,7 @@ public class MailServiceTest {
             eq(Collections.singletonList(user.getContactEmail())),
             eq(Collections.emptyList()),
             eq(Collections.emptyList()),
-            any(),
+            eq("Researcher satisfaction survey for the All of Us Researcher Workbench"),
             any(),
             htmlCaptor.capture());
 
