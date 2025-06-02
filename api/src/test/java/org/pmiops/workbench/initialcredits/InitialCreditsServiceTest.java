@@ -1222,7 +1222,6 @@ public class InitialCreditsServiceTest {
                     new DbUserInitialCreditsExpiration()
                         .setExpirationTime(PAST_EXPIRATION)
                         .setBypassed(false)));
-    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     User creator = new User();
     creator.setUserName(SINGLE_WORKSPACE_TEST_USER);
