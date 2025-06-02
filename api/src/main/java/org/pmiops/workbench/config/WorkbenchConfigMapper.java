@@ -54,6 +54,9 @@ public interface WorkbenchConfigMapper {
       target = "enableInitialCreditsExpiration",
       source = "config.featureFlags.enableInitialCreditsExpiration")
   @Mapping(
+      target = "enableUnlinkBillingForInitialCredits",
+      source = "config.featureFlags.enableUnlinkBillingForInitialCredits")
+  @Mapping(
       target = "initialCreditsValidityPeriodDays",
       source = "config.billing.initialCreditsValidityPeriodDays")
   @Mapping(
