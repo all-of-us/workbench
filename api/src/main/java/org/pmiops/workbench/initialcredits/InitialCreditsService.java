@@ -503,7 +503,8 @@ public class InitialCreditsService {
       fireCloudService.removeBillingAccountFromBillingProjectAsService(namespace);
       logger.info("Removed initial credits billing account from workspace {}", namespace);
     } catch (WorkbenchException e) {
-      logger.error("Failed to remove initial credits billing account from workspace {}", namespace, e);
+      logger.error(
+          "Failed to remove initial credits billing account from workspace {}", namespace, e);
     }
   }
 
