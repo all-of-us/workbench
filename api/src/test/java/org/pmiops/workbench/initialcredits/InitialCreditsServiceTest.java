@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.isA;
@@ -56,7 +57,10 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.User;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.ArgumentMatchers.UserListMatcher;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -66,6 +70,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -94,6 +99,7 @@ public class InitialCreditsServiceTest {
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   @Autowired private TaskQueueService taskQueueService;
+  @Autowired private ApplicationContext applicationContext;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -1205,36 +1211,55 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void test_checkCreditsExpirationForUserIDs_onlyFiltersInitialCreditsWorkspaces() {
+  public void test_checkCreditsExpirationForUserIDs_onlyStopsSpendForInitialCreditsWorkspaces() {
+    //ARRANGE
     // Create a user with an expiration that has passed
     DbUser user = spyUserDao.save(
         new DbUser()
+            .setUsername(SINGLE_WORKSPACE_TEST_USER)
             .setUserInitialCreditsExpiration(
                 new DbUserInitialCreditsExpiration()
                     .setExpirationTime(PAST_EXPIRATION)
                     .setBypassed(false)));
     when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
-    // Create two workspaces for this user: one with initial credits billing account, one with a different billing account
-    DbWorkspace initialCreditsWorkspace = new DbWorkspace()
-        .setCreator(user)
-        .setWorkspaceId(1L)
-        .setGoogleProject("initial-credits-project")
-        .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
+    User creator = new User();
+    creator.setUserName(SINGLE_WORKSPACE_TEST_USER);
     
-    DbWorkspace nonInitialCreditsWorkspace = new DbWorkspace()
-        .setCreator(user)
-        .setWorkspaceId(2L)
-        .setGoogleProject("non-initial-credits-project")
-        .setBillingAccountName("some-other-billing-account");
+    Workspace initialCreditsWorkspace = new Workspace()
+        .googleProject("initial-credits-project")
+        .billingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
+        .namespace("initial-credits-namespace");
+    initialCreditsWorkspace.setCreatorUser(creator);
     
-    Set<DbWorkspace> userWorkspaces = Sets.newHashSet(initialCreditsWorkspace, nonInitialCreditsWorkspace);
-    when(spyWorkspaceDao.findAllByCreator(user)).thenReturn(userWorkspaces);
+    Workspace nonInitialCreditsWorkspace = new Workspace()
+        .googleProject("non-initial-credits-project")
+        .billingAccountName("some-other-billing-account")
+        .namespace("non-initial-credits-namespace");
+    nonInitialCreditsWorkspace.setCreatorUser(creator);
+    
+    List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
+    WorkspaceResponse response1 = new WorkspaceResponse();
+    response1.setWorkspace(initialCreditsWorkspace);
+    workspaceResponses.add(response1);
+    
+    WorkspaceResponse response2 = new WorkspaceResponse();
+    response2.setWorkspace(nonInitialCreditsWorkspace);
+    workspaceResponses.add(response2);
+    
+    FireCloudService mockFireCloudService = applicationContext.getBean(FireCloudService.class);
+    WorkspaceMapper mockWorkspaceMapper = applicationContext.getBean(WorkspaceMapper.class);
+    
+    when(mockFireCloudService.listWorkspacesAsService()).thenReturn(new ArrayList<>());
+    when(mockWorkspaceMapper.toApiWorkspaceResponseList(any(WorkspaceDao.class), anyList(), any(InitialCreditsService.class)))
+        .thenReturn(workspaceResponses);
 
+    // ACT
     // Call the method being tested
     initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
-    // Verify that only the initialCreditsWorkspace was processed (had resources deleted)
+    // ASSERT
+    // Verify that only the initialCreditsWorkspace had billing unlinked and resources deleted
     verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
     verify(leonardoApiClient, never()).deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
     
