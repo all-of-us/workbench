@@ -1212,46 +1212,50 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void test_checkCreditsExpirationForUserIDs_onlyStopsSpendForInitialCreditsWorkspaces() {
-    //ARRANGE
+    // ARRANGE
     // Create a user with an expiration that has passed
-    DbUser user = spyUserDao.save(
-        new DbUser()
-            .setUsername(SINGLE_WORKSPACE_TEST_USER)
-            .setUserInitialCreditsExpiration(
-                new DbUserInitialCreditsExpiration()
-                    .setExpirationTime(PAST_EXPIRATION)
-                    .setBypassed(false)));
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUsername(SINGLE_WORKSPACE_TEST_USER)
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(PAST_EXPIRATION)
+                        .setBypassed(false)));
     when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     User creator = new User();
     creator.setUserName(SINGLE_WORKSPACE_TEST_USER);
-    
-    Workspace initialCreditsWorkspace = new Workspace()
-        .googleProject("initial-credits-project")
-        .billingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
-        .namespace("initial-credits-namespace");
+
+    Workspace initialCreditsWorkspace =
+        new Workspace()
+            .googleProject("initial-credits-project")
+            .billingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
+            .namespace("initial-credits-namespace");
     initialCreditsWorkspace.setCreatorUser(creator);
-    
-    Workspace nonInitialCreditsWorkspace = new Workspace()
-        .googleProject("non-initial-credits-project")
-        .billingAccountName("some-other-billing-account")
-        .namespace("non-initial-credits-namespace");
+
+    Workspace nonInitialCreditsWorkspace =
+        new Workspace()
+            .googleProject("non-initial-credits-project")
+            .billingAccountName("some-other-billing-account")
+            .namespace("non-initial-credits-namespace");
     nonInitialCreditsWorkspace.setCreatorUser(creator);
-    
+
     List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
     WorkspaceResponse response1 = new WorkspaceResponse();
     response1.setWorkspace(initialCreditsWorkspace);
     workspaceResponses.add(response1);
-    
+
     WorkspaceResponse response2 = new WorkspaceResponse();
     response2.setWorkspace(nonInitialCreditsWorkspace);
     workspaceResponses.add(response2);
-    
+
     FireCloudService mockFireCloudService = applicationContext.getBean(FireCloudService.class);
     WorkspaceMapper mockWorkspaceMapper = applicationContext.getBean(WorkspaceMapper.class);
-    
+
     when(mockFireCloudService.listWorkspacesAsService()).thenReturn(new ArrayList<>());
-    when(mockWorkspaceMapper.toApiWorkspaceResponseList(any(WorkspaceDao.class), anyList(), any(InitialCreditsService.class)))
+    when(mockWorkspaceMapper.toApiWorkspaceResponseList(
+            any(WorkspaceDao.class), anyList(), any(InitialCreditsService.class)))
         .thenReturn(workspaceResponses);
 
     // ACT
@@ -1261,10 +1265,13 @@ public class InitialCreditsServiceTest {
     // ASSERT
     // Verify that only the initialCreditsWorkspace had billing unlinked and resources deleted
     verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
-    verify(mockFireCloudService).removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
-    verify(leonardoApiClient, never()).deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
-    verify(mockFireCloudService, never()).removeBillingAccountFromBillingProjectAsService(nonInitialCreditsWorkspace.getNamespace());
-    
+    verify(mockFireCloudService)
+        .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
+    verify(leonardoApiClient, never())
+        .deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
+    verify(mockFireCloudService, never())
+        .removeBillingAccountFromBillingProjectAsService(nonInitialCreditsWorkspace.getNamespace());
+
     // Verify that the user's expiration cleanup time was set
     assertEquals(NOW, user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
   }
