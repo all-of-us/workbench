@@ -1261,7 +1261,9 @@ public class InitialCreditsServiceTest {
     // ASSERT
     // Verify that only the initialCreditsWorkspace had billing unlinked and resources deleted
     verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+    verify(mockFireCloudService).removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
     verify(leonardoApiClient, never()).deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
+    verify(mockFireCloudService, never()).removeBillingAccountFromBillingProjectAsService(nonInitialCreditsWorkspace.getNamespace());
     
     // Verify that the user's expiration cleanup time was set
     assertEquals(NOW, user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
