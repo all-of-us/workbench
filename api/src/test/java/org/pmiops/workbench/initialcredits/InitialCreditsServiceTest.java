@@ -1203,4 +1203,42 @@ public class InitialCreditsServiceTest {
     TestTransaction.flagForCommit();
     TestTransaction.end();
   }
+
+  @Test
+  public void test_checkCreditsExpirationForUserIDs_onlyFiltersInitialCreditsWorkspaces() {
+    // Create a user with an expiration that has passed
+    DbUser user = spyUserDao.save(
+        new DbUser()
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration()
+                    .setExpirationTime(PAST_EXPIRATION)
+                    .setBypassed(false)));
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+
+    // Create two workspaces for this user: one with initial credits billing account, one with a different billing account
+    DbWorkspace initialCreditsWorkspace = new DbWorkspace()
+        .setCreator(user)
+        .setWorkspaceId(1L)
+        .setGoogleProject("initial-credits-project")
+        .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
+    
+    DbWorkspace nonInitialCreditsWorkspace = new DbWorkspace()
+        .setCreator(user)
+        .setWorkspaceId(2L)
+        .setGoogleProject("non-initial-credits-project")
+        .setBillingAccountName("some-other-billing-account");
+    
+    Set<DbWorkspace> userWorkspaces = Sets.newHashSet(initialCreditsWorkspace, nonInitialCreditsWorkspace);
+    when(spyWorkspaceDao.findAllByCreator(user)).thenReturn(userWorkspaces);
+
+    // Call the method being tested
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // Verify that only the initialCreditsWorkspace was processed (had resources deleted)
+    verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+    verify(leonardoApiClient, never()).deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
+    
+    // Verify that the user's expiration cleanup time was set
+    assertEquals(NOW, user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
 }
