@@ -159,6 +159,7 @@ public class InitialCreditsServiceTest {
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForInitialCreditsUsageUpdate = 2L;
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
+    workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = true;
     workbenchConfig.offlineBatch.usersPerCheckInitialCreditsUsageTask = 10;
 
     workspace =
@@ -1210,9 +1211,13 @@ public class InitialCreditsServiceTest {
     TestTransaction.end();
   }
 
-  @Test
-  public void test_checkCreditsExpirationForUserIDs_onlyStopsSpendForInitialCreditsWorkspaces() {
+  @ParameterizedTest(name = "Test with enableUnlinkBillingForInitialCredits={0}")
+  @MethodSource("unlinkBillingFlagProvider")
+  public void test_checkCreditsExpirationForUserIDs_onlyStopsSpendForInitialCreditsWorkspaces(boolean unlinkBillingEnabled) {
     // ARRANGE
+    // Set the feature flag
+    workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = unlinkBillingEnabled;
+
     // Create a user with an expiration that has passed
     DbUser user =
         spyUserDao.save(
@@ -1262,10 +1267,20 @@ public class InitialCreditsServiceTest {
     initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     // ASSERT
-    // Verify that only the initialCreditsWorkspace had billing unlinked and resources deleted
-    verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
-    verify(mockFireCloudService)
-        .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
+    // Verify the appropriate behavior based on the flag
+    if (unlinkBillingEnabled) {
+      // When flag is enabled, the billing account should be unlinked and resources deleted
+      verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+      verify(mockFireCloudService)
+          .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
+    } else {
+      // When flag is disabled, these actions should never happen
+      verify(leonardoApiClient, never()).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+      verify(mockFireCloudService, never())
+          .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
+    }
+
+    // These should never be called regardless of the flag
     verify(leonardoApiClient, never())
         .deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
     verify(mockFireCloudService, never())
@@ -1273,5 +1288,12 @@ public class InitialCreditsServiceTest {
 
     // Verify that the user's expiration cleanup time was set
     assertEquals(NOW, user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
+
+  private static Stream<Arguments> unlinkBillingFlagProvider() {
+    return Stream.of(
+        Arguments.of(true),  // Flag enabled
+        Arguments.of(false)  // Flag disabled
+    );
   }
 }

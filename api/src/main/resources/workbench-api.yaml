@@ -7230,10 +7230,10 @@ components:
           type: boolean
           default: false
           description: If true, allow for user's initial credits to expire.
-        enableUnlinkBillingOnInitialCreditExpiration:
+        enableUnlinkBillingForInitialCredits:
           type: boolean
           default: false
-          description: If true, automatically unlink billing when initial credits expire.
+          description: If true, unlink billing when initial credits when a workspace owner's credits expire or are exhausted.
         initialCreditsValidityPeriodDays:
           type: integer
           description: The number of days that a user's initial credits are valid for.
