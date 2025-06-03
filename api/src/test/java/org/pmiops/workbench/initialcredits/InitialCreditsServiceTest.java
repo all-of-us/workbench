@@ -1268,17 +1268,15 @@ public class InitialCreditsServiceTest {
     initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     // ASSERT
+    verify(leonardoApiClient)
+        .deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
     // Verify the appropriate behavior based on the flag
     if (unlinkBillingEnabled) {
-      // When flag is enabled, the billing account should be unlinked and resources deleted
-      verify(leonardoApiClient)
-          .deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+      // When flag is enabled, the billing account should be unlinked.
       verify(mockFireCloudService)
           .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
     } else {
-      // When flag is disabled, these actions should never happen
-      verify(leonardoApiClient, never())
-          .deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+      // When flag is disabled, billing unlinking should not happen.
       verify(mockFireCloudService, never())
           .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
     }
