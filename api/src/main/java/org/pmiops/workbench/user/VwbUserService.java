@@ -99,4 +99,11 @@ public class VwbUserService {
       DbVwbUserPod pod, String initialCreditsBillingAccountName) {
     return initialCreditsBillingAccountName.equals(getBillingAccountForPod(pod.getVwbPodId()));
   }
+
+  public void unlinkBillingAccountForUserPod(DbUser user) {
+    if (user.getVwbUserPod() == null) {
+      return;
+    }
+    vwbUserManagerClient.unlinkBillingAccountFromPod(user.getVwbUserPod().getVwbPodId());
+  }
 }

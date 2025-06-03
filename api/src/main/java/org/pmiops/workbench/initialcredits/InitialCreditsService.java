@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -128,15 +129,15 @@ public class InitialCreditsService {
             .sorted()
             .map(l -> Long.toString(l))
             .collect(Collectors.joining(","));
-    logger.debug(String.format("Checking billing usage for user IDs: %s ", userIdsAsString));
+    logger.debug("Checking billing usage for user IDs: {} ", userIdsAsString);
     // Current cost in DB for those workspaces which have not been "recently" updated, as defined by
     // a config value.  This guards against excessive updating of workspaces.
     List<WorkspaceCostView> dbCostsForNotRecentlyUpdatedWorkspaces =
         getNotRecentlyUpdatedDbCostsForUsers(users);
 
-    // PHP-62652 Get not recently updated BQ costs for VWB google projects
+    // RW-15247 Get not recently updated BQ costs for VWB google projects
     List<DbVwbUserPod> vwbDbCostsNotRecentlyUpdated =
-        getVwbWorkspaceInitialCreditsUsagesThatWereNotRecentlyUpdated(users);
+        getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(users);
 
     final Map<String, Long> workspaceByProject =
         getWorkspaceByProjectCache(dbCostsForNotRecentlyUpdatedWorkspaces);
@@ -161,6 +162,8 @@ public class InitialCreditsService {
         getLiveCostByCreatorCache(liveCostsInBQ, workspaceByProject, creatorByWorkspace);
 
     // Merge the live costs from VWB users into the live cost of Terra workspaces
+    // At this point, we have the live costs for Terra workspaces and VWB workspaces in one map that
+    // can be passed to the downstream logic to handle the exhaustion alerting.
     vwbUserLiveCosts.forEach((userId, cost) -> liveCostByCreator.merge(userId, cost, Double::sum));
 
     Set<DbUser> filteredUsers = filterUsersHigherThanTheLowestThreshold(users, liveCostByCreator);
@@ -772,8 +775,15 @@ public class InitialCreditsService {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Get the VWB pods that were not recently updated. This is used to update the initial
+   * credits usage for VWB pods.
+   *
+   * @param users the users to get the VWB pods for
+   * @return a List of {@link DbVwbUserPod} that were not recently updated
+   */
   @NotNull
-  private List<DbVwbUserPod> getVwbWorkspaceInitialCreditsUsagesThatWereNotRecentlyUpdated(
+  private List<DbVwbUserPod> getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(
       Set<DbUser> users) {
     Timestamp minusMinutes =
         Timestamp.valueOf(
@@ -781,6 +791,7 @@ public class InitialCreditsService {
 
     return users.stream()
         .map(DbUser::getVwbUserPod)
+        .filter(Objects::nonNull)
         .filter(
             c ->
                 c.getInitialCreditsLastUpdateTime() == null

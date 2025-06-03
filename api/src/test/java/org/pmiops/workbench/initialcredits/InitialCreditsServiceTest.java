@@ -63,6 +63,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.ArgumentMatchers.UserListMatcher;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,7 +134,8 @@ public class InitialCreditsServiceTest {
     BigQueryService.class,
     TaskQueueService.class,
     WorkspaceMapper.class,
-    FireCloudService.class
+    FireCloudService.class,
+    VwbUserService.class,
   })
   static class Configuration {
     @Bean
