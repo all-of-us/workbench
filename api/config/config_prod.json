@@ -170,7 +170,7 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
-    "usersPerCheckInitialCreditsUsageTask": 100,
+    "usersPerCheckInitialCreditsUsageTask": 150,
     "usersPerCheckInitialCreditsExpirationTask": 50,
     "usersPerAccessExpirationEmailTask": 500,
     "workspacesPerDeleteWorkspaceEnvironmentsTask": 50,
