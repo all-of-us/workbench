@@ -26,6 +26,7 @@ import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,7 @@ public class CloudTaskInitialCreditsExhaustionController
   private final Provider<WorkbenchConfig> workbenchConfig;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
+  private final VwbUserService vwbUserService;
 
   CloudTaskInitialCreditsExhaustionController(
       InitialCreditsService initialCreditsService,
@@ -52,13 +54,15 @@ public class CloudTaskInitialCreditsExhaustionController
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfig,
       UserDao userDao,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      VwbUserService vwbUserService) {
     this.initialCreditsService = initialCreditsService;
     this.leonardoApiClient = leonardoApiClient;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfig = workbenchConfig;
     this.workspaceDao = workspaceDao;
+    this.vwbUserService = vwbUserService;
   }
 
   @SuppressWarnings("unchecked")
@@ -105,6 +109,9 @@ public class CloudTaskInitialCreditsExhaustionController
           initialCreditsService.updateInitialCreditsExhaustion(user, true);
           // delete apps and runtimes
           deleteAppsAndRuntimesInInitialCreditsWorkspaces(user);
+          // Unlink billing account in VWB
+          // This is done to stop extra charges from being incurred
+          vwbUserService.unlinkBillingAccountForUserPod(user);
           try {
             mailService.alertUserInitialCreditsExhausted(user);
           } catch (MessagingException e) {

@@ -32,7 +32,8 @@
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
     "minutesBeforeLastInitialCreditsJob": 60,
-    "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 2
+    "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 2,
+    "vwbExportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_vwb_billing_view"
   },
   "auth": {
     "serviceAccountApiUsers": [

@@ -122,6 +122,10 @@ public class WorkbenchConfig {
 
     // The number of days before initial credits expire that a warning email should be sent.
     public Long initialCreditsExpirationWarningDays;
+
+    // The name of the view in the BigQuery billing export dataset that contains the VWB workspaces
+    // usage costs.
+    public String vwbExportBigQueryTable;
   }
 
   public static class FireCloudConfig {

@@ -152,4 +152,18 @@ public class VwbUserManagerClient {
             context ->
                 podApiProvider.get().getPod(organizationId, podId, PodAction.READ_METADATA)));
   }
+
+  public void unlinkBillingAccountFromPod(String podId) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.info("Unlinking billing account from pod {}", podId);
+    vwbUserManagerRetryHandler.run(
+        context ->
+            podApiProvider
+                .get()
+                .unlinkBillingFromPod(
+                    new PodUnlinkBillingRequest()
+                        .jobControl(new JobControl().id(UUID.randomUUID().toString())),
+                    organizationId,
+                    podId));
+  }
 }
