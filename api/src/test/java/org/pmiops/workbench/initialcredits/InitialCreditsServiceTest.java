@@ -1213,7 +1213,8 @@ public class InitialCreditsServiceTest {
 
   @ParameterizedTest(name = "Test with enableUnlinkBillingForInitialCredits={0}")
   @MethodSource("unlinkBillingFlagProvider")
-  public void test_checkCreditsExpirationForUserIDs_onlyStopsSpendForInitialCreditsWorkspaces(boolean unlinkBillingEnabled) {
+  public void test_checkCreditsExpirationForUserIDs_onlyStopsSpendForInitialCreditsWorkspaces(
+      boolean unlinkBillingEnabled) {
     // ARRANGE
     // Set the feature flag
     workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = unlinkBillingEnabled;
@@ -1270,12 +1271,14 @@ public class InitialCreditsServiceTest {
     // Verify the appropriate behavior based on the flag
     if (unlinkBillingEnabled) {
       // When flag is enabled, the billing account should be unlinked and resources deleted
-      verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+      verify(leonardoApiClient)
+          .deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
       verify(mockFireCloudService)
           .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
     } else {
       // When flag is disabled, these actions should never happen
-      verify(leonardoApiClient, never()).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+      verify(leonardoApiClient, never())
+          .deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
       verify(mockFireCloudService, never())
           .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
     }
@@ -1292,8 +1295,8 @@ public class InitialCreditsServiceTest {
 
   private static Stream<Arguments> unlinkBillingFlagProvider() {
     return Stream.of(
-        Arguments.of(true),  // Flag enabled
-        Arguments.of(false)  // Flag disabled
-    );
+        Arguments.of(true), // Flag enabled
+        Arguments.of(false) // Flag disabled
+        );
   }
 }
