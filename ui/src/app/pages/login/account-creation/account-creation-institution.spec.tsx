@@ -1,6 +1,11 @@
 import '@testing-library/jest-dom';
 
-import { CheckEmailResponse, InstitutionalRole, InstitutionApi, Profile } from 'generated/fetch';
+import {
+  CheckEmailResponse,
+  InstitutionalRole,
+  InstitutionApi,
+  Profile,
+} from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render, waitFor, within } from '@testing-library/react';
@@ -23,7 +28,11 @@ import {
   InstitutionApiStub,
   VERILY_WITHOUT_CT,
 } from 'testing/stubs/institution-api-stub';
-import { validateCreateInstitution, validateCreateInstitutionV2 } from './account-creation-institution-validation';
+
+import {
+  validateCreateInstitution,
+  validateCreateInstitutionV2,
+} from './account-creation-institution-validation';
 
 const profile: Profile = {
   generalDiscoverySources: undefined,
@@ -286,7 +295,7 @@ describe('Account Creation- Institution', () => {
     await waitForSpinnerToGoAway(container);
 
     let nextButton = screen.getByRole('button', { name: /next/i });
-    //expect(nextButton.style).toEqual({});
+    // expect(nextButton.style).toEqual({});
     expectButtonElementEnabled(nextButton);
     // Change institution
     const dropDownDefaultValue = screen.getByText('Broad Institute');
@@ -329,50 +338,58 @@ describe('Account Creation- Institution', () => {
 describe('Account Creation- Institution validator', () => {
   it('validates happy profile', () => {
     const checkEmailResponse: CheckEmailResponse = {
-      validMember: true
+      validMember: true,
     };
     const errors = validateCreateInstitution(profile, checkEmailResponse);
-    const errorsV2 = validateCreateInstitutionV2(profile, checkEmailResponse)
-    
+    const errorsV2 = validateCreateInstitutionV2(profile, checkEmailResponse);
+
     expect(errorsV2).toEqual(errors);
   });
 
   it('validates empty profile', () => {
     const checkEmailResponse: CheckEmailResponse = {
-      validMember: true
+      validMember: true,
     };
     const emptyProfile: Profile = {} as Partial<Profile> as Profile;
     const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
-    const errorsV2 = validateCreateInstitutionV2(emptyProfile, checkEmailResponse)
-    
+    const errorsV2 = validateCreateInstitutionV2(
+      emptyProfile,
+      checkEmailResponse
+    );
     expect(errorsV2).toEqual(errors);
   });
 
   it('validates other institution', () => {
     const checkEmailResponse: CheckEmailResponse = {
-      validMember: true
+      validMember: true,
     };
-    const emptyProfile: Profile = { verifiedInstitutionalAffiliation: {
-      institutionalRoleEnum: InstitutionalRole.OTHER
-    }} as Partial<Profile> as Profile;
+    const emptyProfile: Profile = {
+      verifiedInstitutionalAffiliation: {
+        institutionalRoleEnum: InstitutionalRole.OTHER,
+      },
+    } as Partial<Profile> as Profile;
 
     const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
-    const errorsV2 = validateCreateInstitutionV2(emptyProfile, checkEmailResponse)
-    
+    const errorsV2 = validateCreateInstitutionV2(
+      emptyProfile,
+      checkEmailResponse
+    );
     expect(errorsV2).toEqual(errors);
   });
 
   it('validates bad email', () => {
     const checkEmailResponse: CheckEmailResponse = {
-      validMember: true
+      validMember: true,
     };
-    const emptyProfile: Profile = { 
-      contactEmail: 'bad-email'
+    const emptyProfile: Profile = {
+      contactEmail: 'bad-email',
     } as Partial<Profile> as Profile;
-    
+
     const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
-    const errorsV2 = validateCreateInstitutionV2(emptyProfile, checkEmailResponse)
-    
+    const errorsV2 = validateCreateInstitutionV2(
+      emptyProfile,
+      checkEmailResponse
+    );
     expect(errorsV2).toEqual(errors);
   });
 });

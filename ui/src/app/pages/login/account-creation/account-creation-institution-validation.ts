@@ -1,11 +1,20 @@
 import validate from 'validate.js';
+
+import {
+  CheckEmailResponse,
+  InstitutionalRole,
+  Profile,
+} from 'generated/fetch';
+
 import { isBlank } from 'app/utils';
 import { notTooLong } from 'app/utils/validators';
-import { CheckEmailResponse, InstitutionalRole, Profile } from 'generated/fetch';
-
+import {
+  formatZodErrors,
+  refinedObject,
+  refineFields,
+  requiredString,
+} from 'app/utils/zod-validators';
 import { z } from 'zod';
-import { formatZodErrors, requiredString, refinedObject, refineFields } from 'app/utils/zod-validators';
-
 
 export type CreateInstitutionFields = Profile;
 
@@ -30,7 +39,10 @@ validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
   }
 };
 
-export const validateCreateInstitution = (profile: CreateInstitutionFields, checkEmailResponse: CheckEmailResponse): { [key: string]: Array<string> } => {
+export const validateCreateInstitution = (
+  profile: CreateInstitutionFields,
+  checkEmailResponse: CheckEmailResponse
+): { [key: string]: Array<string> } => {
   const validationCheck = {
     'profile.verifiedInstitutionalAffiliation.institutionShortName': {
       presence: {
@@ -55,16 +67,15 @@ export const validateCreateInstitution = (profile: CreateInstitutionFields, chec
     },
     checkEmailResponse:
       !isBlank(
-        profile.verifiedInstitutionalAffiliation
-          ?.institutionShortName
+        profile.verifiedInstitutionalAffiliation?.institutionShortName
       ) && !isBlank(profile.contactEmail)
         ? {
             checkEmailResponse: {},
           }
         : {},
     'profile.verifiedInstitutionalAffiliation.institutionalRoleOtherText':
-      profile.verifiedInstitutionalAffiliation
-        ?.institutionalRoleEnum === InstitutionalRole.OTHER
+      profile.verifiedInstitutionalAffiliation?.institutionalRoleEnum ===
+      InstitutionalRole.OTHER
         ? {
             ...notTooLong(80),
             presence: {
@@ -76,21 +87,26 @@ export const validateCreateInstitution = (profile: CreateInstitutionFields, chec
   };
 
   return validate({ profile, checkEmailResponse }, validationCheck);
-}
+};
 
 // V2 validation with zod ================================================================
 // Email validation response schema
-export const emailValidationSchema = z.object({
-  validMember: z.boolean(),
-  existingAccount: z.boolean().optional()
-}).refine((data) => {
-  if (data.existingAccount) {
-    return false;
-  }
-  return data.validMember;
-}, {
-  message: "Email validation failed"
-});
+export const emailValidationSchema = z
+  .object({
+    validMember: z.boolean(),
+    existingAccount: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.existingAccount) {
+        return false;
+      }
+      return data.validMember;
+    },
+    {
+      message: 'Email validation failed',
+    }
+  );
 
 // Institutional affiliation schema
 export const institutionalAffiliationSchema = refinedObject<
@@ -98,31 +114,39 @@ export const institutionalAffiliationSchema = refinedObject<
 >((fields, ctx) => {
   const noop = undefined;
   return refineFields(fields, ctx, {
-    institutionShortName: requiredString("You must select an institution to continue"),
-    institutionalRoleEnum: z.nativeEnum(InstitutionalRole, { 
-      required_error: "Institutional role cannot be blank" 
+    institutionShortName: requiredString(
+      'You must select an institution to continue'
+    ),
+    institutionalRoleEnum: z.nativeEnum(InstitutionalRole, {
+      required_error: 'Institutional role cannot be blank',
     }),
-    institutionalRoleOtherText: (fields.institutionalRoleEnum === InstitutionalRole.OTHER)
-      ? requiredString("Institutional role text cannot be blank").max(80, {
-        message: "Institutional role text must be 80 characters or fewer"
-      })
-      : noop,
-  })
+    institutionalRoleOtherText:
+      fields.institutionalRoleEnum === InstitutionalRole.OTHER
+        ? requiredString('Institutional role text cannot be blank').max(80, {
+            message: 'Institutional role text must be 80 characters or fewer',
+          })
+        : noop,
+  });
 });
 
 // Full institutional validation schema
 export const institutionalValidationSchema = z.object({
   profile: refinedObject<Profile>((fields, ctx) => {
     return refineFields(fields, ctx, {
-      contactEmail: requiredString("Email address cannot be blank").email("Email address is invalid"),
-      verifiedInstitutionalAffiliation: institutionalAffiliationSchema
-    })
+      contactEmail: requiredString('Email address cannot be blank').email(
+        'Email address is invalid'
+      ),
+      verifiedInstitutionalAffiliation: institutionalAffiliationSchema,
+    });
   }),
-  checkEmailResponse: emailValidationSchema
+  checkEmailResponse: emailValidationSchema,
 });
 
 // Helper function to validate institutional data
-export const validateCreateInstitutionV2 = (profile: Profile, checkEmailResponse: CheckEmailResponse) => {
+export const validateCreateInstitutionV2 = (
+  profile: Profile,
+  checkEmailResponse: CheckEmailResponse
+) => {
   try {
     // stripFieldNames(institutionalValidationSchema).parse(data);
     institutionalValidationSchema.parse({ profile, checkEmailResponse });

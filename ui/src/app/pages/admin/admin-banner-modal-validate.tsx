@@ -1,7 +1,9 @@
 import validate from 'validate.js';
-import { z } from 'zod';
+
+import { StatusAlert } from 'generated/fetch';
+
 import { requiredString, zodToValidateJS } from 'app/utils/zod-validators';
-import { StatusAlert } from "generated/fetch";
+import { z } from 'zod';
 
 const BANNER_VALIDATION_CONSTRAINTS = {
   title: {
@@ -42,9 +44,11 @@ export const validateBannerAlert = (banner: StatusAlert) => {
 export const bannerValidationSchema = z.object({
   title: requiredString('Please enter a banner title'),
   message: requiredString('Please enter a banner message'),
-  startTimeEpochMillis: z.number({ required_error: "Please enter a start time" }),
-  alertLocation: requiredString("Please select a banner location")
+  startTimeEpochMillis: z.number({
+    required_error: 'Please enter a start time',
+  }),
+  alertLocation: requiredString('Please select a banner location'),
 });
 
-export const validateBannerAlertV2 = (data: StatusAlert) => 
- zodToValidateJS(() => bannerValidationSchema.parse(data));
+export const validateBannerAlertV2 = (data: StatusAlert) =>
+  zodToValidateJS(() => bannerValidationSchema.parse(data));

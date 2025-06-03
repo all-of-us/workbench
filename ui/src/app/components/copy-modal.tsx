@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { z } from 'zod';
 
 import {
   CdrVersionTiersResponse,
@@ -28,12 +27,12 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, summarizeErrors, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { NavigationProps } from 'app/utils/navigation';
-import { nameValidationFormat, toDisplay } from 'app/utils/resources';
+import { toDisplay } from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
+import { validateCopyModalV2 } from './copy-modal-validate';
 import { FlexRow } from './flex';
 import { ClrIcon } from './icons';
-import { validateCopyModal, validateCopyModalV2 } from './copy-modal-validate';
 
 enum RequestState {
   UNSENT,

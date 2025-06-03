@@ -19,7 +19,8 @@ import {
   formatDateTimeLocal,
   MILLIS_PER_YEAR,
 } from 'app/utils/dates';
-import { validateBannerAlert, validateBannerAlertV2 } from './admin-banner-modal-validate';
+
+import { validateBannerAlertV2 } from './admin-banner-modal-validate';
 
 const styles = reactStyles({
   label: {

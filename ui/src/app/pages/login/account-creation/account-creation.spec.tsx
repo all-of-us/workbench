@@ -20,8 +20,6 @@ import { Country } from 'app/utils/constants';
 import { serverConfigStore } from 'app/utils/stores';
 
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
-import { AccountCreationFields, validateAccountCreation, validateAccountCreationV2 } from './account-creation-validation';
-
 
 import {
   AccountCreation,
@@ -29,6 +27,11 @@ import {
   formLabels,
   stateCodeErrorMessage,
 } from './account-creation';
+import {
+  AccountCreationFields,
+  validateAccountCreation,
+  validateAccountCreationV2,
+} from './account-creation-validation';
 
 export class MockDate extends Date {
   constructor(arg) {
@@ -75,8 +78,8 @@ const defaultConfig = { gsuiteDomain: 'researchallofus.org' };
 
 beforeAll(() => {
   // stub google analytics
-  window['gtag'] = jest.fn();
-})
+  window.gtag = jest.fn();
+});
 
 beforeEach(() => {
   serverConfigStore.set({ config: defaultConfig });
@@ -432,18 +435,18 @@ describe('Account Creation Validation', () => {
         city: 'Test City',
         state: 'XX',
         zipCode: '12345',
-        country: "Portugal",
+        country: 'Portugal',
       },
-      professionalUrl: '', //'https://example.com',
+      professionalUrl: '', // 'https://example.com',
       generalDiscoverySources: [
         GeneralDiscoverySource.SOCIAL_MEDIA,
-        GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES
+        GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES,
       ],
       partnerDiscoverySources: [
         PartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
-        PartnerDiscoverySource.ASIAN_HEALTH_COALITION
+        PartnerDiscoverySource.ASIAN_HEALTH_COALITION,
       ],
-      usernameWithEmail: 'coolguygreatplace.org'
+      usernameWithEmail: 'coolguygreatplace.org',
     };
     const v1 = validateAccountCreation(profileFields);
     const v2 = validateAccountCreationV2(profileFields);
@@ -452,7 +455,7 @@ describe('Account Creation Validation', () => {
 
   it('should validate with errors on empty object', () => {
     const profileFields: AccountCreationFields = {
-      address: {}
+      address: {},
     } as Partial<AccountCreationFields> as AccountCreationFields;
     const v1 = validateAccountCreation(profileFields);
     const v2 = validateAccountCreationV2(profileFields);

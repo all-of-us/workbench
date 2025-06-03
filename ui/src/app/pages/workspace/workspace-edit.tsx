@@ -108,8 +108,11 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { OldCdrVersionModal } from './old-cdr-version-modal';
 import { UnavailableTierModal } from './unavailable-tier-modal';
-import { getDiseaseNames } from './workspace-edit-providers'
-import { validateWorkspaceEdit, validateWorkspaceEditV2, WorkspaceEditValidationArgs } from './workspace-edit-validation';
+import { getDiseaseNames } from './workspace-edit-providers';
+import {
+  validateWorkspaceEditV2,
+  WorkspaceEditValidationArgs,
+} from './workspace-edit-validation';
 
 export const styles = reactStyles({
   categoryRow: {
@@ -745,7 +748,7 @@ export const WorkspaceEdit = fp.flow(
     }
 
     makeDiseaseInput(): React.ReactNode {
-      //console.log('makeDiseaseInput getDiseaseNames fn=' + getDiseaseNames); 
+      // console.log('makeDiseaseInput getDiseaseNames fn=' + getDiseaseNames);
       return (
         <SearchInput
           data-test-id='diseaseOfFocus-input'
@@ -1383,7 +1386,7 @@ export const WorkspaceEdit = fp.flow(
       };
       return validateWorkspaceEditV2(values, this.getAskAboutAIAN());
 
-      //return validateWorkspace(values);
+      // return validateWorkspace(values);
     }
 
     onAccessTierChange(

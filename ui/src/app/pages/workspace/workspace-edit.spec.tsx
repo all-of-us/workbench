@@ -2,7 +2,6 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mockNavigate } from 'setupTests';
-import { WorkspaceEditValidationArgs, validateWorkspaceEdit, validateWorkspaceEditV2 } from './workspace-edit-validation'
 
 import {
   AIANResearchType,
@@ -61,6 +60,12 @@ import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
+import {
+  validateWorkspaceEdit,
+  validateWorkspaceEditV2,
+  WorkspaceEditValidationArgs,
+} from './workspace-edit-validation';
+
 jest.mock('app/utils/project-billing-info', () => ({
   getBillingAccountInfo: () =>
     new Promise((resolve) =>
@@ -68,11 +73,15 @@ jest.mock('app/utils/project-billing-info', () => ({
     ),
 }));
 
-type WorkspaceEditProvidersExports = typeof import('./workspace-edit-providers');
-jest.mock('./workspace-edit-providers', (): WorkspaceEditProvidersExports => ({
-  ...jest.requireActual('./workspace-edit-providers'),
-  getDiseaseNames: async () => (['some result']),
-}));
+type WorkspaceEditProvidersExports =
+  typeof import('./workspace-edit-providers');
+jest.mock(
+  './workspace-edit-providers',
+  (): WorkspaceEditProvidersExports => ({
+    ...jest.requireActual('./workspace-edit-providers'),
+    getDiseaseNames: async () => ['some result'],
+  })
+);
 
 let mockHasBillingScope: jest.SpyInstance;
 let mockEnsureBillingScope: jest.SpyInstance;
@@ -90,8 +99,8 @@ const OTHER_DISSEMINATION_REGEX = new RegExp(
 
 beforeAll(() => {
   // stub google analytics
-  window['gtag'] = jest.fn();
-})
+  window.gtag = jest.fn();
+});
 
 describe(WorkspaceEdit.name, () => {
   let workspacesApi: WorkspacesApiStub;
@@ -1327,20 +1336,21 @@ describe('WorkspaceEdit valdator utils', () => {
       scientificApproach: 'This is the scientific approach.',
       disseminateResearchFindingList: ['OTHER'],
       researchOutcomeList: ['DECREASE_ILLNESS_BURDEN'],
-      populationDetails: undefined,// ['AGE_OLDER'],
-      otherPurposeDetails: '', //'This is the other purpose details.',
+      populationDetails: undefined, // ['AGE_OLDER'],
+      otherPurposeDetails: '', // 'This is the other purpose details.',
       otherPopulationDetails: 'This is the other population details.',
       diseaseOfFocus: 'This is the disease of focus.',
-      otherDisseminateResearchFindings: 'This is the other dissemination method.',
-      aianResearchDetails: undefined, //'This is the AIAN research details.',
-      aianResearchType: undefined, //AIANResearchType.CASE_CONTROL_AI_AN,
+      otherDisseminateResearchFindings:
+        'This is the other dissemination method.',
+      aianResearchDetails: undefined, // 'This is the AIAN research details.',
+      aianResearchType: undefined, // AIANResearchType.CASE_CONTROL_AI_AN,
       diseaseFocusedResearch: true,
       primaryPurpose: true,
       otherPurpose: true,
       name: 'Test Workspace',
       billingAccountName: 'Test Billing Account',
       reviewRequested: true,
-      populationChecked: true, 
+      populationChecked: true,
     };
 
     const v1 = validateWorkspaceEdit(fields, true);
@@ -1356,27 +1366,29 @@ describe('WorkspaceEdit valdator utils', () => {
       scientificApproach: 'This is the scientific approach.',
       disseminateResearchFindingList: ['OTHER'],
       researchOutcomeList: ['DECREASE_ILLNESS_BURDEN'],
-      populationDetails: undefined,// ['AGE_OLDER'],
-      otherPurposeDetails: '', //'This is the other purpose details.',
+      populationDetails: undefined, // ['AGE_OLDER'],
+      otherPurposeDetails: '', // 'This is the other purpose details.',
       otherPopulationDetails: 'This is the other population details.',
       diseaseOfFocus: 'This is the disease of focus.',
       otherDisseminateResearchFindings: ' '.repeat(8),
-      aianResearchDetails: undefined, //'This is the AIAN research details.',
-      aianResearchType: undefined, //AIANResearchType.CASE_CONTROL_AI_AN,
+      aianResearchDetails: undefined, // 'This is the AIAN research details.',
+      aianResearchType: undefined, // AIANResearchType.CASE_CONTROL_AI_AN,
       diseaseFocusedResearch: true,
       primaryPurpose: true,
       otherPurpose: true,
       name: 'Test Workspace',
       billingAccountName: 'Test Billing Account',
       reviewRequested: true,
-      populationChecked: true, 
+      populationChecked: true,
     };
 
     const v1 = validateWorkspaceEdit(fields, true);
     const v2 = validateWorkspaceEditV2(fields, true);
 
-    
-    console.log('====================== workspace edit validate test v2 = ', v2);
+    console.log(
+      '====================== workspace edit validate test v2 = ',
+      v2
+    );
     expect(v2).toEqual(v1);
-  })
+  });
 });

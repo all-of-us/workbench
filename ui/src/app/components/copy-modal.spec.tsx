@@ -322,7 +322,6 @@ describe(CopyModal.name, () => {
       )
     ).toBeInTheDocument();
 
-
     const newName = 'Freeblast';
     await renameNotebook(newName);
 
@@ -462,8 +461,8 @@ describe(CopyModal.name, () => {
   });
 });
 
-describe("CopyModal input validation", () => {
-  it("V2 matches V1 validation", () => {
+describe('CopyModal input validation', () => {
+  it('V2 matches V1 validation', () => {
     const newName = 'test';
     const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
     const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
@@ -471,7 +470,7 @@ describe("CopyModal input validation", () => {
     expect(v2).toEqual(v1);
   });
 
-  it("V2 matches V1 validation - blank", () => {
+  it('V2 matches V1 validation - blank', () => {
     const newName = '';
     const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
     const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
@@ -479,11 +478,11 @@ describe("CopyModal input validation", () => {
     expect(v2).toEqual(v1);
   });
 
-  it("V2 matches V1 validation - bad char", () => {
+  it('V2 matches V1 validation - bad char', () => {
     const newName = 'this=is?bad';
     const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
     const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
 
     expect(v2).toEqual(v1);
-  })
+  });
 });

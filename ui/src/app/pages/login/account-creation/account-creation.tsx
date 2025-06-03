@@ -43,7 +43,8 @@ import { Country } from 'app/utils/constants';
 import { showDemographicSurvey } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
-import { validateAccountCreation, validateAccountCreationV2 } from './account-creation-validation';
+
+import { validateAccountCreationV2 } from './account-creation-validation';
 
 const styles = reactStyles({
   ...commonStyles,

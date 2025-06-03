@@ -39,7 +39,8 @@ import {
   DuplicateEmailErrorMessage,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
-import { validateCreateInstitution, validateCreateInstitutionV2 } from './account-creation-institution-validation';
+
+import { validateCreateInstitutionV2 } from './account-creation-institution-validation';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -273,7 +274,10 @@ export class AccountCreationInstitution extends React.Component<
    */
   public validate(): { [key: string]: Array<string> } {
     // const errors = validateInstitutional(this.state);
-    const errors = validateCreateInstitutionV2(this.state.profile, this.state.checkEmailResponse);
+    const errors = validateCreateInstitutionV2(
+      this.state.profile,
+      this.state.checkEmailResponse
+    );
     return errors;
   }
 

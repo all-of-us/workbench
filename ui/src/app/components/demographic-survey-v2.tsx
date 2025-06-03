@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
-import validate from 'validate.js';
 
 import {
-  DemographicSurveyV2,
   EducationV2,
   EthnicCategory,
   GenderIdentityV2,
@@ -36,6 +34,14 @@ import {
 } from 'app/utils/constants';
 
 import {
+  maxYear,
+  minYear,
+  NONE_FULLY_DESCRIBE_MAX_LENGTH,
+  OTHER_DISABILITY_MAX_LENGTH,
+  SURVEY_COMMENTS_MAX_LENGTH,
+  validateDemographicSurvey_V2,
+} from './demographic-survey-v2-validation';
+import {
   CheckBox,
   NumberInput,
   TextAreaWithLengthValidationMessage,
@@ -44,15 +50,6 @@ import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { AoU } from './text-wrappers';
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
 import { YesNoOptionalQuestion } from './yes-no-optional-question';
-import { 
-  minYear, 
-  maxYear, 
-  OTHER_DISABILITY_MAX_LENGTH, 
-  NONE_FULLY_DESCRIBE_MAX_LENGTH,
-  SURVEY_COMMENTS_MAX_LENGTH,
-  validateDemographicSurvey,
-  validateDemographicSurvey_V2
-} from './demographic-survey-v2-validation';
 
 export const possiblePreferNotToAnswerErrors = [
   ETHNIC_CATEGORIES,
