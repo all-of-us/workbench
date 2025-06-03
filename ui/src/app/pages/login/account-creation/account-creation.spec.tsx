@@ -20,6 +20,8 @@ import { Country } from 'app/utils/constants';
 import { serverConfigStore } from 'app/utils/stores';
 
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import { AccountCreationFields, validateAccountCreation, validateAccountCreationV2 } from './account-creation-validation';
+
 
 import {
   AccountCreation,
@@ -70,6 +72,11 @@ function getAreaOfResearchTextArea(): HTMLTextAreaElement {
 }
 
 const defaultConfig = { gsuiteDomain: 'researchallofus.org' };
+
+beforeAll(() => {
+  // stub google analytics
+  window['gtag'] = jest.fn();
+})
 
 beforeEach(() => {
   serverConfigStore.set({ config: defaultConfig });
@@ -410,4 +417,45 @@ it('Should show submit button if country is not US', async () => {
   // Updating the Country to ALbania and the fact the date has been mocked to 2023-dec, button will be Submit
   expect(screen.getByText('Albania')).toBeInTheDocument();
   expect(screen.getByText('Submit')).toBeInTheDocument();
+});
+
+describe('Account Creation Validation', () => {
+  it('should validate account creation form fields', () => {
+    const profileFields: AccountCreationFields = {
+      username: 'testuser',
+      givenName: 'Test',
+      familyName: 'User',
+      areaOfResearch: '',
+      address: {
+        streetAddress1: '123 Test St',
+        streetAddress2: '',
+        city: 'Test City',
+        state: 'XX',
+        zipCode: '12345',
+        country: "Portugal",
+      },
+      professionalUrl: '', //'https://example.com',
+      generalDiscoverySources: [
+        GeneralDiscoverySource.SOCIAL_MEDIA,
+        GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES
+      ],
+      partnerDiscoverySources: [
+        PartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
+        PartnerDiscoverySource.ASIAN_HEALTH_COALITION
+      ],
+      usernameWithEmail: 'coolguygreatplace.org'
+    };
+    const v1 = validateAccountCreation(profileFields);
+    const v2 = validateAccountCreationV2(profileFields);
+    expect(v2).toEqual(v1);
+  });
+
+  it('should validate with errors on empty object', () => {
+    const profileFields: AccountCreationFields = {
+      address: {}
+    } as Partial<AccountCreationFields> as AccountCreationFields;
+    const v1 = validateAccountCreation(profileFields);
+    const v2 = validateAccountCreationV2(profileFields);
+    expect(v2).toEqual(v1);
+  });
 });

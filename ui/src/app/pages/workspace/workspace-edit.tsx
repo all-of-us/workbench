@@ -2,7 +2,6 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import validate from 'validate.js';
 
 import {
   ArchivalStatus,
@@ -109,6 +108,8 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { OldCdrVersionModal } from './old-cdr-version-modal';
 import { UnavailableTierModal } from './unavailable-tier-modal';
+import { getDiseaseNames } from './workspace-edit-providers'
+import { validateWorkspaceEdit, validateWorkspaceEditV2, WorkspaceEditValidationArgs } from './workspace-edit-validation';
 
 export const styles = reactStyles({
   categoryRow: {
@@ -259,20 +260,6 @@ export enum WorkspaceEditMode {
   Create = 1,
   Edit = 2,
   Duplicate = 3,
-}
-
-function getDiseaseNames(keyword) {
-  const baseurl = serverConfigStore.get().config.firecloudURL;
-  const url = baseurl + '/duos/autocomplete/' + keyword;
-  return fetch(encodeURI(url))
-    .then((response) => {
-      return response.json();
-    })
-    .then((matches) =>
-      matches
-        .filter((elt) => elt.hasOwnProperty('label'))
-        .map((elt) => elt.label)
-    );
 }
 
 interface UpgradeProps {
@@ -758,6 +745,7 @@ export const WorkspaceEdit = fp.flow(
     }
 
     makeDiseaseInput(): React.ReactNode {
+      //console.log('makeDiseaseInput getDiseaseNames fn=' + getDiseaseNames); 
       return (
         <SearchInput
           data-test-id='diseaseOfFocus-input'
@@ -1342,8 +1330,7 @@ export const WorkspaceEdit = fp.flow(
     }
 
     /**
-     * Validates the current workspace state. This is a pass-through to validate.js
-     * which returns the standard error object if any validation errors occur.
+     * Validates the current workspace state using Zod validation.
      */
     private validate(): any {
       const {
@@ -1370,7 +1357,7 @@ export const WorkspaceEdit = fp.flow(
           },
         },
       } = this.state;
-      const values: object = {
+      const values: WorkspaceEditValidationArgs = {
         aianResearchDetails,
         aianResearchType,
         name,
@@ -1383,6 +1370,7 @@ export const WorkspaceEdit = fp.flow(
         researchOutcomeList,
         disseminateResearchFindingList,
         primaryPurpose: this.primaryPurposeIsSelected,
+        otherPurpose,
 
         // Conditionally include optional fields for validation.
 
@@ -1390,75 +1378,12 @@ export const WorkspaceEdit = fp.flow(
         populationDetails,
         otherPopulationDetails,
         diseaseOfFocus,
+        diseaseFocusedResearch,
         otherDisseminateResearchFindings,
       };
+      return validateWorkspaceEditV2(values, this.getAskAboutAIAN());
 
-      const requiredStringWithMaxLength = (maximum: number, prefix = '') => ({
-        presence: {
-          allowEmpty: false,
-          message: `${prefix} cannot be blank`,
-        },
-        length: {
-          maximum,
-          tooLong: `${prefix} cannot exceed %{count} characters`,
-        },
-      });
-
-      // TODO: This validation spec should include error messages which get
-      // surfaced directly. Currently these constraints are entirely separate
-      // from the user facing error strings we render.
-      const constraints: object = {
-        name: requiredStringWithMaxLength(80, 'Name'),
-        // The prefix for these lengthMessages require HTML formatting
-        // The prefix string is omitted here and included in the React template below
-        billingAccountName: { presence: true },
-        intendedStudy: requiredStringWithMaxLength(1000),
-        populationChecked: { presence: true },
-        anticipatedFindings: requiredStringWithMaxLength(1000),
-        reviewRequested: { presence: true },
-        scientificApproach: requiredStringWithMaxLength(1000),
-        researchOutcomeList: { presence: { allowEmpty: false } },
-        disseminateResearchFindingList: { presence: { allowEmpty: false } },
-        primaryPurpose: { truthiness: true },
-
-        // Conditionally include optional fields for validation.
-
-        otherPurposeDetails: otherPurpose
-          ? requiredStringWithMaxLength(500, 'Other primary purpose')
-          : {},
-        populationDetails: populationChecked
-          ? {
-              presence: true,
-            }
-          : {},
-        otherPopulationDetails: populationDetails?.includes(
-          SpecificPopulationEnum.OTHER
-        )
-          ? requiredStringWithMaxLength(100, 'Other Specific Population')
-          : {},
-        diseaseOfFocus: diseaseFocusedResearch
-          ? requiredStringWithMaxLength(80, 'Disease of Focus')
-          : {},
-        otherDisseminateResearchFindings:
-          disseminateResearchFindingList?.includes(
-            DisseminateResearchEnum.OTHER
-          )
-            ? requiredStringWithMaxLength(
-                100,
-                'Other methods of disseminating research findings'
-              )
-            : {},
-        aianResearchType: this.getAskAboutAIAN()
-          ? {
-              presence: true,
-            }
-          : {},
-        aianResearchDetails: this.getAskAboutAIAN()
-          ? requiredStringWithMaxLength(1000)
-          : {},
-      };
-
-      return validate(values, constraints, { fullMessages: false });
+      //return validateWorkspace(values);
     }
 
     onAccessTierChange(
@@ -1661,7 +1586,7 @@ export const WorkspaceEdit = fp.flow(
                     style={styles.textInput}
                     autoFocus
                     placeholder='Workspace Name'
-                    value={name}
+                    value={name || ''}
                     onBlur={(v) =>
                       this.setState(fp.set(['workspace', 'name'], v.trim()))
                     }
@@ -2200,7 +2125,7 @@ export const WorkspaceEdit = fp.flow(
                       type='text'
                       autoFocus
                       placeholder='Please specify'
-                      value={otherPopulationDetails}
+                      value={otherPopulationDetails || ''}
                       disabled={
                         !fp.includes(
                           SpecificPopulationEnum.OTHER,

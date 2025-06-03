@@ -8,6 +8,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 
 import { RenameModal } from './rename-modal';
+import { validateRenameModal, validateRenameModalV2 } from './rename-modal-validate';
 
 describe(RenameModal.name, () => {
   const existingNames = [];
@@ -125,3 +126,41 @@ describe('validateNewName', () => {
     expect(errors).toBeUndefined();
   });
 });
+
+describe("CopyModal input validation", () => {
+  it("V2 matches V1 validation", () => {
+    const newName = 'test';
+    const exists = ['exists1', 'exists2'];
+    const v1 = validateRenameModal({ newName }, exists, ResourceType.NOTEBOOK);
+    const v2 = validateRenameModalV2({ newName }, exists, ResourceType.NOTEBOOK);
+
+    expect(v2).toEqual(v1);
+  });
+
+  it("V2 matches V1 validation - blank", () => {
+    const newName = '';
+    const exists = ['exists1', 'exists2'];
+    const v1 = validateRenameModal({ newName }, exists, ResourceType.NOTEBOOK);
+    const v2 = validateRenameModalV2({ newName }, exists, ResourceType.NOTEBOOK);
+
+    expect(v2).toEqual(v1);
+  });
+
+  it("V2 matches V1 validation - bad char", () => {
+    const newName = 'this=is?bad';
+    const exists = ['exists1', 'exists2'];
+    const v1 = validateRenameModal({ newName }, exists, ResourceType.NOTEBOOK);
+    const v2 = validateRenameModalV2({ newName }, exists, ResourceType.NOTEBOOK);
+
+    expect(v2).toEqual(v1);
+  });
+
+    it("V2 matches V1 validation - name exists", () => {
+    const newName = 'exists2';
+    const exists = ['exists1', 'exists2'];
+    const v1 = validateRenameModal({ newName }, exists, ResourceType.NOTEBOOK);
+    const v2 = validateRenameModalV2({ newName }, exists, ResourceType.NOTEBOOK);
+
+    expect(v2).toEqual(v1);
+  })
+})

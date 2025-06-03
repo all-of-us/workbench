@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { validate } from 'validate.js';
+import { z } from 'zod';
 
 import { ResourceType } from 'generated/fetch';
 
@@ -16,6 +16,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { nameValidationFormat, toDisplay } from 'app/utils/resources';
+import { validateRenameModal } from './rename-modal-validate';
 
 const styles = reactStyles({
   fieldHeader: {
@@ -77,12 +78,8 @@ export class RenameModal extends React.Component<Props, States> {
         newName
       );
 
-    return validate(
-      { newName: newNameNoExtension.trim() },
-      {
-        newName: nameValidationFormat(lowerCaseNames, resourceType),
-      }
-    );
+
+    return validateRenameModal({ newName: newNameNoExtension }, lowerCaseNames, resourceType);
   }
 
   private getFilteredListOfFileNamesWithoutExtension(

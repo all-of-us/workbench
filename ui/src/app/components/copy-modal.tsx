@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { validate } from 'validate.js';
+import { z } from 'zod';
 
 import {
   CdrVersionTiersResponse,
@@ -33,6 +33,7 @@ import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 import { FlexRow } from './flex';
 import { ClrIcon } from './icons';
+import { validateCopyModal, validateCopyModalV2 } from './copy-modal-validate';
 
 enum RequestState {
   UNSENT,
@@ -461,14 +462,10 @@ const CopyModal = withCdrVersions()(
         copyErrorMsg,
         newName,
       } = this.state;
-      const errors = validate(
-        {
-          newName: newName?.trim(),
-        },
-        {
-          newName: nameValidationFormat([], resourceType),
-        }
-      );
+
+      // Validate the input
+      const errors = validateCopyModalV2({ newName }, resourceType);
+
       return (
         <div>
           <div style={headerStyles.formLabel}>Destination *</div>

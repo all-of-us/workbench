@@ -11,6 +11,7 @@ import {
 } from 'testing/react-test-helpers';
 
 import { AdminBannerModal } from './admin-banner-modal';
+import { validateBannerAlert, validateBannerAlertV2 } from './admin-banner-modal-validate';
 
 describe('AdminBannerModal', () => {
   const defaultBanner: StatusAlert = {
@@ -205,5 +206,32 @@ describe('AdminBannerModal', () => {
         })
       );
     });
+  });
+});
+
+describe('AdminBannerModal - Validation', () => {
+  it("has same results for v2 as v1 validation", () => {
+    const filledBanner: StatusAlert = {
+      title: 'Test Title',
+      message: 'Test Message',
+      link: '',
+      alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: Date.now(),
+    };
+
+    const errors = validateBannerAlert(filledBanner);
+    const errorsV2 = validateBannerAlertV2(filledBanner);
+
+    expect(errorsV2).toEqual(errors);
+  });
+    it("has same results for v2 as v1 validation - empty", () => {
+    const filledBanner: StatusAlert = {
+      
+    } as Partial<StatusAlert> as StatusAlert;
+
+    const errors = validateBannerAlert(filledBanner);
+    const errorsV2 = validateBannerAlertV2(filledBanner);
+
+    expect(errorsV2).toEqual(errors);
   });
 });

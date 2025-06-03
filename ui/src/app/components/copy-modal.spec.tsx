@@ -35,6 +35,7 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { CopyModal, CopyModalProps } from './copy-modal';
+import { validateCopyModal, validateCopyModalV2 } from './copy-modal-validate';
 
 interface TestWorkspace {
   namespace: string;
@@ -321,7 +322,6 @@ describe(CopyModal.name, () => {
       )
     ).toBeInTheDocument();
 
-    screen.debug();
 
     const newName = 'Freeblast';
     await renameNotebook(newName);
@@ -460,4 +460,30 @@ describe(CopyModal.name, () => {
     expectButtonElementDisabled(copyButton);
     expect(spy).toHaveBeenCalledTimes(0);
   });
+});
+
+describe("CopyModal input validation", () => {
+  it("V2 matches V1 validation", () => {
+    const newName = 'test';
+    const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+    const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
+
+    expect(v2).toEqual(v1);
+  });
+
+  it("V2 matches V1 validation - blank", () => {
+    const newName = '';
+    const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+    const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
+
+    expect(v2).toEqual(v1);
+  });
+
+  it("V2 matches V1 validation - bad char", () => {
+    const newName = 'this=is?bad';
+    const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+    const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
+
+    expect(v2).toEqual(v1);
+  })
 });
