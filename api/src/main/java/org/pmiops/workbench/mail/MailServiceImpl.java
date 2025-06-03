@@ -7,14 +7,11 @@ import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToApp
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Streams;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.AddressException;
-import jakarta.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
@@ -28,30 +25,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.mandrill.ApiException;
-import org.pmiops.workbench.mandrill.api.MandrillApi;
-import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
-import org.pmiops.workbench.mandrill.model.RecipientAddress;
-import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,22 +133,16 @@ public class MailServiceImpl implements MailService {
   // CT Steps
   private static final String CT_TRAINING = "Complete All of Us Controlled Tier Training";
 
-  private enum Status {
-    REJECTED,
-    API_ERROR,
-    SUCCESSFUL
-  }
-
-  private final Provider<MandrillApi> mandrillApiProvider;
+  private final Provider<MailSender> mailSenderProvider;
   private final Provider<CloudStorageClient> cloudStorageClientProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public MailServiceImpl(
-      Provider<MandrillApi> mandrillApiProvider,
+      Provider<MailSender> mailSenderProvider,
       Provider<CloudStorageClient> cloudStorageClientProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.mandrillApiProvider = mandrillApiProvider;
+    this.mailSenderProvider = mailSenderProvider;
     this.cloudStorageClientProvider = cloudStorageClientProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -374,7 +353,7 @@ public class MailServiceImpl implements MailService {
                 .put(EmailSubstitutionField.DISK_DELETE_INSTRUCTION, UNUSED_DISK_DELETE_HELP)
                 .build());
     sendWithRetries(
-        workbenchConfigProvider.get().mandrill.fromEmail,
+        workbenchConfigProvider.get().mail.fromEmail,
         Collections.emptyList(),
         Collections.emptyList(),
         users.stream().map(DbUser::getContactEmail).toList(),
@@ -399,7 +378,7 @@ public class MailServiceImpl implements MailService {
     }
     sendWithRetries(
         receiptEmails,
-        Collections.singletonList(workbenchConfigProvider.get().mandrill.fromEmail),
+        Collections.singletonList(workbenchConfigProvider.get().mail.fromEmail),
         "Request to set up Google Cloud Billing Account for All of Us Workbench",
         String.format(" User %s requests billing setup from Carasoft.", userForLogging(dbUser)),
         htmlMessage);
@@ -477,7 +456,7 @@ public class MailServiceImpl implements MailService {
   private void sendPublishUnpublishWorkspaceEmails(
       DbWorkspace workspace, List<DbUser> owners, String emailResource, String actionPresentTense)
       throws MessagingException {
-    final String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+    final String supportEmail = workbenchConfigProvider.get().mail.fromEmail;
     final String presentTenseCapitalized = StringUtils.capitalize(actionPresentTense);
     final String pastTense = actionPresentTense.toLowerCase() + "ed";
 
@@ -525,7 +504,7 @@ public class MailServiceImpl implements MailService {
     WorkbenchConfig config = workbenchConfigProvider.get();
     List<String> ccSupportMaybe =
         config.featureFlags.ccSupportWhenAdminLocking
-            ? List.of(config.mandrill.fromEmail)
+            ? List.of(config.mail.fromEmail)
             : Collections.emptyList();
 
     sendWithRetries(
@@ -670,7 +649,7 @@ public class MailServiceImpl implements MailService {
         .put(
             EmailSubstitutionField.USER_PHONE,
             HtmlEscapers.htmlEscaper().escape(request.getPhone()))
-        .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().mandrill.fromEmail)
+        .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().mail.fromEmail)
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
         .put(
@@ -724,20 +703,6 @@ public class MailServiceImpl implements MailService {
     return new StringSubstitutor(stringMap).replace(emailContent);
   }
 
-  private RecipientAddress validatedRecipient(
-      final String contactEmail, final RecipientType recipientType) {
-    try {
-      final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
-      contactInternetAddress.validate();
-    } catch (AddressException e) {
-      throw new ServerErrorException(String.format("Email: %s is invalid.", contactEmail));
-    }
-
-    final RecipientAddress toAddress = new RecipientAddress();
-    toAddress.email(contactEmail).type(recipientType);
-    return toAddress;
-  }
-
   private void sendWithRetries(
       List<String> toRecipientEmails,
       List<String> ccRecipientEmails,
@@ -746,7 +711,7 @@ public class MailServiceImpl implements MailService {
       String htmlMessage)
       throws MessagingException {
     sendWithRetries(
-        workbenchConfigProvider.get().mandrill.fromEmail,
+        workbenchConfigProvider.get().mail.fromEmail,
         toRecipientEmails,
         ccRecipientEmails,
         Collections.emptyList(),
@@ -764,91 +729,16 @@ public class MailServiceImpl implements MailService {
       String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
-    List<RecipientAddress> recipients =
-        Streams.concat(
-                toRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.TO)),
-                ccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.CC)),
-                bccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.BCC)))
-            .toList();
-    final MandrillMessage msg =
-        new MandrillMessage()
-            .to(recipients)
-            .html(htmlMessage)
-            .subject(subject)
-            .preserveRecipients(true)
-            .fromEmail(from);
-
-    String apiKey = cloudStorageClientProvider.get().readMandrillApiKey();
-    int retries = workbenchConfigProvider.get().mandrill.sendRetries;
-    MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
-    keyAndMessage.setKey(apiKey);
-    keyAndMessage.setMessage(msg);
-    do {
-      retries--;
-      Pair<Status, String> attempt = trySend(keyAndMessage);
-      Status status = Status.valueOf(attempt.getLeft().toString());
-      String defaultFailureMessage = String.format("Sending email failed: %s", attempt.getRight());
-      switch (status) {
-        case API_ERROR:
-          log.log(
-              Level.WARNING,
-              String.format(
-                  "Messaging Exception API_ERROR: Email '%s' not sent: %s",
-                  descriptionForLog, attempt.getRight()));
-          if (retries == 0) {
-            log.log(
-                Level.SEVERE,
-                String.format(
-                    "Messaging Exception API_ERROR: On Last Attempt! Email '%s' not sent: %s",
-                    descriptionForLog, attempt.getRight()));
-            throw new MessagingException(defaultFailureMessage);
-          }
-          break;
-
-        case REJECTED:
-          String sentTo =
-              recipients.stream().map(RecipientAddress::getEmail).collect(Collectors.joining(", "));
-          log.log(
-              Level.SEVERE,
-              String.format(
-                  "Messaging Exception REJECTED: Email '%s' not sent to %s: %s",
-                  descriptionForLog, sentTo, attempt.getRight()));
-          throw new MessagingException(defaultFailureMessage);
-
-        case SUCCESSFUL:
-          log.log(Level.INFO, String.format("Email '%s' was sent.", descriptionForLog));
-          return;
-
-        default:
-          if (retries == 0) {
-            log.log(
-                Level.SEVERE,
-                String.format(
-                    "Messaging Exception: Email '%s' was not sent. Default case.",
-                    descriptionForLog));
-            throw new MessagingException(defaultFailureMessage);
-          }
-      }
-    } while (retries > 0);
-  }
-
-  private Pair<Status, String> trySend(MandrillApiKeyAndMessage keyAndMessage) {
-    try {
-      MandrillMessageStatuses msgStatuses = mandrillApiProvider.get().send(keyAndMessage);
-      for (MandrillMessageStatus msgStatus : msgStatuses) {
-        if (msgStatus.getRejectReason() != null) {
-          return new ImmutablePair<>(Status.REJECTED, msgStatus.getRejectReason());
-        }
-      }
-    } catch (ApiException e) {
-      return new ImmutablePair<>(
-          Status.API_ERROR,
-          String.format(
-              "Code: %s | Response: %s | Exception: %s", e.getCode(), e.getResponseBody(), e));
-    } catch (Exception e) {
-      return new ImmutablePair<>(Status.API_ERROR, e.toString());
-    }
-    return new ImmutablePair<>(Status.SUCCESSFUL, "");
+    mailSenderProvider
+        .get()
+        .sendWithRetries(
+            from,
+            toRecipientEmails,
+            ccRecipientEmails,
+            bccRecipientEmails,
+            subject,
+            descriptionForLog,
+            htmlMessage);
   }
 
   private String getAllOfUsLogo() {
