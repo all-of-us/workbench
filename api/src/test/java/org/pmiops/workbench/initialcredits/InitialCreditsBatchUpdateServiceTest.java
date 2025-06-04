@@ -92,17 +92,16 @@ public class InitialCreditsBatchUpdateServiceTest {
   }
 
   @Test
-    public void checkInitialCreditsUsage_bothTerraAndVWBProjects() {
-        mockGoogleProjectCost();
-        mockVwbUserCost();
-        initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(1L, 2L, 3L));
+  public void checkInitialCreditsUsage_bothTerraAndVWBProjects() {
+    mockGoogleProjectCost();
+    mockVwbUserCost();
+    initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(1L, 2L, 3L));
 
-        verify(mockWorkspaceDao, times(1)).getWorkspaceGoogleProjectsForCreators(List.of(1L, 2L, 3L));
+    verify(mockWorkspaceDao, times(1)).getWorkspaceGoogleProjectsForCreators(List.of(1L, 2L, 3L));
 
-        verify(mockInitialCreditsService)
-            .checkInitialCreditsUsageForUsers(
-                mockDbUserSet, getWorkspacesCostMap(), getUsersCostMap());
-    }
+    verify(mockInitialCreditsService)
+        .checkInitialCreditsUsageForUsers(mockDbUserSet, getWorkspacesCostMap(), getUsersCostMap());
+  }
 
   private void mockDbUsers() {
     DbUser dbUserForId1 = new DbUser().setUserId(1L);
@@ -110,25 +109,25 @@ public class InitialCreditsBatchUpdateServiceTest {
     DbUser dbUserForId3 = new DbUser().setUserId(3L);
 
     DbVwbUserPod dbVwbUserPod1 =
-            new DbVwbUserPod()
-                    .setVwbUserPodId(1L)
-                    .setUser(dbUserForId1)
-                    .setVwbPodId("pod1")
-                    .setInitialCreditsActive(true);
+        new DbVwbUserPod()
+            .setVwbUserPodId(1L)
+            .setUser(dbUserForId1)
+            .setVwbPodId("pod1")
+            .setInitialCreditsActive(true);
     dbUserForId1.setVwbUserPod(dbVwbUserPod1);
     DbVwbUserPod dbVwbUserPod2 =
-            new DbVwbUserPod()
-                    .setVwbUserPodId(2L)
-                    .setUser(dbUserForId2)
-                    .setVwbPodId("pod2")
-                    .setInitialCreditsActive(true);
+        new DbVwbUserPod()
+            .setVwbUserPodId(2L)
+            .setUser(dbUserForId2)
+            .setVwbPodId("pod2")
+            .setInitialCreditsActive(true);
     dbUserForId2.setVwbUserPod(dbVwbUserPod2);
     DbVwbUserPod dbVwbUserPod3 =
-            new DbVwbUserPod()
-                    .setVwbUserPodId(3L)
-                    .setUser(dbUserForId3)
-                    .setVwbPodId("pod3")
-                    .setInitialCreditsActive(true);
+        new DbVwbUserPod()
+            .setVwbUserPodId(3L)
+            .setUser(dbUserForId3)
+            .setVwbPodId("pod3")
+            .setInitialCreditsActive(true);
     dbUserForId3.setVwbUserPod(dbVwbUserPod3);
 
     mockDbUserSet.add(dbUserForId1);
@@ -136,7 +135,7 @@ public class InitialCreditsBatchUpdateServiceTest {
     mockDbUserSet.add(dbUserForId3);
 
     when(mockUserDao.findUsersByUserIdIn(List.of(1L, 2L, 3L)))
-            .thenReturn(List.of(dbUserForId1, dbUserForId2, dbUserForId3));
+        .thenReturn(List.of(dbUserForId1, dbUserForId2, dbUserForId3));
   }
 
   private void mockGoogleProjectsForUser() {
@@ -171,5 +170,4 @@ public class InitialCreditsBatchUpdateServiceTest {
     userCostMap.put(3L, 3.3);
     return userCostMap;
   }
-
 }

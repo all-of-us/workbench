@@ -153,6 +153,11 @@ public class VwbUserManagerClient {
                 podApiProvider.get().getPod(organizationId, podId, PodAction.READ_METADATA)));
   }
 
+  /**
+   * Unlinks the billing account from a pod.
+   *
+   * @param podId The ID of the pod to unlink the billing account from.
+   */
   public void unlinkBillingAccountFromPod(String podId) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     logger.info("Unlinking billing account from pod {}", podId);
