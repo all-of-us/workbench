@@ -47,10 +47,12 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -127,6 +129,7 @@ public class InitialCreditsServiceTest {
               .plusSeconds((warningPeriodDays + 1L) * 24 * 60 * 60));
 
   private DbWorkspace workspace;
+  @Autowired private VwbUserPodDao vwbUserPodDao;
 
   @TestConfiguration
   @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
@@ -1170,8 +1173,8 @@ public class InitialCreditsServiceTest {
 
     Timestamp expectedExtensionDate =
         Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
-    assertEquals(actualExpirationRecord.getExpirationTime(), expectedExtensionDate);
-    assertEquals(actualExpirationRecord.getExtensionTime(), NOW);
+    assertEquals(expectedExtensionDate, actualExpirationRecord.getExpirationTime());
+    assertEquals(NOW, actualExpirationRecord.getExtensionTime());
   }
 
   @Test
@@ -1208,6 +1211,64 @@ public class InitialCreditsServiceTest {
     assertThat(eligibility).isTrue();
   }
 
+  @Test
+  public void checkInitialCreditsUsageForUsers_withVwbCosts_calculatesExhaustionCorrectly() {
+    final String proj1 = "proj-1";
+    final String proj2 = "proj-2";
+    final double cost1 = 123.45;
+    final double cost2 = 234.56;
+    final double vwbCost1 = 0.55;
+    final double vwbCost2 = 0.44;
+
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = Math.min(cost1, cost2) - 0.01;
+
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(proj1, cost1);
+    allBQCosts.put(proj2, cost2);
+
+    DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
+    DbWorkspace ws1 = createWorkspace(user1, proj1);
+    DbUser user2 = createUser("more@test.com");
+    DbWorkspace ws2 = createWorkspace(user2, proj2);
+    DbVwbUserPod vwbPod1 = createVwbPodForUser(user1);
+    DbVwbUserPod vwbPod2 = createVwbPodForUser(user2);
+    user1.setVwbUserPod(vwbPod1);
+    user2.setVwbUserPod(vwbPod2);
+    userDao.save(user1);
+    userDao.save(user2);
+
+    commitTransaction();
+
+    Map<Long, Double> vwbCosts = new HashMap<>();
+    vwbCosts.put(user1.getUserId(), vwbCost1);
+    vwbCosts.put(user2.getUserId(), vwbCost2);
+
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user1, user2), allBQCosts, vwbCosts);
+    verify(taskQueueService)
+        .pushInitialCreditsExhaustionTask(
+            argThat(new UserListMatcher(List.of(user1.getUserId(), user2.getUserId()))),
+            argThat(new MapMatcher(Map.of(user1.getUserId(), 0.0d, user2.getUserId(), 0.0d))),
+            argThat(
+                new MapMatcher(
+                    Map.of(
+                        user1.getUserId(),
+                        cost1 + vwbCost1,
+                        user2.getUserId(),
+                        cost2 + vwbCost2))));
+
+    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
+
+    // confirm DB updates after checkInitialCreditsUsage()
+    final DbWorkspaceFreeTierUsage usage1 = workspaceFreeTierUsageDao.findOneByWorkspace(ws1);
+    assertThat(usage1.getUser()).isEqualTo(user1);
+    assertWithinBillingTolerance(usage1.getCost(), cost1);
+
+    final DbWorkspaceFreeTierUsage usage2 = workspaceFreeTierUsageDao.findOneByWorkspace(ws2);
+    assertThat(usage2.getUser()).isEqualTo(user2);
+    assertWithinBillingTolerance(usage2.getCost(), cost2);
+  }
+
   private void assertSingleWorkspaceTestDbState(
       DbUser user, DbWorkspace workspaceForQuerying, double cost) {
 
@@ -1233,6 +1294,14 @@ public class InitialCreditsServiceTest {
             .setWorkspaceNamespace(project + "-ns")
             .setGoogleProject(project)
             .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName()));
+  }
+
+  private DbVwbUserPod createVwbPodForUser(DbUser user) {
+    return vwbUserPodDao.save(
+        new DbVwbUserPod()
+            .setUser(user)
+            .setVwbPodId("pod" + user.getUserId())
+            .setInitialCreditsActive(true));
   }
 
   private void assertWithinBillingTolerance(double actualValue, double expectedValue) {

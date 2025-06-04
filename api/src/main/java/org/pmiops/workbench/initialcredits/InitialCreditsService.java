@@ -135,36 +135,35 @@ public class InitialCreditsService {
     List<WorkspaceCostView> dbCostsForNotRecentlyUpdatedWorkspaces =
         getNotRecentlyUpdatedDbCostsForUsers(users);
 
-    // RW-15247 Get not recently updated BQ costs for VWB google projects
-    List<DbVwbUserPod> vwbDbCostsNotRecentlyUpdated =
-        getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(users);
-
     final Map<String, Long> workspaceByProject =
         getWorkspaceByProjectCache(dbCostsForNotRecentlyUpdatedWorkspaces);
-    if (workspaceByProject.isEmpty() && vwbDbCostsNotRecentlyUpdated.isEmpty()) {
+
+    // RW-15247 Get not recently updated BQ costs for VWB google projects
+    List<DbVwbUserPod> vwbNotRecentlyUpdatedPods =
+        getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(users);
+    Map<Long, Double> userIdToVwbCostMap = getVwbPodsDbCostCache(vwbNotRecentlyUpdatedPods);
+
+    if (workspaceByProject.isEmpty() && vwbNotRecentlyUpdatedPods.isEmpty()) {
       logger.info("No workspaces require updates");
       return;
     }
     updateInitialCreditsUsageInDb(
         dbCostsForNotRecentlyUpdatedWorkspaces, liveCostsInBQ, workspaceByProject);
 
-    updateVwbInitialCreditsUsageInDb(vwbDbCostsNotRecentlyUpdated, vwbUserLiveCosts);
+    updateVwbInitialCreditsUsageAndInitialCreditsActive(
+        vwbNotRecentlyUpdatedPods, vwbUserLiveCosts);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
-        getDbCostByCreatorCache(
-            dbCostsForNotRecentlyUpdatedWorkspaces, vwbDbCostsNotRecentlyUpdated);
+        getDbCostByCreatorCache(dbCostsForNotRecentlyUpdatedWorkspaces, userIdToVwbCostMap);
     // check cost thresholds for the relevant users
     final Map<Long, Long> creatorByWorkspace =
         getCreatorByWorkspaceCache(dbCostsForNotRecentlyUpdatedWorkspaces);
     // Cache cost in BQ by creator
+    // This includes costs from both Terra and VWB workspaces
     final Map<Long, Double> liveCostByCreator =
-        getLiveCostByCreatorCache(liveCostsInBQ, workspaceByProject, creatorByWorkspace);
-
-    // Merge the live costs from VWB users into the live cost of Terra workspaces
-    // At this point, we have the live costs for Terra workspaces and VWB workspaces in one map that
-    // can be passed to the downstream logic to handle the exhaustion alerting.
-    vwbUserLiveCosts.forEach((userId, cost) -> liveCostByCreator.merge(userId, cost, Double::sum));
+        getLiveCostByCreatorCache(
+            liveCostsInBQ, workspaceByProject, creatorByWorkspace, vwbUserLiveCosts);
 
     Set<DbUser> filteredUsers = filterUsersHigherThanTheLowestThreshold(users, liveCostByCreator);
     if (filteredUsers.isEmpty()) {
@@ -173,6 +172,17 @@ public class InitialCreditsService {
 
     taskQueueService.pushInitialCreditsExhaustionTask(
         filteredUsers.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
+  }
+
+  private static @org.jetbrains.annotations.NotNull Map<Long, Double> getVwbPodsDbCostCache(
+      List<DbVwbUserPod> vwbNotRecentlyUpdatedPods) {
+    Map<Long, Double> userIdToVwbCostMap =
+        vwbNotRecentlyUpdatedPods.stream()
+            .collect(
+                Collectors.toMap(
+                    pod -> pod.getUser().getUserId(),
+                    pod -> Optional.ofNullable(pod.getCost()).orElse(0.0)));
+    return userIdToVwbCostMap;
   }
 
   /**
@@ -726,13 +736,20 @@ public class InitialCreditsService {
   private static Map<Long, Double> getLiveCostByCreatorCache(
       Map<String, Double> liveCostsInBQ,
       Map<String, Long> workspaceByProject,
-      Map<Long, Long> creatorByWorkspace) {
-    return liveCostsInBQ.entrySet().stream()
-        .filter(e -> workspaceByProject.containsKey(e.getKey()))
-        .collect(
-            Collectors.groupingBy(
-                e -> creatorByWorkspace.get(workspaceByProject.get(e.getKey())),
-                Collectors.summingDouble(Entry::getValue)));
+      Map<Long, Long> creatorByWorkspace,
+      Map<Long, Double> vwbUserLiveCosts) {
+    Map<Long, Double> liveCostByCreator =
+        liveCostsInBQ.entrySet().stream()
+            .filter(e -> workspaceByProject.containsKey(e.getKey()))
+            .collect(
+                Collectors.groupingBy(
+                    e -> creatorByWorkspace.get(workspaceByProject.get(e.getKey())),
+                    Collectors.summingDouble(Entry::getValue)));
+    // Merge the live costs from VWB users into the live cost of Terra workspaces
+    // At this point, we have the live costs for Terra workspaces and VWB workspaces in one map that
+    // can be passed to the downstream logic to handle the exhaustion alerting.
+    vwbUserLiveCosts.forEach((userId, cost) -> liveCostByCreator.merge(userId, cost, Double::sum));
+    return liveCostByCreator;
   }
 
   @NotNull
@@ -746,7 +763,7 @@ public class InitialCreditsService {
   @NotNull
   private static Map<Long, Double> getDbCostByCreatorCache(
       List<WorkspaceCostView> allCostsInDbForUsers,
-      List<DbVwbUserPod> vwbDbCostsNotRecentlyUpdated) {
+      Map<Long, Double> vwbDbCostsNotRecentlyUpdated) {
     final Map<Long, Double> dbCostByCreator =
         allCostsInDbForUsers.stream()
             .collect(
@@ -757,11 +774,8 @@ public class InitialCreditsService {
 
     // Add costs from DbVwbUserPod
     vwbDbCostsNotRecentlyUpdated.forEach(
-        pod ->
-            dbCostByCreator.merge(
-                pod.getUser().getUserId(),
-                Optional.ofNullable(pod.getCost()).orElse(0.0),
-                Double::sum));
+        (key, value) ->
+            dbCostByCreator.merge(key, Optional.ofNullable(value).orElse(0.0), Double::sum));
 
     return dbCostByCreator;
   }
@@ -776,8 +790,8 @@ public class InitialCreditsService {
   }
 
   /**
-   * Get the VWB pods that were not recently updated. This is used to update the initial
-   * credits usage for VWB pods.
+   * Get the VWB pods that were not recently updated. This is used to update the initial credits
+   * usage for VWB pods.
    *
    * @param users the users to get the VWB pods for
    * @return a List of {@link DbVwbUserPod} that were not recently updated
@@ -799,25 +813,20 @@ public class InitialCreditsService {
         .toList();
   }
 
-  private void updateVwbInitialCreditsUsageInDb(
+  private void updateVwbInitialCreditsUsageAndInitialCreditsActive(
       List<DbVwbUserPod> vwbDbCostsNotRecentlyUpdated, Map<Long, Double> vwbUserLiveCosts) {
     vwbDbCostsNotRecentlyUpdated.forEach(
         pod -> {
-          updatePodCostAndCheckBillingAccount(pod, vwbUserLiveCosts);
-          vwbUserPodDao.save(pod);
+          updateSinglePodCostAndCheckBillingAccount(pod, vwbUserLiveCosts);
         });
   }
 
-  private void updatePodCostAndCheckBillingAccount(
+  private void updateSinglePodCostAndCheckBillingAccount(
       DbVwbUserPod pod, Map<Long, Double> vwbUserLiveCosts) {
     Long userId = pod.getUser().getUserId();
     Double liveCost = vwbUserLiveCosts.getOrDefault(userId, 0.0);
     pod.setCost(liveCost);
-
-    String initialCreditsBillingAccountName =
-        workbenchConfigProvider.get().billing.initialCreditsBillingAccountName();
-
-    pod.setInitialCreditsActive(
-        vwbUserService.isInitialCreditsBillingAccount(pod, initialCreditsBillingAccountName));
+    pod.setInitialCreditsActive(vwbUserService.isPodUsingInitialCredits(pod));
+    vwbUserPodDao.save(pod);
   }
 }
