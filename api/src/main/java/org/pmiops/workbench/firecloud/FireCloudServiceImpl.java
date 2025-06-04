@@ -315,6 +315,17 @@ public class FireCloudServiceImpl implements FireCloudService {
         });
   }
 
+  @Override
+  public void removeBillingAccountFromBillingProjectAsService(String billingProjectName) {
+    rawlsRetryHandler.run(
+        (context) -> {
+          serviceAccountBillingV2ApiProvider
+              .get()
+              .removeBillingProjectBillingAccount(billingProjectName);
+          return null;
+        });
+  }
+
   private void addRoleToBillingProject(String email, String projectName, String role) {
     Preconditions.checkArgument(email.contains("@"));
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();

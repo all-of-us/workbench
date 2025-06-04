@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.isA;
@@ -56,7 +57,10 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.User;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.ArgumentMatchers.UserListMatcher;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -66,6 +70,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -94,6 +99,7 @@ public class InitialCreditsServiceTest {
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   @Autowired private TaskQueueService taskQueueService;
+  @Autowired private ApplicationContext applicationContext;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -153,6 +159,7 @@ public class InitialCreditsServiceTest {
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForInitialCreditsUsageUpdate = 2L;
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
+    workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = true;
     workbenchConfig.offlineBatch.usersPerCheckInitialCreditsUsageTask = 10;
 
     workspace =
@@ -1202,5 +1209,91 @@ public class InitialCreditsServiceTest {
   private void commitTransaction() {
     TestTransaction.flagForCommit();
     TestTransaction.end();
+  }
+
+  @ParameterizedTest(name = "Test with enableUnlinkBillingForInitialCredits={0}")
+  @MethodSource("unlinkBillingFlagProvider")
+  public void test_checkCreditsExpirationForUserIDs_onlyStopsSpendForInitialCreditsWorkspaces(
+      boolean unlinkBillingEnabled) {
+    // ARRANGE
+    // Set the feature flag
+    workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = unlinkBillingEnabled;
+
+    // Create a user with an expiration that has passed
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUsername(SINGLE_WORKSPACE_TEST_USER)
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(PAST_EXPIRATION)
+                        .setBypassed(false)));
+
+    User creator = new User();
+    creator.setUserName(SINGLE_WORKSPACE_TEST_USER);
+
+    Workspace initialCreditsWorkspace =
+        new Workspace()
+            .googleProject("initial-credits-project")
+            .billingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
+            .namespace("initial-credits-namespace");
+    initialCreditsWorkspace.setCreatorUser(creator);
+
+    Workspace nonInitialCreditsWorkspace =
+        new Workspace()
+            .googleProject("non-initial-credits-project")
+            .billingAccountName("some-other-billing-account")
+            .namespace("non-initial-credits-namespace");
+    nonInitialCreditsWorkspace.setCreatorUser(creator);
+
+    List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
+    WorkspaceResponse response1 = new WorkspaceResponse();
+    response1.setWorkspace(initialCreditsWorkspace);
+    workspaceResponses.add(response1);
+
+    WorkspaceResponse response2 = new WorkspaceResponse();
+    response2.setWorkspace(nonInitialCreditsWorkspace);
+    workspaceResponses.add(response2);
+
+    FireCloudService mockFireCloudService = applicationContext.getBean(FireCloudService.class);
+    WorkspaceMapper mockWorkspaceMapper = applicationContext.getBean(WorkspaceMapper.class);
+
+    when(mockFireCloudService.listWorkspacesAsService()).thenReturn(new ArrayList<>());
+    when(mockWorkspaceMapper.toApiWorkspaceResponseList(
+            any(WorkspaceDao.class), anyList(), any(InitialCreditsService.class)))
+        .thenReturn(workspaceResponses);
+
+    // ACT
+    // Call the method being tested
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // ASSERT
+    verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
+    // Verify the appropriate behavior based on the flag
+    if (unlinkBillingEnabled) {
+      // When flag is enabled, the billing account should be unlinked.
+      verify(mockFireCloudService)
+          .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
+    } else {
+      // When flag is disabled, billing unlinking should not happen.
+      verify(mockFireCloudService, never())
+          .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getNamespace());
+    }
+
+    // These should never be called regardless of the flag
+    verify(leonardoApiClient, never())
+        .deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
+    verify(mockFireCloudService, never())
+        .removeBillingAccountFromBillingProjectAsService(nonInitialCreditsWorkspace.getNamespace());
+
+    // Verify that the user's expiration cleanup time was set
+    assertEquals(NOW, user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
+
+  private static Stream<Arguments> unlinkBillingFlagProvider() {
+    return Stream.of(
+        Arguments.of(true), // Flag enabled
+        Arguments.of(false) // Flag disabled
+        );
   }
 }
