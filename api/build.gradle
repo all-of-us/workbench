@@ -394,7 +394,7 @@ clean.doFirst {
 repositories {
     maven {
         // for Terra service clients (currently sam-client and leonardo-client)
-        url 'https://broadinstitute.jfrog.io/artifactory/libs-release-local'
+        url 'https://us-central1-maven.pkg.dev/dsp-artifact-registry/libs-release/'
     }
     mavenCentral()
 }
