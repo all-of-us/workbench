@@ -467,7 +467,7 @@ public class InitialCreditsService {
             ws ->
                 BillingUtils.isInitialCredits(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .forEach(this::deleteAppsAndRuntimesInWorkspace);
+        .forEach(this::stopInitialCreditSpendInWorkspace);
 
     userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
     userDao.save(user);
@@ -490,14 +490,23 @@ public class InitialCreditsService {
     }
   }
 
-  private void deleteAppsAndRuntimesInWorkspace(Workspace workspace) {
-
+  private void stopInitialCreditSpendInWorkspace(Workspace workspace) {
     String namespace = workspace.getNamespace();
+    String googleProject = workspace.getGoogleProject();
     try {
-      leonardoApiClient.deleteAllResources(workspace.getGoogleProject(), false);
+      leonardoApiClient.deleteAllResources(googleProject, false);
       logger.info("Deleted apps and runtimes for workspace {}", namespace);
     } catch (WorkbenchException e) {
       logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
+    }
+    if (workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits) {
+      try {
+        fireCloudService.removeBillingAccountFromBillingProjectAsService(namespace);
+        logger.info("Removed initial credits billing account from workspace {}", namespace);
+      } catch (WorkbenchException e) {
+        logger.error(
+            "Failed to remove initial credits billing account from workspace {}", namespace, e);
+      }
     }
   }
 

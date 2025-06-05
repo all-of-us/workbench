@@ -17,7 +17,7 @@ dependencies {
     liquibaseRuntime 'org.liquibase:liquibase-core:4.31.1'
     liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:4.0.0'
     liquibaseRuntime 'info.picocli:picocli:4.7.6'
-    liquibaseRuntime 'com.mysql:mysql-connector-j:9.0.0'
+    liquibaseRuntime 'com.mysql:mysql-connector-j:9.3.0'
     liquibaseRuntime 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     liquibaseRuntime 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
 }

@@ -424,4 +424,30 @@ describe('Account Creation Institution - form validator', () => {
     };
     expect(errors).toEqual(expectedErrors);
   });
+
+  it('returns error for email not in institution', () => {
+    // Arrange
+    const checkEmailResponse: CheckEmailResponse = {
+      validMember: false,
+    };
+    const emptyProfile = {
+      verifiedInstitutionalAffiliation: {
+        institutionalRoleEnum: InstitutionalRole.POST_DOCTORAL,
+        institutionShortName: BROAD.shortName,
+        institutionDisplayName: BROAD.displayName,
+      },
+      contactEmail: 'bad-email@bad-place.org',
+    } as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+
+    // Act
+    const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      checkEmailResponse: [
+        'Email address is not a member of the selected institution',
+      ],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
 });
