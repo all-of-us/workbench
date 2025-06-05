@@ -121,7 +121,7 @@
     "enableUnlinkBillingForInitialCredits": false,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": true,
-    "enableVWBEgressMonitor": false,
+    "enableVWBEgressMonitor": true,
     "enableVWBUserAccessManagement": true,
     "enableVWBUserAndPodCreation": true
   },
