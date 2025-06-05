@@ -1219,29 +1219,32 @@ public class InitialCreditsServiceTest {
 
     // Create a user with an expiration that has passed
     DbUser user = new DbUser().setUsername(SINGLE_WORKSPACE_TEST_USER);
-    DbUserInitialCreditsExpiration expiration = new DbUserInitialCreditsExpiration()
-        .setExpirationTime(PAST_EXPIRATION)
-        .setBypassed(false)
-        .setUser(user);
+    DbUserInitialCreditsExpiration expiration =
+        new DbUserInitialCreditsExpiration()
+            .setExpirationTime(PAST_EXPIRATION)
+            .setBypassed(false)
+            .setUser(user);
     user.setUserInitialCreditsExpiration(expiration);
     user = spyUserDao.save(user);
 
     // Create DbWorkspace entities directly in the database
-    DbWorkspace initialCreditsWorkspace = workspaceDao.save(
-        new DbWorkspace()
-            .setCreator(user)
-            .setWorkspaceNamespace("initial-credits-namespace")
-            .setGoogleProject("initial-credits-project")
-            .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+    DbWorkspace initialCreditsWorkspace =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setCreator(user)
+                .setWorkspaceNamespace("initial-credits-namespace")
+                .setGoogleProject("initial-credits-project")
+                .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
+                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
 
-    DbWorkspace nonInitialCreditsWorkspace = workspaceDao.save(
-        new DbWorkspace()
-            .setCreator(user)
-            .setWorkspaceNamespace("non-initial-credits-namespace")
-            .setGoogleProject("non-initial-credits-project")
-            .setBillingAccountName("some-other-billing-account")
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+    DbWorkspace nonInitialCreditsWorkspace =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setCreator(user)
+                .setWorkspaceNamespace("non-initial-credits-namespace")
+                .setGoogleProject("non-initial-credits-project")
+                .setBillingAccountName("some-other-billing-account")
+                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
 
     commitTransaction();
 
@@ -1260,17 +1263,25 @@ public class InitialCreditsServiceTest {
     if (unlinkBillingEnabled) {
       // When flag is enabled, the billing account should be unlinked.
       verify(mockFireCloudService)
-          .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getWorkspaceNamespace());
+          .removeBillingAccountFromBillingProjectAsService(
+              initialCreditsWorkspace.getWorkspaceNamespace());
     } else {
       // When flag is disabled, billing unlinking should not happen.
       verify(mockFireCloudService, never())
-          .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getWorkspaceNamespace());
+          .removeBillingAccountFromBillingProjectAsService(
+              initialCreditsWorkspace.getWorkspaceNamespace());
     }
 
     verify(mockFireCloudService, never())
-        .removeBillingAccountFromBillingProjectAsService(nonInitialCreditsWorkspace.getWorkspaceNamespace());
+        .removeBillingAccountFromBillingProjectAsService(
+            nonInitialCreditsWorkspace.getWorkspaceNamespace());
     // Verify that the user's expiration cleanup time was set
-    assertEquals(NOW, userDao.findUserByUserId(user.getUserId()).getUserInitialCreditsExpiration().getExpirationCleanupTime());
+    assertEquals(
+        NOW,
+        userDao
+            .findUserByUserId(user.getUserId())
+            .getUserInitialCreditsExpiration()
+            .getExpirationCleanupTime());
   }
 
   private static Stream<Arguments> unlinkBillingFlagProvider() {
@@ -1289,13 +1300,14 @@ public class InitialCreditsServiceTest {
     DbWorkspace initialCreditsWorkspace2 = createWorkspace(user, "initial-credits-project-2");
 
     // Create a workspace with a different billing account (not initial credits)
-    DbWorkspace nonInitialCreditsWorkspace = workspaceDao.save(
-        new DbWorkspace()
-            .setCreator(user)
-            .setWorkspaceNamespace("non-initial-credits-namespace")
-            .setGoogleProject("non-initial-credits-project")
-            .setBillingAccountName("some-other-billing-account")
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+    DbWorkspace nonInitialCreditsWorkspace =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setCreator(user)
+                .setWorkspaceNamespace("non-initial-credits-namespace")
+                .setGoogleProject("non-initial-credits-project")
+                .setBillingAccountName("some-other-billing-account")
+                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
 
     commitTransaction();
 
@@ -1306,32 +1318,48 @@ public class InitialCreditsServiceTest {
 
     // ASSERT
     // Verify that initial credits workspaces were marked as exhausted
-    DbWorkspace updatedWorkspace1 = workspaceDao.findById(initialCreditsWorkspace1.getWorkspaceId()).get();
+    DbWorkspace updatedWorkspace1 =
+        workspaceDao.findById(initialCreditsWorkspace1.getWorkspaceId()).get();
     assertThat(updatedWorkspace1.isInitialCreditsExhausted()).isTrue();
 
-    DbWorkspace updatedWorkspace2 = workspaceDao.findById(initialCreditsWorkspace2.getWorkspaceId()).get();
+    DbWorkspace updatedWorkspace2 =
+        workspaceDao.findById(initialCreditsWorkspace2.getWorkspaceId()).get();
     assertThat(updatedWorkspace2.isInitialCreditsExhausted()).isTrue();
 
     // Verify that non-initial credits workspace was not marked as exhausted
-    DbWorkspace updatedNonInitialWorkspace = workspaceDao.findById(nonInitialCreditsWorkspace.getWorkspaceId()).get();
+    DbWorkspace updatedNonInitialWorkspace =
+        workspaceDao.findById(nonInitialCreditsWorkspace.getWorkspaceId()).get();
     assertThat(updatedNonInitialWorkspace.isInitialCreditsExhausted()).isFalse();
 
     // Verify that resources were stopped for initial credits workspaces
-    verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace1.getGoogleProject(), false);
-    verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace2.getGoogleProject(), false);
+    verify(leonardoApiClient)
+        .deleteAllResources(initialCreditsWorkspace1.getGoogleProject(), false);
+    verify(leonardoApiClient)
+        .deleteAllResources(initialCreditsWorkspace2.getGoogleProject(), false);
 
     // Verify that appropriate billing account behavior occurs based on flag
     if (workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits) {
-      verify(mockFireCloudService).removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace1.getWorkspaceNamespace());
-      verify(mockFireCloudService).removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace2.getWorkspaceNamespace());
+      verify(mockFireCloudService)
+          .removeBillingAccountFromBillingProjectAsService(
+              initialCreditsWorkspace1.getWorkspaceNamespace());
+      verify(mockFireCloudService)
+          .removeBillingAccountFromBillingProjectAsService(
+              initialCreditsWorkspace2.getWorkspaceNamespace());
     } else {
-      verify(mockFireCloudService, never()).removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace1.getWorkspaceNamespace());
-      verify(mockFireCloudService, never()).removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace2.getWorkspaceNamespace());
+      verify(mockFireCloudService, never())
+          .removeBillingAccountFromBillingProjectAsService(
+              initialCreditsWorkspace1.getWorkspaceNamespace());
+      verify(mockFireCloudService, never())
+          .removeBillingAccountFromBillingProjectAsService(
+              initialCreditsWorkspace2.getWorkspaceNamespace());
     }
 
     // Verify that resources were not stopped for non-initial credits workspace
-    verify(leonardoApiClient, never()).deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
-    verify(mockFireCloudService, never()).removeBillingAccountFromBillingProjectAsService(nonInitialCreditsWorkspace.getWorkspaceNamespace());
+    verify(leonardoApiClient, never())
+        .deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
+    verify(mockFireCloudService, never())
+        .removeBillingAccountFromBillingProjectAsService(
+            nonInitialCreditsWorkspace.getWorkspaceNamespace());
   }
 
   @Test
@@ -1348,14 +1376,15 @@ public class InitialCreditsServiceTest {
     workspaceDao.save(initialCreditsWorkspace2);
 
     // Create a workspace with a different billing account
-    DbWorkspace nonInitialCreditsWorkspace = workspaceDao.save(
-        new DbWorkspace()
-            .setCreator(user)
-            .setWorkspaceNamespace("non-initial-credits-namespace")
-            .setGoogleProject("non-initial-credits-project")
-            .setBillingAccountName("some-other-billing-account")
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
-            .setInitialCreditsExhausted(true));
+    DbWorkspace nonInitialCreditsWorkspace =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setCreator(user)
+                .setWorkspaceNamespace("non-initial-credits-namespace")
+                .setGoogleProject("non-initial-credits-project")
+                .setBillingAccountName("some-other-billing-account")
+                .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
+                .setInitialCreditsExhausted(true));
 
     commitTransaction();
 
@@ -1366,19 +1395,23 @@ public class InitialCreditsServiceTest {
 
     // ASSERT
     // Verify that initial credits workspaces were marked as not exhausted
-    DbWorkspace updatedWorkspace1 = workspaceDao.findById(initialCreditsWorkspace1.getWorkspaceId()).get();
+    DbWorkspace updatedWorkspace1 =
+        workspaceDao.findById(initialCreditsWorkspace1.getWorkspaceId()).get();
     assertThat(updatedWorkspace1.isInitialCreditsExhausted()).isFalse();
 
-    DbWorkspace updatedWorkspace2 = workspaceDao.findById(initialCreditsWorkspace2.getWorkspaceId()).get();
+    DbWorkspace updatedWorkspace2 =
+        workspaceDao.findById(initialCreditsWorkspace2.getWorkspaceId()).get();
     assertThat(updatedWorkspace2.isInitialCreditsExhausted()).isFalse();
 
     // Verify that non-initial credits workspace was not affected
-    DbWorkspace updatedNonInitialWorkspace = workspaceDao.findById(nonInitialCreditsWorkspace.getWorkspaceId()).get();
+    DbWorkspace updatedNonInitialWorkspace =
+        workspaceDao.findById(nonInitialCreditsWorkspace.getWorkspaceId()).get();
     assertThat(updatedNonInitialWorkspace.isInitialCreditsExhausted()).isTrue();
 
     // Verify that resources were NOT stopped (as exhausted is false)
     verify(leonardoApiClient, never()).deleteAllResources(any(String.class), any(Boolean.class));
-    verify(mockFireCloudService, never()).removeBillingAccountFromBillingProjectAsService(any(String.class));
+    verify(mockFireCloudService, never())
+        .removeBillingAccountFromBillingProjectAsService(any(String.class));
   }
 
   @Test
@@ -1404,7 +1437,8 @@ public class InitialCreditsServiceTest {
 
   @ParameterizedTest(name = "Test with enableUnlinkBillingForInitialCredits={0}")
   @MethodSource("unlinkBillingFlagProvider")
-  public void test_updateInitialCreditsExhaustion_respectsUnlinkBillingFlag(boolean unlinkBillingEnabled) {
+  public void test_updateInitialCreditsExhaustion_respectsUnlinkBillingFlag(
+      boolean unlinkBillingEnabled) {
     // ARRANGE
     // Set the feature flag
     workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = unlinkBillingEnabled;
@@ -1422,7 +1456,8 @@ public class InitialCreditsServiceTest {
 
     // ASSERT
     // Verify that initial credits workspace was marked as exhausted
-    DbWorkspace updatedWorkspace = workspaceDao.findById(initialCreditsWorkspace.getWorkspaceId()).get();
+    DbWorkspace updatedWorkspace =
+        workspaceDao.findById(initialCreditsWorkspace.getWorkspaceId()).get();
     assertThat(updatedWorkspace.isInitialCreditsExhausted()).isTrue();
 
     // Verify that resources were stopped
@@ -1432,11 +1467,13 @@ public class InitialCreditsServiceTest {
     if (unlinkBillingEnabled) {
       // When flag is enabled, the billing account should be unlinked.
       verify(mockFireCloudService)
-          .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getWorkspaceNamespace());
+          .removeBillingAccountFromBillingProjectAsService(
+              initialCreditsWorkspace.getWorkspaceNamespace());
     } else {
       // When flag is disabled, billing unlinking should not happen.
       verify(mockFireCloudService, never())
-          .removeBillingAccountFromBillingProjectAsService(initialCreditsWorkspace.getWorkspaceNamespace());
+          .removeBillingAccountFromBillingProjectAsService(
+              initialCreditsWorkspace.getWorkspaceNamespace());
     }
   }
 }

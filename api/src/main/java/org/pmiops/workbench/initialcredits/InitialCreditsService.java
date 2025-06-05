@@ -519,15 +519,17 @@ public class InitialCreditsService {
   }
 
   public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
-    List<DbWorkspace> workspaces = workspaceDao.findAllByCreator(user).stream()
-        .filter(ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .collect(Collectors.toList());
+    List<DbWorkspace> workspaces =
+        workspaceDao.findAllByCreator(user).stream()
+            .filter(
+                ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
+            .collect(Collectors.toList());
 
     workspaces.forEach(ws -> ws.setInitialCreditsExhausted(exhausted));
 
     workspaceDao.saveAll(workspaces);
 
-    if(exhausted) {
+    if (exhausted) {
       workspaces.forEach(this::stopInitialCreditSpendInWorkspace);
     }
   }
@@ -723,11 +725,11 @@ public class InitialCreditsService {
   private static Map<Long, Double> getDbCostByCreatorCache(
       List<WorkspaceCostView> allCostsInDbForUsers) {
     return allCostsInDbForUsers.stream()
-            .collect(
-                Collectors.groupingBy(
-                    WorkspaceCostView::getCreatorId,
-                    Collectors.summingDouble(
-                        v -> Optional.ofNullable(v.getInitialCreditsCost()).orElse(0.0))));
+        .collect(
+            Collectors.groupingBy(
+                WorkspaceCostView::getCreatorId,
+                Collectors.summingDouble(
+                    v -> Optional.ofNullable(v.getInitialCreditsCost()).orElse(0.0))));
   }
 
   private List<DbWorkspace> getWorkspacesForUser(DbUser user) {
