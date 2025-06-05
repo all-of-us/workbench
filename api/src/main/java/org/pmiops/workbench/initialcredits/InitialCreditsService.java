@@ -141,12 +141,13 @@ public class InitialCreditsService {
     // RW-15247 Get not recently updated BQ costs for VWB google projects
     List<DbVwbUserPod> vwbNotRecentlyUpdatedPods =
         getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(users);
-    Map<Long, Double> userIdToVwbCostMap = getVwbPodsDbCostCache(vwbNotRecentlyUpdatedPods);
+
 
     if (workspaceByProject.isEmpty() && vwbNotRecentlyUpdatedPods.isEmpty()) {
       logger.info("No workspaces require updates");
       return;
     }
+    Map<Long, Double> userIdToVwbCostMap = getVwbPodsDbCostCache(vwbNotRecentlyUpdatedPods);
     updateInitialCreditsUsageInDb(
         dbCostsForNotRecentlyUpdatedWorkspaces, liveCostsInBQ, workspaceByProject);
 
