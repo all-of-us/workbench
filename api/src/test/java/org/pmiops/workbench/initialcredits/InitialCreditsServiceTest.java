@@ -1,9 +1,7 @@
 package org.pmiops.workbench.initialcredits;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -33,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -104,6 +103,7 @@ public class InitialCreditsServiceTest {
 
   @Autowired private TaskQueueService taskQueueService;
   @Autowired private ApplicationContext applicationContext;
+  @Autowired private VwbUserPodDao vwbUserPodDao;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -129,7 +129,6 @@ public class InitialCreditsServiceTest {
               .plusSeconds((warningPeriodDays + 1L) * 24 * 60 * 60));
 
   private DbWorkspace workspace;
-  @Autowired private VwbUserPodDao vwbUserPodDao;
 
   @TestConfiguration
   @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
@@ -1267,6 +1266,15 @@ public class InitialCreditsServiceTest {
     final DbWorkspaceFreeTierUsage usage2 = workspaceFreeTierUsageDao.findOneByWorkspace(ws2);
     assertThat(usage2.getUser()).isEqualTo(user2);
     assertWithinBillingTolerance(usage2.getCost(), cost2);
+
+    // Confirm VwbPod costs are correctly applied
+    Optional<DbVwbUserPod> pod1 = vwbUserPodDao.findById(vwbPod1.getVwbUserPodId());
+    assertThat(pod1).isPresent();
+    assertWithinBillingTolerance(vwbCost1, pod1.get().getCost());
+    Optional<DbVwbUserPod> pod2 = vwbUserPodDao.findById(vwbPod2.getVwbUserPodId());
+    assertThat(pod2).isPresent();
+    assertWithinBillingTolerance(vwbCost2, pod2.get().getCost());
+
   }
 
   private void assertSingleWorkspaceTestDbState(
