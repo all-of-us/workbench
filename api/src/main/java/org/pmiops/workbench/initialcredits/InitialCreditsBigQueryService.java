@@ -47,13 +47,13 @@ public class InitialCreditsBigQueryService {
   Map<String, Double> getAllVWBProjectCostsFromBQ() {
     StringBuilder queryBuilder = new StringBuilder();
     queryBuilder
-        .append("SELECT id, total_cost, vwb_pod_id ")
+        .append("SELECT total_cost, vwb_pod_id ")
         .append("FROM `")
         .append(workbenchConfigProvider.get().billing.vwbExportBigQueryTable)
         .append("` ")
-        .append("WHERE vwb_org_od = ")
+        .append("WHERE vwb_org_id = \"")
         .append(workbenchConfigProvider.get().vwb.organizationId)
-        .append(";");
+        .append("\";");
 
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(queryBuilder.toString()).build();
