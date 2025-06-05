@@ -519,18 +519,16 @@ public class InitialCreditsService {
   }
 
   public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
-    Iterable<DbWorkspace> toUpdate =
-        () ->
-            workspaceDao.findAllByCreator(user).stream()
-                .filter(
-                    ws ->
-                        isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
-                .map(ws -> ws.setInitialCreditsExhausted(exhausted))
-                .iterator();
+    List<DbWorkspace> workspaces = workspaceDao.findAllByCreator(user).stream()
+        .filter(ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .collect(Collectors.toList());
 
-    workspaceDao.saveAll(toUpdate);
+    workspaces.forEach(ws -> ws.setInitialCreditsExhausted(exhausted));
+
+    workspaceDao.saveAll(workspaces);
+
     if(exhausted) {
-      toUpdate.forEach(this::stopInitialCreditSpendInWorkspace);
+      workspaces.forEach(this::stopInitialCreditSpendInWorkspace);
     }
   }
 
