@@ -1274,7 +1274,6 @@ public class InitialCreditsServiceTest {
     Optional<DbVwbUserPod> pod2 = vwbUserPodDao.findById(vwbPod2.getVwbUserPodId());
     assertThat(pod2).isPresent();
     assertWithinBillingTolerance(vwbCost2, pod2.get().getCost());
-
   }
 
   private void assertSingleWorkspaceTestDbState(
