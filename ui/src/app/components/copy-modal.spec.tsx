@@ -35,6 +35,7 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { CopyModal, CopyModalProps } from './copy-modal';
+import { validateCopyModal } from './copy-modal-validation';
 
 interface TestWorkspace {
   namespace: string;
@@ -321,8 +322,6 @@ describe(CopyModal.name, () => {
       )
     ).toBeInTheDocument();
 
-    screen.debug();
-
     const newName = 'Freeblast';
     await renameNotebook(newName);
 
@@ -459,5 +458,49 @@ describe(CopyModal.name, () => {
     await userEvent.click(copyButton);
     expectButtonElementDisabled(copyButton);
     expect(spy).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe('CopyModal form validation', () => {
+  it('returns no errors for filled form', () => {
+    // Arrange
+    const newName = 'test';
+
+    // Act
+    const errors = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+
+    // Assert
+    const expectedErrors = undefined; // no errors
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns errors for blank form', () => {
+    // Arrange
+    const newName = '';
+
+    // Act
+    const errors = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: ["New name can't be blank"],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns error for bad char in name', () => {
+    // Arrange
+    const newName = 'this=is?bad';
+
+    // Act
+    const error = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: [
+        "New name can't contain these characters: @ # $ % * + = ? , [ ] : ; / \\ ",
+      ],
+    };
+    expect(error).toEqual(expectedErrors);
   });
 });

@@ -11,6 +11,7 @@ import {
 } from 'testing/react-test-helpers';
 
 import { AdminBannerModal } from './admin-banner-modal';
+import { validateBannerAlert } from './admin-banner-modal-validation';
 
 describe('AdminBannerModal', () => {
   const defaultBanner: StatusAlert = {
@@ -205,5 +206,41 @@ describe('AdminBannerModal', () => {
         })
       );
     });
+  });
+});
+
+describe('AdminBannerModal - form validation', () => {
+  it('returns no errors for completed form', () => {
+    // Arrange
+    const filledBanner: StatusAlert = {
+      title: 'Test Title',
+      message: 'Test Message',
+      link: '',
+      alertLocation: StatusAlertLocation.AFTER_LOGIN,
+      startTimeEpochMillis: Date.now(),
+    };
+
+    // Act
+    const errors = validateBannerAlert(filledBanner);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> | undefined = undefined;
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns errors empty form', () => {
+    // Arrange
+    const filledBanner: StatusAlert = {} as Partial<StatusAlert> as StatusAlert;
+
+    // Act
+    const errors = validateBannerAlert(filledBanner);
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      title: ['Please enter a banner title'],
+      message: ['Please enter a banner message'],
+      startTimeEpochMillis: ['Please enter a start time'],
+      alertLocation: ['Please select a banner location'],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 });

@@ -8,6 +8,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 
 import { RenameModal } from './rename-modal';
+import { validateRenameModal } from './rename-modal-validation';
 
 describe(RenameModal.name, () => {
   const existingNames = [];
@@ -123,5 +124,83 @@ describe('validateNewName', () => {
       ResourceType.NOTEBOOK
     );
     expect(errors).toBeUndefined();
+  });
+});
+
+describe('RenameModal form validation', () => {
+  it('returns no errors for filled form', () => {
+    // Arrange
+    const newName = 'test';
+    const exists = ['exists1', 'exists2'];
+
+    // Act
+    const errors = validateRenameModal(
+      { newName },
+      exists,
+      ResourceType.NOTEBOOK
+    );
+
+    // Assert
+    const expectedErrors = undefined; // no errors
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns errors for blank form', () => {
+    // Arrange
+    const newName = '';
+    const exists = ['exists1', 'exists2'];
+
+    // Act
+    const errors = validateRenameModal(
+      { newName },
+      exists,
+      ResourceType.NOTEBOOK
+    );
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: ["New name can't be blank"],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns error for bad char in name', () => {
+    // Arrange
+    const newName = 'this=is?bad';
+    const exists = ['exists1', 'exists2'];
+
+    // Act
+    const errors = validateRenameModal(
+      { newName },
+      exists,
+      ResourceType.NOTEBOOK
+    );
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: [
+        "New name can't contain these characters: @ # $ % * + = ? , [ ] : ; / \\ ",
+      ],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns error for name exists', () => {
+    // Arrange
+    const newName = 'exists2';
+    const exists = ['exists1', 'exists2'];
+
+    // Act
+    const errors = validateRenameModal(
+      { newName },
+      exists,
+      ResourceType.NOTEBOOK
+    );
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: ['New name already exists'],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 });

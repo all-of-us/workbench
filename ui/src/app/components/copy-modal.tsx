@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { validate } from 'validate.js';
 
 import {
   CdrVersionTiersResponse,
@@ -28,9 +27,10 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, summarizeErrors, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { NavigationProps } from 'app/utils/navigation';
-import { nameValidationFormat, toDisplay } from 'app/utils/resources';
+import { toDisplay } from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
+import { validateCopyModal } from './copy-modal-validation';
 import { FlexRow } from './flex';
 import { ClrIcon } from './icons';
 
@@ -461,14 +461,10 @@ const CopyModal = withCdrVersions()(
         copyErrorMsg,
         newName,
       } = this.state;
-      const errors = validate(
-        {
-          newName: newName?.trim(),
-        },
-        {
-          newName: nameValidationFormat([], resourceType),
-        }
-      );
+
+      // Validate the input
+      const errors = validateCopyModal({ newName }, resourceType);
+
       return (
         <div>
           <div style={headerStyles.formLabel}>Destination *</div>
