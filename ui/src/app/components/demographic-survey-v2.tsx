@@ -39,7 +39,7 @@ import {
   NONE_FULLY_DESCRIBE_MAX_LENGTH,
   OTHER_DISABILITY_MAX_LENGTH,
   SURVEY_COMMENTS_MAX_LENGTH,
-  validateDemographicSurvey_V2,
+  validateDemographicSurvey,
 } from './demographic-survey-v2-validation';
 import {
   CheckBox,
@@ -152,7 +152,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     ];
 
     useEffect(() => {
-      onError(validateDemographicSurvey_V2(survey));
+      onError(validateDemographicSurvey(survey));
     }, [profile]);
 
     useEffect(() => {
