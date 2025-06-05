@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,11 +39,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +61,7 @@ public class InitialCreditsService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
-  private final WorkspaceMapper workspaceMapper;
+  private final Provider<WorkbenchConfig> workbenchConfig;
 
   private static final Logger logger = LoggerFactory.getLogger(InitialCreditsService.class);
 
@@ -81,7 +79,7 @@ public class InitialCreditsService {
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService,
-      WorkspaceMapper workspaceMapper) {
+      Provider<WorkbenchConfig> workbenchConfig) {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
@@ -94,7 +92,7 @@ public class InitialCreditsService {
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceInitialCreditUsageService = workspaceInitialCreditUsageService;
-    this.workspaceMapper = workspaceMapper;
+    this.workbenchConfig = workbenchConfig;
   }
 
   public double getWorkspaceInitialCreditsUsage(DbWorkspace dbWorkspace) {
@@ -490,8 +488,8 @@ public class InitialCreditsService {
     }
   }
 
-  private void stopInitialCreditSpendInWorkspace(Workspace workspace) {
-    String namespace = workspace.getNamespace();
+  private void stopInitialCreditSpendInWorkspace(DbWorkspace workspace) {
+    String namespace = workspace.getWorkspaceNamespace();
     String googleProject = workspace.getGoogleProject();
     try {
       leonardoApiClient.deleteAllResources(googleProject, false);
@@ -529,7 +527,9 @@ public class InitialCreditsService {
                         isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
                 .map(ws -> ws.setInitialCreditsExhausted(exhausted))
                 .iterator();
+
     workspaceDao.saveAll(toUpdate);
+    toUpdate.forEach(this::stopInitialCreditSpendInWorkspace);
   }
 
   /**
@@ -722,22 +722,22 @@ public class InitialCreditsService {
   @NotNull
   private static Map<Long, Double> getDbCostByCreatorCache(
       List<WorkspaceCostView> allCostsInDbForUsers) {
-    final Map<Long, Double> dbCostByCreator =
-        allCostsInDbForUsers.stream()
+    return allCostsInDbForUsers.stream()
             .collect(
                 Collectors.groupingBy(
                     WorkspaceCostView::getCreatorId,
                     Collectors.summingDouble(
                         v -> Optional.ofNullable(v.getInitialCreditsCost()).orElse(0.0))));
-    return dbCostByCreator;
   }
 
-  private List<Workspace> getWorkspacesForUser(DbUser user) {
-    return workspaceMapper
-        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.listWorkspacesAsService(), this)
-        .stream()
-        .map(WorkspaceResponse::getWorkspace)
-        .filter(ws -> ws.getCreatorUser().getUserName().equals(user.getUsername()))
-        .collect(Collectors.toList());
+  private List<DbWorkspace> getWorkspacesForUser(DbUser user) {
+    Set<DbWorkspace> workspaceSet = workspaceDao.findAllByCreator(user);
+    List<DbWorkspace> allWorkspaces = new ArrayList<>(workspaceSet);
+
+    return allWorkspaces.stream()
+        .filter(
+            dbWorkspace ->
+                isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
+        .toList();
   }
 }
