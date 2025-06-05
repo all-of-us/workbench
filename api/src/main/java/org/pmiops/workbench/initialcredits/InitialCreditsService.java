@@ -529,7 +529,9 @@ public class InitialCreditsService {
                 .iterator();
 
     workspaceDao.saveAll(toUpdate);
-    toUpdate.forEach(this::stopInitialCreditSpendInWorkspace);
+    if(exhausted) {
+      toUpdate.forEach(this::stopInitialCreditSpendInWorkspace);
+    }
   }
 
   /**
