@@ -126,7 +126,8 @@ public class VwbUserService {
    * Retrieves the billing account ID associated with the specified pod.
    *
    * @param podId the ID of the pod to look up
-   * @return the billing account resource name (e.g., "billingAccounts/XXXX") if found, or "billingAccounts/" if not found
+   * @return the billing account resource name (e.g., "billingAccounts/XXXX") if found, or
+   *     "billingAccounts/" if not found
    */
   private String getBillingAccountForPod(String podId) {
     return "billingAccounts/"
