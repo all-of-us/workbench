@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 import static org.pmiops.workbench.utils.CostComparisonUtils.getUserInitialCreditsLimit;
 
 import com.google.common.collect.Sets;
@@ -20,10 +19,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.utils.CostComparisonUtils;
@@ -40,7 +36,6 @@ public class CloudTaskInitialCreditsExhaustionController
       LoggerFactory.getLogger(CloudTaskInitialCreditsExhaustionController.class);
 
   private final InitialCreditsService initialCreditsService;
-  private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfig;
   private final UserDao userDao;
@@ -48,13 +43,11 @@ public class CloudTaskInitialCreditsExhaustionController
 
   CloudTaskInitialCreditsExhaustionController(
       InitialCreditsService initialCreditsService,
-      LeonardoApiClient leonardoApiClient,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfig,
       UserDao userDao,
       WorkspaceDao workspaceDao) {
     this.initialCreditsService = initialCreditsService;
-    this.leonardoApiClient = leonardoApiClient;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfig = workbenchConfig;
@@ -103,8 +96,6 @@ public class CloudTaskInitialCreditsExhaustionController
           logger.info(
               "handleExhaustedUsers: handling user with exhausted credits {}", user.getUsername());
           initialCreditsService.updateInitialCreditsExhaustion(user, true);
-          // delete apps and runtimes
-          deleteAppsAndRuntimesInInitialCreditsWorkspaces(user);
           try {
             mailService.alertUserInitialCreditsExhausted(user);
           } catch (MessagingException e) {
@@ -233,26 +224,6 @@ public class CloudTaskInitialCreditsExhaustionController
   private Set<DbUser> filterToWorkspaceCreatorsWithActiveInitialCredits(Set<DbUser> users) {
     return workspaceDao.findCreatorsByActiveInitialCredits(
         List.of(workbenchConfig.get().billing.initialCreditsBillingAccountName()), users);
-  }
-
-  private void deleteAppsAndRuntimesInInitialCreditsWorkspaces(DbUser user) {
-    logger.info("Deleting apps and runtimes for user {}", user.getUsername());
-
-    workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            dbWorkspace ->
-                isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
-        .filter(DbWorkspace::isActive)
-        .forEach(
-            dbWorkspace -> {
-              String namespace = dbWorkspace.getWorkspaceNamespace();
-              try {
-                leonardoApiClient.deleteAllResources(dbWorkspace.getGoogleProject(), false);
-                logger.info("Deleted apps and runtimes for workspace {}", namespace);
-              } catch (WorkbenchException e) {
-                logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
-              }
-            });
   }
 
   /**
