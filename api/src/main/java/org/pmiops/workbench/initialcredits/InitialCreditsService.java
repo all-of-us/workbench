@@ -522,7 +522,10 @@ public class InitialCreditsService {
     List<DbWorkspace> workspaces =
         workspaceDao.findAllByCreator(user).stream()
             .filter(
-                ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
+                ws ->
+                    ws.isInitialCreditsExhausted() != exhausted
+                        && isInitialCredits(
+                            ws.getBillingAccountName(), workbenchConfigProvider.get()))
             .collect(Collectors.toList());
 
     workspaces.forEach(ws -> ws.setInitialCreditsExhausted(exhausted));

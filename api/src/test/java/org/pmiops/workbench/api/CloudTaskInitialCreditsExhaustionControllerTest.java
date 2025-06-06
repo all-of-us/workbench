@@ -53,6 +53,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -84,7 +85,6 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   @TestConfiguration
   @Import({
     CloudTaskInitialCreditsExhaustionController.class,
-    InitialCreditsService.class,
   })
   @MockBean({
     FireCloudService.class,
@@ -95,6 +95,9 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     UserServiceAuditor.class,
     WorkspaceInitialCreditUsageService.class,
     WorkspaceMapper.class,
+  })
+  @SpyBean({
+    InitialCreditsService.class,
   })
   static class Configuration {
     @Bean
@@ -119,6 +122,8 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForInitialCreditsUsageUpdate = 2L;
     workbenchConfig.offlineBatch.usersPerCheckInitialCreditsUsageTask = 10;
+    workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+    workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits = true;
   }
 
   @AfterEach
@@ -195,6 +200,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     request.setLiveCostByCreator(allBQCosts);
 
     controller.handleInitialCreditsExhaustionBatch(request);
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     // check that we do not alert twice for 100%
@@ -234,6 +240,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         buildExhaustedInitialCreditsEventRequest(List.of(user), allBQCosts, allDbCosts);
 
     controller.handleInitialCreditsExhaustionBatch(request);
+    verifyNoInteractions(initialCreditsService);
     verifyNoInteractions(mailService);
 
     // check that we alert for the 30% threshold
@@ -269,20 +276,22 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
 
-    // check that we alert for expiration when we hit 100%
+    // check that we alert for exhaustion when we hit 100%
 
-    final double costToTriggerExpiration = 100.01;
-    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
+    final double costToTriggerExhaustion = 100.01;
+    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExhaustion);
 
     controller.handleInitialCreditsExhaustionBatch(request);
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
 
     // check that we do not alert twice for 100%
 
-    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
-    allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
+    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExhaustion);
+    allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExhaustion);
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
+    verifyNoMoreInteractions(initialCreditsService);
   }
 
   @Test
@@ -307,6 +316,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
   }
 
   @Test
@@ -330,6 +340,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     controller.handleInitialCreditsExhaustionBatch(request);
 
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
 
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
   }
@@ -350,6 +361,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
+    verifyNoInteractions(initialCreditsService);
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
   }
 
@@ -370,6 +382,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
+    verifyNoInteractions(initialCreditsService);
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
   }
 
@@ -388,6 +401,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         buildExhaustedInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
 
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
 
@@ -457,6 +471,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         buildExhaustedInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
 
     // confirm DB updates after handleInitialCreditsExhaustionBatch()
 
@@ -496,9 +511,11 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
     final DbWorkspace dbWorkspace1 = workspaceDao.findById(ws1.getWorkspaceId()).get();
     assertThat(dbWorkspace1.isInitialCreditsExhausted()).isEqualTo(true);
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user1), eq(true));
 
     final DbWorkspace dbWorkspace2 = workspaceDao.findById(ws2.getWorkspaceId()).get();
     assertThat(dbWorkspace2.isInitialCreditsExhausted()).isEqualTo(true);
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user2), eq(true));
   }
 
   @Test
@@ -617,6 +634,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         buildExhaustedInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
   }
 
   @Test
@@ -638,6 +656,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         buildExhaustedInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verifyNoInteractions(mailService);
+    verifyNoInteractions(initialCreditsService);
 
     DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT + "4");
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
@@ -648,6 +667,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         buildExhaustedInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user));
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
 
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(true);
     assertThat(anotherWorkspace.isInitialCreditsExhausted()).isEqualTo(true);
@@ -689,6 +709,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(eq(user2), eq(0.75d), eq(250.0d), eq(50.0d));
     verify(mailService).alertUserInitialCreditsExhausted(eq(user1));
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user1), eq(true));
     verifyNoMoreInteractions(mailService);
   }
 
