@@ -124,11 +124,15 @@ public class VwbUserService {
 
   /** getPod from VWB */
   private String getBillingAccountForPod(String podId) {
-    return vwbUserManagerClient
-        .getPodById(podId)
-        .map(
-            podDescription ->
-                podDescription.getEnvironmentData().getEnvironmentDataGcp().getBillingAccountId())
-        .orElse("");
+    return "billingAccounts/"
+        + vwbUserManagerClient
+            .getPodById(podId)
+            .map(
+                podDescription ->
+                    podDescription
+                        .getEnvironmentData()
+                        .getEnvironmentDataGcp()
+                        .getBillingAccountId())
+            .orElse("");
   }
 }

@@ -22,7 +22,7 @@
     "accountId": "013713-75CFF6-1751E5",
     "projectNamePrefix": "aou-rw-local1-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
-    "defaultInitialCreditsDollarLimit": 300.0,
+    "defaultInitialCreditsDollarLimit": 100.0,
     "initialCreditsCostAlertThresholds": [
       0.5,
       0.75
@@ -130,7 +130,8 @@
     "enableVWBWorkspaceCreation": true,
     "enableVWBEgressMonitor": true,
     "enableVWBUserAccessManagement": true,
-    "enableVWBUserAndPodCreation": true
+    "enableVWBUserAndPodCreation": true,
+    "enableVWBInitialCreditsExhaustion": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

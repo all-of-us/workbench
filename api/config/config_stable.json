@@ -124,7 +124,8 @@
     "enableVWBWorkspaceCreation": true,
     "enableVWBEgressMonitor": true,
     "enableVWBUserAccessManagement": true,
-    "enableVWBUserAndPodCreation": true
+    "enableVWBUserAndPodCreation": true,
+    "enableVWBInitialCreditsExhaustion": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

@@ -339,6 +339,8 @@ public class WorkbenchConfig {
     // If true, AoU will create the VWB user when the user first gets data access, and will create a
     // POD for the user in VWB
     public boolean enableVWBUserAndPodCreation;
+    // If true, AoU will include VWB costs in the initial credits usage calculation.
+    public boolean enableVWBInitialCreditsExhaustion;
   }
 
   public static class ActionAuditConfig {
