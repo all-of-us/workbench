@@ -6,6 +6,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import jakarta.inject.Provider;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -36,6 +38,7 @@ public class InitialCreditsBatchUpdateService {
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public InitialCreditsBatchUpdateService(
@@ -43,12 +46,14 @@ public class InitialCreditsBatchUpdateService {
       InitialCreditsService initialCreditsService,
       Provider<Stopwatch> stopwatchProvider,
       UserDao userDao,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.initialCreditsBigQueryService = initialCreditsBigQueryService;
     this.initialCreditsService = initialCreditsService;
     this.userDao = userDao;
     this.stopwatchProvider = stopwatchProvider;
     this.workspaceDao = workspaceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   /**
@@ -93,6 +98,9 @@ public class InitialCreditsBatchUpdateService {
 
   /** Return a map of user_id -> total_cost for VWB pods */
   private Map<Long, Double> findVwbUsersLiveCosts(List<DbUser> users) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+      return Collections.emptyMap();
+    }
     // Filter and collect active VWB user pods
     Map<String, DbVwbUserPod> activePodIdToUserPodMap =
         users.stream()

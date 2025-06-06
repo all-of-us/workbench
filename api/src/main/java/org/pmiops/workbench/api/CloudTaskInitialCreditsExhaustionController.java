@@ -12,14 +12,17 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -176,6 +179,9 @@ public class CloudTaskInitialCreditsExhaustionController
         findDbUsersWithChangedCosts(allUsers, dbCostByCreator, liveCostByCreator);
     Set<DbUser> creatorsWithInitialCredits =
         filterToWorkspaceCreatorsWithActiveInitialCredits(allUsers);
+    // Add users with active initial credits in VWB pods. A user may only have a VWB pod and no
+    // Terra workspaces.
+    creatorsWithInitialCredits.addAll(filterToVwbPodsWithActiveInitialCredits(allUsers));
 
     // Find users who exceeded their initial credits limit
     // Here costs in liveCostByCreator could be outdated because we're filtering on active  or
@@ -242,6 +248,15 @@ public class CloudTaskInitialCreditsExhaustionController
         List.of(workbenchConfig.get().billing.initialCreditsBillingAccountName()), users);
   }
 
+  private Set<DbUser> filterToVwbPodsWithActiveInitialCredits(Set<DbUser> allUsers) {
+    return allUsers.stream()
+        .map(DbUser::getVwbUserPod)
+        .filter(Objects::nonNull)
+        .filter(DbVwbUserPod::isInitialCreditsActive)
+        .map(DbVwbUserPod::getUser)
+        .collect(Collectors.toSet());
+  }
+
   private void deleteAppsAndRuntimesInInitialCreditsWorkspaces(DbUser user) {
     logger.info("Deleting apps and runtimes for user {}", user.getUsername());
 
@@ -250,6 +265,7 @@ public class CloudTaskInitialCreditsExhaustionController
             dbWorkspace ->
                 isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
         .filter(DbWorkspace::isActive)
+        .filter(Predicate.not(DbWorkspace::isVwbWorkspace))
         .forEach(
             dbWorkspace -> {
               String namespace = dbWorkspace.getWorkspaceNamespace();

@@ -76,7 +76,7 @@ public class DbVwbUserPod {
   }
 
   public DbVwbUserPod setInitialCreditsLastUpdateTime(Timestamp initialCreditsLastUpdateTime) {
-    this.initialCreditsLastUpdateTime = new Timestamp(Instant.now().toEpochMilli());
+    this.initialCreditsLastUpdateTime = initialCreditsLastUpdateTime;
     return this;
   }
 

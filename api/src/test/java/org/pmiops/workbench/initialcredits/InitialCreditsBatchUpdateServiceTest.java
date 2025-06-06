@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -81,6 +82,7 @@ public class InitialCreditsBatchUpdateServiceTest {
 
   @Test
   public void checkInitialCreditsUsage_onlyVWBProjects() {
+    config.featureFlags.enableVWBInitialCreditsExhaustion = true;
     mockVwbUserCost();
     initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(1L, 2L, 3L));
 
@@ -93,6 +95,7 @@ public class InitialCreditsBatchUpdateServiceTest {
 
   @Test
   public void checkInitialCreditsUsage_bothTerraAndVWBProjects() {
+    config.featureFlags.enableVWBInitialCreditsExhaustion = true;
     mockGoogleProjectCost();
     mockVwbUserCost();
     initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(1L, 2L, 3L));
@@ -169,5 +172,11 @@ public class InitialCreditsBatchUpdateServiceTest {
     userCostMap.put(2L, 2.2);
     userCostMap.put(3L, 3.3);
     return userCostMap;
+  }
+
+  @AfterEach
+  public void tearDown() {
+    config.featureFlags.enableVWBInitialCreditsExhaustion = false;
+    mockUserDao.deleteAll();
   }
 }

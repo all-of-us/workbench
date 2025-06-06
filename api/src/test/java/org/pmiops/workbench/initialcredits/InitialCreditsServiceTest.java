@@ -1213,6 +1213,7 @@ public class InitialCreditsServiceTest {
     final double vwbCost2 = 0.44;
 
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = Math.min(cost1, cost2) - 0.01;
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
 
     Map<String, Double> allBQCosts = Maps.newHashMap();
     allBQCosts.put(proj1, cost1);
