@@ -1,9 +1,8 @@
 package org.pmiops.workbench.mail;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,23 +17,13 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.mandrill.ApiException;
-import org.pmiops.workbench.mandrill.api.MandrillApi;
-import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
-import org.pmiops.workbench.mandrill.model.RecipientAddress;
-import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
@@ -51,18 +40,16 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 public class MailServiceTest {
   private static final String CONTACT_EMAIL = "bob@example.com";
-  private static final String INVALID_EMAIL = "Nota valid email";
   private static final String PASSWORD = "secretpassword";
   private static final String INSTITUTION_NAME = "BROAD Institute";
   private static final String FULL_USER_NAME = "bob@researchallofus.org";
-  private static final String API_KEY = "this-is-an-api-key";
   private static final String FROM_EMAIL = "test-donotreply@fake-research-aou.org";
 
   private static WorkbenchConfig workbenchConfig;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, MailServiceImpl.class})
-  @MockBean({CloudStorageClient.class, MandrillApi.class})
+  @MockBean({CloudStorageClient.class, SendGridMailSender.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -71,86 +58,37 @@ public class MailServiceTest {
     }
   }
 
-  @Captor private ArgumentCaptor<MandrillApiKeyAndMessage> mandrillCaptor;
-
   @Autowired private CloudStorageClient mockCloudStorageClient;
-  @Autowired private MandrillApi mockMandrillApi;
+  @Autowired private SendGridMailSender sendGridMailSender;
 
   @Autowired private MailService mailService;
 
   @BeforeEach
-  public void setUp() throws ApiException {
+  public void setUp() {
     workbenchConfig = createWorkbenchConfig();
 
-    MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
-    msgStatuses.add(new MandrillMessageStatus());
-    when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
-    when(mockCloudStorageClient.readMandrillApiKey()).thenReturn(API_KEY);
     when(mockCloudStorageClient.getImageUrl(any())).thenReturn("test_img");
   }
 
   @Test
-  public void testSendWelcomeEmail_throwsMessagingException() throws ApiException {
-    MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
-    msgStatuses.add(new MandrillMessageStatus().rejectReason("this was rejected"));
-    when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
-    assertThrows(
-        MessagingException.class,
-        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME));
-    verify(mockMandrillApi, times(1)).send(any());
-  }
-
-  @Test
-  public void testSendWelcomeEmail_throwsApiException() throws ApiException {
-    doThrow(ApiException.class).when(mockMandrillApi).send(any());
-    assertThrows(
-        MessagingException.class,
-        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME));
-    verify(mockMandrillApi, times(3)).send(any());
-  }
-
-  @Test
-  public void testSendWelcomeEmail_invalidEmail_RtAndCt() {
-    DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
-    ServerErrorException exception =
-        assertThrows(
-            ServerErrorException.class,
-            () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
-    assertThat(exception.getMessage()).isEqualTo("Email: Nota valid email is invalid.");
-  }
-
-  @Test
-  public void testSendWelcomeEmail_invalidEmail_OnlyRt() throws MessagingException {
-    DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
-    assertThrows(
-        ServerErrorException.class,
-        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
-  }
-
-  @Test
-  public void testSendWelcomeEmail_invalidEmail_NoRtOrCt() throws MessagingException {
-    DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
-    assertThrows(
-        ServerErrorException.class,
-        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
-  }
-
-  @Test
-  public void testSendWelcomeEmailRTAndCT() throws MessagingException, ApiException {
+  public void testSendWelcomeEmail() throws MessagingException {
     mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
-    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
-  }
 
-  @Test
-  public void testSendWelcomeEmailOnlyRT() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
-    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
-  }
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.mail.fromEmail),
+            eq(Collections.singletonList(CONTACT_EMAIL)),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq("Your new All of Us Researcher Workbench Account"),
+            any(),
+            htmlCaptor.capture());
 
-  @Test
-  public void testSendWelcomeEmailNoRtAndCt() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
-    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+    String gotHtml = htmlCaptor.getValue();
+    assertThat(gotHtml).contains(FULL_USER_NAME);
+    assertThat(gotHtml).contains(PASSWORD);
+    assertThat(gotHtml).contains(INSTITUTION_NAME);
   }
 
   @Test
@@ -159,13 +97,19 @@ public class MailServiceTest {
         "asdf@gmail.com",
         "Ask for help at help@myinstitute.org <script>window.alert()</script>>",
         "asdf@fake-research");
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
 
-    MandrillMessage gotMessage = (MandrillMessage) mandrillCaptor.getValue().getMessage();
-    assertThat(gotMessage.getTo())
-        .containsExactly(new RecipientAddress().email("asdf@gmail.com").type(RecipientType.TO));
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.mail.fromEmail),
+            eq(Collections.singletonList("asdf@gmail.com")),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq("Instructions from your institution on using the Researcher Workbench"),
+            any(),
+            htmlCaptor.capture());
 
-    String gotHtml = gotMessage.getHtml();
+    String gotHtml = htmlCaptor.getValue();
     // tags should be escaped, email addresses shouldn't.
     assertThat(gotHtml).contains("help@myinstitute.org");
     assertThat(gotHtml).contains("&lt;script&gt;window.alert()&lt;/script&gt;&gt;");
@@ -178,16 +122,18 @@ public class MailServiceTest {
         new SendBillingSetupEmailRequest().institution("inst").phone("123456");
     mailService.sendBillingSetupEmail(user, request);
 
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.mail.fromEmail),
+            eq(List.of(user.getContactEmail())),
+            eq(List.of(FROM_EMAIL)),
+            eq(Collections.emptyList()),
+            eq("Request to set up Google Cloud Billing Account for All of Us Workbench"),
+            any(),
+            htmlCaptor.capture());
 
-    MandrillMessage gotMessage = (MandrillMessage) mandrillCaptor.getValue().getMessage();
-
-    assertThat(gotMessage.getTo())
-        .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO),
-            new RecipientAddress().email(FROM_EMAIL).type(RecipientType.CC));
-
-    String gotHtml = gotMessage.getHtml();
+    String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains(FULL_USER_NAME);
     assertThat(gotHtml).contains("given name family name");
     assertThat(gotHtml).contains(CONTACT_EMAIL);
@@ -203,17 +149,18 @@ public class MailServiceTest {
         new SendBillingSetupEmailRequest().institution("inst").nihFunded(true).phone("123456");
     mailService.sendBillingSetupEmail(user, request);
 
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.mail.fromEmail),
+            eq(List.of(user.getContactEmail(), "test@carasoft.com")),
+            eq(List.of(FROM_EMAIL)),
+            eq(Collections.emptyList()),
+            eq("Request to set up Google Cloud Billing Account for All of Us Workbench"),
+            any(),
+            htmlCaptor.capture());
 
-    MandrillMessage gotMessage = (MandrillMessage) mandrillCaptor.getValue().getMessage();
-
-    assertThat(gotMessage.getTo())
-        .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO),
-            new RecipientAddress().email("test@carasoft.com").type(RecipientType.TO),
-            new RecipientAddress().email(FROM_EMAIL).type(RecipientType.CC));
-
-    String gotHtml = gotMessage.getHtml();
+    String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains(FULL_USER_NAME);
     assertThat(gotHtml).contains("given name family name");
     assertThat(gotHtml).contains(CONTACT_EMAIL);
@@ -228,16 +175,18 @@ public class MailServiceTest {
     mailService.sendEgressRemediationEmail(
         user, EgressRemediationAction.SUSPEND_COMPUTE, "Jupyter");
 
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
-    MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq("[Response Required] AoU Researcher Workbench High Data Egress Alert"),
+            any(),
+            htmlCaptor.capture());
 
-    assertThat(((MandrillMessage) got.getMessage()).getFromEmail()).isEqualTo("egress@aou.com");
-    List<RecipientAddress> receipts = ((MandrillMessage) got.getMessage()).getTo();
-    assertThat(receipts)
-        .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO));
-
-    String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+    String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("temporarily suspended");
     assertThat(gotHtml).contains("when using the <b>Jupyter</b> application");
     assertThat(gotHtml).doesNotContain("${");
@@ -251,16 +200,19 @@ public class MailServiceTest {
     DbUser user = createDbUser();
     mailService.sendEgressRemediationEmail(user, EgressRemediationAction.DISABLE_USER, "Jupyter");
 
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
-    MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
 
-    List<RecipientAddress> receipts = ((MandrillMessage) got.getMessage()).getTo();
-    assertThat(receipts)
-        .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO),
-            new RecipientAddress().email("egress-cc@aou.com").type(RecipientType.CC));
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq(workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails),
+            eq(Collections.emptyList()),
+            eq("[Response Required] AoU Researcher Workbench High Data Egress Alert"),
+            any(),
+            htmlCaptor.capture());
 
-    String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+    String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("will remain disabled");
     assertThat(gotHtml).contains("when using the <b>Jupyter</b> application");
     assertThat(gotHtml).doesNotContain("${");
@@ -272,16 +224,18 @@ public class MailServiceTest {
     DbUser user = createDbUser();
     mailService.sendEgressRemediationEmailForVwb(user, EgressRemediationAction.SUSPEND_COMPUTE);
 
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
-    MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq("[Response Required] AoU Researcher Workbench High Data Egress Alert"),
+            any(),
+            htmlCaptor.capture());
 
-    assertThat(((MandrillMessage) got.getMessage()).getFromEmail()).isEqualTo("egress@aou.com");
-    List<RecipientAddress> receipts = ((MandrillMessage) got.getMessage()).getTo();
-    assertThat(receipts)
-        .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO));
-
-    String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+    String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("temporarily suspended");
     assertThat(gotHtml).doesNotContain("when using the <b>Jupyter</b> application");
     assertThat(gotHtml).doesNotContain("${");
@@ -304,15 +258,19 @@ public class MailServiceTest {
         14,
         20.0);
 
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
-    MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
 
-    List<RecipientAddress> bcc = ((MandrillMessage) got.getMessage()).getTo();
-    assertThat(bcc)
-        .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.BCC));
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.mail.fromEmail),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq("Reminder - Unused Disk in your Workspace"),
+            any(),
+            htmlCaptor.capture());
 
-    String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+    String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("123 GB");
     assertThat(gotHtml).contains("$20.91 per month");
     assertThat(gotHtml)
@@ -339,15 +297,18 @@ public class MailServiceTest {
         14,
         20.0);
 
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
-    MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.mail.fromEmail),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq("Reminder - Unused Disk in your Workspace"),
+            any(),
+            htmlCaptor.capture());
 
-    List<RecipientAddress> bcc = ((MandrillMessage) got.getMessage()).getTo();
-    assertThat(bcc)
-        .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.BCC));
-
-    String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+    String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("123 GB");
     assertThat(gotHtml).contains("$20.91 per month");
     assertThat(gotHtml)
@@ -363,15 +324,18 @@ public class MailServiceTest {
     String surveyLink = "example.com?survey_code=123";
     mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
 
-    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
+    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
+    verify(sendGridMailSender, times(1))
+        .sendWithRetries(
+            eq(workbenchConfig.mail.fromEmail),
+            eq(Collections.singletonList(user.getContactEmail())),
+            eq(Collections.emptyList()),
+            eq(Collections.emptyList()),
+            eq("Researcher satisfaction survey for the All of Us Researcher Workbench"),
+            any(),
+            htmlCaptor.capture());
 
-    MandrillMessage gotMessage = (MandrillMessage) mandrillCaptor.getValue().getMessage();
-
-    assertThat(gotMessage.getTo())
-        .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO));
-
-    String gotHtml = gotMessage.getHtml();
+    String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains(surveyLink);
     assertThat(gotHtml).contains("Please take two minutes to rate your satisfaction");
   }
@@ -387,8 +351,8 @@ public class MailServiceTest {
 
   private WorkbenchConfig createWorkbenchConfig() {
     WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.mandrill.fromEmail = FROM_EMAIL;
-    workbenchConfig.mandrill.sendRetries = 3;
+    workbenchConfig.mail.fromEmail = FROM_EMAIL;
+    workbenchConfig.mail.sendRetries = 3;
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
     workbenchConfig.googleDirectoryService.gSuiteDomain = "research.org";
     workbenchConfig.admin.loginUrl = "http://localhost:4200/";

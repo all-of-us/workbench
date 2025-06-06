@@ -390,13 +390,6 @@ export const LeonardoAppLauncher = fp.flow(
       return this.props.leoAppType === LeoApplicationType.JupyterTerminal;
     }
 
-    private isPlaygroundMode() {
-      const playgroundMode = parseQueryParams(this.props.location.search).get(
-        'playgroundMode'
-      );
-      return playgroundMode === 'true';
-    }
-
     private async runtimeRetry<T>(f: () => Promise<T>): Promise<T> {
       return await fetchAbortableRetry(
         f,
@@ -660,7 +653,6 @@ export const LeonardoAppLauncher = fp.flow(
           false,
           {
             notebookNames,
-            playgroundMode: this.isPlaygroundMode(),
           },
           { signal: this.pollAborter.signal }
         )

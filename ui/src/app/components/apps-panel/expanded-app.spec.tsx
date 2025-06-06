@@ -397,7 +397,6 @@ describe('ExpandedApp', () => {
             {
               appType: toAppType[appType],
               fileNames: [],
-              playgroundMode: false,
             }
           );
 

@@ -12,7 +12,7 @@
     "xAppIdValue": "local-AoU-RW",
     "timeoutInSeconds": 40,
     "lenientTimeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.13",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.16",
     "workspaceLogsProject": "fc-aou-logs-test",
     "workspaceBucketLocation": "us-central1",
     "gceVmZones": ["us-central1-a","us-central1-b","us-central1-c", "us-central1-f"],
@@ -27,7 +27,7 @@
       0.5,
       0.75
     ],
-    "initialCreditsValidityPeriodDays": 120,
+    "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
@@ -88,7 +88,7 @@
   "admin": {
     "loginUrl": "http:\/\/localhost:4200/login"
   },
-  "mandrill": {
+  "mail": {
     "fromEmail": "localSupport@researchallofus.org",
     "sendRetries": 3
   },
@@ -125,6 +125,7 @@
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
+    "enableUnlinkBillingForInitialCredits": true,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": true,
     "enableVWBEgressMonitor": true,

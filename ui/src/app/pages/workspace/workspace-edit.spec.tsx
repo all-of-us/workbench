@@ -60,12 +60,27 @@ import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
+import {
+  validateWorkspaceEdit,
+  WorkspaceEditValidationArgs,
+} from './workspace-edit-validation';
+
 jest.mock('app/utils/project-billing-info', () => ({
   getBillingAccountInfo: () =>
     new Promise((resolve) =>
       resolve({ billingAccountName: 'billing-account' })
     ),
 }));
+
+type WorkspaceEditProvidersExports =
+  typeof import('./workspace-edit-providers');
+jest.mock(
+  './workspace-edit-providers',
+  (): WorkspaceEditProvidersExports => ({
+    ...jest.requireActual('./workspace-edit-providers'),
+    getDiseaseNames: async () => ['some result'],
+  })
+);
 
 let mockHasBillingScope: jest.SpyInstance;
 let mockEnsureBillingScope: jest.SpyInstance;
@@ -80,6 +95,11 @@ const OTHER_DISSEMINATION_REGEX = new RegExp(
     'through which you will disseminate your findings, if available\\.',
   'i'
 );
+
+beforeAll(() => {
+  // stub google analytics
+  (window as any).gtag = jest.fn();
+});
 
 describe(WorkspaceEdit.name, () => {
   let workspacesApi: WorkspacesApiStub;
@@ -1304,5 +1324,186 @@ describe(WorkspaceEdit.name, () => {
         /you must provide details about your study design \(question 6\.2\)/i
       )
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('WorkspaceEdit form valdation', () => {
+  it('should generate expected errors - blank fields', () => {
+    // Arrange
+    const fields: WorkspaceEditValidationArgs = {
+      // all blank fields
+    } as Partial<WorkspaceEditValidationArgs> as WorkspaceEditValidationArgs;
+
+    // Act
+    const errors = validateWorkspaceEdit(fields, true);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      aianResearchDetails: [' cannot be blank'],
+      aianResearchType: ["can't be blank"],
+      anticipatedFindings: [' cannot be blank'],
+      billingAccountName: ["can't be blank"],
+      disseminateResearchFindingList: ["can't be blank"],
+      intendedStudy: [' cannot be blank'],
+      name: ['Name cannot be blank'],
+      populationChecked: ["can't be blank"],
+      primaryPurpose: ['must be true'],
+      researchOutcomeList: ["can't be blank"],
+      reviewRequested: ["can't be blank"],
+      scientificApproach: [' cannot be blank'],
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+  it('should generate expected errors - other fields become requried', () => {
+    // Arrange
+    const fields: WorkspaceEditValidationArgs = {
+      intendedStudy: 'save the world',
+      anticipatedFindings: 'These are the anticipated findings.',
+      scientificApproach: 'This is the scientific approach.',
+      disseminateResearchFindingList: ['OTHER'],
+      researchOutcomeList: ['DECREASE_ILLNESS_BURDEN'],
+      populationDetails: ['OTHER'],
+      otherPurposeDetails: '',
+      otherPopulationDetails: '',
+      diseaseOfFocus: '',
+      otherDisseminateResearchFindings: '',
+      aianResearchDetails: undefined,
+      aianResearchType: undefined,
+      diseaseFocusedResearch: true,
+      primaryPurpose: true,
+      otherPurpose: true,
+      name: 'Test Workspace',
+      billingAccountName: 'Test Billing Account',
+      reviewRequested: true,
+      populationChecked: true,
+    };
+
+    // Act
+    const errors = validateWorkspaceEdit(fields, true);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      aianResearchDetails: [' cannot be blank'],
+      aianResearchType: ["can't be blank"],
+      diseaseOfFocus: ['Disease of Focus cannot be blank'],
+      otherDisseminateResearchFindings: [
+        'Other methods of disseminating research findings cannot be blank',
+      ],
+      otherPopulationDetails: ['Other Specific Population cannot be blank'],
+      otherPurposeDetails: ['Other primary purpose cannot be blank'],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('should generate expected errors - max lengths', () => {
+    // Arrange
+    const bigText = 'big-important-words-'.repeat(100);
+    const fields: WorkspaceEditValidationArgs = {
+      intendedStudy: bigText,
+      anticipatedFindings: bigText,
+      scientificApproach: bigText,
+      disseminateResearchFindingList: ['OTHER'],
+      researchOutcomeList: ['DECREASE_ILLNESS_BURDEN'],
+      populationDetails: ['OTHER'],
+      otherPurposeDetails: bigText,
+      otherPopulationDetails: bigText,
+      diseaseOfFocus: bigText,
+      otherDisseminateResearchFindings: bigText,
+      aianResearchDetails: bigText,
+      aianResearchType: 'EXCLUSIVE_AI_AN_POPULATION',
+      diseaseFocusedResearch: true,
+      primaryPurpose: true,
+      otherPurpose: true,
+      name: bigText,
+      billingAccountName: 'Test Billing Account',
+      reviewRequested: true,
+      populationChecked: true,
+    };
+
+    // Act
+    const errors = validateWorkspaceEdit(fields, true);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      intendedStudy: [' cannot exceed 1000 characters'],
+      name: ['Name cannot exceed 80 characters'],
+      scientificApproach: [' cannot exceed 1000 characters'],
+      anticipatedFindings: [' cannot exceed 1000 characters'],
+      aianResearchDetails: [' cannot exceed 1000 characters'],
+      diseaseOfFocus: ['Disease of Focus cannot exceed 80 characters'],
+      otherDisseminateResearchFindings: [
+        'Other methods of disseminating research findings cannot exceed 100 characters',
+      ],
+      otherPopulationDetails: [
+        'Other Specific Population cannot exceed 100 characters',
+      ],
+      otherPurposeDetails: [
+        'Other primary purpose cannot exceed 500 characters',
+      ],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('should generate no errors - minimum required fields', () => {
+    // Arrange
+    const fields: WorkspaceEditValidationArgs = {
+      intendedStudy: 'save the world',
+      anticipatedFindings: 'These are the anticipated findings.',
+      scientificApproach: 'This is the scientific approach.',
+      disseminateResearchFindingList: ['PRESENATATION_SCIENTIFIC_CONFERENCES'],
+      researchOutcomeList: ['DECREASE_ILLNESS_BURDEN'],
+      populationDetails: undefined,
+      otherPurposeDetails: '',
+      otherPopulationDetails: '',
+      diseaseOfFocus: '',
+      otherDisseminateResearchFindings: '',
+      aianResearchDetails: undefined,
+      aianResearchType: undefined,
+      diseaseFocusedResearch: false,
+      primaryPurpose: true,
+      otherPurpose: false,
+      name: 'Test Workspace',
+      billingAccountName: 'Test Billing Account',
+      reviewRequested: true,
+      populationChecked: false,
+    };
+
+    // Act
+    const errors = validateWorkspaceEdit(fields, false);
+
+    // Assert
+    expect(errors).toEqual(undefined); // no errors
+  });
+
+  it('should generate no errors - all required fields', () => {
+    // Arrange
+    const fields: WorkspaceEditValidationArgs = {
+      intendedStudy: 'save the world',
+      anticipatedFindings: 'These are the anticipated findings.',
+      scientificApproach: 'This is the scientific approach.',
+      disseminateResearchFindingList: ['PRESENATATION_SCIENTIFIC_CONFERENCES'],
+      researchOutcomeList: ['DECREASE_ILLNESS_BURDEN'],
+      populationDetails: ['OTHER'],
+      otherPurposeDetails: 'other purpose details',
+      otherPopulationDetails: 'other population details',
+      diseaseOfFocus: 'disease of focus',
+      otherDisseminateResearchFindings: 'details about dissemination',
+      aianResearchDetails: 'details about AIAN research',
+      aianResearchType: 'CASE_CONTROL_AI_AN',
+      diseaseFocusedResearch: false,
+      primaryPurpose: true,
+      otherPurpose: true,
+      name: 'Test Workspace',
+      billingAccountName: 'Test Billing Account',
+      reviewRequested: true,
+      populationChecked: true,
+    };
+
+    // Act
+    const errors = validateWorkspaceEdit(fields, true);
+
+    // Assert
+    expect(errors).toEqual(undefined); // no errors
   });
 });

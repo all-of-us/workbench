@@ -1,6 +1,11 @@
 import '@testing-library/jest-dom';
 
-import { InstitutionalRole, InstitutionApi, Profile } from 'generated/fetch';
+import {
+  CheckEmailResponse,
+  InstitutionalRole,
+  InstitutionApi,
+  Profile,
+} from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render, waitFor, within } from '@testing-library/react';
@@ -23,6 +28,11 @@ import {
   InstitutionApiStub,
   VERILY_WITHOUT_CT,
 } from 'testing/stubs/institution-api-stub';
+
+import {
+  CreateInstitutionFields,
+  validateCreateInstitution,
+} from './account-creation-institution-validation';
 
 const profile: Profile = {
   generalDiscoverySources: undefined,
@@ -321,5 +331,123 @@ describe('Account Creation- Institution', () => {
     expectButtonElementDisabled(nextButton);
     await user.tab();
     expectButtonElementEnabled(nextButton);
+  });
+});
+
+describe('Account Creation Institution - form validator', () => {
+  it('returns no errors for completed form', () => {
+    // Arrange
+    const checkEmailResponse: CheckEmailResponse = {
+      validMember: true,
+    };
+
+    // Act
+    const errors = validateCreateInstitution(profile, checkEmailResponse);
+
+    // Assert
+    const expectedErrors = undefined; // no errors
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns errors for empty fields', () => {
+    // Arrange
+    const checkEmailResponse: CheckEmailResponse = {
+      validMember: true,
+    };
+    const emptyProfile =
+      {} as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+
+    // Act
+    const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      'profile.verifiedInstitutionalAffiliation.institutionShortName': [
+        'You must select an institution to continue',
+      ],
+      'profile.contactEmail': ['Email address cannot be blank'],
+      'profile.verifiedInstitutionalAffiliation.institutionalRoleEnum': [
+        'Institutional role cannot be blank',
+      ],
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns errors for missing other institution info', () => {
+    // Arrange
+    const checkEmailResponse: CheckEmailResponse = {
+      validMember: true,
+    };
+    const emptyProfile = {
+      verifiedInstitutionalAffiliation: {
+        institutionalRoleEnum: InstitutionalRole.OTHER,
+      },
+    } as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+
+    // Act
+    const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      'profile.verifiedInstitutionalAffiliation.institutionShortName': [
+        'You must select an institution to continue',
+      ],
+      'profile.contactEmail': ['Email address cannot be blank'],
+      'profile.verifiedInstitutionalAffiliation.institutionalRoleOtherText': [
+        'Institutional role text cannot be blank',
+      ],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns error for bad email', () => {
+    // Arrange
+    const checkEmailResponse: CheckEmailResponse = {
+      validMember: true,
+    };
+    const emptyProfile = {
+      verifiedInstitutionalAffiliation: {
+        institutionalRoleEnum: InstitutionalRole.POST_DOCTORAL,
+        institutionShortName: BROAD.shortName,
+        institutionDisplayName: BROAD.displayName,
+      },
+      contactEmail: 'bad-email',
+    } as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+
+    // Act
+    const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      'profile.contactEmail': ['Email address is invalid'],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('returns error for email not in institution', () => {
+    // Arrange
+    const checkEmailResponse: CheckEmailResponse = {
+      validMember: false,
+    };
+    const emptyProfile = {
+      verifiedInstitutionalAffiliation: {
+        institutionalRoleEnum: InstitutionalRole.POST_DOCTORAL,
+        institutionShortName: BROAD.shortName,
+        institutionDisplayName: BROAD.displayName,
+      },
+      contactEmail: 'bad-email@bad-place.org',
+    } as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+
+    // Act
+    const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      checkEmailResponse: [
+        'Email address is not a member of the selected institution',
+      ],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 });

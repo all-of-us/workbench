@@ -4,11 +4,11 @@ import { Profile, RuntimeStatus, Workspace } from 'generated/fetch';
 
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
-import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeSummary } from 'app/components/runtime-summary';
+import { EnvironmentInformedActionPanel } from 'app/lab/components/common-env-conf-panels/environment-informed-action-panel';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';

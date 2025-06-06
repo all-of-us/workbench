@@ -51,7 +51,7 @@ import {
   updateTierEmailDomains,
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
@@ -667,9 +667,6 @@ export const AdminInstitutionEdit = fp.flow(
     }
 
     render() {
-      const {
-        config: { enableInitialCreditsExpiration },
-      } = serverConfigStore.get();
       const { institution, showOtherInstitutionTextBox, title } = this.state;
       const {
         displayName,
@@ -888,27 +885,23 @@ export const AdminInstitutionEdit = fp.flow(
                     )
                   }
                 />
-                {enableInitialCreditsExpiration && (
-                  <div style={{ marginTop: '2.25rem' }}>
-                    <CommonToggle
-                      name='Initial Credits Expiration Bypass'
-                      onToggle={(bypass) =>
-                        this.setState(
-                          fp.set(
-                            ['institution', 'bypassInitialCreditsExpiration'],
-                            bypass
-                          )
+                <div style={{ marginTop: '2.25rem' }}>
+                  <CommonToggle
+                    name='Initial Credits Expiration Bypass'
+                    onToggle={(bypass) =>
+                      this.setState(
+                        fp.set(
+                          ['institution', 'bypassInitialCreditsExpiration'],
+                          bypass
                         )
-                      }
-                      checked={institution.bypassInitialCreditsExpiration}
-                    />
-                  </div>
-                )}
-                {enableInitialCreditsExpiration && (
-                  <InstitutionExpirationBypassExplanation
-                    bypassed={institution.bypassInitialCreditsExpiration}
+                      )
+                    }
+                    checked={institution.bypassInitialCreditsExpiration}
                   />
-                )}
+                </div>
+                <InstitutionExpirationBypassExplanation
+                  bypassed={institution.bypassInitialCreditsExpiration}
+                />
               </FlexColumn>
             </FlexRow>
             <SemiBoldHeader

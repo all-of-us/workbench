@@ -3,9 +3,9 @@ import { Redirect, Switch, useParams, useRouteMatch } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { AppRoute, withRouteData } from 'app/components/app-router';
-import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
+import { BreadcrumbType } from 'app/lab/components/breadcrumb-type';
 import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
 import {

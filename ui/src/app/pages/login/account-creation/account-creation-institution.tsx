@@ -1,10 +1,8 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import validate from 'validate.js';
 
 import {
-  CheckEmailResponse,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -40,7 +38,11 @@ import {
   DuplicateEmailErrorMessage,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
-import { notTooLong } from 'app/utils/validators';
+
+import {
+  CheckEmailResponseEx,
+  validateCreateInstitution,
+} from './account-creation-institution-validation';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -60,27 +62,6 @@ const styles = reactStyles({
   },
 });
 
-/**
- * Create a custom validate.js validator to validate against a CheckEmailResponse API response
- * object. This validator should be enabled when the state object has a non-empty email and
- * institute. It requires that the CheckEmailResponse has returned and indicates that the
- * entered email address is a valid member of the institution.
- *
- * @param value
- */
-validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
-  if (value == null) {
-    return '^Institutional membership check has not completed';
-  }
-  if (value?.existingAccount) {
-    return '^An account already exists with this email address ';
-  } else if (value?.validMember) {
-    return null;
-  } else {
-    return '^Email address is not a member of the selected institution';
-  }
-};
-
 export interface AccountCreationInstitutionProps {
   profile: Profile;
   onComplete: (profile: Profile) => void;
@@ -92,7 +73,7 @@ interface State {
   loadingInstitutions: boolean;
   institutions: Array<PublicInstitutionDetails>;
   institutionLoadError: boolean;
-  checkEmailResponse?: CheckEmailResponse;
+  checkEmailResponse?: CheckEmailResponseEx;
   checkEmailError: boolean;
 }
 
@@ -294,51 +275,11 @@ export class AccountCreationInstitution extends React.Component<
    * Visible for testing.
    */
   public validate(): { [key: string]: Array<string> } {
-    const validationCheck = {
-      'profile.verifiedInstitutionalAffiliation.institutionShortName': {
-        presence: {
-          allowEmpty: false,
-          message: '^You must select an institution to continue',
-        },
-      },
-      'profile.contactEmail': {
-        presence: {
-          allowEmpty: false,
-          message: '^Email address cannot be blank',
-        },
-        email: {
-          message: '^Email address is invalid',
-        },
-      },
-      'profile.verifiedInstitutionalAffiliation.institutionalRoleEnum': {
-        presence: {
-          allowEmpty: false,
-          message: '^Institutional role cannot be blank',
-        },
-      },
-      checkEmailResponse:
-        !isBlank(
-          this.state.profile.verifiedInstitutionalAffiliation
-            .institutionShortName
-        ) && !isBlank(this.state.profile.contactEmail)
-          ? {
-              checkEmailResponse: {},
-            }
-          : {},
-      'profile.verifiedInstitutionalAffiliation.institutionalRoleOtherText':
-        this.state.profile.verifiedInstitutionalAffiliation
-          .institutionalRoleEnum === InstitutionalRole.OTHER
-          ? {
-              ...notTooLong(80),
-              presence: {
-                allowEmpty: false,
-                message: '^Institutional role text cannot be blank',
-              },
-            }
-          : {},
-    };
-
-    return validate(this.state, validationCheck);
+    const errors = validateCreateInstitution(
+      this.state.profile,
+      this.state.checkEmailResponse
+    );
+    return errors;
   }
 
   updateAffiliationValue(attribute: string, value) {

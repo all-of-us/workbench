@@ -21,6 +21,7 @@ import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserDisabledEventDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -29,6 +30,8 @@ import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
+import org.pmiops.workbench.db.model.DbUserDisabledEvent;
+import org.pmiops.workbench.db.model.DbUserDisabledEvent.DbUserDisabledStatus;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -68,6 +71,7 @@ public class ProfileService {
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final UserDao userDao;
+  private final UserDisabledEventDao userDisabledEventDao;
   private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
@@ -89,6 +93,7 @@ public class ProfileService {
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> configProvider,
       UserDao userDao,
+      UserDisabledEventDao userDisabledEventDao,
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
@@ -108,6 +113,7 @@ public class ProfileService {
     this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.userDao = userDao;
+    this.userDisabledEventDao = userDisabledEventDao;
     this.userService = userService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
@@ -557,6 +563,20 @@ public class ProfileService {
           request.isInitialCreditsExpirationBypassed());
     }
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
+    if (originalProfile.isDisabled() != updatedProfile.isDisabled()) {
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      userDisabledEventDao.save(
+          new DbUserDisabledEvent()
+              .setUserId(dbUser.getUserId())
+              .setUpdatedBy(userProvider.get().getUsername())
+              .setUpdateTime(now)
+              .setAdminComment(
+                  updatedProfile.isDisabled() ? request.getAccountDisabledReason() : "")
+              .setStatus(
+                  updatedProfile.isDisabled()
+                      ? DbUserDisabledStatus.DISABLED
+                      : DbUserDisabledStatus.ENABLED));
+    }
 
     return getProfile(dbUser);
   }

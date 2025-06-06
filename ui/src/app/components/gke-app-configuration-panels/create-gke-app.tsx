@@ -23,7 +23,6 @@ import {
 } from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
-import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { MachineSelector } from 'app/components/common-env-conf-panels/machine-selector';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -33,6 +32,7 @@ import { CheckBox } from 'app/components/inputs';
 import { ErrorMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/disk-size-selector';
+import { EnvironmentInformedActionPanel } from 'app/lab/components/common-env-conf-panels/environment-informed-action-panel';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { getWholeDaysFromNow } from 'app/utils/dates';
 import {

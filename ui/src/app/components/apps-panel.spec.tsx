@@ -178,13 +178,7 @@ describe(AppsPanel.name, () => {
     await expectExpandableApp(user, 'Jupyter');
   });
 
-  it('should disable apps when initial credit expiration is enabled and initial credits are exhausted', async () => {
-    serverConfigStore.set({
-      config: {
-        ...serverConfigStore.get().config,
-        enableInitialCreditsExpiration: true,
-      },
-    });
+  it('should disable apps when initial credits are exhausted', async () => {
     mockInitialCredits({
       exhausted: true,
       expired: false,
@@ -223,14 +217,7 @@ describe(AppsPanel.name, () => {
     expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
-  it('should disable apps when initial credit expiration is enabled and initial credits are expired', async () => {
-    serverConfigStore.set({
-      config: {
-        ...serverConfigStore.get().config,
-        enableInitialCreditsExpiration: true,
-      },
-    });
-
+  it('should disable apps when initial credits are expired', async () => {
     mockInitialCredits({
       exhausted: false,
       expired: true,
@@ -241,14 +228,7 @@ describe(AppsPanel.name, () => {
     await expectAppsInAppsPanelToBeDisabled(user);
   });
 
-  it('should disable apps when initial credit expiration is enabled, initial credits are expired, and expiration is bypassed', async () => {
-    serverConfigStore.set({
-      config: {
-        ...serverConfigStore.get().config,
-        enableInitialCreditsExpiration: true,
-      },
-    });
-
+  it('should allow expansion when initial credits are expired and expiration is bypassed', async () => {
     mockInitialCredits({
       exhausted: false,
       expired: true,
@@ -257,6 +237,7 @@ describe(AppsPanel.name, () => {
 
     await component();
 
+    screen.logTestingPlaygroundURL();
     await expectExpandableApp(user, 'Jupyter');
   });
 

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { Breadcrumb } from 'app/components/breadcrumb';
 import { CTAvailableBannerMaybe } from 'app/components/ct-available-banner-maybe';
 import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
@@ -9,6 +8,7 @@ import { NewUserSatisfactionSurveyBannerMaybe } from 'app/components/new-user-sa
 import { SideNav } from 'app/components/side-nav';
 import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
 import { TakeDemographicSurveyV2BannerMaybe } from 'app/components/take-demographic-survey-v2';
+import { Breadcrumb } from 'app/lab/components/breadcrumb';
 import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';

@@ -36,8 +36,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
+import org.pmiops.workbench.lab.notebooks.NotebookUtils;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.RawlsRetryHandler;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
@@ -315,6 +315,17 @@ public class FireCloudServiceImpl implements FireCloudService {
         });
   }
 
+  @Override
+  public void removeBillingAccountFromBillingProjectAsService(String billingProjectName) {
+    rawlsRetryHandler.run(
+        (context) -> {
+          serviceAccountBillingV2ApiProvider
+              .get()
+              .removeBillingProjectBillingAccount(billingProjectName);
+          return null;
+        });
+  }
+
   private void addRoleToBillingProject(String email, String projectName, String role) {
     Preconditions.checkArgument(email.contains("@"));
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
@@ -464,8 +475,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           e,
           () ->
               String.format(
-                  "Exception encountered retrieving workspace with DbWorkspace %s",
-                  dbWorkspace.toString()));
+                  "Exception encountered retrieving workspace with DbWorkspace %s", dbWorkspace));
       return Optional.empty();
     }
   }

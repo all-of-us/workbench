@@ -2,8 +2,8 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import { withRouteData } from 'app/components/app-router';
-import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
+import { BreadcrumbType } from 'app/lab/components/breadcrumb-type';
 import { DataComponent } from 'app/pages/data/data-component';
 import { DataComponentTanagra } from 'app/pages/data/tanagra-dev/data-component-tanagra';
 import { withCurrentWorkspace } from 'app/utils';

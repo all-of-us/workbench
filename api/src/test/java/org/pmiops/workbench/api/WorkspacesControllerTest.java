@@ -128,6 +128,7 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -173,7 +174,6 @@ import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
@@ -698,7 +698,6 @@ public class WorkspacesControllerTest {
             workspace.getNamespace(), registeredTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test
@@ -1770,7 +1769,7 @@ public class WorkspacesControllerTest {
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
     Map<String, CohortReview> cohortReviewsByName =
         Maps.uniqueIndex(cohortReviews, c -> c.getCohortName());
-    assertThat(cohortsByName.keySet().size()).isEqualTo(2);
+    assertThat(cohortsByName).hasSize(2);
     assertThat(cohortsByName.keySet()).containsExactly("c1", "c2");
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
         .containsNoneOf(c1.getId(), c2.getId());
@@ -2498,7 +2497,6 @@ public class WorkspacesControllerTest {
     List<RawlsWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
-    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test
