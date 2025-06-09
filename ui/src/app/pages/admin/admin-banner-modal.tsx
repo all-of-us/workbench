@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState } from 'react';
-import validate from 'validate.js';
 
 import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
 
@@ -20,6 +19,8 @@ import {
   formatDateTimeLocal,
   MILLIS_PER_YEAR,
 } from 'app/utils/dates';
+
+import { validateBannerAlert } from './admin-banner-modal-validation';
 
 const styles = reactStyles({
   label: {
@@ -56,32 +57,6 @@ const ModalField = ({ label, children, fieldId }: ModalFieldProps) => (
   </div>
 );
 
-const BANNER_VALIDATION_CONSTRAINTS = {
-  title: {
-    presence: {
-      allowEmpty: false,
-      message: 'Please enter a banner title',
-    },
-  },
-  message: {
-    presence: {
-      allowEmpty: false,
-      message: 'Please enter a banner message',
-    },
-  },
-  startTimeEpochMillis: {
-    presence: {
-      allowEmpty: false,
-      message: 'Please enter a start time',
-    },
-  },
-  alertLocation: {
-    presence: {
-      message: 'Please select a banner location',
-    },
-  },
-};
-
 export const AdminBannerModal = ({
   banner,
   setBanner,
@@ -103,14 +78,11 @@ export const AdminBannerModal = ({
       return ['Creating banner...'];
     }
 
-    const validationResult = validate(banner, BANNER_VALIDATION_CONSTRAINTS, {
-      fullMessages: false,
-    });
-    if (!validationResult) {
+    const errors = validateBannerAlert(banner);
+    if (!errors) {
       return [];
     }
 
-    const errors = validationResult as Record<string, string[]>;
     const errorMessages: string[] = [];
     Object.keys(errors).forEach((key) => {
       if (Array.isArray(errors[key])) {
