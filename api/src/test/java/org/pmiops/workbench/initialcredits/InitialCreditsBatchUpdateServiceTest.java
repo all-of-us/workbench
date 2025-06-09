@@ -1,31 +1,26 @@
 package org.pmiops.workbench.initialcredits;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.utils.BigQueryUtils.tableRow;
 
-import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldValueList;
-import com.google.cloud.bigquery.LegacySQLTypeName;
-import com.google.cloud.bigquery.Schema;
 import com.google.common.base.Stopwatch;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.utils.BigQueryUtils;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -44,7 +39,7 @@ public class InitialCreditsBatchUpdateServiceTest {
   @MockBean private WorkspaceDao mockWorkspaceDao;
   @MockBean private InitialCreditsService mockInitialCreditsService;
   @MockBean private UserDao mockUserDao;
-  @MockBean private BigQueryService mockBigQueryService;
+  @MockBean private InitialCreditsBigQueryService mockBigQueryService;
 
   private static WorkbenchConfig config;
 
@@ -69,32 +64,81 @@ public class InitialCreditsBatchUpdateServiceTest {
   @BeforeEach
   public void init() {
     config = WorkbenchConfig.createEmptyConfig();
-
     mockDbUsers();
     mockGoogleProjectsForUser();
-    mockGoogleProjectCost();
   }
 
   @Test
-  public void testFreeTierBillingBatchUpdateService() {
+  public void checkInitialCreditsUsage_onlyTerraWorkspaces() {
+    mockGoogleProjectCost();
     initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(1L, 2L, 3L));
 
     verify(mockWorkspaceDao, times(1)).getWorkspaceGoogleProjectsForCreators(List.of(1L, 2L, 3L));
 
     verify(mockInitialCreditsService)
-        .checkInitialCreditsUsageForUsers(mockDbUserSet, getUserCostMap());
+        .checkInitialCreditsUsageForUsers(
+            mockDbUserSet, getWorkspacesCostMap(), /* VWB costs */ Collections.emptyMap());
+  }
+
+  @Test
+  public void checkInitialCreditsUsage_onlyVWBProjects() {
+    config.featureFlags.enableVWBInitialCreditsExhaustion = true;
+    mockVwbUserCost();
+    initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(1L, 2L, 3L));
+
+    verify(mockWorkspaceDao, times(1)).getWorkspaceGoogleProjectsForCreators(List.of(1L, 2L, 3L));
+
+    verify(mockInitialCreditsService)
+        .checkInitialCreditsUsageForUsers(
+            mockDbUserSet, /* Terra costs */ Collections.emptyMap(), getUsersCostMap());
+  }
+
+  @Test
+  public void checkInitialCreditsUsage_bothTerraAndVWBProjects() {
+    config.featureFlags.enableVWBInitialCreditsExhaustion = true;
+    mockGoogleProjectCost();
+    mockVwbUserCost();
+    initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(1L, 2L, 3L));
+
+    verify(mockWorkspaceDao, times(1)).getWorkspaceGoogleProjectsForCreators(List.of(1L, 2L, 3L));
+
+    verify(mockInitialCreditsService)
+        .checkInitialCreditsUsageForUsers(mockDbUserSet, getWorkspacesCostMap(), getUsersCostMap());
   }
 
   private void mockDbUsers() {
     DbUser dbUserForId1 = new DbUser().setUserId(1L);
     DbUser dbUserForId2 = new DbUser().setUserId(2L);
     DbUser dbUserForId3 = new DbUser().setUserId(3L);
-    when(mockUserDao.findUserByUserId(1L)).thenReturn(dbUserForId1);
-    when(mockUserDao.findUserByUserId(2L)).thenReturn(dbUserForId2);
-    when(mockUserDao.findUserByUserId(3L)).thenReturn(dbUserForId3);
+
+    DbVwbUserPod dbVwbUserPod1 =
+        new DbVwbUserPod()
+            .setVwbUserPodId(1L)
+            .setUser(dbUserForId1)
+            .setVwbPodId("pod1")
+            .setInitialCreditsActive(true);
+    dbUserForId1.setVwbUserPod(dbVwbUserPod1);
+    DbVwbUserPod dbVwbUserPod2 =
+        new DbVwbUserPod()
+            .setVwbUserPodId(2L)
+            .setUser(dbUserForId2)
+            .setVwbPodId("pod2")
+            .setInitialCreditsActive(true);
+    dbUserForId2.setVwbUserPod(dbVwbUserPod2);
+    DbVwbUserPod dbVwbUserPod3 =
+        new DbVwbUserPod()
+            .setVwbUserPodId(3L)
+            .setUser(dbUserForId3)
+            .setVwbPodId("pod3")
+            .setInitialCreditsActive(true);
+    dbUserForId3.setVwbUserPod(dbVwbUserPod3);
+
     mockDbUserSet.add(dbUserForId1);
     mockDbUserSet.add(dbUserForId2);
     mockDbUserSet.add(dbUserForId3);
+
+    when(mockUserDao.findUsersByUserIdIn(List.of(1L, 2L, 3L)))
+        .thenReturn(List.of(dbUserForId1, dbUserForId2, dbUserForId3));
   }
 
   private void mockGoogleProjectsForUser() {
@@ -103,23 +147,16 @@ public class InitialCreditsBatchUpdateServiceTest {
   }
 
   private void mockGoogleProjectCost() {
-    Schema s =
-        Schema.of(
-            Field.of("id", LegacySQLTypeName.STRING), Field.of("cost", LegacySQLTypeName.STRING));
-
-    List<FieldValueList> tableRows =
-        List.of(
-            tableRow("12", "0.013"),
-            tableRow("22", "1.123"),
-            tableRow("23", "6.5"),
-            tableRow("32", "0.34"),
-            tableRow("33", "0.9"));
-
-    when(mockBigQueryService.executeQuery(any()))
-        .thenReturn(BigQueryUtils.newTableResult(s, tableRows));
+    when(mockBigQueryService.getAllTerraWorkspaceCostsFromBQ())
+        .thenReturn(Map.of("12", 0.013d, "22", 1.123d, "23", 6.5d, "32", 0.34d, "33", 0.9d));
   }
 
-  private Map<String, Double> getUserCostMap() {
+  private void mockVwbUserCost() {
+    when(mockBigQueryService.getAllVWBProjectCostsFromBQ())
+        .thenReturn(Map.of("pod1", 1.1d, "pod2", 2.2d, "pod3", 3.3d));
+  }
+
+  private Map<String, Double> getWorkspacesCostMap() {
     Map<String, Double> userCostMap = new HashMap<String, Double>();
     userCostMap.put("12", 0.013);
     userCostMap.put("22", 1.123);
@@ -127,5 +164,19 @@ public class InitialCreditsBatchUpdateServiceTest {
     userCostMap.put("32", 0.34);
     userCostMap.put("33", 0.9);
     return userCostMap;
+  }
+
+  private Map<Long, Double> getUsersCostMap() {
+    Map<Long, Double> userCostMap = new HashMap<Long, Double>();
+    userCostMap.put(1L, 1.1);
+    userCostMap.put(2L, 2.2);
+    userCostMap.put(3L, 3.3);
+    return userCostMap;
+  }
+
+  @AfterEach
+  public void tearDown() {
+    config.featureFlags.enableVWBInitialCreditsExhaustion = false;
+    mockUserDao.deleteAll();
   }
 }
