@@ -7,11 +7,8 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.services.cloudresourcemanager.v3.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.v3.CloudResourceManager.Builder;
 import com.google.api.services.cloudresourcemanager.v3.CloudResourceManagerScopes;
-import com.google.api.services.cloudresourcemanager.v3.model.GetIamPolicyRequest;
-import com.google.api.services.cloudresourcemanager.v3.model.Policy;
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.api.services.cloudresourcemanager.v3.model.SearchProjectsResponse;
-import com.google.api.services.cloudresourcemanager.v3.model.SetIamPolicyRequest;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
@@ -101,31 +98,6 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
                     .filter(((Predicate<String>) String::isEmpty).negate());
           } while (pageToken.isPresent());
           return projects;
-        });
-  }
-
-  @Override
-  public Policy getIamPolicy(String googleProject) {
-    return retryHandler.run(
-        (context) -> {
-          return serviceCloudResouceManager
-              .get()
-              .projects()
-              .getIamPolicy("projects/" + googleProject, new GetIamPolicyRequest())
-              .execute();
-        });
-  }
-
-  @Override
-  public Policy setIamPolicy(String googleProject, Policy policy) {
-    return retryHandler.run(
-        (context) -> {
-          return serviceCloudResouceManager
-              .get()
-              .projects()
-              .setIamPolicy(
-                  "projects/" + googleProject, new SetIamPolicyRequest().setPolicy(policy))
-              .execute();
         });
   }
 }

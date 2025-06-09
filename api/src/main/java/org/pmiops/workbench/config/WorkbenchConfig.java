@@ -23,7 +23,7 @@ public class WorkbenchConfig {
   public GoogleDirectoryServiceConfig googleDirectoryService;
   public ServerConfig server;
   public AdminConfig admin;
-  public MandrillConfig mandrill;
+  public MailConfig mail;
   public AbsorbConfig absorb;
   public TanagraConfig tanagra;
   public ZendeskConfig zendesk;
@@ -62,7 +62,7 @@ public class WorkbenchConfig {
     config.firecloud = new FireCloudConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
-    config.mandrill = new MandrillConfig();
+    config.mail = new MailConfig();
     config.absorb = new AbsorbConfig();
     config.offlineBatch = new OfflineBatchConfig();
     config.ras = new RasConfig();
@@ -242,7 +242,7 @@ public class WorkbenchConfig {
     public String loginUrl;
   }
 
-  public static class MandrillConfig {
+  public static class MailConfig {
     public String fromEmail;
     public int sendRetries;
   }
@@ -319,6 +319,9 @@ public class WorkbenchConfig {
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
     public boolean enableInitialCreditsExpiration;
+    // If true, unlink billing when initial credits when a workspace owner's credits expire or are
+    // exhausted.
+    public boolean enableUnlinkBillingForInitialCredits;
     // If true, prevents users from taking compliance training, however
     // the training is still required if enableComplianceTraining is true.
     public boolean blockComplianceTraining;

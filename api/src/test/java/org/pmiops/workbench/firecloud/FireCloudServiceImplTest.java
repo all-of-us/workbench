@@ -273,6 +273,15 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
+  public void testRemoveBillingAccountFromBillingProjectAsService() throws Exception {
+    final String billingProjectName = "test-project";
+
+    service.removeBillingAccountFromBillingProjectAsService(billingProjectName);
+
+    verify(billingV2Api).removeBillingProjectBillingAccount(billingProjectName);
+  }
+
+  @Test
   public void createBillingProjectName_withUnderScore() {
     String prefix = "prefix-";
     workbenchConfig.billing.projectNamePrefix = prefix;

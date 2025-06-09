@@ -12,7 +12,7 @@
     "xAppIdValue": "AoU-RW",
     "timeoutInSeconds": 40,
     "lenientTimeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.13",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.16",
     "workspaceLogsProject": "fc-aou-logs-prod",
     "workspaceBucketLocation": "us-central1",
     "gceVmZones": ["us-central1-a","us-central1-b","us-central1-c", "us-central1-f"],
@@ -27,7 +27,7 @@
       0.5,
       0.75
     ],
-    "initialCreditsValidityPeriodDays": 120,
+    "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
@@ -87,7 +87,7 @@
   "admin": {
     "loginUrl": "https:\/\/workbench.researchallofus.org/login"
   },
-  "mandrill": {
+  "mail": {
     "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },
@@ -124,6 +124,7 @@
     "enableGKEAppMachineTypeChoice": false,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
+    "enableUnlinkBillingForInitialCredits": false,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": false,
@@ -170,7 +171,7 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50,
-    "usersPerCheckInitialCreditsUsageTask": 200,
+    "usersPerCheckInitialCreditsUsageTask": 150,
     "usersPerCheckInitialCreditsExpirationTask": 50,
     "usersPerAccessExpirationEmailTask": 500,
     "workspacesPerDeleteWorkspaceEnvironmentsTask": 50,

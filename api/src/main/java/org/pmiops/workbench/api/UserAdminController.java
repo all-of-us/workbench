@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.BatchSyncAccessResponse;
 import org.pmiops.workbench.model.CreateEgressBypassWindowRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListEgressBypassWindowResponse;
+import org.pmiops.workbench.model.ListUserDisabledEventsResponse;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
@@ -143,5 +144,13 @@ public class UserAdminController implements UserAdminApiDelegate {
     return ResponseEntity.ok(
         new ListEgressBypassWindowResponse()
             .bypassWindows(userAdminService.listAllEgressBypassWindows(userId)));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<ListUserDisabledEventsResponse> listUserDisabledEvents(Long userId) {
+    return ResponseEntity.ok(
+        new ListUserDisabledEventsResponse()
+            .disabledEvents(userAdminService.listAllUserDisabledEvents(userId)));
   }
 }

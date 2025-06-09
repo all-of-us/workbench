@@ -27,7 +27,7 @@
       0.5,
       0.75
     ],
-    "initialCreditsValidityPeriodDays": 120,
+    "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
@@ -81,7 +81,7 @@
   "admin": {
     "loginUrl": "https:\/\/stable.fake-research-aou.org/login"
   },
-  "mandrill": {
+  "mail": {
     "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },
@@ -118,9 +118,10 @@
     "enableGKEAppMachineTypeChoice": false,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
+    "enableUnlinkBillingForInitialCredits": false,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": true,
-    "enableVWBEgressMonitor": false,
+    "enableVWBEgressMonitor": true,
     "enableVWBUserAccessManagement": true,
     "enableVWBUserAndPodCreation": true
   },

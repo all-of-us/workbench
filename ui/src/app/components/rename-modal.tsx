@@ -16,7 +16,7 @@ import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { toDisplay } from 'app/utils/resources';
 
-import { validateRenameModal } from './rename-modal-validate';
+import { validateRenameModal } from './rename-modal-validation';
 
 const styles = reactStyles({
   fieldHeader: {

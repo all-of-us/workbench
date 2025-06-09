@@ -44,7 +44,10 @@ import { showDemographicSurvey } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 
-import { validateAccountCreationV2 } from './account-creation-validation';
+import {
+  stateCodeErrorMessage,
+  validateAccountCreation,
+} from './account-creation-validation';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -98,9 +101,6 @@ export const formLabels = {
 };
 
 const areaOfResearchId = 'areaOfResearch';
-
-export const stateCodeErrorMessage =
-  'State must be a valid 2-letter code (CA, TX, etc.)';
 
 export const MultiSelectWithLabel = (props) => {
   return (
@@ -292,8 +292,8 @@ export class AccountCreation extends React.Component<
       usernameWithEmail: this.state.profile.username + '@' + gsuiteDomain,
     };
 
-    const errors = validateAccountCreationV2(validationData);
-    return fp.isEmpty(errors) ? undefined : errors;
+    const errors = validateAccountCreation(validationData);
+    return errors;
   }
 
   // We need to stop showing demographic survey only after Nov-03

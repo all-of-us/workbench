@@ -35,7 +35,7 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { CopyModal, CopyModalProps } from './copy-modal';
-import { validateCopyModal, validateCopyModalV2 } from './copy-modal-validate';
+import { validateCopyModal } from './copy-modal-validation';
 
 interface TestWorkspace {
   namespace: string;
@@ -461,28 +461,46 @@ describe(CopyModal.name, () => {
   });
 });
 
-describe('CopyModal input validation', () => {
-  it('V2 matches V1 validation', () => {
+describe('CopyModal form validation', () => {
+  it('returns no errors for filled form', () => {
+    // Arrange
     const newName = 'test';
-    const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
-    const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
 
-    expect(v2).toEqual(v1);
+    // Act
+    const errors = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+
+    // Assert
+    const expectedErrors = undefined; // no errors
+    expect(errors).toEqual(expectedErrors);
   });
 
-  it('V2 matches V1 validation - blank', () => {
+  it('returns errors for blank form', () => {
+    // Arrange
     const newName = '';
-    const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
-    const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
 
-    expect(v2).toEqual(v1);
+    // Act
+    const errors = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: ["New name can't be blank"],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 
-  it('V2 matches V1 validation - bad char', () => {
+  it('returns error for bad char in name', () => {
+    // Arrange
     const newName = 'this=is?bad';
-    const v1 = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
-    const v2 = validateCopyModalV2({ newName }, ResourceType.NOTEBOOK);
 
-    expect(v2).toEqual(v1);
+    // Act
+    const error = validateCopyModal({ newName }, ResourceType.NOTEBOOK);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: [
+        "New name can't contain these characters: @ # $ % * + = ? , [ ] : ; / \\ ",
+      ],
+    };
+    expect(error).toEqual(expectedErrors);
   });
 });

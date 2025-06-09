@@ -8,10 +8,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 
 import { RenameModal } from './rename-modal';
-import {
-  validateRenameModal,
-  validateRenameModalV2,
-} from './rename-modal-validate';
+import { validateRenameModal } from './rename-modal-validation';
 
 describe(RenameModal.name, () => {
   const existingNames = [];
@@ -130,56 +127,80 @@ describe('validateNewName', () => {
   });
 });
 
-describe('CopyModal input validation', () => {
-  it('V2 matches V1 validation', () => {
+describe('RenameModal form validation', () => {
+  it('returns no errors for filled form', () => {
+    // Arrange
     const newName = 'test';
     const exists = ['exists1', 'exists2'];
-    const v1 = validateRenameModal({ newName }, exists, ResourceType.NOTEBOOK);
-    const v2 = validateRenameModalV2(
+
+    // Act
+    const errors = validateRenameModal(
       { newName },
       exists,
       ResourceType.NOTEBOOK
     );
 
-    expect(v2).toEqual(v1);
+    // Assert
+    const expectedErrors = undefined; // no errors
+    expect(errors).toEqual(expectedErrors);
   });
 
-  it('V2 matches V1 validation - blank', () => {
+  it('returns errors for blank form', () => {
+    // Arrange
     const newName = '';
     const exists = ['exists1', 'exists2'];
-    const v1 = validateRenameModal({ newName }, exists, ResourceType.NOTEBOOK);
-    const v2 = validateRenameModalV2(
+
+    // Act
+    const errors = validateRenameModal(
       { newName },
       exists,
       ResourceType.NOTEBOOK
     );
 
-    expect(v2).toEqual(v1);
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: ["New name can't be blank"],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 
-  it('V2 matches V1 validation - bad char', () => {
+  it('returns error for bad char in name', () => {
+    // Arrange
     const newName = 'this=is?bad';
     const exists = ['exists1', 'exists2'];
-    const v1 = validateRenameModal({ newName }, exists, ResourceType.NOTEBOOK);
-    const v2 = validateRenameModalV2(
+
+    // Act
+    const errors = validateRenameModal(
       { newName },
       exists,
       ResourceType.NOTEBOOK
     );
 
-    expect(v2).toEqual(v1);
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: [
+        "New name can't contain these characters: @ # $ % * + = ? , [ ] : ; / \\ ",
+      ],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 
-  it('V2 matches V1 validation - name exists', () => {
+  it('returns error for name exists', () => {
+    // Arrange
     const newName = 'exists2';
     const exists = ['exists1', 'exists2'];
-    const v1 = validateRenameModal({ newName }, exists, ResourceType.NOTEBOOK);
-    const v2 = validateRenameModalV2(
+
+    // Act
+    const errors = validateRenameModal(
       { newName },
       exists,
       ResourceType.NOTEBOOK
     );
 
-    expect(v2).toEqual(v1);
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      newName: ['New name already exists'],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 });

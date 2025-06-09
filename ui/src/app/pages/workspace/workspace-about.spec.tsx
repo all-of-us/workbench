@@ -24,8 +24,6 @@ import {
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  expectTooltip,
-  expectTooltipAbsence,
   renderWithRouter,
   waitForNoSpinner,
 } from 'testing/react-test-helpers';
@@ -84,7 +82,6 @@ describe('WorkspaceAbout', () => {
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
-        enableInitialCreditsExpiration: true,
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);
@@ -324,163 +321,6 @@ describe('WorkspaceAbout', () => {
       screen.getByText(/workspace initial credit expiration/i)
     ).toBeInTheDocument();
     screen.getByText(/tue mar 17 1998/i);
-  });
-
-  it('should not see initial credit expiration date when enableInitialCreditsExpiration is false', async () => {
-    const initialCreditsBillingAccountId = 'initial-credits';
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.getValue(),
-      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
-      initialCredits: {
-        exhausted: false,
-        expirationEpochMillis: new Date('1998-03-17T15:30:00').getTime(),
-      },
-    });
-    serverConfigStore.set({
-      config: {
-        ...serverConfigStore.get().config,
-        initialCreditsBillingAccountId,
-        enableInitialCreditsExpiration: false,
-      },
-    });
-    component();
-    expect(
-      screen.queryByText(/workspace initial credit expiration/i)
-    ).not.toBeInTheDocument();
-  });
-
-  it('eligble creator should be able to request extension', async () => {
-    const initialCreditsBillingAccountId = 'initial-credits';
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.getValue(),
-      creatorUser: {
-        userName: profile.username,
-        givenName: profile.givenName,
-        familyName: profile.familyName,
-      },
-      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
-      initialCredits: {
-        exhausted: false,
-        expirationEpochMillis: nowPlusDays(-1),
-      },
-    });
-    serverConfigStore.set({
-      config: {
-        ...serverConfigStore.get().config,
-        initialCreditsBillingAccountId,
-      },
-    });
-    profileStore.set({
-      ...profileStore.get(),
-      profile: {
-        ...profile,
-        eligibleForInitialCreditsExtension: true,
-      },
-    });
-    component();
-    const requestExtensionButton = screen.getByRole('button', {
-      name: /request extension/i,
-    });
-    expect(requestExtensionButton).toBeInTheDocument();
-
-    await expectTooltipAbsence(
-      requestExtensionButton,
-      'Contact your workspace creator, ' +
-        `${workspace?.creatorUser?.givenName} ${workspace?.creatorUser?.familyName}, to extend initial credits.`,
-      user
-    );
-    await user.click(requestExtensionButton);
-    expect(
-      await screen.findByText(/request credit expiration date extension/i)
-    ).toBeInTheDocument();
-  });
-
-  it('ineligble creator should not be able to request extension', async () => {
-    const initialCreditsBillingAccountId = 'initial-credits';
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.getValue(),
-      creatorUser: {
-        userName: profile.username,
-        givenName: profile.givenName,
-        familyName: profile.familyName,
-      },
-      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
-      initialCredits: {
-        exhausted: false,
-        expirationEpochMillis: nowPlusDays(-1),
-      },
-    });
-    serverConfigStore.set({
-      config: {
-        ...serverConfigStore.get().config,
-        initialCreditsBillingAccountId,
-      },
-    });
-    profileStore.set({
-      ...profileStore.get(),
-      profile: {
-        ...profile,
-        eligibleForInitialCreditsExtension: false,
-      },
-    });
-    component();
-    const requestExtensionButton = screen.getByRole('button', {
-      name: /request extension/i,
-    });
-    expect(requestExtensionButton).toBeInTheDocument();
-
-    await expectTooltip(
-      requestExtensionButton,
-      'You are not eligible to extend your initial credits.',
-      user
-    );
-    expectButtonElementDisabled(requestExtensionButton);
-  });
-
-  it('non-creator should not be able to request extension', async () => {
-    const initialCreditsBillingAccountId = 'initial-credits';
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.getValue(),
-      creatorUser: {
-        userName: 'not-the-user@aou-rwb.com',
-        givenName: 'Bob',
-        familyName: 'Pop',
-      },
-      billingAccountName: `billingAccounts/${initialCreditsBillingAccountId}`,
-      initialCredits: {
-        exhausted: false,
-        expirationEpochMillis: nowPlusDays(-1),
-      },
-    });
-    serverConfigStore.set({
-      config: {
-        ...serverConfigStore.get().config,
-        initialCreditsBillingAccountId,
-      },
-    });
-    profileStore.set({
-      ...profileStore.get(),
-      profile: {
-        ...profile,
-        eligibleForInitialCreditsExtension: true,
-      },
-    });
-    component();
-    const requestExtensionButton = screen.getByRole('button', {
-      name: /request extension/i,
-    });
-    expect(requestExtensionButton).toBeInTheDocument();
-
-    const currentWorkspace = currentWorkspaceStore.getValue();
-
-    await expectTooltip(
-      requestExtensionButton,
-      'Contact your workspace creator, ' +
-        `${currentWorkspace?.creatorUser?.givenName} ${currentWorkspace?.creatorUser?.familyName}, ` +
-        "to update this workspace's billing details.",
-      user
-    );
-    expectButtonElementDisabled(requestExtensionButton);
   });
 
   it('should not see initial credit expiration section when bypassed', async () => {

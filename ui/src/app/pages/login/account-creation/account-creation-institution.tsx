@@ -3,7 +3,6 @@ import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
-  CheckEmailResponse,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -40,7 +39,10 @@ import {
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 
-import { validateCreateInstitutionV2 } from './account-creation-institution-validation';
+import {
+  CheckEmailResponseEx,
+  validateCreateInstitution,
+} from './account-creation-institution-validation';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -71,7 +73,7 @@ interface State {
   loadingInstitutions: boolean;
   institutions: Array<PublicInstitutionDetails>;
   institutionLoadError: boolean;
-  checkEmailResponse?: CheckEmailResponse;
+  checkEmailResponse?: CheckEmailResponseEx;
   checkEmailError: boolean;
 }
 
@@ -273,8 +275,7 @@ export class AccountCreationInstitution extends React.Component<
    * Visible for testing.
    */
   public validate(): { [key: string]: Array<string> } {
-    // const errors = validateInstitutional(this.state);
-    const errors = validateCreateInstitutionV2(
+    const errors = validateCreateInstitution(
       this.state.profile,
       this.state.checkEmailResponse
     );

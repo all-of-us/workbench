@@ -16,7 +16,7 @@ import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
 import {
   buildRasRedirectUrl,
   DARPageMode,
@@ -97,6 +97,7 @@ export const styles = reactStyles({
   },
   completedText: {
     fontSize: '14px',
+    marginBottom: '0.5rem',
   },
   controlledRenewal: {
     padding: '1em',
@@ -512,16 +513,9 @@ const ControlledTierRenewalBanner = () => (
 );
 interface CompletionBannerProps {
   profile: Profile;
-  initialCreditsValidityPeriodDays: number;
-  initialCreditsExtensionPeriodDays: number;
 }
-const CompletionBanner = ({
-  profile,
-  initialCreditsValidityPeriodDays,
-  initialCreditsExtensionPeriodDays,
-}: CompletionBannerProps) => {
-  const enableInitialCreditsExpiration =
-    serverConfigStore.get().config.enableInitialCreditsExpiration;
+const CompletionBanner = ({ profile }: CompletionBannerProps) => {
+  const { initialCreditsLimit, initialCreditsUsage } = profile;
   return (
     <FlexRow data-test-id='dar-completed' style={styles.completed}>
       <FlexColumn style={{ flex: 0.5 }}>
@@ -531,38 +525,47 @@ const CompletionBanner = ({
         <div style={styles.completedText}>
           Researcher Workbench data access is complete.
         </div>
-        {enableInitialCreditsExpiration &&
-          profile.initialCreditsExpirationEpochMillis && (
-            <>
-              <div style={styles.completedText}>
-                Your credits expire on{' '}
-                {displayDateWithoutHours(
-                  profile.initialCreditsExpirationEpochMillis
-                )}
-                .
-              </div>
-              <div style={styles.completedText}>
-                (You have {initialCreditsValidityPeriodDays} days to use credit
-                after gaining data access. You may request an extension when it
-                gets closer to your credit expiration date, which will extend
-                your credit expiration date to a total of{' '}
-                {initialCreditsExtensionPeriodDays} days from the day you gained
-                data access.)
-              </div>
-              <div style={styles.completedText}>
-                Learn more{' '}
-                <LinkButton
-                  style={{ display: 'inline' }}
-                  onClick={() =>
-                    window.open(supportUrls.initialCredits, '_blank')
-                  }
-                >
-                  here
-                </LinkButton>
-                .
-              </div>
-            </>
-          )}
+        {profile.initialCreditsExpirationEpochMillis && (
+          <>
+            <div style={styles.completedText}>
+              You have{' '}
+              {formatInitialCreditsUSD(
+                initialCreditsUsage
+                  ? initialCreditsLimit - initialCreditsUsage
+                  : initialCreditsLimit
+              )}{' '}
+              in initial credits remaining. These credits expire on{' '}
+              {displayDateWithoutHours(
+                profile.initialCreditsExpirationEpochMillis
+              )}
+              .
+            </div>
+            <div style={styles.completedText}>
+              You will need to set up a billing account before your initial
+              credits expire or are fully used in order to avoid a disruption in
+              service.
+            </div>
+            <div style={styles.completedText}>
+              You can learn more about{' '}
+              <LinkButton
+                style={{ display: 'inline' }}
+                onClick={() =>
+                  window.open(supportUrls.initialCredits, '_blank')
+                }
+              >
+                initial credits
+              </LinkButton>{' '}
+              and setting up your own{' '}
+              <LinkButton
+                style={{ display: 'inline' }}
+                onClick={() => window.open(supportUrls.billing, '_blank')}
+              >
+                billing account
+              </LinkButton>{' '}
+              in the linked articles.
+            </div>
+          </>
+        )}
       </FlexColumn>
       <GetStartedButton style={{ marginLeft: 'auto' }} />
     </FlexRow>

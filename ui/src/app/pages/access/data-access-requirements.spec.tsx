@@ -1025,6 +1025,10 @@ describe('DataAccessRequirements', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         tierEligibilities: [
           {
+            accessTierShortName: AccessTierShortNames.Registered,
+            eligible: true,
+          },
+          {
             accessTierShortName: AccessTierShortNames.Controlled,
             eligible: false,
           },
@@ -1900,6 +1904,62 @@ describe('DataAccessRequirements', () => {
       expect(notificationStore.get().message).toEqual(
         'Deliberate testing failure for syncModulesExternal'
       );
+    });
+  });
+
+  describe('CompletionBanner credits display', () => {
+    beforeEach(async () => {
+      registerApiClient(InstitutionApi, new InstitutionApiStub());
+      registerApiClient(ProfileApi, new ProfileApiStub());
+
+      profileStore.set({
+        profile: {
+          ...ProfileStubVariables.PROFILE_STUB,
+          accessModules: {
+            modules: initialRequiredModules.map((module) => ({
+              moduleName: module,
+              completionEpochMillis: 1,
+            })),
+          },
+          initialCreditsLimit: 300,
+          initialCreditsUsage: 50,
+          initialCreditsExpirationEpochMillis: oneYearFromNow(),
+        },
+        load,
+        reload,
+        updateCache,
+      });
+    });
+
+    it('should show correct expiration date for credits', () => {
+      const expirationDate = new Date(oneYearFromNow());
+      const formattedDate = expirationDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+
+      component();
+      expect(
+        screen.getByText(new RegExp(`These credits expire on ${formattedDate}`))
+      ).toBeInTheDocument();
+    });
+
+    it('should display full quota amount when initialCreditsUsage is null or undefined', () => {
+      profileStore.set({
+        profile: {
+          ...profileStore.get().profile,
+          initialCreditsUsage: null,
+        },
+        load,
+        reload,
+        updateCache,
+      });
+
+      component();
+      expect(
+        screen.getByText(/You have \$300.00 in initial credits remaining/)
+      ).toBeInTheDocument();
     });
   });
 });

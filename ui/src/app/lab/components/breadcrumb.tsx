@@ -6,9 +6,8 @@ import * as fp from 'lodash/fp';
 import { Cohort, CohortReview, ConceptSet } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { InvalidBillingBanner } from 'app/lab/pages/workspace/invalid-billing-banner';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
-import { InvalidBillingBannerMaybe } from 'app/pages/workspace/invalid-billing-banner-maybe';
-import { OldInvalidBillingBanner } from 'app/pages/workspace/old-invalid-billing-banner';
 import {
   analysisTabName,
   analysisTabPath,
@@ -25,13 +24,12 @@ import {
 } from 'app/utils';
 import {
   MatchParams,
+  profileStore,
   RouteDataStore,
   routeDataStore,
-  serverConfigStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { isValidBilling } from 'app/utils/workspace-utils';
 
 import { BreadcrumbType } from './breadcrumb-type';
 
@@ -299,6 +297,22 @@ const BreadcrumbLink = ({ href, ...props }) => {
   return <Link to={href} {...props} />;
 };
 
+const shouldShowInvalidBillingBanner = (workspace, profile) => {
+  if (!workspace || !profile) {
+    return false;
+  }
+
+  const { creatorUser } = workspace;
+  const isExpired = workspace.initialCredits.expirationEpochMillis < Date.now();
+  const isExhausted = workspace.initialCredits.exhausted;
+
+  return (
+    creatorUser?.givenName &&
+    creatorUser?.familyName &&
+    (isExhausted || (!workspace.initialCredits.expirationBypassed && isExpired))
+  );
+};
+
 interface Props {
   workspace: WorkspaceData;
   cohort: Cohort;
@@ -314,26 +328,17 @@ export const Breadcrumb = fp.flow(
   withCurrentConceptSet(),
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
-  const enableInitialCreditsExpiration =
-    serverConfigStore.get().config.enableInitialCreditsExpiration;
+  const { profile } = profileStore.get();
   const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
-    enableInitialCreditsExpiration
+    shouldShowInvalidBillingBanner(props.workspace, profile)
   );
 
   useEffect(() => {
-    // TODO: This is only needed for OldInvalidBillingBanner.
-    // Remove once initial credit expiration is live
-    if (!enableInitialCreditsExpiration) {
-      const newShowInvalidBillingBanner = !isValidBilling(props?.workspace);
-
-      if (newShowInvalidBillingBanner !== showInvalidBillingBanner) {
-        setShowInvalidBillingBanner(newShowInvalidBillingBanner);
-      }
-    } else {
-      // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
-      setShowInvalidBillingBanner(true);
-    }
-  }, [props?.workspace]);
+    // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
+    setShowInvalidBillingBanner(
+      shouldShowInvalidBillingBanner(props.workspace, profile)
+    );
+  }, [props?.workspace, profile]);
 
   const trail = (): Array<BreadcrumbData> => {
     const workspaceMatch = matchPath<MatchParams>(location.pathname, {
@@ -422,16 +427,13 @@ export const Breadcrumb = fp.flow(
 
   return (
     <>
-      {showInvalidBillingBanner &&
-        (enableInitialCreditsExpiration ? (
-          <InvalidBillingBannerMaybe
-            onClose={() => setShowInvalidBillingBanner(false)}
-          />
-        ) : (
-          <OldInvalidBillingBanner
-            onClose={() => setShowInvalidBillingBanner(false)}
-          />
-        ))}
+      {showInvalidBillingBanner && (
+        <InvalidBillingBanner
+          profile={profile}
+          workspace={props.workspace}
+          onClose={() => setShowInvalidBillingBanner(false)}
+        />
+      )}
       <div
         style={{
           marginLeft: '4.875rem',

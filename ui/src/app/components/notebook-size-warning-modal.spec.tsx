@@ -22,11 +22,6 @@ function findEditButton() {
     name: /edit/i,
   });
 }
-function findPlaygroundButton() {
-  return screen.getByRole('button', {
-    name: /run playground mode/i,
-  });
-}
 describe('Notebook Size Warning Modal', () => {
   let user;
 
@@ -82,24 +77,7 @@ describe('Notebook Size Warning Modal', () => {
     ];
     await component();
     await user.click(findEditButton());
-    expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation, {
-      queryParams: { playgroundMode: false },
-    });
-  });
-
-  it('should have a functional playground button', async () => {
-    const expectedNavigation = [
-      'workspaces',
-      defaultProps.namespace,
-      defaultProps.terraName,
-      analysisTabName,
-      defaultProps.notebookName,
-    ];
-    await component();
-    await user.click(findPlaygroundButton());
-    expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation, {
-      queryParams: { playgroundMode: true },
-    });
+    expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation);
   });
 
   it('should disable buttons (except close) and show a spinner when notebookName is null', async () => {
@@ -108,7 +86,6 @@ describe('Notebook Size Warning Modal', () => {
     // Looking for spinner label
     screen.getByLabelText('Please Wait');
     await user.click(findEditButton());
-    await user.click(findPlaygroundButton());
     expect(mockNavigate).not.toHaveBeenCalled();
     await user.click(findCloseButton());
     expect(mockClose).toHaveBeenCalledTimes(1);

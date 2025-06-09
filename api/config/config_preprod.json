@@ -27,7 +27,7 @@
       0.5,
       0.75
     ],
-    "initialCreditsValidityPeriodDays": 120,
+    "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
@@ -87,7 +87,7 @@
   "admin": {
     "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"
   },
-  "mandrill": {
+  "mail": {
     "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },
@@ -124,6 +124,7 @@
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
+    "enableUnlinkBillingForInitialCredits": false,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": false,

@@ -279,7 +279,7 @@ commands:
             --app-version "${CIRCLE_TAG}" \
             --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
             --key-file << pipeline.parameters.circle-service-account-key >> \
-            --no-promote
+            --promote
         name: Deploy API and UI to all-of-us-rw-prod App Engine
 
   deploy-to-staging-command:

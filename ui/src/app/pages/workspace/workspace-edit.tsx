@@ -110,7 +110,7 @@ import { OldCdrVersionModal } from './old-cdr-version-modal';
 import { UnavailableTierModal } from './unavailable-tier-modal';
 import { getDiseaseNames } from './workspace-edit-providers';
 import {
-  validateWorkspaceEditV2,
+  validateWorkspaceEdit,
   WorkspaceEditValidationArgs,
 } from './workspace-edit-validation';
 
@@ -1384,9 +1384,7 @@ export const WorkspaceEdit = fp.flow(
         diseaseFocusedResearch,
         otherDisseminateResearchFindings,
       };
-      return validateWorkspaceEditV2(values, this.getAskAboutAIAN());
-
-      // return validateWorkspace(values);
+      return validateWorkspaceEdit(values, this.getAskAboutAIAN());
     }
 
     onAccessTierChange(

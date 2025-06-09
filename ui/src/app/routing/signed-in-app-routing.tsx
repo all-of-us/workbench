@@ -7,12 +7,12 @@ import {
   withFullHeight,
   withRouteData,
 } from 'app/components/app-router';
-import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import {
   DataUserCodeOfConduct,
   DuccSignatureState,
 } from 'app/components/data-user-code-of-conduct';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
+import { BreadcrumbType } from 'app/lab/components/breadcrumb-type';
 import { DataAccessRequirements } from 'app/pages/access/data-access-requirements';
 import { AdminBannerTable } from 'app/pages/admin/admin-banner-table';
 import { AdminEgressAudit } from 'app/pages/admin/admin-egress-audit';

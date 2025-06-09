@@ -25,12 +25,11 @@ import {
   AccountCreation,
   AccountCreationProps,
   formLabels,
-  stateCodeErrorMessage,
 } from './account-creation';
 import {
   AccountCreationFields,
+  stateCodeErrorMessage,
   validateAccountCreation,
-  validateAccountCreationV2,
 } from './account-creation-validation';
 
 export class MockDate extends Date {
@@ -78,7 +77,7 @@ const defaultConfig = { gsuiteDomain: 'researchallofus.org' };
 
 beforeAll(() => {
   // stub google analytics
-  window.gtag = jest.fn();
+  (window as any).gtag = jest.fn();
 });
 
 beforeEach(() => {
@@ -422,43 +421,176 @@ it('Should show submit button if country is not US', async () => {
   expect(screen.getByText('Submit')).toBeInTheDocument();
 });
 
-describe('Account Creation Validation', () => {
-  it('should validate account creation form fields', () => {
-    const profileFields: AccountCreationFields = {
-      username: 'testuser',
-      givenName: 'Test',
-      familyName: 'User',
-      areaOfResearch: '',
-      address: {
-        streetAddress1: '123 Test St',
-        streetAddress2: '',
-        city: 'Test City',
-        state: 'XX',
-        zipCode: '12345',
-        country: 'Portugal',
-      },
-      professionalUrl: '', // 'https://example.com',
-      generalDiscoverySources: [
-        GeneralDiscoverySource.SOCIAL_MEDIA,
-        GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES,
-      ],
-      partnerDiscoverySources: [
-        PartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
-        PartnerDiscoverySource.ASIAN_HEALTH_COALITION,
-      ],
-      usernameWithEmail: 'coolguygreatplace.org',
-    };
-    const v1 = validateAccountCreation(profileFields);
-    const v2 = validateAccountCreationV2(profileFields);
-    expect(v2).toEqual(v1);
-  });
+describe('Account Creation form validation', () => {
+  const happyFields: AccountCreationFields = {
+    username: 'testuser',
+    givenName: 'Test',
+    familyName: 'User',
+    areaOfResearch: 'saving the world',
+    address: {
+      streetAddress1: '123 Test St',
+      streetAddress2: '',
+      city: 'Test City',
+      state: 'XX',
+      zipCode: '12345',
+      country: 'Portugal',
+    },
+    professionalUrl: '', // 'https://example.com',
+    generalDiscoverySources: [
+      GeneralDiscoverySource.SOCIAL_MEDIA,
+      GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES,
+    ],
+    partnerDiscoverySources: [
+      PartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
+      PartnerDiscoverySource.ASIAN_HEALTH_COALITION,
+    ],
+    usernameWithEmail: 'coolguy@greatplace.org',
+  };
 
-  it('should validate with errors on empty object', () => {
+  it('should return errors for blank fields', () => {
+    // Arrange
     const profileFields: AccountCreationFields = {
       address: {},
     } as Partial<AccountCreationFields> as AccountCreationFields;
-    const v1 = validateAccountCreation(profileFields);
-    const v2 = validateAccountCreationV2(profileFields);
-    expect(v2).toEqual(v1);
+
+    // Act
+    const errors = validateAccountCreation(profileFields);
+
+    // Assert
+    const expectedErrors = {
+      'address.streetAddress1': ['Street address cannot be blank'],
+      'address.city': ['City cannot be blank'],
+      'address.state': ['State/province/region cannot be blank'],
+      'address.zipCode': ['Zip/postal code cannot be blank'],
+      'address.country': ['Country cannot be blank'],
+      givenName: ['First name cannot be blank'],
+      familyName: ['Last name cannot be blank'],
+      areaOfResearch: ['Research description cannot be blank'],
+      username: ['Username cannot be blank'],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('should return no errors for completed form', () => {
+    // Arrange
+    const profileFields: AccountCreationFields = {
+      ...happyFields,
+    };
+
+    // Act
+    const errors = validateAccountCreation(profileFields);
+
+    // Assert
+    const expectedErrors = undefined; // no errors
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('should return error for invalid usernameWithEmail', () => {
+    // Arrange
+    const profileFields: AccountCreationFields = {
+      ...happyFields,
+      usernameWithEmail: 'coolguygreatplace.org',
+    };
+    // Act
+    const errors = validateAccountCreation(profileFields);
+
+    // Assert
+    const expectedErrors = {
+      usernameWithEmail: ['Username contains invalid characters'],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('should return error for invalid professionalUrl', () => {
+    // Arrange
+    const profileFields: AccountCreationFields = {
+      ...happyFields,
+      professionalUrl: 'bad://invalid-url',
+    };
+    // Act
+    const errors = validateAccountCreation(profileFields);
+
+    // Assert
+    const expectedErrors = {
+      website: ['Professional URL bad://invalid-url is not a valid URL'],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('should return no error for non-USA state/county', () => {
+    // Arrange
+    const profileFields: AccountCreationFields = {
+      ...happyFields,
+      address: {
+        ...happyFields.address,
+        state: 'Algarve', // ok for country of Portugal
+      },
+    };
+
+    // Act
+    const errors = validateAccountCreation(profileFields);
+
+    // Assert
+    const expectedErrors = undefined; // no errors
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('should return error for invalid USA state/county', () => {
+    // Arrange
+    const profileFields: AccountCreationFields = {
+      ...happyFields,
+      address: {
+        ...happyFields.address,
+        country: Country.US,
+        state: 'XX', // not a valid USA state code
+      },
+    };
+
+    // Act
+    const errors = validateAccountCreation(profileFields);
+
+    // Assert
+    const expectedErrors = {
+      'address.state': [stateCodeErrorMessage],
+    };
+    expect(errors).toEqual(expectedErrors);
+  });
+
+  it('should return errors for field values that are too long', () => {
+    // Arrange
+    const profileFields: AccountCreationFields = {
+      ...happyFields,
+      username: 'u'.repeat(65), // too long
+      areaOfResearch: 'a'.repeat(2001), // too long
+      address: {
+        ...happyFields.address,
+        streetAddress1: 'a'.repeat(96), // too long
+        streetAddress2: 'a'.repeat(96), // too long
+        city: 'a'.repeat(96), // too long
+        zipCode: '7'.repeat(11), // too long
+        country: 'c'.repeat(96), // too long
+        state: 's'.repeat(96), // to long (non-USA)
+      },
+    };
+
+    // Act
+    const errors = validateAccountCreation(profileFields);
+
+    // Assert
+    const expectedErrors = {
+      username: ['Username is too long (maximum is 64 characters)'],
+      areaOfResearch: ['Research description must be 2000 characters or fewer'],
+      'address.streetAddress1': [
+        'Street address must be 95 characters or fewer',
+      ],
+      'address.streetAddress2': [
+        'Street address 2 must be 95 characters or fewer',
+      ],
+      'address.city': ['City must be 95 characters or fewer'],
+      'address.zipCode': ['Zip/postal code must be 10 characters or fewer'],
+      'address.country': ['Country must be 95 characters or fewer'],
+      'address.state': ['State/province/region must be 95 characters or fewer'],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 });

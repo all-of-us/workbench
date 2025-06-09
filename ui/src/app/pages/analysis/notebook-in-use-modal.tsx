@@ -14,7 +14,6 @@ interface Props {
   email: string;
   onCancel: Function;
   onCopy: Function;
-  onPlaygroundMode: Function;
 }
 
 interface State {
@@ -44,8 +43,8 @@ export class NotebookInUseModal extends React.Component<Props, State> {
             <span style={{ color: colors.accent }}> {this.props.email}</span>.
           </p>
           <p style={{ color: colors.primary }}>
-            You can make a copy, or run it in playground mode to explore and
-            execute its contents without saving any changes.
+            You can make a copy to explore and execute its contents without
+            saving any changes to the original.
           </p>
         </ModalBody>
         <ModalFooter style={{ alignItems: 'center' }}>
@@ -72,14 +71,6 @@ export class NotebookInUseModal extends React.Component<Props, State> {
                 style={{ marginLeft: '0.45rem', height: '21px', width: '21px' }}
               />
             )}
-          </Button>
-          <Button
-            style={{ width: '15rem', margin: '0 10px' }}
-            onClick={() => {
-              this.props.onPlaygroundMode();
-            }}
-          >
-            Run Playground Mode
           </Button>
         </ModalFooter>
       </Modal>

@@ -21,6 +21,13 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
+import { TextArea, ValidationError } from 'app/components/inputs';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalTitle,
+} from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
@@ -70,6 +77,7 @@ import {
   UserAdminTableLink,
   UserAuditLink,
 } from './admin-user-common';
+import { AdminUserDisabledEvents } from './admin-user-disabled-events';
 import { AdminUserEgressBypass } from './admin-user-egress-bypass';
 
 const styles = reactStyles({
@@ -223,24 +231,17 @@ const InitialCreditsCard = ({
   onChangeInitialCreditBypass,
   institution,
 }) => {
-  const {
-    config: { enableInitialCreditsExpiration },
-  } = serverConfigStore.get();
-
+  const initialCreditExpirationBypassedViaInstitution =
+    !!institution?.institutionalInitialCreditsExpirationBypassed;
   return (
     <FlexColumn style={{ flex: 0 }}>
       <FlexRow style={styles.initialCreditsPanel}>
         <FlexColumn>
           <div style={styles.subHeader}>Initial credits</div>
-          {enableInitialCreditsExpiration && (
-            <InstitutionExpirationBypassExplanation
-              bypassed={
-                !!institution?.institutionalInitialCreditsExpirationBypassed
-              }
-            />
-          )}
-          {enableInitialCreditsExpiration &&
-            !institution?.institutionalInitialCreditsExpirationBypassed &&
+          <InstitutionExpirationBypassExplanation
+            bypassed={initialCreditExpirationBypassedViaInstitution}
+          />
+          {!initialCreditExpirationBypassedViaInstitution &&
             oldProfile.initialCreditsExtensionEpochMillis && (
               <p style={{ color: colors.primary, fontWeight: 500 }}>
                 User requested an extension on{' '}
@@ -248,22 +249,19 @@ const InitialCreditsCard = ({
               </p>
             )}
           <FlexColumn>
-            {enableInitialCreditsExpiration &&
-              !institution?.institutionalInitialCreditsExpirationBypassed && (
-                <InitialCreditBypassSwitch
-                  currentlyBypassed={
-                    updatedProfile.initialCreditsExpirationBypassed
-                  }
-                  previouslyBypassed={
-                    oldProfile.initialCreditsExpirationBypassed
-                  }
-                  expirationEpochMillis={
-                    oldProfile.initialCreditsExpirationEpochMillis
-                  }
-                  onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
-                  label='Individual Expiration Bypass'
-                />
-              )}
+            {!initialCreditExpirationBypassedViaInstitution && (
+              <InitialCreditBypassSwitch
+                currentlyBypassed={
+                  updatedProfile.initialCreditsExpirationBypassed
+                }
+                previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
+                expirationEpochMillis={
+                  oldProfile.initialCreditsExpirationEpochMillis
+                }
+                onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
+                label='Individual Expiration Bypass'
+              />
+            )}
             <FlexRow style={{ gap: '1rem', paddingTop: '1.5rem' }}>
               <div
                 data-test-id='initial-credits-used'
@@ -435,6 +433,37 @@ const DisabledToggle = (props: {
   );
 };
 
+const AdminCommentModal = (props: {
+  onCancel: Function;
+  onSubmit: Function;
+}) => {
+  const { onCancel, onSubmit } = props;
+  const [comments, setComments] = useState<string>();
+  return (
+    <Modal>
+      <ModalTitle>Reason for disabling user</ModalTitle>
+      <ModalBody>
+        <TextArea value={comments} onChange={(v) => setComments(v)} />
+        {comments?.trim().length > 255 && (
+          <ValidationError>Max character limit is 255</ValidationError>
+        )}
+      </ModalBody>
+      <ModalFooter>
+        <Button onClick={onCancel} type='secondary'>
+          Cancel
+        </Button>
+        <Button
+          onClick={() => onSubmit(comments.trim())}
+          type='primary'
+          disabled={!comments || comments.trim().length > 255}
+        >
+          Submit
+        </Button>
+      </ModalFooter>
+    </Modal>
+  );
+};
+
 export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const {
     config: { gsuiteDomain },
@@ -460,6 +489,8 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     useState<string>(null);
   const [institution, setInstitution] =
     useState<PublicInstitutionDetails>(null);
+  const [showAdminCommentModal, setShowAdminCommentModal] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const onMount = async () => {
@@ -599,6 +630,20 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     setBypassChangeRequests([...otherModuleRequests, accessBypassRequest]);
   };
 
+  const saveProfile = async (accountDisabledReason?: string) => {
+    spinnerProps.showSpinner();
+    setShowAdminCommentModal(false);
+    const response = await updateAccountProperties(
+      oldProfile,
+      updatedProfile,
+      bypassChangeRequests,
+      accountDisabledReason
+    );
+    setOldProfile(response);
+    setUpdatedProfile(response);
+    spinnerProps.hideSpinner();
+  };
+
   const errors = validate(
     {
       contactEmail: !isBlank(updatedProfile?.contactEmail),
@@ -694,16 +739,12 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                           bypassChangeRequests
                         )
                       }
-                      onClick={async () => {
-                        spinnerProps.showSpinner();
-                        const response = await updateAccountProperties(
-                          oldProfile,
-                          updatedProfile,
-                          bypassChangeRequests
-                        );
-                        setOldProfile(response);
-                        setUpdatedProfile(response);
-                        spinnerProps.hideSpinner();
+                      onClick={() => {
+                        if (updatedProfile.disabled && !oldProfile.disabled) {
+                          setShowAdminCommentModal(true);
+                        } else {
+                          saveProfile();
+                        }
                       }}
                     >
                       Save
@@ -801,7 +842,22 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               )
             )}
           </FlexRow>
+          <FlexRow>
+            <h2>User Disabled Event History (all times local)</h2>
+          </FlexRow>
+          <FlexRow>
+            <AdminUserDisabledEvents
+              accountDisabledStatus={oldProfile.disabled}
+              targetUserId={updatedProfile.userId}
+            />
+          </FlexRow>
         </FlexColumn>
+      )}
+      {showAdminCommentModal && (
+        <AdminCommentModal
+          onCancel={() => setShowAdminCommentModal(false)}
+          onSubmit={(disabledReason: string) => saveProfile(disabledReason)}
+        />
       )}
     </FadeBox>
   );

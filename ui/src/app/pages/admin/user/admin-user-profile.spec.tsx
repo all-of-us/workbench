@@ -114,91 +114,62 @@ describe('AdminUserProfile', () => {
     await waitUntilPageLoaded();
   });
 
-  it.each([true, false])(
-    "should display the user's name, username, initial credits information when enableInitialCreditsExpiration is %s",
-    async (enableInitialCreditsExpiration) => {
-      const givenName = 'John Q';
-      const familyName = 'Public';
-      const expectedFullName = 'John Q Public';
+  it("should display the user's name, username, initial credits information", async () => {
+    const givenName = 'John Q';
+    const familyName = 'Public';
+    const expectedFullName = 'John Q Public';
 
-      const username = 'some-email@yahoo.com';
+    const username = 'some-email@yahoo.com';
 
-      const initialCreditsUsage = 543.21;
-      const initialCreditsLimit = 678.99;
-      const creditUsageText = '$543.21';
-      const creditLimitText = '$678.99';
-      const initialCreditsExpirationEpochMillis = Date.now();
+    const initialCreditsUsage = 543.21;
+    const initialCreditsLimit = 678.99;
+    const creditUsageText = '$543.21';
+    const creditLimitText = '$678.99';
+    const initialCreditsExpirationEpochMillis = Date.now();
 
-      serverConfigStore.set({
-        config: {
-          ...defaultServerConfig,
-          enableInitialCreditsExpiration,
-        },
-      });
+    updateTargetProfile({
+      username,
+      givenName,
+      familyName,
+      initialCreditsUsage,
+      initialCreditsLimit,
+      initialCreditsExpirationEpochMillis,
+    });
 
-      updateTargetProfile({
-        username,
-        givenName,
-        familyName,
-        initialCreditsUsage,
-        initialCreditsLimit,
-        initialCreditsExpirationEpochMillis,
-      });
+    const { container } = component();
+    await waitUntilPageLoaded();
+    expect(
+      within(screen.getByTestId('name')).getByText(expectedFullName)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('user-name')).getByText(username)
+    ).toBeInTheDocument();
 
-      const { container } = component();
-      await waitUntilPageLoaded();
-      expect(
-        within(screen.getByTestId('name')).getByText(expectedFullName)
-      ).toBeInTheDocument();
-      expect(
-        within(screen.getByTestId('user-name')).getByText(username)
-      ).toBeInTheDocument();
+    expect(screen.getByText(creditUsageText)).toBeInTheDocument();
+    expect(getDropdownSelection(container, 'initial-credits-dropdown')).toEqual(
+      creditLimitText
+    );
 
-      expect(screen.getByText(creditUsageText)).toBeInTheDocument();
-      expect(
-        getDropdownSelection(container, 'initial-credits-dropdown')
-      ).toEqual(creditLimitText);
+    const expirationMessage = `Credits expired on ${formatDate(
+      initialCreditsExpirationEpochMillis,
+      '-'
+    )}`;
 
-      const expirationMessage = `Credits expired on ${formatDate(
-        initialCreditsExpirationEpochMillis,
-        '-'
-      )}`;
+    expect(screen.getByText(expirationMessage)).toBeInTheDocument();
+  });
 
-      if (enableInitialCreditsExpiration) {
-        expect(screen.getByText(expirationMessage)).toBeInTheDocument();
-      } else {
-        expect(screen.queryByText(expirationMessage)).not.toBeInTheDocument();
-      }
-    }
-  );
+  it('initial credits should not expire when a user is bypassed ', async () => {
+    const initialCreditsExpirationBypassed = true;
 
-  it.each([true, false])(
-    'should display when a user is bypassed when enableInitialCreditsExpiration is %s',
-    async (enableInitialCreditsExpiration) => {
-      serverConfigStore.set({
-        config: {
-          ...defaultServerConfig,
-          enableInitialCreditsExpiration,
-        },
-      });
-      const initialCreditsExpirationBypassed = true;
+    updateTargetProfile({
+      initialCreditsExpirationBypassed,
+    });
 
-      updateTargetProfile({
-        initialCreditsExpirationBypassed,
-      });
+    component();
+    await waitUntilPageLoaded();
 
-      component();
-      await waitUntilPageLoaded();
-
-      if (enableInitialCreditsExpiration) {
-        expect(screen.getByText('Credits will not expire')).toBeInTheDocument();
-      } else {
-        expect(
-          screen.queryByText('Credits will not expire')
-        ).not.toBeInTheDocument();
-      }
-    }
-  );
+    expect(screen.getByText('Credits will not expire')).toBeInTheDocument();
+  });
 
   it('should not display individual expiration info when institutionalInitialCreditsExpirationBypassed is true', async () => {
     const institution = VERILY; // institution with bypassed expiration

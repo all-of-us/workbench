@@ -11,10 +11,7 @@ import {
 } from 'testing/react-test-helpers';
 
 import { AdminBannerModal } from './admin-banner-modal';
-import {
-  validateBannerAlert,
-  validateBannerAlertV2,
-} from './admin-banner-modal-validate';
+import { validateBannerAlert } from './admin-banner-modal-validation';
 
 describe('AdminBannerModal', () => {
   const defaultBanner: StatusAlert = {
@@ -212,8 +209,9 @@ describe('AdminBannerModal', () => {
   });
 });
 
-describe('AdminBannerModal - Validation', () => {
-  it('has same results for v2 as v1 validation', () => {
+describe('AdminBannerModal - form validation', () => {
+  it('returns no errors for completed form', () => {
+    // Arrange
     const filledBanner: StatusAlert = {
       title: 'Test Title',
       message: 'Test Message',
@@ -222,17 +220,27 @@ describe('AdminBannerModal - Validation', () => {
       startTimeEpochMillis: Date.now(),
     };
 
+    // Act
     const errors = validateBannerAlert(filledBanner);
-    const errorsV2 = validateBannerAlertV2(filledBanner);
 
-    expect(errorsV2).toEqual(errors);
+    // Assert
+    const expectedErrors: Record<string, string[]> | undefined = undefined;
+    expect(errors).toEqual(expectedErrors);
   });
-  it('has same results for v2 as v1 validation - empty', () => {
+
+  it('returns errors empty form', () => {
+    // Arrange
     const filledBanner: StatusAlert = {} as Partial<StatusAlert> as StatusAlert;
 
+    // Act
     const errors = validateBannerAlert(filledBanner);
-    const errorsV2 = validateBannerAlertV2(filledBanner);
-
-    expect(errorsV2).toEqual(errors);
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      title: ['Please enter a banner title'],
+      message: ['Please enter a banner message'],
+      startTimeEpochMillis: ['Please enter a start time'],
+      alertLocation: ['Please select a banner location'],
+    };
+    expect(errors).toEqual(expectedErrors);
   });
 });

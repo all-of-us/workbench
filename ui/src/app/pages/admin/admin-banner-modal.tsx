@@ -20,7 +20,7 @@ import {
   MILLIS_PER_YEAR,
 } from 'app/utils/dates';
 
-import { validateBannerAlertV2 } from './admin-banner-modal-validate';
+import { validateBannerAlert } from './admin-banner-modal-validation';
 
 const styles = reactStyles({
   label: {
@@ -78,7 +78,7 @@ export const AdminBannerModal = ({
       return ['Creating banner...'];
     }
 
-    const errors = validateBannerAlertV2(banner);
+    const errors = validateBannerAlert(banner);
     if (!errors) {
       return [];
     }
