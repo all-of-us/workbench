@@ -28,7 +28,6 @@ import { reactStyles, summarizeErrors, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { NavigationProps } from 'app/utils/navigation';
 import { toDisplay } from 'app/utils/resources';
-import { toDisplay } from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 import { validateCopyModal } from './copy-modal-validation';

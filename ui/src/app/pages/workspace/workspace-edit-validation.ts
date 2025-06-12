@@ -1,5 +1,3 @@
-import { validate } from 'validate.js';
-
 import {
   AIANResearchType,
   DisseminateResearchEnum,
@@ -43,70 +41,6 @@ export type WorkspaceEditValidationArgs = Required<
     populationChecked: boolean;
   };
 
-export const validateWorkspaceEdit = (
-  values: WorkspaceEditValidationArgs,
-  askAboutAIAN: boolean
-) => {
-  const requiredStringWithMaxLengthV1 = (maximum: number, prefix = '') => ({
-    presence: {
-      allowEmpty: false,
-      message: `${prefix} cannot be blank`,
-    },
-    length: {
-      maximum,
-      tooLong: `${prefix} cannot exceed %{count} characters`,
-    },
-  });
-
-  // TODO: This validation spec should include error messages which get
-  // surfaced directly. Currently these constraints are entirely separate
-  // from the user facing error strings we render.
-  const constraints: object = {
-    name: requiredStringWithMaxLengthV1(80, 'Name'),
-    // The prefix for these lengthMessages require HTML formatting
-    // The prefix string is omitted here and included in the React template below
-    billingAccountName: { presence: true },
-    intendedStudy: requiredStringWithMaxLengthV1(1000),
-    populationChecked: { presence: true },
-    anticipatedFindings: requiredStringWithMaxLengthV1(1000),
-    reviewRequested: { presence: true },
-    scientificApproach: requiredStringWithMaxLengthV1(1000),
-    researchOutcomeList: { presence: { allowEmpty: false } },
-    disseminateResearchFindingList: { presence: { allowEmpty: false } },
-    primaryPurpose: { truthiness: true },
-
-    // Conditionally include optional fields for validation.
-    otherPurposeDetails: values.otherPurpose
-      ? requiredStringWithMaxLengthV1(500, 'Other primary purpose')
-      : {},
-    populationDetails: values.populationChecked ? { presence: true } : {},
-    otherPopulationDetails: values.populationDetails?.includes(
-      SpecificPopulationEnum.OTHER
-    )
-      ? requiredStringWithMaxLengthV1(100, 'Other Specific Population')
-      : {},
-    diseaseOfFocus: values.diseaseFocusedResearch
-      ? requiredStringWithMaxLengthV1(80, 'Disease of Focus')
-      : {},
-    otherDisseminateResearchFindings:
-      values.disseminateResearchFindingList?.includes(
-        DisseminateResearchEnum.OTHER
-      )
-        ? requiredStringWithMaxLengthV1(
-            100,
-            'Other methods of disseminating research findings'
-          )
-        : {},
-    aianResearchType: askAboutAIAN ? { presence: true } : {},
-    aianResearchDetails: askAboutAIAN
-      ? requiredStringWithMaxLengthV1(1000)
-      : {},
-  };
-
-  return validate(values, constraints, { fullMessages: false });
-};
-
-// V2 validation with zod ================================================================
 export const getWorkspaceEditValidator = (askAboutAIAN: boolean) =>
   refinedObject<WorkspaceEditValidationArgs>((data, ctx) => {
     const noop = undefined;
@@ -116,17 +50,14 @@ export const getWorkspaceEditValidator = (askAboutAIAN: boolean) =>
       // The prefix string is omitted here and included in the React template
       billingAccountName: requiredString(),
       intendedStudy: requiredStringWithMaxLength(1000),
-      populationChecked: z.boolean(),
+      populationChecked: z.boolean({ required_error: "can't be blank" }),
       anticipatedFindings: requiredStringWithMaxLength(1000),
-      reviewRequested: z.boolean(),
+      reviewRequested: z.boolean({ required_error: "can't be blank" }),
       scientificApproach: requiredStringWithMaxLength(1000),
-      researchOutcomeList: nonEmptyArray(
-        z.string(),
-        'Must select at least one research outcome'
-      ),
+      researchOutcomeList: nonEmptyArray(z.string(), "can't be blank"),
       disseminateResearchFindingList: nonEmptyArray(
         z.string(),
-        'Must select at least one dissemination method'
+        "can't be blank"
       ),
       primaryPurpose: trueBoolean(),
 
@@ -165,7 +96,7 @@ export const getWorkspaceEditValidator = (askAboutAIAN: boolean) =>
     return z.NEVER;
   });
 
-export const validateWorkspaceEditV2 = (
+export const validateWorkspaceEdit = (
   data: WorkspaceEditValidationArgs,
   askAboutAIAN: boolean
 ) => zodToValidateJS(() => getWorkspaceEditValidator(askAboutAIAN).parse(data));

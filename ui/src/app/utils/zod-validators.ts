@@ -1,5 +1,7 @@
 import { z, ZodType } from 'zod';
 
+import { canonicalizeUrl } from './urls';
+
 // Common validation schema helpers
 export const requiredString = (msg?: string): z.ZodString =>
   z
@@ -11,7 +13,6 @@ export const requiredString = (msg?: string): z.ZodString =>
         ) {
           return { message: msg || "can't be blank" };
         }
-        S;
         return { message: ctx.defaultError };
       },
     })
@@ -41,6 +42,37 @@ export const trueBoolean = (msg: string = 'must be true') =>
 
 export const nonEmptyArray = <T>(item: z.ZodType<T>, msg: string) =>
   z.array(item, { required_error: msg }).min(1, { message: msg });
+
+export const httpUrl = (msg: string = 'must be a valid URL') =>
+  z
+    .string()
+    .url({ message: msg })
+    .refine(
+      (val) => {
+        let tryVal = val;
+        // Attempt to parse the URL first, if it fails, canonicalize it
+        try {
+          new URL(tryVal);
+        } catch {
+          tryVal = canonicalizeUrl(tryVal);
+        }
+
+        try {
+          const url = new URL(tryVal);
+          const isHttp = url.protocol === 'http:' || url.protocol === 'https:';
+          const isLocalHost =
+            url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+          console.log(
+            `======== Validating URL: ${val}, isHttp: ${isHttp}, isLocalHost: ${isLocalHost}`
+          );
+          return isHttp && !isLocalHost;
+        } catch {
+          return false;
+        }
+      },
+      { message: msg }
+    )
+    .default('');
 
 type SuperRefineFnFromPassThru = (
   data: z.objectOutputType<{}, z.ZodTypeAny>,
