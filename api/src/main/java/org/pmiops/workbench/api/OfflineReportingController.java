@@ -17,6 +17,6 @@ public class OfflineReportingController implements OfflineReportingApiDelegate {
 
   @Override
   public ResponseEntity<Void> uploadReportingSnapshot() {
-    return noContentRun(reportingService::collectRecordsAndUpload);
+    return noContentRun(reportingService::splitUploadIntoTasksAndQueue);
   }
 }

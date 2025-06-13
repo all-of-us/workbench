@@ -245,6 +245,14 @@ public class TaskQueueService {
         VWB_POD_CREATION, new CreateVwbPodTaskRequest().userName(email));
   }
 
+  public void pushReportingUploadTask(String table, Long captureSnapshotTime) {
+    createAndPushTask(
+        new TaskQueuePair("reportingUploadQueue", "reportingUpload"),
+        new ReportingUploadQueueTaskRequest()
+            .tables(List.of(table))
+            .snapshotTimestamp(captureSnapshotTime));
+  }
+
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {
     return new TaskQueuePair(pair.queueName(), pair.endpoint() + "?backfill=true");
   }
