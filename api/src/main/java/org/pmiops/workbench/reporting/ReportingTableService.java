@@ -90,6 +90,13 @@ public class ReportingTableService {
         workspaceFreeTierUsage());
   }
 
+  public List<ReportingTableParams<? extends ReportingBase>> getAll(
+      List<String> tableNames) {
+    return getAll().stream()
+        .filter(table -> tableNames.contains(table.bqTableName()))
+        .toList();
+  }
+
   private int batchSize(String bqTableName) {
     ReportingConfig config = workbenchConfigProvider.get().reporting;
     int wantedSize =
