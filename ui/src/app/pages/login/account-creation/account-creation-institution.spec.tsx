@@ -29,10 +29,7 @@ import {
   VERILY_WITHOUT_CT,
 } from 'testing/stubs/institution-api-stub';
 
-import {
-  CreateInstitutionFields,
-  validateCreateInstitution,
-} from './account-creation-institution-validation';
+import { validateCreateInstitution } from './account-creation-institution-validation';
 
 const profile: Profile = {
   generalDiscoverySources: undefined,
@@ -354,8 +351,7 @@ describe('Account Creation Institution - form validator', () => {
     const checkEmailResponse: CheckEmailResponse = {
       validMember: true,
     };
-    const emptyProfile =
-      {} as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+    const emptyProfile = {} as Partial<Profile> as Profile;
 
     // Act
     const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
@@ -383,7 +379,7 @@ describe('Account Creation Institution - form validator', () => {
       verifiedInstitutionalAffiliation: {
         institutionalRoleEnum: InstitutionalRole.OTHER,
       },
-    } as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+    } as Partial<Profile> as Profile;
 
     // Act
     const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
@@ -413,7 +409,7 @@ describe('Account Creation Institution - form validator', () => {
         institutionDisplayName: BROAD.displayName,
       },
       contactEmail: 'bad-email',
-    } as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+    } as Partial<Profile> as Profile;
 
     // Act
     const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);
@@ -437,7 +433,7 @@ describe('Account Creation Institution - form validator', () => {
         institutionDisplayName: BROAD.displayName,
       },
       contactEmail: 'bad-email@bad-place.org',
-    } as Partial<CreateInstitutionFields> as CreateInstitutionFields;
+    } as Partial<Profile> as Profile;
 
     // Act
     const errors = validateCreateInstitution(emptyProfile, checkEmailResponse);

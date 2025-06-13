@@ -8,7 +8,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataComponent } from 'app/pages/data/data-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -16,11 +16,7 @@ import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
-import {
-  expectSpinner,
-  renderWithRouter,
-  waitForNoSpinner,
-} from 'testing/react-test-helpers';
+import { renderWithRouter, waitForNoSpinner } from 'testing/react-test-helpers';
 import {
   CohortReviewServiceStub,
   cohortReviewStubs,
@@ -59,12 +55,26 @@ describe('DataPage', () => {
   };
 
   it('should render', async () => {
-    component();
-    expectSpinner();
+    await act(async () => {
+      component();
+    });
+    // Wait for loading to complete and verify the component has rendered
+    await waitForNoSpinner();
+
+    // Verify that the main sections are rendered
+    expect(
+      screen.getByRole('heading', { name: 'Cohorts' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Datasets' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('Show All')).toBeInTheDocument();
   });
 
   it('should show all datasets, cohorts, and concept sets', async () => {
-    component();
+    await act(async () => {
+      component();
+    });
     const resourceTableRowsExpected =
       ConceptSetsApiStub.stubConceptSets().length +
       exampleCohortStubs.length +
@@ -92,7 +102,9 @@ describe('DataPage', () => {
   });
 
   it('should show only cohorts when selected', async () => {
-    component();
+    await act(async () => {
+      component();
+    });
     const resourceTableRowsExpected = exampleCohortStubs.length;
 
     const cohortsFilterButton = await screen.findByRole('button', {
@@ -103,7 +115,9 @@ describe('DataPage', () => {
   });
 
   it('should show only cohort reviews when selected', async () => {
-    component();
+    await act(async () => {
+      component();
+    });
     const resourceTableRowsExpected = cohortReviewStubs.length;
     const cohortReviewsFilterButton = await screen.findByRole('button', {
       name: 'Cohort Reviews',
@@ -113,7 +127,9 @@ describe('DataPage', () => {
   });
 
   it('should show only conceptSets when selected', async () => {
-    component();
+    await act(async () => {
+      component();
+    });
     const resourceTableRowsExpected =
       ConceptSetsApiStub.stubConceptSets().length;
     const conceptSetsFilterButton = await screen.findByRole('button', {
@@ -124,7 +140,9 @@ describe('DataPage', () => {
   });
 
   it('should show only dataSets when selected', async () => {
-    component();
+    await act(async () => {
+      component();
+    });
     const resourceTableRowsExpected = DataSetApiStub.stubDataSets().length;
     const datatsetsFilterButton = await screen.findByRole('button', {
       name: 'Datasets',

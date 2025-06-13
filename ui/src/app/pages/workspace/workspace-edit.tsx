@@ -1332,8 +1332,7 @@ export const WorkspaceEdit = fp.flow(
     }
 
     /**
-     * Validates the current workspace state. This is a pass-through to validate.js
-     * which returns the standard error object if any validation errors occur.
+     * Validates the current workspace state using Zod validation.
      */
     private validate(): any {
       const {

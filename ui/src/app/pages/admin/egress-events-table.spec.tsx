@@ -37,19 +37,19 @@ describe('EgressEventsTable', () => {
     // Find the row with the matching event ID and click the edit button.
     const row = await getRowWithMatchingEventId(eventId);
     const editButton = within(row).getByRole('button');
-    user.click(editButton);
+    await user.click(editButton);
 
     // Open the status dropdown
     const statusDropdown = await screen.findByRole('button', {
       name: /select a status/i,
     });
-    user.click(statusDropdown);
+    await user.click(statusDropdown);
 
     // Select the verified false positive option. This should close the dropdown.
     const falsePositiveOption = await screen.findByLabelText(
       /verified_false_positive/i
     );
-    user.click(falsePositiveOption);
+    await user.click(falsePositiveOption);
     await waitFor(() => {
       expect(
         within(row).queryByText(EgressEventStatus.REMEDIATED)
@@ -59,7 +59,7 @@ describe('EgressEventsTable', () => {
     // Not ideal, but since PrimeReact does not offer an accessible way to get the save button,
     // we have to rely on the order of the buttons.
     const saveButton = within(row).queryAllByRole('button')[1];
-    user.click(saveButton);
+    await user.click(saveButton);
 
     // Once the save button is clicked, the row should no longer have the status dropdown.
     await waitFor(() => {
@@ -133,7 +133,7 @@ describe('EgressEventsTable', () => {
 
       // Navigate to the next page unless test is on the last page
       if (i !== numPages - 1) {
-        user.click(nextButton);
+        await user.click(nextButton);
       }
     }
 
