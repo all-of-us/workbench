@@ -10,5 +10,7 @@ import java.util.List;
 public interface ReportingService {
   void collectRecordsAndUpload();
 
+  void splitUploadIntoTasksAndQueue();
+
   void collectRecordsAndUpload(List<String> tables, long captureTimestamp);
 }

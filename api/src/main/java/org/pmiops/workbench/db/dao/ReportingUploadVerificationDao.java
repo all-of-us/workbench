@@ -16,4 +16,9 @@ public interface ReportingUploadVerificationDao extends CrudRepository<DbReporti
   @Modifying
   @Query("UPDATE DbReportingUploadVerification r SET r.uploaded = :uploaded WHERE r.tableName = :tableName AND r.snapshotTimestamp = :snapshotTimestamp")
   int updateUploadedStatus(@Param("tableName") String tableName, @Param("snapshotTimestamp") Timestamp snapshotTimestamp, @Param("uploaded") Boolean uploaded);
+
+  // Create a new entry for a given table and timestamp
+  @Modifying
+  @Query("INSERT INTO DbReportingUploadVerification (tableName, snapshotTimestamp) VALUES (:tableName, :snapshotTimestamp)")
+  int createVerificationEntry(@Param("tableName") String tableName, @Param("snapshotTimestamp") Timestamp snapshotTimestamp);
 }

@@ -74,12 +74,13 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
               boolean uploadOutcome = verifyCount(bqTableName, sourceCount, destCount, sb);
               reportingUploadVerificationDao.updateUploadedStatus(bqTableName, new Timestamp(captureSnapshotTime), uploadOutcome);
             });
+    logger.log(Level.INFO, sb.toString());
   }
 
   @Override
   public boolean verifySnapshot(long captureSnapshotTime) {
     var tablesInSnapshot = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(captureSnapshotTime));
-    return !tablesInSnapshot.isEmpty() &&
+    return !tablesInSnapshot.isEmpty() && // todo: may want to throw if no tables are found for a given snapshot
         tablesInSnapshot.stream()
             .allMatch(record -> Boolean.TRUE.equals(record.getUploaded()));
   }

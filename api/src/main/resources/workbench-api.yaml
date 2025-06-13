@@ -13436,9 +13436,9 @@ components:
             type: string
           description: The names of the tables to be uploaded
         snapshotTimestamp:
-          type: string
-          description: The timestamp of the snapshot to be uploaded, in ISO 8601 format
-          format: date-time
+          type: integer
+          format: int64
+          description: The timestamp of the snapshot to be uploaded, in milliseconds
 
   parameters:
     userId:
