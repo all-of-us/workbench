@@ -748,7 +748,6 @@ export const WorkspaceEdit = fp.flow(
     }
 
     makeDiseaseInput(): React.ReactNode {
-      // console.log('makeDiseaseInput getDiseaseNames fn=' + getDiseaseNames);
       return (
         <SearchInput
           data-test-id='diseaseOfFocus-input'

@@ -4,7 +4,7 @@ import { nameValidationFormat } from 'app/utils/resources';
 import { zodToValidateJS } from 'app/utils/zod-validators';
 import { z } from 'zod';
 
-export interface CopyModalFields {
+export interface RenameModalFields {
   newName: string;
 }
 
@@ -24,7 +24,7 @@ const getCopyModalSchema = (format: FormatChecker, existingNames: string[]) =>
   });
 
 export const validateRenameModal = (
-  fields: CopyModalFields,
+  fields: RenameModalFields,
   existingNames: string[],
   resourceType: ResourceType
 ): Record<string, string[]> | undefined => {
