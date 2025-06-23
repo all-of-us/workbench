@@ -25,6 +25,9 @@ export const DemographicSurveyValidationMessage = fp.flow(
   withProfileErrorModal
 )((props: DemographicSurveyValidationMessageProps) => {
   const { captcha, changed, errors, isAccountCreation } = props;
+  if (errors) {
+    console.error('DemographicSurveyValidationMessage errors:', errors);
+  }
   return (
     <>
       <div>Please review the following:</div>
