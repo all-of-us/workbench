@@ -317,7 +317,7 @@ describe('Account Creation- Institution', () => {
     );
     expect(newInstitutionRole).toBeInTheDocument();
 
-    // Next button is still disabled as  we change the institution so email is not valid
+    // Next button is still disabled as  we change the institution so email is not valid.
     nextButton = screen.getByRole('button', { name: /next/i });
     expectButtonElementDisabled(nextButton);
 
