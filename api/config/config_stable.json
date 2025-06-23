@@ -125,7 +125,7 @@
     "enableVWBEgressMonitor": true,
     "enableVWBUserAccessManagement": true,
     "enableVWBUserAndPodCreation": true,
-    "enableVWBInitialCreditsExhaustion": true
+    "enableVWBInitialCreditsExhaustion": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
