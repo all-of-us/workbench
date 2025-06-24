@@ -36,7 +36,7 @@ describe('DemographicsSurveyV2 form validation', () => {
     expect(errors).toEqual(expectedErrors);
   });
 
-    it('returns no errors for a happy path survey with null optional fields', () => {
+  it('returns no errors for a happy path survey with null optional fields', () => {
     // Arrange
     const surveyFields: DemographicSurveyV2 = {
       ...happySurvey,
