@@ -36,6 +36,33 @@ describe('DemographicsSurveyV2 form validation', () => {
     expect(errors).toEqual(expectedErrors);
   });
 
+    it('returns no errors for a happy path survey with null optional fields', () => {
+    // Arrange
+    const surveyFields: DemographicSurveyV2 = {
+      ...happySurvey,
+      disabilityOtherText: null,
+      ethnicityAiAnOtherText: null,
+      ethnicityAsianOtherText: null,
+      ethnicityBlackOtherText: null,
+      ethnicityHispanicOtherText: null,
+      ethnicityMeNaOtherText: null,
+      ethnicityNhPiOtherText: null,
+      ethnicityWhiteOtherText: null,
+      ethnicityOtherText: null,
+      genderOtherText: null,
+      sexAtBirthOtherText: null,
+      orientationOtherText: null,
+      surveyComments: null,
+    };
+
+    // Act
+    const errors = validateDemographicSurvey(surveyFields);
+
+    // Assert
+    const expectedErrors = undefined; // no errors
+    expect(errors).toEqual(expectedErrors);
+  });
+
   it('returns errors for blank fields', () => {
     // Arrange
     const surveyFields: DemographicSurveyV2 = {};

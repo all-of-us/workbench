@@ -30,7 +30,9 @@ export const optionalStringWithMaxLength = (maximum: number, prefix = '') =>
     .max(maximum, {
       message: `${prefix} can have no more than ${maximum} characters.`,
     })
-    .optional();
+    .optional()
+    .default('')
+    .or(z.literal(null));
 
 export const trueBoolean = (msg: string = 'must be true') =>
   z
