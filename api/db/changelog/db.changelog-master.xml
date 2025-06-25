@@ -274,6 +274,7 @@
   <include file="changelog/db.changelog-264-add-user-disabled-events-table.xml"/>
   <include file="changelog/db.changelog-265-add-unique-constraint-user-initial-credits-expiration.xml"/>
   <include file="changelog/db.changelog-266-update-user-initial-credits-expiration-to-365-days.xml"/>
+  <include file="changelog/db.changelog-267-vwb-initial-credits.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

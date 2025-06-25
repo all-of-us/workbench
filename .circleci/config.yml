@@ -176,111 +176,111 @@ commands:
       - run:
           name: Verify that ADC works
           command: |
-              ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
-              curl -f -i -H "Content-Type: application/x-www-form-urlencoded" -d "access_token=${ACCESS_TOKEN}" https://www.googleapis.com/oauth2/v1/tokeninfo
+            ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
+            curl -f -i -H "Content-Type: application/x-www-form-urlencoded" -d "access_token=${ACCESS_TOKEN}" https://www.googleapis.com/oauth2/v1/tokeninfo
 
   gcloud-auth-login-oidc-test:
     description: "Activate CircleCI service account credential for the Test environment"
     steps:
       - gcloud-auth-login-oidc:
-          project_id: "602460048110"  # all-of-us-workbench-test
+          project_id: "602460048110" # all-of-us-workbench-test
           wip_id: "circleci-wip-test"
           wip_provider_id: "circleci-oidc-prv-test"
 
   gcloud-auth-login-oidc-stable:
     description: "Activate CircleCI service account credential for the Stable environment"
     steps:
-    - gcloud-auth-login-oidc:
-        project_id: "56507752110"  # all-of-us-rw-stable
-        wip_id: "circleci-wip-stable"
-        wip_provider_id: "circleci-oidc-prv-stable"
-        service_account: "deploy@all-of-us-rw-stable.iam.gserviceaccount.com"
+      - gcloud-auth-login-oidc:
+          project_id: "56507752110" # all-of-us-rw-stable
+          wip_id: "circleci-wip-stable"
+          wip_provider_id: "circleci-oidc-prv-stable"
+          service_account: "deploy@all-of-us-rw-stable.iam.gserviceaccount.com"
 
   gcloud-auth-login-oidc-staging:
     description: "Activate CircleCI service account credential for the Staging environment"
     steps:
       - gcloud-auth-login-oidc:
-          project_id: "657299777109"  # all-of-us-rw-staging
+          project_id: "657299777109" # all-of-us-rw-staging
           wip_id: "circleci-wip-staging"
           wip_provider_id: "circleci-oidc-prv-staging"
 
   gcloud-auth-login-oidc-preprod:
     description: "Activate CircleCI service account credential for the Preprod environment"
     steps:
-    - gcloud-auth-login-oidc:
-        project_id: "589109405884"  # all-of-us-rw-preprod
-        wip_id: "circleci-wip-preprod"
-        wip_provider_id: "circleci-oidc-prv-preprod"
-        service_account: "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com"
+      - gcloud-auth-login-oidc:
+          project_id: "589109405884" # all-of-us-rw-preprod
+          wip_id: "circleci-wip-preprod"
+          wip_provider_id: "circleci-oidc-prv-preprod"
+          service_account: "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com"
 
   gcloud-auth-login-oidc-prod:
     description: "Activate CircleCI service account credential for the Production environment"
     steps:
-    - gcloud-auth-login-oidc:
-        project_id: "684273740878"  # all-of-us-rw-prod
-        wip_id: "circleci-wip-prod"
-        wip_provider_id: "circleci-oidc-prv-prod"
-        service_account: "deploy@all-of-us-rw-prod.iam.gserviceaccount.com"
+      - gcloud-auth-login-oidc:
+          project_id: "684273740878" # all-of-us-rw-prod
+          wip_id: "circleci-wip-prod"
+          wip_provider_id: "circleci-oidc-prv-prod"
+          service_account: "deploy@all-of-us-rw-prod.iam.gserviceaccount.com"
 
   deploy-to-preprod-command:
     description: "Deploy API and UI to preprod App Engine"
     steps:
-    - checkout-code
-    - attach_workspace:
-        at: .
-    - gcloud-auth-login-oidc-preprod
-    - run:
-        working_directory: ~/workbench/deploy
-        command: |
-          ./project.rb deploy \
-            --project all-of-us-rw-preprod \
-            --account "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com" \
-            --git-version "${CIRCLE_TAG}" \
-            --app-version "${CIRCLE_TAG}" \
-            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-            --key-file << pipeline.parameters.circle-service-account-key >> \
-            --promote
-        name: Deploy API and UI to all-of-us-rw-preprod App Engine
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login-oidc-preprod
+      - run:
+          working_directory: ~/workbench/deploy
+          command: |
+            ./project.rb deploy \
+              --project all-of-us-rw-preprod \
+              --account "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com" \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
+              --promote
+          name: Deploy API and UI to all-of-us-rw-preprod App Engine
 
   deploy-to-stable-command:
     description: "Deploy API and UI to stable App Engine"
     steps:
-    - checkout-code
-    - attach_workspace:
-        at: .
-    - gcloud-auth-login-oidc-stable
-    - run:
-        working_directory: ~/workbench/deploy
-        command: |
-          ./project.rb deploy \
-            --project all-of-us-rw-stable \
-            --account "deploy@all-of-us-rw-stable.iam.gserviceaccount.com" \
-            --git-version "${CIRCLE_TAG}" \
-            --app-version "${CIRCLE_TAG}" \
-            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-            --key-file << pipeline.parameters.circle-service-account-key >> \
-            --promote
-        name: Deploy API and UI to all-of-us-rw-stable App Engine
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login-oidc-stable
+      - run:
+          working_directory: ~/workbench/deploy
+          command: |
+            ./project.rb deploy \
+              --project all-of-us-rw-stable \
+              --account "deploy@all-of-us-rw-stable.iam.gserviceaccount.com" \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
+              --promote
+          name: Deploy API and UI to all-of-us-rw-stable App Engine
 
   deploy-to-prod-command:
     description: "Deploy API and UI to production App Engine"
     steps:
-    - checkout-code
-    - attach_workspace:
-        at: .
-    - gcloud-auth-login-oidc-prod
-    - run:
-        working_directory: ~/workbench/deploy
-        command: |
-          ./project.rb deploy \
-            --project all-of-us-rw-prod \
-            --account "deploy@all-of-us-rw-prod.iam.gserviceaccount.com" \
-            --git-version "${CIRCLE_TAG}" \
-            --app-version "${CIRCLE_TAG}" \
-            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-            --key-file << pipeline.parameters.circle-service-account-key >> \
-            --promote
-        name: Deploy API and UI to all-of-us-rw-prod App Engine
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login-oidc-prod
+      - run:
+          working_directory: ~/workbench/deploy
+          command: |
+            ./project.rb deploy \
+              --project all-of-us-rw-prod \
+              --account "deploy@all-of-us-rw-prod.iam.gserviceaccount.com" \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
+              --promote
+          name: Deploy API and UI to all-of-us-rw-prod App Engine
 
   deploy-to-staging-command:
     description: "Deploy API and UI to staging App Engine"
@@ -354,13 +354,13 @@ commands:
         type: string
         default: ""
     steps:
-    - run:
-        command: |
-          if [ ! -d "<< parameters.dir_name >>" ]; then
-            echo "<< parameters.dir_name >> directory does does not exist. Exiting Job."
-            circleci-agent step halt
-          fi
-        name: "Halt job if '<< parameters.dir_name >>' directory does not exist."
+      - run:
+          command: |
+            if [ ! -d "<< parameters.dir_name >>" ]; then
+              echo "<< parameters.dir_name >> directory does does not exist. Exiting Job."
+              circleci-agent step halt
+            fi
+          name: "Halt job if '<< parameters.dir_name >>' directory does not exist."
 
   launch-local-api:
     description: "Launch local API server"
@@ -459,7 +459,7 @@ commands:
   gcs-load-test-results:
     description: "Load Puppeteer test results JSON to Google Storage bucket"
     steps:
-      - gcloud-auth-login-oidc-test  # required to access GCS
+      - gcloud-auth-login-oidc-test # required to access GCS
       - run:
           name: Upload test results json to storage bucket
           working_directory: ~/workbench/e2e/logs
@@ -489,9 +489,9 @@ commands:
         description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
         default: "test"
         type: enum
-        enum: [ "test", "staging", "local" ]
+        enum: ["test", "staging", "local"]
     steps:
-      - gcloud-auth-login-oidc-test  # required to access GCS
+      - gcloud-auth-login-oidc-test # required to access GCS
       - run:
           name: "Set environment variable ACCESS_TEST_USER"
           working_directory: ~/workbench/e2e
@@ -547,7 +547,7 @@ jobs:
   api-lint:
     executor: workbench-executor
     steps:
-     - run-api-test:
+      - run-api-test:
           additional_steps:
             - run:
                 name: Lint Java code
@@ -559,7 +559,7 @@ jobs:
     executor: workbench-executor
     steps:
       - attach_workspace:
-            at: /tmp/workspace
+          at: /tmp/workspace
       - checkout-code
       - halt-test-check:
           dir_names: "ui"
@@ -573,30 +573,30 @@ jobs:
     #Jacoco runs against test results to get test coverage
     executor: workbench-executor
     steps:
-    - run-api-test:
-        additional_steps:
-        - attach_workspace:
-            at: /tmp/workspace
-        - run:
-            name: Create build directory
-            working_directory: ~/workbench/api
-            command: |
-              mkdir "./build";
-        - run:
-            name: Copy Jacoco exec files locally
-            working_directory: ~/workbench/api
-            command: |
-              cp -R "/tmp/workspace/api/build/jacoco/" "./build/jacoco/"
-        - run:
-            name: Generate Jacoco Coverage Report
-            working_directory: ~/workbench/api
-            command: |
-              ./gradlew jacocoTestReport
-        - coverage-reporter/send_report:
-            coverage-reports: api/build/reports/jacoco/test/jacocoTestReport.xml
-            project-token: $CODACY_PROJECT_TOKEN
-        - store_artifacts:
-            path: ~/workbench/api/build/reports
+      - run-api-test:
+          additional_steps:
+            - attach_workspace:
+                at: /tmp/workspace
+            - run:
+                name: Create build directory
+                working_directory: ~/workbench/api
+                command: |
+                  mkdir "./build";
+            - run:
+                name: Copy Jacoco exec files locally
+                working_directory: ~/workbench/api
+                command: |
+                  cp -R "/tmp/workspace/api/build/jacoco/" "./build/jacoco/"
+            - run:
+                name: Generate Jacoco Coverage Report
+                working_directory: ~/workbench/api
+                command: |
+                  ./gradlew jacocoTestReport
+            - coverage-reporter/send_report:
+                coverage-reports: api/build/reports/jacoco/test/jacocoTestReport.xml
+                project-token: $CODACY_PROJECT_TOKEN
+            - store_artifacts:
+                path: ~/workbench/api/build/reports
 
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
@@ -606,7 +606,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login-oidc-test  # required to access GCS
+            - gcloud-auth-login-oidc-test # required to access GCS
             - launch-local-api
             - run:
                 working_directory: ~/workbench/api
@@ -627,7 +627,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login-oidc-test  # required to access GCS
+            - gcloud-auth-login-oidc-test # required to access GCS
             - run:
                 name: Run Integration Tests
                 working_directory: ~/workbench/api
@@ -638,7 +638,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login-oidc-test  # required to access GCS
+            - gcloud-auth-login-oidc-test # required to access GCS
             - run:
                 name: Run BigQuery tests
                 working_directory: ~/workbench/api
@@ -692,7 +692,6 @@ jobs:
           working_directory: ~/workbench/ui
           command: yarn run lint --max-warnings 0
 
-
   # Playground job. Re-run with ssh enabled to play with Circle's machine image.
   playground:
     machine:
@@ -707,231 +706,231 @@ jobs:
     machine:
       image: default # latest stable version
     steps:
-    - attach_workspace:
-        at: ~/workbench
-    - run:
-        name: Load JIRA issue key
-        command: |
-          if [ -f ~/workbench/jira-env.sh ]; then
-            source ~/workbench/jira-env.sh
-            echo "export JIRA_ISSUE_KEY=\"$JIRA_ISSUE_KEY\"" >> $BASH_ENV
-            source $BASH_ENV
-            echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
-          else
-            echo "ERROR: jira-env.sh not found"
-            echo "This file is required for this deployment. It contains the Jira issue key associated with this release"
-            exit 1
-          fi
-    - run:
-        name: Comment on Jira
-        command: |
-          echo JIRA ISSUE KEY: ${JIRA_ISSUE_KEY:-"Jira issue key is missing"}
-          curl --request POST \
-            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
-            --header 'accept: application/json' \
-            --header "authorization: Basic ${JIRA_KEY}" \
-            --header 'content-type: application/json' \
-            --data '{
-            "body": {
-              "content": [
-                {
-                  "content": [
-                    {
-                      "text": "Requesting change approval for this release of the Workbench to production. 1 security and 1 business approval are needed for release",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                },
-                {
-                  "content": [
-                    {
-                      "type": "mention",
-                      "attrs": {
-                        "id": "5b50af8f10d57114135ef067",
-                        "text": "Charissa Rotundo"
+      - attach_workspace:
+          at: ~/workbench
+      - run:
+          name: Load JIRA issue key
+          command: |
+            if [ -f ~/workbench/jira-env.sh ]; then
+              source ~/workbench/jira-env.sh
+              echo "export JIRA_ISSUE_KEY=\"$JIRA_ISSUE_KEY\"" >> $BASH_ENV
+              source $BASH_ENV
+              echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
+            else
+              echo "ERROR: jira-env.sh not found"
+              echo "This file is required for this deployment. It contains the Jira issue key associated with this release"
+              exit 1
+            fi
+      - run:
+          name: Comment on Jira
+          command: |
+            echo JIRA ISSUE KEY: ${JIRA_ISSUE_KEY:-"Jira issue key is missing"}
+            curl --request POST \
+              --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
+              --header 'accept: application/json' \
+              --header "authorization: Basic ${JIRA_KEY}" \
+              --header 'content-type: application/json' \
+              --data '{
+              "body": {
+                "content": [
+                  {
+                    "content": [
+                      {
+                        "text": "Requesting change approval for this release of the Workbench to production. 1 security and 1 business approval are needed for release",
+                        "type": "text"
                       }
-                    },
-                    {
-                      "text": " or ",
-                      "type": "text"
-                    },
-                    {
-                      "type": "mention",
-                      "attrs": {
-                        "id": "5ea1be1e61f0e70c11448011",
-                        "text": "Marcie Ansell"
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "type": "mention",
+                        "attrs": {
+                          "id": "5b50af8f10d57114135ef067",
+                          "text": "Charissa Rotundo"
+                        }
+                      },
+                      {
+                        "text": " or ",
+                        "type": "text"
+                      },
+                      {
+                        "type": "mention",
+                        "attrs": {
+                          "id": "5ea1be1e61f0e70c11448011",
+                          "text": "Marcie Ansell"
+                        }
+                      },
+                      {
+                        "text": " (security)",
+                        "type": "text"
                       }
-                    },
-                    {
-                      "text": " (security)",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                },
-                {
-                  "content": [
-                    {
-                      "type": "mention",
-                      "attrs": {
-                        "id": "557058:706ddbed-1979-4f5b-845e-29c4a92b3074",
-                        "text": "Asmita Gauchan"
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "type": "mention",
+                        "attrs": {
+                          "id": "557058:706ddbed-1979-4f5b-845e-29c4a92b3074",
+                          "text": "Asmita Gauchan"
+                        }
+                      },
+                      {
+                        "text": " or ",
+                        "type": "text"
+                      },
+                      {
+                        "type": "mention",
+                        "attrs": {
+                          "id": "61795b54062f4c0069b69057",
+                          "text": "Moira Dillon"
+                        }
+                      },
+                      {
+                        "text": " (business)",
+                        "type": "text"
                       }
-                    },
-                    {
-                      "text": " or ",
-                      "type": "text"
-                    },
-                    {
-                      "type": "mention",
-                      "attrs": {
-                        "id": "61795b54062f4c0069b69057",
-                        "text": "Moira Dillon"
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Please visit the link below to approve the release:",
+                        "type": "text"
                       }
-                    },
-                    {
-                      "text": " (business)",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                },
-                {
-                  "content": [
-                    {
-                      "text": "Please visit the link below to approve the release:",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                },
-                {
-                  "content": [
-                    {
-                      "marks": [{"type": "link", "attrs": {"href": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'"}}],
-                      "text": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                }
-              ],
-              "type": "doc",
-              "version": 1
-            }
-          }'
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "marks": [{"type": "link", "attrs": {"href": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'"}}],
+                        "text": "https://circleci.com/workflow-run/'${CIRCLE_WORKFLOW_ID}'",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  }
+                ],
+                "type": "doc",
+                "version": 1
+              }
+            }'
 
   document-approvals:
     machine:
       image: default # latest stable version
     steps:
-    - attach_workspace:
-        at: ~/workbench
-    - run:
-        name: Load JIRA issue key
-        command: |
-          if [ -f ~/workbench/jira-env.sh ]; then
-            source ~/workbench/jira-env.sh
-            echo "export JIRA_ISSUE_KEY=\"$JIRA_ISSUE_KEY\"" >> $BASH_ENV
-            source $BASH_ENV
-            echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
-          else
-            echo "ERROR: jira-env.sh not found"
-            echo "This file is required for this deployment. It contains the Jira issue key associated with this release"
-            exit 1
-          fi
-    - run:
-        name: Get Multiple Approvers
-        command: |
-          # Get all jobs in the workflow
-          JOBS_RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
-            "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
-          
-          echo "Jobs Response: $JOBS_RESPONSE"
-          
-          # Extract security approver ID
-          SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
-            select(.name=="security-approval" and .type=="approval" and .status=="success") | 
-            .approved_by')
-          
-          # Extract business owner approver ID
-          BUSINESS_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
-            select(.name=="business-owner-approval" and .type=="approval" and .status=="success") | 
-            .approved_by')
-          
-          echo "Security Approver ID: $SECURITY_APPROVER_ID"
-          echo "Business Approver ID: $BUSINESS_APPROVER_ID"
-          
-          # Get security approver details
-          if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
-            SECURITY_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
-              "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
-          
-            echo "Security User: $SECURITY_USER"
-          
-            SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name // .login')
-            echo "export SECURITY_APPROVER=\"$SECURITY_NAME\"" >> $BASH_ENV
-            echo "Security approved by: $SECURITY_NAME"
-          else
-            echo "No security approver found or information unavailable"
-          fi
-          
-          # Get business owner details
-          if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
-            BUSINESS_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
-              "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
-          
-            echo "Business Owner User: $BUSINESS_USER"
-            BUSINESS_NAME=$(echo $BUSINESS_USER | jq -r '.name // .login')
-            echo "export BUSINESS_APPROVER=\"$BUSINESS_NAME\"" >> $BASH_ENV
-            echo "Business approved by: $BUSINESS_NAME"
-          else
-            echo "No business approver found or information unavailable"
-          fi
-    - run:
-        name: Comment on Jira
-        command: |
-          curl --request POST \
-            --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
-            --header 'accept: application/json' \
-            --header "authorization: Basic ${JIRA_KEY}" \
-            --header 'content-type: application/json' \
-            --data '{
-            "body": {
-              "content": [
-                {
-                  "content": [
-                    {
-                      "text": "This request has been approved by the following approvers:",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                },
-                {
-                  "content": [
-                    {
-                      "text": "Business Owner - '"${BUSINESS_APPROVER}"'",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                },
-                {
-                  "content": [
-                    {
-                      "text": "Security - '"${SECURITY_APPROVER}"'",
-                      "type": "text"
-                    }
-                  ],
-                  "type": "paragraph"
-                }
-              ],
-              "type": "doc",
-              "version": 1
-            }
-          }'
+      - attach_workspace:
+          at: ~/workbench
+      - run:
+          name: Load JIRA issue key
+          command: |
+            if [ -f ~/workbench/jira-env.sh ]; then
+              source ~/workbench/jira-env.sh
+              echo "export JIRA_ISSUE_KEY=\"$JIRA_ISSUE_KEY\"" >> $BASH_ENV
+              source $BASH_ENV
+              echo "Loaded JIRA_ISSUE_KEY: $JIRA_ISSUE_KEY"
+            else
+              echo "ERROR: jira-env.sh not found"
+              echo "This file is required for this deployment. It contains the Jira issue key associated with this release"
+              exit 1
+            fi
+      - run:
+          name: Get Multiple Approvers
+          command: |
+            # Get all jobs in the workflow
+            JOBS_RESPONSE=$(curl -s -H "Circle-Token: $CIRCLECI_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
+
+            echo "Jobs Response: $JOBS_RESPONSE"
+
+            # Extract security approver ID
+            SECURITY_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+              select(.name=="security-approval" and .type=="approval" and .status=="success") | 
+              .approved_by')
+
+            # Extract business owner approver ID
+            BUSINESS_APPROVER_ID=$(echo $JOBS_RESPONSE | jq -r '.items[] | 
+              select(.name=="business-owner-approval" and .type=="approval" and .status=="success") | 
+              .approved_by')
+
+            echo "Security Approver ID: $SECURITY_APPROVER_ID"
+            echo "Business Approver ID: $BUSINESS_APPROVER_ID"
+
+            # Get security approver details
+            if [ ! -z "$SECURITY_APPROVER_ID" ] && [ "$SECURITY_APPROVER_ID" != "null" ]; then
+              SECURITY_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
+                "https://circleci.com/api/v2/user/$SECURITY_APPROVER_ID")
+
+              echo "Security User: $SECURITY_USER"
+
+              SECURITY_NAME=$(echo $SECURITY_USER | jq -r '.name // .login')
+              echo "export SECURITY_APPROVER=\"$SECURITY_NAME\"" >> $BASH_ENV
+              echo "Security approved by: $SECURITY_NAME"
+            else
+              echo "No security approver found or information unavailable"
+            fi
+
+            # Get business owner details
+            if [ ! -z "$BUSINESS_APPROVER_ID" ] && [ "$BUSINESS_APPROVER_ID" != "null" ]; then
+              BUSINESS_USER=$(curl -s -H "Circle-Token: $AOU_DEVOPS_APPROVAL_TOKEN" \
+                "https://circleci.com/api/v2/user/$BUSINESS_APPROVER_ID")
+
+              echo "Business Owner User: $BUSINESS_USER"
+              BUSINESS_NAME=$(echo $BUSINESS_USER | jq -r '.name // .login')
+              echo "export BUSINESS_APPROVER=\"$BUSINESS_NAME\"" >> $BASH_ENV
+              echo "Business approved by: $BUSINESS_NAME"
+            else
+              echo "No business approver found or information unavailable"
+            fi
+      - run:
+          name: Comment on Jira
+          command: |
+            curl --request POST \
+              --url https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/${JIRA_ISSUE_KEY}/comment \
+              --header 'accept: application/json' \
+              --header "authorization: Basic ${JIRA_KEY}" \
+              --header 'content-type: application/json' \
+              --data '{
+              "body": {
+                "content": [
+                  {
+                    "content": [
+                      {
+                        "text": "This request has been approved by the following approvers:",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Business Owner - '"${BUSINESS_APPROVER}"'",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Security - '"${SECURITY_APPROVER}"'",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "paragraph"
+                  }
+                ],
+                "type": "doc",
+                "version": 1
+              }
+            }'
 
   e2ev2-deploy-ui:
     machine:
@@ -994,7 +993,7 @@ jobs:
     steps:
       - queue/until_front_of_line:
           job-regex: ^ui-deploy-to-test$
-          time: '10' # minutes
+          time: "10" # minutes
       - checkout-code
       - attach_workspace:
           at: .
@@ -1015,7 +1014,7 @@ jobs:
     steps:
       - queue/until_front_of_line:
           job-regex: ^api-deploy-to-test$
-          time: '10' # minutes
+          time: "10" # minutes
       - checkout-code
       - attach_workspace:
           at: .
@@ -1049,19 +1048,19 @@ jobs:
     executor: workbench-executor
     resource_class: large
     steps:
-    - deploy-to-preprod-command
+      - deploy-to-preprod-command
 
   deploy-to-prod:
     executor: workbench-executor
     resource_class: large
     steps:
-    - deploy-to-prod-command
+      - deploy-to-prod-command
 
   deploy-to-stable:
     executor: workbench-executor
     resource_class: large
     steps:
-    - deploy-to-stable-command
+      - deploy-to-stable-command
 
   # In staging, we deploy all at once in order to track and control the
   # release for a tagged version only. In "test", we maintain individual
@@ -1080,13 +1079,13 @@ jobs:
         description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
         default: "test"
         type: enum
-        enum: [ "test", "staging", "local" ]
+        enum: ["test", "staging", "local"]
     steps:
       - checkout-code
       # When running on PRs, only UI changes are exercised.
       - when:
           condition:
-            equal: [ "local", << parameters.env_name >> ]
+            equal: ["local", << parameters.env_name >>]
           steps:
             - halt-test-check:
                 dir_names: "ui"
@@ -1133,7 +1132,7 @@ jobs:
         description: Switching between "nightly-integration" and normal "integration" test mode
         default: "integration"
         type: enum
-        enum: [ "integration", "nightly-integration" ]
+        enum: ["integration", "nightly-integration"]
       parallel_num:
         type: integer
         default: 1
@@ -1152,7 +1151,7 @@ jobs:
       # When running on PRs, only UI changes are exercised.
       - when:
           condition:
-            equal: [ "local", << parameters.env_name >> ]
+            equal: ["local", << parameters.env_name >>]
           steps:
             - halt-test-check:
                 dir_names: "ui"
@@ -1160,7 +1159,7 @@ jobs:
       - queue/until_front_of_line:
           consider-branch: false # when true, fails if CIRCLE_BRANCH isn't defined, such as on main
           job-regex: ^puppeteer-test$
-          time: '30' # minutes
+          time: "30" # minutes
       - attach_workspace:
           at: .
       - steps: << parameters.optional_steps >>
@@ -1180,14 +1179,14 @@ jobs:
             echo "TEST_MODE=${TEST_MODE}"
       - when:
           condition:
-            equal: [ "local", << parameters.env_name >> ]
+            equal: ["local", << parameters.env_name >>]
           steps:
             - launch-local-ui
       - run:
           name: "Create a file contains test names"
           working_directory: ~/workbench/e2e
           command: yarn jest --listTests | grep -o 'tests/.*.ts$' > e2e_tests.txt
-      - gcloud-auth-login-oidc-test  # needed to run project.rb generate-impersonated-user-tokens as part of "yarn test:ci"
+      - gcloud-auth-login-oidc-test # needed to run project.rb generate-impersonated-user-tokens as part of "yarn test:ci"
       - run:
           name: "Running Puppeteer e2e tests"
           working_directory: ~/workbench/e2e
@@ -1197,7 +1196,7 @@ jobs:
           no_output_timeout: << parameters.no_output_timeout >>
       - when:
           condition:
-            equal: [ "test", << parameters.env_name >> ]
+            equal: ["test", << parameters.env_name >>]
           steps:
             - run:
                 name: Create circleci_parameters.json
@@ -1235,7 +1234,6 @@ jobs:
             - ~/workbench/e2e/node_modules
           key: v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
-
   successful-business-owner-approval:
     machine:
       image: default # latest stable version
@@ -1266,10 +1264,10 @@ workflows:
       - api-integration-test
       - api-test-coverage:
           requires:
-          - api-unit-test
+            - api-unit-test
       - ui-test-coverage:
           requires:
-          - ui-unit-test
+            - ui-unit-test
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
@@ -1376,29 +1374,29 @@ workflows:
             - ask-for-approvals
       - successful-business-owner-approval:
           requires:
-          - business-owner-approval
+            - business-owner-approval
           context:
-          - "Business Owners"
+            - "Business Owners"
           <<: *filter-release-tags
       - successful-security-approval:
           requires:
-          - security-approval
+            - security-approval
           context:
-          - "Security"
+            - "Security"
           <<: *filter-release-tags
       - document-approvals:
           requires:
-          - successful-business-owner-approval
-          - successful-security-approval
+            - successful-business-owner-approval
+            - successful-security-approval
           <<: *filter-release-tags
       - deploy-to-preprod:
           <<: *filter-release-tags
           requires:
-           - document-approvals
+            - document-approvals
       - deploy-to-prod:
           <<: *filter-release-tags
           requires:
-           - deploy-to-preprod
+            - deploy-to-preprod
 
   nightly-tests:
     triggers:

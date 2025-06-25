@@ -2,23 +2,24 @@ package org.pmiops.workbench.initialcredits;
 
 import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
 
-import com.google.cloud.bigquery.FieldValueList;
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 import jakarta.inject.Provider;
 import java.time.Duration;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.api.BigQueryService;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,27 +33,27 @@ public class InitialCreditsBatchUpdateService {
   private static final Logger log =
       Logger.getLogger(InitialCreditsBatchUpdateService.class.getName());
 
-  private final BigQueryService bigQueryService;
+  private final InitialCreditsBigQueryService initialCreditsBigQueryService;
   private final InitialCreditsService initialCreditsService;
   private final Provider<Stopwatch> stopwatchProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public InitialCreditsBatchUpdateService(
-      BigQueryService bigQueryService,
+      InitialCreditsBigQueryService initialCreditsBigQueryService,
       InitialCreditsService initialCreditsService,
       Provider<Stopwatch> stopwatchProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
-      WorkspaceDao workspaceDao) {
-    this.bigQueryService = bigQueryService;
+      WorkspaceDao workspaceDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.initialCreditsBigQueryService = initialCreditsBigQueryService;
     this.initialCreditsService = initialCreditsService;
     this.userDao = userDao;
     this.stopwatchProvider = stopwatchProvider;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   /**
@@ -61,42 +62,62 @@ public class InitialCreditsBatchUpdateService {
    * @param userIdList
    */
   public void checkInitialCreditsUsage(List<Long> userIdList) {
-    Set<String> googleProjects = workspaceDao.getWorkspaceGoogleProjectsForCreators(userIdList);
 
+    // Get the list of users from the database based on the userIdList.
+    List<DbUser> users = userDao.findUsersByUserIdIn(userIdList);
+
+    // This returns a map of google project id to its live cost in BigQuery.
+    Map<String, Double> terraWorkspacesLiveCosts = findTerraWorkspacesLiveCosts(userIdList);
+
+    // This is a map of user_id to its live total cost in BigQuery for VWB projects. We don't need
+    // the google project id here because we don't store it anywhere in the database and therefore
+    // it doesn't give us any information.
+    Map<Long, Double> vwbUserLiveCosts = findVwbUsersLiveCosts(users);
+
+    Set<DbUser> dbUserSet = Sets.newHashSet(users);
+
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        dbUserSet, terraWorkspacesLiveCosts, vwbUserLiveCosts);
+  }
+
+  private @NotNull Map<String, Double> findTerraWorkspacesLiveCosts(List<Long> userIdList) {
+    Set<String> googleProjects = workspaceDao.getWorkspaceGoogleProjectsForCreators(userIdList);
     Stopwatch stopwatch = stopwatchProvider.get().start();
     Map<String, Double> userWorkspaceCosts =
-        getAllWorkspaceCostsFromBQ().entrySet().stream()
+        initialCreditsBigQueryService.getAllTerraWorkspaceCostsFromBQ().entrySet().stream()
             .filter(entry -> googleProjects.contains(entry.getKey()))
             .collect(
-                Collectors.groupingBy(
-                    Entry::getKey, Collectors.summingDouble(Map.Entry::getValue)));
+                Collectors.groupingBy(Entry::getKey, Collectors.summingDouble(Entry::getValue)));
     Duration elapsed = stopwatch.stop().elapsed();
     log.info(
         String.format(
             "checkInitialCreditsUsage: Filtered %d workspace cost entries from BigQuery in %s",
             userWorkspaceCosts.size(), formatDurationPretty(elapsed)));
-
-    Set<DbUser> dbUserSet =
-        userIdList.stream().map(userDao::findUserByUserId).collect(Collectors.toSet());
-
-    initialCreditsService.checkInitialCreditsUsageForUsers(dbUserSet, userWorkspaceCosts);
+    return userWorkspaceCosts;
   }
 
-  private Map<String, Double> getAllWorkspaceCostsFromBQ() {
-    final QueryJobConfiguration queryConfig =
-        QueryJobConfiguration.newBuilder(
-                "SELECT id, SUM(cost) cost FROM `"
-                    + workbenchConfigProvider.get().billing.exportBigQueryTable
-                    + "` WHERE id IS NOT NULL "
-                    + "GROUP BY id ORDER BY cost desc;")
-            .build();
-
-    final Map<String, Double> liveCostByWorkspace = new HashMap<>();
-    for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
-      final String googleProject = tableRow.get("id").getStringValue();
-      liveCostByWorkspace.put(googleProject, tableRow.get("cost").getDoubleValue());
+  /** Return a map of user_id -> total_cost for VWB pods */
+  private Map<Long, Double> findVwbUsersLiveCosts(List<DbUser> users) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+      return Collections.emptyMap();
     }
+    // Filter and collect active VWB user pods
+    Map<String, DbVwbUserPod> activePodIdToUserPodMap =
+        users.stream()
+            .map(DbUser::getVwbUserPod)
+            .filter(Objects::nonNull)
+            .filter(DbVwbUserPod::isInitialCreditsActive)
+            .collect(Collectors.toMap(DbVwbUserPod::getVwbPodId, pod -> pod));
 
-    return liveCostByWorkspace;
+    // Extract the set of active VWB pod IDs
+    Set<String> activeVwbPodIds = activePodIdToUserPodMap.keySet();
+
+    // Map VWB project costs to user IDs
+    return initialCreditsBigQueryService.getAllVWBProjectCostsFromBQ().entrySet().stream()
+        .filter(entry -> activeVwbPodIds.contains(entry.getKey()))
+        .collect(
+            Collectors.toMap(
+                entry -> activePodIdToUserPodMap.get(entry.getKey()).getUser().getUserId(),
+                Entry::getValue));
   }
 }

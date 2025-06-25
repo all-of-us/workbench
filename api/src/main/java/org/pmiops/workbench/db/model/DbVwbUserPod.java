@@ -1,6 +1,15 @@
 package org.pmiops.workbench.db.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Objects;
 
 @Entity
@@ -11,6 +20,8 @@ public class DbVwbUserPod {
   private DbUser user;
   private String vwbPodId;
   private Boolean isInitialCreditsActive;
+  private Timestamp initialCreditsLastUpdateTime;
+  private Double cost;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,6 +66,27 @@ public class DbVwbUserPod {
     return this;
   }
 
+  @Column(name = "cost")
+  public Double getCost() {
+    return cost;
+  }
+
+  public DbVwbUserPod setCost(Double cost) {
+    this.cost = cost;
+    setInitialCreditsLastUpdateTime();
+    return this;
+  }
+
+  @Column(name = "initial_credits_last_update_time")
+  public Timestamp getInitialCreditsLastUpdateTime() {
+    return initialCreditsLastUpdateTime;
+  }
+
+  public DbVwbUserPod setInitialCreditsLastUpdateTime(Timestamp initialCreditsLastUpdateTime) {
+    this.initialCreditsLastUpdateTime = initialCreditsLastUpdateTime;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -68,5 +100,10 @@ public class DbVwbUserPod {
   @Override
   public int hashCode() {
     return Objects.hash(vwbUserPodId, vwbPodId, isInitialCreditsActive);
+  }
+
+  private DbVwbUserPod setInitialCreditsLastUpdateTime() {
+    this.initialCreditsLastUpdateTime = Timestamp.from(Instant.now());
+    return this;
   }
 }
