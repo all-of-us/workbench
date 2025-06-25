@@ -287,6 +287,10 @@ public class InitialCreditsService {
         updateInitialCreditsExhaustion(user, false);
       }
 
+      // Link the initial credits billing account to the user's pod if the feature flag is enabled
+      // and update the status to active
+      linkInitialCreditsAccountAndSetVwbInitialCreditsActive(user);
+
       userServiceAuditor.fireSetInitialCreditsOverride(
           user.getUserId(), previousLimitMaybe, newDollarLimit);
       return true;
@@ -833,5 +837,16 @@ public class InitialCreditsService {
             vwbUserPodDao.save(pod);
           }
         });
+  }
+
+  private void linkInitialCreditsAccountAndSetVwbInitialCreditsActive(DbUser user) {
+    if (workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+      DbVwbUserPod pod = user.getVwbUserPod();
+      if (pod != null) {
+        vwbUserService.linkInitialCreditsBillingAccountToPod(pod);
+        pod.setInitialCreditsActive(true);
+        vwbUserPodDao.save(pod);
+      }
+    }
   }
 }

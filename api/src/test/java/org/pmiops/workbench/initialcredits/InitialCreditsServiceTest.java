@@ -129,6 +129,7 @@ public class InitialCreditsServiceTest {
               .plusSeconds((warningPeriodDays + 1L) * 24 * 60 * 60));
 
   private DbWorkspace workspace;
+  @Autowired private VwbUserService vwbUserService;
 
   @TestConfiguration
   @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
@@ -1230,8 +1231,8 @@ public class InitialCreditsServiceTest {
     DbWorkspace ws1 = createWorkspace(user1, proj1);
     DbUser user2 = createUser("more@test.com");
     DbWorkspace ws2 = createWorkspace(user2, proj2);
-    DbVwbUserPod vwbPod1 = createVwbPodForUser(user1);
-    DbVwbUserPod vwbPod2 = createVwbPodForUser(user2);
+    DbVwbUserPod vwbPod1 = createVwbPodForUser(user1, true);
+    DbVwbUserPod vwbPod2 = createVwbPodForUser(user2, true);
     user1.setVwbUserPod(vwbPod1);
     user2.setVwbUserPod(vwbPod2);
     userDao.save(user1);
@@ -1277,6 +1278,23 @@ public class InitialCreditsServiceTest {
     assertWithinBillingTolerance(vwbCost2, pod2.get().getCost());
   }
 
+  @Test
+  public void
+      maybeSetDollarLimitOverride_callsLinkInitialCreditsAccountAndSetVwbInitialCreditsActive() {
+    // Arrange
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
+    DbUser user = createUser("vwbuser@test.com");
+    DbVwbUserPod pod = createVwbPodForUser(user, false);
+    user.setVwbUserPod(pod);
+    userDao.save(user);
+
+    initialCreditsService.maybeSetDollarLimitOverride(user, 200);
+
+    DbVwbUserPod updatedPod = vwbUserPodDao.findById(pod.getVwbUserPodId()).get();
+    verify(vwbUserService, times(1)).linkInitialCreditsBillingAccountToPod(pod);
+    assertThat(updatedPod.isInitialCreditsActive()).isTrue();
+  }
+
   private void assertSingleWorkspaceTestDbState(
       DbUser user, DbWorkspace workspaceForQuerying, double cost) {
 
@@ -1304,12 +1322,12 @@ public class InitialCreditsServiceTest {
             .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName()));
   }
 
-  private DbVwbUserPod createVwbPodForUser(DbUser user) {
+  private DbVwbUserPod createVwbPodForUser(DbUser user, boolean initialCreditsActive) {
     return vwbUserPodDao.save(
         new DbVwbUserPod()
             .setUser(user)
             .setVwbPodId("pod" + user.getUserId())
-            .setInitialCreditsActive(true));
+            .setInitialCreditsActive(initialCreditsActive));
   }
 
   private void assertWithinBillingTolerance(double actualValue, double expectedValue) {

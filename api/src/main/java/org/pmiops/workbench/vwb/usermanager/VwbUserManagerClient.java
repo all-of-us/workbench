@@ -130,8 +130,7 @@ public class VwbUserManagerClient {
           podApiProvider
               .get()
               .deletePod(
-                  new DeletePodRequest()
-                      .jobControl(new JobControl().id(UUID.randomUUID().toString())),
+                  new DeletePodRequest().jobControl(generateJobControlWithUUID()),
                   organizationId,
                   podId.toString());
           return null;
@@ -166,9 +165,30 @@ public class VwbUserManagerClient {
             podApiProvider
                 .get()
                 .unlinkBillingFromPod(
-                    new PodUnlinkBillingRequest()
-                        .jobControl(new JobControl().id(UUID.randomUUID().toString())),
+                    new PodUnlinkBillingRequest().jobControl(generateJobControlWithUUID()),
                     organizationId,
                     podId));
+  }
+
+  public void updatePodBillingAccount(String vwbPodId, String billingAccount) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    vwbUserManagerRetryHandler.run(
+        context ->
+            podApiProvider
+                .get()
+                .updatePod(
+                    new PodUpdateRequest()
+                        .jobControl(generateJobControlWithUUID())
+                        .environment(
+                            new PodEnvironment()
+                                .environmentDataGcp(
+                                    new PodEnvironmentDataGcp()
+                                        .billingAccountId("billingAccounts/" + billingAccount))),
+                    organizationId,
+                    vwbPodId));
+  }
+
+  private static JobControl generateJobControlWithUUID() {
+    return new JobControl().id(UUID.randomUUID().toString());
   }
 }
