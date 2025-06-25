@@ -840,13 +840,14 @@ public class InitialCreditsService {
   }
 
   private void linkInitialCreditsAccountAndSetVwbInitialCreditsActive(DbUser user) {
-    if (workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
-      DbVwbUserPod pod = user.getVwbUserPod();
-      if (pod != null) {
-        vwbUserService.linkInitialCreditsBillingAccountToPod(pod);
-        pod.setInitialCreditsActive(true);
-        vwbUserPodDao.save(pod);
-      }
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+      return;
+    }
+    DbVwbUserPod pod = user.getVwbUserPod();
+    if (pod != null) {
+      vwbUserService.linkInitialCreditsBillingAccountToPod(pod);
+      pod.setInitialCreditsActive(true);
+      vwbUserPodDao.save(pod);
     }
   }
 }

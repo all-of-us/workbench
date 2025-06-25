@@ -181,9 +181,9 @@ public class VwbUserManagerClient {
                         .jobControl(generateJobControlWithUUID())
                         .environment(
                             new PodEnvironment()
+                                .environmentType(PodEnvironmentType.GCP)
                                 .environmentDataGcp(
-                                    new PodEnvironmentDataGcp()
-                                        .billingAccountId("billingAccounts/" + billingAccount))),
+                                    new PodEnvironmentDataGcp().billingAccountId(billingAccount))),
                     organizationId,
                     vwbPodId));
   }
