@@ -504,6 +504,10 @@ public class InitialCreditsService {
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .forEach(this::stopInitialCreditSpendInWorkspace);
 
+    if (workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+      vwbUserService.unlinkBillingAccountForUserPod(user);
+    }
+
     userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
     userDao.save(user);
   }
