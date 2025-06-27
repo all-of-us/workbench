@@ -42,8 +42,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
@@ -575,6 +573,9 @@ public class InitialCreditsService {
 
     if (exhausted) {
       workspaces.forEach(this::stopInitialCreditSpendInWorkspace);
+      // Unlink billing account in VWB
+      // This is done to stop extra charges from being incurred
+      vwbUserService.unlinkBillingAccountForUserPod(user);
     }
   }
 

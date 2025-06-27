@@ -15,19 +15,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
-import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,21 +42,18 @@ public class CloudTaskInitialCreditsExhaustionController
   private final Provider<WorkbenchConfig> workbenchConfig;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
-  private final VwbUserService vwbUserService;
 
   CloudTaskInitialCreditsExhaustionController(
       InitialCreditsService initialCreditsService,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfig,
       UserDao userDao,
-      WorkspaceDao workspaceDao,
-      VwbUserService vwbUserService) {
+      WorkspaceDao workspaceDao) {
     this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfig = workbenchConfig;
     this.workspaceDao = workspaceDao;
-    this.vwbUserService = vwbUserService;
   }
 
   @SuppressWarnings("unchecked")
@@ -105,9 +98,6 @@ public class CloudTaskInitialCreditsExhaustionController
           logger.info(
               "handleExhaustedUsers: handling user with exhausted credits {}", user.getUsername());
           initialCreditsService.updateInitialCreditsExhaustion(user, true);
-          // Unlink billing account in VWB
-          // This is done to stop extra charges from being incurred
-          vwbUserService.unlinkBillingAccountForUserPod(user);
           try {
             mailService.alertUserInitialCreditsExhausted(user);
           } catch (MessagingException e) {
