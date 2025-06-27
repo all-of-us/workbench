@@ -527,8 +527,9 @@ public class DbUser {
     return vwbUserPod;
   }
 
-  public void setVwbUserPod(DbVwbUserPod vwbUserPod) {
+  public DbUser setVwbUserPod(DbVwbUserPod vwbUserPod) {
     this.vwbUserPod = vwbUserPod;
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.LAZY)

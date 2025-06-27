@@ -11,17 +11,23 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,18 +46,21 @@ public class CloudTaskInitialCreditsExhaustionController
   private final Provider<WorkbenchConfig> workbenchConfig;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
+  private final VwbUserService vwbUserService;
 
   CloudTaskInitialCreditsExhaustionController(
       InitialCreditsService initialCreditsService,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfig,
       UserDao userDao,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      VwbUserService vwbUserService) {
     this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfig = workbenchConfig;
     this.workspaceDao = workspaceDao;
+    this.vwbUserService = vwbUserService;
   }
 
   @SuppressWarnings("unchecked")
@@ -96,6 +105,9 @@ public class CloudTaskInitialCreditsExhaustionController
           logger.info(
               "handleExhaustedUsers: handling user with exhausted credits {}", user.getUsername());
           initialCreditsService.updateInitialCreditsExhaustion(user, true);
+          // Unlink billing account in VWB
+          // This is done to stop extra charges from being incurred
+          vwbUserService.unlinkBillingAccountForUserPod(user);
           try {
             mailService.alertUserInitialCreditsExhausted(user);
           } catch (MessagingException e) {
@@ -160,6 +172,9 @@ public class CloudTaskInitialCreditsExhaustionController
         findDbUsersWithChangedCosts(allUsers, dbCostByCreator, liveCostByCreator);
     Set<DbUser> creatorsWithInitialCredits =
         filterToWorkspaceCreatorsWithActiveInitialCredits(allUsers);
+    // Add users with active initial credits in VWB pods. A user may only have a VWB pod and no
+    // Terra workspaces.
+    creatorsWithInitialCredits.addAll(filterToVwbPodsWithActiveInitialCredits(allUsers));
 
     // Find users who exceeded their initial credits limit
     // Here costs in liveCostByCreator could be outdated because we're filtering on active  or
@@ -224,6 +239,15 @@ public class CloudTaskInitialCreditsExhaustionController
   private Set<DbUser> filterToWorkspaceCreatorsWithActiveInitialCredits(Set<DbUser> users) {
     return workspaceDao.findCreatorsByActiveInitialCredits(
         List.of(workbenchConfig.get().billing.initialCreditsBillingAccountName()), users);
+  }
+
+  private Set<DbUser> filterToVwbPodsWithActiveInitialCredits(Set<DbUser> allUsers) {
+    return allUsers.stream()
+        .map(DbUser::getVwbUserPod)
+        .filter(Objects::nonNull)
+        .filter(DbVwbUserPod::isInitialCreditsActive)
+        .map(DbVwbUserPod::getUser)
+        .collect(Collectors.toSet());
   }
 
   /**

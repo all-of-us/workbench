@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -27,10 +28,12 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -39,6 +42,9 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
@@ -62,6 +68,8 @@ public class InitialCreditsService {
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
   private final Provider<WorkbenchConfig> workbenchConfig;
+  private final VwbUserPodDao vwbUserPodDao;
+  private final VwbUserService vwbUserService;
 
   private static final Logger logger = LoggerFactory.getLogger(InitialCreditsService.class);
 
@@ -79,7 +87,9 @@ public class InitialCreditsService {
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService,
-      Provider<WorkbenchConfig> workbenchConfig) {
+      Provider<WorkbenchConfig> workbenchConfig,
+      VwbUserPodDao vwbUserPodDao,
+      VwbUserService vwbUserService) {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
@@ -93,6 +103,8 @@ public class InitialCreditsService {
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceInitialCreditUsageService = workspaceInitialCreditUsageService;
     this.workbenchConfig = workbenchConfig;
+    this.vwbUserPodDao = vwbUserPodDao;
+    this.vwbUserService = vwbUserService;
   }
 
   public double getWorkspaceInitialCreditsUsage(DbWorkspace dbWorkspace) {
@@ -108,45 +120,70 @@ public class InitialCreditsService {
    * passing thresholds or exceeding limits.
    */
   public void checkInitialCreditsUsageForUsers(
-      Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
+      final Set<DbUser> users,
+      final Map<String, Double> liveCostsInBQ,
+      final Map<Long, Double> vwbUserLiveCosts) {
     String userIdsAsString =
         users.stream()
             .map(DbUser::getUserId)
             .sorted()
             .map(l -> Long.toString(l))
             .collect(Collectors.joining(","));
-    logger.info(String.format("Checking billing usage for user IDs: %s ", userIdsAsString));
+    logger.debug("Checking billing usage for user IDs: {} ", userIdsAsString);
     // Current cost in DB for those workspaces which have not been "recently" updated, as defined by
     // a config value.  This guards against excessive updating of workspaces.
-    List<WorkspaceCostView> dbCostsForNotRecentlyUpdatedWorkspaces =
+    final List<WorkspaceCostView> dbCostsForNotRecentlyUpdatedWorkspaces =
         getNotRecentlyUpdatedDbCostsForUsers(users);
 
     final Map<String, Long> workspaceByProject =
         getWorkspaceByProjectCache(dbCostsForNotRecentlyUpdatedWorkspaces);
-    if (workspaceByProject.isEmpty()) {
-      logger.info("No workspaces require updates");
+
+    // RW-15247 Get not recently updated BQ costs for VWB google projects
+    final List<DbVwbUserPod> vwbNotRecentlyUpdatedPods =
+        getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(users);
+
+    if (workspaceByProject.isEmpty() && vwbNotRecentlyUpdatedPods.isEmpty()) {
+      logger.info("No workspaces or pods require updates");
       return;
     }
+    final Map<Long, Double> userIdToVwbCostMap = getVwbPodsDbCostCache(vwbNotRecentlyUpdatedPods);
     updateInitialCreditsUsageInDb(
         dbCostsForNotRecentlyUpdatedWorkspaces, liveCostsInBQ, workspaceByProject);
 
+    updateVwbInitialCreditsUsageAndInitialCreditsActive(
+        vwbNotRecentlyUpdatedPods, vwbUserLiveCosts);
+
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
-        getDbCostByCreatorCache(dbCostsForNotRecentlyUpdatedWorkspaces);
+        getDbCostByCreatorCache(dbCostsForNotRecentlyUpdatedWorkspaces, userIdToVwbCostMap);
     // check cost thresholds for the relevant users
     final Map<Long, Long> creatorByWorkspace =
         getCreatorByWorkspaceCache(dbCostsForNotRecentlyUpdatedWorkspaces);
     // Cache cost in BQ by creator
+    // This includes costs from both Terra and VWB workspaces
     final Map<Long, Double> liveCostByCreator =
-        getLiveCostByCreatorCache(liveCostsInBQ, workspaceByProject, creatorByWorkspace);
+        getLiveCostByCreatorCache(
+            liveCostsInBQ, workspaceByProject, creatorByWorkspace, vwbUserLiveCosts);
 
-    Set<DbUser> filteredUsers = filterUsersHigherThanTheLowestThreshold(users, liveCostByCreator);
+    final Set<DbUser> filteredUsers =
+        filterUsersHigherThanTheLowestThreshold(users, liveCostByCreator);
     if (filteredUsers.isEmpty()) {
       return;
     }
 
     taskQueueService.pushInitialCreditsExhaustionTask(
         filteredUsers.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
+  }
+
+  private static @org.jetbrains.annotations.NotNull Map<Long, Double> getVwbPodsDbCostCache(
+      List<DbVwbUserPod> vwbNotRecentlyUpdatedPods) {
+    Map<Long, Double> userIdToVwbCostMap =
+        vwbNotRecentlyUpdatedPods.stream()
+            .collect(
+                Collectors.toMap(
+                    pod -> pod.getUser().getUserId(),
+                    pod -> Optional.ofNullable(pod.getCost()).orElse(0.0)));
+    return userIdToVwbCostMap;
   }
 
   /**
@@ -467,6 +504,10 @@ public class InitialCreditsService {
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .forEach(this::stopInitialCreditSpendInWorkspace);
 
+    if (workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+      vwbUserService.unlinkBillingAccountForUserPod(user);
+    }
+
     userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
     userDao.save(user);
   }
@@ -707,13 +748,20 @@ public class InitialCreditsService {
   private static Map<Long, Double> getLiveCostByCreatorCache(
       Map<String, Double> liveCostsInBQ,
       Map<String, Long> workspaceByProject,
-      Map<Long, Long> creatorByWorkspace) {
-    return liveCostsInBQ.entrySet().stream()
-        .filter(e -> workspaceByProject.containsKey(e.getKey()))
-        .collect(
-            Collectors.groupingBy(
-                e -> creatorByWorkspace.get(workspaceByProject.get(e.getKey())),
-                Collectors.summingDouble(Entry::getValue)));
+      Map<Long, Long> creatorByWorkspace,
+      Map<Long, Double> vwbUserLiveCosts) {
+    Map<Long, Double> liveCostByCreator =
+        liveCostsInBQ.entrySet().stream()
+            .filter(e -> workspaceByProject.containsKey(e.getKey()))
+            .collect(
+                Collectors.groupingBy(
+                    e -> creatorByWorkspace.get(workspaceByProject.get(e.getKey())),
+                    Collectors.summingDouble(Entry::getValue)));
+    // Merge the live costs from VWB users into the live cost of Terra workspaces
+    // At this point, we have the live costs for Terra workspaces and VWB workspaces in one map that
+    // can be passed to the downstream logic to handle the exhaustion alerting.
+    vwbUserLiveCosts.forEach((userId, cost) -> liveCostByCreator.merge(userId, cost, Double::sum));
+    return liveCostByCreator;
   }
 
   @NotNull
@@ -726,13 +774,22 @@ public class InitialCreditsService {
 
   @NotNull
   private static Map<Long, Double> getDbCostByCreatorCache(
-      List<WorkspaceCostView> allCostsInDbForUsers) {
-    return allCostsInDbForUsers.stream()
-        .collect(
-            Collectors.groupingBy(
-                WorkspaceCostView::getCreatorId,
-                Collectors.summingDouble(
-                    v -> Optional.ofNullable(v.getInitialCreditsCost()).orElse(0.0))));
+      List<WorkspaceCostView> allCostsInDbForUsers,
+      Map<Long, Double> vwbDbCostsNotRecentlyUpdated) {
+    final Map<Long, Double> dbCostByCreator =
+        allCostsInDbForUsers.stream()
+            .collect(
+                Collectors.groupingBy(
+                    WorkspaceCostView::getCreatorId,
+                    Collectors.summingDouble(
+                        v -> Optional.ofNullable(v.getInitialCreditsCost()).orElse(0.0))));
+
+    // Add costs from DbVwbUserPod
+    vwbDbCostsNotRecentlyUpdated.forEach(
+        (key, value) ->
+            dbCostByCreator.merge(key, Optional.ofNullable(value).orElse(0.0), Double::sum));
+
+    return dbCostByCreator;
   }
 
   private List<DbWorkspace> getWorkspacesForUser(DbUser user) {
@@ -744,5 +801,50 @@ public class InitialCreditsService {
             dbWorkspace ->
                 isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
         .toList();
+  }
+
+  /**
+   * Get the VWB pods that were not recently updated. This is used to update the initial credits
+   * usage for VWB pods.
+   *
+   * @param users the users to get the VWB pods for
+   * @return a List of {@link DbVwbUserPod} that were not recently updated
+   */
+  @NotNull
+  private List<DbVwbUserPod> getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(
+      Set<DbUser> users) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+      return Collections.emptyList();
+    }
+
+    Timestamp minusMinutes =
+        Timestamp.valueOf(
+            LocalDateTime.now().minusMinutes(getMinutesBeforeLastInitialCreditsJob()));
+
+    return users.stream()
+        .map(DbUser::getVwbUserPod)
+        .filter(Objects::nonNull)
+        .filter(
+            c ->
+                c.getInitialCreditsLastUpdateTime() == null
+                    || c.getInitialCreditsLastUpdateTime().before(minusMinutes))
+        .toList();
+  }
+
+  private void updateVwbInitialCreditsUsageAndInitialCreditsActive(
+      List<DbVwbUserPod> vwbDbCostsNotRecentlyUpdated, Map<Long, Double> vwbUserLiveCosts) {
+    Map<Long, DbVwbUserPod> userIdToPod =
+        vwbDbCostsNotRecentlyUpdated.stream()
+            .collect(Collectors.toMap(pod -> pod.getUser().getUserId(), pod -> pod));
+
+    vwbUserLiveCosts.forEach(
+        (userId, liveCost) -> {
+          DbVwbUserPod pod = userIdToPod.get(userId);
+          if (pod != null) {
+            pod.setCost(Optional.ofNullable(liveCost).orElse(0.0));
+            pod.setInitialCreditsActive(vwbUserService.isPodUsingInitialCredits(pod));
+            vwbUserPodDao.save(pod);
+          }
+        });
   }
 }

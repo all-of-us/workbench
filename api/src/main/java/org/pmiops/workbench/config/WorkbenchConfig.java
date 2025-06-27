@@ -122,6 +122,10 @@ public class WorkbenchConfig {
 
     // The number of days before initial credits expire that a warning email should be sent.
     public Long initialCreditsExpirationWarningDays;
+
+    // The name of the view in the BigQuery billing export dataset that contains the VWB workspaces
+    // usage costs.
+    public String vwbExportBigQueryTable;
   }
 
   public static class FireCloudConfig {
@@ -335,6 +339,8 @@ public class WorkbenchConfig {
     // If true, AoU will create the VWB user when the user first gets data access, and will create a
     // POD for the user in VWB
     public boolean enableVWBUserAndPodCreation;
+    // If true, AoU will include VWB costs in the initial credits usage calculation.
+    public boolean enableVWBInitialCreditsExhaustion;
   }
 
   public static class ActionAuditConfig {

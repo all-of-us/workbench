@@ -47,6 +47,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -95,6 +96,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     UserServiceAuditor.class,
     WorkspaceInitialCreditUsageService.class,
     WorkspaceMapper.class,
+    VwbUserService.class,
   })
   @SpyBean({
     InitialCreditsService.class,
