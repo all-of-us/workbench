@@ -141,4 +141,10 @@ public class VwbUserService {
                         .getBillingAccountId())
             .orElse("");
   }
+
+  public void linkInitialCreditsBillingAccountToPod(DbVwbUserPod pod) {
+    vwbUserManagerClient.updatePodBillingAccount(
+        pod.getVwbPodId(),
+        workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
+  }
 }
