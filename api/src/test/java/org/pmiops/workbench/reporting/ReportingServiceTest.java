@@ -53,8 +53,6 @@ public class ReportingServiceTest {
             mockReportingVerificationService,
             mockReportingUploadVerificationDao,
             mockTaskQueueService);
-
-    when(mockClock.millis()).thenReturn(NOW_MILLIS);
   }
 
   @Test
@@ -63,6 +61,7 @@ public class ReportingServiceTest {
     ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
 
     when(mockReportingTableService.getAll()).thenReturn(List.of(cohortTableParams));
+    when(mockClock.millis()).thenReturn(NOW_MILLIS);
 
     // Act
     reportingService.splitUploadIntoTasksAndQueue();
@@ -96,6 +95,7 @@ public class ReportingServiceTest {
 
     when(mockReportingTableService.getAll())
         .thenReturn(List.of(cohortTableParams, userTableParams));
+    when(mockClock.millis()).thenReturn(NOW_MILLIS);
 
     // Act
     reportingService.splitUploadIntoTasksAndQueue();
@@ -133,6 +133,7 @@ public class ReportingServiceTest {
   public void testSplitUploadIntoTasksAndQueue_emptyTableList() {
     // Arrange
     when(mockReportingTableService.getAll()).thenReturn(List.of());
+    when(mockClock.millis()).thenReturn(NOW_MILLIS);
 
     // Act
     reportingService.splitUploadIntoTasksAndQueue();
@@ -153,6 +154,7 @@ public class ReportingServiceTest {
 
     when(mockReportingTableService.getAll())
         .thenReturn(List.of(cohortTableParams, userTableParams));
+    when(mockClock.millis()).thenReturn(NOW_MILLIS);
 
     // Act
     reportingService.splitUploadIntoTasksAndQueue();
@@ -181,8 +183,8 @@ public class ReportingServiceTest {
     List<String> tables = List.of("cohort", "user");
     long captureTimestamp = 1640995200000L;
 
-    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
-    ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user");
+    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort", false);
+    ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user", false);
 
     when(mockReportingTableService.getAll(tables))
         .thenReturn(List.of(cohortTableParams, userTableParams));
@@ -204,8 +206,8 @@ public class ReportingServiceTest {
     List<String> tables = List.of("cohort", "user");
     long captureTimestamp = 1640995200000L;
 
-    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
-    ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user");
+    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort", false);
+    ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user", false);
 
     when(mockReportingTableService.getAll(tables))
         .thenReturn(List.of(cohortTableParams, userTableParams));
@@ -244,9 +246,17 @@ public class ReportingServiceTest {
   /** Helper method to create a mock ReportingTableParams with the specified table name. */
   @SuppressWarnings("unchecked")
   private <T extends ReportingBase> ReportingTableParams<T> createMockTableParams(
-      String tableName) {
+      String tableName, boolean stubBqTableName) {
     ReportingTableParams<T> tableParams = mock(ReportingTableParams.class);
-    when(tableParams.bqTableName()).thenReturn(tableName);
+    if (stubBqTableName) {
+      when(tableParams.bqTableName()).thenReturn(tableName);
+    }
     return tableParams;
+  }
+
+  /** Helper method to create a mock ReportingTableParams with bqTableName stubbed. */
+  private <T extends ReportingBase> ReportingTableParams<T> createMockTableParams(
+      String tableName) {
+    return createMockTableParams(tableName, true);
   }
 }
