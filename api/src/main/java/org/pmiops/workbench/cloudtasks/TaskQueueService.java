@@ -83,7 +83,8 @@ public class TaskQueueService {
   public static final TaskQueuePair VWB_POD_CREATION =
       new TaskQueuePair("vwbPodCreationQueue", "createVwbPod");
 
-  public static final TaskQueuePair REPORTING_UPLOAD = new TaskQueuePair("reportingUploadQueue", "reportingUpload");
+  public static final TaskQueuePair REPORTING_UPLOAD =
+      new TaskQueuePair("reportingUploadQueue", "reportingUpload");
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 

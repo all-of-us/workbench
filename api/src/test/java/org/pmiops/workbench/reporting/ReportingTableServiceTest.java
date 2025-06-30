@@ -32,10 +32,8 @@ public class ReportingTableServiceTest {
 
     when(mockWorkbenchConfigProvider.get()).thenReturn(workbenchConfig);
 
-    reportingTableService = new ReportingTableService(
-        mockWorkbenchConfigProvider,
-        mockReportingQueryService
-    );
+    reportingTableService =
+        new ReportingTableService(mockWorkbenchConfigProvider, mockReportingQueryService);
   }
 
   @Test
@@ -49,9 +47,8 @@ public class ReportingTableServiceTest {
     assertThat(result).hasSize(3);
 
     // Verify that the returned tables match the requested table names
-    List<String> returnedTableNames = result.stream()
-        .map(ReportingTableParams::bqTableName)
-        .toList();
+    List<String> returnedTableNames =
+        result.stream().map(ReportingTableParams::bqTableName).toList();
 
     assertThat(returnedTableNames).containsExactlyElementsIn(requestedTables);
   }
@@ -79,22 +76,16 @@ public class ReportingTableServiceTest {
 
   @Test
   public void testGetAll_withMixedValidAndInvalidTableNames_returnsOnlyValidTables() {
-    List<String> requestedTables = Arrays.asList(
-        "cohort",
-        "invalid_table",
-        "user",
-        "another_invalid_table",
-        "dataset"
-    );
+    List<String> requestedTables =
+        Arrays.asList("cohort", "invalid_table", "user", "another_invalid_table", "dataset");
 
     List<ReportingTableParams<? extends ReportingBase>> result =
         reportingTableService.getAll(requestedTables);
 
     assertThat(result).hasSize(3);
 
-    List<String> returnedTableNames = result.stream()
-        .map(ReportingTableParams::bqTableName)
-        .toList();
+    List<String> returnedTableNames =
+        result.stream().map(ReportingTableParams::bqTableName).toList();
 
     assertThat(returnedTableNames).containsExactly("cohort", "user", "dataset");
   }
@@ -111,19 +102,19 @@ public class ReportingTableServiceTest {
 
   @Test
   public void testGetAll_withAllValidTableNames_returnsAllTables() {
-    List<String> allValidTableNames = Arrays.asList(
-        "cohort",
-        "dataset",
-        "dataset_domain_value",
-        "institution",
-        "leonardo_app_usage",
-        "new_user_satisfaction_survey",
-        "user",
-        "user_general_discovery_source",
-        "user_partner_discovery_source",
-        "workspace",
-        "workspace_free_tier_usage"
-    );
+    List<String> allValidTableNames =
+        Arrays.asList(
+            "cohort",
+            "dataset",
+            "dataset_domain_value",
+            "institution",
+            "leonardo_app_usage",
+            "new_user_satisfaction_survey",
+            "user",
+            "user_general_discovery_source",
+            "user_partner_discovery_source",
+            "workspace",
+            "workspace_free_tier_usage");
 
     List<ReportingTableParams<? extends ReportingBase>> result =
         reportingTableService.getAll(allValidTableNames);
@@ -131,31 +122,30 @@ public class ReportingTableServiceTest {
     // Should return all 11 tables defined in getAll()
     assertThat(result).hasSize(11);
 
-    List<String> returnedTableNames = result.stream()
-        .map(ReportingTableParams::bqTableName)
-        .toList();
+    List<String> returnedTableNames =
+        result.stream().map(ReportingTableParams::bqTableName).toList();
 
     assertThat(returnedTableNames).containsExactlyElementsIn(allValidTableNames);
   }
 
   @Test
   public void testGetAll_withDuplicateTableNames_returnsUniqueTablesOnly() {
-    List<String> requestedTablesWithDuplicates = Arrays.asList(
-        "cohort",
-        "user",
-        "cohort",  // duplicate
-        "workspace",
-        "user"     // duplicate
-    );
+    List<String> requestedTablesWithDuplicates =
+        Arrays.asList(
+            "cohort",
+            "user",
+            "cohort", // duplicate
+            "workspace",
+            "user" // duplicate
+            );
 
     List<ReportingTableParams<? extends ReportingBase>> result =
         reportingTableService.getAll(requestedTablesWithDuplicates);
 
     assertThat(result).hasSize(3);
 
-    List<String> returnedTableNames = result.stream()
-        .map(ReportingTableParams::bqTableName)
-        .toList();
+    List<String> returnedTableNames =
+        result.stream().map(ReportingTableParams::bqTableName).toList();
 
     assertThat(returnedTableNames).containsExactly("cohort", "user", "workspace");
   }
@@ -163,20 +153,15 @@ public class ReportingTableServiceTest {
   @Test
   public void testGetAll_preservesOriginalOrderOfValidTables() {
     // Test that the method preserves the order from getAll(), not the input order
-    List<String> requestedTablesInDifferentOrder = Arrays.asList(
-        "workspace",
-        "cohort",
-        "user"
-    );
+    List<String> requestedTablesInDifferentOrder = Arrays.asList("workspace", "cohort", "user");
 
     List<ReportingTableParams<? extends ReportingBase>> result =
         reportingTableService.getAll(requestedTablesInDifferentOrder);
 
     assertThat(result).hasSize(3);
 
-    List<String> returnedTableNames = result.stream()
-        .map(ReportingTableParams::bqTableName)
-        .toList();
+    List<String> returnedTableNames =
+        result.stream().map(ReportingTableParams::bqTableName).toList();
 
     // The order should match the order from getAll() method, not the input order
     // getAll() returns tables in this order: cohort, dataset, datasetDomainIdValue, institution,
@@ -187,11 +172,12 @@ public class ReportingTableServiceTest {
 
   @Test
   public void testGetAll_withCaseSensitiveTableNames_onlyMatchesExactCase() {
-    List<String> requestedTablesWithWrongCase = Arrays.asList(
-        "COHORT",      // wrong case
-        "User",        // wrong case
-        "workspace"    // correct case
-    );
+    List<String> requestedTablesWithWrongCase =
+        Arrays.asList(
+            "COHORT", // wrong case
+            "User", // wrong case
+            "workspace" // correct case
+            );
 
     List<ReportingTableParams<? extends ReportingBase>> result =
         reportingTableService.getAll(requestedTablesWithWrongCase);

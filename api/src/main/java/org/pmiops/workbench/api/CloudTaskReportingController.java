@@ -19,6 +19,9 @@ public class CloudTaskReportingController implements CloudTaskReportingApiDelega
   @Override
   public ResponseEntity<Void> processReportingUploadQueueTask(
       ReportingUploadQueueTaskRequest body) {
-    return noContentRun(() -> reportingService.collectRecordsAndUpload(body.getTables(), body.getSnapshotTimestamp()));
+    return noContentRun(
+        () ->
+            reportingService.collectRecordsAndUpload(
+                body.getTables(), body.getSnapshotTimestamp()));
   }
 }

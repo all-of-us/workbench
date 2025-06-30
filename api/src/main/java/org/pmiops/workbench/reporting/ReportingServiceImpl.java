@@ -85,10 +85,14 @@ public class ReportingServiceImpl implements ReportingService {
   public void splitUploadIntoTasksAndQueue() {
     final long captureTimestamp = clock.millis();
 
-    reportingTableService.getAll().forEach(tableParams -> {
-      reportingUploadVerificationDao.createVerificationEntry(tableParams.bqTableName(), new Timestamp(captureTimestamp));
-      taskQueueService.pushReportingUploadTask(tableParams.bqTableName(), captureTimestamp);
-    });
+    reportingTableService
+        .getAll()
+        .forEach(
+            tableParams -> {
+              reportingUploadVerificationDao.createVerificationEntry(
+                  tableParams.bqTableName(), new Timestamp(captureTimestamp));
+              taskQueueService.pushReportingUploadTask(tableParams.bqTableName(), captureTimestamp);
+            });
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -103,7 +107,9 @@ public class ReportingServiceImpl implements ReportingService {
     if (batchUploadSuccess) {
       reportingUploadService.uploadVerifiedSnapshot(captureTimestamp);
     } else {
-      logger.info("Some tables have not been uploaded successfully yet for snapshot at " + captureTimestamp);
+      logger.info(
+          "Some tables have not been uploaded successfully yet for snapshot at "
+              + captureTimestamp);
     }
   }
 }

@@ -320,7 +320,8 @@ public class ReportingVerificationServiceTest {
     assertThat(reportingVerificationService.verifySnapshot(snapshotTimestamp2)).isFalse();
   }
 
-  private void createVerificationRecord(String tableName, Timestamp snapshotTimestamp, Boolean uploaded) {
+  private void createVerificationRecord(
+      String tableName, Timestamp snapshotTimestamp, Boolean uploaded) {
     DbReportingUploadVerification record = new DbReportingUploadVerification();
     record.setTableName(tableName);
     record.setSnapshotTimestamp(snapshotTimestamp);

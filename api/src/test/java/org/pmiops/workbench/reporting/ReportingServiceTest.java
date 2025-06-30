@@ -44,14 +44,15 @@ public class ReportingServiceTest {
 
   @BeforeEach
   public void setUp() {
-    reportingService = new ReportingServiceImpl(
-        mockClock,
-        mockReportingTableService,
-        mockReportingQueryService,
-        mockReportingUploadService,
-        mockReportingVerificationService,
-        mockReportingUploadVerificationDao,
-        mockTaskQueueService);
+    reportingService =
+        new ReportingServiceImpl(
+            mockClock,
+            mockReportingTableService,
+            mockReportingQueryService,
+            mockReportingUploadService,
+            mockReportingVerificationService,
+            mockReportingUploadVerificationDao,
+            mockTaskQueueService);
 
     when(mockClock.millis()).thenReturn(NOW_MILLIS);
   }
@@ -59,8 +60,7 @@ public class ReportingServiceTest {
   @Test
   public void testSplitUploadIntoTasksAndQueue_singleTable() {
     // Arrange
-    ReportingTableParams<ReportingCohort> cohortTableParams =
-        createMockTableParams("cohort");
+    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
 
     when(mockReportingTableService.getAll()).thenReturn(List.of(cohortTableParams));
 
@@ -74,16 +74,16 @@ public class ReportingServiceTest {
     // Verify verification entry is created for the cohort table
     ArgumentCaptor<String> tableNameCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<Timestamp> timestampCaptor = ArgumentCaptor.forClass(Timestamp.class);
-    verify(mockReportingUploadVerificationDao).createVerificationEntry(
-        tableNameCaptor.capture(), timestampCaptor.capture());
+    verify(mockReportingUploadVerificationDao)
+        .createVerificationEntry(tableNameCaptor.capture(), timestampCaptor.capture());
     assertThat(tableNameCaptor.getValue()).isEqualTo("cohort");
     assertThat(timestampCaptor.getValue()).isEqualTo(new Timestamp(NOW_MILLIS));
 
     // Verify task is queued for the cohort table
     ArgumentCaptor<String> taskTableNameCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<Long> taskTimestampCaptor = ArgumentCaptor.forClass(Long.class);
-    verify(mockTaskQueueService).pushReportingUploadTask(
-        taskTableNameCaptor.capture(), taskTimestampCaptor.capture());
+    verify(mockTaskQueueService)
+        .pushReportingUploadTask(taskTableNameCaptor.capture(), taskTimestampCaptor.capture());
     assertThat(taskTableNameCaptor.getValue()).isEqualTo("cohort");
     assertThat(taskTimestampCaptor.getValue()).isEqualTo(NOW_MILLIS);
   }
@@ -91,13 +91,11 @@ public class ReportingServiceTest {
   @Test
   public void testSplitUploadIntoTasksAndQueue_multipleTables() {
     // Arrange
-    ReportingTableParams<ReportingCohort> cohortTableParams =
-        createMockTableParams("cohort");
-    ReportingTableParams<ReportingUser> userTableParams =
-        createMockTableParams("user");
+    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
+    ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user");
 
-    when(mockReportingTableService.getAll()).thenReturn(
-        List.of(cohortTableParams, userTableParams));
+    when(mockReportingTableService.getAll())
+        .thenReturn(List.of(cohortTableParams, userTableParams));
 
     // Act
     reportingService.splitUploadIntoTasksAndQueue();
@@ -109,8 +107,8 @@ public class ReportingServiceTest {
     // Verify verification entries are created for both tables
     ArgumentCaptor<String> tableNameCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<Timestamp> timestampCaptor = ArgumentCaptor.forClass(Timestamp.class);
-    verify(mockReportingUploadVerificationDao, times(2)).createVerificationEntry(
-        tableNameCaptor.capture(), timestampCaptor.capture());
+    verify(mockReportingUploadVerificationDao, times(2))
+        .createVerificationEntry(tableNameCaptor.capture(), timestampCaptor.capture());
     List<String> capturedTableNames = tableNameCaptor.getAllValues();
     assertThat(capturedTableNames).containsExactly("cohort", "user");
     List<Timestamp> capturedTimestamps = timestampCaptor.getAllValues();
@@ -121,8 +119,8 @@ public class ReportingServiceTest {
     // Verify tasks are queued for both tables
     ArgumentCaptor<String> taskTableNameCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<Long> taskTimestampCaptor = ArgumentCaptor.forClass(Long.class);
-    verify(mockTaskQueueService, times(2)).pushReportingUploadTask(
-        taskTableNameCaptor.capture(), taskTimestampCaptor.capture());
+    verify(mockTaskQueueService, times(2))
+        .pushReportingUploadTask(taskTableNameCaptor.capture(), taskTimestampCaptor.capture());
     List<String> capturedTaskTableNames = taskTableNameCaptor.getAllValues();
     assertThat(capturedTaskTableNames).containsExactly("cohort", "user");
     List<Long> capturedTaskTimestamps = taskTimestampCaptor.getAllValues();
@@ -150,29 +148,29 @@ public class ReportingServiceTest {
   @Test
   public void testSplitUploadIntoTasksAndQueue_captureTimestampConsistency() {
     // Arrange
-    ReportingTableParams<ReportingCohort> cohortTableParams =
-        createMockTableParams("cohort");
-    ReportingTableParams<ReportingUser> userTableParams =
-        createMockTableParams("user");
+    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
+    ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user");
 
-    when(mockReportingTableService.getAll()).thenReturn(
-        List.of(cohortTableParams, userTableParams));
+    when(mockReportingTableService.getAll())
+        .thenReturn(List.of(cohortTableParams, userTableParams));
 
     // Act
     reportingService.splitUploadIntoTasksAndQueue();
 
     // Assert
     // Verify that the same timestamp is used for all verification entries and tasks
-    ArgumentCaptor<Timestamp> verificationTimestampCaptor = ArgumentCaptor.forClass(Timestamp.class);
-    verify(mockReportingUploadVerificationDao, times(2)).createVerificationEntry(
-        any(), verificationTimestampCaptor.capture());
+    ArgumentCaptor<Timestamp> verificationTimestampCaptor =
+        ArgumentCaptor.forClass(Timestamp.class);
+    verify(mockReportingUploadVerificationDao, times(2))
+        .createVerificationEntry(any(), verificationTimestampCaptor.capture());
 
     ArgumentCaptor<Long> taskTimestampCaptor = ArgumentCaptor.forClass(Long.class);
-    verify(mockTaskQueueService, times(2)).pushReportingUploadTask(
-        any(), taskTimestampCaptor.capture());
+    verify(mockTaskQueueService, times(2))
+        .pushReportingUploadTask(any(), taskTimestampCaptor.capture());
 
     // All timestamps should be the same
-    List<Long> verificationTimestamps = verificationTimestampCaptor.getAllValues().stream().map(Timestamp::getTime).toList();
+    List<Long> verificationTimestamps =
+        verificationTimestampCaptor.getAllValues().stream().map(Timestamp::getTime).toList();
     List<Long> taskTimestamps = taskTimestampCaptor.getAllValues();
     assertEquals(new HashSet<>(verificationTimestamps), new HashSet<>(taskTimestamps));
   }
@@ -186,7 +184,8 @@ public class ReportingServiceTest {
     ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
     ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user");
 
-    when(mockReportingTableService.getAll(tables)).thenReturn(List.of(cohortTableParams, userTableParams));
+    when(mockReportingTableService.getAll(tables))
+        .thenReturn(List.of(cohortTableParams, userTableParams));
     when(mockReportingVerificationService.verifySnapshot(captureTimestamp)).thenReturn(true);
 
     // Act
@@ -208,7 +207,8 @@ public class ReportingServiceTest {
     ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
     ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user");
 
-    when(mockReportingTableService.getAll(tables)).thenReturn(List.of(cohortTableParams, userTableParams));
+    when(mockReportingTableService.getAll(tables))
+        .thenReturn(List.of(cohortTableParams, userTableParams));
     when(mockReportingVerificationService.verifySnapshot(captureTimestamp)).thenReturn(false);
 
     // Act
@@ -241,11 +241,10 @@ public class ReportingServiceTest {
     verify(mockReportingUploadService).uploadVerifiedSnapshot(captureTimestamp);
   }
 
-  /**
-   * Helper method to create a mock ReportingTableParams with the specified table name.
-   */
+  /** Helper method to create a mock ReportingTableParams with the specified table name. */
   @SuppressWarnings("unchecked")
-  private <T extends ReportingBase> ReportingTableParams<T> createMockTableParams(String tableName) {
+  private <T extends ReportingBase> ReportingTableParams<T> createMockTableParams(
+      String tableName) {
     ReportingTableParams<T> tableParams = mock(ReportingTableParams.class);
     when(tableParams.bqTableName()).thenReturn(tableName);
     return tableParams;

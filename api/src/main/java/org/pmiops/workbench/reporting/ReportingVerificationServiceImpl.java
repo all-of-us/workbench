@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ReportingUploadVerificationDao;
-import org.pmiops.workbench.db.model.DbReportingUploadVerification;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.stereotype.Service;
 
@@ -65,24 +64,27 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
 
-    reportingTableService.getAll(tables)
+    reportingTableService
+        .getAll(tables)
         .forEach(
             table -> {
               final String bqTableName = table.bqTableName();
               long sourceCount = table.rwbTableCountFn().getAsInt();
               long destCount = getBigQueryRowCount(bqTableName, captureSnapshotTime);
               boolean uploadOutcome = verifyCount(bqTableName, sourceCount, destCount, sb);
-              reportingUploadVerificationDao.updateUploadedStatus(bqTableName, new Timestamp(captureSnapshotTime), uploadOutcome);
+              reportingUploadVerificationDao.updateUploadedStatus(
+                  bqTableName, new Timestamp(captureSnapshotTime), uploadOutcome);
             });
     logger.log(Level.INFO, sb.toString());
   }
 
   @Override
   public boolean verifySnapshot(long captureSnapshotTime) {
-    var tablesInSnapshot = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(captureSnapshotTime));
-    return !tablesInSnapshot.isEmpty() && // todo: may want to throw if no tables are found for a given snapshot
-        tablesInSnapshot.stream()
-            .allMatch(record -> Boolean.TRUE.equals(record.getUploaded()));
+    var tablesInSnapshot =
+        reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(captureSnapshotTime));
+    return !tablesInSnapshot.isEmpty()
+        && // todo: may want to throw if no tables are found for a given snapshot
+        tablesInSnapshot.stream().allMatch(record -> Boolean.TRUE.equals(record.getUploaded()));
   }
 
   /** Verifies source count equals to destination count. Returns {@code true} of match. */

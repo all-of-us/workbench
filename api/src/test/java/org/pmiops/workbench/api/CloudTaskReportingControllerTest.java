@@ -22,8 +22,7 @@ import org.springframework.http.ResponseEntity;
 @ExtendWith(MockitoExtension.class)
 class CloudTaskReportingControllerTest {
 
-  @Mock
-  private ReportingService mockReportingService;
+  @Mock private ReportingService mockReportingService;
 
   private CloudTaskReportingController controller;
   private static final long SNAPSHOT_TIMESTAMP = 1640995200000L; // 2022-01-01T00:00:00.000Z
@@ -35,7 +34,7 @@ class CloudTaskReportingControllerTest {
 
   @Test
   void processReportingUploadQueueTask_withValidRequest_callsServiceAndReturnsNoContent() {
-    //Arrange
+    // Arrange
     List<String> tables = Arrays.asList("table1", "table2", "table3");
 
     ReportingUploadQueueTaskRequest request = new ReportingUploadQueueTaskRequest();
@@ -44,10 +43,10 @@ class CloudTaskReportingControllerTest {
 
     doNothing().when(mockReportingService).collectRecordsAndUpload(tables, SNAPSHOT_TIMESTAMP);
 
-    //Act
+    // Act
     ResponseEntity<Void> response = controller.processReportingUploadQueueTask(request);
 
-    //Assert
+    // Assert
     assertValidResponse(response);
     verify(mockReportingService).collectRecordsAndUpload(eq(tables), eq(SNAPSHOT_TIMESTAMP));
     verifyNoMoreInteractions(mockReportingService);
@@ -76,5 +75,4 @@ class CloudTaskReportingControllerTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     assertThat(response.getBody()).isNull();
   }
-
 }
