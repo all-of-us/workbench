@@ -83,6 +83,8 @@ public class TaskQueueService {
   public static final TaskQueuePair VWB_POD_CREATION =
       new TaskQueuePair("vwbPodCreationQueue", "createVwbPod");
 
+  public static final TaskQueuePair REPORTING_UPLOAD = new TaskQueuePair("reportingUploadQueue", "reportingUpload");
+
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
   private final WorkbenchLocationConfigService locationConfigService;
@@ -247,7 +249,7 @@ public class TaskQueueService {
 
   public void pushReportingUploadTask(String table, Long captureSnapshotTime) {
     createAndPushTask(
-        new TaskQueuePair("reportingUploadQueue", "reportingUpload"),
+        REPORTING_UPLOAD,
         new ReportingUploadQueueTaskRequest()
             .tables(List.of(table))
             .snapshotTimestamp(captureSnapshotTime));
