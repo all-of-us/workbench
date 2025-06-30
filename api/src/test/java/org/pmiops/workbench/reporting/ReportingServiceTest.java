@@ -183,7 +183,8 @@ public class ReportingServiceTest {
     List<String> tables = List.of("cohort", "user");
     long captureTimestamp = 1640995200000L;
 
-    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort", false);
+    ReportingTableParams<ReportingCohort> cohortTableParams =
+        createMockTableParams("cohort", false);
     ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user", false);
 
     when(mockReportingTableService.getAll(tables))
@@ -206,7 +207,8 @@ public class ReportingServiceTest {
     List<String> tables = List.of("cohort", "user");
     long captureTimestamp = 1640995200000L;
 
-    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort", false);
+    ReportingTableParams<ReportingCohort> cohortTableParams =
+        createMockTableParams("cohort", false);
     ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user", false);
 
     when(mockReportingTableService.getAll(tables))
