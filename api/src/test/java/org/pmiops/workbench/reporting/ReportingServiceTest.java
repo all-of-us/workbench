@@ -177,6 +177,70 @@ public class ReportingServiceTest {
     assertEquals(new HashSet<>(verificationTimestamps), new HashSet<>(taskTimestamps));
   }
 
+  @Test
+  public void testCollectRecordsAndUpload_withValidTables_successfulUpload() {
+    // Arrange
+    List<String> tables = List.of("cohort", "user");
+    long captureTimestamp = 1640995200000L;
+
+    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
+    ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user");
+
+    when(mockReportingTableService.getAll(tables)).thenReturn(List.of(cohortTableParams, userTableParams));
+    when(mockReportingVerificationService.verifySnapshot(captureTimestamp)).thenReturn(true);
+
+    // Act
+    reportingService.collectRecordsAndUpload(tables, captureTimestamp);
+
+    // Assert
+    verify(mockReportingTableService).getAll(tables);
+    verify(mockReportingVerificationService).verifyBatchesAndLog(tables, captureTimestamp);
+    verify(mockReportingVerificationService).verifySnapshot(captureTimestamp);
+    verify(mockReportingUploadService).uploadVerifiedSnapshot(captureTimestamp);
+  }
+
+  @Test
+  public void testCollectRecordsAndUpload_withValidTables_failedVerification() {
+    // Arrange
+    List<String> tables = List.of("cohort", "user");
+    long captureTimestamp = 1640995200000L;
+
+    ReportingTableParams<ReportingCohort> cohortTableParams = createMockTableParams("cohort");
+    ReportingTableParams<ReportingUser> userTableParams = createMockTableParams("user");
+
+    when(mockReportingTableService.getAll(tables)).thenReturn(List.of(cohortTableParams, userTableParams));
+    when(mockReportingVerificationService.verifySnapshot(captureTimestamp)).thenReturn(false);
+
+    // Act
+    reportingService.collectRecordsAndUpload(tables, captureTimestamp);
+
+    // Assert
+    verify(mockReportingTableService).getAll(tables);
+    verify(mockReportingVerificationService).verifyBatchesAndLog(tables, captureTimestamp);
+    verify(mockReportingVerificationService).verifySnapshot(captureTimestamp);
+    // Should NOT upload verified snapshot when verification fails
+    verify(mockReportingUploadService, times(0)).uploadVerifiedSnapshot(captureTimestamp);
+  }
+
+  @Test
+  public void testCollectRecordsAndUpload_withEmptyTables_successfulUpload() {
+    // Arrange
+    List<String> emptyTables = List.of();
+    long captureTimestamp = 1640995200000L;
+
+    when(mockReportingTableService.getAll(emptyTables)).thenReturn(List.of());
+    when(mockReportingVerificationService.verifySnapshot(captureTimestamp)).thenReturn(true);
+
+    // Act
+    reportingService.collectRecordsAndUpload(emptyTables, captureTimestamp);
+
+    // Assert
+    verify(mockReportingTableService).getAll(emptyTables);
+    verify(mockReportingVerificationService).verifyBatchesAndLog(emptyTables, captureTimestamp);
+    verify(mockReportingVerificationService).verifySnapshot(captureTimestamp);
+    verify(mockReportingUploadService).uploadVerifiedSnapshot(captureTimestamp);
+  }
+
   /**
    * Helper method to create a mock ReportingTableParams with the specified table name.
    */
