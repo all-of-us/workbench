@@ -26,6 +26,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -52,6 +53,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.user.VwbUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -125,6 +127,8 @@ public class WorkspaceMapperTest {
     WorkspaceDao.class,
     WorkspaceFreeTierUsageDao.class,
     WorkspaceInitialCreditUsageService.class,
+    VwbUserPodDao.class,
+    VwbUserService.class,
   })
   static class Configuration {
 

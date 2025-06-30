@@ -1,6 +1,7 @@
 package org.pmiops.workbench.vwb.usermanager;
 
 import jakarta.inject.Provider;
+import java.util.Optional;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.vwb.user.ApiException;
@@ -129,11 +130,65 @@ public class VwbUserManagerClient {
           podApiProvider
               .get()
               .deletePod(
-                  new DeletePodRequest()
-                      .jobControl(new JobControl().id(UUID.randomUUID().toString())),
+                  new DeletePodRequest().jobControl(generateJobControlWithUUID()),
                   organizationId,
                   podId.toString());
           return null;
         });
+  }
+
+  /**
+   * Gets a pod by its ID.
+   *
+   * @param podId The ID of the pod to retrieve.
+   * @return The PodDescription for the specified pod ID.
+   */
+  public Optional<PodDescription> getPodById(String podId) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.debug("Getting pod by id {}", podId);
+    return Optional.ofNullable(
+        vwbUserManagerRetryHandler.run(
+            context ->
+                podApiProvider.get().getPod(organizationId, podId, PodAction.READ_METADATA)));
+  }
+
+  /**
+   * Unlinks the billing account from a pod.
+   *
+   * @param podId The ID of the pod to unlink the billing account from.
+   */
+  public void unlinkBillingAccountFromPod(String podId) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.info("Unlinking billing account from pod {}", podId);
+    vwbUserManagerRetryHandler.run(
+        context ->
+            podApiProvider
+                .get()
+                .unlinkBillingFromPod(
+                    new PodUnlinkBillingRequest().jobControl(generateJobControlWithUUID()),
+                    organizationId,
+                    podId));
+  }
+
+  public void updatePodBillingAccount(String vwbPodId, String billingAccount) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    vwbUserManagerRetryHandler.run(
+        context ->
+            podApiProvider
+                .get()
+                .updatePod(
+                    new PodUpdateRequest()
+                        .jobControl(generateJobControlWithUUID())
+                        .environment(
+                            new PodEnvironment()
+                                .environmentType(PodEnvironmentType.GCP)
+                                .environmentDataGcp(
+                                    new PodEnvironmentDataGcp().billingAccountId(billingAccount))),
+                    organizationId,
+                    vwbPodId));
+  }
+
+  private static JobControl generateJobControlWithUUID() {
+    return new JobControl().id(UUID.randomUUID().toString());
   }
 }

@@ -3,6 +3,7 @@ package org.pmiops.workbench.user;
 import jakarta.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
@@ -21,14 +22,17 @@ public class VwbUserService {
   private final VwbUserManagerClient vwbUserManagerClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
+  private final VwbUserPodDao vwbUserPodDao;
 
   public VwbUserService(
       VwbUserManagerClient vwbUserManagerClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      UserDao userDao) {
+      UserDao userDao,
+      VwbUserPodDao vwbUserPodDao) {
     this.vwbUserManagerClient = vwbUserManagerClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
+    this.vwbUserPodDao = vwbUserPodDao;
   }
 
   /**
@@ -83,5 +87,64 @@ public class VwbUserService {
       vwbUserManagerClient.deletePod(initialCreditsPodForUser.getPodId());
       return null;
     }
+  }
+
+  /**
+   * Check if the pod is using initial credits billing account.
+   *
+   * @param pod The pod to check.
+   * @return true if the pod is using initial credits billing account, false otherwise.
+   */
+  public boolean isPodUsingInitialCredits(DbVwbUserPod pod) {
+    return workbenchConfigProvider
+        .get()
+        .billing
+        .initialCreditsBillingAccountName()
+        .equals(getBillingAccountForPod(pod.getVwbPodId()));
+  }
+
+  /**
+   * Unlink the billing account for a user pod if it is using initial credits. This method will set
+   * the initial credits active flag to false in the database.
+   *
+   * @param user The user whose pod's billing account should be unlinked.
+   */
+  public void unlinkBillingAccountForUserPod(DbUser user) {
+    // If the user does not have a pod or the pod is not using initial credits, do nothing.
+    DbVwbUserPod vwbUserPod = user.getVwbUserPod();
+    if (vwbUserPod == null || !vwbUserPod.isInitialCreditsActive()) {
+      return;
+    }
+    vwbUserManagerClient.unlinkBillingAccountFromPod(vwbUserPod.getVwbPodId());
+    // At this point, the pod is unlinked from the initial credits billing account, so we should set
+    // the initial credits active flag to false.
+    DbVwbUserPod dbVwbUserPod = vwbUserPod.setInitialCreditsActive(false);
+    vwbUserPodDao.save(dbVwbUserPod);
+  }
+
+  /**
+   * Retrieves the billing account ID associated with the specified pod.
+   *
+   * @param podId the ID of the pod to look up
+   * @return the billing account resource name (e.g., "billingAccounts/XXXX") if found, or
+   *     "billingAccounts/" if not found
+   */
+  private String getBillingAccountForPod(String podId) {
+    return "billingAccounts/"
+        + vwbUserManagerClient
+            .getPodById(podId)
+            .map(
+                podDescription ->
+                    podDescription
+                        .getEnvironmentData()
+                        .getEnvironmentDataGcp()
+                        .getBillingAccountId())
+            .orElse("");
+  }
+
+  public void linkInitialCreditsBillingAccountToPod(DbVwbUserPod pod) {
+    vwbUserManagerClient.updatePodBillingAccount(
+        pod.getVwbPodId(),
+        workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
   }
 }
