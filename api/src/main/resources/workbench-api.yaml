@@ -4569,6 +4569,7 @@ paths:
       description: |
         Asynchronously uploads reporting data to the reporting service.
       operationId: processReportingUploadQueueTask
+      security: [ ]
       requestBody:
         description: Reporting upload task to process.
         content:
