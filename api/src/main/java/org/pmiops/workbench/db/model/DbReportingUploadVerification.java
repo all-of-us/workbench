@@ -29,7 +29,7 @@ public class DbReportingUploadVerification {
     return this;
   }
 
-  @Column(name = "table", nullable = false)
+  @Column(name = "table_name", nullable = false)
   public String getTableName() {
     return tableName;
   }
