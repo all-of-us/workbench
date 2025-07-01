@@ -186,7 +186,7 @@ export class AccountCreationInstitution extends React.Component<
    * is returned, the icon will not display anything.
    *
    * Note: this does *not* check for format correctness of the indicated email. That is checked
-   * separately at the form-level via validate.js
+   * separately at the form-level via validation helper validateCreateInstitution().
    */
   isEmailValid(): boolean | undefined {
     const {

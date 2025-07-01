@@ -11,7 +11,13 @@ import {
 } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { render, RenderResult, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  render,
+  RenderResult,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import {
   profileApi,
   registerApiClient,
@@ -73,6 +79,7 @@ describe('DataAccessRequirements', () => {
       reload: jest.fn(),
       replace: jest.fn(),
     });
+
     return render(
       <MemoryRouter initialEntries={[path]}>
         <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}} />
@@ -579,28 +586,28 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toBeUndefined();
   });
 
-  it('should render all required modules by default (all FFs enabled)', () => {
-    const { container } = component();
+  it('should render all required modules by default (all FFs enabled)', async () => {
+    const { container } = await component();
     allInitialModules.forEach((module) =>
       expect(findModule(container, module)).toBeTruthy()
     );
   });
 
-  it('should not render the ERA module when its feature flag is disabled', () => {
+  it('should not render the ERA module when its feature flag is disabled', async () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig },
     });
-    const { container } = component();
+    const { container } = await component();
     expect(
       findModule(container, AccessModule.ERA_COMMONS)?.parentElement
     ).toBeFalsy();
   });
 
-  it('should not render the Compliance module when its feature flag is disabled', () => {
+  it('should not render the Compliance module when its feature flag is disabled', async () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableComplianceTraining: false },
     });
-    const { container } = component();
+    const { container } = await component();
     expect(
       findModule(container, AccessModule.COMPLIANCE_TRAINING)?.parentElement
     ).toBeFalsy();
@@ -609,14 +616,14 @@ describe('DataAccessRequirements', () => {
   // Temporary hack Sep 16: when enableRasLoginGovLinking is false, we DO show the module
   // along with an Ineligible icon and some "technical difficulties" text
   // and it never becomes an activeModule
-  it('should render the RAS module as ineligible when its feature flag is disabled', () => {
+  it('should render the RAS module as ineligible when its feature flag is disabled', async () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: false,
       },
     });
-    const { container } = component();
+    const { container } = await component();
     expect(
       findModule(container, AccessModule.IDENTITY).parentElement
     ).toBeTruthy();
@@ -632,8 +639,8 @@ describe('DataAccessRequirements', () => {
     ).toBeFalsy();
   });
 
-  it('should render all required modules as incomplete when the profile accessModules are empty', () => {
-    const { container } = component();
+  it('should render all required modules as incomplete when the profile accessModules are empty', async () => {
+    const { container } = await component();
     initialRequiredModules.forEach((module) => {
       expect(findIncompleteModule(container, module)).toBeTruthy();
 
@@ -643,23 +650,25 @@ describe('DataAccessRequirements', () => {
     expect(findCompletionBanner(container)).toBeFalsy();
   });
 
-  it('should render all required modules as complete when the profile accessModules are all complete', () => {
-    profileStore.set({
-      profile: {
-        ...ProfileStubVariables.PROFILE_STUB,
-        accessModules: {
-          modules: initialRequiredModules.map((module) => ({
-            moduleName: module,
-            completionEpochMillis: 1,
-          })),
+  it('should render all required modules as complete when the profile accessModules are all complete', async () => {
+    await act(async () => {
+      profileStore.set({
+        profile: {
+          ...ProfileStubVariables.PROFILE_STUB,
+          accessModules: {
+            modules: initialRequiredModules.map((module) => ({
+              moduleName: module,
+              completionEpochMillis: 1,
+            })),
+          },
         },
-      },
-      load,
-      reload,
-      updateCache,
+        load,
+        reload,
+        updateCache,
+      });
     });
 
-    const { container } = component();
+    const { container } = await component();
     initialRequiredModules.forEach((module) => {
       expect(findCompleteModule(container, module)).toBeTruthy();
 

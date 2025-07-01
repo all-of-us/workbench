@@ -25,6 +25,9 @@ export const DemographicSurveyValidationMessage = fp.flow(
   withProfileErrorModal
 )((props: DemographicSurveyValidationMessageProps) => {
   const { captcha, changed, errors, isAccountCreation } = props;
+  if (errors) {
+    console.error('DemographicSurveyValidationMessage errors:', errors);
+  }
   return (
     <>
       <div>Please review the following:</div>
@@ -33,7 +36,7 @@ export const DemographicSurveyValidationMessage = fp.flow(
           <>
             {Object.keys(errors).map((key) => (
               <li key={errors[key][0]}>
-                {errors[key]} (Question {questionsIndex[key]})
+                {key}: {errors[key]} (Question {questionsIndex[key]})
               </li>
             ))}
             {showPreferNotToAnswerMessage(errors) && (
