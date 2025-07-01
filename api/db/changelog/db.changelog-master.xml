@@ -276,6 +276,7 @@
   <include file="changelog/db.changelog-266-update-user-initial-credits-expiration-to-365-days.xml"/>
   <include file="changelog/db.changelog-267-vwb-initial-credits.xml"/>
   <include file="changelog/db.changelog-268-recreate-vwb-pod-columns.xml"/>
+  <include file="changelog/db.changelog-269-add-reporting-upload-verification-table.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

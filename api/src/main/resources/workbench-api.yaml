@@ -4561,6 +4561,27 @@ paths:
           description: Vwb Pod created
           content: {}
       x-codegen-request-body-name: request
+  /v1/cloudTask/reportingUploadQueue:
+    post:
+      tags:
+      - cloudTaskReporting
+      - cloudTask
+      description: |
+        Asynchronously uploads reporting data to the reporting service.
+      operationId: processReportingUploadQueueTask
+      security: [ ]
+      requestBody:
+        description: Reporting upload task to process.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportingUploadQueueTaskRequest'
+        required: true
+      responses:
+        200:
+          description: Reporting data uploaded successfully
+          content: {}
+      x-codegen-request-body-name: request
   /v1/institutions:
     get:
       tags:
@@ -13407,6 +13428,18 @@ components:
         userName:
           type: string
           description: The user name of the user who is creating the pod
+    ReportingUploadQueueTaskRequest:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: string
+          description: The names of the tables to be uploaded
+        snapshotTimestamp:
+          type: integer
+          format: int64
+          description: The timestamp of the snapshot to be uploaded, in milliseconds
 
   parameters:
     userId:
