@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -41,12 +42,9 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +65,7 @@ public class InitialCreditsService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
-  private final WorkspaceMapper workspaceMapper;
+  private final Provider<WorkbenchConfig> workbenchConfig;
   private final VwbUserPodDao vwbUserPodDao;
   private final VwbUserService vwbUserService;
 
@@ -87,7 +85,7 @@ public class InitialCreditsService {
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService,
-      WorkspaceMapper workspaceMapper,
+      Provider<WorkbenchConfig> workbenchConfig,
       VwbUserPodDao vwbUserPodDao,
       VwbUserService vwbUserService) {
     this.clock = clock;
@@ -102,7 +100,7 @@ public class InitialCreditsService {
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceInitialCreditUsageService = workspaceInitialCreditUsageService;
-    this.workspaceMapper = workspaceMapper;
+    this.workbenchConfig = workbenchConfig;
     this.vwbUserPodDao = vwbUserPodDao;
     this.vwbUserService = vwbUserService;
   }
@@ -533,8 +531,8 @@ public class InitialCreditsService {
     }
   }
 
-  private void stopInitialCreditSpendInWorkspace(Workspace workspace) {
-    String namespace = workspace.getNamespace();
+  private void stopInitialCreditSpendInWorkspace(DbWorkspace workspace) {
+    String namespace = workspace.getWorkspaceNamespace();
     String googleProject = workspace.getGoogleProject();
     try {
       leonardoApiClient.deleteAllResources(googleProject, false);
@@ -564,15 +562,25 @@ public class InitialCreditsService {
   }
 
   public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
-    Iterable<DbWorkspace> toUpdate =
-        () ->
-            workspaceDao.findAllByCreator(user).stream()
-                .filter(
-                    ws ->
-                        isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
-                .map(ws -> ws.setInitialCreditsExhausted(exhausted))
-                .iterator();
-    workspaceDao.saveAll(toUpdate);
+    List<DbWorkspace> workspaces =
+        workspaceDao.findAllByCreator(user).stream()
+            .filter(
+                ws ->
+                    ws.isInitialCreditsExhausted() != exhausted
+                        && isInitialCredits(
+                            ws.getBillingAccountName(), workbenchConfigProvider.get()))
+            .collect(Collectors.toList());
+
+    workspaces.forEach(ws -> ws.setInitialCreditsExhausted(exhausted));
+
+    workspaceDao.saveAll(workspaces);
+
+    if (exhausted) {
+      workspaces.forEach(this::stopInitialCreditSpendInWorkspace);
+      // Unlink billing account in VWB
+      // This is done to stop extra charges from being incurred
+      vwbUserService.unlinkBillingAccountForUserPod(user);
+    }
   }
 
   /**
@@ -789,13 +797,15 @@ public class InitialCreditsService {
     return dbCostByCreator;
   }
 
-  private List<Workspace> getWorkspacesForUser(DbUser user) {
-    return workspaceMapper
-        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.listWorkspacesAsService(), this)
-        .stream()
-        .map(WorkspaceResponse::getWorkspace)
-        .filter(ws -> ws.getCreatorUser().getUserName().equals(user.getUsername()))
-        .collect(Collectors.toList());
+  private List<DbWorkspace> getWorkspacesForUser(DbUser user) {
+    Set<DbWorkspace> workspaceSet = workspaceDao.findAllByCreator(user);
+    List<DbWorkspace> allWorkspaces = new ArrayList<>(workspaceSet);
+
+    return allWorkspaces.stream()
+        .filter(
+            dbWorkspace ->
+                isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
+        .toList();
   }
 
   /**

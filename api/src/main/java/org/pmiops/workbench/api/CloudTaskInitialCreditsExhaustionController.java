@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 import static org.pmiops.workbench.utils.CostComparisonUtils.getUserInitialCreditsLimit;
 
 import com.google.common.collect.Sets;
@@ -16,20 +15,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ExhaustedInitialCreditsEventRequest;
-import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,28 +38,22 @@ public class CloudTaskInitialCreditsExhaustionController
       LoggerFactory.getLogger(CloudTaskInitialCreditsExhaustionController.class);
 
   private final InitialCreditsService initialCreditsService;
-  private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfig;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
-  private final VwbUserService vwbUserService;
 
   CloudTaskInitialCreditsExhaustionController(
       InitialCreditsService initialCreditsService,
-      LeonardoApiClient leonardoApiClient,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfig,
       UserDao userDao,
-      WorkspaceDao workspaceDao,
-      VwbUserService vwbUserService) {
+      WorkspaceDao workspaceDao) {
     this.initialCreditsService = initialCreditsService;
-    this.leonardoApiClient = leonardoApiClient;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfig = workbenchConfig;
     this.workspaceDao = workspaceDao;
-    this.vwbUserService = vwbUserService;
   }
 
   @SuppressWarnings("unchecked")
@@ -110,11 +98,6 @@ public class CloudTaskInitialCreditsExhaustionController
           logger.info(
               "handleExhaustedUsers: handling user with exhausted credits {}", user.getUsername());
           initialCreditsService.updateInitialCreditsExhaustion(user, true);
-          // delete apps and runtimes
-          deleteAppsAndRuntimesInInitialCreditsWorkspaces(user);
-          // Unlink billing account in VWB
-          // This is done to stop extra charges from being incurred
-          vwbUserService.unlinkBillingAccountForUserPod(user);
           try {
             mailService.alertUserInitialCreditsExhausted(user);
           } catch (MessagingException e) {
@@ -255,27 +238,6 @@ public class CloudTaskInitialCreditsExhaustionController
         .filter(DbVwbUserPod::isInitialCreditsActive)
         .map(DbVwbUserPod::getUser)
         .collect(Collectors.toSet());
-  }
-
-  private void deleteAppsAndRuntimesInInitialCreditsWorkspaces(DbUser user) {
-    logger.info("Deleting apps and runtimes for user {}", user.getUsername());
-
-    workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            dbWorkspace ->
-                isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
-        .filter(DbWorkspace::isActive)
-        .filter(Predicate.not(DbWorkspace::isVwbWorkspace))
-        .forEach(
-            dbWorkspace -> {
-              String namespace = dbWorkspace.getWorkspaceNamespace();
-              try {
-                leonardoApiClient.deleteAllResources(dbWorkspace.getGoogleProject(), false);
-                logger.info("Deleted apps and runtimes for workspace {}", namespace);
-              } catch (WorkbenchException e) {
-                logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
-              }
-            });
   }
 
   /**
