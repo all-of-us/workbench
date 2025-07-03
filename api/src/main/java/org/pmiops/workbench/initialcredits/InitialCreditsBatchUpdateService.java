@@ -96,7 +96,7 @@ public class InitialCreditsBatchUpdateService {
     return userWorkspaceCosts;
   }
 
-  /** Return a map of user_id -> total_cost for VWB pods */
+  /** Return a map of user_id -> cost for VWB pods */
   private Map<Long, Double> findVwbUsersLiveCosts(List<DbUser> users) {
     if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
       return Collections.emptyMap();

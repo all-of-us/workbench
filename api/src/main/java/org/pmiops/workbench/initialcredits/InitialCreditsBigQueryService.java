@@ -47,13 +47,14 @@ public class InitialCreditsBigQueryService {
   Map<String, Double> getAllVWBProjectCostsFromBQ() {
     StringBuilder queryBuilder = new StringBuilder();
     queryBuilder
-        .append("SELECT total_cost, vwb_pod_id ")
+        .append("SELECT sum(cost) cost, vwb_pod_id ")
         .append("FROM `")
         .append(workbenchConfigProvider.get().billing.vwbExportBigQueryTable)
         .append("` ")
         .append("WHERE vwb_org_id = \"")
         .append(workbenchConfigProvider.get().vwb.organizationId)
-        .append("\";");
+        .append("\"")
+        .append(" group by vwb_pod_id order by cost desc; ");
 
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(queryBuilder.toString()).build();
@@ -63,9 +64,9 @@ public class InitialCreditsBigQueryService {
     for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
       final String vwbPodId =
           tableRow.get("vwb_pod_id").isNull() ? null : tableRow.get("vwb_pod_id").getStringValue();
-      final double totalCost = tableRow.get("total_cost").getDoubleValue();
+      final double totalCost = tableRow.get("cost").getDoubleValue();
       if (vwbPodId != null) {
-        costByVwbPodId.merge(vwbPodId, totalCost, Double::sum);
+        costByVwbPodId.put(vwbPodId, totalCost);
       }
     }
 

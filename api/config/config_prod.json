@@ -32,7 +32,8 @@
     "initialCreditsExpirationWarningDays": 14,
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "minutesBeforeLastInitialCreditsJob": 60,
-    "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 7
+    "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 7,
+    "vwbExportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.vwb_billing_export"
   },
   "auth": {
     "serviceAccountApiUsers": [
