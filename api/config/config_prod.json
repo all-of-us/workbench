@@ -33,7 +33,7 @@
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "minutesBeforeLastInitialCreditsJob": 60,
     "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 7,
-    "vwbExportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.vwb_billing_export"
+    "vwbExportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.vwb_billing_export"
   },
   "auth": {
     "serviceAccountApiUsers": [
