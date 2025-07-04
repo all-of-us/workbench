@@ -100,9 +100,7 @@ class InitialCreditsBigQueryServiceTest {
             Field.of("vwb_pod_id", LegacySQLTypeName.STRING));
 
     List<FieldValueList> tableRows =
-        List.of(
-            tableRow("1", "50.0", "pod1"),
-            tableRow("2", "75.0", "pod2"));
+        List.of(tableRow("1", "50.0", "pod1"), tableRow("2", "75.0", "pod2"));
 
     when(mockBigQueryService.executeQuery(any()))
         .thenReturn(BigQueryUtils.newTableResult(schema, tableRows));
