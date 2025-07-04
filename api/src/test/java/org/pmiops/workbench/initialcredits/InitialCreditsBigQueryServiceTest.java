@@ -96,14 +96,11 @@ class InitialCreditsBigQueryServiceTest {
     Schema schema =
         Schema.of(
             Field.of("id", LegacySQLTypeName.STRING),
-            Field.of("total_cost", LegacySQLTypeName.STRING),
+            Field.of("cost", LegacySQLTypeName.STRING),
             Field.of("vwb_pod_id", LegacySQLTypeName.STRING));
 
     List<FieldValueList> tableRows =
-        List.of(
-            tableRow("1", "50.0", "pod1"),
-            tableRow("2", "75.0", "pod2"),
-            tableRow("3", "25.0", "pod1"));
+        List.of(tableRow("1", "50.0", "pod1"), tableRow("2", "75.0", "pod2"));
 
     when(mockBigQueryService.executeQuery(any()))
         .thenReturn(BigQueryUtils.newTableResult(schema, tableRows));
@@ -111,7 +108,7 @@ class InitialCreditsBigQueryServiceTest {
     Map<String, Double> result = initialCreditsBigQueryService.getAllVWBProjectCostsFromBQ();
 
     assertEquals(2, result.size());
-    assertEquals(75.0, result.get("pod1"));
+    assertEquals(50.0, result.get("pod1"));
     assertEquals(75.0, result.get("pod2"));
   }
 
@@ -120,7 +117,7 @@ class InitialCreditsBigQueryServiceTest {
     Schema schema =
         Schema.of(
             Field.of("id", LegacySQLTypeName.STRING),
-            Field.of("total_cost", LegacySQLTypeName.FLOAT),
+            Field.of("cost", LegacySQLTypeName.FLOAT),
             Field.of("vwb_pod_id", LegacySQLTypeName.STRING));
 
     List<FieldValueList> tableRows =
@@ -140,7 +137,7 @@ class InitialCreditsBigQueryServiceTest {
     Schema schema =
         Schema.of(
             Field.of("id", LegacySQLTypeName.STRING),
-            Field.of("total_cost", LegacySQLTypeName.FLOAT),
+            Field.of("cost", LegacySQLTypeName.FLOAT),
             Field.of("vwb_pod_id", LegacySQLTypeName.STRING));
 
     when(mockBigQueryService.executeQuery(any()))
