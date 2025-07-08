@@ -82,9 +82,16 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   public boolean verifySnapshot(long captureSnapshotTime) {
     var tablesInSnapshot =
         reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(captureSnapshotTime));
-    return !tablesInSnapshot.isEmpty()
-        && // todo: may want to throw if no tables are found for a given snapshot
-        tablesInSnapshot.stream().allMatch(record -> Boolean.TRUE.equals(record.getUploaded()));
+    if (tablesInSnapshot.isEmpty()) {
+      // This really shouldn't happen, but if it does, we return false to avoid uploading a falsely verified snapshot.
+      logger.warning(
+          String.format(
+              "No tables found for snapshot at %d. Cannot verify snapshot.",
+              captureSnapshotTime));
+      return false;
+    } else {
+      return tablesInSnapshot.stream().allMatch(record -> Boolean.TRUE.equals(record.getUploaded()));
+    }
   }
 
   /** Verifies source count equals to destination count. Returns {@code true} of match. */

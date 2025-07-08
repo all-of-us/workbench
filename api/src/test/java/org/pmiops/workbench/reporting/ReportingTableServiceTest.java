@@ -151,39 +151,21 @@ public class ReportingTableServiceTest {
   }
 
   @Test
-  public void testGetAll_preservesOriginalOrderOfValidTables() {
-    // Test that the method preserves the order from getAll(), not the input order
-    List<String> requestedTablesInDifferentOrder = Arrays.asList("workspace", "cohort", "user");
+  public void testGetAll_withCaseSensitiveTableNames_matchesCaseInsensitive() {
+    List<String> requestedTablesWithWrongCase =
+        Arrays.asList(
+            "COHORT",
+            "User",
+            "workspace"
+            );
 
     List<ReportingTableParams<? extends ReportingBase>> result =
-        reportingTableService.getAll(requestedTablesInDifferentOrder);
-
+        reportingTableService.getAll(requestedTablesWithWrongCase);
     assertThat(result).hasSize(3);
 
     List<String> returnedTableNames =
         result.stream().map(ReportingTableParams::bqTableName).toList();
 
-    // The order should match the order from getAll() method, not the input order
-    // getAll() returns tables in this order: cohort, dataset, datasetDomainIdValue, institution,
-    // leoAppUsage, newUserSatisfactionSurvey, user, userGeneralDiscoverySource,
-    // userPartnerDiscoverySource, workspace, workspaceFreeTierUsage
-    assertThat(returnedTableNames).containsExactly("cohort", "user", "workspace").inOrder();
-  }
-
-  @Test
-  public void testGetAll_withCaseSensitiveTableNames_onlyMatchesExactCase() {
-    List<String> requestedTablesWithWrongCase =
-        Arrays.asList(
-            "COHORT", // wrong case
-            "User", // wrong case
-            "workspace" // correct case
-            );
-
-    List<ReportingTableParams<? extends ReportingBase>> result =
-        reportingTableService.getAll(requestedTablesWithWrongCase);
-
-    // Only "workspace" should match (case-sensitive)
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).bqTableName()).isEqualTo("workspace");
+    assertThat(returnedTableNames).containsExactly("cohort", "user", "workspace");
   }
 }

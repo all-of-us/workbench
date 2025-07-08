@@ -6,6 +6,7 @@ import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ReportingConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
@@ -91,7 +92,8 @@ public class ReportingTableService {
   }
 
   public List<ReportingTableParams<? extends ReportingBase>> getAll(List<String> tableNames) {
-    return getAll().stream().filter(table -> tableNames.contains(table.bqTableName())).toList();
+    var lowerCaseTables = tableNames.stream().map(String::toLowerCase).collect(Collectors.toSet());
+    return getAll().stream().filter(table -> lowerCaseTables.contains(table.bqTableName().toLowerCase())).toList();
   }
 
   private int batchSize(String bqTableName) {

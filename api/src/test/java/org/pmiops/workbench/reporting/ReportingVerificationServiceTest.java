@@ -215,6 +215,32 @@ public class ReportingVerificationServiceTest {
   }
 
   @Test
+  public void testVerifyBatch_forSpecificTables_verified() {
+    createTableEntries(ACTUAL_COUNT);
+    var tables = List.of("cohort", "user", "workspace", "new_user_satisfaction_survey");
+    var timestamp = NOW.toEpochMilli();
+    tables.forEach(table -> reportingUploadVerificationDao.createVerificationEntry(table, new Timestamp(timestamp)));
+    reportingVerificationService.verifyBatchesAndLog(tables, NOW.toEpochMilli());
+
+    var res = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(timestamp));
+    assertThat(res.size()).isEqualTo(4);
+    assertThat(res.stream().allMatch(DbReportingUploadVerification::getUploaded)).isTrue();
+  }
+
+  @Test
+  public void testVerifyTablesBatch_forSpecificTables_fail() {
+    createTableEntries(ACTUAL_COUNT * 2);
+    var tables = List.of("cohort", "user", "workspace", "new_user_satisfaction_survey");
+    var timestamp = NOW.toEpochMilli();
+    tables.forEach(table -> reportingUploadVerificationDao.createVerificationEntry(table, new Timestamp(timestamp)));
+    reportingVerificationService.verifyBatchesAndLog(List.of("cohort", "user", "workspace", "new_user_satisfaction_survey"), NOW.toEpochMilli());
+
+    var res = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(timestamp));
+    assertThat(res.size()).isEqualTo(4);
+    assertThat(res.stream().noneMatch(DbReportingUploadVerification::getUploaded)).isTrue();
+  }
+
+  @Test
   public void testVerifySnapshot_withAllTablesUploaded_returnsTrue() {
     // Arrange
     long snapshotTimestamp = NOW.toEpochMilli();
