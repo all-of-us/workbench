@@ -152,12 +152,7 @@ public class ReportingTableServiceTest {
 
   @Test
   public void testGetAll_withCaseSensitiveTableNames_matchesCaseInsensitive() {
-    List<String> requestedTablesWithWrongCase =
-        Arrays.asList(
-            "COHORT",
-            "User",
-            "workspace"
-            );
+    List<String> requestedTablesWithWrongCase = Arrays.asList("COHORT", "User", "workspace");
 
     List<ReportingTableParams<? extends ReportingBase>> result =
         reportingTableService.getAll(requestedTablesWithWrongCase);

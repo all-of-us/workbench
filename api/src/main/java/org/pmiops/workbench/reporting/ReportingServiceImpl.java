@@ -95,8 +95,9 @@ public class ReportingServiceImpl implements ReportingService {
             });
   }
 
-  // Upload data in batches for specified tables, verify the counts, and try to mark this snapshot valid.
-  // If there are still tables that have not been uploaded successfully, the snapshot will not be marked valid.
+  // Upload data in batches for specified tables, verify the counts, and check to see if all tables
+  // in snapshot have successfully uploaded. If they have, mark snapshot as valid. If they haven't,
+  // do nothing
   @Transactional(isolation = Isolation.SERIALIZABLE)
   @Override
   public void collectRecordsAndUpload(List<String> tables, long captureTimestamp) {

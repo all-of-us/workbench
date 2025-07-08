@@ -219,7 +219,10 @@ public class ReportingVerificationServiceTest {
     createTableEntries(ACTUAL_COUNT);
     var tables = List.of("cohort", "user", "workspace", "new_user_satisfaction_survey");
     var timestamp = NOW.toEpochMilli();
-    tables.forEach(table -> reportingUploadVerificationDao.createVerificationEntry(table, new Timestamp(timestamp)));
+    tables.forEach(
+        table ->
+            reportingUploadVerificationDao.createVerificationEntry(
+                table, new Timestamp(timestamp)));
     reportingVerificationService.verifyBatchesAndLog(tables, NOW.toEpochMilli());
 
     var res = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(timestamp));
@@ -232,8 +235,12 @@ public class ReportingVerificationServiceTest {
     createTableEntries(ACTUAL_COUNT * 2);
     var tables = List.of("cohort", "user", "workspace", "new_user_satisfaction_survey");
     var timestamp = NOW.toEpochMilli();
-    tables.forEach(table -> reportingUploadVerificationDao.createVerificationEntry(table, new Timestamp(timestamp)));
-    reportingVerificationService.verifyBatchesAndLog(List.of("cohort", "user", "workspace", "new_user_satisfaction_survey"), NOW.toEpochMilli());
+    tables.forEach(
+        table ->
+            reportingUploadVerificationDao.createVerificationEntry(
+                table, new Timestamp(timestamp)));
+    reportingVerificationService.verifyBatchesAndLog(
+        List.of("cohort", "user", "workspace", "new_user_satisfaction_survey"), NOW.toEpochMilli());
 
     var res = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(timestamp));
     assertThat(res.size()).isEqualTo(4);

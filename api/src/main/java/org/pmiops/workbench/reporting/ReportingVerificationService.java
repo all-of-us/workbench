@@ -9,6 +9,9 @@ public interface ReportingVerificationService {
   /** Verifies batched uploaded result specified tables. */
   void verifyBatchesAndLog(List<String> tables, long captureSnapshotTime);
 
-  /** Verifies all tables associated with captureSnapshotTime uploaded successfully. Returns {@code true} if all are verified. */
+  /**
+   * Verifies all tables associated with captureSnapshotTime uploaded successfully. Returns {@code
+   * true} if all are verified.
+   */
   boolean verifySnapshot(long captureSnapshotTime);
 }

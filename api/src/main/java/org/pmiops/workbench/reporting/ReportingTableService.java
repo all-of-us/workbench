@@ -93,7 +93,9 @@ public class ReportingTableService {
 
   public List<ReportingTableParams<? extends ReportingBase>> getAll(List<String> tableNames) {
     var lowerCaseTables = tableNames.stream().map(String::toLowerCase).collect(Collectors.toSet());
-    return getAll().stream().filter(table -> lowerCaseTables.contains(table.bqTableName().toLowerCase())).toList();
+    return getAll().stream()
+        .filter(table -> lowerCaseTables.contains(table.bqTableName().toLowerCase()))
+        .toList();
   }
 
   private int batchSize(String bqTableName) {
