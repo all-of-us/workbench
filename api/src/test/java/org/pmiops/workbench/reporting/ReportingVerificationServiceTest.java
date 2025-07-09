@@ -223,7 +223,7 @@ public class ReportingVerificationServiceTest {
         table ->
             reportingUploadVerificationDao.createVerificationEntry(
                 table, new Timestamp(timestamp)));
-    reportingVerificationService.verifyBatchesAndLog(tables, NOW.toEpochMilli());
+    reportingVerificationService.verifyBatchesAndLog(tables, timestamp);
 
     var res = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(timestamp));
     assertThat(res.size()).isEqualTo(4);
@@ -240,7 +240,7 @@ public class ReportingVerificationServiceTest {
             reportingUploadVerificationDao.createVerificationEntry(
                 table, new Timestamp(timestamp)));
     reportingVerificationService.verifyBatchesAndLog(
-        List.of("cohort", "user", "workspace", "new_user_satisfaction_survey"), NOW.toEpochMilli());
+        List.of("cohort", "user", "workspace", "new_user_satisfaction_survey"), timestamp);
 
     var res = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(timestamp));
     assertThat(res.size()).isEqualTo(4);
