@@ -23,7 +23,8 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   NAME("name", ReportingWorkspace::getName),
   RP_ADDITIONAL_NOTES("rp_additional_notes", ReportingWorkspace::getRpAdditionalNotes),
   RP_AIAN_RESEARCH_TYPE("rp_aian_research_type", ReportingWorkspace::getRpAianResearchType),
-  RP_AIAN_RESEARCH_DETAILS("rp_aian_research_details", ReportingWorkspace::getRpAianResearchDetails),
+  RP_AIAN_RESEARCH_DETAILS(
+      "rp_aian_research_details", ReportingWorkspace::getRpAianResearchDetails),
   RP_ANCESTRY("rp_ancestry", ReportingWorkspace::isRpAncestry),
   RP_ANTICIPATED_FINDINGS("rp_anticipated_findings", ReportingWorkspace::getRpAnticipatedFindings),
   RP_APPROVED("rp_approved", ReportingWorkspace::isRpApproved),

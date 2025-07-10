@@ -39,7 +39,7 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_9";
   public static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo_12";
-  public static final String WORKSPACE__RP_AIAN_RESEARCH_TYPE = 
+  public static final String WORKSPACE__RP_AIAN_RESEARCH_TYPE =
       AIANResearchType.NO_AI_AN_ANALYSIS.toString();
   public static final String WORKSPACE__RP_AIAN_RESEARCH_DETAILS = "foo_14";
   public static final Boolean WORKSPACE__RP_ANCESTRY = false;
