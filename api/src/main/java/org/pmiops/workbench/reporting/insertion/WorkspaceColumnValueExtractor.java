@@ -22,6 +22,8 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   LAST_MODIFIED_TIME("last_modified_time", w -> toInsertRowString(w.getLastModifiedTime())),
   NAME("name", ReportingWorkspace::getName),
   RP_ADDITIONAL_NOTES("rp_additional_notes", ReportingWorkspace::getRpAdditionalNotes),
+  RP_AIAN_RESEARCH_TYPE("rp_aian_research_type", ReportingWorkspace::getRpAianResearchType),
+  RP_AIAN_RESEARCH_DETAILS("rp_aian_research_details", ReportingWorkspace::getRpAianResearchDetails),
   RP_ANCESTRY("rp_ancestry", ReportingWorkspace::isRpAncestry),
   RP_ANTICIPATED_FINDINGS("rp_anticipated_findings", ReportingWorkspace::getRpAnticipatedFindings),
   RP_APPROVED("rp_approved", ReportingWorkspace::isRpApproved),

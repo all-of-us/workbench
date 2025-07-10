@@ -496,6 +496,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  last_modified_time,\n"
             + "  w.name AS name,\n"
             + "  rp_additional_notes,\n"
+            + "  rp_aian_research_type,\n"
+            + "  rp_aian_research_details,\n"
             + "  rp_ancestry,\n"
             + "  rp_anticipated_findings,\n"
             + "  rp_approved,\n"
@@ -545,6 +547,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
                 .name(rs.getString("name"))
                 .rpAdditionalNotes(rs.getString("rp_additional_notes"))
+                .rpAianResearchType(rs.getString("rp_aian_research_type"))
+                .rpAianResearchDetails(rs.getString("rp_aian_research_details"))
                 .rpAncestry(rs.getBoolean("rp_ancestry"))
                 .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))
                 .rpApproved(rs.getBoolean("rp_approved"))
