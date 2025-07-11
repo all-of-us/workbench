@@ -12830,7 +12830,7 @@ components:
         - $ref: '#/components/schemas/ReportingBase'
       type: object
       properties:
-        id:
+        demographicSurveyV2Id:
           type: integer
           description: ID of the demographic survey response.
           format: int64

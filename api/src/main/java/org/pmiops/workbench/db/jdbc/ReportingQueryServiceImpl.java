@@ -149,7 +149,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             limit, offset),
         (rs, unused) ->
             new ReportingDemographicSurveyV2()
-                .id(rs.getLong("demographic_survey_v2_id"))
+                .demographicSurveyV2Id(rs.getLong("demographic_survey_v2_id"))
                 .userId(rs.getLong("user_id"))
                 .completionTime(offsetDateTimeUtc(rs.getTimestamp("completion_time")))
                 .ethnicityAiAnOtherText(rs.getString("ethnicity_ai_an_other_text"))
