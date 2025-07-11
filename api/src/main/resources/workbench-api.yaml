@@ -12825,6 +12825,100 @@ components:
         additionalInfo:
           type: string
           description: Additional information regarding the satisfaction score.
+    ReportingDemographicSurveyV2:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the demographic survey response.
+          format: int64
+        userId:
+          type: integer
+          description: ID of the user who created the survey response.
+          format: int64
+        created:
+          type: string
+          description: Time the survey response was created.
+          format: date-time
+        modified:
+          type: string
+          description: Time the survey response was last modified.
+          format: date-time
+        ethnicityAiAnOtherText:
+          type: string
+          description: Other text for American Indian/Alaska Native ethnicity.
+        ethnicityAsianOtherText:
+          type: string
+          description: Other text for Asian ethnicity.
+        ethnicityBlackOtherText:
+          type: string
+          description: Other text for Black ethnicity.
+        ethnicityHispanicOtherText:
+          type: string
+          description: Other text for Hispanic ethnicity.
+        ethnicityMeNaOtherText:
+          type: string
+          description: Other text for Middle Eastern/North African ethnicity.
+        ethnicityNhPiOtherText:
+          type: string
+          description: Other text for Native Hawaiian/Pacific Islander ethnicity.
+        ethnicityWhiteOtherText:
+          type: string
+          description: Other text for White ethnicity.
+        ethnicityOtherText:
+          type: string
+          description: Other text for ethnicity not covered by other categories.
+        genderOtherText:
+          type: string
+          description: Other text for gender identity.
+        orientationOtherText:
+          type: string
+          description: Other text for sexual orientation.
+        sexAtBirth:
+          type: string
+          description: Sex assigned at birth.
+        sexAtBirthOtherText:
+          type: string
+          description: Other text for sex at birth.
+        yearOfBirth:
+          type: integer
+          description: Year of birth.
+          format: int64
+        yearOfBirthPreferNot:
+          type: boolean
+          description: Whether the user preferred not to answer year of birth.
+        disabilityHearing:
+          type: string
+          description: Disability status for hearing.
+        disabilitySeeing:
+          type: string
+          description: Disability status for seeing.
+        disabilityConcentrating:
+          type: string
+          description: Disability status for concentrating.
+        disabilityWalking:
+          type: string
+          description: Disability status for walking.
+        disabilityDressing:
+          type: string
+          description: Disability status for dressing.
+        disabilityErrands:
+          type: string
+          description: Disability status for doing errands.
+        disabilityOtherText:
+          type: string
+          description: Other text for disability.
+        education:
+          type: string
+          description: Education level.
+        disadvantaged:
+          type: string
+          description: Disadvantaged status.
+        surveyComments:
+          type: string
+          description: General comments about the survey.
     ReportingUserGeneralDiscoverySource:
       allOf:
         - $ref: '#/components/schemas/ReportingBase'

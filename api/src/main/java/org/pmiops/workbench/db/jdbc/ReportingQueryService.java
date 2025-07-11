@@ -9,6 +9,7 @@ import java.util.stream.StreamSupport;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingDemographicSurveyV2;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -36,6 +37,8 @@ public interface ReportingQueryService {
 
   List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveyBatch(
       long limit, long offset);
+
+  List<ReportingDemographicSurveyV2> getDemographicSurveyV2Batch(long limit, long offset);
 
   List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySourceBatch(
       long limit, long offset);

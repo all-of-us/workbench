@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
+import org.pmiops.workbench.model.ReportingDemographicSurveyV2;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
@@ -99,6 +101,37 @@ public class ReportingTestUtils {
   public static final NewUserSatisfactionSurveySatisfaction
       NEW_USER_SATISFACTION_SURVEY__SATISFACTION = NewUserSatisfactionSurveySatisfaction.NEUTRAL;
   public static final String NEW_USER_SATISFACTION_SURVEY__ADDITIONAL_INFO = "It's ok.";
+
+  public static final Long DEMOGRAPHIC_SURVEY_V2__ID = 1L;
+  public static final Long DEMOGRAPHIC_SURVEY_V2__USER_ID = 2L;
+  public static final Timestamp DEMOGRAPHIC_SURVEY_V2__CREATED =
+      Timestamp.from(Instant.parse("2001-01-01T00:00:00.00Z"));
+  public static final Timestamp DEMOGRAPHIC_SURVEY_V2__MODIFIED =
+      Timestamp.from(Instant.parse("2002-01-01T00:00:00.00Z"));
+  public static final String DEMOGRAPHIC_SURVEY_V2__ETHNICITY_AI_AN_OTHER_TEXT = "Alaska Native";
+  public static final String DEMOGRAPHIC_SURVEY_V2__ETHNICITY_ASIAN_OTHER_TEXT = "Vietnamese";
+  public static final String DEMOGRAPHIC_SURVEY_V2__ETHNICITY_BLACK_OTHER_TEXT = "Nigerian";
+  public static final String DEMOGRAPHIC_SURVEY_V2__ETHNICITY_HISPANIC_OTHER_TEXT = "Mexican";
+  public static final String DEMOGRAPHIC_SURVEY_V2__ETHNICITY_ME_NA_OTHER_TEXT = "Lebanese";
+  public static final String DEMOGRAPHIC_SURVEY_V2__ETHNICITY_NH_PI_OTHER_TEXT = "Samoan";
+  public static final String DEMOGRAPHIC_SURVEY_V2__ETHNICITY_WHITE_OTHER_TEXT = "Irish";
+  public static final String DEMOGRAPHIC_SURVEY_V2__ETHNICITY_OTHER_TEXT = "Other";
+  public static final String DEMOGRAPHIC_SURVEY_V2__GENDER_OTHER_TEXT = "Non-binary";
+  public static final String DEMOGRAPHIC_SURVEY_V2__ORIENTATION_OTHER_TEXT = "Pansexual";
+  public static final String DEMOGRAPHIC_SURVEY_V2__SEX_AT_BIRTH = "FEMALE";
+  public static final String DEMOGRAPHIC_SURVEY_V2__SEX_AT_BIRTH_OTHER_TEXT = "Other";
+  public static final Long DEMOGRAPHIC_SURVEY_V2__YEAR_OF_BIRTH = 1990L;
+  public static final Boolean DEMOGRAPHIC_SURVEY_V2__YEAR_OF_BIRTH_PREFER_NOT = false;
+  public static final String DEMOGRAPHIC_SURVEY_V2__DISABILITY_HEARING = "NO";
+  public static final String DEMOGRAPHIC_SURVEY_V2__DISABILITY_SEEING = "NO";
+  public static final String DEMOGRAPHIC_SURVEY_V2__DISABILITY_CONCENTRATING = "NO";
+  public static final String DEMOGRAPHIC_SURVEY_V2__DISABILITY_WALKING = "NO";
+  public static final String DEMOGRAPHIC_SURVEY_V2__DISABILITY_DRESSING = "NO";
+  public static final String DEMOGRAPHIC_SURVEY_V2__DISABILITY_ERRANDS = "NO";
+  public static final String DEMOGRAPHIC_SURVEY_V2__DISABILITY_OTHER_TEXT = "Other";
+  public static final String DEMOGRAPHIC_SURVEY_V2__EDUCATION = "COLLEGE_GRADUATE";
+  public static final String DEMOGRAPHIC_SURVEY_V2__DISADVANTAGED = "NO";
+  public static final String DEMOGRAPHIC_SURVEY_V2__SURVEY_COMMENTS = "Great survey!";
 
   public static ReportingWorkspace createDtoWorkspace() {
     return new ReportingWorkspace()
@@ -218,6 +251,68 @@ public class ReportingTestUtils {
         .modified(offsetDateTimeUtc(NEW_USER_SATISFACTION_SURVEY__MODIFIED))
         .satisfaction(NEW_USER_SATISFACTION_SURVEY__SATISFACTION)
         .additionalInfo(NEW_USER_SATISFACTION_SURVEY__ADDITIONAL_INFO);
+  }
+
+  public static ReportingDemographicSurveyV2 createReportingDemographicSurveyV2() {
+    return new ReportingDemographicSurveyV2()
+        .id(DEMOGRAPHIC_SURVEY_V2__ID)
+        .userId(DEMOGRAPHIC_SURVEY_V2__USER_ID)
+        .created(offsetDateTimeUtc(DEMOGRAPHIC_SURVEY_V2__CREATED))
+        .modified(offsetDateTimeUtc(DEMOGRAPHIC_SURVEY_V2__MODIFIED))
+        .ethnicityAiAnOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_AI_AN_OTHER_TEXT)
+        .ethnicityAsianOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_ASIAN_OTHER_TEXT)
+        .ethnicityBlackOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_BLACK_OTHER_TEXT)
+        .ethnicityHispanicOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_HISPANIC_OTHER_TEXT)
+        .ethnicityMeNaOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_ME_NA_OTHER_TEXT)
+        .ethnicityNhPiOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_NH_PI_OTHER_TEXT)
+        .ethnicityWhiteOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_WHITE_OTHER_TEXT)
+        .ethnicityOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_OTHER_TEXT)
+        .genderOtherText(DEMOGRAPHIC_SURVEY_V2__GENDER_OTHER_TEXT)
+        .orientationOtherText(DEMOGRAPHIC_SURVEY_V2__ORIENTATION_OTHER_TEXT)
+        .sexAtBirth(DEMOGRAPHIC_SURVEY_V2__SEX_AT_BIRTH)
+        .sexAtBirthOtherText(DEMOGRAPHIC_SURVEY_V2__SEX_AT_BIRTH_OTHER_TEXT)
+        .yearOfBirth(DEMOGRAPHIC_SURVEY_V2__YEAR_OF_BIRTH)
+        .yearOfBirthPreferNot(DEMOGRAPHIC_SURVEY_V2__YEAR_OF_BIRTH_PREFER_NOT)
+        .disabilityHearing(DEMOGRAPHIC_SURVEY_V2__DISABILITY_HEARING)
+        .disabilitySeeing(DEMOGRAPHIC_SURVEY_V2__DISABILITY_SEEING)
+        .disabilityConcentrating(DEMOGRAPHIC_SURVEY_V2__DISABILITY_CONCENTRATING)
+        .disabilityWalking(DEMOGRAPHIC_SURVEY_V2__DISABILITY_WALKING)
+        .disabilityDressing(DEMOGRAPHIC_SURVEY_V2__DISABILITY_DRESSING)
+        .disabilityErrands(DEMOGRAPHIC_SURVEY_V2__DISABILITY_ERRANDS)
+        .disabilityOtherText(DEMOGRAPHIC_SURVEY_V2__DISABILITY_OTHER_TEXT)
+        .education(DEMOGRAPHIC_SURVEY_V2__EDUCATION)
+        .disadvantaged(DEMOGRAPHIC_SURVEY_V2__DISADVANTAGED)
+        .surveyComments(DEMOGRAPHIC_SURVEY_V2__SURVEY_COMMENTS);
+  }
+
+  public static DbDemographicSurveyV2 createDbDemographicSurveyV2(DbUser user) {
+    return new DbDemographicSurveyV2()
+        .setUser(user)
+        .setCompletionTime(DEMOGRAPHIC_SURVEY_V2__CREATED)
+        .setEthnicityAiAnOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_AI_AN_OTHER_TEXT)
+        .setEthnicityAsianOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_ASIAN_OTHER_TEXT)
+        .setEthnicityBlackOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_BLACK_OTHER_TEXT)
+        .setEthnicityHispanicOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_HISPANIC_OTHER_TEXT)
+        .setEthnicityMeNaOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_ME_NA_OTHER_TEXT)
+        .setEthnicityNhPiOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_NH_PI_OTHER_TEXT)
+        .setEthnicityWhiteOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_WHITE_OTHER_TEXT)
+        .setEthnicityOtherText(DEMOGRAPHIC_SURVEY_V2__ETHNICITY_OTHER_TEXT)
+        .setGenderOtherText(DEMOGRAPHIC_SURVEY_V2__GENDER_OTHER_TEXT)
+        .setOrientationOtherText(DEMOGRAPHIC_SURVEY_V2__ORIENTATION_OTHER_TEXT)
+        .setSexAtBirth(DbDemographicSurveyV2.DbSexAtBirthV2.FEMALE)
+        .setSexAtBirthOtherText(DEMOGRAPHIC_SURVEY_V2__SEX_AT_BIRTH_OTHER_TEXT)
+        .setYearOfBirth(DEMOGRAPHIC_SURVEY_V2__YEAR_OF_BIRTH)
+        .setYearOfBirthPreferNot(DEMOGRAPHIC_SURVEY_V2__YEAR_OF_BIRTH_PREFER_NOT)
+        .setDisabilityHearing(DbDemographicSurveyV2.DbYesNoPreferNot.NO)
+        .setDisabilitySeeing(DbDemographicSurveyV2.DbYesNoPreferNot.NO)
+        .setDisabilityConcentrating(DbDemographicSurveyV2.DbYesNoPreferNot.NO)
+        .setDisabilityWalking(DbDemographicSurveyV2.DbYesNoPreferNot.NO)
+        .setDisabilityDressing(DbDemographicSurveyV2.DbYesNoPreferNot.NO)
+        .setDisabilityErrands(DbDemographicSurveyV2.DbYesNoPreferNot.NO)
+        .setDisabilityOtherText(DEMOGRAPHIC_SURVEY_V2__DISABILITY_OTHER_TEXT)
+        .setEducation(DbDemographicSurveyV2.DbEducationV2.COLLEGE_GRADUATE)
+        .setDisadvantaged(DbDemographicSurveyV2.DbYesNoPreferNot.NO)
+        .setSurveyComments(DEMOGRAPHIC_SURVEY_V2__SURVEY_COMMENTS);
   }
 
   public static DbNewUserSatisfactionSurvey createDbNewUserSatisfactionSurvey(DbUser user) {
