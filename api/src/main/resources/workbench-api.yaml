@@ -12838,13 +12838,9 @@ components:
           type: integer
           description: ID of the user who created the survey response.
           format: int64
-        created:
+        completionTime:
           type: string
-          description: Time the survey response was created.
-          format: date-time
-        modified:
-          type: string
-          description: Time the survey response was last modified.
+          description: Time the survey was last modified.
           format: date-time
         ethnicityAiAnOtherText:
           type: string

@@ -13,8 +13,7 @@ public enum DemographicSurveyV2ColumnValueExtractor
     implements ColumnValueExtractor<ReportingDemographicSurveyV2> {
   ID("id", ReportingDemographicSurveyV2::getId),
   USER_ID("user_id", ReportingDemographicSurveyV2::getUserId),
-  CREATED("created", demographicSurveyV2 -> toInsertRowString(demographicSurveyV2.getCreated())),
-  MODIFIED("modified", demographicSurveyV2 -> toInsertRowString(demographicSurveyV2.getModified())),
+  COMPLETION_TIME("completion_time", demographicSurveyV2 -> toInsertRowString(demographicSurveyV2.getCompletionTime())),
   ETHNICITY_AI_AN_OTHER_TEXT(
       "ethnicity_ai_an_other_text", ReportingDemographicSurveyV2::getEthnicityAiAnOtherText),
   ETHNICITY_ASIAN_OTHER_TEXT(

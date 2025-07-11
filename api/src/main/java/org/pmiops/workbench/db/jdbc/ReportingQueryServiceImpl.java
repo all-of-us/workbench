@@ -151,9 +151,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             new ReportingDemographicSurveyV2()
                 .id(rs.getLong("demographic_survey_v2_id"))
                 .userId(rs.getLong("user_id"))
-                .created(offsetDateTimeUtc(rs.getTimestamp("completion_time")))
-                // Users cannot modify this survey, so `modified` is the same as `created`.
-                .modified(offsetDateTimeUtc(rs.getTimestamp("completion_time")))
+                .completionTime(offsetDateTimeUtc(rs.getTimestamp("completion_time")))
                 .ethnicityAiAnOtherText(rs.getString("ethnicity_ai_an_other_text"))
                 .ethnicityAsianOtherText(rs.getString("ethnicity_asian_other_text"))
                 .ethnicityBlackOtherText(rs.getString("ethnicity_black_other_text"))
