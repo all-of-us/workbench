@@ -11,7 +11,7 @@ import org.pmiops.workbench.model.ReportingDemographicSurveyV2;
  */
 public enum DemographicSurveyV2ColumnValueExtractor
     implements ColumnValueExtractor<ReportingDemographicSurveyV2> {
-  DEMOGRAPHIC_SURVEY_V2_ID("id", ReportingDemographicSurveyV2::getDemographicSurveyV2Id),
+  DEMOGRAPHIC_SURVEY_V2_ID("demographic_survey_v2_id", ReportingDemographicSurveyV2::getDemographicSurveyV2Id),
   USER_ID("user_id", ReportingDemographicSurveyV2::getUserId),
   COMPLETION_TIME("completion_time", demographicSurveyV2 -> toInsertRowString(demographicSurveyV2.getCompletionTime())),
   ETHNICITY_AI_AN_OTHER_TEXT(
