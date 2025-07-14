@@ -4,10 +4,13 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.Streams;
 import jakarta.inject.Provider;
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.ReportingUploadVerificationDao;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +22,17 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final ReportingTableService reportingTableService;
+  private final ReportingUploadVerificationDao reportingUploadVerificationDao;
 
   public ReportingVerificationServiceImpl(
       BigQueryService bigQueryService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      ReportingTableService reportingTableService) {
+      ReportingTableService reportingTableService,
+      ReportingUploadVerificationDao reportingUploadVerificationDao) {
     this.bigQueryService = bigQueryService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.reportingTableService = reportingTableService;
+    this.reportingUploadVerificationDao = reportingUploadVerificationDao;
   }
 
   @Override
@@ -49,6 +55,44 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
     logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
     return verified;
+  }
+
+  @Override
+  public void verifyBatchesAndLog(List<String> tables, long captureSnapshotTime) {
+    final StringBuilder sb =
+        new StringBuilder(String.format("Verifying batches at %d:\n", captureSnapshotTime));
+
+    sb.append("Table\tSource\tDestination\tDifference(%)\n");
+
+    reportingTableService
+        .getAll(tables)
+        .forEach(
+            table -> {
+              final String bqTableName = table.bqTableName();
+              long sourceCount = table.rwbTableCountFn().getAsInt();
+              long destCount = getBigQueryRowCount(bqTableName, captureSnapshotTime);
+              boolean uploadOutcome = verifyCount(bqTableName, sourceCount, destCount, sb);
+              reportingUploadVerificationDao.updateUploadedStatus(
+                  bqTableName, new Timestamp(captureSnapshotTime), uploadOutcome);
+            });
+    logger.log(Level.INFO, sb.toString());
+  }
+
+  @Override
+  public boolean verifySnapshot(long captureSnapshotTime) {
+    var tablesInSnapshot =
+        reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(captureSnapshotTime));
+    if (tablesInSnapshot.isEmpty()) {
+      // This really shouldn't happen, but if it does, we return false to avoid uploading a falsely
+      // verified snapshot.
+      logger.warning(
+          String.format(
+              "No tables found for snapshot at %d. Cannot verify snapshot.", captureSnapshotTime));
+      return false;
+    } else {
+      return tablesInSnapshot.stream()
+          .allMatch(record -> Boolean.TRUE.equals(record.getUploaded()));
+    }
   }
 
   /** Verifies source count equals to destination count. Returns {@code true} of match. */

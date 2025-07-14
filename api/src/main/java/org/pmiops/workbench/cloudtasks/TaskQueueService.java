@@ -83,6 +83,9 @@ public class TaskQueueService {
   public static final TaskQueuePair VWB_POD_CREATION =
       new TaskQueuePair("vwbPodCreationQueue", "createVwbPod");
 
+  public static final TaskQueuePair REPORTING_UPLOAD =
+      new TaskQueuePair("reportingUploadQueue", "reportingUploadQueue");
+
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
   private final WorkbenchLocationConfigService locationConfigService;
@@ -243,6 +246,14 @@ public class TaskQueueService {
     }
     createAndPushTaskWithBearerToken(
         VWB_POD_CREATION, new CreateVwbPodTaskRequest().userName(email));
+  }
+
+  public void pushReportingUploadTask(String table, Long captureSnapshotTime) {
+    createAndPushTask(
+        REPORTING_UPLOAD,
+        new ReportingUploadQueueTaskRequest()
+            .tables(List.of(table))
+            .snapshotTimestamp(captureSnapshotTime));
   }
 
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {
