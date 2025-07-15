@@ -116,6 +116,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.query(
         String.format(
             "SELECT\n"
+                + " demographic_survey_v2_id,\n"
                 + "  user_id,\n"
                 + "  completion_time,\n"
                 + "  ethnicity_ai_an_other_text,\n"
