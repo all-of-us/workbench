@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.HashSet;
@@ -72,11 +71,11 @@ public class ReportingServiceTest {
 
     // Verify verification entry is created for the cohort table
     ArgumentCaptor<String> tableNameCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<Timestamp> timestampCaptor = ArgumentCaptor.forClass(Timestamp.class);
+    ArgumentCaptor<Long> timestampCaptor = ArgumentCaptor.forClass(Long.class);
     verify(mockReportingUploadVerificationDao)
         .createVerificationEntry(tableNameCaptor.capture(), timestampCaptor.capture());
     assertThat(tableNameCaptor.getValue()).isEqualTo("cohort");
-    assertThat(timestampCaptor.getValue()).isEqualTo(new Timestamp(NOW_MILLIS));
+    assertThat(timestampCaptor.getValue()).isEqualTo(NOW_MILLIS);
 
     // Verify task is queued for the cohort table
     ArgumentCaptor<String> taskTableNameCaptor = ArgumentCaptor.forClass(String.class);
@@ -106,15 +105,15 @@ public class ReportingServiceTest {
 
     // Verify verification entries are created for both tables
     ArgumentCaptor<String> tableNameCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<Timestamp> timestampCaptor = ArgumentCaptor.forClass(Timestamp.class);
+    ArgumentCaptor<Long> timestampCaptor = ArgumentCaptor.forClass(Long.class);
     verify(mockReportingUploadVerificationDao, times(2))
         .createVerificationEntry(tableNameCaptor.capture(), timestampCaptor.capture());
     List<String> capturedTableNames = tableNameCaptor.getAllValues();
     assertThat(capturedTableNames).containsExactly("cohort", "user");
-    List<Timestamp> capturedTimestamps = timestampCaptor.getAllValues();
+    List<Long> capturedTimestamps = timestampCaptor.getAllValues();
     assertThat(capturedTimestamps).hasSize(2);
-    assertThat(capturedTimestamps.get(0)).isEqualTo(new Timestamp(NOW_MILLIS));
-    assertThat(capturedTimestamps.get(1)).isEqualTo(new Timestamp(NOW_MILLIS));
+    assertThat(capturedTimestamps.get(0)).isEqualTo(NOW_MILLIS);
+    assertThat(capturedTimestamps.get(1)).isEqualTo(NOW_MILLIS);
 
     // Verify tasks are queued for both tables
     ArgumentCaptor<String> taskTableNameCaptor = ArgumentCaptor.forClass(String.class);
@@ -161,8 +160,7 @@ public class ReportingServiceTest {
 
     // Assert
     // Verify that the same timestamp is used for all verification entries and tasks
-    ArgumentCaptor<Timestamp> verificationTimestampCaptor =
-        ArgumentCaptor.forClass(Timestamp.class);
+    ArgumentCaptor<Long> verificationTimestampCaptor = ArgumentCaptor.forClass(Long.class);
     verify(mockReportingUploadVerificationDao, times(2))
         .createVerificationEntry(any(), verificationTimestampCaptor.capture());
 
@@ -171,8 +169,7 @@ public class ReportingServiceTest {
         .pushReportingUploadTask(any(), taskTimestampCaptor.capture());
 
     // All timestamps should be the same
-    List<Long> verificationTimestamps =
-        verificationTimestampCaptor.getAllValues().stream().map(Timestamp::getTime).toList();
+    List<Long> verificationTimestamps = verificationTimestampCaptor.getAllValues();
     List<Long> taskTimestamps = taskTimestampCaptor.getAllValues();
     assertEquals(new HashSet<>(verificationTimestamps), new HashSet<>(taskTimestamps));
   }

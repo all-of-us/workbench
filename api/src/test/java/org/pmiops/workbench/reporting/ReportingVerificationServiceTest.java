@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableSet;
 import jakarta.persistence.EntityManager;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
@@ -220,12 +219,10 @@ public class ReportingVerificationServiceTest {
     var tables = List.of("cohort", "user", "workspace", "new_user_satisfaction_survey");
     var timestamp = NOW.toEpochMilli();
     tables.forEach(
-        table ->
-            reportingUploadVerificationDao.createVerificationEntry(
-                table, new Timestamp(timestamp)));
+        table -> reportingUploadVerificationDao.createVerificationEntry(table, timestamp));
     reportingVerificationService.verifyBatchesAndLog(tables, timestamp);
 
-    var res = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(timestamp));
+    var res = reportingUploadVerificationDao.findBySnapshotTimestamp(timestamp);
     assertThat(res.size()).isEqualTo(4);
     assertThat(res.stream().allMatch(DbReportingUploadVerification::getUploaded)).isTrue();
   }
@@ -236,13 +233,11 @@ public class ReportingVerificationServiceTest {
     var tables = List.of("cohort", "user", "workspace", "new_user_satisfaction_survey");
     var timestamp = NOW.toEpochMilli();
     tables.forEach(
-        table ->
-            reportingUploadVerificationDao.createVerificationEntry(
-                table, new Timestamp(timestamp)));
+        table -> reportingUploadVerificationDao.createVerificationEntry(table, timestamp));
     reportingVerificationService.verifyBatchesAndLog(
         List.of("cohort", "user", "workspace", "new_user_satisfaction_survey"), timestamp);
 
-    var res = reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(timestamp));
+    var res = reportingUploadVerificationDao.findBySnapshotTimestamp(timestamp);
     assertThat(res.size()).isEqualTo(4);
     assertThat(res.stream().noneMatch(DbReportingUploadVerification::getUploaded)).isTrue();
   }
@@ -250,8 +245,7 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifySnapshot_withAllTablesUploaded_returnsTrue() {
     // Arrange
-    long snapshotTimestamp = NOW.toEpochMilli();
-    Timestamp timestamp = new Timestamp(snapshotTimestamp);
+    long timestamp = NOW.toEpochMilli();
 
     // Create verification records for multiple tables, all uploaded successfully
     createVerificationRecord("cohort", timestamp, true);
@@ -259,7 +253,7 @@ public class ReportingVerificationServiceTest {
     createVerificationRecord("workspace", timestamp, true);
 
     // Act
-    boolean result = reportingVerificationService.verifySnapshot(snapshotTimestamp);
+    boolean result = reportingVerificationService.verifySnapshot(timestamp);
 
     // Assert
     assertThat(result).isTrue();
@@ -268,8 +262,7 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifySnapshot_withSomeTablesNotUploaded_returnsFalse() {
     // Arrange
-    long snapshotTimestamp = NOW.toEpochMilli();
-    Timestamp timestamp = new Timestamp(snapshotTimestamp);
+    long timestamp = NOW.toEpochMilli();
 
     // Create verification records with mixed upload status
     createVerificationRecord("cohort", timestamp, true);
@@ -277,7 +270,7 @@ public class ReportingVerificationServiceTest {
     createVerificationRecord("workspace", timestamp, true);
 
     // Act
-    boolean result = reportingVerificationService.verifySnapshot(snapshotTimestamp);
+    boolean result = reportingVerificationService.verifySnapshot(timestamp);
 
     // Assert
     assertThat(result).isFalse();
@@ -286,15 +279,14 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifySnapshot_withNoTablesUploaded_returnsFalse() {
     // Arrange
-    long snapshotTimestamp = NOW.toEpochMilli();
-    Timestamp timestamp = new Timestamp(snapshotTimestamp);
+    long timestamp = NOW.toEpochMilli();
 
     // Create verification records where none are uploaded
     createVerificationRecord("cohort", timestamp, false);
     createVerificationRecord("user", timestamp, false);
 
     // Act
-    boolean result = reportingVerificationService.verifySnapshot(snapshotTimestamp);
+    boolean result = reportingVerificationService.verifySnapshot(timestamp);
 
     // Assert
     assertThat(result).isFalse();
@@ -303,11 +295,11 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifySnapshot_withEmptySnapshot_returnsFalse() {
     // Arrange
-    long snapshotTimestamp = NOW.toEpochMilli();
+    long timestamp = NOW.toEpochMilli();
     // Don't create any verification records
 
     // Act
-    boolean result = reportingVerificationService.verifySnapshot(snapshotTimestamp);
+    boolean result = reportingVerificationService.verifySnapshot(timestamp);
 
     // Assert
     assertThat(result).isFalse();
@@ -316,8 +308,7 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifySnapshot_withNullUploadedValues_returnsFalse() {
     // Arrange
-    long snapshotTimestamp = NOW.toEpochMilli();
-    Timestamp timestamp = new Timestamp(snapshotTimestamp);
+    long timestamp = NOW.toEpochMilli();
 
     // Create verification records with mixed status including null
     createVerificationRecord("cohort", timestamp, true);
@@ -325,7 +316,7 @@ public class ReportingVerificationServiceTest {
     createVerificationRecord("workspace", timestamp, true);
 
     // Act
-    boolean result = reportingVerificationService.verifySnapshot(snapshotTimestamp);
+    boolean result = reportingVerificationService.verifySnapshot(timestamp);
 
     // Assert
     assertThat(result).isFalse();
@@ -334,11 +325,8 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifySnapshot_withDifferentTimestamp_returnsCorrectResult() {
     // Arrange
-    long snapshotTimestamp1 = NOW.toEpochMilli();
-    long snapshotTimestamp2 = NOW.toEpochMilli() + 1000L; // Different timestamp
-
-    Timestamp timestamp1 = new Timestamp(snapshotTimestamp1);
-    Timestamp timestamp2 = new Timestamp(snapshotTimestamp2);
+    long timestamp1 = NOW.toEpochMilli();
+    long timestamp2 = NOW.toEpochMilli() + 1000L; // Different timestamp
 
     // Create records for timestamp1 (all uploaded)
     createVerificationRecord("cohort", timestamp1, true);
@@ -349,12 +337,12 @@ public class ReportingVerificationServiceTest {
     createVerificationRecord("user", timestamp2, false);
 
     // Act & Assert
-    assertThat(reportingVerificationService.verifySnapshot(snapshotTimestamp1)).isTrue();
-    assertThat(reportingVerificationService.verifySnapshot(snapshotTimestamp2)).isFalse();
+    assertThat(reportingVerificationService.verifySnapshot(timestamp1)).isTrue();
+    assertThat(reportingVerificationService.verifySnapshot(timestamp2)).isFalse();
   }
 
   private void createVerificationRecord(
-      String tableName, Timestamp snapshotTimestamp, Boolean uploaded) {
+      String tableName, Long snapshotTimestamp, Boolean uploaded) {
     DbReportingUploadVerification record = new DbReportingUploadVerification();
     record.setTableName(tableName);
     record.setSnapshotTimestamp(snapshotTimestamp);

@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.sql.Timestamp;
 
 @Entity
 @Table(name = "reporting_upload_verification")
@@ -14,7 +13,7 @@ public class DbReportingUploadVerification {
 
   private long id;
   private String tableName;
-  private Timestamp snapshotTimestamp;
+  private Long snapshotTimestamp;
   private Boolean uploaded;
 
   @Id
@@ -40,11 +39,11 @@ public class DbReportingUploadVerification {
   }
 
   @Column(name = "snapshot_timestamp", nullable = false)
-  public Timestamp getSnapshotTimestamp() {
+  public Long getSnapshotTimestamp() {
     return snapshotTimestamp;
   }
 
-  public DbReportingUploadVerification setSnapshotTimestamp(Timestamp snapshotTimestamp) {
+  public DbReportingUploadVerification setSnapshotTimestamp(Long snapshotTimestamp) {
     this.snapshotTimestamp = snapshotTimestamp;
     return this;
   }
