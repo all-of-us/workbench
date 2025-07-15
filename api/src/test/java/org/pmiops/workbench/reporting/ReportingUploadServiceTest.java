@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDemographicSurveyV2;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingNewUserSatisfactionSurvey;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
@@ -32,12 +33,14 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingCohort;
+import org.pmiops.workbench.model.ReportingDemographicSurveyV2;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DemographicSurveyV2ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
@@ -234,6 +237,36 @@ public class ReportingUploadServiceTest {
             newUserSatisfactionSurveyColumnValues.get(
                 NewUserSatisfactionSurveyColumnValueExtractor.ID.getParameterName()))
         .isEqualTo(reportingNewUserSatisfactionSurvey.getId());
+  }
+
+  @Test
+  public void testUploadBatchDemographicSurveyV2() {
+    ReportingDemographicSurveyV2 reportingDemographicSurveyV2 =
+        createReportingDemographicSurveyV2();
+    List<ReportingDemographicSurveyV2> reportingDemographicSurveyV2s =
+        List.of(reportingDemographicSurveyV2, new ReportingDemographicSurveyV2());
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadBatch(
+        reportingTableService.demographicSurveyV2(),
+        reportingDemographicSurveyV2s,
+        NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(reportingDemographicSurveyV2s.size());
+    final Map<String, Object> demographicSurveyV2ColumnValues =
+        request.getRows().get(0).getContent();
+
+    assertThat(
+            demographicSurveyV2ColumnValues.get(
+                DemographicSurveyV2ColumnValueExtractor.ID.getParameterName()))
+        .isEqualTo(reportingDemographicSurveyV2.getId());
   }
 
   @Test

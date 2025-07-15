@@ -35,6 +35,7 @@ import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingDemographicSurveyV2;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -108,6 +109,73 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .satisfaction(
                     NewUserSatisfactionSurveySatisfaction.valueOf(rs.getString("satisfaction")))
                 .additionalInfo(rs.getString("additional_info")));
+  }
+
+  @Override
+  public List<ReportingDemographicSurveyV2> getDemographicSurveyV2Batch(long limit, long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT\n"
+                + " demographic_survey_v2_id,\n"
+                + "  user_id,\n"
+                + "  completion_time,\n"
+                + "  ethnicity_ai_an_other_text,\n"
+                + "  ethnicity_asian_other_text,\n"
+                + "  ethnicity_black_other_text,\n"
+                + "  ethnicity_hispanic_other_text,\n"
+                + "  ethnicity_me_na_other_text,\n"
+                + "  ethnicity_nh_pi_other_text,\n"
+                + "  ethnicity_white_other_text,\n"
+                + "  ethnicity_other_text,\n"
+                + "  gender_other_text,\n"
+                + "  orientation_other_text,\n"
+                + "  sex_at_birth,\n"
+                + "  sex_at_birth_other_text,\n"
+                + "  year_of_birth,\n"
+                + "  year_of_birth_prefer_not,\n"
+                + "  disability_hearing,\n"
+                + "  disability_seeing,\n"
+                + "  disability_concentrating,\n"
+                + "  disability_walking,\n"
+                + "  disability_dressing,\n"
+                + "  disability_errands,\n"
+                + "  disability_other_text,\n"
+                + "  education,\n"
+                + "  disadvantaged,\n"
+                + "  survey_comments\n"
+                + "FROM demographic_survey_v2\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingDemographicSurveyV2()
+                .demographicSurveyV2Id(rs.getLong("demographic_survey_v2_id"))
+                .userId(rs.getLong("user_id"))
+                .completionTime(offsetDateTimeUtc(rs.getTimestamp("completion_time")))
+                .ethnicityAiAnOtherText(rs.getString("ethnicity_ai_an_other_text"))
+                .ethnicityAsianOtherText(rs.getString("ethnicity_asian_other_text"))
+                .ethnicityBlackOtherText(rs.getString("ethnicity_black_other_text"))
+                .ethnicityHispanicOtherText(rs.getString("ethnicity_hispanic_other_text"))
+                .ethnicityMeNaOtherText(rs.getString("ethnicity_me_na_other_text"))
+                .ethnicityNhPiOtherText(rs.getString("ethnicity_nh_pi_other_text"))
+                .ethnicityWhiteOtherText(rs.getString("ethnicity_white_other_text"))
+                .ethnicityOtherText(rs.getString("ethnicity_other_text"))
+                .genderOtherText(rs.getString("gender_other_text"))
+                .orientationOtherText(rs.getString("orientation_other_text"))
+                .sexAtBirth(rs.getString("sex_at_birth"))
+                .sexAtBirthOtherText(rs.getString("sex_at_birth_other_text"))
+                .yearOfBirth(rs.getObject("year_of_birth", Long.class))
+                .yearOfBirthPreferNot(rs.getObject("year_of_birth_prefer_not", Boolean.class))
+                .disabilityHearing(rs.getString("disability_hearing"))
+                .disabilitySeeing(rs.getString("disability_seeing"))
+                .disabilityConcentrating(rs.getString("disability_concentrating"))
+                .disabilityWalking(rs.getString("disability_walking"))
+                .disabilityDressing(rs.getString("disability_dressing"))
+                .disabilityErrands(rs.getString("disability_errands"))
+                .disabilityOtherText(rs.getString("disability_other_text"))
+                .education(rs.getString("education"))
+                .disadvantaged(rs.getString("disadvantaged"))
+                .surveyComments(rs.getString("survey_comments")));
   }
 
   @Override

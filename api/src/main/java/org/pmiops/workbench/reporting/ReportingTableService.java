@@ -14,6 +14,7 @@ import org.pmiops.workbench.model.ReportingBase;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingDemographicSurveyV2;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -25,6 +26,7 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DemographicSurveyV2ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.LeonardoAppUsageColumnValueExtractor;
@@ -56,6 +58,7 @@ public class ReportingTableService {
 
   private static final String INSTITUTION_TABLE_NAME = "institution";
   private static final String COHORT_TABLE_NAME = "cohort";
+  private static final String DEMOGRAPHIC_SURVEY_V2_TABLE_NAME = "demographic_survey_v2";
   private static final String NEW_USER_SATISFACTION_SURVEY_TABLE_NAME =
       "new_user_satisfaction_survey";
   private static final String USER_GENERAL_DISCOVERY_SOURCE_TABLE_NAME =
@@ -81,6 +84,7 @@ public class ReportingTableService {
         cohort(),
         dataset(),
         datasetDomainIdValue(),
+        demographicSurveyV2(),
         institution(),
         leoAppUsage(),
         newUserSatisfactionSurvey(),
@@ -145,6 +149,13 @@ public class ReportingTableService {
         NEW_USER_SATISFACTION_SURVEY_TABLE_NAME,
         NewUserSatisfactionSurveyColumnValueExtractor::values,
         reportingQueryService::getNewUserSatisfactionSurveyBatch);
+  }
+
+  public final ReportingTableParams<ReportingDemographicSurveyV2> demographicSurveyV2() {
+    return defaultParams(
+        DEMOGRAPHIC_SURVEY_V2_TABLE_NAME,
+        DemographicSurveyV2ColumnValueExtractor::values,
+        reportingQueryService::getDemographicSurveyV2Batch);
   }
 
   public final ReportingTableParams<ReportingUser> user() {
