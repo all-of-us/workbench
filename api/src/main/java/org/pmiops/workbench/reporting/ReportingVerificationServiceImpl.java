@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.Streams;
 import jakarta.inject.Provider;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,7 +72,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
               long destCount = getBigQueryRowCount(bqTableName, captureSnapshotTime);
               boolean uploadOutcome = verifyCount(bqTableName, sourceCount, destCount, sb);
               reportingUploadVerificationDao.updateUploadedStatus(
-                  bqTableName, new Timestamp(captureSnapshotTime), uploadOutcome);
+                  bqTableName, captureSnapshotTime, uploadOutcome);
             });
     logger.log(Level.INFO, sb.toString());
   }
@@ -81,7 +80,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   @Override
   public boolean verifySnapshot(long captureSnapshotTime) {
     var tablesInSnapshot =
-        reportingUploadVerificationDao.findBySnapshotTimestamp(new Timestamp(captureSnapshotTime));
+        reportingUploadVerificationDao.findBySnapshotTimestamp(captureSnapshotTime);
     if (tablesInSnapshot.isEmpty()) {
       // This really shouldn't happen, but if it does, we return false to avoid uploading a falsely
       // verified snapshot.

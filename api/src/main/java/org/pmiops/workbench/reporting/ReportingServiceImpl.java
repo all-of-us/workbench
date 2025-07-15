@@ -1,6 +1,5 @@
 package org.pmiops.workbench.reporting;
 
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.logging.Logger;
@@ -90,7 +89,7 @@ public class ReportingServiceImpl implements ReportingService {
         .forEach(
             tableParams -> {
               reportingUploadVerificationDao.createVerificationEntry(
-                  tableParams.bqTableName(), new Timestamp(captureTimestamp));
+                  tableParams.bqTableName(), captureTimestamp);
               taskQueueService.pushReportingUploadTask(tableParams.bqTableName(), captureTimestamp);
             });
   }

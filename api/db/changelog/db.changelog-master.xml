@@ -277,6 +277,7 @@
   <include file="changelog/db.changelog-267-vwb-initial-credits.xml"/>
   <include file="changelog/db.changelog-268-recreate-vwb-pod-columns.xml"/>
   <include file="changelog/db.changelog-269-add-reporting-upload-verification-table.xml"/>
+  <include file="changelog/db.changelog-270-replace-reporting-upload-verification-timestamp.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
