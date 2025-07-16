@@ -12603,6 +12603,12 @@ components:
         rpAdditionalNotes:
           type: string
           description: Research purpose additional notes input.
+        rpAianResearchType:
+          type: string
+          description: Type of research involving American Indian and Alaska Native populations.
+        rpAianResearchDetails:
+          type: string
+          description: Additional details about American Indian and Alaska Native research.
         rpAncestry:
           type: boolean
           description: If true, user has reported this workspace will study ancestry.

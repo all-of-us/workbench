@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace.AIANResearchType;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
@@ -38,8 +39,11 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_9";
   public static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo_12";
+  public static final String WORKSPACE__RP_AIAN_RESEARCH_TYPE =
+      AIANResearchType.NO_AI_AN_ANALYSIS.toString();
+  public static final String WORKSPACE__RP_AIAN_RESEARCH_DETAILS = "foo_14";
   public static final Boolean WORKSPACE__RP_ANCESTRY = false;
-  public static final String WORKSPACE__RP_ANTICIPATED_FINDINGS = "foo_14";
+  public static final String WORKSPACE__RP_ANTICIPATED_FINDINGS = "foo_15";
   public static final Boolean WORKSPACE__RP_APPROVED = false;
   public static final Boolean WORKSPACE__RP_COMMERCIAL_PURPOSE = true;
   public static final Boolean WORKSPACE__RP_CONTROL_SET = false;
@@ -112,6 +116,8 @@ public class ReportingTestUtils {
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
         .name(WORKSPACE__NAME)
         .rpAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES)
+        .rpAianResearchType(WORKSPACE__RP_AIAN_RESEARCH_TYPE)
+        .rpAianResearchDetails(WORKSPACE__RP_AIAN_RESEARCH_DETAILS)
         .rpAncestry(WORKSPACE__RP_ANCESTRY)
         .rpAnticipatedFindings(WORKSPACE__RP_ANTICIPATED_FINDINGS)
         .rpApproved(WORKSPACE__RP_APPROVED)
@@ -146,6 +152,8 @@ public class ReportingTestUtils {
     workspace.setLastModifiedTime(WORKSPACE__LAST_MODIFIED_TIME);
     workspace.setName(WORKSPACE__NAME);
     workspace.setAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES);
+    workspace.setAianResearchType(AIANResearchType.NO_AI_AN_ANALYSIS);
+    workspace.setAianResearchDetails(WORKSPACE__RP_AIAN_RESEARCH_DETAILS);
     workspace.setAncestry(WORKSPACE__RP_ANCESTRY);
     workspace.setAnticipatedFindings(WORKSPACE__RP_ANTICIPATED_FINDINGS);
     workspace.setApproved(WORKSPACE__RP_APPROVED);
