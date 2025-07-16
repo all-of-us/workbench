@@ -2,20 +2,28 @@ import { z, ZodType } from 'zod';
 
 import { canonicalizeUrl } from './urls';
 
+/**
+ * maps null or undefined value as simplified "can't be blank" error.
+ * 
+ * @param msg - Error message to return if blank
+ * @returns 
+ */
+const mapNoValueError = (msg?: string): z.ZodErrorMap => {
+  return (issue, ctx) => {
+    if (
+      issue.code === 'invalid_type' &&
+      (issue.received === 'null' || issue.received === 'undefined')
+    ) {
+      return { message: msg || "can't be blank" };
+    }
+    return { message: ctx.defaultError };
+  };
+};
+
 // Common validation schema helpers
 export const requiredString = (msg?: string): z.ZodString =>
   z
-    .string({
-      errorMap: (issue, ctx) => {
-        if (
-          issue.code === 'invalid_type' &&
-          (issue.received === 'null' || issue.received === 'undefined')
-        ) {
-          return { message: msg || "can't be blank" };
-        }
-        return { message: ctx.defaultError };
-      },
-    })
+    .string({ errorMap: mapNoValueError(msg) })
     .trim()
     .min(1, { message: msg || "can't be blank" });
 
@@ -34,6 +42,9 @@ export const optionalStringWithMaxLength = (maximum: number, prefix = '') =>
     .default('')
     .or(z.literal(null));
 
+export const requiredNumber = (msg?: string): z.ZodNumber =>
+  z.number({ errorMap: mapNoValueError(msg) });
+
 export const trueBoolean = (msg: string = 'must be true') =>
   z
     .boolean({
@@ -43,7 +54,7 @@ export const trueBoolean = (msg: string = 'must be true') =>
     .refine((val) => val === true, { message: msg });
 
 export const nonEmptyArray = <T>(item: z.ZodType<T>, msg: string) =>
-  z.array(item, { required_error: msg }).min(1, { message: msg });
+  z.array(item, { errorMap: mapNoValueError(msg) }).min(1, { message: msg });
 
 export const httpUrl = (msg: string = 'must be a valid URL') =>
   z
@@ -64,9 +75,6 @@ export const httpUrl = (msg: string = 'must be a valid URL') =>
           const isHttp = url.protocol === 'http:' || url.protocol === 'https:';
           const isLocalHost =
             url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-          console.log(
-            `======== Validating URL: ${val}, isHttp: ${isHttp}, isLocalHost: ${isLocalHost}`
-          );
           return isHttp && !isLocalHost;
         } catch {
           return false;

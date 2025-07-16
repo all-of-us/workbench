@@ -64,6 +64,51 @@ describe('DemographicsSurveyV2 form validation', () => {
 
     expect(errors).toEqual(expectedErrors);
   });
+
+  it('returns errors for blank fields (null)', () => {
+    // Arrange
+    const surveyFields: DemographicSurveyV2 = {
+      disabilityConcentrating: null,
+      disabilityWalking: null,
+      disabilityDressing: null,
+      disabilityErrands: null,
+      disabilityHearing: null,
+      disabilitySeeing: null,
+      yearOfBirth: null,
+      education: null,
+      disadvantaged: null,
+      ethnicCategories: null,
+      genderIdentities: null,
+      sexAtBirth: null,
+      sexualOrientations: null,
+    };
+
+    // Act
+    const errors = validateDemographicSurvey(surveyFields);
+
+    // Assert
+    const expectedErrors: Record<string, string[]> = {
+      disabilityConcentrating: [" Difficulty concentrating can't be blank"],
+      disabilityWalking: [" Difficulty walking can't be blank"],
+      disabilityDressing: [" Difficulty dressing can't be blank"],
+      disabilityErrands: [" Difficulty doing errands can't be blank"],
+      disabilityHearing: [" Difficulty hearing can't be blank"],
+      disabilitySeeing: [" Difficulty seeing can't be blank"],
+      yearOfBirth: [
+        'You must either fill in your year of birth or check the corresponding "Prefer not to answer" checkbox ',
+      ],
+      education: ["Education can't be blank"],
+      disadvantaged: ["Disadvantaged can't be blank"],
+      ethnicCategories: ["Ethnic categories can't be blank"],
+      genderIdentities: ["Gender identities can't be blank"],
+      sexAtBirth: ["Sex at birth can't be blank"],
+      sexualOrientations: ["Sexual orientations can't be blank"],
+    };
+
+    expect(errors).toEqual(expectedErrors);
+  });
+
+
   it('returns max length errors', () => {
     // Arrange
     const longOtherText = 'a'.repeat(NONE_FULLY_DESCRIBE_MAX_LENGTH + 1);

@@ -36,7 +36,7 @@ export const DemographicSurveyValidationMessage = fp.flow(
           <>
             {Object.keys(errors).map((key) => (
               <li key={errors[key][0]}>
-                {key}: {errors[key]} (Question {questionsIndex[key]})
+                {errors[key]} (Question {questionsIndex[key]})
               </li>
             ))}
             {showPreferNotToAnswerMessage(errors) && (
