@@ -267,16 +267,27 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Transactional
-  @Override
-  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+//  @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace, boolean includeTerraResources) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
-    // TODO: do we want to delete workspace resource references and save only metadata?
 
-    // This automatically handles access control to the workspace.
-    fireCloudService.deleteWorkspace(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    if(includeTerraResources) {
+      // This automatically handles access control to the workspace.
+      fireCloudService.deleteWorkspace(
+          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+      String billingProjectName = dbWorkspace.getWorkspaceNamespace();
+      try {
+        fireCloudService.deleteBillingProject(billingProjectName);
+        billingProjectAuditor.fireDeleteAction(billingProjectName);
+      } catch (Exception e) {
+        String msg =
+            String.format(
+                "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
+        log.warning(msg);
+      }
+    }
     dbWorkspace =
         workspaceDao.saveWithLastModified(
             dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
@@ -285,17 +296,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // featured_workspace
     // if they exist
     featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
+  }
 
-    String billingProjectName = dbWorkspace.getWorkspaceNamespace();
-    try {
-      fireCloudService.deleteBillingProject(billingProjectName);
-      billingProjectAuditor.fireDeleteAction(billingProjectName);
-    } catch (Exception e) {
-      String msg =
-          String.format(
-              "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
-      log.warning(msg);
-    }
+  @Transactional
+  @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+    deleteWorkspace(dbWorkspace, true);
   }
 
   @Override
