@@ -328,6 +328,193 @@ public class WorkspaceDaoTest {
         .containsExactlyElementsIn(expectedNamespaces);
   }
 
+  @Test
+  public void findAllActiveWorkspaceNamespaces_empty() {
+    workspaceDao.deleteAll();
+
+    List<String> namespaces = workspaceDao.findAllActiveWorkspaceNamespaces();
+
+    assertThat(namespaces).isEmpty();
+  }
+
+  @Test
+  public void findAllActiveWorkspaceNamespaces_singleActive() {
+    workspaceDao.deleteAll();
+
+    String namespace = "test-namespace-1";
+    DbWorkspace workspace =
+        createWorkspace()
+            .setWorkspaceNamespace(namespace)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    workspaceDao.save(workspace);
+
+    List<String> namespaces = workspaceDao.findAllActiveWorkspaceNamespaces();
+
+    assertThat(namespaces).containsExactly(namespace);
+  }
+
+  @Test
+  public void findAllActiveWorkspaceNamespaces_multipleActive() {
+    workspaceDao.deleteAll();
+
+    String namespace1 = "test-namespace-1";
+    String namespace2 = "test-namespace-2";
+    String namespace3 = "test-namespace-3";
+
+    DbWorkspace workspace1 =
+        createWorkspace()
+            .setWorkspaceNamespace(namespace1)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspace2 =
+        createWorkspace()
+            .setWorkspaceNamespace(namespace2)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspace3 =
+        createWorkspace()
+            .setWorkspaceNamespace(namespace3)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+
+    workspaceDao.save(workspace1);
+    workspaceDao.save(workspace2);
+    workspaceDao.save(workspace3);
+
+    List<String> namespaces = workspaceDao.findAllActiveWorkspaceNamespaces();
+
+    assertThat(namespaces).containsExactly(namespace1, namespace2, namespace3);
+  }
+
+  @Test
+  public void findAllActiveWorkspaceNamespaces_excludesDeleted() {
+    workspaceDao.deleteAll();
+
+    String activeNamespace = "active-namespace";
+    String deletedNamespace = "deleted-namespace";
+
+    DbWorkspace activeWorkspace =
+        createWorkspace()
+            .setWorkspaceNamespace(activeNamespace)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace deletedWorkspace =
+        createWorkspace()
+            .setWorkspaceNamespace(deletedNamespace)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+
+    workspaceDao.save(activeWorkspace);
+    workspaceDao.save(deletedWorkspace);
+
+    List<String> namespaces = workspaceDao.findAllActiveWorkspaceNamespaces();
+
+    assertThat(namespaces).containsExactly(activeNamespace);
+  }
+
+  @Test
+  public void findAllActiveWorkspaceNamespaces_duplicateNamespaces() {
+    workspaceDao.deleteAll();
+
+    String sharedNamespace = "shared-namespace";
+
+    // Create two workspaces with the same namespace but different firecloud names
+    DbWorkspace workspace1 =
+        createWorkspace()
+            .setWorkspaceNamespace(sharedNamespace)
+            .setFirecloudName("firecloud-name-1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspace2 =
+        createWorkspace()
+            .setWorkspaceNamespace(sharedNamespace)
+            .setFirecloudName("firecloud-name-2")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+
+    workspaceDao.save(workspace1);
+    workspaceDao.save(workspace2);
+
+    List<String> namespaces = workspaceDao.findAllActiveWorkspaceNamespaces();
+
+    // Should only return one instance of the shared namespace due to DISTINCT
+    assertThat(namespaces).containsExactly(sharedNamespace);
+  }
+
+  @Test
+  public void findAllActiveWorkspaceNamespaces_mixedStatusesWithDuplicates() {
+    workspaceDao.deleteAll();
+
+    String activeNamespace1 = "active-namespace-1";
+    String activeNamespace2 = "active-namespace-2";
+    String deletedNamespace = "deleted-namespace";
+    String sharedNamespace = "shared-namespace";
+
+    // Active workspaces
+    DbWorkspace activeWorkspace1 =
+        createWorkspace()
+            .setWorkspaceNamespace(activeNamespace1)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace activeWorkspace2 =
+        createWorkspace()
+            .setWorkspaceNamespace(activeNamespace2)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+
+    // Deleted workspace
+    DbWorkspace deletedWorkspace =
+        createWorkspace()
+            .setWorkspaceNamespace(deletedNamespace)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+
+    // Multiple active workspaces with shared namespace
+    DbWorkspace sharedActiveWorkspace1 =
+        createWorkspace()
+            .setWorkspaceNamespace(sharedNamespace)
+            .setFirecloudName("shared-firecloud-1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace sharedActiveWorkspace2 =
+        createWorkspace()
+            .setWorkspaceNamespace(sharedNamespace)
+            .setFirecloudName("shared-firecloud-2")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+
+    // One deleted workspace with shared namespace
+    DbWorkspace sharedDeletedWorkspace =
+        createWorkspace()
+            .setWorkspaceNamespace(sharedNamespace)
+            .setFirecloudName("shared-firecloud-deleted")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+
+    workspaceDao.save(activeWorkspace1);
+    workspaceDao.save(activeWorkspace2);
+    workspaceDao.save(deletedWorkspace);
+    workspaceDao.save(sharedActiveWorkspace1);
+    workspaceDao.save(sharedActiveWorkspace2);
+    workspaceDao.save(sharedDeletedWorkspace);
+
+    List<String> namespaces = workspaceDao.findAllActiveWorkspaceNamespaces();
+
+    // Should return distinct namespaces from active workspaces only
+    assertThat(namespaces).containsExactly(activeNamespace1, activeNamespace2, sharedNamespace);
+  }
+
+  @Test
+  public void findAllActiveWorkspaceNamespaces_onlyDeletedWorkspaces() {
+    workspaceDao.deleteAll();
+
+    String deletedNamespace1 = "deleted-namespace-1";
+    String deletedNamespace2 = "deleted-namespace-2";
+
+    DbWorkspace deletedWorkspace1 =
+        createWorkspace()
+            .setWorkspaceNamespace(deletedNamespace1)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    DbWorkspace deletedWorkspace2 =
+        createWorkspace()
+            .setWorkspaceNamespace(deletedNamespace2)
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+
+    workspaceDao.save(deletedWorkspace1);
+    workspaceDao.save(deletedWorkspace2);
+
+    List<String> namespaces = workspaceDao.findAllActiveWorkspaceNamespaces();
+
+    assertThat(namespaces).isEmpty();
+  }
+
   private DbWorkspace createWorkspace() {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setVersion(1);
