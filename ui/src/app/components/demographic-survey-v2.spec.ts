@@ -108,7 +108,6 @@ describe('DemographicsSurveyV2 form validation', () => {
     expect(errors).toEqual(expectedErrors);
   });
 
-
   it('returns max length errors', () => {
     // Arrange
     const longOtherText = 'a'.repeat(NONE_FULLY_DESCRIBE_MAX_LENGTH + 1);

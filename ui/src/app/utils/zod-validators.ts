@@ -4,9 +4,9 @@ import { canonicalizeUrl } from './urls';
 
 /**
  * maps null or undefined value as simplified "can't be blank" error.
- * 
+ *
  * @param msg - Error message to return if blank
- * @returns 
+ * @returns
  */
 const mapNoValueError = (msg?: string): z.ZodErrorMap => {
   return (issue, ctx) => {

@@ -5,8 +5,8 @@ import {
   optionalStringWithMaxLength,
   refinedObject,
   refineFields,
-  requiredString,
   requiredNumber,
+  requiredString,
   zodToValidateJS,
 } from 'app/utils/zod-validators';
 import { z } from 'zod';
@@ -53,13 +53,13 @@ export const demographicSurveySchema = refinedObject<DemographicSurveyV2>(
       yearOfBirth: fields.yearOfBirthPreferNot
         ? noop
         : requiredNumber(needYearOfBirthMsg)
-          .int()
-          .min(minYear, {
-            message: `Year of birth must be greater than or equal to ${minYear}`,
-          })
-          .max(maxYear, {
-            message: `Year of birth must be less than or equal to ${maxYear}`,
-          }),
+            .int()
+            .min(minYear, {
+              message: `Year of birth must be greater than or equal to ${minYear}`,
+            })
+            .max(maxYear, {
+              message: `Year of birth must be less than or equal to ${maxYear}`,
+            }),
       education: requiredString("Education can't be blank"),
       disadvantaged: requiredYesNoPreferNot("Disadvantaged can't be blank"),
       disabilityHearing: requiredYesNoPreferNot(
