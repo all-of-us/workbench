@@ -35,7 +35,6 @@ import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -141,7 +140,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      UserService userService,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
@@ -226,6 +224,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  public List<String> getOrphanedWorkspaceNamespacesAsService() {
+    List<String> activeWorkspaceNamespaces = getActiveWorkspaceNamespacesAsService();
+    return workspaceDao.findAllOrphanedWorkspaceNamespaces(activeWorkspaceNamespaces);
+  }
+
+  @Override
   public String getPublishedWorkspacesGroupEmail() {
     // All users with CT access also have RT access, so we know that any user with access to
     // workspaces will be a member of the RT Auth Domain Group.  Therefore, we can use this group
@@ -267,16 +271,26 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Transactional
-  @Override
-  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+  public void deleteWorkspace(DbWorkspace dbWorkspace, boolean includeExternalResources) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
-    // TODO: do we want to delete workspace resource references and save only metadata?
 
-    // This automatically handles access control to the workspace.
-    fireCloudService.deleteWorkspace(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    if (includeExternalResources) {
+      // This automatically handles access control to the workspace.
+      fireCloudService.deleteWorkspace(
+          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+      String billingProjectName = dbWorkspace.getWorkspaceNamespace();
+      try {
+        fireCloudService.deleteBillingProject(billingProjectName);
+        billingProjectAuditor.fireDeleteAction(billingProjectName);
+      } catch (Exception e) {
+        String msg =
+            String.format(
+                "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
+        log.warning(msg);
+      }
+    }
     dbWorkspace =
         workspaceDao.saveWithLastModified(
             dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
@@ -285,17 +299,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // featured_workspace
     // if they exist
     featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
+  }
 
-    String billingProjectName = dbWorkspace.getWorkspaceNamespace();
-    try {
-      fireCloudService.deleteBillingProject(billingProjectName);
-      billingProjectAuditor.fireDeleteAction(billingProjectName);
-    } catch (Exception e) {
-      String msg =
-          String.format(
-              "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
-      log.warning(msg);
-    }
+  @Transactional
+  @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+    deleteWorkspace(dbWorkspace, true);
   }
 
   @Override

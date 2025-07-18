@@ -49,6 +49,8 @@ public class TaskQueueService {
       new TaskQueuePair("checkPersistentDiskQueue", "checkPersistentDisks");
   public static final TaskQueuePair SYNCHRONIZE_ACCESS =
       new TaskQueuePair("synchronizeAccessQueue", "synchronizeUserAccess");
+  public static final TaskQueuePair CLEANUP_ORPHANED_WORKSPACES =
+      new TaskQueuePair("cleanupOrphanedWorkspacesQueue", "cleanupOrphanedWorkspaces");
 
   // RDR exporting uniquely uses the same queue for two endpoints
 
@@ -156,6 +158,14 @@ public class TaskQueueService {
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
     OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
     return createAndPushAll(userIds, config.usersPerSynchronizeAccessTask, SYNCHRONIZE_ACCESS);
+  }
+
+  public void groupAndPushCleanupOrphanedWorkspacesTasks(List<String> workspaceNamespaces) {
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
+    createAndPushAll(
+        workspaceNamespaces,
+        config.workspacesPerCleanupOrphanedWorkspacesTask,
+        CLEANUP_ORPHANED_WORKSPACES);
   }
 
   public void groupAndPushAccessExpirationEmailTasks(List<Long> userIds) {

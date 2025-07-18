@@ -163,7 +163,8 @@
     "usersPerCheckInitialCreditsExpirationTask": 50,
     "usersPerAccessExpirationEmailTask": 500,
     "workspacesPerDeleteWorkspaceEnvironmentsTask": 50,
-    "disksPerCheckPersistentDiskTask": 500
+    "disksPerCheckPersistentDiskTask": 500,
+    "workspacesPerCleanupOrphanedWorkspacesTask": 50
   },
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": false,

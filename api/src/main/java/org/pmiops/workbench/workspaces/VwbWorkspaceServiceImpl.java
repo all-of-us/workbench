@@ -106,6 +106,12 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  public List<String> getOrphanedWorkspaceNamespacesAsService() {
+    logger.warn("getOrphanedWorkspaceNamespacesAsService not implemented in VWB");
+    return Collections.emptyList();
+  }
+
+  @Override
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
     logger.warn("getFeaturedWorkspaces not implemented in VWB");
     return Collections.emptyList();
@@ -119,6 +125,11 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public void deleteWorkspace(DbWorkspace dbWorkspace) {
+    logger.warn("deleteWorkspace not implemented for VWB");
+  }
+
+  @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace, boolean includeExternalResources) {
     logger.warn("deleteWorkspace not implemented for VWB");
   }
 
