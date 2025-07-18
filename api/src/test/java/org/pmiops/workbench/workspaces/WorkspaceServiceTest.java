@@ -11,11 +11,12 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTierCdrVersion;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import com.google.common.base.Stopwatch;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -56,7 +57,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
@@ -79,7 +79,6 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -134,6 +133,12 @@ public class WorkspaceServiceTest {
     DbUser user() {
       return currentUser;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    Stopwatch stopwatch() {
+      return Stopwatch.createUnstarted();
+    }
   }
 
   @Autowired private AccessTierDao accessTierDao;
@@ -149,10 +154,7 @@ public class WorkspaceServiceTest {
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private MailService mockMailService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
-
-  @MockBean
-  @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
-  EgressRemediationService egressRemediationService;
+  @MockBean private Provider<Stopwatch> mockStopwatchProvider;
 
   private static DbUser currentUser;
 
@@ -170,6 +172,10 @@ public class WorkspaceServiceTest {
   @BeforeEach
   public void setUp() {
     doReturn(NOW).when(mockClock).instant();
+
+    // Mock the Stopwatch provider
+    Stopwatch mockStopwatch = Stopwatch.createUnstarted();
+    doReturn(mockStopwatch).when(mockStopwatchProvider).get();
 
     firecloudWorkspaceResponses.clear();
     dbWorkspaces.clear();
@@ -215,16 +221,21 @@ public class WorkspaceServiceTest {
     workbenchConfig.billing.accountId = "initial-credits";
   }
 
+  private RawlsWorkspaceDetails createMockWorkspaceDetails(
+      String workspaceTerraUuid, String workspaceTerraName, String workspaceNamespace) {
+    return new RawlsWorkspaceDetails()
+        .workspaceId(workspaceTerraUuid)
+        .name(workspaceTerraName)
+        .namespace(workspaceNamespace);
+  }
+
   private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
       String workspaceTerraUuid,
       String workspaceTerraName,
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel) {
     RawlsWorkspaceDetails mockWorkspace =
-        new RawlsWorkspaceDetails()
-            .workspaceId(workspaceTerraUuid)
-            .name(workspaceTerraName)
-            .namespace(workspaceNamespace);
+        createMockWorkspaceDetails(workspaceTerraUuid, workspaceTerraName, workspaceNamespace);
 
     RawlsWorkspaceResponse mockWorkspaceResponse = new RawlsWorkspaceResponse();
     mockWorkspaceResponse.workspace(mockWorkspace);
@@ -242,10 +253,7 @@ public class WorkspaceServiceTest {
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel) {
     RawlsWorkspaceDetails mockWorkspace =
-        new RawlsWorkspaceDetails()
-            .workspaceId(workspaceTerraUuid)
-            .name(workspaceTerraName)
-            .namespace(workspaceNamespace);
+        createMockWorkspaceDetails(workspaceTerraUuid, workspaceTerraName, workspaceNamespace);
 
     RawlsWorkspaceListResponse mockWorkspaceListResponse = new RawlsWorkspaceListResponse();
     mockWorkspaceListResponse.setAccessLevel(accessLevel);
@@ -621,7 +629,7 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void updateBillingAccount_noChange() throws Exception {
+  public void updateBillingAccount_noChange() {
     String newBillingAccount = "billing-123";
     DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
     workspace.setBillingAccountName(newBillingAccount);
@@ -778,5 +786,197 @@ public class WorkspaceServiceTest {
     assertThat(resultWorkspace.getTerraName()).isEqualTo(testWorkspace.getFirecloudName());
     assertThat(resultWorkspace.getFeaturedCategory())
         .isEqualTo(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+  }
+
+  @Test
+  public void getOrphanedWorkspaceNamespacesAsService_empty() {
+    // Mock Terra returning empty list
+    doReturn(Collections.emptyList()).when(mockFireCloudService).listWorkspacesAsService();
+
+    workspaceDao.deleteAll();
+
+    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
+
+    assertThat(orphanedNamespaces).isEmpty();
+  }
+
+  @Test
+  public void getOrphanedWorkspaceNamespacesAsService_noOrphans() {
+    // Mock Terra returning some workspaces
+    List<RawlsWorkspaceListResponse> terraWorkspaces = new ArrayList<>();
+    terraWorkspaces.add(createMockTerraWorkspace("uuid1", "namespace1"));
+    terraWorkspaces.add(createMockTerraWorkspace("uuid2", "namespace2"));
+    doReturn(terraWorkspaces).when(mockFireCloudService).listWorkspacesAsService();
+
+    // Have the database contain the same workspaces
+    workspaceDao.deleteAll();
+    DbWorkspace workspace1 =
+        createWorkspace()
+            .setWorkspaceNamespace("namespace1")
+            .setFirecloudUuid("uuid1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspace2 =
+        createWorkspace()
+            .setWorkspaceNamespace("namespace2")
+            .setFirecloudUuid("uuid2")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    workspaceDao.save(workspace1);
+    workspaceDao.save(workspace2);
+
+    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
+
+    assertThat(orphanedNamespaces).isEmpty();
+  }
+
+  @Test
+  public void getOrphanedWorkspaceNamespacesAsService_someOrphans() {
+    // Mock Terra returning some workspaces
+    List<RawlsWorkspaceListResponse> terraWorkspaces = new ArrayList<>();
+    terraWorkspaces.add(createMockTerraWorkspace("uuid1", "namespace1"));
+    terraWorkspaces.add(createMockTerraWorkspace("uuid2", "namespace2"));
+    doReturn(terraWorkspaces).when(mockFireCloudService).listWorkspacesAsService();
+
+    // Set the database up to have two orphaned workspaces
+    workspaceDao.deleteAll();
+    DbWorkspace workspace1 =
+        createWorkspace()
+            .setWorkspaceNamespace("namespace1")
+            .setFirecloudUuid("uuid1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspace2 =
+        createWorkspace()
+            .setWorkspaceNamespace("namespace2")
+            .setFirecloudUuid("uuid2")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    // These are orphans - in DB but not in Terra
+    DbWorkspace orphan1 =
+        createWorkspace()
+            .setWorkspaceNamespace("orphan-namespace1")
+            .setFirecloudUuid("orphan-uuid1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace orphan2 =
+        createWorkspace()
+            .setWorkspaceNamespace("orphan-namespace2")
+            .setFirecloudUuid("orphan-uuid2")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    workspaceDao.save(workspace1);
+    workspaceDao.save(workspace2);
+    workspaceDao.save(orphan1);
+    workspaceDao.save(orphan2);
+
+    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
+
+    assertThat(orphanedNamespaces).containsExactly("orphan-namespace1", "orphan-namespace2");
+  }
+
+  @Test
+  public void getOrphanedWorkspaceNamespacesAsService_allOrphans() {
+    // Mock Terra returning empty list
+    doReturn(Collections.emptyList()).when(mockFireCloudService).listWorkspacesAsService();
+
+    // Add only orphans to the database
+    workspaceDao.deleteAll();
+    DbWorkspace orphan1 =
+        createWorkspace()
+            .setWorkspaceNamespace("orphan-namespace1")
+            .setFirecloudUuid("orphan-uuid1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace orphan2 =
+        createWorkspace()
+            .setWorkspaceNamespace("orphan-namespace2")
+            .setFirecloudUuid("orphan-uuid2")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    workspaceDao.save(orphan1);
+    workspaceDao.save(orphan2);
+
+    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
+
+    assertThat(orphanedNamespaces).containsExactly("orphan-namespace1", "orphan-namespace2");
+  }
+
+  @Test
+  public void getOrphanedWorkspaceNamespacesAsService_excludesDeletedWorkspaces() {
+    // Mock Terra returning some workspaces
+    List<RawlsWorkspaceListResponse> terraWorkspaces = new ArrayList<>();
+    terraWorkspaces.add(createMockTerraWorkspace("uuid1", "namespace1"));
+    doReturn(terraWorkspaces).when(mockFireCloudService).listWorkspacesAsService();
+
+    // Add a combination of active and deleted workspaces to the database
+    workspaceDao.deleteAll();
+    DbWorkspace activeWorkspace =
+        createWorkspace()
+            .setWorkspaceNamespace("namespace1")
+            .setFirecloudUuid("uuid1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    // This workspace is deleted, so it should not be considered an orphan
+    DbWorkspace deletedWorkspace =
+        createWorkspace()
+            .setWorkspaceNamespace("deleted-namespace")
+            .setFirecloudUuid("deleted-uuid")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    // This workspace is active but not in Terra, so it's an orphan
+    DbWorkspace orphanWorkspace =
+        createWorkspace()
+            .setWorkspaceNamespace("orphan-namespace")
+            .setFirecloudUuid("orphan-uuid")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    workspaceDao.save(activeWorkspace);
+    workspaceDao.save(deletedWorkspace);
+    workspaceDao.save(orphanWorkspace);
+
+    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
+
+    // Should only return the active orphan, not the deleted workspace
+    assertThat(orphanedNamespaces).containsExactly("orphan-namespace");
+  }
+
+  @Test
+  public void getOrphanedWorkspaceNamespacesAsService_duplicateNamespaces() {
+    // Mock Terra returning some workspaces
+    List<RawlsWorkspaceListResponse> terraWorkspaces = new ArrayList<>();
+    terraWorkspaces.add(createMockTerraWorkspace("uuid1", "namespace1"));
+    doReturn(terraWorkspaces).when(mockFireCloudService).listWorkspacesAsService();
+
+    // Add orphaned workspaces with the same namespace
+    workspaceDao.deleteAll();
+    DbWorkspace workspace1 =
+        createWorkspace()
+            .setWorkspaceNamespace("namespace1")
+            .setFirecloudUuid("uuid1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    // Two orphan workspaces with same namespace
+    DbWorkspace orphan1 =
+        createWorkspace()
+            .setWorkspaceNamespace("orphan-namespace")
+            .setFirecloudUuid("orphan-uuid1")
+            .setFirecloudName("orphan-firecloud-name1")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace orphan2 =
+        createWorkspace()
+            .setWorkspaceNamespace("orphan-namespace")
+            .setFirecloudUuid("orphan-uuid2")
+            .setFirecloudName("orphan-firecloud-name2")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    workspaceDao.save(workspace1);
+    workspaceDao.save(orphan1);
+    workspaceDao.save(orphan2);
+
+    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
+
+    // Should only return one instance of the duplicate namespace due to DISTINCT
+    assertThat(orphanedNamespaces).containsExactly("orphan-namespace");
+  }
+
+  private RawlsWorkspaceListResponse createMockTerraWorkspace(String uuid, String namespace) {
+    return mockRawlsWorkspaceListResponse(
+        uuid, "terra-name", namespace, RawlsWorkspaceAccessLevel.OWNER);
+  }
+
+  private DbWorkspace createWorkspace() {
+    return buildDbWorkspace(
+        workspaceIdIncrementer.getAndIncrement(),
+        "test-workspace-name",
+        "test-workspace-namespace",
+        WorkspaceActiveStatus.ACTIVE);
   }
 }

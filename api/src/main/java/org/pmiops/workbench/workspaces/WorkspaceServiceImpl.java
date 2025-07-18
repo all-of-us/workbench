@@ -35,7 +35,6 @@ import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -141,7 +140,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      UserService userService,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
@@ -223,6 +221,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             rwbNamespaces.size(), formatDurationPretty(elapsed)));
 
     return rwbNamespaces;
+  }
+
+  @Override
+  public List<String> getOrphanedWorkspaceNamespacesAsService() {
+    List<String> activeWorkspaceNamespaces = getActiveWorkspaceNamespacesAsService();
+    return workspaceDao.findAllActiveWorkspaceNamespaces().stream()
+        .filter(namespace -> !activeWorkspaceNamespaces.contains(namespace))
+        .toList();
   }
 
   @Override
