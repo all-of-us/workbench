@@ -226,9 +226,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<String> getOrphanedWorkspaceNamespacesAsService() {
     List<String> activeWorkspaceNamespaces = getActiveWorkspaceNamespacesAsService();
-    return workspaceDao.findAllActiveWorkspaceNamespaces().stream()
-        .filter(namespace -> !activeWorkspaceNamespaces.contains(namespace))
-        .toList();
+    return workspaceDao.findAllOrphanedWorkspaceNamespaces(activeWorkspaceNamespaces);
   }
 
   @Override
