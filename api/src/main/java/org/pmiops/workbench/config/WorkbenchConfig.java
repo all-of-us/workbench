@@ -432,6 +432,8 @@ public class WorkbenchConfig {
     public Integer workspacesPerDeleteWorkspaceEnvironmentsTask;
     // Number of persistent disks to process within a single check persistent disks task.
     public Integer disksPerCheckPersistentDiskTask;
+    // Number of workspaces to process within a single cleanup missing workspace task.
+    public Integer workspacesPerCleanupOrphanedWorkspacesTask;
   }
 
   /**
