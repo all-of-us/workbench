@@ -273,12 +273,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Transactional
-  public void deleteWorkspace(DbWorkspace dbWorkspace, boolean includeTerraResources) {
+  public void deleteWorkspace(DbWorkspace dbWorkspace, boolean includeExternalResources) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
 
-    if (includeTerraResources) {
+    if (includeExternalResources) {
       // This automatically handles access control to the workspace.
       fireCloudService.deleteWorkspace(
           dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
