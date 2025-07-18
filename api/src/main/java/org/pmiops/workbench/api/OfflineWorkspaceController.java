@@ -1,12 +1,8 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.base.Stopwatch;
-import jakarta.inject.Provider;
 import java.util.List;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,18 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 /** Handles offline / cron-based API requests related to workspace management. */
 @RestController
 public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
-  private final Logger logger = LoggerFactory.getLogger(OfflineWorkspaceController.class);
-
-  private final Provider<Stopwatch> stopwatchProvider;
+//  private final Logger logger = LoggerFactory.getLogger(OfflineWorkspaceController.class);
+//
   private final TaskQueueService taskQueueService;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public OfflineWorkspaceController(
-      Provider<Stopwatch> stopwatchProvider,
       TaskQueueService taskQueueService,
       WorkspaceService workspaceService) {
-    this.stopwatchProvider = stopwatchProvider;
     this.taskQueueService = taskQueueService;
     this.workspaceService = workspaceService;
   }
@@ -48,7 +41,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     //
     //    stopwatch.reset().start();
     //    List<String> taskIds =
-     taskQueueService.groupAndPushCleanupOrphanedWorkspacesTasks(orphanedNamespaces);
+    taskQueueService.groupAndPushCleanupOrphanedWorkspacesTasks(orphanedNamespaces);
     //    elapsed = stopwatch.stop().elapsed();
     //    logger.info(
     //        String.format(
