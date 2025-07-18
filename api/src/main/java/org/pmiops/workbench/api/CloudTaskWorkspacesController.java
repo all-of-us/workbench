@@ -7,6 +7,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,10 +20,14 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   private static final boolean DELETE_BILLING_PROJECTS = true;
 
   private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
+  private final WorkspaceService workspaceService;
 
   @Autowired
-  public CloudTaskWorkspacesController(ImpersonatedWorkspaceService impersonatedWorkspaceService) {
+  public CloudTaskWorkspacesController(
+      ImpersonatedWorkspaceService impersonatedWorkspaceService,
+      WorkspaceService workspaceService) {
     this.impersonatedWorkspaceService = impersonatedWorkspaceService;
+    this.workspaceService = workspaceService;
   }
 
   @Override
@@ -75,6 +80,24 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
                 String.format(
                     "Workspace %s/%s was not found in Rawls",
                     workspace.getNamespace(), workspace.getTerraName()));
+          }
+        });
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> cleanupOrphanedWorkspaces(List<String> request) {
+    LOGGER.info(
+        String.format("Cleanup up %d orphaned workspaces in internal database...", request.size()));
+
+    request.forEach(
+        namespace -> {
+          try {
+            workspaceService.deleteWorkspace(
+                workspaceService.lookupWorkspaceByNamespace(namespace), false);
+          } catch (NotFoundException e) {
+            LOGGER.info(String.format("Workspace (%s) was not found in database", namespace));
           }
         });
 

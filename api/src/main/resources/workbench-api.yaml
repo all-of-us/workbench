@@ -4595,6 +4595,27 @@ paths:
           description: Reporting data uploaded successfully
           content: {}
       x-codegen-request-body-name: request
+  /v1/cloudTask/cleanupOrphanedWorkspaces:
+    post:
+      tags:
+      - cloudTaskWorkspaces
+      - cloudTask
+      description: |
+        Cleans up workspace records in the database that are no longer Terra.
+      operationId: cleanupOrphanedWorkspaces
+      security: []
+      requestBody:
+        description: Batch of workspaces cleanup tasks to process.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceNamespaceList'
+        required: true
+      responses:
+        200:
+          description: Workspaces cleaned
+          content: {}
+      x-codegen-request-body-name: request
   /v1/institutions:
     get:
       tags:
