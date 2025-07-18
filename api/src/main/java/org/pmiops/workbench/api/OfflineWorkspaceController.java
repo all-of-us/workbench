@@ -36,8 +36,8 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
    * <p>This API method is called by a cron job and is not part of our normal user-facing surface.
    */
   @Override
-  public ResponseEntity<Void> cleanupMissingWorkspaces() {
-    List<String> activeNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
+  public ResponseEntity<Void> cleanupOrphanedWorkspaces() {
+    List<String> orphanedNamespaces = workspaceService.getOrphanedWorkspaceNamespacesAsService();
     //    Stopwatch stopwatch = stopwatchProvider.get().start();
     //    List<Long> userIds = userService.getAllUserIdsWithActiveInitialCredits();
     //    Duration elapsed = stopwatch.stop().elapsed();
@@ -48,7 +48,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     //
     //    stopwatch.reset().start();
     //    List<String> taskIds =
-    // taskQueueService.groupAndPushCheckInitialCreditsExpirationTasks(userIds);
+     taskQueueService.groupAndPushCleanupOrphanedWorkspacesTasks(orphanedNamespaces);
     //    elapsed = stopwatch.stop().elapsed();
     //    logger.info(
     //        String.format(

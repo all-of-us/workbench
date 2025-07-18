@@ -2640,14 +2640,14 @@ paths:
         204:
           description: No content.
           content: {}
-  /v1/cron/cleanupMissingWorkspaces:
+  /v1/cron/cleanupOrphanedWorkspaces:
     get:
       tags:
       - offlineWorkspace
       - cron
       description: Occasionally Terra workspaces are deleted without being cleaned
-        up in Workbench. This endpoint cleans up those missing workspaces.
-      operationId: cleanupMissingWorkspaces
+        up in Workbench. This endpoint cleans up those orphaned workspaces.
+      operationId: cleanupOrphanedWorkspaces
       security: []
       responses:
         204:
