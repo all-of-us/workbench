@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,6 +58,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
@@ -79,6 +81,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -113,6 +116,7 @@ public class WorkspaceServiceTest {
     CohortService.class,
     ConceptSetService.class,
     DataSetService.class,
+    EgressRemediationService.class,
     FeaturedWorkspaceMapper.class,
     IamService.class,
     InitialCreditsService.class,
@@ -138,6 +142,12 @@ public class WorkspaceServiceTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     Stopwatch stopwatch() {
       return Stopwatch.createUnstarted();
+    }
+
+    @Bean
+    @Qualifier("objectLengthsEgressService")
+    EgressRemediationService objectLengthsEgressService() {
+      return mock(EgressRemediationService.class);
     }
   }
 
