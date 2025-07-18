@@ -87,7 +87,7 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   }
 
   @Override
-  public ResponseEntity<Void> cleanupOrphanedWorkspaces(List<String> request) {
+  public ResponseEntity<Void> cleanupOrphanedWorkspacesBatch(List<String> request) {
     LOGGER.info(
         String.format("Cleanup up %d orphaned workspaces in internal database...", request.size()));
 
