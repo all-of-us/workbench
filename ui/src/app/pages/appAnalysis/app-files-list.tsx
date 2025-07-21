@@ -64,6 +64,15 @@ const styles = reactStyles({
 const notebookSizeThreshold = 5 * 1024 * 1024; // 5 MB
 const transferCheckInterval = 10e3; // 10 seconds
 
+const errors = {
+  filesError: {
+    title: 'Error Loading Files',
+    message: 'Please refresh to try again.  ' +
+      'If this problem persists, it may be because the bucket has been deleted, ' +
+      'or that billing has been deactivated or detached from this project.',
+  } 
+};
+
 const WaitingForFiles = () => (
   <FlexColumn style={{ paddingTop: '0.75rem' }}>
     <div>
@@ -104,10 +113,7 @@ export const AppFilesList = withCurrentWorkspace()(
     const [activeNotebookName, setActiveNotebookName] = useState<string>(null);
 
     const checkTransferComplete = withErrorModal(
-      {
-        title: 'Error Loading Files',
-        message: 'Please refresh to try again.',
-      },
+      errors.filesError,
       () =>
         workspacesApi()
           .notebookTransferComplete(workspace.namespace, workspace.terraName)
@@ -128,10 +134,7 @@ export const AppFilesList = withCurrentWorkspace()(
     );
 
     const loadNotebooks = withErrorModal(
-      {
-        title: 'Error Loading Files',
-        message: 'Please refresh to try again.',
-      },
+      errors.filesError,
       () => listNotebooks(workspace).then(setFilesList)
     );
 
