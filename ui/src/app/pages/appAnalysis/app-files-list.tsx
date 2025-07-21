@@ -67,10 +67,11 @@ const transferCheckInterval = 10e3; // 10 seconds
 const errors = {
   filesError: {
     title: 'Error Loading Files',
-    message: 'Please refresh to try again.  ' +
+    message:
+      'Please refresh to try again.  ' +
       'If this problem persists, it may be because the bucket has been deleted, ' +
       'or that billing has been deactivated or detached from this project.',
-  } 
+  },
 };
 
 const WaitingForFiles = () => (
@@ -112,30 +113,27 @@ export const AppFilesList = withCurrentWorkspace()(
       useState<boolean>(false);
     const [activeNotebookName, setActiveNotebookName] = useState<string>(null);
 
-    const checkTransferComplete = withErrorModal(
-      errors.filesError,
-      () =>
-        workspacesApi()
-          .notebookTransferComplete(workspace.namespace, workspace.terraName)
-          .then((isComplete) => {
-            setIsTransferComplete(isComplete);
+    const checkTransferComplete = withErrorModal(errors.filesError, () =>
+      workspacesApi()
+        .notebookTransferComplete(workspace.namespace, workspace.terraName)
+        .then((isComplete) => {
+          setIsTransferComplete(isComplete);
 
-            if (!isComplete) {
-              // check again after a delay, if we haven't scheduled a check already
-              if (!transferTimeoutId) {
-                const timeoutId = setTimeout(
-                  checkTransferComplete,
-                  transferCheckInterval
-                );
-                setTransferTimeoutId(timeoutId);
-              }
+          if (!isComplete) {
+            // check again after a delay, if we haven't scheduled a check already
+            if (!transferTimeoutId) {
+              const timeoutId = setTimeout(
+                checkTransferComplete,
+                transferCheckInterval
+              );
+              setTransferTimeoutId(timeoutId);
             }
-          })
+          }
+        })
     );
 
-    const loadNotebooks = withErrorModal(
-      errors.filesError,
-      () => listNotebooks(workspace).then(setFilesList)
+    const loadNotebooks = withErrorModal(errors.filesError, () =>
+      listNotebooks(workspace).then(setFilesList)
     );
 
     useEffect(() => {
