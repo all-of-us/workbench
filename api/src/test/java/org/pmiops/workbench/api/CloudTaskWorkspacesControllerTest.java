@@ -39,7 +39,7 @@ class CloudTaskWorkspacesControllerTest {
   }
 
   @Test
-  void cleanupOrphanedWorkspaces_withValidNamespaces_deletesWorkspacesAndReturnsOk() {
+  void cleanupOrphanedWorkspacesBatch_withValidNamespaces_deletesWorkspacesAndReturnsOk() {
     // Arrange
     List<String> namespaces = Arrays.asList("namespace1", "namespace2", "namespace3");
 
@@ -54,7 +54,7 @@ class CloudTaskWorkspacesControllerTest {
     doNothing().when(mockWorkspaceService).deleteWorkspace(any(DbWorkspace.class), eq(false));
 
     // Act
-    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspaces(namespaces);
+    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
     // Assert
     assertValidResponse(response);
@@ -68,12 +68,12 @@ class CloudTaskWorkspacesControllerTest {
   }
 
   @Test
-  void cleanupOrphanedWorkspaces_withEmptyList_doesNothingAndReturnsOk() {
+  void cleanupOrphanedWorkspacesBatch_withEmptyList_doesNothingAndReturnsOk() {
     // Arrange
     List<String> emptyNamespaces = Collections.emptyList();
 
     // Act
-    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspaces(emptyNamespaces);
+    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(emptyNamespaces);
 
     // Assert
     assertValidResponse(response);
@@ -81,7 +81,7 @@ class CloudTaskWorkspacesControllerTest {
   }
 
   @Test
-  void cleanupOrphanedWorkspaces_withSingleNamespace_deletesWorkspaceAndReturnsOk() {
+  void cleanupOrphanedWorkspacesBatch_withSingleNamespace_deletesWorkspaceAndReturnsOk() {
     // Arrange
     List<String> namespaces = Collections.singletonList("single-namespace");
     DbWorkspace workspace = createMockWorkspace("single-namespace");
@@ -90,7 +90,7 @@ class CloudTaskWorkspacesControllerTest {
     doNothing().when(mockWorkspaceService).deleteWorkspace(workspace, false);
 
     // Act
-    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspaces(namespaces);
+    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
     // Assert
     assertValidResponse(response);
@@ -100,7 +100,7 @@ class CloudTaskWorkspacesControllerTest {
   }
 
   @Test
-  void cleanupOrphanedWorkspaces_withNotFoundWorkspace_continuesProcessingAndReturnsOk() {
+  void cleanupOrphanedWorkspacesBatch_withNotFoundWorkspace_continuesProcessingAndReturnsOk() {
     // Arrange
     List<String> namespaces =
         Arrays.asList("existing-namespace", "missing-namespace", "another-existing");
@@ -118,7 +118,7 @@ class CloudTaskWorkspacesControllerTest {
     doNothing().when(mockWorkspaceService).deleteWorkspace(any(DbWorkspace.class), eq(false));
 
     // Act
-    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspaces(namespaces);
+    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
     // Assert
     assertValidResponse(response);
@@ -131,7 +131,7 @@ class CloudTaskWorkspacesControllerTest {
   }
 
   @Test
-  void cleanupOrphanedWorkspaces_withDeleteFailure_throwsException() {
+  void cleanupOrphanedWorkspacesBatch_withDeleteFailure_throwsException() {
     // Arrange
     List<String> namespaces = Arrays.asList("namespace1", "namespace2");
 
@@ -149,7 +149,7 @@ class CloudTaskWorkspacesControllerTest {
     // Act & Assert
     RuntimeException exception =
         org.junit.jupiter.api.Assertions.assertThrows(
-            RuntimeException.class, () -> controller.cleanupOrphanedWorkspaces(namespaces));
+            RuntimeException.class, () -> controller.cleanupOrphanedWorkspacesBatch(namespaces));
 
     assertThat(exception.getMessage()).isEqualTo("Delete failed");
     verify(mockWorkspaceService).lookupWorkspaceByNamespace("namespace1");
@@ -160,7 +160,7 @@ class CloudTaskWorkspacesControllerTest {
   }
 
   @Test
-  void cleanupOrphanedWorkspaces_withNotFoundAndSuccessfulDelete_processesAllAndReturnsOk() {
+  void cleanupOrphanedWorkspacesBatch_withNotFoundAndSuccessfulDelete_processesAllAndReturnsOk() {
     // Arrange
     List<String> namespaces = Arrays.asList("success1", "notfound", "success2");
 
@@ -176,7 +176,7 @@ class CloudTaskWorkspacesControllerTest {
     doNothing().when(mockWorkspaceService).deleteWorkspace(successWorkspace2, false);
 
     // Act
-    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspaces(namespaces);
+    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
     // Assert
     assertValidResponse(response);
