@@ -235,4 +235,15 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       }
     }
   }
+
+  @Override
+  public void cleanupWorkspace(String workspaceNamespace, String lastModifiedBy) {
+    DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElse(null);
+    if (dbWorkspace != null
+        && dbWorkspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.DELETED) {
+      dbWorkspace.setLastModifiedBy(lastModifiedBy);
+      dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+      workspaceDao.save(dbWorkspace);
+    }
+  }
 }
