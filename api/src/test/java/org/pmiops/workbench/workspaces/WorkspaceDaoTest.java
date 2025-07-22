@@ -332,7 +332,8 @@ public class WorkspaceDaoTest {
   public void findAllOrphanedWorkspaceNamespaces_empty() {
     workspaceDao.deleteAll();
 
-    List<String> orphanedNamespaces = workspaceDao.findAllOrphanedWorkspaceNamespaces(Collections.emptyList());
+    List<String> orphanedNamespaces =
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(Collections.emptyList());
 
     assertThat(orphanedNamespaces).isEmpty();
   }
@@ -356,7 +357,8 @@ public class WorkspaceDaoTest {
     workspaceDao.save(workspace1);
     workspaceDao.save(workspace2);
 
-    List<String> orphanedNamespaces = workspaceDao.findAllOrphanedWorkspaceNamespaces(Collections.emptyList());
+    List<String> orphanedNamespaces =
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(Collections.emptyList());
 
     assertThat(orphanedNamespaces).containsExactly(namespace1, namespace2);
   }
@@ -380,7 +382,8 @@ public class WorkspaceDaoTest {
     workspaceDao.save(orphanedWorkspace);
     workspaceDao.save(knownWorkspace);
 
-    List<String> orphanedNamespaces = workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
+    List<String> orphanedNamespaces =
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
 
     assertThat(orphanedNamespaces).containsExactly(orphanedNamespace);
   }
@@ -416,8 +419,8 @@ public class WorkspaceDaoTest {
     workspaceDao.save(knownWorkspace1);
     workspaceDao.save(knownWorkspace2);
 
-    List<String> orphanedNamespaces = workspaceDao.findAllOrphanedWorkspaceNamespaces(
-        List.of(knownNamespace1, knownNamespace2));
+    List<String> orphanedNamespaces =
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace1, knownNamespace2));
 
     assertThat(orphanedNamespaces).containsExactly(orphanedNamespace1, orphanedNamespace2);
   }
@@ -441,8 +444,8 @@ public class WorkspaceDaoTest {
     workspaceDao.save(workspace1);
     workspaceDao.save(workspace2);
 
-    List<String> orphanedNamespaces = workspaceDao.findAllOrphanedWorkspaceNamespaces(
-        List.of(namespace1, namespace2));
+    List<String> orphanedNamespaces =
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(namespace1, namespace2));
 
     assertThat(orphanedNamespaces).isEmpty();
   }
@@ -472,7 +475,8 @@ public class WorkspaceDaoTest {
     workspaceDao.save(orphanedWorkspace);
     workspaceDao.save(knownWorkspace);
 
-    List<String> orphanedNamespaces = workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
+    List<String> orphanedNamespaces =
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
 
     // Should only return the active orphaned workspace, not the deleted one
     assertThat(orphanedNamespaces).containsExactly(orphanedNamespace);
@@ -505,7 +509,8 @@ public class WorkspaceDaoTest {
     workspaceDao.save(orphanedWorkspace2);
     workspaceDao.save(knownWorkspace);
 
-    List<String> orphanedNamespaces = workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
+    List<String> orphanedNamespaces =
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
 
     // Should only return one instance of the orphaned namespace due to DISTINCT
     assertThat(orphanedNamespaces).containsExactly(orphanedNamespace);
