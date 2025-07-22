@@ -73,13 +73,15 @@ public class ImpersonatedWorkspaceServiceTest {
       this.lastLogRecord = record;
     }
 
-    /** Implementation of flush is not needed for this test handler. */
     @Override
-    public void flush() {}
+    public void flush() {
+      /* Implementation of flush is not needed for this test handler. */
+    }
 
-    /** Implementation of close is not needed for this test handler. */
     @Override
-    public void close() throws SecurityException {}
+    public void close() throws SecurityException {
+      /* Implementation of close is not needed for this test handler. */
+    }
 
     public LogRecord getLastLogRecord() {
       return lastLogRecord;
