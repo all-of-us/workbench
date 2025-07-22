@@ -61,15 +61,6 @@ public interface WorkspaceService {
    */
   void deleteWorkspace(DbWorkspace dbWorkspace);
 
-  /**
-   * This function will delete the workspace and all of its resources, including the billing
-   * project, if includeExternalResources is true.
-   *
-   * @param dbWorkspace The workspace to delete.
-   * @param includeExternalResources If true, delete the billing project and all external resources.
-   */
-  void deleteWorkspace(DbWorkspace dbWorkspace, boolean includeExternalResources);
-
   /*
    * This function will call the Google Cloud Billing API to set the given billing
    * account name to the given workspace. It will also update the billingAccountName

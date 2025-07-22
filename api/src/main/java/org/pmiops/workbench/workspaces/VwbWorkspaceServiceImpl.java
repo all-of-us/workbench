@@ -129,11 +129,6 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void deleteWorkspace(DbWorkspace dbWorkspace, boolean includeExternalResources) {
-    logger.warn("deleteWorkspace not implemented for VWB");
-  }
-
-  @Override
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
     logger.warn("updateWorkspaceBillingAccount not implemented in VWB");
   }

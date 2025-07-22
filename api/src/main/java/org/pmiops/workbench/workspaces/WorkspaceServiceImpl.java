@@ -271,26 +271,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Transactional
-  public void deleteWorkspace(DbWorkspace dbWorkspace, boolean includeExternalResources) {
+  @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
+    // TODO: do we want to delete workspace resource references and save only metadata?
 
-    if (includeExternalResources) {
-      // This automatically handles access control to the workspace.
-      fireCloudService.deleteWorkspace(
-          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-      String billingProjectName = dbWorkspace.getWorkspaceNamespace();
-      try {
-        fireCloudService.deleteBillingProject(billingProjectName);
-        billingProjectAuditor.fireDeleteAction(billingProjectName);
-      } catch (Exception e) {
-        String msg =
-            String.format(
-                "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
-        log.warning(msg);
-      }
-    }
+    // This automatically handles access control to the workspace.
+    fireCloudService.deleteWorkspace(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     dbWorkspace =
         workspaceDao.saveWithLastModified(
             dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
@@ -299,12 +289,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // featured_workspace
     // if they exist
     featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
-  }
 
-  @Transactional
-  @Override
-  public void deleteWorkspace(DbWorkspace dbWorkspace) {
-    deleteWorkspace(dbWorkspace, true);
+    String billingProjectName = dbWorkspace.getWorkspaceNamespace();
+    try {
+      fireCloudService.deleteBillingProject(billingProjectName);
+      billingProjectAuditor.fireDeleteAction(billingProjectName);
+    } catch (Exception e) {
+      String msg =
+          String.format(
+              "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
+      log.warning(msg);
+    }
   }
 
   @Override
