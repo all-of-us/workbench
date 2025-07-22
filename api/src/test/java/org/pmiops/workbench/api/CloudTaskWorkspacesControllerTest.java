@@ -61,9 +61,12 @@ public class CloudTaskWorkspacesControllerTest {
     assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
     verify(mockImpersonatedWorkspaceService, times(3))
         .cleanupWorkspace(any(String.class), eq("CleanupOrphanedWorkspaces Cron Job"));
-    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("workspace-ns-1", "CleanupOrphanedWorkspaces Cron Job");
-    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("workspace-ns-2", "CleanupOrphanedWorkspaces Cron Job");
-    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("workspace-ns-3", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("workspace-ns-1", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("workspace-ns-2", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("workspace-ns-3", "CleanupOrphanedWorkspaces Cron Job");
   }
 
   @Test
@@ -113,10 +116,12 @@ public class CloudTaskWorkspacesControllerTest {
     assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
 
     // Verify all cleanup attempts were made
-    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("existing-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("existing-workspace", "CleanupOrphanedWorkspaces Cron Job");
     verify(mockImpersonatedWorkspaceService)
         .cleanupWorkspace("non-existent-workspace", "CleanupOrphanedWorkspaces Cron Job");
-    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("another-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("another-workspace", "CleanupOrphanedWorkspaces Cron Job");
     verify(mockImpersonatedWorkspaceService, times(3))
         .cleanupWorkspace(any(String.class), eq("CleanupOrphanedWorkspaces Cron Job"));
   }
@@ -187,8 +192,10 @@ public class CloudTaskWorkspacesControllerTest {
 
     controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
-    // Verify the exact string "CleanupOrphanedWorkspaces Cron Job" is used as lastModifiedBy parameter
-    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("test-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    // Verify the exact string "CleanupOrphanedWorkspaces Cron Job" is used as lastModifiedBy
+    // parameter
+    verify(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("test-workspace", "CleanupOrphanedWorkspaces Cron Job");
     verify(mockImpersonatedWorkspaceService, never())
         .cleanupWorkspace(eq("test-workspace"), eq("system"));
     verify(mockImpersonatedWorkspaceService, never())

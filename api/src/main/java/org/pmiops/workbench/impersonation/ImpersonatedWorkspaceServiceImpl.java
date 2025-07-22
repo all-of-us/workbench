@@ -2,6 +2,7 @@ package org.pmiops.workbench.impersonation;
 
 import com.google.common.collect.Sets;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -241,8 +242,18 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElse(null);
     if (dbWorkspace != null
         && dbWorkspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.DELETED) {
+      String previousLastModifiedBy = dbWorkspace.getLastModifiedBy();
+      Timestamp previousLastModifiedTime = dbWorkspace.getLastModifiedTime();
       dbWorkspace.setLastModifiedBy(lastModifiedBy);
       dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+      logger.log(
+          Level.INFO,
+          String.format(
+              "Workspace (%s), that was last updated by %s on %s, has been cleaned up by %s",
+              workspaceNamespace,
+              previousLastModifiedBy,
+              previousLastModifiedTime,
+              lastModifiedBy));
       workspaceDao.save(dbWorkspace);
     }
   }
