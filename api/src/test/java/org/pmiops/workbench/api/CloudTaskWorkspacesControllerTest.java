@@ -1,201 +1,197 @@
 package org.pmiops.workbench.api;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 
-@ExtendWith(MockitoExtension.class)
-class CloudTaskWorkspacesControllerTest {
+@DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+public class CloudTaskWorkspacesControllerTest {
 
-  @Mock private ImpersonatedWorkspaceService mockImpersonatedWorkspaceService;
-  @Mock private WorkspaceService mockWorkspaceService;
+  @Autowired private CloudTaskWorkspacesController controller;
 
-  private CloudTaskWorkspacesController controller;
+  @MockBean private ImpersonatedWorkspaceService mockImpersonatedWorkspaceService;
+
+  @TestConfiguration
+  @Import({
+    FakeClockConfiguration.class,
+    CloudTaskWorkspacesController.class,
+  })
+  @MockBean({
+    ImpersonatedWorkspaceService.class,
+  })
+  static class Configuration {}
 
   @BeforeEach
-  void setUp() {
-    controller =
-        new CloudTaskWorkspacesController(mockImpersonatedWorkspaceService, mockWorkspaceService);
+  public void setUp() {
+    // Reset mocks before each test
   }
 
   @Test
-  void cleanupOrphanedWorkspacesBatch_withValidNamespaces_deletesWorkspacesAndReturnsOk() {
-    // Arrange
-    List<String> namespaces = Arrays.asList("namespace1", "namespace2", "namespace3");
+  public void testCleanupOrphanedWorkspacesBatch_success() {
+    List<String> namespaces = List.of("workspace-ns-1", "workspace-ns-2", "workspace-ns-3");
 
-    DbWorkspace workspace1 = createMockWorkspace("namespace1");
-    DbWorkspace workspace2 = createMockWorkspace("namespace2");
-    DbWorkspace workspace3 = createMockWorkspace("namespace3");
+    doNothing()
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace(any(String.class), eq("CleanupOrphanedWorkspaces Cron Job"));
 
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("namespace1")).thenReturn(workspace1);
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("namespace2")).thenReturn(workspace2);
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("namespace3")).thenReturn(workspace3);
-
-    doNothing().when(mockWorkspaceService).deleteWorkspace(any(DbWorkspace.class), eq(false));
-
-    // Act
     ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
-    // Assert
-    assertValidResponse(response);
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("namespace1");
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("namespace2");
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("namespace3");
-    verify(mockWorkspaceService).deleteWorkspace(workspace1, false);
-    verify(mockWorkspaceService).deleteWorkspace(workspace2, false);
-    verify(mockWorkspaceService).deleteWorkspace(workspace3, false);
-    verifyNoMoreInteractions(mockWorkspaceService);
+    assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
+    verify(mockImpersonatedWorkspaceService, times(3))
+        .cleanupWorkspace(any(String.class), eq("CleanupOrphanedWorkspaces Cron Job"));
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("workspace-ns-1", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("workspace-ns-2", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("workspace-ns-3", "CleanupOrphanedWorkspaces Cron Job");
   }
 
   @Test
-  void cleanupOrphanedWorkspacesBatch_withEmptyList_doesNothingAndReturnsOk() {
-    // Arrange
-    List<String> emptyNamespaces = Collections.emptyList();
+  public void testCleanupOrphanedWorkspacesBatch_singleWorkspace() {
+    List<String> namespaces = List.of("single-workspace-ns");
 
-    // Act
-    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(emptyNamespaces);
+    doNothing()
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("single-workspace-ns", "CleanupOrphanedWorkspaces Cron Job");
 
-    // Assert
-    assertValidResponse(response);
-    verifyNoMoreInteractions(mockWorkspaceService);
-  }
-
-  @Test
-  void cleanupOrphanedWorkspacesBatch_withSingleNamespace_deletesWorkspaceAndReturnsOk() {
-    // Arrange
-    List<String> namespaces = Collections.singletonList("single-namespace");
-    DbWorkspace workspace = createMockWorkspace("single-namespace");
-
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("single-namespace")).thenReturn(workspace);
-    doNothing().when(mockWorkspaceService).deleteWorkspace(workspace, false);
-
-    // Act
     ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
-    // Assert
-    assertValidResponse(response);
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("single-namespace");
-    verify(mockWorkspaceService).deleteWorkspace(workspace, false);
-    verifyNoMoreInteractions(mockWorkspaceService);
+    assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
+    verify(mockImpersonatedWorkspaceService, times(1))
+        .cleanupWorkspace("single-workspace-ns", "CleanupOrphanedWorkspaces Cron Job");
   }
 
   @Test
-  void cleanupOrphanedWorkspacesBatch_withNotFoundWorkspace_continuesProcessingAndReturnsOk() {
-    // Arrange
+  public void testCleanupOrphanedWorkspacesBatch_emptyList() {
+    List<String> namespaces = Collections.emptyList();
+
+    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
+
+    assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
+    verifyNoInteractions(mockImpersonatedWorkspaceService);
+  }
+
+  @Test
+  public void testCleanupOrphanedWorkspacesBatch_workspaceNotFound() {
     List<String> namespaces =
-        Arrays.asList("existing-namespace", "missing-namespace", "another-existing");
+        List.of("existing-workspace", "non-existent-workspace", "another-workspace");
 
-    DbWorkspace existingWorkspace1 = createMockWorkspace("existing-namespace");
-    DbWorkspace existingWorkspace2 = createMockWorkspace("another-existing");
+    // Configure mock to throw NotFoundException for the second workspace
+    doNothing()
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("existing-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    doThrow(new NotFoundException("Workspace not found"))
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("non-existent-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    doNothing()
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("another-workspace", "CleanupOrphanedWorkspaces Cron Job");
 
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("existing-namespace"))
-        .thenReturn(existingWorkspace1);
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("missing-namespace"))
-        .thenThrow(new NotFoundException("Workspace not found"));
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("another-existing"))
-        .thenReturn(existingWorkspace2);
-
-    doNothing().when(mockWorkspaceService).deleteWorkspace(any(DbWorkspace.class), eq(false));
-
-    // Act
     ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
-    // Assert
-    assertValidResponse(response);
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("existing-namespace");
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("missing-namespace");
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("another-existing");
-    verify(mockWorkspaceService).deleteWorkspace(existingWorkspace1, false);
-    verify(mockWorkspaceService).deleteWorkspace(existingWorkspace2, false);
-    verifyNoMoreInteractions(mockWorkspaceService);
+    // Should still return OK even when some workspaces are not found
+    assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
+
+    // Verify all cleanup attempts were made
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("existing-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("non-existent-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("another-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService, times(3))
+        .cleanupWorkspace(any(String.class), eq("CleanupOrphanedWorkspaces Cron Job"));
   }
 
   @Test
-  void cleanupOrphanedWorkspacesBatch_withDeleteFailure_throwsException() {
-    // Arrange
-    List<String> namespaces = Arrays.asList("namespace1", "namespace2");
+  public void testCleanupOrphanedWorkspacesBatch_allWorkspacesNotFound() {
+    List<String> namespaces = List.of("non-existent-1", "non-existent-2");
 
-    DbWorkspace workspace1 = createMockWorkspace("namespace1");
-    DbWorkspace workspace2 = createMockWorkspace("namespace2");
+    doThrow(new NotFoundException("Workspace not found"))
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace(any(String.class), eq("CleanupOrphanedWorkspaces Cron Job"));
 
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("namespace1")).thenReturn(workspace1);
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("namespace2")).thenReturn(workspace2);
+    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
-    doNothing().when(mockWorkspaceService).deleteWorkspace(workspace1, false);
-    doThrow(new RuntimeException("Delete failed"))
-        .when(mockWorkspaceService)
-        .deleteWorkspace(workspace2, false);
-
-    // Act & Assert
-    RuntimeException exception =
-        org.junit.jupiter.api.Assertions.assertThrows(
-            RuntimeException.class, () -> controller.cleanupOrphanedWorkspacesBatch(namespaces));
-
-    assertThat(exception.getMessage()).isEqualTo("Delete failed");
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("namespace1");
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("namespace2");
-    verify(mockWorkspaceService).deleteWorkspace(workspace1, false);
-    verify(mockWorkspaceService).deleteWorkspace(workspace2, false);
-    verifyNoMoreInteractions(mockWorkspaceService);
+    assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
+    verify(mockImpersonatedWorkspaceService, times(2))
+        .cleanupWorkspace(any(String.class), eq("CleanupOrphanedWorkspaces Cron Job"));
   }
 
   @Test
-  void cleanupOrphanedWorkspacesBatch_withNotFoundAndSuccessfulDelete_processesAllAndReturnsOk() {
-    // Arrange
-    List<String> namespaces = Arrays.asList("success1", "notfound", "success2");
+  public void testCleanupOrphanedWorkspacesBatch_mixedExceptionsAndSuccess() {
+    List<String> namespaces = List.of("workspace-1", "workspace-2", "workspace-3", "workspace-4");
 
-    DbWorkspace successWorkspace1 = createMockWorkspace("success1");
-    DbWorkspace successWorkspace2 = createMockWorkspace("success2");
+    // Configure different behaviors for different workspaces
+    doNothing()
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("workspace-1", "CleanupOrphanedWorkspaces Cron Job");
+    doThrow(new NotFoundException("Not found"))
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("workspace-2", "CleanupOrphanedWorkspaces Cron Job");
+    doNothing()
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("workspace-3", "CleanupOrphanedWorkspaces Cron Job");
+    doThrow(new NotFoundException("Another not found"))
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("workspace-4", "CleanupOrphanedWorkspaces Cron Job");
 
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("success1")).thenReturn(successWorkspace1);
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("notfound"))
-        .thenThrow(new NotFoundException("Not found"));
-    when(mockWorkspaceService.lookupWorkspaceByNamespace("success2")).thenReturn(successWorkspace2);
-
-    doNothing().when(mockWorkspaceService).deleteWorkspace(successWorkspace1, false);
-    doNothing().when(mockWorkspaceService).deleteWorkspace(successWorkspace2, false);
-
-    // Act
     ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
 
-    // Assert
-    assertValidResponse(response);
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("success1");
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("notfound");
-    verify(mockWorkspaceService).lookupWorkspaceByNamespace("success2");
-    verify(mockWorkspaceService).deleteWorkspace(successWorkspace1, false);
-    verify(mockWorkspaceService).deleteWorkspace(successWorkspace2, false);
-    verifyNoMoreInteractions(mockWorkspaceService);
+    assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
+    verify(mockImpersonatedWorkspaceService, times(4))
+        .cleanupWorkspace(any(String.class), eq("CleanupOrphanedWorkspaces Cron Job"));
   }
 
-  private DbWorkspace createMockWorkspace(String namespace) {
-    DbWorkspace workspace = new DbWorkspace();
-    workspace.setWorkspaceNamespace(namespace);
-    return workspace;
+  @Test
+  public void testCleanupOrphanedWorkspacesBatch_duplicateNamespaces() {
+    List<String> namespaces = List.of("workspace-ns", "workspace-ns", "workspace-ns");
+
+    doNothing()
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace("workspace-ns", "CleanupOrphanedWorkspaces Cron Job");
+
+    ResponseEntity<Void> response = controller.cleanupOrphanedWorkspacesBatch(namespaces);
+
+    assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
+    // Should be called 3 times even with duplicates (forEach processes all elements)
+    verify(mockImpersonatedWorkspaceService, times(3))
+        .cleanupWorkspace("workspace-ns", "CleanupOrphanedWorkspaces Cron Job");
   }
 
-  private void assertValidResponse(ResponseEntity<Void> response) {
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody()).isNull();
+  @Test
+  public void testCleanupOrphanedWorkspacesBatch_usesCorrectLastModifiedBy() {
+    List<String> namespaces = List.of("test-workspace");
+
+    doNothing()
+        .when(mockImpersonatedWorkspaceService)
+        .cleanupWorkspace(any(String.class), any(String.class));
+
+    controller.cleanupOrphanedWorkspacesBatch(namespaces);
+
+    // Verify the exact string "CleanupOrphanedWorkspaces Cron Job" is used as lastModifiedBy parameter
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("test-workspace", "CleanupOrphanedWorkspaces Cron Job");
+    verify(mockImpersonatedWorkspaceService, never())
+        .cleanupWorkspace(eq("test-workspace"), eq("system"));
+    verify(mockImpersonatedWorkspaceService, never())
+        .cleanupWorkspace(eq("test-workspace"), eq("admin"));
   }
 }
