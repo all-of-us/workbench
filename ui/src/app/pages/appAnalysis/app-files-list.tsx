@@ -64,13 +64,13 @@ const styles = reactStyles({
 const notebookSizeThreshold = 5 * 1024 * 1024; // 5 MB
 const transferCheckInterval = 10e3; // 10 seconds
 
-const errors = {
+export const errors = {
   filesError: {
     title: 'Error Loading Files',
     message:
       'Please refresh to try again.  ' +
-      'If this problem persists, it may be because the bucket has been deleted, ' +
-      'or that billing has been deactivated or detached from this project.',
+      'If this problem persists, it may be because billing has been deactivated for this project, ' +
+      'or that the bucket has been deleted.',
   },
 };
 
