@@ -153,7 +153,7 @@ describe(AppFilesList.name, () => {
     );
   });
 
-  it.only("should show error if files can't load", async () => {
+  it("should show error if files can't load", async () => {
     // Arrange
     const watchNotificationSet = jest.spyOn(notificationStore, 'set');
     workspacesApiStub.notebookTransferComplete = () =>
