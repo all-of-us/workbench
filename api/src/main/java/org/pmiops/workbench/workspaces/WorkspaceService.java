@@ -53,12 +53,6 @@ public interface WorkspaceService {
    */
   String getPublishedWorkspacesGroupEmail();
 
-  /**
-   * This function will delete the workspace and all of its resources, including the billing
-   * project.
-   *
-   * @param dbWorkspace The workspace to delete.
-   */
   void deleteWorkspace(DbWorkspace dbWorkspace);
 
   /*
