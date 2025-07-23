@@ -364,27 +364,29 @@ public class WorkspaceDaoTest {
     return Stream.of(
         Arguments.of(
             "No referenced workspaces - all orphaned",
-            List.of("orphaned-namespace-1", "orphaned-namespace-2"), // orphaned namespaces
-            Collections.emptyList(), // known namespaces
+            List.of("orphaned-namespace-1", "orphaned-namespace-2"), // namespaces in db
+            Collections.emptyList(), // externally referenced namespaces
             List.of("orphaned-namespace-1", "orphaned-namespace-2") // expected orphaned
             ),
         Arguments.of(
             "Single orphaned workspace",
-            List.of("orphaned-namespace"), // orphaned namespaces
-            List.of("known-namespace"), // known namespaces
+            List.of("orphaned-namespace"), // namespaces in db
+            List.of("externally-referenced-namespace"), // externally referenced namespaces
             List.of("orphaned-namespace") // expected orphaned
             ),
         Arguments.of(
             "Multiple orphaned workspaces",
-            List.of("orphaned-namespace-1", "orphaned-namespace-2"), // orphaned namespaces
-            List.of("known-namespace-1", "known-namespace-2"), // known namespaces
+            List.of("orphaned-namespace-1", "orphaned-namespace-2"), // namespaces in db
+            List.of(
+                "externally-referenced-namespace-1",
+                "externally-referenced-namespace-2"), // externally referenced namespaces
             List.of("orphaned-namespace-1", "orphaned-namespace-2") // expected orphaned
             ),
         Arguments.of(
             "No orphaned workspaces",
-            List.of("namespace-1", "namespace-2"), // orphaned namespaces (none actually orphaned)
-            List.of("namespace-1", "namespace-2"), // known namespaces (same as above)
-            Collections.emptyList() // expected orphaned (none)
+            List.of("namespace-1", "namespace-2"), // namespaces in db
+            List.of("namespace-1", "namespace-2"), // externally referenced namespaces
+            Collections.emptyList() // expected orphaned
             ));
   }
 
@@ -393,7 +395,7 @@ public class WorkspaceDaoTest {
   void testFindAllOrphanedWorkspaceNamespaces_basicScenarios(
       String scenarioName,
       List<String> workspaceNamespaces,
-      List<String> knownNamespaces,
+      List<String> externallyReferencedNamespaces,
       List<String> expectedOrphaned) {
     workspaceDao.deleteAll();
 
@@ -404,7 +406,7 @@ public class WorkspaceDaoTest {
 
     // Execute the query
     List<String> orphanedNamespaces =
-        workspaceDao.findAllOrphanedWorkspaceNamespaces(knownNamespaces);
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(externallyReferencedNamespaces);
 
     // Assert the results
     if (expectedOrphaned.isEmpty()) {
@@ -420,14 +422,14 @@ public class WorkspaceDaoTest {
 
     String deletedNamespace = "deleted-namespace";
     String orphanedNamespace = "orphaned-namespace";
-    String knownNamespace = "known-namespace";
+    String externallyReferencedNamespace = "known-namespace";
 
     createAndSaveWorkspace(deletedNamespace, WorkspaceActiveStatus.DELETED);
     createAndSaveWorkspace(orphanedNamespace, WorkspaceActiveStatus.ACTIVE);
-    createAndSaveWorkspace(knownNamespace, WorkspaceActiveStatus.ACTIVE);
+    createAndSaveWorkspace(externallyReferencedNamespace, WorkspaceActiveStatus.ACTIVE);
 
     List<String> orphanedNamespaces =
-        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(externallyReferencedNamespace));
 
     // Should only return the active orphaned workspace, not the deleted one
     assertThat(orphanedNamespaces).containsExactly(orphanedNamespace);
@@ -438,15 +440,15 @@ public class WorkspaceDaoTest {
     workspaceDao.deleteAll();
 
     String orphanedNamespace = "orphaned-namespace";
-    String knownNamespace = "known-namespace";
+    String externallyReferencedNamespace = "externally-referenced-namespace";
 
     // Create multiple workspaces with the same orphaned namespace
     createAndSaveWorkspace(orphanedNamespace, WorkspaceActiveStatus.ACTIVE, "firecloud-1");
     createAndSaveWorkspace(orphanedNamespace, WorkspaceActiveStatus.ACTIVE, "firecloud-2");
-    createAndSaveWorkspace(knownNamespace, WorkspaceActiveStatus.ACTIVE);
+    createAndSaveWorkspace(externallyReferencedNamespace, WorkspaceActiveStatus.ACTIVE);
 
     List<String> orphanedNamespaces =
-        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(externallyReferencedNamespace));
 
     // Should only return one instance of the orphaned namespace due to DISTINCT
     assertThat(orphanedNamespaces).containsExactly(orphanedNamespace);
