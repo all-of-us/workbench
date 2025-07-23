@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 /** Handles offline / cron-based API requests related to workspace management. */
 @RestController
 public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
-  //  private final Logger logger = LoggerFactory.getLogger(OfflineWorkspaceController.class);
-  //
   private final TaskQueueService taskQueueService;
   private final WorkspaceService workspaceService;
 
