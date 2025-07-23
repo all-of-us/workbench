@@ -53,36 +53,22 @@ public class CloudTaskWorkspacesControllerTest {
     assertEquals("Response should be OK", ResponseEntity.ok().build(), response);
   }
 
-  // Helper method for setting up successful cleanup
-  private void setupSuccessfulCleanup(String... namespaces) {
-    for (String namespace : namespaces) {
-      doNothing()
-          .when(mockImpersonatedWorkspaceService)
-          .cleanupWorkspace(namespace, CLEANUP_REASON);
-    }
-  }
-
-  // Helper method for setting up failed cleanup
-  private void setupFailedCleanup(String... namespaces) {
-    for (String namespace : namespaces) {
-      doThrow(new NotFoundException("Workspace not found"))
-          .when(mockImpersonatedWorkspaceService)
-          .cleanupWorkspace(namespace, CLEANUP_REASON);
-    }
-  }
-
   // Parameterized test data for successful scenarios
   static Stream<Arguments> successfulCleanupScenarios() {
     return Stream.of(
         Arguments.of("Single workspace", List.of("single-workspace-ns"), 1),
-        Arguments.of("Multiple workspaces", List.of("workspace-ns-1", "workspace-ns-2", "workspace-ns-3"), 3),
-        Arguments.of("Duplicate workspaces", List.of("workspace-ns", "workspace-ns", "workspace-ns"), 3)
-    );
+        Arguments.of(
+            "Multiple workspaces",
+            List.of("workspace-ns-1", "workspace-ns-2", "workspace-ns-3"),
+            3),
+        Arguments.of(
+            "Duplicate workspaces", List.of("workspace-ns", "workspace-ns", "workspace-ns"), 3));
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("successfulCleanupScenarios")
-  void testCleanupOrphanedWorkspacesBatch_successfulScenarios(String scenario, List<String> namespaces, int expectedCalls) {
+  void testCleanupOrphanedWorkspacesBatch_successfulScenarios(
+      String scenario, List<String> namespaces, int expectedCalls) {
     // Arrange
     doNothing()
         .when(mockImpersonatedWorkspaceService)
@@ -129,12 +115,10 @@ public class CloudTaskWorkspacesControllerTest {
     assertOkResponse(response);
 
     // Verify all cleanup attempts were made
-    verify(mockImpersonatedWorkspaceService)
-        .cleanupWorkspace("existing-workspace", CLEANUP_REASON);
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("existing-workspace", CLEANUP_REASON);
     verify(mockImpersonatedWorkspaceService)
         .cleanupWorkspace("non-existent-workspace", CLEANUP_REASON);
-    verify(mockImpersonatedWorkspaceService)
-        .cleanupWorkspace("another-workspace", CLEANUP_REASON);
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("another-workspace", CLEANUP_REASON);
     verify(mockImpersonatedWorkspaceService, times(3))
         .cleanupWorkspace(any(String.class), eq(CLEANUP_REASON));
   }
@@ -166,8 +150,7 @@ public class CloudTaskWorkspacesControllerTest {
 
     // Verify the exact string "CleanupOrphanedWorkspaces Cron Job" is used as lastModifiedBy
     // parameter
-    verify(mockImpersonatedWorkspaceService)
-        .cleanupWorkspace("test-workspace", CLEANUP_REASON);
+    verify(mockImpersonatedWorkspaceService).cleanupWorkspace("test-workspace", CLEANUP_REASON);
     verify(mockImpersonatedWorkspaceService, never())
         .cleanupWorkspace(eq("test-workspace"), eq("system"));
     verify(mockImpersonatedWorkspaceService, never())
