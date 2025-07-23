@@ -12,7 +12,6 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -42,11 +41,6 @@ public class CloudTaskWorkspacesControllerTest {
     ImpersonatedWorkspaceService.class,
   })
   static class Configuration {}
-
-  @BeforeEach
-  public void setUp() {
-    // Reset mocks before each test
-  }
 
   @Test
   public void testCleanupOrphanedWorkspacesBatch_success() {
