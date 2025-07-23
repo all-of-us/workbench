@@ -9,8 +9,12 @@ import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -338,116 +342,76 @@ public class WorkspaceDaoTest {
     assertThat(orphanedNamespaces).isEmpty();
   }
 
-  @Test
-  public void findAllOrphanedWorkspaceNamespaces_noReferencedWorkspaces() {
-    workspaceDao.deleteAll();
-
-    String namespace1 = "orphaned-namespace-1";
-    String namespace2 = "orphaned-namespace-2";
-
-    DbWorkspace workspace1 =
-        createWorkspace()
-            .setWorkspaceNamespace(namespace1)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace workspace2 =
-        createWorkspace()
-            .setWorkspaceNamespace(namespace2)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-
-    workspaceDao.save(workspace1);
-    workspaceDao.save(workspace2);
-
-    List<String> orphanedNamespaces =
-        workspaceDao.findAllOrphanedWorkspaceNamespaces(Collections.emptyList());
-
-    assertThat(orphanedNamespaces).containsExactly(namespace1, namespace2);
+  // Helper method to create and save a workspace with specific namespace and status
+  private void createAndSaveWorkspace(String namespace, WorkspaceActiveStatus status) {
+    workspaceDao.save(
+        createWorkspace().setWorkspaceNamespace(namespace).setWorkspaceActiveStatusEnum(status));
   }
 
-  @Test
-  public void findAllOrphanedWorkspaceNamespaces_singleOrphaned() {
-    workspaceDao.deleteAll();
-
-    String orphanedNamespace = "orphaned-namespace";
-    String knownNamespace = "known-namespace";
-
-    DbWorkspace orphanedWorkspace =
+  // Helper method to create and save a workspace with specific namespace, status, and firecloud
+  // name
+  private void createAndSaveWorkspace(
+      String namespace, WorkspaceActiveStatus status, String firecloudName) {
+    workspaceDao.save(
         createWorkspace()
-            .setWorkspaceNamespace(orphanedNamespace)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace knownWorkspace =
-        createWorkspace()
-            .setWorkspaceNamespace(knownNamespace)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-
-    workspaceDao.save(orphanedWorkspace);
-    workspaceDao.save(knownWorkspace);
-
-    List<String> orphanedNamespaces =
-        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
-
-    assertThat(orphanedNamespaces).containsExactly(orphanedNamespace);
+            .setWorkspaceNamespace(namespace)
+            .setFirecloudName(firecloudName)
+            .setWorkspaceActiveStatusEnum(status));
   }
 
-  @Test
-  public void findAllOrphanedWorkspaceNamespaces_multipleOrphaned() {
-    workspaceDao.deleteAll();
-
-    String orphanedNamespace1 = "orphaned-namespace-1";
-    String orphanedNamespace2 = "orphaned-namespace-2";
-    String knownNamespace1 = "known-namespace-1";
-    String knownNamespace2 = "known-namespace-2";
-
-    DbWorkspace orphanedWorkspace1 =
-        createWorkspace()
-            .setWorkspaceNamespace(orphanedNamespace1)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace orphanedWorkspace2 =
-        createWorkspace()
-            .setWorkspaceNamespace(orphanedNamespace2)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace knownWorkspace1 =
-        createWorkspace()
-            .setWorkspaceNamespace(knownNamespace1)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace knownWorkspace2 =
-        createWorkspace()
-            .setWorkspaceNamespace(knownNamespace2)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-
-    workspaceDao.save(orphanedWorkspace1);
-    workspaceDao.save(orphanedWorkspace2);
-    workspaceDao.save(knownWorkspace1);
-    workspaceDao.save(knownWorkspace2);
-
-    List<String> orphanedNamespaces =
-        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace1, knownNamespace2));
-
-    assertThat(orphanedNamespaces).containsExactly(orphanedNamespace1, orphanedNamespace2);
+  // Test data for orphaned workspace scenarios
+  static Stream<Arguments> orphanedWorkspaceScenarios() {
+    return Stream.of(
+        Arguments.of(
+            "No referenced workspaces - all orphaned",
+            List.of("orphaned-namespace-1", "orphaned-namespace-2"), // orphaned namespaces
+            Collections.emptyList(), // known namespaces
+            List.of("orphaned-namespace-1", "orphaned-namespace-2") // expected orphaned
+            ),
+        Arguments.of(
+            "Single orphaned workspace",
+            List.of("orphaned-namespace"), // orphaned namespaces
+            List.of("known-namespace"), // known namespaces
+            List.of("orphaned-namespace") // expected orphaned
+            ),
+        Arguments.of(
+            "Multiple orphaned workspaces",
+            List.of("orphaned-namespace-1", "orphaned-namespace-2"), // orphaned namespaces
+            List.of("known-namespace-1", "known-namespace-2"), // known namespaces
+            List.of("orphaned-namespace-1", "orphaned-namespace-2") // expected orphaned
+            ),
+        Arguments.of(
+            "No orphaned workspaces",
+            List.of("namespace-1", "namespace-2"), // orphaned namespaces (none actually orphaned)
+            List.of("namespace-1", "namespace-2"), // known namespaces (same as above)
+            Collections.emptyList() // expected orphaned (none)
+            ));
   }
 
-  @Test
-  public void findAllOrphanedWorkspaceNamespaces_noOrphans() {
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("orphanedWorkspaceScenarios")
+  void testFindAllOrphanedWorkspaceNamespaces_basicScenarios(
+      String scenarioName,
+      List<String> workspaceNamespaces,
+      List<String> knownNamespaces,
+      List<String> expectedOrphaned) {
     workspaceDao.deleteAll();
 
-    String namespace1 = "namespace-1";
-    String namespace2 = "namespace-2";
+    // Create and save all workspaces
+    for (String namespace : workspaceNamespaces) {
+      createAndSaveWorkspace(namespace, WorkspaceActiveStatus.ACTIVE);
+    }
 
-    DbWorkspace workspace1 =
-        createWorkspace()
-            .setWorkspaceNamespace(namespace1)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace workspace2 =
-        createWorkspace()
-            .setWorkspaceNamespace(namespace2)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-
-    workspaceDao.save(workspace1);
-    workspaceDao.save(workspace2);
-
+    // Execute the query
     List<String> orphanedNamespaces =
-        workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(namespace1, namespace2));
+        workspaceDao.findAllOrphanedWorkspaceNamespaces(knownNamespaces);
 
-    assertThat(orphanedNamespaces).isEmpty();
+    // Assert the results
+    if (expectedOrphaned.isEmpty()) {
+      assertThat(orphanedNamespaces).isEmpty();
+    } else {
+      assertThat(orphanedNamespaces).containsExactlyElementsIn(expectedOrphaned);
+    }
   }
 
   @Test
@@ -458,22 +422,9 @@ public class WorkspaceDaoTest {
     String orphanedNamespace = "orphaned-namespace";
     String knownNamespace = "known-namespace";
 
-    DbWorkspace deletedWorkspace =
-        createWorkspace()
-            .setWorkspaceNamespace(deletedNamespace)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    DbWorkspace orphanedWorkspace =
-        createWorkspace()
-            .setWorkspaceNamespace(orphanedNamespace)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace knownWorkspace =
-        createWorkspace()
-            .setWorkspaceNamespace(knownNamespace)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-
-    workspaceDao.save(deletedWorkspace);
-    workspaceDao.save(orphanedWorkspace);
-    workspaceDao.save(knownWorkspace);
+    createAndSaveWorkspace(deletedNamespace, WorkspaceActiveStatus.DELETED);
+    createAndSaveWorkspace(orphanedNamespace, WorkspaceActiveStatus.ACTIVE);
+    createAndSaveWorkspace(knownNamespace, WorkspaceActiveStatus.ACTIVE);
 
     List<String> orphanedNamespaces =
         workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
@@ -490,24 +441,9 @@ public class WorkspaceDaoTest {
     String knownNamespace = "known-namespace";
 
     // Create multiple workspaces with the same orphaned namespace
-    DbWorkspace orphanedWorkspace1 =
-        createWorkspace()
-            .setWorkspaceNamespace(orphanedNamespace)
-            .setFirecloudName("firecloud-1")
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace orphanedWorkspace2 =
-        createWorkspace()
-            .setWorkspaceNamespace(orphanedNamespace)
-            .setFirecloudName("firecloud-2")
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    DbWorkspace knownWorkspace =
-        createWorkspace()
-            .setWorkspaceNamespace(knownNamespace)
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-
-    workspaceDao.save(orphanedWorkspace1);
-    workspaceDao.save(orphanedWorkspace2);
-    workspaceDao.save(knownWorkspace);
+    createAndSaveWorkspace(orphanedNamespace, WorkspaceActiveStatus.ACTIVE, "firecloud-1");
+    createAndSaveWorkspace(orphanedNamespace, WorkspaceActiveStatus.ACTIVE, "firecloud-2");
+    createAndSaveWorkspace(knownNamespace, WorkspaceActiveStatus.ACTIVE);
 
     List<String> orphanedNamespaces =
         workspaceDao.findAllOrphanedWorkspaceNamespaces(List.of(knownNamespace));
