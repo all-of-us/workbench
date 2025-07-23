@@ -176,3 +176,11 @@ queue:
   bucket_size: 10
   rate: 1/s
   max_concurrent_requests: 1
+
+- name: cleanupOrphanedWorkspacesQueue
+  target: api
+
+  # rate parameters
+  bucket_size: 10
+  rate: 1/s
+  max_concurrent_requests: 1
