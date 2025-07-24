@@ -408,7 +408,6 @@ public class WorkspaceServiceTest {
             accessLevel);
     firecloudWorkspaceResponses.add(mockWorkspaceListResponse);
     when(mockFireCloudService.listWorkspaces()).thenReturn(firecloudWorkspaceResponses);
-
   }
 
   @Test
