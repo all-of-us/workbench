@@ -473,8 +473,8 @@ dependencies {
     implementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     implementation 'com.mysql:mysql-connector-j:9.3.0'
     implementation "org.apache.commons:commons-collections4:4.5.0-M3"
-    implementation 'org.apache.commons:commons-lang3:3.15.0'
-    implementation 'org.apache.commons:commons-text:1.13.0'
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
+    implementation 'org.apache.commons:commons-text:1.13.1'
     // 5.4+ results in a runtime error:
     // java.lang.NoSuchMethodError: 'void org.apache.hc.core5.http.impl.io.DefaultHttpRequestWriterFactory.<init>(org.apache.hc.core5.http.config.Http1Config)'
     implementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
