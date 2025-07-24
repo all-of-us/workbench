@@ -6,11 +6,11 @@ import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
 
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
-import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
+import { AppFilesList, errors } from 'app/pages/appAnalysis/app-files-list';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
+import { notificationStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { renderWithRouter } from 'testing/react-test-helpers';
@@ -151,5 +151,22 @@ describe(AppFilesList.name, () => {
         screen.queryByText(/Copying 1 or more notebooks from another workspace/)
       ).not.toBeInTheDocument()
     );
+  });
+
+  it("should show error if files can't load", async () => {
+    // Arrange
+    const watchNotificationSet = jest.spyOn(notificationStore, 'set');
+    workspacesApiStub.notebookTransferComplete = () =>
+      Promise.reject('500 - Files not Found');
+    currentWorkspaceStore.next(workspaceDataStub);
+
+    // Act
+    await component();
+
+    // Assert
+    await waitFor(() => expect(watchNotificationSet).toHaveBeenCalledTimes(1));
+    expect(watchNotificationSet).toHaveBeenCalledWith(errors.filesError);
+
+    watchNotificationSet.mockRestore();
   });
 });
