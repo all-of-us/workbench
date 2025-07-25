@@ -181,6 +181,6 @@ queue:
   target: api
 
   # rate parameters
-  bucket_size: 10
+  bucket_size: 100
   rate: 1/s
   max_concurrent_requests: 1
