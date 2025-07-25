@@ -27,11 +27,11 @@ const toToastMessage = (statusAlert: StatusAlert): MultiToastMessage => {
     title: statusAlert.title,
     message: statusAlert.message,
     toastType: ToastType.WARNING,
-    footer: statusAlert.link ? (
+    footer: statusAlert.link && (
       <Button onClick={() => window.open(statusAlert.link, '_blank')}>
         READ MORE
       </Button>
-    ) : undefined,
+    ),
   };
 };
 
