@@ -107,7 +107,8 @@ public class ImpersonatedWorkspaceServiceTest {
 
   @ParameterizedTest
   @MethodSource("noOperationScenarios")
-  public void testCleanupWorkspace_NoOperationPerformed(String scenarioName, Optional<DbWorkspace> workspaceOptional) {
+  public void testCleanupWorkspace_NoOperationPerformed(
+      String scenarioName, Optional<DbWorkspace> workspaceOptional) {
     // Arrange
     when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(workspaceOptional);
 
@@ -121,18 +122,17 @@ public class ImpersonatedWorkspaceServiceTest {
   private static Stream<Arguments> noOperationScenarios() {
     // Workspace does not exist scenario
     Optional<DbWorkspace> emptyOptional = Optional.empty();
-    
+
     // Workspace already deleted scenario
     DbWorkspace deletedWorkspace = new DbWorkspace();
     deletedWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     deletedWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     deletedWorkspace.setLastModifiedBy("previous-user@example.com");
     Optional<DbWorkspace> deletedOptional = Optional.of(deletedWorkspace);
-    
+
     return Stream.of(
         Arguments.of("WorkspaceDoesNotExist", emptyOptional),
-        Arguments.of("WorkspaceAlreadyDeleted", deletedOptional)
-    );
+        Arguments.of("WorkspaceAlreadyDeleted", deletedOptional));
   }
 
   @Test
