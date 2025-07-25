@@ -158,4 +158,56 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "FROM DbWorkspace w "
           + "WHERE w.creator.userId in (:creatorIds)")
   Set<String> getWorkspaceGoogleProjectsForCreators(@Param("creatorIds") List<Long> creatorIds);
+
+  // a speculative view of fields I'll need when dumping the whole workspace table in
+  // OrphanedProjects
+  @Query(
+      nativeQuery = true,
+      value =
+          "SELECT workspace.workspace_id AS dbId, workspace.name, workspace.workspace_namespace AS namespace, "
+              + "workspace.google_project AS googleProject, workspace.active_status AS activeStatus, "
+              + "workspace.creator_id AS creatorId, workspace.creation_time AS creationTime, "
+              + "workspace.last_modified_time AS lastModifiedTime, "
+              + "access_tier.short_name AS tierName "
+              + "FROM workspace "
+              + "JOIN cdr_version ON workspace.cdr_version_id = cdr_version.cdr_version_id "
+              + "JOIN access_tier ON cdr_version.access_tier = access_tier.access_tier_id "
+              + "WHERE active_status = 0 " // ACTIVE
+              + "ORDER BY workspace.google_project")
+  List<FieldsForOrphanChecking> getActiveWorkspacesForOrphanChecking();
+
+  interface FieldsForOrphanChecking {
+    long getDbId();
+
+    String getName();
+
+    String getNamespace();
+
+    String getGoogleProject();
+
+    Short getActiveStatus();
+
+    String getTierName();
+
+    long getCreatorId();
+
+    Timestamp getCreationTime();
+
+    Timestamp getLastModifiedTime();
+
+    default WorkspaceActiveStatus getActiveStatusEnum() {
+      return DbStorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
+    }
+
+    default String logString() {
+      return String.format(
+          "WS: db-id %d, name %s, namespace %s, googProj %s, tier %s, status %s",
+          getDbId(),
+          getName(),
+          getNamespace(),
+          getGoogleProject(),
+          getTierName(),
+          getActiveStatusEnum());
+    }
+  }
 }
