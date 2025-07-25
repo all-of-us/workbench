@@ -14,7 +14,11 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -98,22 +102,14 @@ public class ImpersonatedWorkspaceServiceTest {
     impersonatedWorkspaceService.cleanupWorkspace(WORKSPACE_NAMESPACE, LAST_MODIFIED_BY);
 
     // Assert
-    ArgumentCaptor<DbWorkspace> workspaceCaptor = ArgumentCaptor.forClass(DbWorkspace.class);
-    verify(workspaceDao).save(workspaceCaptor.capture());
-
-    DbWorkspace savedWorkspace = workspaceCaptor.getValue();
-    assertThat(savedWorkspace.getLastModifiedBy()).isEqualTo(LAST_MODIFIED_BY);
-    assertThat(savedWorkspace.getWorkspaceActiveStatusEnum())
-        .isEqualTo(WorkspaceActiveStatus.DELETED);
-
-    // Verify that the same workspace object was modified
-    assertThat(savedWorkspace).isSameInstanceAs(dbWorkspace);
+    verifyWorkspaceUpdated(dbWorkspace);
   }
 
-  @Test
-  public void testCleanupWorkspace_WorkspaceDoesNotExist_NoOperationPerformed() {
+  @ParameterizedTest
+  @MethodSource("noOperationScenarios")
+  public void testCleanupWorkspace_NoOperationPerformed(String scenarioName, Optional<DbWorkspace> workspaceOptional) {
     // Arrange
-    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
+    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(workspaceOptional);
 
     // Act
     impersonatedWorkspaceService.cleanupWorkspace(WORKSPACE_NAMESPACE, LAST_MODIFIED_BY);
@@ -122,35 +118,21 @@ public class ImpersonatedWorkspaceServiceTest {
     verify(workspaceDao, never()).save(any(DbWorkspace.class));
   }
 
-  @Test
-  public void testCleanupWorkspace_WorkspaceAlreadyDeleted_NoOperationPerformed() {
-    // Arrange
-    DbWorkspace dbWorkspace = createTestWorkspace();
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    dbWorkspace.setLastModifiedBy("previous-user@example.com");
-    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.of(dbWorkspace));
-
-    // Act
-    impersonatedWorkspaceService.cleanupWorkspace(WORKSPACE_NAMESPACE, LAST_MODIFIED_BY);
-
-    // Assert - No save should be called since workspace is already deleted
-    verify(workspaceDao, never()).save(any(DbWorkspace.class));
-  }
-
-  @Test
-  public void testCleanupWorkspace_WorkspaceActiveStatus_UpdatesIfNotDeleted() {
-    // Test that only non-deleted workspaces are updated
-    DbWorkspace activeWorkspace = createTestWorkspace();
-    activeWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.of(activeWorkspace));
-
-    impersonatedWorkspaceService.cleanupWorkspace(WORKSPACE_NAMESPACE, LAST_MODIFIED_BY);
-
-    // Should call save for active workspace
-    verify(workspaceDao).save(activeWorkspace);
-    assertThat(activeWorkspace.getWorkspaceActiveStatusEnum())
-        .isEqualTo(WorkspaceActiveStatus.DELETED);
-    assertThat(activeWorkspace.getLastModifiedBy()).isEqualTo(LAST_MODIFIED_BY);
+  private static Stream<Arguments> noOperationScenarios() {
+    // Workspace does not exist scenario
+    Optional<DbWorkspace> emptyOptional = Optional.empty();
+    
+    // Workspace already deleted scenario
+    DbWorkspace deletedWorkspace = new DbWorkspace();
+    deletedWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
+    deletedWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    deletedWorkspace.setLastModifiedBy("previous-user@example.com");
+    Optional<DbWorkspace> deletedOptional = Optional.of(deletedWorkspace);
+    
+    return Stream.of(
+        Arguments.of("WorkspaceDoesNotExist", emptyOptional),
+        Arguments.of("WorkspaceAlreadyDeleted", deletedOptional)
+    );
   }
 
   @Test
@@ -221,6 +203,19 @@ public class ImpersonatedWorkspaceServiceTest {
       // Clean up
       logger.removeHandler(testHandler);
     }
+  }
+
+  private void verifyWorkspaceUpdated(DbWorkspace dbWorkspace) {
+    ArgumentCaptor<DbWorkspace> workspaceCaptor = ArgumentCaptor.forClass(DbWorkspace.class);
+    verify(workspaceDao).save(workspaceCaptor.capture());
+
+    DbWorkspace savedWorkspace = workspaceCaptor.getValue();
+    assertThat(savedWorkspace.getLastModifiedBy()).isEqualTo(LAST_MODIFIED_BY);
+    assertThat(savedWorkspace.getWorkspaceActiveStatusEnum())
+        .isEqualTo(WorkspaceActiveStatus.DELETED);
+
+    // Verify that the same workspace object was modified
+    assertThat(savedWorkspace).isSameInstanceAs(dbWorkspace);
   }
 
   private DbWorkspace createTestWorkspace() {
