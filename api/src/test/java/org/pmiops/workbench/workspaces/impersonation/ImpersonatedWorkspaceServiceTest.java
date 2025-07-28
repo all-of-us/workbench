@@ -17,11 +17,14 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.pmiops.workbench.FakeClockConfiguration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -29,43 +32,26 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.impersonation.ImpersonatedFirecloudService;
-import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceServiceImpl;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 
-@DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 public class ImpersonatedWorkspaceServiceTest {
 
-  @TestConfiguration
-  @Import({
-    FakeClockConfiguration.class,
-    ImpersonatedWorkspaceServiceImpl.class,
-  })
-  @MockBean({
-    BillingProjectAuditor.class,
-    FeaturedWorkspaceDao.class,
-    FireCloudService.class,
-    FirecloudMapper.class,
-    ImpersonatedFirecloudService.class,
-    InitialCreditsService.class,
-    UserDao.class,
-    WorkspaceMapper.class
-  })
-  static class Configuration {}
+  @Mock private BillingProjectAuditor billingProjectAuditor;
+  @Mock private FeaturedWorkspaceDao featuredWorkspaceDao;
+  @Mock private FireCloudService fireCloudService;
+  @Mock private FirecloudMapper firecloudMapper;
+  @Mock private ImpersonatedFirecloudService impersonatedFirecloudService;
+  @Mock private InitialCreditsService initialCreditsService;
+  @Mock private UserDao userDao;
+  @Mock private WorkspaceDao workspaceDao;
+  @Mock private WorkspaceMapper workspaceMapper;
 
-  @Autowired private ImpersonatedWorkspaceService impersonatedWorkspaceService;
-  @MockBean private WorkspaceDao workspaceDao;
-  @MockBean private FeaturedWorkspaceDao featuredWorkspaceDao;
+  @InjectMocks private ImpersonatedWorkspaceServiceImpl impersonatedWorkspaceService;
 
   private static final String WORKSPACE_NAMESPACE = "test-workspace-namespace";
   private static final String LAST_MODIFIED_BY = "test-user@example.com";
