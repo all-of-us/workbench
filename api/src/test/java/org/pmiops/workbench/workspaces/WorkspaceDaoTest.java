@@ -387,6 +387,12 @@ public class WorkspaceDaoTest {
             List.of("namespace-1", "namespace-2"), // namespaces in db
             List.of("namespace-1", "namespace-2"), // externally referenced namespaces
             Collections.emptyList() // expected orphaned
+            ),
+        Arguments.of(
+            "Mixed bag - some orphaned, some externally referenced",
+            List.of("orphaned-1", "orphaned-2", "referenced-1", "referenced-2"), // namespaces in db
+            List.of("referenced-1", "referenced-2"), // externally referenced namespaces
+            List.of("orphaned-1", "orphaned-2") // expected orphaned
             ));
   }
 
