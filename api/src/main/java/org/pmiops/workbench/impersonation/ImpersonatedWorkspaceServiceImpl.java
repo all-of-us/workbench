@@ -258,7 +258,8 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
               previousLastModifiedTime,
               lastModifiedBy));
       workspaceDao.save(dbWorkspace);
-      // Since a deleted workspace entry still exists in the database we have to explicitly remove it from
+      // Since a deleted workspace entry still exists in the database we have to explicitly remove
+      // it from
       // the featured_workspace table if it exists
       featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
     }
