@@ -4601,7 +4601,7 @@ paths:
       - cloudTaskWorkspaces
       - cloudTask
       description: |
-        Cleans up workspace records in the database that are no longer Terra.
+        Cleans up workspace records in the database that are no longer in Terra.
       operationId: cleanupOrphanedWorkspacesBatch
       security: []
       requestBody:
