@@ -1,6 +1,7 @@
 package org.pmiops.workbench.impersonation;
 
 import com.google.common.collect.Sets;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Collections;
@@ -238,6 +239,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   }
 
   @Override
+  @Transactional
   public void cleanupWorkspace(String workspaceNamespace, String lastModifiedBy) {
     DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElse(null);
     if (dbWorkspace != null
@@ -245,6 +247,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       String previousLastModifiedBy = dbWorkspace.getLastModifiedBy();
       Timestamp previousLastModifiedTime = dbWorkspace.getLastModifiedTime();
       dbWorkspace.setLastModifiedBy(lastModifiedBy);
+      dbWorkspace.setLastModifiedTime(new Timestamp(System.currentTimeMillis()));
       dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
       logger.log(
           Level.INFO,
@@ -255,6 +258,9 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
               previousLastModifiedTime,
               lastModifiedBy));
       workspaceDao.save(dbWorkspace);
+      // Since a deleted workspace entry still exists in the database we have to explicitly remove it from
+      // the featured_workspace table if it exists
+      featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
     }
   }
 }

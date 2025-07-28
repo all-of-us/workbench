@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces.impersonation;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,6 +65,7 @@ public class ImpersonatedWorkspaceServiceTest {
 
   @Autowired private ImpersonatedWorkspaceService impersonatedWorkspaceService;
   @MockBean private WorkspaceDao workspaceDao;
+  @MockBean private FeaturedWorkspaceDao featuredWorkspaceDao;
 
   private static final String WORKSPACE_NAMESPACE = "test-workspace-namespace";
   private static final String LAST_MODIFIED_BY = "test-user@example.com";
@@ -103,6 +105,7 @@ public class ImpersonatedWorkspaceServiceTest {
 
     // Assert
     verifyWorkspaceUpdated(dbWorkspace);
+    verify(featuredWorkspaceDao).deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
   }
 
   @ParameterizedTest
@@ -117,6 +120,7 @@ public class ImpersonatedWorkspaceServiceTest {
 
     // Assert
     verify(workspaceDao, never()).save(any(DbWorkspace.class));
+    verify(featuredWorkspaceDao, never()).deleteDbFeaturedWorkspaceByWorkspace(any(DbWorkspace.class));
   }
 
   private static Stream<Arguments> noOperationScenarios() {
@@ -154,8 +158,9 @@ public class ImpersonatedWorkspaceServiceTest {
     assertThat(thrownException).isSameInstanceAs(expectedException);
     assertThat(thrownException.getMessage()).isEqualTo("Database error");
 
-    // Verify that save was attempted
+    // Verify that save was attempted but featured workspace cleanup was not called due to exception
     verify(workspaceDao).save(any(DbWorkspace.class));
+    verify(featuredWorkspaceDao, never()).deleteDbFeaturedWorkspaceByWorkspace(any(DbWorkspace.class));
   }
 
   @Test
@@ -203,6 +208,60 @@ public class ImpersonatedWorkspaceServiceTest {
       // Clean up
       logger.removeHandler(testHandler);
     }
+  }
+
+  @Test
+  public void testCleanupWorkspace_WhenWorkspaceNotFound() {
+    // Arrange
+    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
+
+    // Act
+    impersonatedWorkspaceService.cleanupWorkspace(WORKSPACE_NAMESPACE, LAST_MODIFIED_BY);
+
+    // Assert
+    verify(workspaceDao, never()).save(any(DbWorkspace.class));
+    verify(featuredWorkspaceDao, never()).deleteDbFeaturedWorkspaceByWorkspace(any(DbWorkspace.class));
+  }
+
+  @Test
+  public void testCleanupWorkspace_WhenWorkspaceAlreadyDeleted() {
+    // Arrange
+    DbWorkspace deletedWorkspace = createTestWorkspace();
+    deletedWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.of(deletedWorkspace));
+
+    // Act
+    impersonatedWorkspaceService.cleanupWorkspace(WORKSPACE_NAMESPACE, LAST_MODIFIED_BY);
+
+    // Assert
+    verify(workspaceDao, never()).save(any(DbWorkspace.class));
+    verify(featuredWorkspaceDao, never()).deleteDbFeaturedWorkspaceByWorkspace(any(DbWorkspace.class));
+  }
+
+  @Test
+  public void testCleanupWorkspace_FeaturedWorkspaceDaoThrowsException_ExceptionPropagated() {
+    // Arrange
+    DbWorkspace dbWorkspace = createTestWorkspace();
+    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.of(dbWorkspace));
+    RuntimeException expectedException = new RuntimeException("Featured workspace DAO error");
+    doThrow(expectedException).when(featuredWorkspaceDao).deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
+
+    // Act & Assert
+    RuntimeException thrownException =
+        assertThrows(
+            RuntimeException.class,
+            () ->
+                impersonatedWorkspaceService.cleanupWorkspace(
+                    WORKSPACE_NAMESPACE, LAST_MODIFIED_BY));
+
+    assertThat(thrownException).isSameInstanceAs(expectedException);
+    assertThat(thrownException.getMessage()).isEqualTo("Featured workspace DAO error");
+
+    // Verify that both workspace save and featured workspace cleanup were attempted during the transaction
+    // Note: Due to @Transactional annotation, the workspace save will be rolled back when the 
+    // featured workspace cleanup fails, but both method calls should still occur
+    verify(workspaceDao).save(any(DbWorkspace.class));
+    verify(featuredWorkspaceDao).deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
   }
 
   private void verifyWorkspaceUpdated(DbWorkspace dbWorkspace) {
