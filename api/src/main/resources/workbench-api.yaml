@@ -12551,6 +12551,92 @@ components:
           type: string
           description: User-reported races information, comma-delimited if multiple
             answers were provided.
+        dsv2CompletionTime:
+          type: string
+          description: Time the survey was completed.
+          format: date-time
+        dsv2DisabilityConcentrating:
+          type: string
+          description: Disability status for concentrating.
+        dsv2DisabilityDressing:
+          type: string
+          description: Disability status for dressing.
+        dsv2DisabilityErrands:
+          type: string
+          description: Disability status for doing errands.
+        dsv2DisabilityHearing:
+          type: string
+          description: Disability status for hearing.
+        dsv2DisabilityOtherText:
+          type: string
+          description: Other text for disability.
+        dsv2DisabilitySeeing:
+          type: string
+          description: Disability status for seeing.
+        dsv2DisabilityWalking:
+          type: string
+          description: Disability status for walking.
+        dsv2Disadvantaged:
+          type: string
+          description: Disadvantaged status.
+        dsv2Education:
+          type: string
+          description: Education level.
+        dsv2EthnicCategory:
+          type: string
+          description: User-reported ethnic category information.
+        dsv2GenderIdentity:
+          type: string
+          description: User-reported gender identity information.
+        dsv2SexualOrientation:
+          type: string
+          description: User-reported sexual orientation information.
+        dsv2EthnicityAiAnOtherText:
+          type: string
+          description: Other text for American Indian/Alaska Native ethnicity.
+        dsv2EthnicityAsianOtherText:
+          type: string
+          description: Other text for Asian ethnicity.
+        dsv2EthnicityBlackOtherText:
+          type: string
+          description: Other text for Black ethnicity.
+        dsv2EthnicityHispanicOtherText:
+          type: string
+          description: Other text for Hispanic ethnicity.
+        dsv2EthnicityMeNaOtherText:
+          type: string
+          description: Other text for Middle Eastern/North African ethnicity.
+        dsv2EthnicityNhPiOtherText:
+          type: string
+          description: Other text for Native Hawaiian/Pacific Islander ethnicity.
+        dsv2EthnicityOtherText:
+          type: string
+          description: Other text for ethnicity not covered by other categories.
+        dsv2EthnicityWhiteOtherText:
+          type: string
+          description: Other text for White ethnicity.
+        dsv2GenderOtherText:
+          type: string
+          description: Other text for gender identity.
+        dsv2OrientationOtherText:
+          type: string
+          description: Other text for sexual orientation.
+        dsv2SexAtBirth:
+          type: string
+          description: Sex assigned at birth.
+        dsv2SexAtBirthOtherText:
+          type: string
+          description: Other text for sex at birth.
+        dsv2SurveyComments:
+          type: string
+          description: General comments about the survey.
+        dsv2YearOfBirth:
+          type: integer
+          description: Year of birth.
+          format: int32
+        dsv2YearOfBirthPreferNot:
+          type: boolean
+          description: Whether the user preferred not to answer year of birth.
       x-aou-note: |-
         This code was generated using reporting-wizard.rb at 2020-09-30T16:18:29-04:00.
         Manual modification should be avoided if possible as this is a one-time generation
