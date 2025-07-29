@@ -65,6 +65,13 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbEthnicCategory;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbGenderIdentityV2;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbSexualOrientationV2;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbSexAtBirthV2;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbEducationV2;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbYesNoPreferNot;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
@@ -468,6 +475,88 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
+  public void testQueryUser_withDsv2Fields() {
+    final DbUser user = createDbUserWithInstitute();
+    addUserToTier(user, registeredTier);
+    createDemographicSurveyV2(user);
+    
+    entityManager.flush();
+
+    final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
+    assertThat(batches.size()).isEqualTo(1);
+
+    ReportingUser reportingUser = batches.stream().findFirst().get().get(0);
+    
+    // Verify dsv2 fields are populated
+    assertThat(reportingUser.getDsv2CompletionTime()).isNotNull();
+    assertThat(reportingUser.getDsv2DisabilityConcentrating()).isEqualTo("NO");
+    assertThat(reportingUser.getDsv2DisabilityDressing()).isEqualTo("NO");
+    assertThat(reportingUser.getDsv2DisabilityErrands()).isEqualTo("NO");
+    assertThat(reportingUser.getDsv2DisabilityHearing()).isEqualTo("NO");
+    assertThat(reportingUser.getDsv2DisabilityOtherText()).isEqualTo("No other disabilities");
+    assertThat(reportingUser.getDsv2DisabilitySeeing()).isEqualTo("NO");
+    assertThat(reportingUser.getDsv2DisabilityWalking()).isEqualTo("NO");
+    assertThat(reportingUser.getDsv2Disadvantaged()).isEqualTo("NO");
+    assertThat(reportingUser.getDsv2Education()).isEqualTo("COLLEGE_GRADUATE");
+    assertThat(reportingUser.getDsv2EthnicityAiAnOtherText()).isEqualTo("AI/AN other text");
+    assertThat(reportingUser.getDsv2EthnicityAsianOtherText()).isEqualTo("Asian other text");
+    assertThat(reportingUser.getDsv2EthnicityBlackOtherText()).isEqualTo("Black other text");
+    assertThat(reportingUser.getDsv2EthnicityHispanicOtherText()).isEqualTo("Hispanic other text");
+    assertThat(reportingUser.getDsv2EthnicityMeNaOtherText()).isEqualTo("ME/NA other text");
+    assertThat(reportingUser.getDsv2EthnicityNhPiOtherText()).isEqualTo("NH/PI other text");
+    assertThat(reportingUser.getDsv2EthnicityOtherText()).isEqualTo("Other ethnicity text");
+    assertThat(reportingUser.getDsv2EthnicityWhiteOtherText()).isEqualTo("White other text");
+    assertThat(reportingUser.getDsv2GenderOtherText()).isEqualTo("Gender other text");
+    assertThat(reportingUser.getDsv2OrientationOtherText()).isEqualTo("Orientation other text");
+    assertThat(reportingUser.getDsv2SexAtBirth()).isEqualTo("MALE");
+    assertThat(reportingUser.getDsv2SexAtBirthOtherText()).isEqualTo("Sex at birth other text");
+    assertThat(reportingUser.getDsv2SurveyComments()).isEqualTo("Test survey comments");
+    assertThat(reportingUser.getDsv2YearOfBirth()).isEqualTo(1990);
+    assertThat(reportingUser.isDsv2YearOfBirthPreferNot()).isEqualTo(false);
+    // Multi-value fields - now testable with EntityManager
+    assertThat(reportingUser.getDsv2EthnicCategory()).isEqualTo("WHITE");
+    assertThat(reportingUser.getDsv2GenderIdentity()).isEqualTo("MAN");
+    assertThat(reportingUser.getDsv2SexualOrientation()).isEqualTo("STRAIGHT");
+  }
+
+  @Test
+  public void testQueryUser_withMultipleDsv2Values() {
+    final DbUser user = createDbUserWithInstitute();
+    addUserToTier(user, registeredTier);
+    
+    // Create dsv2 with multiple values for multi-value fields
+    DbDemographicSurveyV2 dsv2 = new DbDemographicSurveyV2();
+    dsv2.setUser(user);
+    dsv2.setCompletionTime(Timestamp.from(Instant.now()));
+    dsv2.setEducation(DbEducationV2.MASTER);
+    dsv2.setSexAtBirth(DbSexAtBirthV2.FEMALE);
+    dsv2.setYearOfBirth(1985L);
+    dsv2.setYearOfBirthPreferNot(false);
+    
+    // Set multiple values for multi-value fields
+    dsv2.setEthnicCategory(Set.of(DbEthnicCategory.WHITE, DbEthnicCategory.ASIAN));
+    dsv2.setGenderIdentity(Set.of(DbGenderIdentityV2.WOMAN, DbGenderIdentityV2.NON_BINARY));
+    dsv2.setSexualOrientation(Set.of(DbSexualOrientationV2.STRAIGHT));
+
+    dsv2 = entityManager.merge(dsv2);
+    entityManager.flush();
+
+    final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
+    assertThat(batches.size()).isEqualTo(1);
+
+    ReportingUser reportingUser = batches.stream().findFirst().get().get(0);
+    
+    // Verify multi-value fields are comma-separated
+    assertThat(reportingUser.getDsv2EthnicCategory()).contains("WHITE");
+    assertThat(reportingUser.getDsv2EthnicCategory()).contains("ASIAN");
+    assertThat(reportingUser.getDsv2EthnicCategory()).contains(",");
+    
+    assertThat(reportingUser.getDsv2GenderIdentity()).contains("WOMAN");
+    assertThat(reportingUser.getDsv2GenderIdentity()).contains("NON_BINARY");
+    assertThat(reportingUser.getDsv2GenderIdentity()).contains(",");
+  }
+
+  @Test
   public void testQueryInstitution() {
     // A simple test to make sure the query works.
     createInstitutionTierRequirement(dbInstitution);
@@ -793,8 +882,49 @@ public class ReportingQueryServiceTest {
           duccModule,
           USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME,
           USER__DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME);
+      createDemographicSurveyV2(user);
     }
     entityManager.flush();
+  }
+
+  @Transactional
+  public DbDemographicSurveyV2 createDemographicSurveyV2(DbUser user) {
+    DbDemographicSurveyV2 dsv2 = new DbDemographicSurveyV2();
+    dsv2.setUser(user);
+    dsv2.setCompletionTime(Timestamp.from(Instant.now()));
+    dsv2.setDisabilityConcentrating(DbYesNoPreferNot.NO);
+    dsv2.setDisabilityDressing(DbYesNoPreferNot.NO);
+    dsv2.setDisabilityErrands(DbYesNoPreferNot.NO);
+    dsv2.setDisabilityHearing(DbYesNoPreferNot.NO);
+    dsv2.setDisabilityOtherText("No other disabilities");
+    dsv2.setDisabilitySeeing(DbYesNoPreferNot.NO);
+    dsv2.setDisabilityWalking(DbYesNoPreferNot.NO);
+    dsv2.setDisadvantaged(DbYesNoPreferNot.NO);
+    dsv2.setEducation(DbEducationV2.COLLEGE_GRADUATE);
+    dsv2.setEthnicityAiAnOtherText("AI/AN other text");
+    dsv2.setEthnicityAsianOtherText("Asian other text");
+    dsv2.setEthnicityBlackOtherText("Black other text");
+    dsv2.setEthnicityHispanicOtherText("Hispanic other text");
+    dsv2.setEthnicityMeNaOtherText("ME/NA other text");
+    dsv2.setEthnicityNhPiOtherText("NH/PI other text");
+    dsv2.setEthnicityOtherText("Other ethnicity text");
+    dsv2.setEthnicityWhiteOtherText("White other text");
+    dsv2.setGenderOtherText("Gender other text");
+    dsv2.setOrientationOtherText("Orientation other text");
+    dsv2.setSexAtBirth(DbSexAtBirthV2.MALE);
+    dsv2.setSexAtBirthOtherText("Sex at birth other text");
+    dsv2.setSurveyComments("Test survey comments");
+    dsv2.setYearOfBirth(1990L);
+    dsv2.setYearOfBirthPreferNot(false);
+    
+    // Set multi-value fields using Set.of()
+    dsv2.setEthnicCategory(Set.of(DbEthnicCategory.WHITE));
+    dsv2.setGenderIdentity(Set.of(DbGenderIdentityV2.MAN));
+    dsv2.setSexualOrientation(Set.of(DbSexualOrientationV2.STRAIGHT));
+    
+    dsv2 = entityManager.merge(dsv2);
+    
+    return dsv2;
   }
 
   private void createCohorts(int count) {
