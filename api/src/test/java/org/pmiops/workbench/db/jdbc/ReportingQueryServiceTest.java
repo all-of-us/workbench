@@ -66,11 +66,11 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbEducationV2;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbEthnicCategory;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbGenderIdentityV2;
-import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbSexualOrientationV2;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbSexAtBirthV2;
-import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbEducationV2;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbSexualOrientationV2;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbYesNoPreferNot;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
@@ -479,14 +479,14 @@ public class ReportingQueryServiceTest {
     final DbUser user = createDbUserWithInstitute();
     addUserToTier(user, registeredTier);
     createDemographicSurveyV2(user);
-    
+
     entityManager.flush();
 
     final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
     assertThat(batches.size()).isEqualTo(1);
 
     ReportingUser reportingUser = batches.stream().findFirst().get().get(0);
-    
+
     // Verify dsv2 fields are populated
     assertThat(reportingUser.getDsv2CompletionTime()).isNotNull();
     assertThat(reportingUser.getDsv2DisabilityConcentrating()).isEqualTo("NO");
@@ -523,7 +523,7 @@ public class ReportingQueryServiceTest {
   public void testQueryUser_withMultipleDsv2Values() {
     final DbUser user = createDbUserWithInstitute();
     addUserToTier(user, registeredTier);
-    
+
     // Create dsv2 with multiple values for multi-value fields
     DbDemographicSurveyV2 dsv2 = new DbDemographicSurveyV2();
     dsv2.setUser(user);
@@ -532,7 +532,7 @@ public class ReportingQueryServiceTest {
     dsv2.setSexAtBirth(DbSexAtBirthV2.FEMALE);
     dsv2.setYearOfBirth(1985L);
     dsv2.setYearOfBirthPreferNot(false);
-    
+
     // Set multiple values for multi-value fields
     dsv2.setEthnicCategory(Set.of(DbEthnicCategory.WHITE, DbEthnicCategory.ASIAN));
     dsv2.setGenderIdentity(Set.of(DbGenderIdentityV2.WOMAN, DbGenderIdentityV2.NON_BINARY));
@@ -545,12 +545,12 @@ public class ReportingQueryServiceTest {
     assertThat(batches.size()).isEqualTo(1);
 
     ReportingUser reportingUser = batches.stream().findFirst().get().get(0);
-    
+
     // Verify multi-value fields are comma-separated
     assertThat(reportingUser.getDsv2EthnicCategory()).contains("WHITE");
     assertThat(reportingUser.getDsv2EthnicCategory()).contains("ASIAN");
     assertThat(reportingUser.getDsv2EthnicCategory()).contains(",");
-    
+
     assertThat(reportingUser.getDsv2GenderIdentity()).contains("WOMAN");
     assertThat(reportingUser.getDsv2GenderIdentity()).contains("NON_BINARY");
     assertThat(reportingUser.getDsv2GenderIdentity()).contains(",");
@@ -916,14 +916,14 @@ public class ReportingQueryServiceTest {
     dsv2.setSurveyComments("Test survey comments");
     dsv2.setYearOfBirth(1990L);
     dsv2.setYearOfBirthPreferNot(false);
-    
+
     // Set multi-value fields using Set.of()
     dsv2.setEthnicCategory(Set.of(DbEthnicCategory.WHITE));
     dsv2.setGenderIdentity(Set.of(DbGenderIdentityV2.MAN));
     dsv2.setSexualOrientation(Set.of(DbSexualOrientationV2.STRAIGHT));
-    
+
     dsv2 = entityManager.merge(dsv2);
-    
+
     return dsv2;
   }
 
