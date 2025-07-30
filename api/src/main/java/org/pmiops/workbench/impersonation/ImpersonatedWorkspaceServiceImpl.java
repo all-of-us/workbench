@@ -1,7 +1,9 @@
 package org.pmiops.workbench.impersonation;
 
 import com.google.common.collect.Sets;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -233,6 +235,33 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
                 "Error deleting billing project %s: %s", workspaceNamespace, e.getMessage());
         logger.warning(msg);
       }
+    }
+  }
+
+  @Override
+  @Transactional
+  public void cleanupWorkspace(String workspaceNamespace, String lastModifiedBy) {
+    DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElse(null);
+    if (dbWorkspace != null
+        && dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE) {
+      String previousLastModifiedBy = dbWorkspace.getLastModifiedBy();
+      Timestamp previousLastModifiedTime = dbWorkspace.getLastModifiedTime();
+      dbWorkspace.setLastModifiedBy(lastModifiedBy);
+      dbWorkspace.setLastModifiedTime(new Timestamp(System.currentTimeMillis()));
+      dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+      logger.log(
+          Level.INFO,
+          String.format(
+              "Workspace (%s), that was last updated by %s on %s, has been cleaned up by %s",
+              workspaceNamespace,
+              previousLastModifiedBy,
+              previousLastModifiedTime,
+              lastModifiedBy));
+      workspaceDao.save(dbWorkspace);
+      // Since a deleted workspace entry still exists in the database we have to explicitly remove
+      // it from
+      // the featured_workspace table if it exists
+      featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
     }
   }
 }

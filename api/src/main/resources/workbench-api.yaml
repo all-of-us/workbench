@@ -2640,6 +2640,19 @@ paths:
         204:
           description: No content.
           content: {}
+  /v1/cron/cleanupOrphanedWorkspaces:
+    get:
+      tags:
+      - offlineWorkspace
+      - cron
+      description: Occasionally Terra workspaces are deleted without being cleaned
+        up in Workbench. This endpoint cleans up those orphaned workspaces.
+      operationId: cleanupOrphanedWorkspaces
+      security: []
+      responses:
+        204:
+          description: No content.
+          content: {}
   /v1/cron/deleteTestUserWorkspacesOrphanedInRawls:
     get:
       tags:
@@ -4580,6 +4593,27 @@ paths:
       responses:
         200:
           description: Reporting data uploaded successfully
+          content: {}
+      x-codegen-request-body-name: request
+  /v1/cloudTask/cleanupOrphanedWorkspaces:
+    post:
+      tags:
+      - cloudTaskWorkspaces
+      - cloudTask
+      description: |
+        Cleans up workspace records in the database that are no longer in Terra.
+      operationId: cleanupOrphanedWorkspacesBatch
+      security: []
+      requestBody:
+        description: Batch of workspaces cleanup tasks to process.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceNamespaceList'
+        required: true
+      responses:
+        200:
+          description: Workspaces cleaned
           content: {}
       x-codegen-request-body-name: request
   /v1/institutions:

@@ -30,4 +30,6 @@ public interface ImpersonatedWorkspaceService {
       String googleProject,
       String workspaceTerraName,
       boolean deleteBillingProjects);
+
+  void cleanupWorkspace(String workspaceNamespace, String lastModifiedBy);
 }

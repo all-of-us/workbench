@@ -38,6 +38,8 @@ public interface WorkspaceService {
 
   List<String> getActiveWorkspaceNamespacesAsService();
 
+  List<String> getOrphanedWorkspaceNamespacesAsService();
+
   /**
    * Get all Featured workspaces from the DB.
    *

@@ -158,4 +158,10 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "FROM DbWorkspace w "
           + "WHERE w.creator.userId in (:creatorIds)")
   Set<String> getWorkspaceGoogleProjectsForCreators(@Param("creatorIds") List<Long> creatorIds);
+
+  @Query(
+      "SELECT DISTINCT w.workspaceNamespace FROM DbWorkspace w "
+          + "WHERE w.activeStatus = 0 AND w.workspaceNamespace NOT IN (:referencedWorkspaceNamespaces)")
+  List<String> findAllOrphanedWorkspaceNamespaces(
+      @Param("referencedWorkspaceNamespaces") List<String> referencedWorkspaceNamespaces);
 }

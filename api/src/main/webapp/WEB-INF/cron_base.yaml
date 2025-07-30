@@ -92,3 +92,9 @@ cron:
   schedule: every day 22:30
   timezone: America/Chicago
   target: api
+- description: >
+    Cleanup orphaned workspaces in database but not in Rawls.
+  url: /v1/cron/cleanupOrphanedWorkspaces
+  schedule: every day 21:00
+  timezone: America/Chicago
+  target: api

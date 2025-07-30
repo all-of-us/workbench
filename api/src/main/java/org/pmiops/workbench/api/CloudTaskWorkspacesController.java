@@ -80,4 +80,23 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
     return ResponseEntity.ok().build();
   }
+
+  @Override
+  public ResponseEntity<Void> cleanupOrphanedWorkspacesBatch(List<String> request) {
+    LOGGER.info(
+        String.format(
+            "Cleaning up %d orphaned workspaces in internal database...", request.size()));
+
+    request.forEach(
+        namespace -> {
+          try {
+            impersonatedWorkspaceService.cleanupWorkspace(
+                namespace, "CleanupOrphanedWorkspaces Cron Job");
+          } catch (NotFoundException e) {
+            LOGGER.info(String.format("Workspace (%s) was not found in database", namespace));
+          }
+        });
+
+    return ResponseEntity.ok().build();
+  }
 }
