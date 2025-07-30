@@ -124,7 +124,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportingQueryServiceTest {
 
   public static final int BATCH_SIZE = 2;
-  private final long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -198,8 +197,7 @@ public class ReportingQueryServiceTest {
 
   @Transactional
   public DbCohort createCohort(DbUser user1, DbWorkspace workspace1) {
-    final DbCohort cohort = cohortDao.save(ReportingTestUtils.createDbCohort(user1, workspace1));
-    return cohort;
+    return cohortDao.save(ReportingTestUtils.createDbCohort(user1, workspace1));
   }
 
   @Transactional
@@ -513,7 +511,6 @@ public class ReportingQueryServiceTest {
     assertThat(reportingUser.getDsv2SurveyComments()).isEqualTo("Test survey comments");
     assertThat(reportingUser.getDsv2YearOfBirth()).isEqualTo(1990);
     assertThat(reportingUser.isDsv2YearOfBirthPreferNot()).isEqualTo(false);
-    // Multi-value fields - now testable with EntityManager
     assertThat(reportingUser.getDsv2EthnicCategory()).isEqualTo("WHITE");
     assertThat(reportingUser.getDsv2GenderIdentity()).isEqualTo("MAN");
     assertThat(reportingUser.getDsv2SexualOrientation()).isEqualTo("STRAIGHT");
@@ -538,7 +535,7 @@ public class ReportingQueryServiceTest {
     dsv2.setGenderIdentity(Set.of(DbGenderIdentityV2.WOMAN, DbGenderIdentityV2.NON_BINARY));
     dsv2.setSexualOrientation(Set.of(DbSexualOrientationV2.STRAIGHT));
 
-    dsv2 = entityManager.merge(dsv2);
+    entityManager.merge(dsv2);
     entityManager.flush();
 
     final List<List<ReportingUser>> batches = getBatchedUserStream().toList();
@@ -917,7 +914,6 @@ public class ReportingQueryServiceTest {
     dsv2.setYearOfBirth(1990L);
     dsv2.setYearOfBirthPreferNot(false);
 
-    // Set multi-value fields using Set.of()
     dsv2.setEthnicCategory(Set.of(DbEthnicCategory.WHITE));
     dsv2.setGenderIdentity(Set.of(DbGenderIdentityV2.MAN));
     dsv2.setSexualOrientation(Set.of(DbSexualOrientationV2.STRAIGHT));
