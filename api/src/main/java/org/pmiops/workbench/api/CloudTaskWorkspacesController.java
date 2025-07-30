@@ -7,6 +7,9 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
+import org.pmiops.workbench.model.WorkspaceUserCacheQueueWorkspace;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,10 +22,17 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   private static final boolean DELETE_BILLING_PROJECTS = true;
 
   private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
+  private final WorkspaceUserCacheService workspaceUserCacheService;
 
   @Autowired
-  public CloudTaskWorkspacesController(ImpersonatedWorkspaceService impersonatedWorkspaceService) {
+  public CloudTaskWorkspacesController(
+      ImpersonatedWorkspaceService impersonatedWorkspaceService,
+      WorkspaceAuthService workspaceAuthService,
+      WorkspaceUserCacheService workspaceUserCacheService) {
     this.impersonatedWorkspaceService = impersonatedWorkspaceService;
+    this.workspaceAuthService = workspaceAuthService;
+    this.workspaceUserCacheService = workspaceUserCacheService;
   }
 
   @Override
@@ -99,4 +109,27 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
     return ResponseEntity.ok().build();
   }
+
+  @Override
+  public ResponseEntity<Void> processWorkspaceUserCacheQueueTask(
+      List<WorkspaceUserCacheQueueWorkspace> workspaces) {
+    LOGGER.info("Processing workspace user cache queue task...");
+
+    var wsAcls =
+        workspaces.stream()
+            .collect(
+                Collectors.toMap(
+                    WorkspaceUserCacheQueueWorkspace::getWorkspaceId,
+                    workspace ->
+                        workspaceAuthService.getFirecloudWorkspaceAcl(
+                            workspace.getWorkspaceNamespace(),
+                            workspace.getWorkspaceFirecloudName())));
+
+    workspaceUserCacheService.updateWorkspaceUserCache(wsAcls);
+
+    return ResponseEntity.ok().build();
+  }
+
+  record WorkspaceUserCacheEntry(
+      String workspaceNamespace, String workspaceFirecloudName, String userEmail, String role) {}
 }
