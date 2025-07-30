@@ -316,7 +316,35 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  dm.gender_identity,\n"
                 + "  dm.race,\n"
                 + "  dm.sex_at_birth,\n"
-                + "  t.access_tier_short_names\n"
+                + "  t.access_tier_short_names,\n"
+                + "  dsv2.completion_time AS dsv2_completion_time,\n"
+                + "  dsv2.disability_concentrating AS dsv2_disability_concentrating,\n"
+                + "  dsv2.disability_dressing AS dsv2_disability_dressing,\n"
+                + "  dsv2.disability_errands AS dsv2_disability_errands,\n"
+                + "  dsv2.disability_hearing AS dsv2_disability_hearing,\n"
+                + "  dsv2.disability_other_text AS dsv2_disability_other_text,\n"
+                + "  dsv2.disability_seeing AS dsv2_disability_seeing,\n"
+                + "  dsv2.disability_walking AS dsv2_disability_walking,\n"
+                + "  dsv2.disadvantaged AS dsv2_disadvantaged,\n"
+                + "  dsv2.education AS dsv2_education,\n"
+                + "  dsv2.ethnicity_ai_an_other_text AS dsv2_ethnicity_ai_an_other_text,\n"
+                + "  dsv2.ethnicity_asian_other_text AS dsv2_ethnicity_asian_other_text,\n"
+                + "  dsv2.ethnicity_black_other_text AS dsv2_ethnicity_black_other_text,\n"
+                + "  dsv2.ethnicity_hispanic_other_text AS dsv2_ethnicity_hispanic_other_text,\n"
+                + "  dsv2.ethnicity_me_na_other_text AS dsv2_ethnicity_me_na_other_text,\n"
+                + "  dsv2.ethnicity_nh_pi_other_text AS dsv2_ethnicity_nh_pi_other_text,\n"
+                + "  dsv2.ethnicity_other_text AS dsv2_ethnicity_other_text,\n"
+                + "  dsv2.ethnicity_white_other_text AS dsv2_ethnicity_white_other_text,\n"
+                + "  dsv2.gender_other_text AS dsv2_gender_other_text,\n"
+                + "  dsv2.orientation_other_text AS dsv2_orientation_other_text,\n"
+                + "  dsv2.sex_at_birth AS dsv2_sex_at_birth,\n"
+                + "  dsv2.sex_at_birth_other_text AS dsv2_sex_at_birth_other_text,\n"
+                + "  dsv2.survey_comments AS dsv2_survey_comments,\n"
+                + "  dsv2.year_of_birth AS dsv2_year_of_birth,\n"
+                + "  dsv2.year_of_birth_prefer_not AS dsv2_year_of_birth_prefer_not,\n"
+                + "  dsv2.ethnic_category AS dsv2_ethnic_category,\n"
+                + "  dsv2.gender_identity AS dsv2_gender_identity,\n"
+                + "  dsv2.sexual_orientation AS dsv2_sexual_orientation\n"
                 + "FROM user u"
                 + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id\n"
                 + "  LEFT OUTER JOIN user_code_of_conduct_agreement AS ducc on u.user_id = ducc.user_id\n"
@@ -344,6 +372,47 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "         LEFT OUTER JOIN user_degree AS ud on demo.user_id = ud.user_id "
                 + "         GROUP BY demo.user_id "
                 + "  ) AS dm on u.user_id = dm.user_id"
+                + "  LEFT OUTER JOIN "
+                + "  ( "
+                + "       SELECT \n"
+                + "             dsv2.user_id, "
+                + "             dsv2.completion_time, "
+                + "             dsv2.disability_concentrating, "
+                + "             dsv2.disability_dressing, "
+                + "             dsv2.disability_errands, "
+                + "             dsv2.disability_hearing, "
+                + "             dsv2.disability_other_text, "
+                + "             dsv2.disability_seeing, "
+                + "             dsv2.disability_walking, "
+                + "             dsv2.disadvantaged, "
+                + "             dsv2.education, "
+                + "             dsv2.ethnicity_ai_an_other_text, "
+                + "             dsv2.ethnicity_asian_other_text, "
+                + "             dsv2.ethnicity_black_other_text, "
+                + "             dsv2.ethnicity_hispanic_other_text, "
+                + "             dsv2.ethnicity_me_na_other_text, "
+                + "             dsv2.ethnicity_nh_pi_other_text, "
+                + "             dsv2.ethnicity_other_text, "
+                + "             dsv2.ethnicity_white_other_text, "
+                + "             dsv2.gender_other_text, "
+                + "             dsv2.orientation_other_text, "
+                + "             dsv2.sex_at_birth, "
+                + "             dsv2.sex_at_birth_other_text, "
+                + "             dsv2.survey_comments, "
+                + "             dsv2.year_of_birth, "
+                + "             dsv2.year_of_birth_prefer_not, "
+                + "             GROUP_CONCAT(DISTINCT dsv2ec.ethnic_category) as ethnic_category, "
+                + "             GROUP_CONCAT(DISTINCT dsv2gi.gender_identity) as gender_identity, "
+                + "             GROUP_CONCAT(DISTINCT dsv2so.sexual_orientation) as sexual_orientation "
+                + "       FROM demographic_survey_v2 as dsv2 "
+                + "         LEFT OUTER JOIN demographic_survey_v2_ethnic_category as dsv2ec "
+                + "             ON dsv2.demographic_survey_v2_id = dsv2ec.demographic_survey_v2_id\n"
+                + "         LEFT OUTER JOIN demographic_survey_v2_gender_identity as dsv2gi "
+                + "             ON dsv2.demographic_survey_v2_id = dsv2gi.demographic_survey_v2_id\n"
+                + "         LEFT OUTER JOIN demographic_survey_v2_sexual_orientation as dsv2so "
+                + "             ON dsv2.demographic_survey_v2_id = dsv2so.demographic_survey_v2_id\n"
+                + "         GROUP BY dsv2.user_id "
+                + "  ) AS dsv2 on u.user_id = dsv2.user_id"
                 + "  LEFT OUTER JOIN ("
                 + "    SELECT u.user_id, GROUP_CONCAT(DISTINCT a.short_name) AS access_tier_short_names "
                 + "    FROM user u "
@@ -479,7 +548,35 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .yearOfBirth(rs.getBigDecimal("year_of_birth"))
                 .degrees(
                     convertListEnumFromStorage(
-                        rs.getString("degrees"), e -> degreeFromStorage(e).toString())));
+                        rs.getString("degrees"), e -> degreeFromStorage(e).toString()))
+                .dsv2CompletionTime(offsetDateTimeUtc(rs.getTimestamp("dsv2_completion_time")))
+                .dsv2DisabilityConcentrating(rs.getString("dsv2_disability_concentrating"))
+                .dsv2DisabilityDressing(rs.getString("dsv2_disability_dressing"))
+                .dsv2DisabilityErrands(rs.getString("dsv2_disability_errands"))
+                .dsv2DisabilityHearing(rs.getString("dsv2_disability_hearing"))
+                .dsv2DisabilityOtherText(rs.getString("dsv2_disability_other_text"))
+                .dsv2DisabilitySeeing(rs.getString("dsv2_disability_seeing"))
+                .dsv2DisabilityWalking(rs.getString("dsv2_disability_walking"))
+                .dsv2Disadvantaged(rs.getString("dsv2_disadvantaged"))
+                .dsv2Education(rs.getString("dsv2_education"))
+                .dsv2EthnicityAiAnOtherText(rs.getString("dsv2_ethnicity_ai_an_other_text"))
+                .dsv2EthnicityAsianOtherText(rs.getString("dsv2_ethnicity_asian_other_text"))
+                .dsv2EthnicityBlackOtherText(rs.getString("dsv2_ethnicity_black_other_text"))
+                .dsv2EthnicityHispanicOtherText(rs.getString("dsv2_ethnicity_hispanic_other_text"))
+                .dsv2EthnicityMeNaOtherText(rs.getString("dsv2_ethnicity_me_na_other_text"))
+                .dsv2EthnicityNhPiOtherText(rs.getString("dsv2_ethnicity_nh_pi_other_text"))
+                .dsv2EthnicityOtherText(rs.getString("dsv2_ethnicity_other_text"))
+                .dsv2EthnicityWhiteOtherText(rs.getString("dsv2_ethnicity_white_other_text"))
+                .dsv2GenderOtherText(rs.getString("dsv2_gender_other_text"))
+                .dsv2OrientationOtherText(rs.getString("dsv2_orientation_other_text"))
+                .dsv2SexAtBirth(rs.getString("dsv2_sex_at_birth"))
+                .dsv2SexAtBirthOtherText(rs.getString("dsv2_sex_at_birth_other_text"))
+                .dsv2SurveyComments(rs.getString("dsv2_survey_comments"))
+                .dsv2YearOfBirth(rs.getInt("dsv2_year_of_birth"))
+                .dsv2YearOfBirthPreferNot(rs.getBoolean("dsv2_year_of_birth_prefer_not"))
+                .dsv2EthnicCategory(rs.getString("dsv2_ethnic_category"))
+                .dsv2GenderIdentity(rs.getString("dsv2_gender_identity"))
+                .dsv2SexualOrientation(rs.getString("dsv2_sexual_orientation")));
   }
 
   @Override

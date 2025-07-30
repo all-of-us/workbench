@@ -81,7 +81,48 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   SEXES_AT_BIRTH("sexes_at_birth", ReportingUser::getSexesAtBirth),
   RACES("races", ReportingUser::getRaces),
   YEAR_OF_BIRTH(
-      "year_of_birth", u -> u.getYearOfBirth() == null ? null : u.getYearOfBirth().intValue());
+      "year_of_birth", u -> u.getYearOfBirth() == null ? null : u.getYearOfBirth().intValue()),
+  // --- Demographic Survey V2 fields ---
+  DSV2_COMPLETION_TIME("dsv2_completion_time", u -> toInsertRowString(u.getDsv2CompletionTime())),
+  DSV2_DISABILITY_CONCENTRATING(
+      "dsv2_disability_concentrating", ReportingUser::getDsv2DisabilityConcentrating),
+  DSV2_DISABILITY_DRESSING("dsv2_disability_dressing", ReportingUser::getDsv2DisabilityDressing),
+  DSV2_DISABILITY_ERRANDS("dsv2_disability_errands", ReportingUser::getDsv2DisabilityErrands),
+  DSV2_DISABILITY_HEARING("dsv2_disability_hearing", ReportingUser::getDsv2DisabilityHearing),
+  DSV2_DISABILITY_OTHER_TEXT(
+      "dsv2_disability_other_text", ReportingUser::getDsv2DisabilityOtherText),
+  DSV2_DISABILITY_SEEING("dsv2_disability_seeing", ReportingUser::getDsv2DisabilitySeeing),
+  DSV2_DISABILITY_WALKING("dsv2_disability_walking", ReportingUser::getDsv2DisabilityWalking),
+  DSV2_DISADVANTAGED("dsv2_disadvantaged", ReportingUser::getDsv2Disadvantaged),
+  DSV2_EDUCATION("dsv2_education", ReportingUser::getDsv2Education),
+  DSV2_ETHNICITY_AI_AN_OTHER_TEXT(
+      "dsv2_ethnicity_ai_an_other_text", ReportingUser::getDsv2EthnicityAiAnOtherText),
+  DSV2_ETHNICITY_ASIAN_OTHER_TEXT(
+      "dsv2_ethnicity_asian_other_text", ReportingUser::getDsv2EthnicityAsianOtherText),
+  DSV2_ETHNICITY_BLACK_OTHER_TEXT(
+      "dsv2_ethnicity_black_other_text", ReportingUser::getDsv2EthnicityBlackOtherText),
+  DSV2_ETHNICITY_HISPANIC_OTHER_TEXT(
+      "dsv2_ethnicity_hispanic_other_text", ReportingUser::getDsv2EthnicityHispanicOtherText),
+  DSV2_ETHNICITY_ME_NA_OTHER_TEXT(
+      "dsv2_ethnicity_me_na_other_text", ReportingUser::getDsv2EthnicityMeNaOtherText),
+  DSV2_ETHNICITY_NH_PI_OTHER_TEXT(
+      "dsv2_ethnicity_nh_pi_other_text", ReportingUser::getDsv2EthnicityNhPiOtherText),
+  DSV2_ETHNICITY_OTHER_TEXT("dsv2_ethnicity_other_text", ReportingUser::getDsv2EthnicityOtherText),
+  DSV2_ETHNICITY_WHITE_OTHER_TEXT(
+      "dsv2_ethnicity_white_other_text", ReportingUser::getDsv2EthnicityWhiteOtherText),
+  DSV2_GENDER_OTHER_TEXT("dsv2_gender_other_text", ReportingUser::getDsv2GenderOtherText),
+  DSV2_ORIENTATION_OTHER_TEXT(
+      "dsv2_orientation_other_text", ReportingUser::getDsv2OrientationOtherText),
+  DSV2_SEX_AT_BIRTH("dsv2_sex_at_birth", ReportingUser::getDsv2SexAtBirth),
+  DSV2_SEX_AT_BIRTH_OTHER_TEXT(
+      "dsv2_sex_at_birth_other_text", ReportingUser::getDsv2SexAtBirthOtherText),
+  DSV2_SURVEY_COMMENTS("dsv2_survey_comments", ReportingUser::getDsv2SurveyComments),
+  DSV2_YEAR_OF_BIRTH("dsv2_year_of_birth", ReportingUser::getDsv2YearOfBirth),
+  DSV2_YEAR_OF_BIRTH_PREFER_NOT(
+      "dsv2_year_of_birth_prefer_not", ReportingUser::isDsv2YearOfBirthPreferNot),
+  DSV2_ETHNIC_CATEGORY("dsv2_ethnic_category", ReportingUser::getDsv2EthnicCategory),
+  DSV2_GENDER_IDENTITY("dsv2_gender_identity", ReportingUser::getDsv2GenderIdentity),
+  DSV2_SEXUAL_ORIENTATION("dsv2_sexual_orientation", ReportingUser::getDsv2SexualOrientation);
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
