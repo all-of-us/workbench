@@ -15,9 +15,16 @@
       <column name="user_id" type="bigint">
         <constraints nullable="false" foreignKeyName="fk_workspace_user_cache_user" references="user(id)" deleteCascade="true"/>
       </column>
+      <column name="role" type="varchar">
+        <constraints nullable="false"/>
+      </column>
       <column name="last_updated" type="datetime">
         <constraints nullable="false"/>
       </column>
     </createTable>
+    <addUniqueConstraint
+      tableName="workspace_user_cache"
+      columnNames="workspace_id, user_id"
+      constraintName="uniq_workspace_user"/>
   </changeSet>
 </databaseChangeLog>

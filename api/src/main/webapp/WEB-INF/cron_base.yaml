@@ -98,3 +98,8 @@ cron:
   schedule: every day 21:00
   timezone: America/Chicago
   target: api
+- description: Cache ACLs for all workspaces in the database
+  url: /v1/cron/cacheWorkspaceAcls
+  schedule: every day 21:30
+  timezone: America/Chicago
+  target: api

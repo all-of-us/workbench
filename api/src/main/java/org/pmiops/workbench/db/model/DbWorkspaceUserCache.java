@@ -15,6 +15,7 @@ public class DbWorkspaceUserCache {
   private long id;
   private long workspaceId;
   private long userId;
+  private String role;
   private Timestamp lastUpdated;
 
   @Id
@@ -48,6 +49,16 @@ public class DbWorkspaceUserCache {
     return this;
   }
 
+  @Column(name = "role")
+  public String getRole() {
+    return role;
+  }
+
+  public DbWorkspaceUserCache setRole(String role) {
+    this.role = role;
+    return this;
+  }
+
   @Column(name = "last_updated")
   public Timestamp getLastUpdated() {
     return lastUpdated;
@@ -66,19 +77,21 @@ public class DbWorkspaceUserCache {
     return id == that.id
         && workspaceId == that.workspaceId
         && userId == that.userId
+        && Objects.equals(role, that.role)
         && Objects.equals(lastUpdated, that.lastUpdated);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, workspaceId, userId, lastUpdated);
+    return Objects.hash(id, workspaceId, userId, role, lastUpdated);
   }
 
   public DbWorkspaceUserCache() {}
 
-  public DbWorkspaceUserCache(long workspaceId, long userId, Timestamp lastUpdated) {
+  public DbWorkspaceUserCache(long workspaceId, long userId, String role, Timestamp lastUpdated) {
     this.workspaceId = workspaceId;
     this.userId = userId;
+    this.role = role;
     this.lastUpdated = lastUpdated;
   }
 }

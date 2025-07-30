@@ -164,4 +164,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "WHERE w.activeStatus = 0 AND w.workspaceNamespace NOT IN (:referencedWorkspaceNamespaces)")
   List<String> findAllOrphanedWorkspaceNamespaces(
       @Param("referencedWorkspaceNamespaces") List<String> referencedWorkspaceNamespaces);
+
+  @Query(
+      "SELECT w "
+          + "from DbWorkspace w "
+          + "left join DbWorkspaceUserCache wuc on w.workspaceId = wuc.workspaceId "
+          + "where w.activeStatus = 0 "
+          + "and (wuc.workspaceId is null or w.lastModifiedTime > wuc.lastUpdated)")
+  List<DbWorkspace> findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
 }
