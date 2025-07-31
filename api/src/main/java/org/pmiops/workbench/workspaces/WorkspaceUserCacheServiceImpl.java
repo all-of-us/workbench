@@ -46,7 +46,7 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
             .findUsersByUsernameIn(
                 newEntriesByWorkspaceId.values().stream()
                     .flatMap(entry -> entry.keySet().stream())
-                    .toList())
+                    .collect(Collectors.toSet()))
             .stream()
             .collect(Collectors.toMap(DbUser::getUsername, user -> user));
 
@@ -67,6 +67,7 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
       Map<String, RawlsWorkspaceAccessEntry> acl,
       Map<String, DbUser> usernameMap) {
     return acl.entrySet().stream()
+        .filter(aclItem -> usernameMap.containsKey(aclItem.getKey()))
         .map(
             aclItem ->
                 new DbWorkspaceUserCache()
