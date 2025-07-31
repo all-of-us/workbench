@@ -469,13 +469,14 @@ public class WorkspaceDaoTest {
     workspaceUserCacheDao.deleteAll();
 
     // Create an active workspace with no cache entries
-    DbWorkspace activeWorkspace = new DbWorkspace()
-        .setName("Active Workspace")
-        .setWorkspaceNamespace("active-ws")
-        .setFirecloudName("active-ws")
-        .setCreationTime(new Timestamp(System.currentTimeMillis()))
-        .setLastModifiedTime(new Timestamp(System.currentTimeMillis()))
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace activeWorkspace =
+        new DbWorkspace()
+            .setName("Active Workspace")
+            .setWorkspaceNamespace("active-ws")
+            .setFirecloudName("active-ws")
+            .setCreationTime(new Timestamp(System.currentTimeMillis()))
+            .setLastModifiedTime(new Timestamp(System.currentTimeMillis()))
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     activeWorkspace = workspaceDao.save(activeWorkspace);
 
     List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
@@ -490,21 +491,23 @@ public class WorkspaceDaoTest {
     long baseTime = System.currentTimeMillis();
 
     // Create workspace
-    DbWorkspace workspace = new DbWorkspace()
-        .setName("Workspace")
-        .setWorkspaceNamespace("ws-namespace")
-        .setFirecloudName("ws-firecloud")
-        .setCreationTime(new Timestamp(baseTime))
-        .setLastModifiedTime(new Timestamp(baseTime + 1000)) // Modified after cache
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspace =
+        new DbWorkspace()
+            .setName("Workspace")
+            .setWorkspaceNamespace("ws-namespace")
+            .setFirecloudName("ws-firecloud")
+            .setCreationTime(new Timestamp(baseTime))
+            .setLastModifiedTime(new Timestamp(baseTime + 1000)) // Modified after cache
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspace = workspaceDao.save(workspace);
 
     // Create cache entry that's older than workspace modification
-    DbWorkspaceUserCache cacheEntry = new DbWorkspaceUserCache(
-        workspace.getWorkspaceId(),
-        dbUser.getUserId(),
-        "OWNER",
-        new Timestamp(baseTime)); // Cache updated before workspace modification
+    DbWorkspaceUserCache cacheEntry =
+        new DbWorkspaceUserCache(
+            workspace.getWorkspaceId(),
+            dbUser.getUserId(),
+            "OWNER",
+            new Timestamp(baseTime)); // Cache updated before workspace modification
     workspaceUserCacheDao.save(cacheEntry);
 
     List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
@@ -519,21 +522,23 @@ public class WorkspaceDaoTest {
     long baseTime = System.currentTimeMillis();
 
     // Create workspace
-    DbWorkspace workspace = new DbWorkspace()
-        .setName("Workspace")
-        .setWorkspaceNamespace("ws-namespace")
-        .setFirecloudName("ws-firecloud")
-        .setCreationTime(new Timestamp(baseTime))
-        .setLastModifiedTime(new Timestamp(baseTime)) // Modified before cache
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspace =
+        new DbWorkspace()
+            .setName("Workspace")
+            .setWorkspaceNamespace("ws-namespace")
+            .setFirecloudName("ws-firecloud")
+            .setCreationTime(new Timestamp(baseTime))
+            .setLastModifiedTime(new Timestamp(baseTime)) // Modified before cache
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspace = workspaceDao.save(workspace);
 
     // Create cache entry that's newer than workspace modification
-    DbWorkspaceUserCache cacheEntry = new DbWorkspaceUserCache(
-        workspace.getWorkspaceId(),
-        dbUser.getUserId(),
-        "OWNER",
-        new Timestamp(baseTime + 1000)); // Cache updated after workspace modification
+    DbWorkspaceUserCache cacheEntry =
+        new DbWorkspaceUserCache(
+            workspace.getWorkspaceId(),
+            dbUser.getUserId(),
+            "OWNER",
+            new Timestamp(baseTime + 1000)); // Cache updated after workspace modification
     workspaceUserCacheDao.save(cacheEntry);
 
     List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
@@ -546,13 +551,14 @@ public class WorkspaceDaoTest {
     workspaceUserCacheDao.deleteAll();
 
     // Create inactive workspace with no cache
-    DbWorkspace inactiveWorkspace = new DbWorkspace()
-        .setName("Inactive Workspace")
-        .setWorkspaceNamespace("inactive-ws")
-        .setFirecloudName("inactive-ws")
-        .setCreationTime(new Timestamp(System.currentTimeMillis()))
-        .setLastModifiedTime(new Timestamp(System.currentTimeMillis()))
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    DbWorkspace inactiveWorkspace =
+        new DbWorkspace()
+            .setName("Inactive Workspace")
+            .setWorkspaceNamespace("inactive-ws")
+            .setFirecloudName("inactive-ws")
+            .setCreationTime(new Timestamp(System.currentTimeMillis()))
+            .setLastModifiedTime(new Timestamp(System.currentTimeMillis()))
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspaceDao.save(inactiveWorkspace);
 
     List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
@@ -567,47 +573,52 @@ public class WorkspaceDaoTest {
     long baseTime = System.currentTimeMillis();
 
     // Workspace with no cache - should be included
-    DbWorkspace workspaceNoCache = new DbWorkspace()
-        .setName("No Cache Workspace")
-        .setWorkspaceNamespace("no-cache-ws")
-        .setFirecloudName("no-cache-ws")
-        .setCreationTime(new Timestamp(baseTime))
-        .setLastModifiedTime(new Timestamp(baseTime))
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspaceNoCache =
+        new DbWorkspace()
+            .setName("No Cache Workspace")
+            .setWorkspaceNamespace("no-cache-ws")
+            .setFirecloudName("no-cache-ws")
+            .setCreationTime(new Timestamp(baseTime))
+            .setLastModifiedTime(new Timestamp(baseTime))
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspaceNoCache = workspaceDao.save(workspaceNoCache);
 
     // Workspace with stale cache - should be included
-    DbWorkspace workspaceStaleCache = new DbWorkspace()
-        .setName("Stale Cache Workspace")
-        .setWorkspaceNamespace("stale-cache-ws")
-        .setFirecloudName("stale-cache-ws")
-        .setCreationTime(new Timestamp(baseTime))
-        .setLastModifiedTime(new Timestamp(baseTime + 2000))
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspaceStaleCache =
+        new DbWorkspace()
+            .setName("Stale Cache Workspace")
+            .setWorkspaceNamespace("stale-cache-ws")
+            .setFirecloudName("stale-cache-ws")
+            .setCreationTime(new Timestamp(baseTime))
+            .setLastModifiedTime(new Timestamp(baseTime + 2000))
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspaceStaleCache = workspaceDao.save(workspaceStaleCache);
 
     // Workspace with fresh cache - should NOT be included
-    DbWorkspace workspaceFreshCache = new DbWorkspace()
-        .setName("Fresh Cache Workspace")
-        .setWorkspaceNamespace("fresh-cache-ws")
-        .setFirecloudName("fresh-cache-ws")
-        .setCreationTime(new Timestamp(baseTime))
-        .setLastModifiedTime(new Timestamp(baseTime))
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    DbWorkspace workspaceFreshCache =
+        new DbWorkspace()
+            .setName("Fresh Cache Workspace")
+            .setWorkspaceNamespace("fresh-cache-ws")
+            .setFirecloudName("fresh-cache-ws")
+            .setCreationTime(new Timestamp(baseTime))
+            .setLastModifiedTime(new Timestamp(baseTime))
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspaceFreshCache = workspaceDao.save(workspaceFreshCache);
 
     // Create cache entries
-    workspaceUserCacheDao.save(new DbWorkspaceUserCache(
-        workspaceStaleCache.getWorkspaceId(),
-        dbUser.getUserId(),
-        "OWNER",
-        new Timestamp(baseTime + 1000))); // Older than workspace modification
+    workspaceUserCacheDao.save(
+        new DbWorkspaceUserCache(
+            workspaceStaleCache.getWorkspaceId(),
+            dbUser.getUserId(),
+            "OWNER",
+            new Timestamp(baseTime + 1000))); // Older than workspace modification
 
-    workspaceUserCacheDao.save(new DbWorkspaceUserCache(
-        workspaceFreshCache.getWorkspaceId(),
-        dbUser.getUserId(),
-        "OWNER",
-        new Timestamp(baseTime + 1000))); // Newer than workspace modification
+    workspaceUserCacheDao.save(
+        new DbWorkspaceUserCache(
+            workspaceFreshCache.getWorkspaceId(),
+            dbUser.getUserId(),
+            "OWNER",
+            new Timestamp(baseTime + 1000))); // Newer than workspace modification
 
     List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
     assertThat(result).containsExactly(workspaceNoCache, workspaceStaleCache);

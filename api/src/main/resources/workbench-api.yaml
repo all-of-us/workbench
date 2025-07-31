@@ -4637,7 +4637,7 @@ paths:
           description: Workspaces cleaned
           content: {}
       x-codegen-request-body-name: request
-  /v1/cloudTask/workspaceUserCacheQueue:
+  /v1/cloudTask/updateWorkspaceUserCache:
     post:
       tags:
       - cloudTaskWorkspaces

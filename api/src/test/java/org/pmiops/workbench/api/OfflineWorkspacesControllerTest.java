@@ -30,22 +30,24 @@ public class OfflineWorkspacesControllerTest {
 
   @BeforeEach
   public void setUp() {
-    offlineWorkspacesController = new OfflineWorkspacesController(
-        mockWorkspaceUserCacheService, mockTaskQueueService);
+    offlineWorkspacesController =
+        new OfflineWorkspacesController(mockWorkspaceUserCacheService, mockTaskQueueService);
 
-    testWorkspace1 = new DbWorkspace()
-        .setWorkspaceId(1L)
-        .setName("Test Workspace 1")
-        .setWorkspaceNamespace("test-ws-1")
-        .setFirecloudName("test-ws-1-fc")
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    testWorkspace1 =
+        new DbWorkspace()
+            .setWorkspaceId(1L)
+            .setName("Test Workspace 1")
+            .setWorkspaceNamespace("test-ws-1")
+            .setFirecloudName("test-ws-1-fc")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
 
-    testWorkspace2 = new DbWorkspace()
-        .setWorkspaceId(2L)
-        .setName("Test Workspace 2")
-        .setWorkspaceNamespace("test-ws-2")
-        .setFirecloudName("test-ws-2-fc")
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    testWorkspace2 =
+        new DbWorkspace()
+            .setWorkspaceId(2L)
+            .setName("Test Workspace 2")
+            .setWorkspaceNamespace("test-ws-2")
+            .setFirecloudName("test-ws-2-fc")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 
   @Test
