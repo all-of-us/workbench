@@ -336,7 +336,6 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-<<<<<<< HEAD
   public void findAllOrphanedWorkspaceNamespaces_empty() {
     workspaceDao.deleteAll();
 
