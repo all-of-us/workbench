@@ -103,8 +103,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       @Param("minCreationTime") Timestamp minCreationTime,
       @Param("maxCreationTime") Timestamp maxCreationTime);
 
-  Map<String, DbUser> findUsersByEmail(List<String> emails);
-
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {
     Long getUserId();

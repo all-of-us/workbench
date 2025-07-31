@@ -6,11 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "workspace_user_cache")
+@Table(
+    name = "workspace_user_cache",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"workspace_id", "user_id"})})
 public class DbWorkspaceUserCache {
   private long id;
   private long workspaceId;

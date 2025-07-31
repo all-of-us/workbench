@@ -10,10 +10,10 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="workspace_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_workspace_user_cache_workspace" references="workspace(id)" deleteCascade="true"/>
+        <constraints nullable="false" foreignKeyName="fk_workspace_user_cache_workspace" references="workspace(workspace_id)" deleteCascade="true"/>
       </column>
       <column name="user_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_workspace_user_cache_user" references="user(id)" deleteCascade="true"/>
+        <constraints nullable="false" foreignKeyName="fk_workspace_user_cache_user" references="user(user_id)" deleteCascade="true"/>
       </column>
       <column name="role" type="varchar">
         <constraints nullable="false"/>
