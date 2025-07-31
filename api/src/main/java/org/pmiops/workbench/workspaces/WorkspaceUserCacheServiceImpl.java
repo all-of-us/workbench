@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -40,20 +41,23 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
   @Transactional
   public void updateWorkspaceUserCache(
       Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId) {
-    var userEmailMap =
-        userDao.findUsersByEmail(
-            newEntriesByWorkspaceId.values().stream()
-                .flatMap(entry -> entry.keySet().stream())
-                .toList());
+    var usernameMap =
+        userDao
+            .findUsersByUsernameIn(
+                newEntriesByWorkspaceId.values().stream()
+                    .flatMap(entry -> entry.keySet().stream())
+                    .toList())
+            .stream()
+            .collect(Collectors.toMap(DbUser::getUsername, user -> user));
 
-    workspaceUserCacheDao.deleteAllForWorkspaces(newEntriesByWorkspaceId.keySet());
+    workspaceUserCacheDao.deleteAllByWorkspaceIdIn(newEntriesByWorkspaceId.keySet());
 
     var newRecords =
         newEntriesByWorkspaceId.entrySet().stream()
             .flatMap(
                 workspaceWithAcl ->
                     getWorkspaceUserCacheEntries(
-                        workspaceWithAcl.getKey(), workspaceWithAcl.getValue(), userEmailMap))
+                        workspaceWithAcl.getKey(), workspaceWithAcl.getValue(), usernameMap))
             .toList();
     workspaceUserCacheDao.saveAll(newRecords);
   }
@@ -61,13 +65,13 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
   private Stream<DbWorkspaceUserCache> getWorkspaceUserCacheEntries(
       long workspaceId,
       Map<String, RawlsWorkspaceAccessEntry> acl,
-      Map<String, DbUser> userEmailMap) {
+      Map<String, DbUser> usernameMap) {
     return acl.entrySet().stream()
         .map(
             aclItem ->
                 new DbWorkspaceUserCache()
                     .setWorkspaceId(workspaceId)
-                    .setUserId(userEmailMap.get(aclItem.getKey()).getUserId())
+                    .setUserId(usernameMap.get(aclItem.getKey()).getUserId())
                     .setRole(aclItem.getValue().getAccessLevel())
                     .setLastUpdated(Timestamp.from(Instant.now())));
   }

@@ -13,12 +13,12 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface WorkspaceUserCacheDao extends CrudRepository<DbWorkspaceUserCache, Long> {
   @Modifying
-  void deleteAllForWorkspaces(Set<Long> workspaceId);
+  void deleteAllByWorkspaceIdIn(Set<Long> workspaceIds);
 
   @Modifying
   @Query(
       value =
-          "DELETE wuc FROM workspace_user_cache wuc JOIN workspace w ON w.workspace_id = wuc.workspace_id WHERE w.active_status = 1",
+          "delete from workspace_user_cache wuc where exists (select * from workspace w where w.workspace_id = wuc.workspace_id and w.active_status = 1)",
       nativeQuery = true)
   void deleteAllInactiveWorkspaces();
 }
