@@ -1,9 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,31 +44,29 @@ public class WorkspaceUserCacheServiceTest {
 
   @BeforeEach
   public void setUp() {
-    workspaceUserCacheService = new WorkspaceUserCacheServiceImpl(
-        mockUserDao, mockWorkspaceDao, mockWorkspaceUserCacheDao);
+    workspaceUserCacheService =
+        new WorkspaceUserCacheServiceImpl(mockUserDao, mockWorkspaceDao, mockWorkspaceUserCacheDao);
 
     // Set up test data
-    testWorkspace1 = new DbWorkspace()
-        .setWorkspaceId(1L)
-        .setName("Test Workspace 1")
-        .setWorkspaceNamespace("test-ws-1")
-        .setFirecloudName("test-ws-1-fc")
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    testWorkspace1 =
+        new DbWorkspace()
+            .setWorkspaceId(1L)
+            .setName("Test Workspace 1")
+            .setWorkspaceNamespace("test-ws-1")
+            .setFirecloudName("test-ws-1-fc")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
 
-    testWorkspace2 = new DbWorkspace()
-        .setWorkspaceId(2L)
-        .setName("Test Workspace 2")
-        .setWorkspaceNamespace("test-ws-2")
-        .setFirecloudName("test-ws-2-fc")
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    testWorkspace2 =
+        new DbWorkspace()
+            .setWorkspaceId(2L)
+            .setName("Test Workspace 2")
+            .setWorkspaceNamespace("test-ws-2")
+            .setFirecloudName("test-ws-2-fc")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
 
-    testUser1 = new DbUser()
-        .setUserId(101L)
-        .setUsername("user1@example.com");
+    testUser1 = new DbUser().setUserId(101L).setUsername("user1@example.com");
 
-    testUser2 = new DbUser()
-        .setUserId(102L)
-        .setUsername("user2@example.com");
+    testUser2 = new DbUser().setUserId(102L).setUsername("user2@example.com");
   }
 
   @Test
@@ -80,7 +75,8 @@ public class WorkspaceUserCacheServiceTest {
     when(mockWorkspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate())
         .thenReturn(expectedWorkspaces);
 
-    List<DbWorkspace> result = workspaceUserCacheService.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    List<DbWorkspace> result =
+        workspaceUserCacheService.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
 
     assertThat(result).containsExactlyElementsIn(expectedWorkspaces);
     verify(mockWorkspaceDao).findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
@@ -91,14 +87,12 @@ public class WorkspaceUserCacheServiceTest {
     RawlsWorkspaceAccessEntry ownerEntry = new RawlsWorkspaceAccessEntry().accessLevel("OWNER");
     RawlsWorkspaceAccessEntry readerEntry = new RawlsWorkspaceAccessEntry().accessLevel("READER");
 
-    Map<String, RawlsWorkspaceAccessEntry> acl = Map.of(
-        "user1@example.com", ownerEntry,
-        "user2@example.com", readerEntry
-    );
+    Map<String, RawlsWorkspaceAccessEntry> acl =
+        Map.of(
+            "user1@example.com", ownerEntry,
+            "user2@example.com", readerEntry);
 
-    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId = Map.of(
-        1L, acl
-    );
+    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId = Map.of(1L, acl);
 
     when(mockUserDao.findUsersByUsernameIn(Set.of("user1@example.com", "user2@example.com")))
         .thenReturn(List.of(testUser1, testUser2));
@@ -112,18 +106,14 @@ public class WorkspaceUserCacheServiceTest {
     assertThat(savedEntries).hasSize(2);
 
     // Verify the cache entries were created correctly
-    DbWorkspaceUserCache user1Entry = savedEntries.stream()
-        .filter(entry -> entry.getUserId() == 101L)
-        .findFirst()
-        .orElseThrow();
+    DbWorkspaceUserCache user1Entry =
+        savedEntries.stream().filter(entry -> entry.getUserId() == 101L).findFirst().orElseThrow();
     assertThat(user1Entry.getWorkspaceId()).isEqualTo(1L);
     assertThat(user1Entry.getRole()).isEqualTo("OWNER");
     assertThat(user1Entry.getLastUpdated()).isNotNull();
 
-    DbWorkspaceUserCache user2Entry = savedEntries.stream()
-        .filter(entry -> entry.getUserId() == 102L)
-        .findFirst()
-        .orElseThrow();
+    DbWorkspaceUserCache user2Entry =
+        savedEntries.stream().filter(entry -> entry.getUserId() == 102L).findFirst().orElseThrow();
     assertThat(user2Entry.getWorkspaceId()).isEqualTo(1L);
     assertThat(user2Entry.getRole()).isEqualTo("READER");
     assertThat(user2Entry.getLastUpdated()).isNotNull();
@@ -134,10 +124,10 @@ public class WorkspaceUserCacheServiceTest {
     RawlsWorkspaceAccessEntry ownerEntry = new RawlsWorkspaceAccessEntry().accessLevel("OWNER");
     RawlsWorkspaceAccessEntry writerEntry = new RawlsWorkspaceAccessEntry().accessLevel("WRITER");
 
-    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId = Map.of(
-        1L, Map.of("user1@example.com", ownerEntry),
-        2L, Map.of("user2@example.com", writerEntry)
-    );
+    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
+        Map.of(
+            1L, Map.of("user1@example.com", ownerEntry),
+            2L, Map.of("user2@example.com", writerEntry));
 
     when(mockUserDao.findUsersByUsernameIn(Set.of("user1@example.com", "user2@example.com")))
         .thenReturn(List.of(testUser1, testUser2));
@@ -151,30 +141,30 @@ public class WorkspaceUserCacheServiceTest {
     assertThat(savedEntries).hasSize(2);
 
     // Verify workspace 1 entry
-    DbWorkspaceUserCache ws1Entry = savedEntries.stream()
-        .filter(entry -> entry.getWorkspaceId() == 1L)
-        .findFirst()
-        .orElseThrow();
+    DbWorkspaceUserCache ws1Entry =
+        savedEntries.stream()
+            .filter(entry -> entry.getWorkspaceId() == 1L)
+            .findFirst()
+            .orElseThrow();
     assertThat(ws1Entry.getUserId()).isEqualTo(101L);
     assertThat(ws1Entry.getRole()).isEqualTo("OWNER");
 
     // Verify workspace 2 entry
-    DbWorkspaceUserCache ws2Entry = savedEntries.stream()
-        .filter(entry -> entry.getWorkspaceId() == 2L)
-        .findFirst()
-        .orElseThrow();
+    DbWorkspaceUserCache ws2Entry =
+        savedEntries.stream()
+            .filter(entry -> entry.getWorkspaceId() == 2L)
+            .findFirst()
+            .orElseThrow();
     assertThat(ws2Entry.getUserId()).isEqualTo(102L);
     assertThat(ws2Entry.getRole()).isEqualTo("WRITER");
   }
 
   @Test
   public void testUpdateWorkspaceUserCache_emptyAcl() {
-    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId = Map.of(
-        1L, Map.of()
-    );
+    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
+        Map.of(1L, Map.of());
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of()))
-        .thenReturn(List.of());
+    when(mockUserDao.findUsersByUsernameIn(Set.of())).thenReturn(List.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
@@ -189,8 +179,7 @@ public class WorkspaceUserCacheServiceTest {
   public void testUpdateWorkspaceUserCache_noWorkspaces() {
     Map<Long, Map<String, RawlsWorkspaceAccessEntry>> emptyMap = Map.of();
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of()))
-        .thenReturn(List.of());
+    when(mockUserDao.findUsersByUsernameIn(Set.of())).thenReturn(List.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(emptyMap);
 
@@ -206,10 +195,10 @@ public class WorkspaceUserCacheServiceTest {
     RawlsWorkspaceAccessEntry ownerEntry = new RawlsWorkspaceAccessEntry().accessLevel("OWNER");
     RawlsWorkspaceAccessEntry readerEntry = new RawlsWorkspaceAccessEntry().accessLevel("READER");
 
-    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId = Map.of(
-        1L, Map.of("user1@example.com", ownerEntry),
-        2L, Map.of("user1@example.com", readerEntry)
-    );
+    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
+        Map.of(
+            1L, Map.of("user1@example.com", ownerEntry),
+            2L, Map.of("user1@example.com", readerEntry));
 
     when(mockUserDao.findUsersByUsernameIn(Set.of("user1@example.com")))
         .thenReturn(List.of(testUser1));
@@ -235,9 +224,8 @@ public class WorkspaceUserCacheServiceTest {
     Instant beforeCall = Instant.now();
 
     RawlsWorkspaceAccessEntry ownerEntry = new RawlsWorkspaceAccessEntry().accessLevel("OWNER");
-    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId = Map.of(
-        1L, Map.of("user1@example.com", ownerEntry)
-    );
+    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
+        Map.of(1L, Map.of("user1@example.com", ownerEntry));
 
     when(mockUserDao.findUsersByUsernameIn(Set.of("user1@example.com")))
         .thenReturn(List.of(testUser1));
@@ -259,9 +247,8 @@ public class WorkspaceUserCacheServiceTest {
   @Test
   public void testUpdateWorkspaceUserCache_userNotFound() {
     RawlsWorkspaceAccessEntry ownerEntry = new RawlsWorkspaceAccessEntry().accessLevel("OWNER");
-    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId = Map.of(
-        1L, Map.of("nonexistent@example.com", ownerEntry)
-    );
+    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
+        Map.of(1L, Map.of("nonexistent@example.com", ownerEntry));
 
     when(mockUserDao.findUsersByUsernameIn(Set.of("nonexistent@example.com")))
         .thenReturn(List.of()); // User not found

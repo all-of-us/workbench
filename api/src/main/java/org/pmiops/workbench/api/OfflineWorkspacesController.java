@@ -1,22 +1,17 @@
 package org.pmiops.workbench.api;
 
+import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Offline workspace API. Handles cron jobs for workspace cache management and ACL synchronization.
- * Methods here should be access restricted as, unlike WorkspacesController, these endpoints run as
- * the Workbench service account.
- */
+/** Handles offline / cron-based API requests related to workspace management */
 @RestController
-@RequestMapping("/v1/cron")
-public class OfflineWorkspacesController {
+public class OfflineWorkspacesController implements OfflineWorkspacesApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineWorkspacesController.class.getName());
 
   private final WorkspaceUserCacheService workspaceUserCacheService;
@@ -29,10 +24,11 @@ public class OfflineWorkspacesController {
     this.taskQueueService = taskQueueService;
   }
 
-  @PostMapping("/cacheWorkspaceAcls")
+  @Override
   public ResponseEntity<Void> cacheWorkspaceAcls() {
     log.info("Starting cacheWorkspaceAcls cron job");
-    var workspaces = workspaceUserCacheService.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    List<DbWorkspace> workspaces =
+        workspaceUserCacheService.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
     workspaceUserCacheService.removeInactiveWorkspaces();
     taskQueueService.pushWorkspaceUserCacheTask(workspaces);
 

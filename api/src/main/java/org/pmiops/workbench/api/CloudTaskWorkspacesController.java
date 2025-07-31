@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -8,6 +9,7 @@ import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.WorkspaceUserCacheQueueWorkspace;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +117,7 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
       List<WorkspaceUserCacheQueueWorkspace> workspaces) {
     LOGGER.info("Processing workspace user cache queue task...");
 
-    var wsAcls =
+    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> wsAcls =
         workspaces.stream()
             .collect(
                 Collectors.toMap(
@@ -129,7 +131,4 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
     return ResponseEntity.ok().build();
   }
-
-  record WorkspaceUserCacheEntry(
-      String workspaceNamespace, String workspaceFirecloudName, String userEmail, String role) {}
 }

@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,14 +48,6 @@ public class CloudTaskWorkspacesControllerTest {
   private static final String CLEANUP_REASON = "CleanupOrphanedWorkspaces Cron Job";
 
   @Captor private ArgumentCaptor<Map<Long, Map<String, RawlsWorkspaceAccessEntry>>> cacheUpdateCaptor;
-
-  @BeforeEach
-  public void setUp() {
-    controller = new CloudTaskWorkspacesController(
-        mockImpersonatedWorkspaceService,
-        mockWorkspaceAuthService,
-        mockWorkspaceUserCacheService);
-  }
 
   // Helper method for common response assertion
   private void assertOkResponse(ResponseEntity<Void> response) {
@@ -169,33 +160,42 @@ public class CloudTaskWorkspacesControllerTest {
 
   @Test
   public void testProcessWorkspaceUserCacheQueueTask_success() {
-    WorkspaceUserCacheQueueWorkspace workspace1 = new WorkspaceUserCacheQueueWorkspace()
-        .workspaceId(1L)
-        .workspaceNamespace("test-ws-1")
-        .workspaceFirecloudName("test-ws-1-fc");
-    WorkspaceUserCacheQueueWorkspace workspace2 = new WorkspaceUserCacheQueueWorkspace()
-        .workspaceId(2L)
-        .workspaceNamespace("test-ws-2")
-        .workspaceFirecloudName("test-ws-2-fc");
+    WorkspaceUserCacheQueueWorkspace workspace1 =
+        new WorkspaceUserCacheQueueWorkspace()
+            .workspaceId(1L)
+            .workspaceNamespace("test-ws-1")
+            .workspaceFirecloudName("test-ws-1-fc");
+    WorkspaceUserCacheQueueWorkspace workspace2 =
+        new WorkspaceUserCacheQueueWorkspace()
+            .workspaceId(2L)
+            .workspaceNamespace("test-ws-2")
+            .workspaceFirecloudName("test-ws-2-fc");
 
-    Map<String, RawlsWorkspaceAccessEntry> acl1 = Map.of(
-        "user1@example.com", new RawlsWorkspaceAccessEntry().accessLevel("OWNER"),
-        "user2@example.com", new RawlsWorkspaceAccessEntry().accessLevel("READER")
-    );
+    Map<String, RawlsWorkspaceAccessEntry> acl1 =
+        Map.of(
+            "user1@example.com", new RawlsWorkspaceAccessEntry().accessLevel("OWNER"),
+            "user2@example.com", new RawlsWorkspaceAccessEntry().accessLevel("READER"));
 
-    Map<String, RawlsWorkspaceAccessEntry> acl2 = Map.of(
-        "user3@example.com", new RawlsWorkspaceAccessEntry().accessLevel("WRITER")
-    );
+    Map<String, RawlsWorkspaceAccessEntry> acl2 =
+        Map.of("user3@example.com", new RawlsWorkspaceAccessEntry().accessLevel("WRITER"));
 
-    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcl(workspace1.getWorkspaceNamespace(), workspace1.getWorkspaceFirecloudName()))
+    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcl(
+            workspace1.getWorkspaceNamespace(), workspace1.getWorkspaceFirecloudName()))
         .thenReturn(acl1);
-    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcl(workspace2.getWorkspaceNamespace(), workspace2.getWorkspaceFirecloudName()))
+    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcl(
+            workspace2.getWorkspaceNamespace(), workspace2.getWorkspaceFirecloudName()))
         .thenReturn(acl2);
 
-    ResponseEntity<Void> response = controller.processWorkspaceUserCacheQueueTask(List.of(workspace1, workspace2));
+    ResponseEntity<Void> response =
+        controller.processWorkspaceUserCacheQueueTask(
+            List.of(workspace1, workspace2));
 
-    verify(mockWorkspaceAuthService).getFirecloudWorkspaceAcl(workspace1.getWorkspaceNamespace(), workspace1.getWorkspaceFirecloudName());
-    verify(mockWorkspaceAuthService).getFirecloudWorkspaceAcl(workspace2.getWorkspaceNamespace(), workspace2.getWorkspaceFirecloudName());
+    verify(mockWorkspaceAuthService)
+        .getFirecloudWorkspaceAcl(
+            workspace1.getWorkspaceNamespace(), workspace1.getWorkspaceFirecloudName());
+    verify(mockWorkspaceAuthService)
+        .getFirecloudWorkspaceAcl(
+            workspace2.getWorkspaceNamespace(), workspace2.getWorkspaceFirecloudName());
 
     verify(mockWorkspaceUserCacheService).updateWorkspaceUserCache(cacheUpdateCaptor.capture());
 
@@ -211,7 +211,8 @@ public class CloudTaskWorkspacesControllerTest {
   public void testProcessWorkspaceUserCacheQueueTask_emptyList() {
     List<WorkspaceUserCacheQueueWorkspace> emptyList = List.of();
 
-    ResponseEntity<Void> response = controller.processWorkspaceUserCacheQueueTask(emptyList);
+    ResponseEntity<Void> response =
+        controller.processWorkspaceUserCacheQueueTask(emptyList);
 
     verify(mockWorkspaceAuthService, never()).getFirecloudWorkspaceAcl(anyString(), anyString());
 

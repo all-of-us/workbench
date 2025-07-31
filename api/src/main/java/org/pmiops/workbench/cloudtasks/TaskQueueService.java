@@ -90,7 +90,7 @@ public class TaskQueueService {
       new TaskQueuePair("reportingUploadQueue", "reportingUploadQueue");
 
   public static final TaskQueuePair CACHE_WORKSPACE_USERS =
-      new TaskQueuePair("workspaceUserCacheQueue", "workspaceUserCacheQueue");
+      new TaskQueuePair("workspaceUserCacheQueue", "updateWorkspaceUserCache");
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
