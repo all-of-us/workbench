@@ -15,7 +15,7 @@
       <column name="user_id" type="bigint">
         <constraints nullable="false" foreignKeyName="fk_workspace_user_cache_user" references="user(user_id)" deleteCascade="true"/>
       </column>
-      <column name="role" type="varchar">
+      <column name="role" type="varchar(255)">
         <constraints nullable="false"/>
       </column>
       <column name="last_updated" type="datetime">
