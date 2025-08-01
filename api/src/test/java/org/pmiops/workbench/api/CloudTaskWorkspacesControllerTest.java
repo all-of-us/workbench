@@ -47,7 +47,8 @@ public class CloudTaskWorkspacesControllerTest {
 
   private static final String CLEANUP_REASON = "CleanupOrphanedWorkspaces Cron Job";
 
-  @Captor private ArgumentCaptor<Map<Long, Map<String, RawlsWorkspaceAccessEntry>>> cacheUpdateCaptor;
+  @Captor
+  private ArgumentCaptor<Map<Long, Map<String, RawlsWorkspaceAccessEntry>>> cacheUpdateCaptor;
 
   // Helper method for common response assertion
   private void assertOkResponse(ResponseEntity<Void> response) {
@@ -187,8 +188,7 @@ public class CloudTaskWorkspacesControllerTest {
         .thenReturn(acl2);
 
     ResponseEntity<Void> response =
-        controller.processWorkspaceUserCacheQueueTask(
-            List.of(workspace1, workspace2));
+        controller.processWorkspaceUserCacheQueueTask(List.of(workspace1, workspace2));
 
     verify(mockWorkspaceAuthService)
         .getFirecloudWorkspaceAcl(
@@ -211,8 +211,7 @@ public class CloudTaskWorkspacesControllerTest {
   public void testProcessWorkspaceUserCacheQueueTask_emptyList() {
     List<WorkspaceUserCacheQueueWorkspace> emptyList = List.of();
 
-    ResponseEntity<Void> response =
-        controller.processWorkspaceUserCacheQueueTask(emptyList);
+    ResponseEntity<Void> response = controller.processWorkspaceUserCacheQueueTask(emptyList);
 
     verify(mockWorkspaceAuthService, never()).getFirecloudWorkspaceAcl(anyString(), anyString());
 
