@@ -17,6 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.OfflineBatchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.springframework.stereotype.Service;
@@ -87,6 +88,9 @@ public class TaskQueueService {
 
   public static final TaskQueuePair REPORTING_UPLOAD =
       new TaskQueuePair("reportingUploadQueue", "reportingUploadQueue");
+
+  public static final TaskQueuePair CACHE_WORKSPACE_USERS =
+      new TaskQueuePair("workspaceUserCacheQueue", "updateWorkspaceUserCache");
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
@@ -264,6 +268,20 @@ public class TaskQueueService {
         new ReportingUploadQueueTaskRequest()
             .tables(List.of(table))
             .snapshotTimestamp(captureSnapshotTime));
+  }
+
+  public void pushWorkspaceUserCacheTask(List<DbWorkspace> workspaces) {
+    OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
+    var request =
+        workspaces.stream()
+            .map(
+                workspace ->
+                    new WorkspaceUserCacheQueueWorkspace()
+                        .workspaceId(workspace.getWorkspaceId())
+                        .workspaceNamespace(workspace.getWorkspaceNamespace())
+                        .workspaceFirecloudName(workspace.getFirecloudName()))
+            .toList();
+    createAndPushAll(request, config.workspacesPerWorkspaceUserCacheTask, CACHE_WORKSPACE_USERS);
   }
 
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {

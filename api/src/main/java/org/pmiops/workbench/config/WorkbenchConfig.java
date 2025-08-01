@@ -434,6 +434,8 @@ public class WorkbenchConfig {
     public Integer disksPerCheckPersistentDiskTask;
     // Number of workspaces to process within a single cleanup missing workspace task.
     public Integer workspacesPerCleanupOrphanedWorkspacesTask;
+    // Number of workspaces to process within a single workspace user cache task.
+    public Integer workspacesPerWorkspaceUserCacheTask;
   }
 
   /**
