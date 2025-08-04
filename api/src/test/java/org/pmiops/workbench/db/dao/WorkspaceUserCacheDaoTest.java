@@ -32,7 +32,6 @@ public class WorkspaceUserCacheDaoTest {
   private DbWorkspace activeWorkspace;
   private DbWorkspace inactiveWorkspace;
   private DbUser user1;
-  private DbUser user2;
   private DbWorkspaceUserCache cache1;
   private DbWorkspaceUserCache cache2;
   private DbWorkspaceUserCache cache3;
@@ -42,7 +41,7 @@ public class WorkspaceUserCacheDaoTest {
     Timestamp now = Timestamp.from(Instant.now());
 
     user1 = userDao.save(new DbUser().setUsername("user1@example.com"));
-    user2 = userDao.save(new DbUser().setUsername("user2@example.com"));
+    DbUser user2 = userDao.save(new DbUser().setUsername("user2@example.com"));
 
     activeWorkspace =
         new DbWorkspace()
