@@ -33,7 +33,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "FROM \n"
           + "  %s \n"
           + "WHERE \n"
-          + " created_by_email=\"@EMAIL\" ";
+          + " created_by_email=@EMAIL ";
 
   @Autowired
   public VwbAdminQueryServiceImpl(
@@ -73,8 +73,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   private VwbWorkspace fieldValueListToVwbWorkspace(FieldValueList row) {
     VwbWorkspace vwbWorkspace = new VwbWorkspace();
-    FieldValues.getString(row, "worspace_id").ifPresent(vwbWorkspace::setId);
-    FieldValues.getString(row, "worspace_user_facing_id").ifPresent(vwbWorkspace::setUserFacingId);
+    FieldValues.getString(row, "workspace_id").ifPresent(vwbWorkspace::setId);
+    FieldValues.getString(row, "workspace_user_facing_id").ifPresent(vwbWorkspace::setUserFacingId);
     FieldValues.getString(row, "workspace_display_name").ifPresent(vwbWorkspace::setDisplayName);
     FieldValues.getString(row, "description").ifPresent(vwbWorkspace::setDescription);
 
