@@ -6759,6 +6759,33 @@ paths:
           description: The egress event was successfully handled.
           content: { }
       x-codegen-request-body-name: request
+  /v2/admin/vwb/workspaces/getVwbWorkspaceByUsername:
+    get:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Returns all VWB workspaces created by a user. Requires RESEARCHER_DATA_VIEW
+        authority.
+      operationId: getVwbWorkspaceByUsername
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of VWB workspaces
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbWorkspaceListResponse'
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     ArchivalStatus:
@@ -13566,6 +13593,40 @@ components:
           type: integer
           format: int64
           description: The timestamp of the snapshot to be uploaded, in milliseconds
+
+    VwbWorkspaceListResponse:
+      required:
+        - items
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/VwbWorkspace'
+
+    VwbWorkspace:
+      required:
+        - displayName
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the workspace
+        userFacingId:
+          type: string
+          description: ID of the workspace displayed to the user
+        displayName:
+          type: string
+          description: The name of the workspace as displayed in the UI.
+        description:
+          type: string
+          description: The description of the workspace
+        createdBy:
+          type: string
+          description: Username of the workspace creator
+        creationTime:
+          type: string
+          description: Timestamp the workspace was created
 
   parameters:
     userId:

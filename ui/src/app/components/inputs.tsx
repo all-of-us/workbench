@@ -662,6 +662,7 @@ export function TextInputWithLabel(props) {
           disabled={props.disabled}
           onChange={props.onChange}
           onBlur={props.onBlur}
+          onKeyDown={props.onKeyDown}
           invalid={props.invalid ? props.invalid.toString() : undefined}
           style={{ ...commonStyles.sectionInput, ...style }}
           aria-label={props.ariaLabel}
