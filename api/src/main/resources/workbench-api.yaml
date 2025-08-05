@@ -2437,6 +2437,7 @@ paths:
         workspace ACL such as reporting or finding unshared resources. Cache is not to be
         used for authorization decisions. Only executable via App Engine cronjob.
       operationId: cacheWorkspaceAcls
+      security: []
       responses:
         204:
             description: Workspaces were cached successfully.
