@@ -18,7 +18,7 @@ public interface WorkspaceUserCacheDao extends CrudRepository<DbWorkspaceUserCac
   @Modifying
   @Query(
       value =
-          "delete from workspace_user_cache wuc where exists (select * from workspace w where w.workspace_id = wuc.workspace_id and w.active_status = 1)",
+          "delete from workspace_user_cache where exists (select 1 from workspace where workspace.workspace_id = workspace_user_cache.workspace_id and workspace.active_status = 1)",
       nativeQuery = true)
   void deleteAllInactiveWorkspaces();
 }

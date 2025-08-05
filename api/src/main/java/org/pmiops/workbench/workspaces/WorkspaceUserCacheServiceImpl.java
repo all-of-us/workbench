@@ -78,6 +78,7 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
   }
 
   @Override
+  @Transactional
   public void removeInactiveWorkspaces() {
     workspaceUserCacheDao.deleteAllInactiveWorkspaces();
   }
