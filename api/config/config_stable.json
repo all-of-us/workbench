@@ -199,8 +199,7 @@
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-p-1v-s0i.iam.gserviceaccount.com",
     "adminBigQuery": {
       "logProjectId": "workbench-bq-log-sink",
-      "bigQueryDataset": "workbench_monitoring_org_logs_prod",
-      "workspaceTable": "wsm_workspaces"
+      "bigQueryDataset": "workbench_monitoring_org_logs_prod"
     }
   }
 }

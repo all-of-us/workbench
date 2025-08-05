@@ -210,8 +210,7 @@
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-d-1v-ucd.iam.gserviceaccount.com",
     "adminBigQuery": {
       "logProjectId": "all-of-us-workbench-test",
-      "bigQueryDataset": "vwb_admin_test",
-      "workspaceTable": "wsm_workspaces"
+      "bigQueryDataset": "vwb_admin_test"
     }
   }
 }

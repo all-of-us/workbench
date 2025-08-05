@@ -513,7 +513,6 @@ public class WorkbenchConfig {
     public static class AdminBigQuery {
       public String logProjectId;
       public String bigQueryDataset;
-      public String workspaceTable;
     }
 
     public AdminBigQuery adminBigQuery;

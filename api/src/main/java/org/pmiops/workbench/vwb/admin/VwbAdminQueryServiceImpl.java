@@ -23,6 +23,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
 
+  private static final String VWB_WORKSPACE_TABLE = "wsm_workspaces";
+
   private static final String QUERY =
       "SELECT \n"
           + "  workspace_id, \n"
@@ -62,7 +64,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         "`%s.%s.%s`",
         vwbConfig.adminBigQuery.logProjectId,
         vwbConfig.adminBigQuery.bigQueryDataset,
-        vwbConfig.adminBigQuery.workspaceTable);
+        VWB_WORKSPACE_TABLE);
   }
 
   private List<VwbWorkspace> tableResultToVwbWorkspace(TableResult tableResult) {
