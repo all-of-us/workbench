@@ -25,6 +25,7 @@ import { AdminInstitutionEdit } from 'app/pages/admin/institution/admin-institut
 import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
+import { AdminVwbWorkspace } from 'app/pages/admin/vwb/admin-vwb-workspace';
 import { AdminWorkspace } from 'app/pages/admin/workspace/admin-workspace';
 import { AdminWorkspaceSearch } from 'app/pages/admin/workspace/admin-workspace-search';
 import { DemographicSurvey } from 'app/pages/demographic-survey';
@@ -124,6 +125,10 @@ const WorkspaceAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminWorkspace);
+const VwbWorkspaceAdminPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminVwbWorkspace);
 const WorkspaceAuditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -280,6 +285,15 @@ export const SignedInRoutes = () => {
       >
         <WorkspaceAdminPage
           routeData={{ title: 'Workspace Admin', minimizeChrome: true }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/admin/vwb/workspaces'
+        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
+      >
+        <VwbWorkspaceAdminPage
+          routeData={{ title: 'VWB Workspace Admin', minimizeChrome: true }}
         />
       </AppRoute>
       <AppRoute
