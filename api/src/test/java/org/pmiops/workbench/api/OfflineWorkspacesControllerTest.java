@@ -53,12 +53,12 @@ public class OfflineWorkspacesControllerTest {
   @Test
   public void testCacheWorkspaceAcls_withWorkspacesNeedingUpdate() {
     List<DbWorkspace> workspacesNeedingUpdate = List.of(testWorkspace1, testWorkspace2);
-    when(mockWorkspaceUserCacheService.findAllActiveWorkspaceNamespacesNeedingCacheUpdate())
+    when(mockWorkspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate())
         .thenReturn(workspacesNeedingUpdate);
 
     ResponseEntity<Void> response = offlineWorkspacesController.cacheWorkspaceAcls();
 
-    verify(mockWorkspaceUserCacheService).findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    verify(mockWorkspaceUserCacheService).findAllActiveWorkspacesNeedingCacheUpdate();
     verify(mockWorkspaceUserCacheService).removeInactiveWorkspaces();
     verify(mockTaskQueueService).pushWorkspaceUserCacheTask(workspacesNeedingUpdate);
 
@@ -68,12 +68,12 @@ public class OfflineWorkspacesControllerTest {
   @Test
   public void testCacheWorkspaceAcls_noWorkspacesNeedingUpdate() {
     List<DbWorkspace> emptyList = List.of();
-    when(mockWorkspaceUserCacheService.findAllActiveWorkspaceNamespacesNeedingCacheUpdate())
+    when(mockWorkspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate())
         .thenReturn(emptyList);
 
     ResponseEntity<Void> response = offlineWorkspacesController.cacheWorkspaceAcls();
 
-    verify(mockWorkspaceUserCacheService).findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    verify(mockWorkspaceUserCacheService).findAllActiveWorkspacesNeedingCacheUpdate();
     verify(mockWorkspaceUserCacheService).removeInactiveWorkspaces();
     verify(mockTaskQueueService).pushWorkspaceUserCacheTask(emptyList);
 

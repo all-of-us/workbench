@@ -70,13 +70,13 @@ public class WorkspaceUserCacheServiceTest {
   }
 
   @Test
-  public void testFindAllActiveWorkspaceNamespacesNeedingCacheUpdate() {
+  public void testFindAllActiveWorkspacesNeedingCacheUpdate() {
     List<DbWorkspace> expectedWorkspaces = List.of(testWorkspace1, testWorkspace2);
     when(mockWorkspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate())
         .thenReturn(expectedWorkspaces);
 
     List<DbWorkspace> result =
-        workspaceUserCacheService.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+        workspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate();
 
     assertThat(result).containsExactlyElementsIn(expectedWorkspaces);
     verify(mockWorkspaceDao).findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
