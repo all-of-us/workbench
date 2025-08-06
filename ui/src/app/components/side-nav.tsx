@@ -130,6 +130,10 @@ const workspaceAdminActive = () => {
   return window.location.pathname.startsWith('/admin/workspaces');
 };
 
+const vwbWorkspaceAdminActive = () => {
+  return window.location.pathname.startsWith('/admin/vwb/workspaces');
+};
+
 const workspaceAuditActive = () => {
   return window.location.pathname.startsWith('/admin/workspace-audit');
 };
@@ -419,6 +423,15 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href='/admin/workspaces'
             active={workspaceAdminActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='VWB Workspaces'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/vwb/workspaces'
+            active={vwbWorkspaceAdminActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) &&

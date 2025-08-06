@@ -511,5 +511,12 @@ public class WorkbenchConfig {
     // later authZ check.
     public String exfilManagerServiceAccount;
     public String userManagerBaseUrl;
+
+    public static class AdminBigQuery {
+      public String logProjectId;
+      public String bigQueryDataset;
+    }
+
+    public AdminBigQuery adminBigQuery;
   }
 }
