@@ -113,8 +113,9 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   }
 
   /**
-   * Process a workspace user cache task by fetching the current ACLs from Terra and updating
-   * the workspace_user_cache table. Cached ACLs is not to be used for authorization.
+   * Process a workspace user cache task by fetching the current ACLs from Terra and updating the
+   * workspace_user_cache table. Cached ACLs is not to be used for authorization.
+   *
    * @param workspaces the workspaces to process
    */
   @Override

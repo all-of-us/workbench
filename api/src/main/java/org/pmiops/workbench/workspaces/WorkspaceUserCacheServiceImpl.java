@@ -42,11 +42,10 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
   public void updateWorkspaceUserCache(
       Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId) {
     var usernameMap =
-        userDao
-            .getUsersMappedByUsernames(
-                newEntriesByWorkspaceId.values().stream()
-                    .flatMap(entry -> entry.keySet().stream())
-                    .collect(Collectors.toSet()));
+        userDao.getUsersMappedByUsernames(
+            newEntriesByWorkspaceId.values().stream()
+                .flatMap(entry -> entry.keySet().stream())
+                .collect(Collectors.toSet()));
 
     workspaceUserCacheDao.deleteAllByWorkspaceIdIn(newEntriesByWorkspaceId.keySet());
 
