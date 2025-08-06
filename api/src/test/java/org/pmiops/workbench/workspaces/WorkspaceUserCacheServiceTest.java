@@ -94,8 +94,8 @@ public class WorkspaceUserCacheServiceTest {
 
     Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId = Map.of(1L, acl);
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of("user1@example.com", "user2@example.com")))
-        .thenReturn(List.of(testUser1, testUser2));
+    when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com", "user2@example.com")))
+        .thenReturn(Map.of(testUser1.getUsername(), testUser1, testUser2.getUsername(), testUser2));
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
@@ -129,8 +129,8 @@ public class WorkspaceUserCacheServiceTest {
             1L, Map.of("user1@example.com", ownerEntry),
             2L, Map.of("user2@example.com", writerEntry));
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of("user1@example.com", "user2@example.com")))
-        .thenReturn(List.of(testUser1, testUser2));
+    when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com", "user2@example.com")))
+        .thenReturn(Map.of(testUser1.getUsername(), testUser1, testUser2.getUsername(), testUser2));
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
@@ -164,7 +164,7 @@ public class WorkspaceUserCacheServiceTest {
     Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
         Map.of(1L, Map.of());
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of())).thenReturn(List.of());
+    when(mockUserDao.getUsersMappedByUsernames(Set.of())).thenReturn(Map.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
@@ -179,7 +179,7 @@ public class WorkspaceUserCacheServiceTest {
   public void testUpdateWorkspaceUserCache_noWorkspaces() {
     Map<Long, Map<String, RawlsWorkspaceAccessEntry>> emptyMap = Map.of();
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of())).thenReturn(List.of());
+    when(mockUserDao.getUsersMappedByUsernames(Set.of())).thenReturn(Map.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(emptyMap);
 
@@ -200,8 +200,8 @@ public class WorkspaceUserCacheServiceTest {
             1L, Map.of("user1@example.com", ownerEntry),
             2L, Map.of("user1@example.com", readerEntry));
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of("user1@example.com")))
-        .thenReturn(List.of(testUser1));
+    when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com")))
+        .thenReturn(Map.of(testUser1.getUsername(), testUser1));
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
@@ -227,8 +227,8 @@ public class WorkspaceUserCacheServiceTest {
     Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
         Map.of(1L, Map.of("user1@example.com", ownerEntry));
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of("user1@example.com")))
-        .thenReturn(List.of(testUser1));
+    when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com")))
+        .thenReturn(Map.of(testUser1.getUsername(), testUser1));
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
@@ -250,8 +250,8 @@ public class WorkspaceUserCacheServiceTest {
     Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
         Map.of(1L, Map.of("nonexistent@example.com", ownerEntry));
 
-    when(mockUserDao.findUsersByUsernameIn(Set.of("nonexistent@example.com")))
-        .thenReturn(List.of()); // User not found
+    when(mockUserDao.getUsersMappedByUsernames(Set.of("nonexistent@example.com")))
+        .thenReturn(Map.of()); // User not found
 
     // Method should complete without throwing exception
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
