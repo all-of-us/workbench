@@ -112,6 +112,11 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
     return ResponseEntity.ok().build();
   }
 
+  /**
+   * Process a workspace user cache task by fetching the current ACLs from Terra and updating
+   * the workspace_user_cache table. Cached ACLs is not to be used for authorization.
+   * @param workspaces the workspaces to process
+   */
   @Override
   public ResponseEntity<Void> processWorkspaceUserCacheQueueTask(
       List<WorkspaceUserCacheQueueWorkspace> workspaces) {
