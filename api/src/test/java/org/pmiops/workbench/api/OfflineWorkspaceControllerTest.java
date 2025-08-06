@@ -13,25 +13,28 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-public class OfflineWorkspacesControllerTest {
+public class OfflineWorkspaceControllerTest {
 
+  @Mock private WorkspaceService workspaceService;
   @Mock private WorkspaceUserCacheService mockWorkspaceUserCacheService;
   @Mock private TaskQueueService mockTaskQueueService;
 
-  private OfflineWorkspacesController offlineWorkspacesController;
+  private OfflineWorkspaceController offlineWorkspaceController;
 
   private DbWorkspace testWorkspace1;
   private DbWorkspace testWorkspace2;
 
   @BeforeEach
   public void setUp() {
-    offlineWorkspacesController =
-        new OfflineWorkspacesController(mockWorkspaceUserCacheService, mockTaskQueueService);
+    offlineWorkspaceController =
+        new OfflineWorkspaceController(
+            mockTaskQueueService, workspaceService, mockWorkspaceUserCacheService);
 
     testWorkspace1 =
         new DbWorkspace()
@@ -56,7 +59,7 @@ public class OfflineWorkspacesControllerTest {
     when(mockWorkspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate())
         .thenReturn(workspacesNeedingUpdate);
 
-    ResponseEntity<Void> response = offlineWorkspacesController.cacheWorkspaceAcls();
+    ResponseEntity<Void> response = offlineWorkspaceController.cacheWorkspaceAcls();
 
     verify(mockWorkspaceUserCacheService).findAllActiveWorkspacesNeedingCacheUpdate();
     verify(mockWorkspaceUserCacheService).removeInactiveWorkspaces();
@@ -71,7 +74,7 @@ public class OfflineWorkspacesControllerTest {
     when(mockWorkspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate())
         .thenReturn(emptyList);
 
-    ResponseEntity<Void> response = offlineWorkspacesController.cacheWorkspaceAcls();
+    ResponseEntity<Void> response = offlineWorkspaceController.cacheWorkspaceAcls();
 
     verify(mockWorkspaceUserCacheService).findAllActiveWorkspacesNeedingCacheUpdate();
     verify(mockWorkspaceUserCacheService).removeInactiveWorkspaces();
