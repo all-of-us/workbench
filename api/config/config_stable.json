@@ -164,7 +164,8 @@
     "usersPerAccessExpirationEmailTask": 500,
     "workspacesPerDeleteWorkspaceEnvironmentsTask": 50,
     "disksPerCheckPersistentDiskTask": 500,
-    "workspacesPerCleanupOrphanedWorkspacesTask": 50
+    "workspacesPerCleanupOrphanedWorkspacesTask": 50,
+    "workspacesPerWorkspaceUserCacheTask": 50
   },
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": true,

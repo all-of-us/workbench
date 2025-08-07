@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="mtalbott" id="changelog-271-add-workspace-user-cache-table">
+    <createTable tableName="workspace_user_cache">
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_workspace_user_cache_workspace" references="workspace(workspace_id)" deleteCascade="true"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_workspace_user_cache_user" references="user(user_id)" deleteCascade="true"/>
+      </column>
+      <column name="role" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_updated" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addUniqueConstraint
+      tableName="workspace_user_cache"
+      columnNames="workspace_id, user_id"
+      constraintName="uniq_workspace_user"/>
+  </changeSet>
+</databaseChangeLog>

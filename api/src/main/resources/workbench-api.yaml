@@ -2426,6 +2426,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListUserDisabledEventsResponse'
+  /v1/cron/cacheWorkspaceAcls:
+    get:
+      tags:
+        - offlineWorkspace
+        - cron
+      description: |
+        Endpoint meant to be called offline to cache workspace ACLs in the database.
+        This is used to reduce load on Terra for operations that do not require active
+        workspace ACL such as reporting or finding unshared resources. Cache is not to be
+        used for authorization decisions. Only executable via App Engine cronjob.
+      operationId: cacheWorkspaceAcls
+      security: []
+      responses:
+        204:
+            description: Workspaces were cached successfully.
+            content: {}
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/cron/deleteOldRuntimes:
     get:
       tags:
@@ -4616,6 +4638,27 @@ paths:
           description: Workspaces cleaned
           content: {}
       x-codegen-request-body-name: request
+  /v1/cloudTask/updateWorkspaceUserCache:
+    post:
+      tags:
+      - cloudTaskWorkspaces
+      - cloudTask
+      description: |
+        Asynchronously updates the workspace user cache.
+      operationId: processWorkspaceUserCacheQueueTask
+      security: [ ]
+      requestBody:
+        description: Workspace user cache update task to process.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/WorkspaceUserCacheQueueWorkspace'
+        required: true
+      responses:
+        200:
+          description: Workspace user cache updated successfully
   /v1/institutions:
     get:
       tags:
@@ -13593,6 +13636,19 @@ components:
           type: integer
           format: int64
           description: The timestamp of the snapshot to be uploaded, in milliseconds
+    WorkspaceUserCacheQueueWorkspace:
+      type: object
+      properties:
+        workspaceId:
+          type: integer
+          description: The ID of the workspace to be updated in the cache
+          format: int64
+        workspaceNamespace:
+            type: string
+            description: The namespace of the workspace to be updated in the cache
+        workspaceFirecloudName:
+            type: string
+            description: The name of the workspace in Terra
 
     VwbWorkspaceListResponse:
       required:
