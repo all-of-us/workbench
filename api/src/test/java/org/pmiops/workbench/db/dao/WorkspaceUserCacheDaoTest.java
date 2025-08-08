@@ -168,7 +168,8 @@ public class WorkspaceUserCacheDaoTest {
 
   @Test
   public void testGetWorkspaceUsers() {
-    Set<String> users = workspaceUserCacheDao.findAllUsersByWorkspaceId(activeWorkspace.getWorkspaceId());
+    Set<String> users =
+        workspaceUserCacheDao.findAllUsersByWorkspaceId(activeWorkspace.getWorkspaceId());
 
     assertThat(users).hasSize(2);
     assertThat(users).containsExactly(user1.getUsername(), user2.getUsername());
