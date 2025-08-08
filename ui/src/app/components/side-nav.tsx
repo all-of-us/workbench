@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Profile } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
@@ -425,7 +426,11 @@ export const SideNav = (props: SideNavProps) => {
             active={workspaceAdminActive()}
           />
         )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) &&
+      {environment.enableVwbAdmin &&
+        hasAuthorityForAction(
+          profile,
+          AuthorityGuardedAction.WORKSPACE_ADMIN
+        ) &&
         showAdminOptions && (
           <SideNavItem
             content='VWB Workspaces'
