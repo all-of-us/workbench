@@ -208,9 +208,9 @@ public class EnvironmentsAdminServiceTest {
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
         .thenReturn(Set.of());
     // User still has access in Terra
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(List.of(new UserRole().email(USER_EMAIL_1)));
-
 
     when(mockLeonardoApiClient.listRuntimesByProjectAsService(workspace.getGoogleProject()))
         .thenReturn(List.of(createMockRuntime("runtime-1", USER_EMAIL_1)));
