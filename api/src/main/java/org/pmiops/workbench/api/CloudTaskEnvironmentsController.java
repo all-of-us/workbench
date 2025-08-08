@@ -40,7 +40,8 @@ public class CloudTaskEnvironmentsController implements CloudTaskEnvironmentsApi
             "Deleting unshared environments for %d workspaces.", workspaceNamespaces.size()));
 
     var stopwatch = stopwatchProvider.get().start();
-    var failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(workspaceNamespaces);
+    var failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(workspaceNamespaces);
     var elapsed = stopwatch.stop().elapsed();
     LOGGER.info(
         String.format(
