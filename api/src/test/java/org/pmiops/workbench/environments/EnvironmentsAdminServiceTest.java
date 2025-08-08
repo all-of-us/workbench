@@ -198,6 +198,37 @@ public class EnvironmentsAdminServiceTest {
   }
 
   @Test
+  void testDeleteUnsharedWorkspaceEnvironmentsBatch_handlesCacheMiss() {
+    DbWorkspace workspace = createMockWorkspace();
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
+        .thenReturn(List.of(workspace));
+
+    // Cache returns no users, simulating a cache miss
+    when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
+        .thenReturn(Set.of());
+    // User still has access in Terra
+    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+        .thenReturn(List.of(new UserRole().email(USER_EMAIL_1)));
+
+
+    when(mockLeonardoApiClient.listRuntimesByProjectAsService(workspace.getGoogleProject()))
+        .thenReturn(List.of(createMockRuntime("runtime-1", USER_EMAIL_1)));
+    when(mockLeonardoApiClient.listAppsInProjectAsService(workspace.getGoogleProject()))
+        .thenReturn(List.of(createMockApp("app-1", USER_EMAIL_1)));
+    when(mockLeonardoApiClient.listDisksByProjectAsService(workspace.getGoogleProject()))
+        .thenReturn(List.of(createMockDisk("disk-1", USER_EMAIL_1)));
+
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
+
+    assertEquals(0, failures);
+    // User still has access, so no deletions should occur
+    verifyNoDeleteCalls();
+  }
+
+  @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_deletesUnsharedRuntimes() {
     DbWorkspace workspace = createMockWorkspace();
     when(mockWorkspaceService.lookupWorkspacesByNamespace(
