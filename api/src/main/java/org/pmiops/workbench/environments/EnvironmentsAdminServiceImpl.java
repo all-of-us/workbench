@@ -1,6 +1,5 @@
 package org.pmiops.workbench.environments;
 
-
 import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
@@ -32,14 +31,14 @@ public class EnvironmentsAdminServiceImpl implements EnvironmentsAdminService {
   public EnvironmentsAdminServiceImpl(
       WorkspaceService workspaceService,
       LeonardoApiClient leonardoApiClient,
-      WorkspaceUserCacheService workspaceUserCacheService
-      ) {
+      WorkspaceUserCacheService workspaceUserCacheService) {
     this.workspaceService = workspaceService;
     this.leonardoApiClient = leonardoApiClient;
     this.workspaceUserCacheService = workspaceUserCacheService;
   }
 
-  /** * Delete unshared environments (runtimes, apps, and disks) in the given workspaces. This method
+  /**
+   * * Delete unshared environments (runtimes, apps, and disks) in the given workspaces. This method
    * will return the number of workspaces that failed to fetch workspace ACLs.
    *
    * @param workspaceNamespaces the namespaces of the workspaces to check for unshared environments
@@ -48,12 +47,12 @@ public class EnvironmentsAdminServiceImpl implements EnvironmentsAdminService {
   @Override
   public long deleteUnsharedWorkspaceEnvironmentsBatch(List<String> workspaceNamespaces) {
     return workspaceService.lookupWorkspacesByNamespace(workspaceNamespaces).stream()
-            .filter(
-                ws -> {
-                  boolean successfulGetFirecloudUserRoles = deleteUnshared(ws);
-                  return !successfulGetFirecloudUserRoles;
-                })
-            .count();
+        .filter(
+            ws -> {
+              boolean successfulGetFirecloudUserRoles = deleteUnshared(ws);
+              return !successfulGetFirecloudUserRoles;
+            })
+        .count();
   }
 
   /**
@@ -158,8 +157,8 @@ public class EnvironmentsAdminServiceImpl implements EnvironmentsAdminService {
   }
 
   /**
-   * Given a list of deletable apps and the current users with access to the workspace, delete
-   * any apps not owned by a current user.
+   * Given a list of deletable apps and the current users with access to the workspace, delete any
+   * apps not owned by a current user.
    *
    * @param dbWorkspace workspace the apps are in
    * @param deletableApps all apps in the workspace that are in a deletable state
@@ -289,6 +288,7 @@ public class EnvironmentsAdminServiceImpl implements EnvironmentsAdminService {
    * Make a live call to Rawls to get the current users with access to the workspace. Called when
    * the workspace user cache indicates that there may be resources to delete as we need to get
    * fresh ACLs before deleting anything.
+   *
    * @param dbWorkspace the workspace to get current users for
    * @return the set of usernames for users with access to the workspace
    */

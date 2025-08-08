@@ -48,14 +48,16 @@ public class EnvironmentsAdminServiceTest {
 
   @BeforeEach
   void setUp() {
-    environmentsAdminService = new EnvironmentsAdminServiceImpl(
-        mockWorkspaceService, mockLeonardoApiClient, mockWorkspaceUserCacheService);
+    environmentsAdminService =
+        new EnvironmentsAdminServiceImpl(
+            mockWorkspaceService, mockLeonardoApiClient, mockWorkspaceUserCacheService);
   }
 
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_noResources() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
@@ -68,11 +70,13 @@ public class EnvironmentsAdminServiceTest {
     when(mockLeonardoApiClient.listDisksByProjectAsService(workspace.getGoogleProject()))
         .thenReturn(Collections.emptyList());
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
-    verify(mockWorkspaceService).lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace()));
+    verify(mockWorkspaceService)
+        .lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace()));
     verify(mockWorkspaceService, never()).getFirecloudUserRoles(any(), any());
     verifyNoDeleteCalls();
   }
@@ -81,21 +85,24 @@ public class EnvironmentsAdminServiceTest {
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_withFailures() {
     DbWorkspace workspace = createMockWorkspace();
     when(mockWorkspaceService.lookupWorkspacesByNamespace(
-        List.of(workspace.getWorkspaceNamespace())))
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
         .thenReturn(Set.of(USER_EMAIL_1));
 
-    when(mockLeonardoApiClient.listRuntimesByProjectAsService(workspace.getGoogleProject())).thenReturn(List.of(
-        createMockRuntime("runtime-1", CREATOR_EMAIL)));
+    when(mockLeonardoApiClient.listRuntimesByProjectAsService(workspace.getGoogleProject()))
+        .thenReturn(List.of(createMockRuntime("runtime-1", CREATOR_EMAIL)));
     when(mockLeonardoApiClient.listAppsInProjectAsService(workspace.getGoogleProject()))
         .thenReturn(Collections.emptyList());
 
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName())).thenThrow(new WorkbenchException("Failed to get user roles"));
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+        .thenThrow(new WorkbenchException("Failed to get user roles"));
 
-    Long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    Long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(1, failures);
     verifyNoDeleteCalls();
@@ -106,8 +113,9 @@ public class EnvironmentsAdminServiceTest {
     when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of("nonexistent-namespace")))
         .thenReturn(Collections.emptyList());
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of("nonexistent-namespace"));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of("nonexistent-namespace"));
 
     assertEquals(0, failures);
     verify(mockWorkspaceService).lookupWorkspacesByNamespace(List.of("nonexistent-namespace"));
@@ -124,7 +132,7 @@ public class EnvironmentsAdminServiceTest {
     workspace2.setGoogleProject("another-project");
 
     when(mockWorkspaceService.lookupWorkspacesByNamespace(
-        List.of(workspace1.getWorkspaceNamespace(), workspace2.getWorkspaceNamespace())))
+            List.of(workspace1.getWorkspaceNamespace(), workspace2.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace1, workspace2));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace1.getWorkspaceId()))
@@ -144,26 +152,30 @@ public class EnvironmentsAdminServiceTest {
     when(mockLeonardoApiClient.listAppsInProjectAsService(workspace2.getGoogleProject()))
         .thenReturn(Collections.emptyList());
 
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace1.getWorkspaceNamespace(),
-        workspace1.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace1.getWorkspaceNamespace(), workspace1.getFirecloudName()))
         .thenReturn(List.of(new UserRole().email(USER_EMAIL_1)));
 
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace2.getWorkspaceNamespace(),
-        workspace2.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
         .thenReturn(List.of(new UserRole().email(USER_EMAIL_2)));
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace1.getWorkspaceNamespace(), workspace2.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace1.getWorkspaceNamespace(), workspace2.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(workspace1.getGoogleProject(), runtime1.getRuntimeName(), true);
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(workspace2.getGoogleProject(), runtime2.getRuntimeName(), true);
+    verify(mockLeonardoApiClient)
+        .deleteRuntimeAsService(workspace1.getGoogleProject(), runtime1.getRuntimeName(), true);
+    verify(mockLeonardoApiClient)
+        .deleteRuntimeAsService(workspace2.getGoogleProject(), runtime2.getRuntimeName(), true);
   }
 
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_creatorsStillHaveAccess() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
@@ -176,8 +188,9 @@ public class EnvironmentsAdminServiceTest {
     when(mockLeonardoApiClient.listDisksByProjectAsService(workspace.getGoogleProject()))
         .thenReturn(List.of(createMockDisk("disk-1", USER_EMAIL_1)));
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
     verify(mockWorkspaceService, never()).getFirecloudUserRoles(any(), any());
@@ -187,7 +200,8 @@ public class EnvironmentsAdminServiceTest {
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_deletesUnsharedRuntimes() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
@@ -202,21 +216,26 @@ public class EnvironmentsAdminServiceTest {
         .thenReturn(Collections.emptyList());
 
     UserRole userRole = new UserRole().email(USER_EMAIL_1);
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(List.of(userRole));
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
-    verify(mockWorkspaceService).getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(workspace.getGoogleProject(), runtime.getRuntimeName(), true);
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+    verify(mockLeonardoApiClient)
+        .deleteRuntimeAsService(workspace.getGoogleProject(), runtime.getRuntimeName(), true);
   }
 
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_deletesUnsharedApps() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
@@ -231,21 +250,25 @@ public class EnvironmentsAdminServiceTest {
         .thenReturn(Collections.emptyList());
 
     UserRole userRole = new UserRole().email(USER_EMAIL_1);
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(List.of(userRole));
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
-    verify(mockWorkspaceService).getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     verify(mockLeonardoApiClient).deleteAppAsService(app.getAppName(), workspace, true);
   }
 
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_deletesUnsharedDisks() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
@@ -260,21 +283,26 @@ public class EnvironmentsAdminServiceTest {
         .thenReturn(List.of(disk));
 
     UserRole userRole = new UserRole().email(USER_EMAIL_1);
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(List.of(userRole));
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
-    verify(mockWorkspaceService, times(1)).getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    verify(mockLeonardoApiClient).deletePersistentDiskAsService(workspace.getGoogleProject(), disk.getName());
+    verify(mockWorkspaceService, times(1))
+        .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+    verify(mockLeonardoApiClient)
+        .deletePersistentDiskAsService(workspace.getGoogleProject(), disk.getName());
   }
 
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_reusesCurrentUsersForDisks() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
@@ -291,30 +319,38 @@ public class EnvironmentsAdminServiceTest {
         .thenReturn(List.of(disk));
 
     UserRole userRole = new UserRole().email(USER_EMAIL_1);
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(List.of(userRole));
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
     // Should only call getCurrentUsers once (for runtime/app phase, then reuse for disks)
-    verify(mockWorkspaceService, times(1)).getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(workspace.getGoogleProject(), runtime.getRuntimeName(), true);
-    verify(mockLeonardoApiClient).deletePersistentDiskAsService(workspace.getGoogleProject(), disk.getName());
+    verify(mockWorkspaceService, times(1))
+        .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+    verify(mockLeonardoApiClient)
+        .deleteRuntimeAsService(workspace.getGoogleProject(), runtime.getRuntimeName(), true);
+    verify(mockLeonardoApiClient)
+        .deletePersistentDiskAsService(workspace.getGoogleProject(), disk.getName());
   }
 
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_handlesRuntimeDeletionFailure() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
         .thenReturn(Set.of(USER_EMAIL_1));
 
-    LeonardoListRuntimeResponse runtimeFailure = createMockRuntime("runtime-failure", CREATOR_EMAIL);
-    LeonardoListRuntimeResponse runtimeSuccess = createMockRuntime("runtime-success", CREATOR_EMAIL);
+    LeonardoListRuntimeResponse runtimeFailure =
+        createMockRuntime("runtime-failure", CREATOR_EMAIL);
+    LeonardoListRuntimeResponse runtimeSuccess =
+        createMockRuntime("runtime-success", CREATOR_EMAIL);
     when(mockLeonardoApiClient.listRuntimesByProjectAsService(workspace.getGoogleProject()))
         .thenReturn(List.of(runtimeFailure, runtimeSuccess));
     when(mockLeonardoApiClient.listAppsInProjectAsService(workspace.getGoogleProject()))
@@ -323,24 +359,32 @@ public class EnvironmentsAdminServiceTest {
         .thenReturn(Collections.emptyList());
 
     UserRole userRole = new UserRole().email(USER_EMAIL_1);
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(List.of(userRole));
 
     doThrow(new WorkbenchException("Deletion failed"))
-        .when(mockLeonardoApiClient).deleteRuntimeAsService(any(), eq(runtimeFailure.getRuntimeName()), anyBoolean());
+        .when(mockLeonardoApiClient)
+        .deleteRuntimeAsService(any(), eq(runtimeFailure.getRuntimeName()), anyBoolean());
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(workspace.getGoogleProject(), runtimeFailure.getRuntimeName(), true);
-    verify(mockLeonardoApiClient).deleteRuntimeAsService(workspace.getGoogleProject(), runtimeSuccess.getRuntimeName(), true);
+    verify(mockLeonardoApiClient)
+        .deleteRuntimeAsService(
+            workspace.getGoogleProject(), runtimeFailure.getRuntimeName(), true);
+    verify(mockLeonardoApiClient)
+        .deleteRuntimeAsService(
+            workspace.getGoogleProject(), runtimeSuccess.getRuntimeName(), true);
   }
 
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_handlesAppDeletionFailure() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
@@ -356,14 +400,17 @@ public class EnvironmentsAdminServiceTest {
         .thenReturn(Collections.emptyList());
 
     UserRole userRole = new UserRole().email(USER_EMAIL_1);
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(List.of(userRole));
 
     doThrow(new WorkbenchException("Deletion failed"))
-        .when(mockLeonardoApiClient).deleteAppAsService(appFailure.getAppName(), workspace, true);
+        .when(mockLeonardoApiClient)
+        .deleteAppAsService(appFailure.getAppName(), workspace, true);
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
     verify(mockLeonardoApiClient).deleteAppAsService(appFailure.getAppName(), workspace, true);
@@ -373,7 +420,8 @@ public class EnvironmentsAdminServiceTest {
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_handlesDiskDeletionFailure() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
@@ -389,31 +437,39 @@ public class EnvironmentsAdminServiceTest {
         .thenReturn(List.of(diskFailure, diskSuccess));
 
     UserRole userRole = new UserRole().email(USER_EMAIL_1);
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(List.of(userRole));
 
     doThrow(new WorkbenchException("Deletion failed"))
-        .when(mockLeonardoApiClient).deletePersistentDiskAsService(workspace.getGoogleProject(), diskFailure.getName());
+        .when(mockLeonardoApiClient)
+        .deletePersistentDiskAsService(workspace.getGoogleProject(), diskFailure.getName());
 
-    long failures = environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
-        List.of(workspace.getWorkspaceNamespace()));
+    long failures =
+        environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
+            List.of(workspace.getWorkspaceNamespace()));
 
     assertEquals(0, failures);
-    verify(mockLeonardoApiClient).deletePersistentDiskAsService(workspace.getGoogleProject(), diskFailure.getName());
-    verify(mockLeonardoApiClient).deletePersistentDiskAsService(workspace.getGoogleProject(), diskSuccess.getName());
+    verify(mockLeonardoApiClient)
+        .deletePersistentDiskAsService(workspace.getGoogleProject(), diskFailure.getName());
+    verify(mockLeonardoApiClient)
+        .deletePersistentDiskAsService(workspace.getGoogleProject(), diskSuccess.getName());
   }
 
   @Test
   void testDeleteUnsharedWorkspaceEnvironmentsBatch_usesCurrentWorkspaceUsersToDelete() {
     DbWorkspace workspace = createMockWorkspace();
-    when(mockWorkspaceService.lookupWorkspacesByNamespace(List.of(workspace.getWorkspaceNamespace())))
+    when(mockWorkspaceService.lookupWorkspacesByNamespace(
+            List.of(workspace.getWorkspaceNamespace())))
         .thenReturn(List.of(workspace));
 
     when(mockWorkspaceUserCacheService.getWorkspaceUsers(workspace.getWorkspaceId()))
         .thenReturn(Set.of(USER_EMAIL_1));
     // Simulate a stale cache and CREATOR_EMAIL does actually have access
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
-        .thenReturn(List.of(new UserRole().email(USER_EMAIL_1), new UserRole().email(CREATOR_EMAIL)));
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+        .thenReturn(
+            List.of(new UserRole().email(USER_EMAIL_1), new UserRole().email(CREATOR_EMAIL)));
 
     var runtime = createMockRuntime("runtime-1", CREATOR_EMAIL);
     when(mockLeonardoApiClient.listRuntimesByProjectAsService(workspace.getGoogleProject()))
@@ -426,7 +482,8 @@ public class EnvironmentsAdminServiceTest {
     environmentsAdminService.deleteUnsharedWorkspaceEnvironmentsBatch(
         List.of(workspace.getWorkspaceNamespace()));
 
-    verify(mockWorkspaceService).getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     verifyNoDeleteCalls();
   }
 
@@ -446,7 +503,10 @@ public class EnvironmentsAdminServiceTest {
   }
 
   private LeonardoListRuntimeResponse createMockRuntime(String name, String creator) {
-    return new LeonardoListRuntimeResponse().runtimeName(name).auditInfo(new LeonardoAuditInfo().creator(creator)).status(LeonardoRuntimeStatus.RUNNING);
+    return new LeonardoListRuntimeResponse()
+        .runtimeName(name)
+        .auditInfo(new LeonardoAuditInfo().creator(creator))
+        .status(LeonardoRuntimeStatus.RUNNING);
   }
 
   private UserAppEnvironment createMockApp(String name, String creator) {
@@ -454,6 +514,9 @@ public class EnvironmentsAdminServiceTest {
   }
 
   private ListPersistentDiskResponse createMockDisk(String name, String creator) {
-    return new ListPersistentDiskResponse().name(name).auditInfo(new AuditInfo().creator(creator)).status(DiskStatus.READY);
+    return new ListPersistentDiskResponse()
+        .name(name)
+        .auditInfo(new AuditInfo().creator(creator))
+        .status(DiskStatus.READY);
   }
 }
