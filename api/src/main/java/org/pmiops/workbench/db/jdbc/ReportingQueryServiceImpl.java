@@ -34,6 +34,7 @@ import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
+import org.pmiops.workbench.model.ReportingWorkspaceUser;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -679,6 +680,25 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         },
         limit,
         offset);
+  }
+
+  @Override
+  public List<ReportingWorkspaceUser> getWorkspaceUserBatch(long limit, long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT \n"
+                + "  wuc.workspace_id,\n"
+                + "  wuc.user_id,\n"
+                + "  wuc.role\n"
+                + "FROM workspace_user_cache wuc\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingWorkspaceUser()
+                .workspaceId(rs.getLong("workspace_id"))
+                .userId(rs.getLong("user_id"))
+                .role(rs.getString("access_level")));
   }
 
   @Override
