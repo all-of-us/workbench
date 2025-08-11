@@ -17,6 +17,7 @@ import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
+import org.pmiops.workbench.model.ReportingWorkspaceUser;
 
 /** Expose handy, performant queries that don't require Dao, Entity, or Projection classes. */
 public interface ReportingQueryService {
@@ -29,6 +30,8 @@ public interface ReportingQueryService {
   List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsageBatch(long limit, long offset);
 
   List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset);
+
+  List<ReportingWorkspaceUser> getWorkspaceUserBatch(long limit, long offset);
 
   List<ReportingUser> getUserBatch(long limit, long offset);
 
