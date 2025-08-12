@@ -32,6 +32,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -58,6 +59,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
+import org.pmiops.workbench.rawls.ApiException;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -227,23 +229,47 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         userRoles.stream()
             .map(ur -> toWorkspaceUserAdminView(ur, userMap.get(ur.getEmail())))
             .toList();
+    Workspace workspace;
+    AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts = new AdminWorkspaceCloudStorageCounts();
+    AdminWorkspaceObjectsCounts adminWorkspaceObjectsCounts = new AdminWorkspaceObjectsCounts();
+    try {
+        adminWorkspaceCloudStorageCounts =
+            getAdminWorkspaceCloudStorageCounts(
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    final AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts =
-        getAdminWorkspaceCloudStorageCounts(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+        adminWorkspaceObjectsCounts = getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId());
+    }
+    catch (WorkbenchException e) {
+        if (e.getClass() == NotFoundException.class || e.getErrorResponse().getStatusCode() == 404) {
+        }
+        else {
+            throw e;
+        }
+    }
+    try {
+        final RawlsWorkspaceDetails firecloudWorkspace =
+            fireCloudService
+                .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
+                .getWorkspace();
+
+        workspace =
+            workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, initialCreditsService);
+    } 
+    catch (WorkbenchException e) {
+        // treat "workspace not found" similar to "inactive"
+        if (e.getClass() == NotFoundException.class || e.getErrorResponse().getStatusCode() == 404) {
+            workspace = workspaceMapper
+                .toApiWorkspace(dbWorkspace, new RawlsWorkspaceDetails(), initialCreditsService);
+        }
+        else {
+            throw e;
+        }
+    }
 
     final AdminWorkspaceResources adminWorkspaceResources =
         new AdminWorkspaceResources()
-            .workspaceObjects(getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId()))
+            .workspaceObjects(adminWorkspaceObjectsCounts)
             .cloudStorage(adminWorkspaceCloudStorageCounts);
-
-    final RawlsWorkspaceDetails firecloudWorkspace =
-        fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
-            .getWorkspace();
-
-    Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, initialCreditsService);
 
     return new WorkspaceAdminView()
         .workspace(workspace)
