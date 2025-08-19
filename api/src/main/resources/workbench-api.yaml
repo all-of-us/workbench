@@ -13691,7 +13691,7 @@ components:
       description: Type for the search parameter used to query for VWB workspaces
       enum:
         - WORKSPACE_CREATOR
-        - WORKSPACE_ID
+        - WORKSPACE_USER_FACING_ID
         - WORKSPACE_NAME
         - WORKSPACE_SHARED
 

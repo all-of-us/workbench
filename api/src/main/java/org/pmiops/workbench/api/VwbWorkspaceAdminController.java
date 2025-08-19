@@ -33,7 +33,7 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
         return ResponseEntity.ok(
             new VwbWorkspaceListResponse()
                 .items(vwbAdminQueryService.queryVwbWorkspacesByCreator(searchParam)));
-      case ID:
+      case USER_FACING_ID:
         return ResponseEntity.ok(
             new VwbWorkspaceListResponse()
                 .items(vwbAdminQueryService.queryVwbWorkspacesById(searchParam)));

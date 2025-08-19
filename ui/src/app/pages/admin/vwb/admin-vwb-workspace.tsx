@@ -18,8 +18,8 @@ const VwbWorkspaceSearchParamTypeOptions = [
     label: 'Workspace Creator',
   },
   {
-    value: VwbWorkspaceSearchParamType.ID,
-    label: 'Workspace ID',
+    value: VwbWorkspaceSearchParamType.USER_FACING_ID,
+    label: 'Workspace User Facing ID',
   },
   {
     value: VwbWorkspaceSearchParamType.NAME,
@@ -33,7 +33,7 @@ const VwbWorkspaceSearchParamTypeOptions = [
 
 const SearchParamTypeLabel = {
   [VwbWorkspaceSearchParamType.CREATOR]: 'Creator Username',
-  [VwbWorkspaceSearchParamType.ID]: 'Workspace ID',
+  [VwbWorkspaceSearchParamType.USER_FACING_ID]: 'Workspace User Facing ID',
   [VwbWorkspaceSearchParamType.NAME]: 'Workspace Name',
   [VwbWorkspaceSearchParamType.SHARED]: 'Collaborator Username',
 };
@@ -117,7 +117,7 @@ export const AdminVwbWorkspace = (spinnerProps: WithSpinnerOverlayProps) => {
             >
               <Column
                 field='userFacingId'
-                header='Workspace ID'
+                header='User Facing ID'
                 headerStyle={{ width: '250px' }}
               />
               <Column
