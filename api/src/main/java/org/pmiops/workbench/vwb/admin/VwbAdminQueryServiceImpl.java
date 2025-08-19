@@ -24,6 +24,10 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private final BigQueryService bigQueryService;
 
   private static final String VWB_WORKSPACE_TABLE = "wsm_workspaces";
+  private static final String VWB_WORKSPACE_ACTIVITY_LOG_TABLE = "wsm_workspace_activity_logs";
+  private static final String VWB_WORKSPACE_CREATOR_COLUMN = "created_by_email";
+  private static final String VWB_WORKSPACE_ID_COLUMN = "workspace_user_facing_id";
+  private static final String VWB_WORKSPACE_NAME_COLUMN = "workspace_display_name";
 
   private static final String QUERY =
       "SELECT \n"
@@ -31,11 +35,29 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  workspace_user_facing_id, \n"
           + "  workspace_display_name,\n"
           + "  description, \n"
+          + "  created_by_email, \n"
           + "  created_date, \n"
           + "FROM \n"
           + "  %s \n"
           + "WHERE \n"
-          + " created_by_email=@EMAIL ";
+          + " %s=@SEARCH_PARAM ";
+
+  private static final String SHARED_QUERY =
+      "SELECT \n"
+          + "  w.workspace_id, \n"
+          + "  w.workspace_user_facing_id, \n"
+          + "  w.workspace_display_name,\n"
+          + "  w.description, \n"
+          + "  w.created_by_email, \n"
+          + "  w.created_date, \n"
+          + "FROM \n"
+          + " %s w \n"
+          + "JOIN \n"
+          + " %s wal ON w.workspace_id = wal.workspace_id \n"
+          + "WHERE \n"
+          + " wal.change_type='GRANT_WORKSPACE_ROLE' \n"
+          + "AND \n"
+          + " (wal.change_subject_id=@SEARCH_PARAM OR wal.actor_email=@SEARCH_PARAM) \n";
 
   @Autowired
   public VwbAdminQueryServiceImpl(
@@ -47,24 +69,71 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   @Override
   public List<VwbWorkspace> queryVwbWorkspacesByCreator(String email) {
 
-    final String queryString = String.format(QUERY, getTableName());
+    final String queryString =
+        String.format(QUERY, getTableName(VWB_WORKSPACE_TABLE), VWB_WORKSPACE_CREATOR_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
-            .addNamedParameter("EMAIL", QueryParameterValue.string(email))
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(email))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
     return tableResultToVwbWorkspace(result);
   }
 
-  private String getTableName() {
+  @Override
+  public List<VwbWorkspace> queryVwbWorkspacesById(String id) {
+
+    final String queryString =
+        String.format(QUERY, getTableName(VWB_WORKSPACE_TABLE), VWB_WORKSPACE_ID_COLUMN);
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(id))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return tableResultToVwbWorkspace(result);
+  }
+
+  @Override
+  public List<VwbWorkspace> queryVwbWorkspacesByName(String name) {
+
+    final String queryString =
+        String.format(QUERY, getTableName(VWB_WORKSPACE_TABLE), VWB_WORKSPACE_NAME_COLUMN);
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(name))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return tableResultToVwbWorkspace(result);
+  }
+
+  @Override
+  public List<VwbWorkspace> queryVwbWorkspacesByShareActivity(String email) {
+
+    final String queryString =
+        String.format(
+            SHARED_QUERY,
+            getTableName(VWB_WORKSPACE_TABLE),
+            getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(email))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return tableResultToVwbWorkspace(result);
+  }
+
+  private String getTableName(String table) {
     final VwbConfig vwbConfig = workbenchConfigProvider.get().vwb;
     return String.format(
         "`%s.%s.%s`",
-        vwbConfig.adminBigQuery.logProjectId,
-        vwbConfig.adminBigQuery.bigQueryDataset,
-        VWB_WORKSPACE_TABLE);
+        vwbConfig.adminBigQuery.logProjectId, vwbConfig.adminBigQuery.bigQueryDataset, table);
   }
 
   private List<VwbWorkspace> tableResultToVwbWorkspace(TableResult tableResult) {
@@ -79,6 +148,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     FieldValues.getString(row, "workspace_user_facing_id").ifPresent(vwbWorkspace::setUserFacingId);
     FieldValues.getString(row, "workspace_display_name").ifPresent(vwbWorkspace::setDisplayName);
     FieldValues.getString(row, "description").ifPresent(vwbWorkspace::setDescription);
+    FieldValues.getString(row, "created_by_email").ifPresent(vwbWorkspace::setCreatedBy);
 
     FieldValues.getDateTime(row, "created_date")
         .map(OffsetDateTime::toString)

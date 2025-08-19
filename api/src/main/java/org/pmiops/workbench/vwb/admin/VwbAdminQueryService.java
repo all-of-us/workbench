@@ -11,4 +11,10 @@ public interface VwbAdminQueryService {
    * @return A List of workspaces created by the user
    */
   List<VwbWorkspace> queryVwbWorkspacesByCreator(String email);
+
+  List<VwbWorkspace> queryVwbWorkspacesById(String id);
+
+  List<VwbWorkspace> queryVwbWorkspacesByName(String name);
+
+  List<VwbWorkspace> queryVwbWorkspacesByShareActivity(String email);
 }
