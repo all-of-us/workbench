@@ -6802,15 +6802,20 @@ paths:
           description: The egress event was successfully handled.
           content: { }
       x-codegen-request-body-name: request
-  /v2/admin/vwb/workspaces/getVwbWorkspaceByUsername:
+  /v2/admin/vwb/workspaces/getVwbWorkspaceBySearchParam:
     get:
       tags:
         - vwbWorkspaceAdmin
-      description: Returns all VWB workspaces created by a user. Requires RESEARCHER_DATA_VIEW
-        authority.
-      operationId: getVwbWorkspaceByUsername
+      description: Returns all VWB workspaces that match the given search param. Requires
+        RESEARCHER_DATA_VIEW authority.
+      operationId: getVwbWorkspaceBySearchParam
       parameters:
-        - name: username
+        - name: searchParamType
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: searchParam
           in: query
           required: true
           schema:
@@ -13649,7 +13654,6 @@ components:
         workspaceFirecloudName:
             type: string
             description: The name of the workspace in Terra
-
     VwbWorkspaceListResponse:
       required:
         - items
@@ -13659,7 +13663,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VwbWorkspace'
-
     VwbWorkspace:
       required:
         - displayName
@@ -13683,6 +13686,14 @@ components:
         creationTime:
           type: string
           description: Timestamp the workspace was created
+    VwbWorkspaceSearchParamType:
+      type: string
+      description: Type for the search parameter used to query for VWB workspaces
+      enum:
+        - WORKSPACE_CREATOR
+        - WORKSPACE_USER_FACING_ID
+        - WORKSPACE_NAME
+        - WORKSPACE_SHARED
 
   parameters:
     userId:
