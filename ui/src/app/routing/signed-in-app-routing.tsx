@@ -26,6 +26,7 @@ import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
 import { AdminVwbWorkspace } from 'app/pages/admin/vwb/admin-vwb-workspace';
+import { AdminVwbWorkspaceSearch } from 'app/pages/admin/vwb/admin-vwb-workspace-search';
 import { AdminWorkspace } from 'app/pages/admin/workspace/admin-workspace';
 import { AdminWorkspaceSearch } from 'app/pages/admin/workspace/admin-workspace-search';
 import { DemographicSurvey } from 'app/pages/demographic-survey';
@@ -125,6 +126,10 @@ const WorkspaceAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminWorkspace);
+const VwbWorkspaceAdminSearchPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminVwbWorkspaceSearch);
 const VwbWorkspaceAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -290,6 +295,15 @@ export const SignedInRoutes = () => {
       <AppRoute
         exact
         path='/admin/vwb/workspaces'
+        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
+      >
+        <VwbWorkspaceAdminSearchPage
+          routeData={{ title: 'VWB Workspace Admin', minimizeChrome: true }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/admin/vwb/workspaces/:ufid'
         guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
       >
         <VwbWorkspaceAdminPage
