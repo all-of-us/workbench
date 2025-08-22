@@ -3,7 +3,9 @@ package org.pmiops.workbench.api;
 import java.util.Optional;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.VwbWorkspaceAdminView;
 import org.pmiops.workbench.model.VwbWorkspaceListResponse;
 import org.pmiops.workbench.model.VwbWorkspaceSearchParamType;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
@@ -25,7 +27,7 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<VwbWorkspaceListResponse> getVwbWorkspaceBySearchParam(
+  public ResponseEntity<VwbWorkspaceListResponse> getVwbWorkspacesBySearchParam(
       String paramType, String searchParam) {
     VwbWorkspaceSearchParamType searchParamType = validateSearchParamType(paramType);
     switch (searchParamType) {
@@ -36,7 +38,7 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
       case USER_FACING_ID:
         return ResponseEntity.ok(
             new VwbWorkspaceListResponse()
-                .items(vwbAdminQueryService.queryVwbWorkspacesById(searchParam)));
+                .items(vwbAdminQueryService.queryVwbWorkspacesByUserFacingId(searchParam)));
       case NAME:
         return ResponseEntity.ok(
             new VwbWorkspaceListResponse()
@@ -48,6 +50,23 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
       default:
         throw new BadRequestException("Search Param Type " + paramType + " is not supported");
     }
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<VwbWorkspaceAdminView> getVwbWorkspaceAdminView(String userFacingId) {
+    return ResponseEntity.ok(
+        new VwbWorkspaceAdminView()
+            .workspace(
+                vwbAdminQueryService.queryVwbWorkspacesByUserFacingId(userFacingId).stream()
+                    .findFirst()
+                    .orElseThrow(
+                        () ->
+                            new NotFoundException(
+                                String.format(
+                                    "Workspace User Facing Id %s was not found", userFacingId))))
+            .collaborators(
+                vwbAdminQueryService.queryVwbWorkspaceCollaboratorsByUserFacingId(userFacingId)));
   }
 
   protected VwbWorkspaceSearchParamType validateSearchParamType(String param) {

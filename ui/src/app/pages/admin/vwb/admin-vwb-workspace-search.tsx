@@ -5,13 +5,12 @@ import { DataTable } from 'primereact/datatable';
 
 import { VwbWorkspace, VwbWorkspaceSearchParamType } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
+import { Button, StyledRouterLink } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Error, Select, TextInputWithLabel } from 'app/components/inputs';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import { useNavigation } from 'app/utils/navigation';
 
 const VwbWorkspaceSearchParamTypeOptions = [
   {
@@ -48,7 +47,6 @@ export const AdminVwbWorkspaceSearch = (
   const [vwbWorkspaces, setVwbWorkspaces] = useState<VwbWorkspace[]>(null);
   const [fetchError, setFetchError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [navigate] = useNavigation();
 
   useEffect(() => spinnerProps.hideSpinner(), []);
 
@@ -58,7 +56,7 @@ export const AdminVwbWorkspaceSearch = (
       setLoading(true);
       setVwbWorkspaces(null);
       const response =
-        await vwbWorkspaceAdminApi().getVwbWorkspaceBySearchParam(
+        await vwbWorkspaceAdminApi().getVwbWorkspacesBySearchParam(
           searchParamType.toString(),
           searchParam
         );
@@ -115,9 +113,6 @@ export const AdminVwbWorkspaceSearch = (
             <DataTable
               paginator
               rows={10}
-              onRowClick={(row) =>
-                navigate(['admin','vwb', 'workspaces', row.data.userFacingId])
-              }
               emptyMessage='No workspaces found'
               loading={loading}
               value={vwbWorkspaces}
@@ -126,6 +121,13 @@ export const AdminVwbWorkspaceSearch = (
                 field='userFacingId'
                 header='User Facing ID'
                 headerStyle={{ width: '250px' }}
+                body={({ userFacingId }) => (
+                  <StyledRouterLink
+                    path={`/admin/vwb/workspaces/${userFacingId}`}
+                  >
+                    {userFacingId}
+                  </StyledRouterLink>
+                )}
               />
               <Column
                 field='displayName'
