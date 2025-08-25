@@ -408,9 +408,9 @@ public class ComplianceTrainingServiceTest {
 
     // There should be an Absorb (not Moodle) verification record for RT but not CT.
     assertThat(
-        getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
-            .get()
-            .getComplianceTrainingVerificationSystem())
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
         .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
     assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).isPresent()).isFalse();
 
@@ -433,14 +433,14 @@ public class ComplianceTrainingServiceTest {
 
     // There should be Absorb (not Moodle) verification records.
     assertThat(
-        getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
-            .get()
-            .getComplianceTrainingVerificationSystem())
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
         .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
     assertThat(
-        getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
-            .get()
-            .getComplianceTrainingVerificationSystem())
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
         .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
   }
 
@@ -471,7 +471,8 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
                 new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null, null)));
   }
 
@@ -490,7 +491,8 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
                 new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null, 50)));
   }
 
@@ -500,7 +502,8 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
                 new Enrollment(
                     ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime, 100)));
   }

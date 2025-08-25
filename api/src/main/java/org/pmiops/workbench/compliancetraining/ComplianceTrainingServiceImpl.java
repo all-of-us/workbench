@@ -102,8 +102,10 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
       maybeEnrollment.ifPresentOrElse(
           enrollment -> {
-            // If the course is incomplete or the user does not have a passing score, do not update the user access module
-            if (enrollment.completionTime != null && (enrollment.score != null && enrollment.score >= PASSING_SCORE)) {
+            // If the course is incomplete or the user does not have a passing score, do not update
+            // the user access module
+            if (enrollment.completionTime != null
+                && (enrollment.score != null && enrollment.score >= PASSING_SCORE)) {
               var updatedUserAccessModule =
                   accessModuleService.updateCompletionTime(
                       dbUser, accessModuleName, Timestamp.from(enrollment.completionTime));
