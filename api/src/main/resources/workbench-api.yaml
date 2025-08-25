@@ -6802,13 +6802,13 @@ paths:
           description: The egress event was successfully handled.
           content: { }
       x-codegen-request-body-name: request
-  /v2/admin/vwb/workspaces/getVwbWorkspaceBySearchParam:
+  /v2/admin/vwb/workspaces:
     get:
       tags:
         - vwbWorkspaceAdmin
       description: Returns all VWB workspaces that match the given search param. Requires
         RESEARCHER_DATA_VIEW authority.
-      operationId: getVwbWorkspaceBySearchParam
+      operationId: getVwbWorkspacesBySearchParam
       parameters:
         - name: searchParamType
           in: query
@@ -6827,6 +6827,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VwbWorkspaceListResponse'
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v2/admin/vwb/workspaces/{workspaceUserFacingId}:
+    get:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Given a workspace user facing id, returns workspace details. Requires
+        RESEARCHER_DATA_VIEW authority.
+      operationId: getVwbWorkspaceAdminView
+      parameters:
+        - name: workspaceUserFacingId
+          in: path
+          description: The workspace user facing id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: The details for a VWB workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbWorkspaceAdminView'
 
         403:
           description: User doesn't have the RESEARCHER_DATA_VIEW authority
@@ -13671,6 +13699,9 @@ components:
         id:
           type: string
           description: ID of the workspace
+        googleProjectId:
+          type: string
+          description: ID of the workspace
         userFacingId:
           type: string
           description: ID of the workspace displayed to the user
@@ -13694,6 +13725,22 @@ components:
         - WORKSPACE_USER_FACING_ID
         - WORKSPACE_NAME
         - WORKSPACE_SHARED
+    VwbWorkspaceAdminView:
+      type: object
+      properties:
+        workspace:
+          $ref: '#/components/schemas/VwbWorkspace'
+        workspaceDatabaseId:
+          type: integer
+          description: |
+            ID used in the AoU RWB workspace table. Useful for DB queries and Action Audit searches in Stackdriver Logging and BigQuery.
+          format: int64
+        collaborators:
+          type: array
+          description: List of users who own or collaborate on this workspace.
+          items:
+            type: string
+      description: Admin-visible metadata about a VWB workspace.
 
   parameters:
     userId:

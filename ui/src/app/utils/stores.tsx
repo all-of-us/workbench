@@ -241,6 +241,7 @@ export interface MatchParams {
   ns?: string;
   pid?: string;
   sparkConsolePath?: string;
+  ufid?: string;
   username?: string;
   usernameWithoutGsuiteDomain?: string;
   terraName?: string;

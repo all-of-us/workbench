@@ -25,6 +25,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   private static final String VWB_WORKSPACE_TABLE = "wsm_workspaces";
   private static final String VWB_WORKSPACE_ACTIVITY_LOG_TABLE = "wsm_workspace_activity_logs";
+  private static final String VWB_WORKSPACE_SAM_USERS_TABLE = "sam_workspace_users";
   private static final String VWB_WORKSPACE_CREATOR_COLUMN = "created_by_email";
   private static final String VWB_WORKSPACE_ID_COLUMN = "workspace_user_facing_id";
   private static final String VWB_WORKSPACE_NAME_COLUMN = "workspace_display_name";
@@ -37,10 +38,21 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  description, \n"
           + "  created_by_email, \n"
           + "  created_date, \n"
+          + "  gcp_project_id, \n"
           + "FROM \n"
           + "  %s \n"
           + "WHERE \n"
           + " %s=@SEARCH_PARAM ";
+
+  private static final String COLLABORATOR_QUERY =
+      "SELECT \n"
+          + " swu.user_email, \n"
+          + "FROM \n"
+          + " %s swu \n"
+          + "JOIN \n"
+          + " %s w ON swu.workspace_id = w.workspace_id \n"
+          + "WHERE \n"
+          + " w.workspace_user_facing_id=@USER_FACING_ID ";
 
   private static final String SHARED_QUERY =
       "SELECT \n"
@@ -50,6 +62,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  w.description, \n"
           + "  w.created_by_email, \n"
           + "  w.created_date, \n"
+          + "  w.gcp_project_id, \n"
           + "FROM \n"
           + " %s w \n"
           + "JOIN \n"
@@ -57,7 +70,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "WHERE \n"
           + " wal.change_type='GRANT_WORKSPACE_ROLE' \n"
           + "AND \n"
-          + " (wal.change_subject_id=@SEARCH_PARAM OR wal.actor_email=@SEARCH_PARAM) \n";
+          + " (wal.change_subject_id=@SEARCH_PARAM OR wal.actor_email=@SEARCH_PARAM) ";
 
   @Autowired
   public VwbAdminQueryServiceImpl(
@@ -82,7 +95,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   }
 
   @Override
-  public List<VwbWorkspace> queryVwbWorkspacesById(String id) {
+  public List<VwbWorkspace> queryVwbWorkspacesByUserFacingId(String id) {
 
     final String queryString =
         String.format(QUERY, getTableName(VWB_WORKSPACE_TABLE), VWB_WORKSPACE_ID_COLUMN);
@@ -129,6 +142,24 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     return tableResultToVwbWorkspace(result);
   }
 
+  @Override
+  public List<String> queryVwbWorkspaceCollaboratorsByUserFacingId(String id) {
+    final String queryString =
+        String.format(
+            COLLABORATOR_QUERY,
+            getTableName(VWB_WORKSPACE_SAM_USERS_TABLE),
+            getTableName(VWB_WORKSPACE_TABLE));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("USER_FACING_ID", QueryParameterValue.string(id))
+            .build();
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(row -> row.get("user_email").getStringValue())
+        .collect(Collectors.toList());
+  }
+
   private String getTableName(String table) {
     final VwbConfig vwbConfig = workbenchConfigProvider.get().vwb;
     return String.format(
@@ -149,6 +180,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     FieldValues.getString(row, "workspace_display_name").ifPresent(vwbWorkspace::setDisplayName);
     FieldValues.getString(row, "description").ifPresent(vwbWorkspace::setDescription);
     FieldValues.getString(row, "created_by_email").ifPresent(vwbWorkspace::setCreatedBy);
+    FieldValues.getString(row, "gcp_project_id").ifPresent(vwbWorkspace::setGoogleProjectId);
 
     FieldValues.getDateTime(row, "created_date")
         .map(OffsetDateTime::toString)

@@ -12,9 +12,11 @@ public interface VwbAdminQueryService {
    */
   List<VwbWorkspace> queryVwbWorkspacesByCreator(String email);
 
-  List<VwbWorkspace> queryVwbWorkspacesById(String id);
+  List<VwbWorkspace> queryVwbWorkspacesByUserFacingId(String id);
 
   List<VwbWorkspace> queryVwbWorkspacesByName(String name);
 
   List<VwbWorkspace> queryVwbWorkspacesByShareActivity(String email);
+
+  List<String> queryVwbWorkspaceCollaboratorsByUserFacingId(String id);
 }
