@@ -253,3 +253,7 @@ components:
         isActive:
           type: "boolean"
           description: "`Sortable` `Filterable` \n\nIndicates if the enrollment is the current (active) enrollment or a historical enrollment."
+        score:
+          type: "number"
+          description: "Score in percentage."
+          format: "double"

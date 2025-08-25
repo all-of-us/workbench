@@ -391,6 +391,59 @@ public class ComplianceTrainingServiceTest {
     verifyNoInteractions(mockAbsorbService);
   }
 
+  @Test
+  public void testSyncComplianceTrainingStatus_EnforcesPassingGrade() throws Exception {
+    // User completes RT training but fails CT training in Absorb
+    var rtCompletionTime = currentInstant();
+    stubAbsorbRTCompleteCTFailed(rtCompletionTime);
+
+    // User syncs training
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    // The user should be updated in the database with a non-empty completion
+    // for only RT training.
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+    assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+
+    // There should be an Absorb (not Moodle) verification record for RT but not CT.
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).isPresent()).isFalse();
+
+    // Time passes
+    tick();
+
+    // User passes CT training in Absorb
+    var ctCompletionTime = currentInstant();
+    stubAbsorbAllTrainingsComplete(rtCompletionTime, ctCompletionTime);
+
+    // User syncs training
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    // The user should be updated in the database with a non-empty completion
+    // for both RT and CT training.
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctCompletionTime));
+
+    // There should be Absorb (not Moodle) verification records.
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+  }
+
   private void assertModuleCompletionEqual(DbAccessModuleName moduleName, Timestamp timestamp) {
     assertThat(getModuleCompletionTime(moduleName)).isEqualTo(timestamp);
   }
@@ -410,7 +463,7 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
-            List.of(new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null)));
+            List.of(new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null, null)));
   }
 
   private void stubAbsorbOnlyRTComplete(Instant rtCompletionTime) throws ApiException {
@@ -418,8 +471,9 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime),
-                new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null)));
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
+                new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null, null)));
   }
 
   private void stubAbsorbRTExpiredCTComplete(Instant ctCompletionTime) throws ApiException {
@@ -427,9 +481,19 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null),
+                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null, null),
                 new Enrollment(
-                    ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime)));
+                    ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime, 100)));
+  }
+
+  private void stubAbsorbRTCompleteCTFailed(Instant rtCompletionTime) throws ApiException {
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
+        .thenReturn(
+            List.of(
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
+                new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null, 50)));
   }
 
   private void stubAbsorbAllTrainingsComplete(Instant rtCompletionTime, Instant ctCompletionTime)
@@ -438,9 +502,10 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime),
                 new Enrollment(
-                    ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime)));
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime, 100)));
   }
 
   private Optional<DbComplianceTrainingVerification> getVerification(

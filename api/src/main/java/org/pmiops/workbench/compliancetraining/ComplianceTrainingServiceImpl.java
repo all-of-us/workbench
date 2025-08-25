@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ComplianceTrainingServiceImpl implements ComplianceTrainingService {
   public static final String rtTrainingCourseId = "9ad49c70-3b72-4789-8282-5794efcd4ce1";
   public static final String ctTrainingCourseId = "3765dc64-cc64-4efa-bfc0-9a4dc2e9d09d";
+  private static final Integer PASSING_SCORE = 80;
 
   private static final Logger log = Logger.getLogger(ComplianceTrainingServiceImpl.class.getName());
   private final AccessModuleService accessModuleService;
@@ -101,8 +102,10 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
       maybeEnrollment.ifPresentOrElse(
           enrollment -> {
-            // If the course is incomplete, do not update the user access module
-            if (enrollment.completionTime != null) {
+            // If the course is incomplete or the user does not have a passing score, do not update
+            // the user access module
+            if (enrollment.completionTime != null
+                && (enrollment.score != null && enrollment.score >= PASSING_SCORE)) {
               var updatedUserAccessModule =
                   accessModuleService.updateCompletionTime(
                       dbUser, accessModuleName, Timestamp.from(enrollment.completionTime));
