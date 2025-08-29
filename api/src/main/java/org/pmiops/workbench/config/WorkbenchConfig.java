@@ -511,6 +511,8 @@ public class WorkbenchConfig {
     // later authZ check.
     public String exfilManagerServiceAccount;
     public String userManagerBaseUrl;
+    // pod_user_facing_id of the pod used for initial credits for vwb workspaces
+    public String initialCreditsPodUserFacingId;
 
     public static class AdminBigQuery {
       public String logProjectId;

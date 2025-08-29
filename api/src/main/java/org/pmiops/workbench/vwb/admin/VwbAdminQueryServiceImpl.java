@@ -39,6 +39,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  created_by_email, \n"
           + "  created_date, \n"
           + "  gcp_project_id, \n"
+          + "  pod_user_facing_id, \n"
           + "FROM \n"
           + "  %s \n"
           + "WHERE \n"
@@ -63,6 +64,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  w.created_by_email, \n"
           + "  w.created_date, \n"
           + "  w.gcp_project_id, \n"
+          + "  w.pod_user_facing_id, \n"
           + "FROM \n"
           + " %s w \n"
           + "JOIN \n"
@@ -181,6 +183,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     FieldValues.getString(row, "description").ifPresent(vwbWorkspace::setDescription);
     FieldValues.getString(row, "created_by_email").ifPresent(vwbWorkspace::setCreatedBy);
     FieldValues.getString(row, "gcp_project_id").ifPresent(vwbWorkspace::setGoogleProjectId);
+    FieldValues.getString(row, "pod_user_facing_id").ifPresent(vwbWorkspace::setPodUserFacingId);
 
     FieldValues.getDateTime(row, "created_date")
         .map(OffsetDateTime::toString)

@@ -228,6 +228,7 @@
     "organizationId": "00a62244-0497-460f-8d55-dd1eee3ce975",
     "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b",
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-d-1v-ucd.iam.gserviceaccount.com",
+    "initialCreditsPodUserFacingId": "aou-initial-credit-stable",
     "adminBigQuery": {
       "logProjectId": "all-of-us-workbench-test",
       "bigQueryDataset": "vwb_admin_test"

@@ -7417,6 +7417,9 @@ components:
           type: boolean
           default: false
           description: If true, enable the creating workspaces in Verily Workbench
+        initialCreditsPodUserFacingId:
+          type: string
+          description: pod_user_facing_id of the pod used for initial credits for vwb workspaces
     AccessModuleConfig:
       required:
       - expirable
@@ -13705,6 +13708,9 @@ components:
         userFacingId:
           type: string
           description: ID of the workspace displayed to the user
+        podUserFacingId:
+          type: string
+          description: ID of the pod displayed to the user
         displayName:
           type: string
           description: The name of the workspace as displayed in the UI.

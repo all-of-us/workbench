@@ -9,7 +9,7 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { WorkspaceInfoField } from 'app/pages/admin/workspace/workspace-info-field';
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 
 interface Props
   extends WithSpinnerOverlayProps,
@@ -62,6 +62,12 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
         <div>
           <h3>Basic Information</h3>
           <div className='basic-info' style={{ marginTop: '1.5rem' }}>
+            <WorkspaceInfoField labelText='Billing Account Type'>
+              {workspace.podUserFacingId ===
+              serverConfigStore.get().config.initialCreditsPodUserFacingId
+                ? `Initial credits (${workspace.createdBy})`
+                : 'User provided'}
+            </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Google Project Id'>
               {workspace.googleProjectId}
             </WorkspaceInfoField>
