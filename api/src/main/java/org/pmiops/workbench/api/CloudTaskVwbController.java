@@ -47,8 +47,9 @@ public class CloudTaskVwbController implements CloudTaskVwbApiDelegate {
         vwbUserService.createInitialCreditsPodForUser(user);
         // If the user has run out of initial credits, unlink the billing account to prevent further
         // spending
-        if (initialCreditsService.hasUserRunOutOfInitialCredits(user)) {
-          log.info(
+        if (initialCreditsService.hasUserRunOutOfInitialCredits(user)
+            || initialCreditsService.areUserCreditsExpired(user)) {
+          log.debug(
               "User has run out of initial credits, unlinking billing account for user: "
                   + user.getUsername());
           vwbUserService.unlinkBillingAccountForUserPod(user);

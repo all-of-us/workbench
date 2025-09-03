@@ -126,6 +126,7 @@ class CloudTaskVwbControllerTest {
 
     when(mockUserService.getByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
     when(mockInitialCreditsService.hasUserRunOutOfInitialCredits(user)).thenReturn(false);
+    when(mockInitialCreditsService.areUserCreditsExpired(user)).thenReturn(false);
 
     // Act
     ResponseEntity<Void> response = controller.processCreateVwbPodTask(request);
@@ -135,12 +136,67 @@ class CloudTaskVwbControllerTest {
     verify(mockUserService).getByUsername(TEST_USERNAME);
     verify(mockVwbUserService).createInitialCreditsPodForUser(user);
     verify(mockInitialCreditsService).hasUserRunOutOfInitialCredits(user);
+    verify(mockInitialCreditsService).areUserCreditsExpired(user);
     verify(mockVwbUserService, never()).unlinkBillingAccountForUserPod(any());
   }
 
   @Test
   void
       processCreateVwbPodTask_whenUserExistsWithoutPodAndCreditsExhausted_createsPodUnlinksBillingAndReturnsOk() {
+    // Arrange
+    mockFeatureFlags.enableVWBUserAndPodCreation = true;
+    CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
+    request.setUserName(TEST_USERNAME);
+
+    DbUser user = new DbUser();
+    user.setUsername(TEST_USERNAME);
+    user.setVwbUserPod(null);
+
+    when(mockUserService.getByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
+    when(mockInitialCreditsService.hasUserRunOutOfInitialCredits(user)).thenReturn(true);
+
+    // Act
+    ResponseEntity<Void> response = controller.processCreateVwbPodTask(request);
+
+    // Assert
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    verify(mockUserService).getByUsername(TEST_USERNAME);
+    verify(mockVwbUserService).createInitialCreditsPodForUser(user);
+    verify(mockInitialCreditsService).hasUserRunOutOfInitialCredits(user);
+    verify(mockVwbUserService).unlinkBillingAccountForUserPod(user);
+  }
+
+  @Test
+  void
+      processCreateVwbPodTask_whenUserExistsWithoutPodAndCreditsExpired_createsPodUnlinksBillingAndReturnsOk() {
+    // Arrange
+    mockFeatureFlags.enableVWBUserAndPodCreation = true;
+    CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
+    request.setUserName(TEST_USERNAME);
+
+    DbUser user = new DbUser();
+    user.setUsername(TEST_USERNAME);
+    user.setVwbUserPod(null);
+
+    when(mockUserService.getByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
+    when(mockInitialCreditsService.hasUserRunOutOfInitialCredits(user)).thenReturn(false);
+    when(mockInitialCreditsService.areUserCreditsExpired(user)).thenReturn(true);
+
+    // Act
+    ResponseEntity<Void> response = controller.processCreateVwbPodTask(request);
+
+    // Assert
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    verify(mockUserService).getByUsername(TEST_USERNAME);
+    verify(mockVwbUserService).createInitialCreditsPodForUser(user);
+    verify(mockInitialCreditsService).hasUserRunOutOfInitialCredits(user);
+    verify(mockInitialCreditsService).areUserCreditsExpired(user);
+    verify(mockVwbUserService).unlinkBillingAccountForUserPod(user);
+  }
+
+  @Test
+  void
+      processCreateVwbPodTask_whenUserExistsWithoutPodAndCreditsExhaustedAndExpired_createsPodUnlinksBillingAndReturnsOk() {
     // Arrange
     mockFeatureFlags.enableVWBUserAndPodCreation = true;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
