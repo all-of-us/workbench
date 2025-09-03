@@ -13745,7 +13745,7 @@ components:
           type: array
           description: List of users who own or collaborate on this workspace.
           items:
-            type: string
+            $ref: '#/components/schemas/UserRole'
       description: Admin-visible metadata about a VWB workspace.
 
   parameters:

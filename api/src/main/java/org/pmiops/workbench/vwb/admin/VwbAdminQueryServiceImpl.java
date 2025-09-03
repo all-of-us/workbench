@@ -12,7 +12,9 @@ import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig;
+import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.VwbWorkspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   private static final String COLLABORATOR_QUERY =
       "SELECT \n"
+          + " swu.role, \n"
           + " swu.user_email, \n"
           + "FROM \n"
           + " %s swu \n"
@@ -145,7 +148,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   }
 
   @Override
-  public List<String> queryVwbWorkspaceCollaboratorsByUserFacingId(String id) {
+  public List<UserRole> queryVwbWorkspaceCollaboratorsByUserFacingId(String id) {
     final String queryString =
         String.format(
             COLLABORATOR_QUERY,
@@ -158,7 +161,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
             .build();
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
     return StreamSupport.stream(result.iterateAll().spliterator(), false)
-        .map(row -> row.get("user_email").getStringValue())
+        .map(this::fieldValueListToUserRole)
         .collect(Collectors.toList());
   }
 
@@ -189,5 +192,14 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .map(OffsetDateTime::toString)
         .ifPresent(vwbWorkspace::setCreationTime);
     return vwbWorkspace;
+  }
+
+  private UserRole fieldValueListToUserRole(FieldValueList row) {
+    UserRole userRole = new UserRole();
+    FieldValues.getString(row, "role")
+        .map((role) -> WorkspaceAccessLevel.valueOf(role.toUpperCase()))
+        .ifPresent(userRole::setRole);
+    FieldValues.getString(row, "user_email").ifPresent(userRole::setEmail);
+    return userRole;
   }
 }
