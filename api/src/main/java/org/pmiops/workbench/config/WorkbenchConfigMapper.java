@@ -71,8 +71,5 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableVWBWorkspaceCreation",
       source = "config.featureFlags.enableVWBWorkspaceCreation")
-  @Mapping(
-      target = "initialCreditsPodUserFacingId",
-      source = "config.vwb.initialCreditsPodUserFacingId")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

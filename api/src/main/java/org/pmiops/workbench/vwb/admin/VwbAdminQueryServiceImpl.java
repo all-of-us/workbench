@@ -28,22 +28,25 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String VWB_WORKSPACE_TABLE = "wsm_workspaces";
   private static final String VWB_WORKSPACE_ACTIVITY_LOG_TABLE = "wsm_workspace_activity_logs";
   private static final String VWB_WORKSPACE_SAM_USERS_TABLE = "sam_workspace_users";
+  private static final String VWB_PODS_TABLE = "um_pods";
   private static final String VWB_WORKSPACE_CREATOR_COLUMN = "created_by_email";
   private static final String VWB_WORKSPACE_ID_COLUMN = "workspace_user_facing_id";
   private static final String VWB_WORKSPACE_NAME_COLUMN = "workspace_display_name";
 
   private static final String QUERY =
       "SELECT \n"
-          + "  workspace_id, \n"
-          + "  workspace_user_facing_id, \n"
-          + "  workspace_display_name,\n"
-          + "  description, \n"
-          + "  created_by_email, \n"
-          + "  created_date, \n"
-          + "  gcp_project_id, \n"
-          + "  pod_user_facing_id, \n"
+          + "  w.workspace_id, \n"
+          + "  w.workspace_user_facing_id, \n"
+          + "  w.workspace_display_name,\n"
+          + "  w.description, \n"
+          + "  w.created_by_email, \n"
+          + "  w.created_date, \n"
+          + "  w.gcp_project_id, \n"
+          + "  p.billing_account_id, \n"
           + "FROM \n"
-          + "  %s \n"
+          + "  %s w \n"
+          + "JOIN \n"
+          + " %s p ON w.pod_id = p.pod_id \n"
           + "WHERE \n"
           + " %s=@SEARCH_PARAM ";
 
@@ -67,9 +70,11 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  w.created_by_email, \n"
           + "  w.created_date, \n"
           + "  w.gcp_project_id, \n"
-          + "  w.pod_user_facing_id, \n"
+          + "  p.billing_account_id, \n"
           + "FROM \n"
           + " %s w \n"
+          + "JOIN \n"
+          + " %s p ON w.pod_id = p.pod_id \n"
           + "JOIN \n"
           + " %s wal ON w.workspace_id = wal.workspace_id \n"
           + "WHERE \n"
@@ -103,7 +108,11 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   public List<VwbWorkspace> queryVwbWorkspacesByUserFacingId(String id) {
 
     final String queryString =
-        String.format(QUERY, getTableName(VWB_WORKSPACE_TABLE), VWB_WORKSPACE_ID_COLUMN);
+        String.format(
+            QUERY,
+            getTableName(VWB_WORKSPACE_TABLE),
+            getTableName(VWB_PODS_TABLE),
+            VWB_WORKSPACE_ID_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -118,7 +127,11 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   public List<VwbWorkspace> queryVwbWorkspacesByName(String name) {
 
     final String queryString =
-        String.format(QUERY, getTableName(VWB_WORKSPACE_TABLE), VWB_WORKSPACE_NAME_COLUMN);
+        String.format(
+            QUERY,
+            getTableName(VWB_WORKSPACE_TABLE),
+            getTableName(VWB_PODS_TABLE),
+            VWB_WORKSPACE_NAME_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -136,6 +149,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         String.format(
             SHARED_QUERY,
             getTableName(VWB_WORKSPACE_TABLE),
+            getTableName(VWB_PODS_TABLE),
             getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE));
 
     final QueryJobConfiguration queryJobConfiguration =
@@ -186,7 +200,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     FieldValues.getString(row, "description").ifPresent(vwbWorkspace::setDescription);
     FieldValues.getString(row, "created_by_email").ifPresent(vwbWorkspace::setCreatedBy);
     FieldValues.getString(row, "gcp_project_id").ifPresent(vwbWorkspace::setGoogleProjectId);
-    FieldValues.getString(row, "pod_user_facing_id").ifPresent(vwbWorkspace::setPodUserFacingId);
+    FieldValues.getString(row, "billing_account_id").ifPresent(vwbWorkspace::billingAccountId);
 
     FieldValues.getDateTime(row, "created_date")
         .map(OffsetDateTime::toString)

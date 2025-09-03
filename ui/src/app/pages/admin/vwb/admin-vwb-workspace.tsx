@@ -77,8 +77,8 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
           <h3>Basic Information</h3>
           <div className='basic-info' style={{ marginTop: '1.5rem' }}>
             <WorkspaceInfoField labelText='Billing Account Type'>
-              {workspace.podUserFacingId ===
-              serverConfigStore.get().config.initialCreditsPodUserFacingId
+              {workspace.billingAccountId ===
+              serverConfigStore.get().config.initialCreditsBillingAccountId
                 ? `Initial credits (${workspace.createdBy})`
                 : 'User provided'}
             </WorkspaceInfoField>
