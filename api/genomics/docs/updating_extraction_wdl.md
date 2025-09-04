@@ -25,8 +25,8 @@
 ### Merging
 1. Create a PR with your GATK branch
 2. Get it reviewed by the Variants team and merge it
-3. Upload the new snapshot to all environments using the `--all-projects` parameter of `create-terra-method-snapshot`
-   1. `./project.rb create-terra-method-snapshot --source-git-repo broadinstitute/gatk --source-git-path scripts/variantstore/wdl/GvsExtractCohortFromSampleNames.wdl --source-git-ref ah_var_store —method-name GvsExtractCohortFromSampleNames —all-projects`
+3. Upload the new snapshot to all environments `create-terra-method-snapshot` (the `--all-projects` parameter no longer works so each environment will need to be uploaded separately)
+   1. `./project.rb create-terra-method-snapshot --source-git-repo broadinstitute/gatk --source-git-path scripts/variantstore/wdl/GvsExtractCohortFromSampleNames.wdl --source-git-ref ah_var_store --method-name GvsExtractCohortFromSampleNames --project [project-id]`
       1. The `--source-git-ref` should match the branch that your changes were merged into
       2. The `--method-name` parameter can be anything but our convention has been to use the WDL workflow's name.
    2. Update the config_*.json files. The version number for each environment will be in the output of the previous step.
