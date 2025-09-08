@@ -281,6 +281,7 @@ public class TaskQueueService {
                         .workspaceNamespace(workspace.getWorkspaceNamespace())
                         .workspaceFirecloudName(workspace.getFirecloudName()))
             .toList();
+    LOGGER.info("Pushing " + request.size() + " tasks onto workspace user cache queue");
     createAndPushAll(request, config.workspacesPerWorkspaceUserCacheTask, CACHE_WORKSPACE_USERS);
   }
 
@@ -289,7 +290,14 @@ public class TaskQueueService {
   }
 
   private <T> List<String> createAndPushAll(List<List<T>> batches, TaskQueuePair pair) {
-    return batches.stream().map(batch -> createAndPushTask(pair, batch)).toList();
+    LOGGER.info("Pushing " + batches.size() + " tasks onto " + pair.queueName());
+    return batches.stream()
+        .map(
+            batch -> {
+              LOGGER.info("Task contains " + batch.size() + " items");
+              return createAndPushTask(pair, batch);
+            })
+        .toList();
   }
 
   private <T> List<String> createAndPushAll(List<T> fullList, int batchSize, TaskQueuePair pair) {
