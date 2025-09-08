@@ -13705,6 +13705,9 @@ components:
         userFacingId:
           type: string
           description: ID of the workspace displayed to the user
+        billingAccountId:
+          type: string
+          description: ID of the billing account for the workspace
         displayName:
           type: string
           description: The name of the workspace as displayed in the UI.
@@ -13739,7 +13742,7 @@ components:
           type: array
           description: List of users who own or collaborate on this workspace.
           items:
-            type: string
+            $ref: '#/components/schemas/UserRole'
       description: Admin-visible metadata about a VWB workspace.
 
   parameters:
