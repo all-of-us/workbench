@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, matchPath } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { Cohort, CohortReview, ConceptSet } from 'generated/fetch';
+import { Cohort, CohortReview, ConceptSet, Profile } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { BannerScenario } from 'app/lab/pages/workspace/initial-credits/banner-config';
@@ -298,7 +298,7 @@ const BreadcrumbLink = ({ href, ...props }) => {
   return <Link to={href} {...props} />;
 };
 
-const getCreditBannerData = (workspace: any, profile: any) => {
+const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
   if (!workspace || !profile) {
     return null;
   }
@@ -364,7 +364,7 @@ export const Breadcrumb = fp.flow(
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
   const { profile } = profileStore.get();
-  const [creditBannerData, setCreditBannerData] = useState(() =>
+  const [creditBannerData, setCreditBannerData] = useState(
     getCreditBannerData(props.workspace, profile)
   );
 
