@@ -28,21 +28,19 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { Breadcrumb, getTrail } from './breadcrumb';
 import { BreadcrumbType } from './breadcrumb-type';
 
-// Mock ReactDOM.createPortal since InvalidBillingBanner uses portals
+// Mock ReactDOM.createPortal since CreditBanner uses portals
 jest.mock('react-dom', () => {
   return {
     ...jest.requireActual('react-dom'),
-    createPortal: (element) => element,
+    createPortal: (element: any) => element,
   };
 });
 
-// Mock the InvalidBillingBanner component
-jest.mock('app/lab/pages/workspace/invalid-billing-banner', () => {
+// Mock the CreditBanner component
+jest.mock('app/lab/pages/workspace/initial-credits/credit-banner', () => {
   return {
-    InvalidBillingBanner: () => (
-      <div data-testid='invalid-billing-banner'>
-        Invalid Billing Banner (Mocked)
-      </div>
+    CreditBanner: () => (
+      <div data-testid='credit-banner'>Credit Banner (Mocked)</div>
     ),
   };
 });
@@ -194,7 +192,7 @@ describe('Breadcrumb Component', () => {
     routeDataStore.set({ breadcrumb: BreadcrumbType.Workspace });
   });
 
-  it('should display InvalidBillingBanner when credits are exhausted', () => {
+  it('should display CreditBanner when credits are exhausted', async () => {
     // Arrange
     const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
     modifiedWorkspace.creatorUser = {
@@ -218,20 +216,17 @@ describe('Breadcrumb Component', () => {
     });
 
     // Act
-    const { container } = render(
+    render(
       <MemoryRouter>
         <Breadcrumb />
       </MemoryRouter>
     );
 
-    // Assert - find banner directly in the container
-    const banner = container.querySelector(
-      '[data-testid="invalid-billing-banner"]'
-    );
-    expect(banner).toBeInTheDocument();
+    // Assert
+    expect(screen.queryByTestId('credit-banner')).not.toBeInTheDocument();
   });
 
-  it('should display InvalidBillingBanner when credits are expired and not bypassed', () => {
+  it('should display CreditBanner when credits are expired and not bypassed', async () => {
     // Arrange
     const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
     modifiedWorkspace.creatorUser = {
@@ -255,20 +250,19 @@ describe('Breadcrumb Component', () => {
     });
 
     // Act
-    const { container } = render(
+    render(
       <MemoryRouter>
         <Breadcrumb />
       </MemoryRouter>
     );
 
-    // Assert - find banner directly in the container
-    const banner = container.querySelector(
-      '[data-testid="invalid-billing-banner"]'
-    );
-    expect(banner).toBeInTheDocument();
+    // Assert
+    expect(
+      await screen.findByText('Credit Banner (Mocked)')
+    ).toBeInTheDocument();
   });
 
-  it('should not display InvalidBillingBanner when credits are expired but bypassed', () => {
+  it('should not display CreditBanner when credits are expired but bypassed', () => {
     // Arrange
     const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
     modifiedWorkspace.creatorUser = {
@@ -299,12 +293,10 @@ describe('Breadcrumb Component', () => {
     );
 
     // Assert
-    expect(
-      screen.queryByTestId('invalid-billing-banner')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('credit-banner')).not.toBeInTheDocument();
   });
 
-  it('should not display InvalidBillingBanner when credits are not expired and not exhausted', () => {
+  it('should not display CreditBanner when credits are not expired and not exhausted', () => {
     // Arrange
     const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
     modifiedWorkspace.creatorUser = {
@@ -335,8 +327,6 @@ describe('Breadcrumb Component', () => {
     );
 
     // Assert
-    expect(
-      screen.queryByTestId('invalid-billing-banner')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('credit-banner')).not.toBeInTheDocument();
   });
 });

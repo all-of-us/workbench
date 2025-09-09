@@ -6,7 +6,8 @@ import * as fp from 'lodash/fp';
 import { Cohort, CohortReview, ConceptSet } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
-import { InvalidBillingBanner } from 'app/lab/pages/workspace/invalid-billing-banner';
+import { BannerScenario } from 'app/lab/pages/workspace/initial-credits/banner-config';
+import { CreditBanner } from 'app/lab/pages/workspace/initial-credits/credit-banner';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import {
   analysisTabName,
@@ -297,20 +298,54 @@ const BreadcrumbLink = ({ href, ...props }) => {
   return <Link to={href} {...props} />;
 };
 
-const shouldShowInvalidBillingBanner = (workspace, profile) => {
+const getCreditBannerData = (workspace: any, profile: any) => {
   if (!workspace || !profile) {
-    return false;
+    return null;
   }
 
-  const { creatorUser } = workspace;
-  const isExpired = workspace.initialCredits.expirationEpochMillis < Date.now();
-  const isExhausted = workspace.initialCredits.exhausted;
+  const { initialCreditsLimit = 0, initialCreditsUsage = 0 } = profile;
+  const {
+    creatorUser: { givenName, familyName },
+    initialCredits: { exhausted, expirationBypassed, expirationEpochMillis },
+  } = workspace;
 
-  return (
-    creatorUser?.givenName &&
-    creatorUser?.familyName &&
-    (isExhausted || (!workspace.initialCredits.expirationBypassed && isExpired))
-  );
+  const now = Date.now();
+  const balance = initialCreditsLimit - initialCreditsUsage;
+
+  const scenarios = [
+    {
+      cond: exhausted,
+      scenario: BannerScenario.Exhausted,
+    },
+    {
+      cond: !expirationBypassed && expirationEpochMillis < now,
+      scenario: BannerScenario.Expired,
+    },
+    {
+      cond:
+        !expirationBypassed &&
+        expirationEpochMillis - now < 24 * 60 * 60 * 1000 * 90, // < 90 days
+      scenario: BannerScenario.ExpiringSoon,
+    },
+    {
+      cond: balance <= 150, // $150 is 50% of $300 initial credits
+      scenario: BannerScenario.LowBalance,
+    },
+  ];
+
+  const match = scenarios.find((s) => s.cond);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    scenario: match.scenario,
+    expirationDate: new Date(expirationEpochMillis).toLocaleDateString(),
+    creatorName: `${givenName} ${familyName}`.trim(),
+    creditBalance: balance.toFixed(2),
+    workspace,
+    profile,
+  };
 };
 
 interface Props {
@@ -329,15 +364,13 @@ export const Breadcrumb = fp.flow(
   withStore(routeDataStore, 'routeData')
 )((props: Props) => {
   const { profile } = profileStore.get();
-  const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
-    shouldShowInvalidBillingBanner(props.workspace, profile)
+  const [creditBannerData, setCreditBannerData] = useState(() =>
+    getCreditBannerData(props.workspace, profile)
   );
 
   useEffect(() => {
-    // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
-    setShowInvalidBillingBanner(
-      shouldShowInvalidBillingBanner(props.workspace, profile)
-    );
+    // When user navigates to a different workspace, show the credit banner even if dismissed in the past
+    setCreditBannerData(getCreditBannerData(props.workspace, profile));
   }, [props?.workspace, profile]);
 
   const trail = (): Array<BreadcrumbData> => {
@@ -427,11 +460,15 @@ export const Breadcrumb = fp.flow(
 
   return (
     <>
-      {showInvalidBillingBanner && (
-        <InvalidBillingBanner
-          profile={profile}
-          workspace={props.workspace}
-          onClose={() => setShowInvalidBillingBanner(false)}
+      {creditBannerData && (
+        <CreditBanner
+          scenario={creditBannerData.scenario}
+          expirationDate={creditBannerData.expirationDate}
+          creatorName={creditBannerData.creatorName}
+          creditBalance={creditBannerData.creditBalance}
+          workspace={creditBannerData.workspace}
+          profile={creditBannerData.profile}
+          onClose={() => setCreditBannerData(null)}
         />
       )}
       <div
