@@ -505,7 +505,7 @@ public class EgressRemediationServiceTest {
 
   @Test
   public void testRemediateEgressEvent_noJiraTicketWhenJiraDisabled() throws Exception {
-    when(mockJiraApi.searchForIssuesUsingJqlPost(any()))
+    when(mockJiraApi.searchForIssuesUsingJql(any()))
         .thenReturn(new SearchResults().issues(ImmutableList.of()));
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
@@ -519,7 +519,7 @@ public class EgressRemediationServiceTest {
   public void testRemediateEgressEvent_createJiraTicketNoExisting() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.enableJiraTicketing = true;
 
-    when(mockJiraApi.searchForIssuesUsingJqlPost(any()))
+    when(mockJiraApi.searchForIssuesUsingJql(any()))
         .thenReturn(new SearchResults().issues(ImmutableList.of()));
     when(mockJiraApi.createIssue(any(), any())).thenReturn(new CreatedIssue().key("RW-1234"));
     workbenchConfig.egressAlertRemediationPolicy.escalations =
@@ -555,7 +555,7 @@ public class EgressRemediationServiceTest {
   public void testRemediateEgressEvent_commentExistingJiraTicket() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.enableJiraTicketing = true;
 
-    when(mockJiraApi.searchForIssuesUsingJqlPost(any()))
+    when(mockJiraApi.searchForIssuesUsingJql(any()))
         .thenReturn(new SearchResults().issues(ImmutableList.of(new IssueBean().id("123"))));
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
