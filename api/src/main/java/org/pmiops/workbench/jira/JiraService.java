@@ -1,10 +1,12 @@
 package org.pmiops.workbench.jira;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.inject.Provider;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -46,6 +48,9 @@ public class JiraService {
       DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
           .withLocale(Locale.US)
           .withZone(displayTimeZone);
+
+  public static final List<String> SEARCH_FIELDS =
+      List.of("summary", "status", "assignee", "reporter", "created", "updated", "labels");
 
   @Autowired private Provider<JiraApi> apiProvider;
 
@@ -135,13 +140,20 @@ public class JiraService {
     }
   }
 
-  public SearchResults searchIssues(String jqlSubquery) throws ApiException {
+  public SearchResults searchIssues(String jqlSubquery, String nextPageToken) throws ApiException {
     try {
-      return apiProvider
-          .get()
-          .searchForIssuesUsingJqlPost(
-              new SearchRequestBean()
-                  .jql(String.format("project = %s AND %s", PROJECT_KEY, jqlSubquery)));
+      SearchRequestBean requestBean =
+          new SearchRequestBean()
+              .jql(String.format("project = %s AND %s", PROJECT_KEY, jqlSubquery))
+              .fields(SEARCH_FIELDS);
+
+      // Conditionally set the nextPageToken if it is not null or empty
+      if (!Strings.isNullOrEmpty(nextPageToken)) {
+        requestBean.setNextPageToken(nextPageToken);
+      }
+
+      return apiProvider.get().searchForIssuesUsingJql(requestBean);
+
     } catch (ApiException e) {
       logJiraErrorPayload(e);
       throw e;
