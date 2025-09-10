@@ -69,6 +69,10 @@ public interface WorkspaceMapper {
       target = "initialCredits.expirationBypassed",
       source = "dbWorkspace.creator",
       qualifiedByName = "isInitialCreditExpirationBypassed")
+  @Mapping(
+          target = "initialCredits.balance",
+          source = "dbWorkspace",
+          qualifiedByName = "initialCreditsBalance")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
