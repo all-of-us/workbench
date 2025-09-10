@@ -143,6 +143,6 @@ public class CommonMappers {
   @Named("initialCreditsBalance")
   public double initialCreditsBalance(
       DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService) {
-      return initialCreditsService.getWorkspaceCreatorInitialCreditsRemaining(dbWorkspace);
+    return initialCreditsService.getWorkspaceCreatorInitialCreditsRemaining(dbWorkspace);
   }
 }
