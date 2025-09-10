@@ -94,13 +94,14 @@ public class VwbUserManagerClient {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     String initialCreditBillingAccount = workbenchConfigProvider.get().billing.accountId;
     logger.info("Creating pod for user in VWB with email {}", email);
+    String userFacingId = getUserFacingId(email);
     return vwbUserManagerRetryHandler.run(
         context ->
             podApiProvider
                 .get()
                 .createPod(
                     new PodCreateRequest()
-                        .userFacingId("user-pod-" + email.substring(0, email.indexOf('@')))
+                        .userFacingId(userFacingId)
                         .description("Pod for " + email)
                         .environment(
                             new PodEnvironment()
@@ -190,5 +191,16 @@ public class VwbUserManagerClient {
 
   private static JobControl generateJobControlWithUUID() {
     return new JobControl().id(UUID.randomUUID().toString());
+  }
+
+  private static String getUserFacingId(String email) {
+    String username =
+        email
+            .substring(0, email.indexOf('@'))
+            .replaceAll("\\.", "-")
+            .replaceAll("[^a-zA-Z0-9\\-]", "");
+    String randomSuffix =
+        UUID.randomUUID().toString().replaceAll("[^a-zA-Z0-9]", "").substring(0, 4);
+    return "user-pod-" + username + "-" + randomSuffix;
   }
 }
