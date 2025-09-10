@@ -26,8 +26,8 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
+import org.pmiops.workbench.vwb.wsmanager.model.WorkspaceDescription;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
-import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @Mapper(
     config = MapStructConfig.class,
