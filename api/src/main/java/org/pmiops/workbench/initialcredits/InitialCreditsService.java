@@ -480,6 +480,12 @@ public class InitialCreditsService {
                 .plus(billingConfig.initialCreditsExtensionPeriodDays, DAYS));
   }
 
+  public boolean hasUserRunOutOfInitialCredits(DbUser user) {
+    double usage = Optional.ofNullable(getCachedInitialCreditsUsage(user)).orElse(0.0);
+    double limit = getUserInitialCreditsLimit(user);
+    return usage >= limit;
+  }
+
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
