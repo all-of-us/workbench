@@ -39,9 +39,9 @@ class VwbUserServiceTest {
     reset(workbenchConfigProvider);
   }
 
-  void stub(boolean enableVWBUserAndPodCreation) {
+  void stub(boolean enableVWBUserCreation) {
     WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.featureFlags.enableVWBUserAndPodCreation = enableVWBUserAndPodCreation;
+    workbenchConfig.featureFlags.enableVWBUserCreation = enableVWBUserCreation;
 
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
   }
