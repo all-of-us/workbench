@@ -53,7 +53,7 @@ class CloudTaskVwbControllerTest {
   @Test
   void processCreateVwbPodTask_whenFeatureFlagDisabled_returnsBadRequest() {
     // Arrange
-    mockFeatureFlags.enableVWBUserAndPodCreation = false;
+    mockFeatureFlags.enableVWBUserCreation = false;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
     request.setUserName(TEST_USERNAME);
 
@@ -68,7 +68,7 @@ class CloudTaskVwbControllerTest {
   @Test
   void processCreateVwbPodTask_whenUserNotFound_returnsNoContent() {
     // Arrange
-    mockFeatureFlags.enableVWBUserAndPodCreation = true;
+    mockFeatureFlags.enableVWBPodCreation = true;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
     request.setUserName(TEST_USERNAME);
 
@@ -86,7 +86,7 @@ class CloudTaskVwbControllerTest {
   @Test
   void processCreateVwbPodTask_whenUserExistsButAlreadyHasPod_returnsNoContent() {
     // Arrange
-    mockFeatureFlags.enableVWBUserAndPodCreation = true;
+    mockFeatureFlags.enableVWBPodCreation = true;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
     request.setUserName(TEST_USERNAME);
 
@@ -116,7 +116,7 @@ class CloudTaskVwbControllerTest {
   @Test
   void processCreateVwbPodTask_whenUserExistsWithoutPod_createsPodAndReturnsOk() {
     // Arrange
-    mockFeatureFlags.enableVWBUserAndPodCreation = true;
+    mockFeatureFlags.enableVWBPodCreation = true;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
     request.setUserName(TEST_USERNAME);
 
@@ -144,7 +144,7 @@ class CloudTaskVwbControllerTest {
   void
       processCreateVwbPodTask_whenUserExistsWithoutPodAndCreditsExhausted_createsPodUnlinksBillingAndReturnsOk() {
     // Arrange
-    mockFeatureFlags.enableVWBUserAndPodCreation = true;
+    mockFeatureFlags.enableVWBPodCreation = true;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
     request.setUserName(TEST_USERNAME);
 
@@ -170,7 +170,7 @@ class CloudTaskVwbControllerTest {
   void
       processCreateVwbPodTask_whenUserExistsWithoutPodAndCreditsExpired_createsPodUnlinksBillingAndReturnsOk() {
     // Arrange
-    mockFeatureFlags.enableVWBUserAndPodCreation = true;
+    mockFeatureFlags.enableVWBPodCreation = true;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
     request.setUserName(TEST_USERNAME);
 
@@ -198,7 +198,7 @@ class CloudTaskVwbControllerTest {
   void
       processCreateVwbPodTask_whenUserExistsWithoutPodAndCreditsExhaustedAndExpired_createsPodUnlinksBillingAndReturnsOk() {
     // Arrange
-    mockFeatureFlags.enableVWBUserAndPodCreation = true;
+    mockFeatureFlags.enableVWBPodCreation = true;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
     request.setUserName(TEST_USERNAME);
 

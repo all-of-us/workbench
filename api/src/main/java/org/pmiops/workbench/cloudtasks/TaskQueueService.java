@@ -255,7 +255,8 @@ public class TaskQueueService {
   }
 
   public void pushVwbPodCreationTask(String email) {
-    if (!workbenchConfigProvider.get().featureFlags.enableVWBUserAndPodCreation) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBUserCreation
+        || !workbenchConfigProvider.get().featureFlags.enableVWBPodCreation) {
       return;
     }
     createAndPushTaskWithBearerToken(
