@@ -305,12 +305,13 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
 
   const { initialCreditsLimit = 0, initialCreditsUsage = 0 } = profile;
   const {
-    creatorUser: { givenName, familyName },
     initialCredits: { exhausted, expirationBypassed, expirationEpochMillis },
   } = workspace;
 
   const now = Date.now();
   const balance = initialCreditsLimit - initialCreditsUsage;
+  const givenName = workspace?.creatorUser?.givenName;
+  const familyName = workspace?.creatorUser?.familyName;
 
   const scenarios = [
     {
@@ -334,7 +335,7 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
   ];
 
   const match = scenarios.find((s) => s.cond);
-  if (!match) {
+  if (!match || !givenName || !familyName) {
     return null;
   }
 
