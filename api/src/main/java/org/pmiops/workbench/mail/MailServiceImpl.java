@@ -91,6 +91,8 @@ public class MailServiceImpl implements MailService {
       "emails/initial_credits_exhaustion/content.html";
   private static final String INITIAL_CREDITS_EXPIRING_RESOURCE =
       "emails/initial_credits_expiring/content.html";
+  private static final String INITIAL_CREDITS_EXPIRED_RESOURCE =
+      "emails/initial_credits_expired/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
   private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
       "emails/new_user_satisfaction_survey/content.html";
@@ -247,6 +249,24 @@ public class MailServiceImpl implements MailService {
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         "Alert - Initial credit expiration in All of Us Researcher Workbench",
+        logMsg,
+        htmlMessage);
+  }
+
+  @Override
+  public void alertUserInitialCreditsExpired(DbUser user) throws MessagingException {
+    final String logMsg =
+        String.format(
+            "Sending email because initial credits are expired for User %s", userForLogging(user));
+    log.info(logMsg);
+
+    final String htmlMessage =
+        buildHtml(INITIAL_CREDITS_EXPIRED_RESOURCE, initialCreditsExpiredSubstitutionMap(user));
+
+    sendWithRetries(
+        Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
+        "Alert - Initial credit expired in All of Us Researcher Workbench",
         logMsg,
         htmlMessage);
   }
@@ -579,11 +599,9 @@ public class MailServiceImpl implements MailService {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
-        .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
-        .put(EmailSubstitutionField.INITIAL_CREDITS_RESOLUTION, getInitialCreditsResolutionText())
         .build();
   }
 
@@ -593,9 +611,8 @@ public class MailServiceImpl implements MailService {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
-        .put(EmailSubstitutionField.INITIAL_CREDITS_RESOLUTION, getInitialCreditsResolutionText())
         .build();
   }
 
@@ -604,8 +621,23 @@ public class MailServiceImpl implements MailService {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .put(
+            EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION,
+            formatCondensedDateCentralTime(
+                user.getUserInitialCreditsExpiration().getExpirationTime().toInstant()))
+        .build();
+  }
+
+  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExpiredSubstitutionMap(
+      DbUser user) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(
             EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION,
