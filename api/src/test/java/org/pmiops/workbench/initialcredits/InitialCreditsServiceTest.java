@@ -156,7 +156,7 @@ public class InitialCreditsServiceTest {
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
     workbenchConfig.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
-    workbenchConfig.billing.initialCreditsExpirationWarningDays = warningPeriodDays;
+    workbenchConfig.billing.initialCreditsExpirationWarningDays = List.of(10L, 20L);
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForInitialCreditsUsageUpdate = 2L;
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
@@ -172,6 +172,7 @@ public class InitialCreditsServiceTest {
                 .setGoogleProject("initial-credits-project")
                 .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
     doNothing().when(mailService).alertUserInitialCreditsExpiring(isA(DbUser.class));
+    doNothing().when(mailService).alertUserInitialCreditsExpired(isA(DbUser.class));
   }
 
   @AfterEach

@@ -370,16 +370,19 @@ public class InitialCreditsService {
 
   // Returns true if the user's credits are expiring within the initialCreditsExpirationWarningDays.
   private boolean areCreditsExpiringSoon(DbUser user) {
-    long initialCreditsExpirationWarningDays =
+    List<Long> initialCreditsExpirationWarningDays =
         workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDays;
     return getCreditsExpiration(user)
         .map(
-            expirationTime ->
-                clockNow()
-                    .after(
-                        new Timestamp(
-                            expirationTime.getTime()
-                                - TimeUnit.DAYS.toMillis(initialCreditsExpirationWarningDays))))
+            expirationTime -> {
+              long expirationMillis = expirationTime.getTime();
+              Timestamp now = clockNow();
+              return initialCreditsExpirationWarningDays.stream()
+                  .anyMatch(
+                      days ->
+                          now.after(
+                              new Timestamp(expirationMillis - TimeUnit.DAYS.toMillis(days))));
+            })
         .orElse(false);
   }
 
@@ -468,11 +471,11 @@ public class InitialCreditsService {
         && initialCreditsExpiration != null
         && initialCreditsExpiration.getExtensionTime() == null
         && initialCreditsExpiration.getCreditStartTime() != null
-        && now.isAfter(
-            initialCreditsExpiration
-                .getExpirationTime()
-                .toInstant()
-                .minus(billingConfig.initialCreditsExpirationWarningDays, DAYS))
+        && billingConfig.initialCreditsExpirationWarningDays.stream()
+            .anyMatch(
+                days ->
+                    now.isAfter(
+                        initialCreditsExpiration.getExpirationTime().toInstant().minus(days, DAYS)))
         && now.isBefore(
             initialCreditsExpiration
                 .getCreditStartTime()
@@ -516,8 +519,15 @@ public class InitialCreditsService {
       vwbUserService.unlinkBillingAccountForUserPod(user);
     }
 
-    userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
-    userDao.save(user);
+    try {
+      mailService.alertUserInitialCreditsExpired(user);
+      userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
+      userDao.save(user);
+    } catch (MessagingException e) {
+      logger.error(
+          "Failed to send initial credits expired warning notification for user {}",
+          user.getUserId());
+    }
   }
 
   private void handleExpiringSoonCredits(
