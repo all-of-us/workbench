@@ -121,7 +121,7 @@ public class WorkbenchConfig {
     public Long initialCreditsExtensionPeriodDays;
 
     // The number of days before initial credits expire that a warning email should be sent.
-    public Long initialCreditsExpirationWarningDays;
+    public List<Long> initialCreditsExpirationWarningDays;
 
     // The name of the view in the BigQuery billing export dataset that contains the VWB workspaces
     // usage costs.
