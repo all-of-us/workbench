@@ -48,7 +48,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "JOIN \n"
           + " %s p ON w.pod_id = p.pod_id \n"
           + "WHERE \n"
-          + " %s=@SEARCH_PARAM ";
+          + " w.%s=@SEARCH_PARAM ";
 
   private static final String COLLABORATOR_QUERY =
       "SELECT \n"
@@ -93,7 +93,11 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   public List<VwbWorkspace> queryVwbWorkspacesByCreator(String email) {
 
     final String queryString =
-        String.format(QUERY, getTableName(VWB_WORKSPACE_TABLE), VWB_WORKSPACE_CREATOR_COLUMN);
+        String.format(
+            QUERY,
+            getTableName(VWB_WORKSPACE_TABLE),
+            getTableName(VWB_PODS_TABLE),
+            VWB_WORKSPACE_CREATOR_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
