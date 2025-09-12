@@ -15,6 +15,7 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.stereotype.Service;
@@ -137,5 +138,11 @@ public class CommonMappers {
   public boolean isInitialCreditExpirationBypassed(
       DbUser dbUser, @Context InitialCreditsService initialCreditsService) {
     return initialCreditsService.isExpirationBypassed(dbUser);
+  }
+
+  @Named("initialCreditsBalance")
+  public double initialCreditsBalance(
+      DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService) {
+    return initialCreditsService.getWorkspaceCreatorInitialCreditsRemaining(dbWorkspace);
   }
 }
