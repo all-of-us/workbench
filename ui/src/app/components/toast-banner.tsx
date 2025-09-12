@@ -92,7 +92,7 @@ const styleForType = (
 
 interface ToastProps {
   title: string;
-  message: string | JSX.Element;
+  message: React.ReactNode;
   onClose: Function;
   toastType: ToastType;
   zIndex: any; // TODO better type
