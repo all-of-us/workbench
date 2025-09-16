@@ -193,7 +193,22 @@ ENVIRONMENTS = {
       },
       "controlled" => {
         :dest_cdr_project => "vwb-dev-buoyant-apple-6238",
-        :dest_cdr_bucket => "gs://fc-aou-test-datasets-controlled",
+        :dest_cdr_bucket => "<PLACEHOLDER FOR VWB DEV-STABLE CONTROLLED BUCKET>",
+      }
+    }
+  }),
+  "vwb-stable" => env_with_defaults("vwb-stable", {
+    :source_cdr_project => "all-of-us-ehr-dev",
+    :source_cdr_wgs_project => "all-of-us-workbench-test",
+    :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
+    :skip_acl => true,
+    :accessTiers => {
+      "registered" => {
+        :dest_cdr_project => "wb-ardent-leek-9025",
+      },
+      "controlled" => {
+        :dest_cdr_project => "wb-agile-corn-797",
+        :dest_cdr_bucket => "<PLACEHOLDER FOR VWB STABLE ORG CONTROLLED BUCKET>",
       }
     }
   }),
@@ -204,11 +219,11 @@ ENVIRONMENTS = {
     :skip_acl => true,
     :accessTiers => {
       "registered" => {
-        :dest_cdr_project => "vwb-prod-dest-project",
+        :dest_cdr_project => "wb-affable-acorn-7941",
       },
       "controlled" => {
-        :dest_cdr_project => "vwb-prod-ct-dest-project",
-        :dest_cdr_bucket => "gs://fc-aou-datasets-controlled",
+        :dest_cdr_project => "wb-silky-artichoke-2408",
+        :dest_cdr_bucket => "<PLACEHOLDER FOR VWB PROD CONTROLLED BUCKET>",
       }
     }
   })
