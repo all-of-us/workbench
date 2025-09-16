@@ -36,26 +36,47 @@ def must_get_wgs_proxy_group(project)
   return v
 end
 
-def service_account_context_for_bq(project, account)
+def service_account_context_for_bq(project, account, provided_key_file = nil)
   common = Common.new
   original_account = get_active_gcloud_account()
-  # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
-  key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
+
+  # Use provided key file or create a temporary one
+  if provided_key_file
+    unless File.exist?(provided_key_file)
+      raise ArgumentError.new("Provided key file does not exist: #{provided_key_file}")
+    end
+    key_file_path = provided_key_file
+    key_file = nil # No temp file to clean up
+    common.status "Using provided key file: #{provided_key_file}"
+  else
+    # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
+    key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
+    key_file_path = key_file.path
+    common.status "Using temporary key file: #{key_file_path}"
+  end
+
   refresh_interval = 30 * 60 # Refresh every 30 minutes
 
   refresh_token = lambda do
     loop do
       sleep(refresh_interval)
-      common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file.path}}
+      common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file_path}}
     end
   end
 
   refresh_thread = Thread.new(&refresh_token)
 
   begin
-    ServiceAccountContext.new(project, account, key_file.path).run do
-      common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file.path}}
+    if provided_key_file
+      # If using provided key file, just activate it directly
+      common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file_path}}
       yield
+    else
+      # Use the ServiceAccountContext for temporary key files
+      ServiceAccountContext.new(project, account, key_file_path).run do
+        common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file_path}}
+        yield
+      end
     end
   ensure
     refresh_thread.kill
@@ -67,6 +88,55 @@ end
 
 
 # By default, skip empty lines only.
+def bq_direct_copy(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter = "", table_skip_filter = "^$")
+  common = Common.new
+  source_fq_dataset = "#{source_project}:#{source_dataset_name}"
+  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{dest_dataset_name}"
+  common.status "Copying directly from '#{source_fq_dataset}' -> '#{dest_fq_dataset}'"
+
+  # validate the CDR's tier label against the user-supplied tier, as a safety check
+  cdr_metadata = JSON.parse(common.capture_stdout %{bq show --format=json #{source_fq_dataset}})
+  dataset_tier = cdr_metadata.dig('labels', 'data_tier')
+
+  if dataset_tier
+    unless dataset_tier == tier_name
+      raise ArgumentError.new("The dataset's access tier '#{dataset_tier}' differs from the requested '#{tier_name}'. Aborting.")
+    end
+  else
+    common.warning "no data_tier label found for #{source_fq_dataset}"
+  end
+
+  # Check if destination dataset exists, create only if needed
+  begin
+    result = common.capture_stdout %{bq show --format=json #{dest_fq_dataset}}
+    if result.include?("BigQuery error") || result.include?("ERROR:")
+      raise RuntimeError.new("BigQuery authentication or permission error: #{result}")
+    end
+    common.status "Dataset #{dest_fq_dataset} already exists, skipping creation"
+  rescue => e
+    if e.message.include?("authentication") || e.message.include?("auth") || e.message.include?("JWT")
+      common.error "Authentication error detected. Please check your service account credentials."
+      common.error "You may need to run: gcloud auth activate-service-account --key-file=<path-to-key>"
+      raise e
+    elsif e.message.include?("Not found")
+      common.status "Dataset #{dest_fq_dataset} does not exist, creating it"
+      common.run_inline %W{bq mk --dataset #{dest_fq_dataset}}
+    else
+      common.status "Could not check dataset existence (#{e.message}), attempting to create #{dest_fq_dataset}"
+      common.run_inline %W{bq mk --dataset #{dest_fq_dataset}}
+    end
+  end
+
+  copy_args = %W{./copy-bq-dataset.sh
+      #{source_fq_dataset} #{dest_fq_dataset} #{source_project}
+  #{table_match_filter} #{table_skip_filter}}
+
+  # Run dry-run first to validate
+  common.capture_stdout(copy_args + %W{--dry-run}, nil)
+  # Execute the actual copy
+  common.run_inline copy_args
+end
+
 def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter = "", table_skip_filter = "^$")
   common = Common.new
   source_fq_dataset = "#{source_project}:#{source_dataset_name}"
@@ -93,6 +163,8 @@ def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset
 
   # Copy through an intermediate project and delete after (include TTL in case later steps fail).
   # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
+
+  # Create ingest dataset with TTL (always recreate for safety)
   common.run_inline %W{bq mk -f --default_table_expiration 86400 --dataset #{ingest_fq_dataset}}
   ingest_args = %W{./copy-bq-dataset.sh
       #{source_fq_dataset} #{ingest_fq_dataset} #{source_project}
@@ -100,7 +172,26 @@ def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset
   ingest_dry_stdout = common.capture_stdout(ingest_args + %W{--dry-run}, nil)
   common.run_inline ingest_args
 
-  common.run_inline %W{bq mk -f --dataset #{dest_fq_dataset}}
+  # Check if destination dataset exists, create only if needed
+  begin
+    result = common.capture_stdout %{bq show --format=json #{dest_fq_dataset}}
+    if result.include?("BigQuery error") || result.include?("ERROR:")
+      raise RuntimeError.new("BigQuery authentication or permission error: #{result}")
+    end
+    common.status "Dataset #{dest_fq_dataset} already exists, skipping creation"
+  rescue => e
+    if e.message.include?("authentication") || e.message.include?("auth") || e.message.include?("JWT")
+      common.error "Authentication error detected. Please check your service account credentials."
+      common.error "You may need to run: gcloud auth activate-service-account --key-file=<path-to-key>"
+      raise e
+    elsif e.message.include?("Not found")
+      common.status "Dataset #{dest_fq_dataset} does not exist, creating it"
+      common.run_inline %W{bq mk --dataset #{dest_fq_dataset}}
+    else
+      common.status "Could not check dataset existence (#{e.message}), attempting to create #{dest_fq_dataset}"
+      common.run_inline %W{bq mk --dataset #{dest_fq_dataset}}
+    end
+  end
   publish_args = %W{./copy-bq-dataset.sh
       #{ingest_fq_dataset} #{dest_fq_dataset} #{tier.fetch(:ingest_cdr_project)}
   #{table_match_filter} #{table_skip_filter}}
@@ -178,6 +269,12 @@ def publish_cdr(cmd_name, args)
       "was an issue with the publish. In general, CDRs should be treated as " +
       "immutable after the initial publish."
   )
+  op.add_option(
+    "--key-file [path]",
+    ->(opts, v) { opts.key_file = v },
+    "Optional path to service account key file. If provided, will use this " +
+      "key file for authentication instead of generating a new one."
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
@@ -200,41 +297,50 @@ def publish_cdr(cmd_name, args)
   source_cdr_project = env.fetch(:source_cdr_project)
   dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
 
-  service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    bq_ingest(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.bq_dataset, table_match_filter, table_skip_filter)
+  service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account), op.opts.key_file) do
+    # Use direct copy if no ingest project is configured (e.g., for VWB environments)
+    if tier.has_key?(:ingest_cdr_project)
+      bq_ingest(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.bq_dataset, table_match_filter, table_skip_filter)
+    else
+      bq_direct_copy(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.bq_dataset, table_match_filter, table_skip_filter)
+    end
 
-    bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
-      auth_domain_group_emails = [tier.fetch(:auth_domain_group_email)]
-      if SHARED_TEST_CDR_PROJECTS.include?(op.opts.project)
-        # While test/local do share GCP environments, we use separate auth domains
-        # to avoid cross-contamination of registration states across environments.
-        # As a special-case, add all auth domains to the shared test CDR.
-        auth_domain_group_emails = SHARED_TEST_CDR_PROJECTS.map do |p|
-          shared_tier = ENVIRONMENTS[p].fetch(:accessTiers)[op.opts.tier]
-          shared_tier.fetch(:auth_domain_group_email)
+    # Skip ACL changes if configured in the environment (defaults to false)
+    skip_acl = env.fetch(:skip_acl, false)
+    unless skip_acl
+      bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
+        auth_domain_group_emails = [tier.fetch(:auth_domain_group_email)]
+        if SHARED_TEST_CDR_PROJECTS.include?(op.opts.project)
+          # While test/local do share GCP environments, we use separate auth domains
+          # to avoid cross-contamination of registration states across environments.
+          # As a special-case, add all auth domains to the shared test CDR.
+          auth_domain_group_emails = SHARED_TEST_CDR_PROJECTS.map do |p|
+            shared_tier = ENVIRONMENTS[p].fetch(:accessTiers)[op.opts.tier]
+            shared_tier.fetch(:auth_domain_group_email)
+          end
         end
-      end
-      for group in auth_domain_group_emails do
-        if existing_groups.include?(group)
-          common.status "#{group} already in ACL, skipping..."
+        for group in auth_domain_group_emails do
+          if existing_groups.include?(group)
+            common.status "#{group} already in ACL, skipping..."
+          else
+            common.status "Adding #{group} as a READER..."
+            acl_json["access"].push({
+                                      "groupByEmail" => group,
+                                      "role" => "READER"
+                                    })
+          end
+        end
+
+        app_sa = "#{op.opts.project}@appspot.gserviceaccount.com"
+        if existing_users.include?(app_sa)
+          common.status "#{app_sa} already in ACL, skipping..."
         else
-          common.status "Adding #{group} as a READER..."
-          acl_json["access"].push({
-                                    "groupByEmail" => group,
-                                    "role" => "READER"
-                                  })
+          common.status "Adding #{app_sa} as a READER..."
+          acl_json["access"].push({ "userByEmail" => app_sa, "role" => "READER" })
         end
-      end
 
-      app_sa = "#{op.opts.project}@appspot.gserviceaccount.com"
-      if existing_users.include?(app_sa)
-        common.status "#{app_sa} already in ACL, skipping..."
-      else
-        common.status "Adding #{app_sa} as a READER..."
-        acl_json["access"].push({ "userByEmail" => app_sa, "role" => "READER" })
+        acl_json
       end
-
-      acl_json
     end
   end
 end
