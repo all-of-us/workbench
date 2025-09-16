@@ -46,7 +46,6 @@ def service_account_context_for_bq(project, account, provided_key_file = nil)
       raise ArgumentError.new("Provided key file does not exist: #{provided_key_file}")
     end
     key_file_path = provided_key_file
-    key_file = nil # No temp file to clean up
     common.status "Using provided key file: #{provided_key_file}"
   else
     # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
@@ -87,26 +86,20 @@ def service_account_context_for_bq(project, account, provided_key_file = nil)
 end
 
 
-# By default, skip empty lines only.
-def bq_direct_copy(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter = "", table_skip_filter = "^$")
-  common = Common.new
-  source_fq_dataset = "#{source_project}:#{source_dataset_name}"
-  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{dest_dataset_name}"
-  common.status "Copying directly from '#{source_fq_dataset}' -> '#{dest_fq_dataset}'"
-
-  # validate the CDR's tier label against the user-supplied tier, as a safety check
+# Validates the CDR's tier label against the user-supplied tier
+def validate_dataset_tier(common, source_fq_dataset, tier_name)
   cdr_metadata = JSON.parse(common.capture_stdout %{bq show --format=json #{source_fq_dataset}})
   dataset_tier = cdr_metadata.dig('labels', 'data_tier')
 
-  if dataset_tier
-    unless dataset_tier == tier_name
-      raise ArgumentError.new("The dataset's access tier '#{dataset_tier}' differs from the requested '#{tier_name}'. Aborting.")
-    end
-  else
+  if dataset_tier && dataset_tier != tier_name
+    raise ArgumentError.new("The dataset's access tier '#{dataset_tier}' differs from the requested '#{tier_name}'. Aborting.")
+  elsif !dataset_tier
     common.warning "no data_tier label found for #{source_fq_dataset}"
   end
+end
 
-  # Check if destination dataset exists, create only if needed
+# Ensures the destination dataset exists, creating it if necessary
+def ensure_dataset_exists(common, dest_fq_dataset)
   begin
     result = common.capture_stdout %{bq show --format=json #{dest_fq_dataset}}
     if result.include?("BigQuery error") || result.include?("ERROR:")
@@ -114,18 +107,35 @@ def bq_direct_copy(tier, tier_name, source_project, source_dataset_name, dest_da
     end
     common.status "Dataset #{dest_fq_dataset} already exists, skipping creation"
   rescue => e
-    if e.message.include?("authentication") || e.message.include?("auth") || e.message.include?("JWT")
-      common.error "Authentication error detected. Please check your service account credentials."
-      common.error "You may need to run: gcloud auth activate-service-account --key-file=<path-to-key>"
-      raise e
-    elsif e.message.include?("Not found")
-      common.status "Dataset #{dest_fq_dataset} does not exist, creating it"
-      common.run_inline %W{bq mk --dataset #{dest_fq_dataset}}
-    else
-      common.status "Could not check dataset existence (#{e.message}), attempting to create #{dest_fq_dataset}"
-      common.run_inline %W{bq mk --dataset #{dest_fq_dataset}}
-    end
+    handle_dataset_creation_error(common, dest_fq_dataset, e)
   end
+end
+
+# Handles errors during dataset creation
+def handle_dataset_creation_error(common, dest_fq_dataset, error)
+  if error.message.include?("authentication") || error.message.include?("auth") || error.message.include?("JWT")
+    common.error "Authentication error detected. Please check your service account credentials."
+    common.error "You may need to run: gcloud auth activate-service-account --key-file=<path-to-key>"
+    raise error
+  else
+    status_msg = error.message.include?("Not found") ? "does not exist" : "Could not check dataset existence (#{error.message})"
+    common.status "Dataset #{dest_fq_dataset} #{status_msg}, creating it"
+    common.run_inline %W{bq mk --dataset #{dest_fq_dataset}}
+  end
+end
+
+# By default, skip empty lines only.
+def bq_direct_copy(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter = "", table_skip_filter = "^$")
+  common = Common.new
+  source_fq_dataset = "#{source_project}:#{source_dataset_name}"
+  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{dest_dataset_name}"
+  common.status "Copying directly from '#{source_fq_dataset}' -> '#{dest_fq_dataset}'"
+
+  # Validate the CDR's tier label
+  validate_dataset_tier(common, source_fq_dataset, tier_name)
+
+  # Ensure destination dataset exists
+  ensure_dataset_exists(common, dest_fq_dataset)
 
   copy_args = %W{./copy-bq-dataset.sh
       #{source_fq_dataset} #{dest_fq_dataset} #{source_project}
