@@ -540,6 +540,7 @@ def build_copy_manifest_for_preprod_section(input_section, ingest_bucket, dest_b
   end
 end
 
+
 # Concurrently run the given process block over all rows in the provided manifest.
 # The block should have the following signature:
 #
