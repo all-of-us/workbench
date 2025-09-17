@@ -66,7 +66,7 @@ export enum ToastType {
 
 const styleForType = (
   toastType: ToastType,
-  zIndex,
+  zIndex: any,
   styleOverrides?: React.CSSProperties
 ): React.CSSProperties =>
   switchCase(

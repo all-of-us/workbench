@@ -53,14 +53,18 @@ describe('CreditBanner', () => {
     render(
       <MemoryRouter>
         <CreditBanner
-          scenario={BannerScenario.ExpiringSoon}
-          expirationDate='2025-01-01'
-          workspace={workspace}
-          profile={{
-            ...ProfileStubVariables.PROFILE_STUB,
-            ...me,
-          }}
-          onClose={jest.fn()}
+          banners={[
+            {
+              scenario: BannerScenario.ExpiringSoon,
+              expirationDate: '2025-01-01',
+              workspace: workspace,
+              profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                ...me,
+              },
+              onClose: jest.fn(),
+            },
+          ]}
         />
       </MemoryRouter>
     );
@@ -73,14 +77,18 @@ describe('CreditBanner', () => {
     render(
       <MemoryRouter>
         <CreditBanner
-          scenario={BannerScenario.Expired}
-          creatorName='Jane Doe'
-          workspace={workspace}
-          profile={{
-            ...ProfileStubVariables.PROFILE_STUB,
-            ...someOneElse,
-          }}
-          onClose={jest.fn()}
+          banners={[
+            {
+              scenario: BannerScenario.Expired,
+              creatorName: 'Jane Doe',
+              workspace: workspace,
+              profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                ...someOneElse,
+              },
+              onClose: jest.fn(),
+            },
+          ]}
         />
       </MemoryRouter>
     );
@@ -94,14 +102,18 @@ describe('CreditBanner', () => {
     render(
       <MemoryRouter>
         <CreditBanner
-          scenario={BannerScenario.ExpiringSoon}
-          expirationDate='2025-01-01'
-          workspace={workspace}
-          profile={{
-            ...ProfileStubVariables.PROFILE_STUB,
-            ...me,
-          }}
-          onClose={onClose}
+          banners={[
+            {
+              scenario: BannerScenario.ExpiringSoon,
+              expirationDate: '2025-01-01',
+              workspace: workspace,
+              profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                ...me,
+              },
+              onClose: onClose,
+            },
+          ]}
         />
       </MemoryRouter>
     );

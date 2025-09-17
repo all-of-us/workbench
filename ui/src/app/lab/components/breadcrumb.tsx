@@ -305,13 +305,18 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
 
   const { initialCreditsLimit = 0, initialCreditsUsage = 0 } = profile;
   const {
-    initialCredits: { exhausted, expirationBypassed, expirationEpochMillis },
+    initialCredits: {
+      exhausted,
+      expirationBypassed,
+      expirationEpochMillis,
+      balance,
+    },
   } = workspace;
 
   const now = Date.now();
-  const balance = initialCreditsLimit - initialCreditsUsage;
   const givenName = workspace?.creatorUser?.givenName;
   const familyName = workspace?.creatorUser?.familyName;
+  const creditBalance = balance ?? initialCreditsLimit - initialCreditsUsage;
 
   const scenarios = [
     {
@@ -329,24 +334,24 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
       scenario: BannerScenario.ExpiringSoon,
     },
     {
-      cond: balance <= 150, // $150 is 50% of $300 initial credits
+      cond: creditBalance <= 150, // $150 is 50% of $300 initial credits
       scenario: BannerScenario.LowBalance,
     },
   ];
 
-  const match = scenarios.find((s) => s.cond);
-  if (!match || !givenName || !familyName) {
+  const matches = scenarios.filter((s) => s.cond).map((s) => s.scenario);
+  if (matches.length === 0 || !givenName || !familyName) {
     return null;
   }
 
-  return {
-    scenario: match.scenario,
+  return matches.map((match) => ({
+    scenario: match,
     expirationDate: new Date(expirationEpochMillis).toLocaleDateString(),
     creatorName: `${givenName} ${familyName}`.trim(),
-    creditBalance: balance.toFixed(2),
+    creditBalance: creditBalance.toFixed(2),
     workspace,
     profile,
-  };
+  }));
 };
 
 interface Props {
@@ -459,17 +464,20 @@ export const Breadcrumb = fp.flow(
     return fp.last(trail());
   };
 
+  const handleBannerClose = (idx: number) => {
+    setCreditBannerData((prev) =>
+      prev ? prev.filter((_, i) => i !== idx) : null
+    );
+  };
+
   return (
     <>
       {creditBannerData && (
         <CreditBanner
-          scenario={creditBannerData.scenario}
-          expirationDate={creditBannerData.expirationDate}
-          creatorName={creditBannerData.creatorName}
-          creditBalance={creditBannerData.creditBalance}
-          workspace={creditBannerData.workspace}
-          profile={creditBannerData.profile}
-          onClose={() => setCreditBannerData(null)}
+          banners={creditBannerData.map((data, idx) => ({
+            ...data,
+            onClose: () => handleBannerClose(idx),
+          }))}
         />
       )}
       <div
