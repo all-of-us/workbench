@@ -13600,6 +13600,10 @@ components:
         extensionEpochMillis:
           type: integer
           format: int64
+        balance:
+          type: number
+          format: double
+          description: The current balance of initial credits for the workspace
     VwbEgressEventRequest:
       type: object
       properties:

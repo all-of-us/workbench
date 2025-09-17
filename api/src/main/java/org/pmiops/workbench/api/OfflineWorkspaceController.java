@@ -39,10 +39,15 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   @Override
   public ResponseEntity<Void> cacheWorkspaceAcls() {
     log.info("Starting cacheWorkspaceAcls cron job");
+    log.info("Finding all workspaces in need of a cache update");
     List<DbWorkspace> workspaces =
         workspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate();
+    log.info("Found " + workspaces.size() + " workspaces in need of a cache update");
+    log.info("Removing inactive workspaces from cache");
     workspaceUserCacheService.removeInactiveWorkspaces();
+    log.info("Pushing workspaces onto task queue");
     taskQueueService.pushWorkspaceUserCacheTask(workspaces);
+    log.info("Finished cacheWorkspaceAcls cron job");
 
     return ResponseEntity.ok().build();
   }

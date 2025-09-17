@@ -2,6 +2,7 @@ package org.pmiops.workbench.exfiltration.jirahandler;
 
 import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.pmiops.workbench.db.model.DbEgressEvent;
@@ -37,9 +38,7 @@ public abstract class EgressJiraHandler {
 
   protected SearchResults searchJiraIssuesWithLabel(
       DbEgressEvent event, String envShortName, String label) throws ApiException {
-    return jiraService.searchIssues(
-        // Ideally we would use Resolution = Unresolved here, but due to a misconfiguration of
-        // RW Jira, transitioning to Won't Fix / Duplicate do not currently resolve an issue.
+    String jqlQuery =
         String.format(
             "\"%s\" ~ \"%s\""
                 + " AND \"%s\" ~ \"%s\""
@@ -51,7 +50,28 @@ public abstract class EgressJiraHandler {
             IssueProperty.RW_ENVIRONMENT.key(),
             envShortName,
             IssueProperty.LABELS,
-            label));
+            label);
+
+    // Call a new helper method to handle paginated results
+    return fetchAllPages(jqlQuery);
+  }
+
+  /**
+   * Fetches all pages of Jira issues for a given JQL query using the new token-based pagination.
+   */
+  private SearchResults fetchAllPages(String jqlQuery) throws ApiException {
+    SearchResults allResults = new SearchResults().issues(new ArrayList<>());
+    String nextPageToken = null;
+    do {
+      // Pass the nextPageToken to the searchIssues method
+      SearchResults currentPageResults = jiraService.searchIssues(jqlQuery, nextPageToken);
+
+      allResults.getIssues().addAll(currentPageResults.getIssues());
+      nextPageToken = currentPageResults.getNextPageToken();
+
+    } while (nextPageToken != null);
+
+    return allResults;
   }
 
   protected void createJiraIssueWithLabels(
