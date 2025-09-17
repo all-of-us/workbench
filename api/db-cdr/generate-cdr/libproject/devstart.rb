@@ -668,6 +668,158 @@ Common.register_command({
                           :fn => ->(*args) { publish_cdr_files("publish-cdr-files", args) }
                         })
 
+# Helper method to create VWB copy manifests
+def vwb_create_copy_manifests_mode(opts, tier, working_dir)
+  common = Common.new
+  common.status "Starting: VWB copy manifest creation"
+
+  copy_manifests = {}
+  output_manifests = {}
+  output_manifest_path = -> (source_name) { "#{working_dir}/#{source_name}_output_manifest.csv" }
+  copy_manifest_files = []
+
+  input_manifest = parse_input_manifest(opts.input_manifest_file)
+
+  # Process AW4 Microarray sources
+  aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
+  unless aw4_microarray_sources.nil? or aw4_microarray_sources.empty?
+    if opts.microarray_rids_file.to_s.empty?
+      raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
+    end
+    microarray_aw4_rows = read_all_microarray_aw4s(opts.project, read_research_ids_file(opts.microarray_rids_file))
+
+    aw4_microarray_sources.each do |source_name, section|
+      common.status("building VWB manifest for '#{source_name}'")
+      copy, output = build_vwb_copy_manifest_for_aw4_section(
+        section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name))
+      key_name = "aw4_microarray_" + source_name
+      copy_manifests[key_name] = copy
+      unless output.nil?
+        output_manifests[key_name] = output
+      end
+    end
+  end
+
+  # Process AW4 WGS sources
+  aw4_wgs_sources = input_manifest["aw4WgsSources"]
+  unless aw4_wgs_sources.nil? or aw4_wgs_sources.empty?
+    if opts.wgs_rids_file.to_s.empty?
+      raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
+    end
+    wgs_aw4_rows = read_all_wgs_aw4s(opts.project, read_research_ids_file(opts.wgs_rids_file))
+
+    aw4_wgs_sources.each do |source_name, section|
+      common.status("building VWB manifest for '#{source_name}'")
+      copy, output = build_vwb_copy_manifest_for_aw4_section(
+        section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name))
+      key_name = "aw4_wgs_" + source_name
+      copy_manifests[key_name] = copy
+      unless output.nil?
+        output_manifests[key_name] = output
+      end
+    end
+  end
+
+  # Process curation sources
+  curation_sources = input_manifest["curationSources"]
+  unless curation_sources.nil? or curation_sources.empty?
+    curation_sources.each do |source_name, section|
+      common.status("building VWB manifest for '#{source_name}'")
+      copy_manifests["curation_" + source_name] = build_vwb_copy_manifest_for_curation_section(
+        section, tier[:dest_cdr_bucket], opts.display_version_id)
+    end
+  end
+
+  if copy_manifests.empty?
+    raise ArgumentError.new("CREATE_COPY_MANIFESTS was requested, but no copy manifests were created, input manifest may be empty")
+  end
+
+  # Write copy manifests to files
+  copy_manifests.each do |source_name, copy_manifest|
+    path = "#{working_dir}/#{source_name}_copy_manifest.csv"
+    CSV.open(path, 'wb') do |f|
+      f << copy_manifest.first.keys
+      copy_manifest.each { |c| f << c.values }
+    end
+    copy_manifest_files.push(path)
+  end
+
+  # Write output manifests to files
+  output_manifests.each do |source_name, output_manifest|
+    path = output_manifest_path.call(source_name)
+    CSV.open(path, 'wb') do |f|
+      f << output_manifest.first.keys
+      output_manifest.each { |c| f << c.values }
+    end
+  end
+
+  common.status "Finished: VWB manifests created"
+  copy_manifest_files
+end
+
+# Helper method to publish VWB manifests
+def vwb_publish_mode(opts, copy_manifest_files, working_dir)
+  common = Common.new
+
+  # Find manifest files if not provided
+  if copy_manifest_files.empty?
+    copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
+    if copy_manifest_files.empty?
+      raise ArgumentError.new(
+        "no copy manifests generated or found in the working dir #{working_dir}; if you " +
+          "are running PUBLISH without CREATE_COPY_MANIFESTS, be sure to " +
+          "specify an existing --working-dir which contains copy manifest CSV files")
+    end
+  end
+
+  if opts.dry_run
+    common.status "Starting: VWB publishing phase (DRY RUN - no transfers will be created)"
+  else
+    common.status "Starting: VWB publishing phase using Storage Transfer Service"
+  end
+
+  # Use VWB-specific publishing with Storage Transfer Service
+  publish_vwb_manifests(opts.project, copy_manifest_files, opts.jira_ticket, opts.dry_run)
+
+  if opts.dry_run
+    common.status "Finished: VWB publishing dry run"
+  else
+    common.status "Finished: VWB publishing"
+  end
+
+  copy_manifest_files
+end
+
+# Helper method to post-process VWB files
+def vwb_post_process_mode(opts, copy_manifest_files, working_dir)
+  common = Common.new
+
+  if opts.dry_run
+    common.status "Starting: VWB post-processing phase (DRY RUN)"
+  else
+    common.status "Starting: VWB post-processing phase"
+  end
+
+  # Ensure we have manifest files to process
+  if copy_manifest_files.empty?
+    copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
+    if copy_manifest_files.empty?
+      raise ArgumentError.new(
+        "no copy manifests found in the working dir #{working_dir}; " +
+        "POST_PROCESS requires manifest files from CREATE_COPY_MANIFESTS")
+    end
+  end
+
+  # Post-process files to rename them if needed
+  post_process_vwb_files(opts.project, copy_manifest_files, opts.dry_run)
+
+  if opts.dry_run
+    common.status "Finished: VWB post-processing dry run"
+  else
+    common.status "Finished: VWB post-processing"
+  end
+end
+
 def publish_cdr_files_vwb(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
 
@@ -715,6 +867,12 @@ def publish_cdr_files_vwb(cmd_name, args)
       "included in the published file directory structure. " +
       "Only applicable and required for task CREATE_COPY_MANIFESTS."
   )
+  op.add_option(
+    "--dry-run",
+    ->(opts, v) { opts.dry_run = true },
+    "Preview the Storage Transfer Service jobs that would be created without actually creating them. " +
+      "Shows the source, destination, storage class, and number of files for each transfer job."
+  )
   supported_tasks = ["CREATE_COPY_MANIFESTS", "PUBLISH", "POST_PROCESS"]
   op.opts.tasks = supported_tasks
   op.add_option(
@@ -729,6 +887,7 @@ def publish_cdr_files_vwb(cmd_name, args)
     "The access tier associated with this CDR, e.g. controlled." +
       "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
+
   op.add_validator ->(opts) { raise ArgumentError unless opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("--input-manifest-file,--display-version-id are required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and (not opts.display_version_id or not opts.input_manifest_file) }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty? }
@@ -741,6 +900,7 @@ def publish_cdr_files_vwb(cmd_name, args)
 
   common = Common.new
 
+  # Setup working directory
   working_dir = op.opts.working_dir
   if working_dir.nil?
     working_dir = Dir.mktmpdir("cdr-file-publish-vwb")
@@ -749,131 +909,23 @@ def publish_cdr_files_vwb(cmd_name, args)
   end
   common.status("local working directory: '#{working_dir}'")
 
-  copy_manifest_files = []
-
-  # Mode 1: CREATE_COPY_MANIFESTS
-  if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
-    common.status "Starting: VWB copy manifest creation"
-    copy_manifests = {}
-    output_manifests = {}
-    output_manifest_path = -> (source_name) { "#{working_dir}/#{source_name}_output_manifest.csv" }
-
-    input_manifest = parse_input_manifest(op.opts.input_manifest_file)
-
-    # Process AW4 Microarray sources
-    aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
-    unless aw4_microarray_sources.nil? or aw4_microarray_sources.empty?
-      if op.opts.microarray_rids_file.to_s.empty?
-        raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
-      end
-      microarray_aw4_rows = read_all_microarray_aw4s(op.opts.project, read_research_ids_file(op.opts.microarray_rids_file))
-
-      aw4_microarray_sources.each do |source_name, section|
-        common.status("building VWB manifest for '#{source_name}'")
-        copy, output = build_vwb_copy_manifest_for_aw4_section(
-          section, tier[:dest_cdr_bucket], op.opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name))
-        key_name = "aw4_microarray_" + source_name
-        copy_manifests[key_name] = copy
-        unless output.nil?
-          output_manifests[key_name] = output
-        end
-      end
-    end
-
-    # Process AW4 WGS sources
-    aw4_wgs_sources = input_manifest["aw4WgsSources"]
-    unless aw4_wgs_sources.nil? or aw4_wgs_sources.empty?
-      if op.opts.wgs_rids_file.to_s.empty?
-        raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
-      end
-      wgs_aw4_rows = read_all_wgs_aw4s(op.opts.project, read_research_ids_file(op.opts.wgs_rids_file))
-
-      aw4_wgs_sources.each do |source_name, section|
-        common.status("building VWB manifest for '#{source_name}'")
-        copy, output = build_vwb_copy_manifest_for_aw4_section(
-          section, tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name))
-        key_name = "aw4_wgs_" + source_name
-        copy_manifests[key_name] = copy
-        unless output.nil?
-          output_manifests[key_name] = output
-        end
-      end
-    end
-
-    # Process curation sources
-    curation_sources = input_manifest["curationSources"]
-    unless curation_sources.nil? or curation_sources.empty?
-      curation_sources.each do |source_name, section|
-        common.status("building VWB manifest for '#{source_name}'")
-        copy_manifests["curation_" + source_name] = build_vwb_copy_manifest_for_curation_section(
-          section, tier[:dest_cdr_bucket], op.opts.display_version_id)
-      end
-    end
-
-    if copy_manifests.empty?
-      raise ArgumentError.new("CREATE_COPY_MANIFESTS was requested, but no copy manifests were created, input manifest may be empty")
-    end
-
-    # Write copy manifests to files
-    copy_manifests.each do |source_name, copy_manifest|
-      path = "#{working_dir}/#{source_name}_copy_manifest.csv"
-      CSV.open(path, 'wb') do |f|
-        f << copy_manifest.first.keys
-        copy_manifest.each { |c| f << c.values }
-      end
-      copy_manifest_files.push(path)
-    end
-
-    # Write output manifests to files
-    output_manifests.each do |source_name, output_manifest|
-      path = output_manifest_path.call(source_name)
-      CSV.open(path, 'wb') do |f|
-        f << output_manifest.first.keys
-        output_manifest.each { |c| f << c.values }
-      end
-    end
-    common.status "Finished: VWB manifests created"
-  end
-
+  # Setup logs directory
   logs_dir = FileUtils.makedirs(File.join(working_dir, "logs"))
   common.status "Writing logs to #{logs_dir}"
 
-  if copy_manifest_files.empty?
-    copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
-    if copy_manifest_files.empty?
-      raise ArgumentError.new(
-        "no copy manifests generated or found in the working dir #{working_dir}; if you " +
-          "are running PUBLISH without CREATE_COPY_MANIFESTS, be sure to " +
-          "specify an existing --working-dir which contains copy manifest CSV files")
-    end
+  copy_manifest_files = []
+
+  # Execute tasks
+  if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
+    copy_manifest_files = vwb_create_copy_manifests_mode(op.opts, tier, working_dir)
   end
 
-  # Mode 2: PUBLISH
   if op.opts.tasks.include? "PUBLISH"
-    common.status "Starting: VWB publishing phase using Storage Transfer Service"
-
-    # Use VWB-specific publishing with Storage Transfer Service
-    publish_vwb_manifests(op.opts.project, copy_manifest_files, op.opts.jira_ticket)
-
-    common.status "Finished: VWB publishing"
+    copy_manifest_files = vwb_publish_mode(op.opts, copy_manifest_files, working_dir)
   end
 
-  # Mode 3: POST_PROCESS
   if op.opts.tasks.include? "POST_PROCESS"
-    common.status "Starting: VWB post-processing phase"
-
-    # TODO: Add VWB-specific post-processing logic here
-    # This could include:
-    # - Validation of published files
-    # - Updating metadata
-    # - Sending notifications
-    # - Cleanup of temporary files
-    # - ACL updates
-    # - Any VWB-specific finalization steps
-
-    common.status "Post-processing logic to be implemented..."
-
-    common.status "Finished: VWB post-processing"
+    vwb_post_process_mode(op.opts, copy_manifest_files, working_dir)
   end
 end
 
