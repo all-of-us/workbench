@@ -1206,7 +1206,7 @@ public class InitialCreditsServiceTest {
     workspaceFreeTierUsageDao.save(
         new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(30.0));
     boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
-    assertThat(eligibility).isTrue();
+    assertThat(eligibility).isFalse();
   }
 
   @Test
