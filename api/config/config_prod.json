@@ -146,7 +146,7 @@
     "bigQueryTable": "cloudaudit_googleapis_com_data_access"
   },
   "rdrExport": {
-    "host": "all-of-us-rdr-prod.appspot.com",
+    "host": "rdr-api.pmi-ops.org",
     "exportObjectsPerTask": 10
   },
   "captcha": {
