@@ -1,11 +1,13 @@
 package org.pmiops.workbench.api;
 
+import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.VwbWorkspaceAdminView;
+import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
 import org.pmiops.workbench.model.VwbWorkspaceListResponse;
 import org.pmiops.workbench.model.VwbWorkspaceSearchParamType;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
@@ -67,6 +69,12 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
                                     "Workspace User Facing Id %s was not found", userFacingId))))
             .collaborators(
                 vwbAdminQueryService.queryVwbWorkspaceCollaboratorsByUserFacingId(userFacingId)));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<VwbWorkspaceAuditLog>> getVwbWorkspaceAuditLogs(String workspaceId) {
+    return ResponseEntity.ok(vwbAdminQueryService.queryVwbWorkspaceActivity(workspaceId));
   }
 
   protected VwbWorkspaceSearchParamType validateSearchParamType(String param) {

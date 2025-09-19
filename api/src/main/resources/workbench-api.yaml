@@ -6862,6 +6862,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v2/admin/vwb/workspaces/{workspaceId}/audit:
+    get:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Returns all VWB workspaces audit logs for the given workspace. Requires
+        RESEARCHER_DATA_VIEW authority.
+      operationId: getVwbWorkspaceAuditLogs
+      parameters:
+        - name: workspaceId
+          in: path
+          description: The workspace id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of VWB workspace audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VwbWorkspaceAuditLog'
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     ArchivalStatus:
@@ -13748,6 +13778,21 @@ components:
           items:
             $ref: '#/components/schemas/UserRole'
       description: Admin-visible metadata about a VWB workspace.
+    VwbWorkspaceAuditLog:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          description: ID of the workspace
+        changeType:
+          type: string
+          description: Type of change made to the workspace
+        actorEmail:
+          type: string
+          description: Username of the user that made the workspace change
+        changeTime:
+          type: string
+          description: Timestamp the workspace was changed
 
   parameters:
     userId:
