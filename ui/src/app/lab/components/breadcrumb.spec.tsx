@@ -16,7 +16,11 @@ import {
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { minusDays, plusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { profileStore, routeDataStore } from 'app/utils/stores';
+import {
+  profileStore,
+  routeDataStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 import { cohortReviewStubs } from 'testing/stubs/cohort-review-service-stub';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
@@ -33,6 +37,17 @@ jest.mock('react-dom', () => {
   return {
     ...jest.requireActual('react-dom'),
     createPortal: (element: any) => element,
+  };
+});
+
+// Mock the InvalidBillingBanner component
+jest.mock('app/lab/pages/workspace/invalid-billing-banner', () => {
+  return {
+    InvalidBillingBanner: () => (
+      <div data-testid='invalid-billing-banner'>
+        Invalid Billing Banner (Mocked)
+      </div>
+    ),
   };
 });
 
@@ -182,7 +197,7 @@ describe('getTrail', () => {
   });
 });
 
-describe('Breadcrumb Component', () => {
+describe('InvalidBillingBanner Component', () => {
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -190,6 +205,175 @@ describe('Breadcrumb Component', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     routeDataStore.set({ breadcrumb: BreadcrumbType.Workspace });
+    serverConfigStore.set({
+      config: {
+        enableInitialCreditsExpiration: false,
+        gsuiteDomain: '',
+      },
+    });
+  });
+
+  it('should display InvalidBillingBanner when credits are exhausted', () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: true,
+      expirationEpochMillis: plusDays(Date.now(), 1), // not expired
+      expirationBypassed: false,
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    const { container } = render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert - find banner directly in the container
+    const banner = container.querySelector(
+      '[data-testid="invalid-billing-banner"]'
+    );
+    expect(banner).toBeInTheDocument();
+  });
+
+  it('should display InvalidBillingBanner when credits are expired and not bypassed', () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: false,
+      expirationEpochMillis: minusDays(Date.now(), 1), // expired
+      expirationBypassed: false,
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    const { container } = render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert - find banner directly in the container
+    const banner = container.querySelector(
+      '[data-testid="invalid-billing-banner"]'
+    );
+    expect(banner).toBeInTheDocument();
+  });
+
+  it('should not display InvalidBillingBanner when credits are expired but bypassed', () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: false,
+      expirationEpochMillis: minusDays(Date.now(), 1), // expired
+      expirationBypassed: true, // but bypassed
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(
+      screen.queryByTestId('invalid-billing-banner')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not display InvalidBillingBanner when credits are not expired and not exhausted', () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: false,
+      expirationEpochMillis: plusDays(Date.now(), 1), // not expired
+      expirationBypassed: false,
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(
+      screen.queryByTestId('invalid-billing-banner')
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('CreditBanner Component', () => {
+  const load = jest.fn();
+  const reload = jest.fn();
+  const updateCache = jest.fn();
+
+  beforeEach(() => {
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
+    routeDataStore.set({ breadcrumb: BreadcrumbType.Workspace });
+    serverConfigStore.set({
+      config: {
+        enableInitialCreditsExpiration: true,
+        gsuiteDomain: '',
+      },
+    });
   });
 
   it('should display CreditBanner when credits are exhausted', async () => {
