@@ -34,7 +34,6 @@ describe('bannerConfigs', () => {
     expect(config.button.label).toBe('Edit Workspace');
     expect(config.button.action).toBe('editWorkspace');
     render(config.body({ creditBalance: '12.34' }));
-    screen.debug();
     expect(screen.getByText(/\$12.34/)).toBeInTheDocument();
     expect(screen.getByText(/remaining credit balance/i)).toBeInTheDocument();
   });
