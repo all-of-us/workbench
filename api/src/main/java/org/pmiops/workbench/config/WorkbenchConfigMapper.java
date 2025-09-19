@@ -63,6 +63,9 @@ public interface WorkbenchConfigMapper {
       target = "initialCreditsExpirationWarningDays",
       source = "config.billing.initialCreditsExpirationWarningDays")
   @Mapping(
+      target = "initialCreditsExpirationWarningDaysList",
+      source = "config.billing.initialCreditsExpirationWarningDaysList")
+  @Mapping(
       target = "blockComplianceTraining",
       source = "config.featureFlags.blockComplianceTraining")
   @Mapping(target = "isDownForMaintenance", source = "config.server.isDownForMaintenance")

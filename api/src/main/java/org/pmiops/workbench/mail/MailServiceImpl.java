@@ -33,6 +33,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
@@ -85,12 +86,20 @@ public class MailServiceImpl implements MailService {
   private static final String EGRESS_SOURCE = " when using the <b>%s</b> application";
   private static final String EGRESS_REMEDIATION_RESOURCE =
       "emails/egress_remediation/content.html";
-  private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE =
-      "emails/initial_credits_dollar_threshold/content.html";
-  private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE =
-      "emails/initial_credits_exhaustion/content.html";
-  private static final String INITIAL_CREDITS_EXPIRING_RESOURCE =
-      "emails/initial_credits_expiring/content.html";
+  private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V1 =
+      "emails/initial_credits_dollar_threshold/v1/content.html";
+  private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2 =
+      "emails/initial_credits_dollar_threshold/v2/content.html";
+  private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE_V1 =
+      "emails/initial_credits_exhaustion/v1/content.html";
+  private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2 =
+      "emails/initial_credits_exhaustion/v2/content.html";
+  private static final String INITIAL_CREDITS_EXPIRING_RESOURCE_V1 =
+      "emails/initial_credits_expiring/v1/content.html";
+  private static final String INITIAL_CREDITS_EXPIRING_RESOURCE_V2 =
+      "emails/initial_credits_expiring/v2/content.html";
+  private static final String INITIAL_CREDITS_EXPIRED_RESOURCE =
+      "emails/initial_credits_expired/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
   private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
       "emails/new_user_satisfaction_survey/content.html";
@@ -186,6 +195,10 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
+  private boolean checkEnabledInitialCreditsExpirationFlag() {
+    return workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
+  }
+
   @Override
   public void alertUserInitialCreditsDollarThreshold(
       final DbUser user, double threshold, double currentUsage, double remainingBalance)
@@ -198,9 +211,15 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        buildHtml(
-            INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE,
-            initialCreditsDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
+        checkEnabledInitialCreditsExpirationFlag()
+            ? buildHtml(
+                INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2,
+                initialCreditsDollarThresholdSubstitutionMapV2(
+                    user, currentUsage, remainingBalance))
+            : buildHtml(
+                INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V1,
+                initialCreditsDollarThresholdSubstitutionMapV1(
+                    user, currentUsage, remainingBalance));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -221,8 +240,13 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        buildHtml(
-            INITIAL_CREDITS_EXHAUSTION_RESOURCE, initialCreditsExhaustionSubstitutionMap(user));
+        checkEnabledInitialCreditsExpirationFlag()
+            ? buildHtml(
+                INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2,
+                initialCreditsExhaustionSubstitutionMapV1(user))
+            : buildHtml(
+                INITIAL_CREDITS_EXHAUSTION_RESOURCE_V1,
+                initialCreditsExhaustionSubstitutionMapV2(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -241,12 +265,39 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        buildHtml(INITIAL_CREDITS_EXPIRING_RESOURCE, initialCreditsExpiringSubstitutionMap(user));
+        buildHtml(
+            checkEnabledInitialCreditsExpirationFlag()
+                ? INITIAL_CREDITS_EXPIRING_RESOURCE_V2
+                : INITIAL_CREDITS_EXPIRING_RESOURCE_V1,
+            initialCreditsExpiringSubstitutionMap(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         "Alert - Initial credit expiration in All of Us Researcher Workbench",
+        logMsg,
+        htmlMessage);
+  }
+
+  @Override
+  public void alertUserInitialCreditsExpired(DbUser user) throws MessagingException {
+    if (!checkEnabledInitialCreditsExpirationFlag()) {
+      // This is a safety check to avoid sending expired emails when the feature flag is off.
+      log.info("Initial credits expiration feature flag is disabled. Not sending expired email.");
+      throw new BadRequestException("Initial credits expiration feature flag is disabled.");
+    }
+    final String logMsg =
+        String.format(
+            "Sending email because initial credits are expired for User %s", userForLogging(user));
+    log.info(logMsg);
+
+    final String htmlMessage =
+        buildHtml(INITIAL_CREDITS_EXPIRED_RESOURCE, initialCreditsExpiredSubstitutionMap(user));
+
+    sendWithRetries(
+        Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
+        "Alert - Initial credit expired in All of Us Researcher Workbench",
         logMsg,
         htmlMessage);
   }
@@ -573,8 +624,9 @@ public class MailServiceImpl implements MailService {
         getSupportHubUrlAsHref());
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> initialCreditsDollarThresholdSubstitutionMap(
-      final DbUser user, double currentUsage, double remainingBalance) {
+  private ImmutableMap<EmailSubstitutionField, String>
+      initialCreditsDollarThresholdSubstitutionMapV1(
+          final DbUser user, double currentUsage, double remainingBalance) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
@@ -587,7 +639,20 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExhaustionSubstitutionMap(
+  private ImmutableMap<EmailSubstitutionField, String>
+      initialCreditsDollarThresholdSubstitutionMapV2(
+          final DbUser user, double currentUsage, double remainingBalance) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
+        .build();
+  }
+
+  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExhaustionSubstitutionMapV1(
       DbUser user) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
@@ -599,13 +664,39 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
+  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExhaustionSubstitutionMapV2(
+      DbUser user) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .build();
+  }
+
   private ImmutableMap<EmailSubstitutionField, String> initialCreditsExpiringSubstitutionMap(
       DbUser user) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .put(
+            EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION,
+            formatCondensedDateCentralTime(
+                user.getUserInitialCreditsExpiration().getExpirationTime().toInstant()))
+        .build();
+  }
+
+  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExpiredSubstitutionMap(
+      DbUser user) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(
             EmailSubstitutionField.INITIAL_CREDITS_EXPIRATION,
