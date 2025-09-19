@@ -26,11 +26,13 @@
     "defaultInitialCreditsDollarLimit": 300.0,
     "initialCreditsCostAlertThresholds": [
       0.25,
-      0.5
+      0.5,
+      0.75
     ],
     "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
-    "initialCreditsExpirationWarningDays": [30, 90],
+    "initialCreditsExpirationWarningDays": 14,
+    "initialCreditsExpirationWarningDaysList": [30, 90],
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
     "minutesBeforeLastInitialCreditsJob": 60,
     "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 2

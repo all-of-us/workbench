@@ -156,7 +156,8 @@ public class InitialCreditsServiceTest {
     workbenchConfig.billing.defaultInitialCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
     workbenchConfig.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
-    workbenchConfig.billing.initialCreditsExpirationWarningDays = List.of(warningPeriodDays);
+    workbenchConfig.billing.initialCreditsExpirationWarningDays = warningPeriodDays;
+    workbenchConfig.billing.initialCreditsExpirationWarningDaysList = List.of(warningPeriodDays);
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForInitialCreditsUsageUpdate = 2L;
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.initialcredits;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -366,17 +368,34 @@ public class InitialCreditsService {
         .orElse(false);
   }
 
+  private boolean checkEnabledInitialCreditsExpirationFlag() {
+    return workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
+  }
+
   // Returns true if the user's credits expiry matches the initialCreditsExpirationWarningDays.
   private boolean areCreditsExpiringSoon(DbUser user) {
-    List<Long> initialCreditsExpirationWarningDays =
+    if (checkEnabledInitialCreditsExpirationFlag()) {
+      List<Long> initialCreditsExpirationWarningDaysList =
+          workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDaysList;
+      return getCreditsExpiration(user)
+          .map(
+              expirationTime -> {
+                long millisDiff = expirationTime.getTime() - clockNow().getTime();
+                long daysDiff = TimeUnit.MILLISECONDS.toDays(millisDiff);
+                return initialCreditsExpirationWarningDaysList.contains(daysDiff);
+              })
+          .orElse(false);
+    }
+    long initialCreditsExpirationWarningDays =
         workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDays;
     return getCreditsExpiration(user)
         .map(
-            expirationTime -> {
-              long millisDiff = expirationTime.getTime() - clockNow().getTime();
-              long daysDiff = TimeUnit.MILLISECONDS.toDays(millisDiff);
-              return initialCreditsExpirationWarningDays.contains(daysDiff);
-            })
+            expirationTime ->
+                clockNow()
+                    .after(
+                        new Timestamp(
+                            expirationTime.getTime()
+                                - TimeUnit.DAYS.toMillis(initialCreditsExpirationWarningDays))))
         .orElse(false);
   }
 
@@ -420,7 +439,29 @@ public class InitialCreditsService {
   }
 
   public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
-    return false; // Feature is effectively disabled
+    if (checkEnabledInitialCreditsExpirationFlag()) {
+      return false; // Feature is effectively disabled
+    }
+
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        dbUser.getUserInitialCreditsExpiration();
+    Instant now = clock.instant();
+    WorkbenchConfig.BillingConfig billingConfig = workbenchConfigProvider.get().billing;
+
+    return userHasRemainingInitialCredits(dbUser)
+        && initialCreditsExpiration != null
+        && initialCreditsExpiration.getExtensionTime() == null
+        && initialCreditsExpiration.getCreditStartTime() != null
+        && now.isAfter(
+            initialCreditsExpiration
+                .getExpirationTime()
+                .toInstant()
+                .minus(billingConfig.initialCreditsExpirationWarningDays, DAYS))
+        && now.isBefore(
+            initialCreditsExpiration
+                .getCreditStartTime()
+                .toInstant()
+                .plus(billingConfig.initialCreditsExtensionPeriodDays, DAYS));
   }
 
   public boolean hasUserRunOutOfInitialCredits(DbUser user) {

@@ -28,7 +28,7 @@ jest.mock('react-dom', () => {
 });
 
 describe('InvalidBillingBanner', () => {
-  const warningThresholdDays = [5, 10]; // arbitrary
+  const warningThresholdDays = 5; // arbitrary
   const me: User = {
     userName: ProfileStubVariables.PROFILE_STUB.username,
     givenName: 'Me',
