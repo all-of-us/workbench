@@ -399,7 +399,8 @@ export const Breadcrumb = fp.flow(
   );
 
   // Use feature flag to render initial credits banners
-  const { enableInitialCreditsExpiration } = serverConfigStore.get().config;
+  const { enableInitialCreditsExpiration = false } =
+    serverConfigStore.get().config;
 
   useEffect(() => {
     // When user navigates to a different workspace, show the credit banner even if dismissed in the past
