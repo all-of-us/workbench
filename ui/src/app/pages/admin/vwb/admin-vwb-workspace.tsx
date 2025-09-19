@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 
 import {
   UserRole,
   VwbWorkspaceAdminView,
+  VwbWorkspaceAuditLog,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
 import { Error as ErrorDiv } from 'app/components/inputs';
-import { SpinnerOverlay } from 'app/components/spinners';
+import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { WorkspaceInfoField } from 'app/pages/admin/workspace/workspace-info-field';
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
@@ -32,7 +35,11 @@ interface Props
 export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
   const [workspaceDetails, setWorkspaceDetails] =
     useState<VwbWorkspaceAdminView>();
+  const [workspaceActivity, setWorkspaceActivity] =
+    useState<VwbWorkspaceAuditLog[]>();
   const [loadingWorkspace, setLoadingWorkspace] = useState<boolean>(false);
+  const [loadingWorkspaceActivity, setLoadingWorkspaceActivity] =
+    useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
 
   const handleDataLoadError = async (error) => {
@@ -42,13 +49,26 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     }
   };
 
+  const getWorkspaceActivity = async (workspaceId: string) => {
+    setLoadingWorkspaceActivity(true);
+
+    vwbWorkspaceAdminApi()
+      .getVwbWorkspaceAuditLogs(workspaceId)
+      .then(setWorkspaceActivity)
+      .catch((error) => handleDataLoadError(error))
+      .finally(() => setLoadingWorkspaceActivity(false));
+  };
+
   const populateWorkspaceDetails = async () => {
     const { ufid } = props.match.params;
     setLoadingWorkspace(true);
 
     vwbWorkspaceAdminApi()
       .getVwbWorkspaceAdminView(ufid)
-      .then(setWorkspaceDetails)
+      .then((resp) => {
+        setWorkspaceDetails(resp);
+        getWorkspaceActivity(resp.workspace.id);
+      })
       .catch((error) => handleDataLoadError(error))
       .finally(() => setLoadingWorkspace(false));
   };
@@ -131,6 +151,39 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                   )
                 )}
               </div>
+            </div>
+            <h3>Workspace Activity</h3>
+            <div className='collaborators' style={{ marginTop: '1.5rem' }}>
+              {loadingWorkspaceActivity ? (
+                <Spinner style={{ marginLeft: '40%' }} />
+              ) : (
+                <DataTable
+                  paginator
+                  rows={10}
+                  emptyMessage='No workspace activity found'
+                  loading={loadingWorkspaceActivity}
+                  value={workspaceActivity}
+                >
+                  <Column
+                    field='changeType'
+                    header='Change Type'
+                    headerStyle={{ width: '250px' }}
+                  />
+                  <Column
+                    field='actorEmail'
+                    header='Change By'
+                    headerStyle={{ width: '150px' }}
+                  />
+                  <Column
+                    field='changeTime'
+                    header='Change Time'
+                    headerStyle={{ width: '150px' }}
+                    body={({ changeTime }) =>
+                      new Date(changeTime).toLocaleString()
+                    }
+                  />
+                </DataTable>
+              )}
             </div>
           </div>
         </div>
