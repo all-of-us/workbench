@@ -416,43 +416,7 @@ public class InitialCreditsService {
   }
 
   public DbUser extendInitialCreditsExpiration(DbUser user) {
-    if (!workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration) {
-      throw new BadRequestException("Initial credits extension is disabled.");
-    }
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        user.getUserInitialCreditsExpiration();
-    // This handles the case existing users that have not yet been migrated but also those who have
-    // not yet completed RT training.
-    if (userInitialCreditsExpiration == null) {
-      throw new BadRequestException(
-          "User does not have initial credits expiration set, so they cannot extend their expiration date.");
-    }
-
-    if (institutionService.shouldBypassForCreditsExpiration(user)) {
-      throw new BadRequestException(
-          "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.");
-    }
-
-    if (userInitialCreditsExpiration.isBypassed()) {
-      throw new BadRequestException(
-          "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.");
-    }
-
-    if (userInitialCreditsExpiration.getExtensionTime() != null) {
-      throw new BadRequestException(
-          "User has already extended their initial credits expiration and cannot extend further.");
-    }
-    if (!areCreditsExpiringSoon(user)) {
-      throw new BadRequestException(
-          "User's initial credits are not close enough to their expiration date to be extended.");
-    }
-    userInitialCreditsExpiration.setExpirationTime(
-        new Timestamp(
-            userInitialCreditsExpiration.getCreditStartTime().getTime()
-                + TimeUnit.DAYS.toMillis(
-                    workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
-    userInitialCreditsExpiration.setExtensionTime(clockNow());
-    return userDao.save(user);
+    throw new BadRequestException("Initial credits extension is disabled.");
   }
 
   public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
