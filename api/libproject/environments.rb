@@ -186,6 +186,7 @@ ENVIRONMENTS = {
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
+    :publishing_project => "all-of-us-workbench-test",
     :skip_acl => true,
     :accessTiers => {
       "registered" => {
@@ -193,7 +194,7 @@ ENVIRONMENTS = {
       },
       "controlled" => {
         :dest_cdr_project => "vwb-dev-buoyant-apple-6238",
-        :dest_cdr_bucket => "<PLACEHOLDER FOR VWB DEV-STABLE CONTROLLED BUCKET>",
+        :dest_cdr_bucket => "gs://cdrv1genomic-vwb-dev-buoyant-apple-6238",
       }
     }
   }),
@@ -201,6 +202,7 @@ ENVIRONMENTS = {
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
+    :publishing_project => "all-of-us-rw-stable",
     :skip_acl => true,
     :accessTiers => {
       "registered" => {
@@ -216,6 +218,7 @@ ENVIRONMENTS = {
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
+    :publishing_project => "all-of-us-rw-prod",
     :skip_acl => true,
     :accessTiers => {
       "registered" => {

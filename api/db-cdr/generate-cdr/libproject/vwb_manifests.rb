@@ -163,18 +163,21 @@ def build_vwb_publish_configs(manifest_files)
     end
   end
 
-  # Group file transfers by storage class and destination directory
+  # Group file transfers by source bucket, storage class and destination directory
   grouped_file_transfers = {}
   file_transfers.each do |transfer|
+    # Extract source bucket from the GCS path
+    source_bucket = transfer[:source].gsub("gs://", "").split("/")[0]
     dest_dir = File.dirname(transfer[:destination])
     storage_class = transfer[:storage_class]
 
-    # Create a key based on destination directory and storage class
-    key = "#{dest_dir}_#{storage_class}"
+    # Create a key based on source bucket, destination directory and storage class
+    key = "#{source_bucket}_#{dest_dir}_#{storage_class}"
 
     if grouped_file_transfers[key].nil?
       grouped_file_transfers[key] = {
         :files => [],
+        :source_bucket => source_bucket,
         :dest_dir => dest_dir,
         :storage_class => storage_class
       }
@@ -190,7 +193,7 @@ def build_vwb_publish_configs(manifest_files)
 end
 
 # Create Storage Transfer Service job for VWB folder transfers
-def create_vwb_folder_transfer(project, source, destination, storage_class, job_name, dry_run = false)
+def create_vwb_folder_transfer(project, source, destination, storage_class, job_name, dry_run = false, service_account = nil)
   common = Common.new
 
   # Extract bucket and path components
@@ -201,10 +204,15 @@ def create_vwb_folder_transfer(project, source, destination, storage_class, job_
   dest_path = destination.gsub(/^gs:\/\/[^\/]+\//, "")
 
   if dry_run
+    # Ensure paths end with / for display
+    source_path_display = source_path.end_with?("/") ? source_path : "#{source_path}/"
+    dest_path_display = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
+
     common.status "DRY RUN: Would create folder transfer job: #{job_name}"
-    common.status "  Source: gs://#{source_bucket}/#{source_path}"
-    common.status "  Destination: gs://#{dest_bucket}/#{dest_path}"
+    common.status "  Source: gs://#{source_bucket}/#{source_path_display}"
+    common.status "  Destination: gs://#{dest_bucket}/#{dest_path_display}"
     common.status "  Storage Class: #{storage_class || 'STANDARD'}"
+    common.status "  Transfer Project: #{project}"
 
     # Try to count objects in the source folder
     begin
@@ -221,14 +229,25 @@ def create_vwb_folder_transfer(project, source, destination, storage_class, job_
   end
 
   # Build gcloud transfer command
-  cmd = [
-    "gcloud", "transfer", "jobs", "create",
-    "gs://#{source_bucket}/#{source_path}",
-    "gs://#{dest_bucket}/#{dest_path}",
+  cmd = ["gcloud"]
+
+  # Add impersonation if service account is provided
+  if service_account
+    cmd.push("--impersonate-service-account", service_account)
+  end
+
+  # Ensure paths end with / for folder transfers
+  source_path_with_slash = source_path.end_with?("/") ? source_path : "#{source_path}/"
+  dest_path_with_slash = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
+
+  cmd.push(
+    "transfer", "jobs", "create",
+    "gs://#{source_bucket}/#{source_path_with_slash}",
+    "gs://#{dest_bucket}/#{dest_path_with_slash}",
     "--project=#{project}",
     "--name=#{job_name}",
     "--description=VWB folder transfer: #{source_path} to #{dest_path}"
-  ]
+  )
 
   # Add storage class if not STANDARD
   if storage_class && storage_class != "STANDARD"
@@ -239,7 +258,7 @@ def create_vwb_folder_transfer(project, source, destination, storage_class, job_
 end
 
 # Create Storage Transfer Service job for grouped file transfers
-def create_vwb_file_list_transfer(project, file_group, job_name, dry_run = false)
+def create_vwb_file_list_transfer(project, file_group, job_name, dry_run = false, service_account = nil)
   common = Common.new
 
   if dry_run
@@ -299,15 +318,23 @@ def create_vwb_file_list_transfer(project, file_group, job_name, dry_run = false
     common.run_inline(["gsutil", "cp", manifest_file.path, temp_manifest_path])
 
     # Create transfer job with manifest
-    cmd = [
-      "gcloud", "transfer", "jobs", "create",
+    cmd = ["gcloud"]
+
+    # Add impersonation if service account is provided
+    if service_account
+      cmd.push("--impersonate-service-account", service_account)
+    end
+
+    # For file list transfers, we specify the bucket root with trailing slash
+    cmd.push(
+      "transfer", "jobs", "create",
       "gs://#{source_bucket}/",
       "gs://#{dest_bucket}/",
       "--project=#{project}",
       "--name=#{job_name}",
       "--manifest-file=#{temp_manifest_path}",
       "--description=VWB file list transfer: #{file_group[:files].length} files"
-    ]
+    )
 
     # Add storage class if not STANDARD
     if file_group[:storage_class] && file_group[:storage_class] != "STANDARD"
@@ -325,7 +352,7 @@ def create_vwb_file_list_transfer(project, file_group, job_name, dry_run = false
 end
 
 # Execute VWB publishing using Storage Transfer Service
-def publish_vwb_manifests(project, manifest_files, jira_ticket = nil, dry_run = false)
+def publish_vwb_manifests(project, manifest_files, jira_ticket = nil, dry_run = false, service_account = nil)
   common = Common.new
 
   if dry_run
@@ -381,7 +408,8 @@ def publish_vwb_manifests(project, manifest_files, jira_ticket = nil, dry_run = 
       transfer[:destination],
       transfer[:storage_class],
       job_name,
-      dry_run
+      dry_run,
+      service_account
     )
     job_index += 1
   end
@@ -399,7 +427,7 @@ def publish_vwb_manifests(project, manifest_files, jira_ticket = nil, dry_run = 
       common.status "Creating file list transfer job: #{job_name} (#{file_group[:files].length} files)"
     end
 
-    create_vwb_file_list_transfer(project, file_group, job_name, dry_run)
+    create_vwb_file_list_transfer(project, file_group, job_name, dry_run, service_account)
     job_index += 1
   end
 
@@ -414,6 +442,168 @@ def publish_vwb_manifests(project, manifest_files, jira_ticket = nil, dry_run = 
 end
 
 # Post-process VWB files to rename them if needed
+# Helper method to create VWB copy manifests
+def vwb_create_copy_manifests_mode(opts, tier, working_dir)
+  common = Common.new
+  common.status "Starting: VWB copy manifest creation"
+
+  copy_manifests = {}
+  output_manifests = {}
+  output_manifest_path = -> (source_name) { "#{working_dir}/#{source_name}_output_manifest.csv" }
+  copy_manifest_files = []
+
+  input_manifest = parse_input_manifest(opts.input_manifest_file)
+
+  # Process AW4 Microarray sources
+  aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
+  unless aw4_microarray_sources.nil? or aw4_microarray_sources.empty?
+    if opts.microarray_rids_file.to_s.empty?
+      raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
+    end
+    microarray_aw4_rows = read_all_microarray_aw4s(opts.project, read_research_ids_file(opts.microarray_rids_file))
+
+    aw4_microarray_sources.each do |source_name, section|
+      common.status("building VWB manifest for '#{source_name}'")
+      copy, output = build_vwb_copy_manifest_for_aw4_section(
+        section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name))
+      key_name = "aw4_microarray_" + source_name
+      copy_manifests[key_name] = copy
+      unless output.nil?
+        output_manifests[key_name] = output
+      end
+    end
+  end
+
+  # Process AW4 WGS sources
+  aw4_wgs_sources = input_manifest["aw4WgsSources"]
+  unless aw4_wgs_sources.nil? or aw4_wgs_sources.empty?
+    if opts.wgs_rids_file.to_s.empty?
+      raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
+    end
+    wgs_aw4_rows = read_all_wgs_aw4s(opts.project, read_research_ids_file(opts.wgs_rids_file))
+
+    aw4_wgs_sources.each do |source_name, section|
+      common.status("building VWB manifest for '#{source_name}'")
+      copy, output = build_vwb_copy_manifest_for_aw4_section(
+        section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name))
+      key_name = "aw4_wgs_" + source_name
+      copy_manifests[key_name] = copy
+      unless output.nil?
+        output_manifests[key_name] = output
+      end
+    end
+  end
+
+  # Process curation sources
+  curation_sources = input_manifest["curationSources"]
+  unless curation_sources.nil? or curation_sources.empty?
+    curation_sources.each do |source_name, section|
+      common.status("building VWB manifest for '#{source_name}'")
+      copy_manifests["curation_" + source_name] = build_vwb_copy_manifest_for_curation_section(
+        section, tier[:dest_cdr_bucket], opts.display_version_id)
+    end
+  end
+
+  if copy_manifests.empty?
+    raise ArgumentError.new("CREATE_COPY_MANIFESTS was requested, but no copy manifests were created, input manifest may be empty")
+  end
+
+  # Write copy manifests to files
+  copy_manifests.each do |source_name, copy_manifest|
+    path = "#{working_dir}/#{source_name}_copy_manifest.csv"
+    CSV.open(path, 'wb') do |f|
+      f << copy_manifest.first.keys
+      copy_manifest.each { |c| f << c.values }
+    end
+    copy_manifest_files.push(path)
+  end
+
+  # Write output manifests to files
+  output_manifests.each do |source_name, output_manifest|
+    path = output_manifest_path.call(source_name)
+    CSV.open(path, 'wb') do |f|
+      f << output_manifest.first.keys
+      output_manifest.each { |c| f << c.values }
+    end
+  end
+
+  common.status "Finished: VWB manifests created"
+  copy_manifest_files
+end
+
+# Helper method to publish VWB manifests
+def vwb_publish_mode(opts, copy_manifest_files, working_dir)
+  common = Common.new
+
+  # Find manifest files if not provided
+  if copy_manifest_files.empty?
+    copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
+    if copy_manifest_files.empty?
+      raise ArgumentError.new(
+        "no copy manifests generated or found in the working dir #{working_dir}; if you " +
+          "are running PUBLISH without CREATE_COPY_MANIFESTS, be sure to " +
+          "specify an existing --working-dir which contains copy manifest CSV files")
+    end
+  end
+
+  if opts.dry_run
+    common.status "Starting: VWB publishing phase (DRY RUN - no transfers will be created)"
+  else
+    common.status "Starting: VWB publishing phase using Storage Transfer Service"
+  end
+
+  # Get the environment configuration
+  env = ENVIRONMENTS[opts.project]
+
+  # Get the service account for impersonation
+  service_account = env.fetch(:publisher_account)
+
+  # Get the publishing project (for VWB environments)
+  # This is the GCP project where Storage Transfer Service jobs will be created
+  publishing_project = env.fetch(:publishing_project, opts.project)
+
+  # Use VWB-specific publishing with Storage Transfer Service
+  publish_vwb_manifests(publishing_project, copy_manifest_files, opts.jira_ticket, opts.dry_run, service_account)
+
+  if opts.dry_run
+    common.status "Finished: VWB publishing dry run"
+  else
+    common.status "Finished: VWB publishing"
+  end
+
+  copy_manifest_files
+end
+
+# Helper method to post-process VWB files
+def vwb_post_process_mode(opts, copy_manifest_files, working_dir)
+  common = Common.new
+
+  if opts.dry_run
+    common.status "Starting: VWB post-processing phase (DRY RUN)"
+  else
+    common.status "Starting: VWB post-processing phase"
+  end
+
+  # Ensure we have manifest files to process
+  if copy_manifest_files.empty?
+    copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
+    if copy_manifest_files.empty?
+      raise ArgumentError.new(
+        "no copy manifests found in the working dir #{working_dir}; " +
+        "POST_PROCESS requires manifest files from CREATE_COPY_MANIFESTS")
+    end
+  end
+
+  # Post-process files to rename them if needed
+  post_process_vwb_files(opts.project, copy_manifest_files, opts.dry_run)
+
+  if opts.dry_run
+    common.status "Finished: VWB post-processing dry run"
+  else
+    common.status "Finished: VWB post-processing"
+  end
+end
+
 def post_process_vwb_files(project, manifest_files, dry_run = false)
   common = Common.new
 
