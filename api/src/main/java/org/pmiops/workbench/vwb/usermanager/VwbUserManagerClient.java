@@ -76,6 +76,26 @@ public class VwbUserManagerClient {
     updateGroupMembership(groupName, email, SetAccessOperation.REVOKE);
   }
 
+  /** List all users in a group. */
+  public void listUsersInGroup(String groupName) {
+    logger.info("Removing user in VWB group {}, with email {}", groupName, email);
+    GroupMemberList groupMembers = vwbUserManagerRetryHandler.run(
+        context -> {
+          return groupApiProvider.get().listGroupMembership(groupName, workbenchConfigProvider.get().vwb.organizationId);
+        });
+    groupMembers.stream().filter(m -> m.getRoles().contains());
+  }
+
+  /** List all users in a group. */
+  public void getUsersInGroup(String groupName) {
+    logger.info("Removing user in VWB group {}, with email {}", groupName, email);
+    GroupMemberList groupMembers = vwbUserManagerRetryHandler.run(
+        context -> {
+          return groupApiProvider.get().listGroupMembership(groupName, workbenchConfigProvider.get().vwb.organizationId);
+        });
+    groupMembers.stream().filter(m -> m.getRoles().contains());
+  }
+
   private void updateGroupMembership(String groupName, String email, SetAccessOperation operation) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     SetAccessRequest setAccessRequest =
