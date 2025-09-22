@@ -1,6 +1,8 @@
 require "csv"
 require "json"
 require "tempfile"
+require "net/http"
+require "uri"
 require_relative "../../../../aou-utils/utils/common"
 require_relative "../../../libproject/environments"
 require_relative "../../../libproject/affirm"
@@ -192,6 +194,67 @@ def build_vwb_publish_configs(manifest_files)
   }
 end
 
+# Helper function to get OAuth token for the current user
+def get_service_account_token(service_account)
+  common = Common.new
+  # Use gcloud to get an access token for the current logged-in user
+  # (ignoring the service_account parameter, but keeping it for compatibility)
+  token = common.capture_stdout([
+    "gcloud", "auth", "print-access-token"
+  ]).strip
+  return token
+end
+
+# Helper function to create Storage Transfer job via REST API
+def create_transfer_job_via_api(project, job_config, service_account = nil)
+  common = Common.new
+
+  # Get access token for the service account
+  access_token = get_service_account_token(service_account)
+
+  # API endpoint
+  uri = URI("https://storagetransfer.googleapis.com/v1/transferJobs")
+
+  # Create HTTP client
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+
+  # Create request
+  request = Net::HTTP::Post.new(uri)
+  request["Authorization"] = "Bearer #{access_token}"
+  request["Content-Type"] = "application/json"
+
+  # Add project to the job config
+  job_config["projectId"] = project
+
+  # Set the request body
+  request.body = JSON.generate(job_config)
+
+  # Debug logging
+  common.status "="*60
+  common.status "DEBUG: Storage Transfer Service API Request"
+  common.status "="*60
+  common.status "URL: #{uri}"
+  common.status "Project: #{project}"
+  common.status "Service Account: #{service_account}"
+  common.status "Request Body:"
+  common.status JSON.pretty_generate(job_config)
+  common.status "="*60
+
+  # Send request
+  response = http.request(request)
+
+  # Check response
+  if response.code.to_i >= 200 && response.code.to_i < 300
+    result = JSON.parse(response.body)
+    common.status "Transfer job created successfully: #{result['name']}"
+    return result
+  else
+    error_details = JSON.parse(response.body) rescue response.body
+    raise "Failed to create transfer job: #{response.code} - #{error_details}"
+  end
+end
+
 # Create Storage Transfer Service job for VWB folder transfers
 def create_vwb_folder_transfer(project, source, destination, storage_class, job_name, dry_run = false, service_account = nil)
   common = Common.new
@@ -228,33 +291,56 @@ def create_vwb_folder_transfer(project, source, destination, storage_class, job_
     return
   end
 
-  # Build gcloud transfer command
-  cmd = ["gcloud"]
-
-  # Add impersonation if service account is provided
-  if service_account
-    cmd.push("--impersonate-service-account", service_account)
-  end
-
   # Ensure paths end with / for folder transfers
   source_path_with_slash = source_path.end_with?("/") ? source_path : "#{source_path}/"
   dest_path_with_slash = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
 
-  cmd.push(
-    "transfer", "jobs", "create",
-    "gs://#{source_bucket}/#{source_path_with_slash}",
-    "gs://#{dest_bucket}/#{dest_path_with_slash}",
-    "--project=#{project}",
-    "--name=#{job_name}",
-    "--description=VWB folder transfer: #{source_path} to #{dest_path}"
-  )
+  # Build transfer job configuration
+  # Note: The API doesn't accept a 'name' field - it generates one automatically
+  job_config = {
+    "description" => "VWB folder transfer: #{source_path} to #{dest_path} (#{job_name})",
+    "status" => "ENABLED",
+    "schedule" => {
+      "scheduleStartDate" => {
+        "year" => Time.now.year,
+        "month" => Time.now.month,
+        "day" => Time.now.day
+      },
+      "scheduleEndDate" => {
+        "year" => Time.now.year,
+        "month" => Time.now.month,
+        "day" => Time.now.day
+      }
+    },
+    "transferSpec" => {
+      "gcsDataSource" => {
+        "bucketName" => source_bucket,
+        "path" => source_path_with_slash
+      },
+      "gcsDataSink" => {
+        "bucketName" => dest_bucket,
+        "path" => dest_path_with_slash
+      },
+      "transferOptions" => {
+        "overwriteObjectsAlreadyExistingInSink" => true
+      }
+    }
+  }
+
+  # Add the service account at the root level if provided
+  if service_account
+    job_config["serviceAccount"] = service_account
+  end
 
   # Add storage class if not STANDARD
   if storage_class && storage_class != "STANDARD"
-    cmd.push("--custom-storage-class=#{storage_class}")
+    job_config["transferSpec"]["objectConditions"] = {
+      "storageClass" => storage_class
+    }
   end
 
-  common.run_inline(cmd)
+  # Create the transfer job via REST API
+  create_transfer_job_via_api(project, job_config, service_account)
 end
 
 # Create Storage Transfer Service job for grouped file transfers
@@ -317,31 +403,53 @@ def create_vwb_file_list_transfer(project, file_group, job_name, dry_run = false
     # Upload manifest file
     common.run_inline(["gsutil", "cp", manifest_file.path, temp_manifest_path])
 
-    # Create transfer job with manifest
-    cmd = ["gcloud"]
+    # Build transfer job configuration for file list transfer
+    # Note: The API doesn't accept a 'name' field - it generates one automatically
+    job_config = {
+      "description" => "VWB file list transfer: #{file_group[:files].length} files (#{job_name})",
+      "status" => "ENABLED",
+      "schedule" => {
+        "scheduleStartDate" => {
+          "year" => Time.now.year,
+          "month" => Time.now.month,
+          "day" => Time.now.day
+        },
+        "scheduleEndDate" => {
+          "year" => Time.now.year,
+          "month" => Time.now.month,
+          "day" => Time.now.day
+        }
+      },
+      "transferSpec" => {
+        "gcsDataSource" => {
+          "bucketName" => source_bucket
+        },
+        "gcsDataSink" => {
+          "bucketName" => dest_bucket
+        },
+        "transferManifest" => {
+          "location" => temp_manifest_path
+        },
+        "transferOptions" => {
+          "overwriteObjectsAlreadyExistingInSink" => true
+        }
+      }
+    }
 
-    # Add impersonation if service account is provided
+    # Add the service account at the root level if provided
     if service_account
-      cmd.push("--impersonate-service-account", service_account)
+      job_config["serviceAccount"] = service_account
     end
-
-    # For file list transfers, we specify the bucket root with trailing slash
-    cmd.push(
-      "transfer", "jobs", "create",
-      "gs://#{source_bucket}/",
-      "gs://#{dest_bucket}/",
-      "--project=#{project}",
-      "--name=#{job_name}",
-      "--manifest-file=#{temp_manifest_path}",
-      "--description=VWB file list transfer: #{file_group[:files].length} files"
-    )
 
     # Add storage class if not STANDARD
     if file_group[:storage_class] && file_group[:storage_class] != "STANDARD"
-      cmd.push("--custom-storage-class=#{file_group[:storage_class]}")
+      job_config["transferSpec"]["objectConditions"] = {
+        "storageClass" => file_group[:storage_class]
+      }
     end
 
-    common.run_inline(cmd)
+    # Create the transfer job via REST API
+    create_transfer_job_via_api(project, job_config, service_account)
 
     # Clean up temporary manifest
     common.run_inline(["gsutil", "rm", temp_manifest_path])
