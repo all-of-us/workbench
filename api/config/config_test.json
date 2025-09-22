@@ -129,10 +129,10 @@
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": true,
-    "enableVWBUserAccessManagement": false,
-    "enableVWBUserCreation": false,
-    "enableVWBPodCreation": false,
-    "enableVWBInitialCreditsExhaustion": false
+    "enableVWBUserAccessManagement": true,
+    "enableVWBUserCreation": true,
+    "enableVWBPodCreation": true,
+    "enableVWBInitialCreditsExhaustion": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
