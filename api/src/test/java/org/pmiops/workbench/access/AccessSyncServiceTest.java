@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForControlledTierAccess;
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
 import static org.pmiops.workbench.utils.PresetData.createDbUser;
