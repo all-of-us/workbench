@@ -129,9 +129,9 @@
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": true,
-    "enableVWBUserAccessManagement": false,
+    "enableVWBUserAccessManagement": true,
     "enableVWBUserCreation": false,
-    "enableVWBPodCreation": false,
+    "enableVWBPodCreation": true,
     "enableVWBInitialCreditsExhaustion": false,
     "enableTierAccessCheckInDb": true
   },
