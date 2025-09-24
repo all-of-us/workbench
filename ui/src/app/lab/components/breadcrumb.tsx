@@ -367,7 +367,15 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
 
   return matches.map((match) => ({
     scenario: match,
-    expirationDate: new Date(expirationEpochMillis).toLocaleDateString(),
+    expirationDate: new Date(expirationEpochMillis).toLocaleDateString(
+      'en-US',
+      {
+        weekday: 'short', // e.g., 'Mon'
+        year: 'numeric', // e.g., '2025'
+        month: 'short', // e.g., 'Jan'
+        day: '2-digit', // e.g., '01'
+      }
+    ), // e.g., 'Mon, Jan 01, 2025'
     creatorName: `${givenName} ${familyName}`.trim(),
     creditBalance: creditBalance.toFixed(2),
     workspace,
