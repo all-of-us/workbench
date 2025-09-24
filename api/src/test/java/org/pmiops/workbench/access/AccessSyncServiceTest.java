@@ -291,21 +291,4 @@ public class AccessSyncServiceTest {
     verify(accessTierService).addUserToTier(dbUser, controlledTier);
     verify(accessTierService, times(0)).removeUserFromTier(any(), any());
   }
-
-  private void setupModuleComplianceForRegisteredTier(boolean compliant) {
-    getRequiredModulesForRegisteredTierAccess()
-        .forEach(
-            moduleName ->
-                when(accessModuleService.isModuleCompliant(dbUser, moduleName))
-                    .thenReturn(compliant));
-  }
-
-  private void setupModuleComplianceForControlledTier(boolean compliant) {
-    // CT requires all RT modules plus CT-specific modules
-    getRequiredModulesForControlledTierAccess()
-        .forEach(
-            moduleName ->
-                when(accessModuleService.isModuleCompliant(dbUser, moduleName))
-                    .thenReturn(compliant));
-  }
 }
