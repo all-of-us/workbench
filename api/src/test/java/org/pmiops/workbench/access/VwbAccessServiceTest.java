@@ -1,7 +1,6 @@
 package org.pmiops.workbench.access;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,7 +10,8 @@ import jakarta.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.vwb.sam.VwbSamClient;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -28,37 +28,20 @@ public class VwbAccessServiceTest {
   public void setUp() {
     workbenchConfig.featureFlags.enableVWBUserAccessManagement = true;
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
-    vwbAccessService =
-        new VwbAccessService(mockVwbUserManagerClient, workbenchConfigProvider);
+    vwbAccessService = new VwbAccessService(mockVwbUserManagerClient, workbenchConfigProvider);
   }
 
   @Test
   public void testAddUserIntoVwbTier_vwbUm() {
-    vwbAccessService.addUserIntoVwbTier("test-user", "test-group");
-    verify(mockVwbUserManagerClient).addUserToGroup("test-group", "test-user");
-  }
-
-  @Test
-  public void testAddUserIntoVwbTier_fallOffSam() {
-    doThrow(new RuntimeException("UM API failure"))
-        .when(mockVwbUserManagerClient)
-        .addUserToGroup(anyString(), anyString());
-    vwbAccessService.addUserIntoVwbTier("test-user", "test-group");
+    DbUser userWithPod = new DbUser().setUsername("test-user").setVwbUserPod(new DbVwbUserPod());
+    vwbAccessService.addUserIntoVwbTier(userWithPod, "test-group");
     verify(mockVwbUserManagerClient).addUserToGroup("test-group", "test-user");
   }
 
   @Test
   public void testRemoveUserFromVwbTier_vwbUm() {
-    vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
-    verify(mockVwbUserManagerClient).removeUserFromGroup("test-group", "test-user");
-  }
-
-  @Test
-  public void testRemoveUserFromVwbTier_fallOffSam() {
-    doThrow(new RuntimeException("UM API failure"))
-        .when(mockVwbUserManagerClient)
-        .removeUserFromGroup(anyString(), anyString());
-    vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
+    DbUser userWithPod = new DbUser().setUsername("test-user").setVwbUserPod(new DbVwbUserPod());
+    vwbAccessService.removeUserFromVwbTier(userWithPod, "test-group");
     verify(mockVwbUserManagerClient).removeUserFromGroup("test-group", "test-user");
   }
 
@@ -66,7 +49,22 @@ public class VwbAccessServiceTest {
   public void testRemoveUserFromVwbTier_featureDisabled() {
     workbenchConfig.featureFlags.enableVWBUserAccessManagement = false;
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
-    vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
+    DbUser userWithPod = new DbUser().setUsername("test-user").setVwbUserPod(new DbVwbUserPod());
+    vwbAccessService.removeUserFromVwbTier(userWithPod, "test-group");
+    verify(mockVwbUserManagerClient, never()).removeUserFromGroup(anyString(), anyString());
+  }
+
+  @Test
+  public void testAddUserIntoVwbTier_nullPod() {
+    DbUser userWithoutPod = new DbUser().setUsername("test-user");
+    vwbAccessService.addUserIntoVwbTier(userWithoutPod, "test-group");
+    verify(mockVwbUserManagerClient, never()).addUserToGroup(anyString(), anyString());
+  }
+
+  @Test
+  public void testRemoveUserFromVwbTier_nullPod() {
+    DbUser userWithoutPod = new DbUser().setUsername("test-user");
+    vwbAccessService.removeUserFromVwbTier(userWithoutPod, "test-group");
     verify(mockVwbUserManagerClient, never()).removeUserFromGroup(anyString(), anyString());
   }
 }

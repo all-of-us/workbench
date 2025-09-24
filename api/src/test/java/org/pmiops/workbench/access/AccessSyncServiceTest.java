@@ -27,10 +27,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -42,7 +42,6 @@ import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.user.VwbUserService;
-import org.pmiops.workbench.cloudtasks.TaskQueueService;
 
 @ExtendWith(MockitoExtension.class)
 public class AccessSyncServiceTest {
@@ -93,7 +92,8 @@ public class AccessSyncServiceTest {
 
     // Mock dependencies so that updateUserAccessTiers can function
     when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
-    when(accessTierService.getAccessTierByName("controlled")).thenReturn(Optional.of(controlledTier));
+    when(accessTierService.getAccessTierByName("controlled"))
+        .thenReturn(Optional.of(controlledTier));
 
     dbUser = createDbUser();
     dbUser.setDisabled(false);
@@ -104,10 +104,6 @@ public class AccessSyncServiceTest {
     // Mock institution service to return valid institution
     when(institutionService.getByUser(any())).thenReturn(Optional.of(institution));
     when(institutionService.validateInstitutionalEmail(any(), any(), any())).thenReturn(true);
-
-    // Mock VWB services - only when needed
-    // doNothing().when(vwbUserService).createUser(any());
-    // doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
 
     // Setup default compliance for all modules
     when(accessModuleService.isModuleCompliant(any(), any())).thenReturn(true);
@@ -125,7 +121,7 @@ public class AccessSyncServiceTest {
 
   @ParameterizedTest
   @CsvSource({"false", "true"})
-  public void testUpdateUserAccessTiers_whenRTGranted(boolean enableInitialCreditsExpiration) {
+  public void testUpdateUserAccessTiers_whenTierGranted(boolean enableInitialCreditsExpiration) {
     stubWorkbenchConfig_enableInitialCreditsExpiration(enableInitialCreditsExpiration);
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
 
@@ -147,7 +143,8 @@ public class AccessSyncServiceTest {
     stubWorkbenchConfig_enableInitialCreditsExpiration(enableInitialCreditsExpiration);
 
     // User starts and ends with access to the same tiers.
-    // The `isModuleCompliant` setup in `setUp()` ensures the "new" list will also contain these tiers.
+    // The `isModuleCompliant` setup in `setUp()` ensures the "new" list will also contain these
+    // tiers.
     List<DbAccessTier> oldAccessTiers = List.of(registeredTier, controlledTier);
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
 
@@ -167,10 +164,13 @@ public class AccessSyncServiceTest {
 
     // User remains compliant for RT but loses CT compliance
     // First set RT modules to compliant
-    getRequiredModulesForRegisteredTierAccess().forEach(moduleName ->
-        when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(true));
+    getRequiredModulesForRegisteredTierAccess()
+        .forEach(
+            moduleName ->
+                when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(true));
     // Then set CT-specific module to non-compliant
-    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING)).thenReturn(false);
+    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING))
+        .thenReturn(false);
 
     stubWorkbenchConfig_enableInitialCreditsExpiration(true);
 
@@ -191,10 +191,13 @@ public class AccessSyncServiceTest {
 
     // User remains compliant for RT but loses CT compliance
     // First set RT modules to compliant
-    getRequiredModulesForRegisteredTierAccess().forEach(moduleName ->
-        when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(true));
+    getRequiredModulesForRegisteredTierAccess()
+        .forEach(
+            moduleName ->
+                when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(true));
     // Then set CT-specific module to non-compliant
-    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING)).thenReturn(false);
+    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING))
+        .thenReturn(false);
 
     stubWorkbenchConfig_enableInitialCreditsExpiration(true);
 
@@ -207,7 +210,7 @@ public class AccessSyncServiceTest {
 
   @Test
   public void
-  testUpdateUserAccessTiers_existingCreditExpirationDoesNotChangeWithAdditionalAccess() {
+      testUpdateUserAccessTiers_existingCreditExpirationDoesNotChangeWithAdditionalAccess() {
     stubWorkbenchConfig_enableInitialCreditsExpiration(true);
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
 
@@ -257,7 +260,8 @@ public class AccessSyncServiceTest {
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
 
     // User is compliant for RT modules but not CT (CT module is false)
-    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING)).thenReturn(false);
+    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING))
+        .thenReturn(false);
 
     accessSyncService.updateUserAccessTiers(dbUser, agent);
 
@@ -294,13 +298,19 @@ public class AccessSyncServiceTest {
   }
 
   private void setupModuleComplianceForRegisteredTier(boolean compliant) {
-    getRequiredModulesForRegisteredTierAccess().forEach(moduleName ->
-        when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(compliant));
+    getRequiredModulesForRegisteredTierAccess()
+        .forEach(
+            moduleName ->
+                when(accessModuleService.isModuleCompliant(dbUser, moduleName))
+                    .thenReturn(compliant));
   }
 
   private void setupModuleComplianceForControlledTier(boolean compliant) {
     // CT requires all RT modules plus CT-specific modules
-    getRequiredModulesForControlledTierAccess().forEach(moduleName ->
-        when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(compliant));
+    getRequiredModulesForControlledTierAccess()
+        .forEach(
+            moduleName ->
+                when(accessModuleService.isModuleCompliant(dbUser, moduleName))
+                    .thenReturn(compliant));
   }
 }

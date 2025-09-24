@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.ListUtils;
-import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -84,13 +83,12 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
-     // Tiers to add are those present in the new set of tiers but not in the previous set.
-     // We use ListUtils.subtract() to find the difference: (new - previous) = toAdd.
-    final List<DbAccessTier> tiersToAdd =
-        ListUtils.subtract(newAccessTiers, previousAccessTiers);
+    // Tiers to add are those present in the new set of tiers but not in the previous set.
+    // We use ListUtils.subtract() to find the difference: (new - previous) = toAdd.
+    final List<DbAccessTier> tiersToAdd = ListUtils.subtract(newAccessTiers, previousAccessTiers);
 
-     // Tiers to remove are those present in the previous set of tiers but not in the new set.
-     // We use ListUtils.subtract() to find the difference: (previous - new) = toRemove.
+    // Tiers to remove are those present in the previous set of tiers but not in the new set.
+    // We use ListUtils.subtract() to find the difference: (previous - new) = toRemove.
     final List<DbAccessTier> tiersToRemove =
         ListUtils.subtract(previousAccessTiers, newAccessTiers);
 
