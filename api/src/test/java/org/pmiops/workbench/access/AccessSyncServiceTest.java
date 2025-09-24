@@ -292,11 +292,6 @@ public class AccessSyncServiceTest {
     verify(accessTierService, times(0)).removeUserFromTier(any(), any());
   }
 
-  private void setupModuleComplianceForAllTiers(boolean compliant) {
-    setupModuleComplianceForRegisteredTier(compliant);
-    setupModuleComplianceForControlledTier(compliant);
-  }
-
   private void setupModuleComplianceForRegisteredTier(boolean compliant) {
     getRequiredModulesForRegisteredTierAccess()
         .forEach(
