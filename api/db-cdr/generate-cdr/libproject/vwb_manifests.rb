@@ -195,13 +195,16 @@ def build_vwb_publish_configs(manifest_files)
 end
 
 # Helper function to get OAuth token for the current user
-def get_service_account_token(service_account)
+def get_token(service_account)
   common = Common.new
   # Use gcloud to get an access token for the current logged-in user
   # (ignoring the service_account parameter, but keeping it for compatibility)
   token = common.capture_stdout([
     "gcloud", "auth", "print-access-token"
   ]).strip
+
+
+
   return token
 end
 
@@ -210,7 +213,7 @@ def create_transfer_job_via_api(project, job_config, service_account = nil)
   common = Common.new
 
   # Get access token for the service account
-  access_token = get_service_account_token(service_account)
+  access_token = get_token(service_account)
 
   # API endpoint
   uri = URI("https://storagetransfer.googleapis.com/v1/transferJobs")
@@ -223,6 +226,7 @@ def create_transfer_job_via_api(project, job_config, service_account = nil)
   request = Net::HTTP::Post.new(uri)
   request["Authorization"] = "Bearer #{access_token}"
   request["Content-Type"] = "application/json"
+  request["X-Goog-User-Project"] = project
 
   # Add project to the job config
   job_config["projectId"] = project
@@ -393,14 +397,12 @@ def create_vwb_file_list_transfer(project, file_group, job_name, dry_run = false
     source_bucket = first_file[:source].gsub("gs://", "").split("/")[0]
     dest_bucket = first_file[:destination].gsub("gs://", "").split("/")[0]
 
-    # Upload manifest to a temporary location
-    temp_manifest_bucket = "#{project}-vwb-temp"
-    temp_manifest_path = "gs://#{temp_manifest_bucket}/manifests/#{job_name}-manifest.txt"
+    # Upload manifest to a temporary location in the destination bucket
+    # Using the destination bucket with a temp folder to avoid permission issues
+    # NOTE: Remember to manually clean up the temp-manifests folder after transfers complete
+    temp_manifest_path = "gs://#{dest_bucket}/temp-manifests/#{job_name}-manifest.txt"
 
-    # Ensure temp bucket exists
-    common.run_inline(["gsutil", "mb", "-p", project, "gs://#{temp_manifest_bucket}"], true) rescue nil
-
-    # Upload manifest file
+    # Upload manifest file (no need to create bucket since we're using the existing destination bucket)
     common.run_inline(["gsutil", "cp", manifest_file.path, temp_manifest_path])
 
     # Build transfer job configuration for file list transfer
