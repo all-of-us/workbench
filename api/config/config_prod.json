@@ -132,7 +132,8 @@
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": false,
     "enableVWBUserAccessManagement": false,
-    "enableVWBUserAndPodCreation": false,
+    "enableVWBUserCreation": false,
+    "enableVWBPodCreation": false,
     "enableVWBInitialCreditsExhaustion": false
   },
   "actionAudit": {
@@ -147,7 +148,7 @@
     "bigQueryTable": "cloudaudit_googleapis_com_data_access"
   },
   "rdrExport": {
-    "host": "all-of-us-rdr-prod.appspot.com",
+    "host": "rdr-api.pmi-ops.org",
     "exportObjectsPerTask": 10
   },
   "captcha": {

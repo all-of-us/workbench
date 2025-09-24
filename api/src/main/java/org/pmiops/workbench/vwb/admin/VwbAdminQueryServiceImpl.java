@@ -14,6 +14,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.VwbWorkspace;
+import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "JOIN \n"
           + " %s p ON w.pod_id = p.pod_id \n"
           + "WHERE \n"
-          + " %s=@SEARCH_PARAM ";
+          + " w.%s=@SEARCH_PARAM ";
 
   private static final String COLLABORATOR_QUERY =
       "SELECT \n"
@@ -82,6 +83,18 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "AND \n"
           + " (wal.change_subject_id=@SEARCH_PARAM OR wal.actor_email=@SEARCH_PARAM) ";
 
+  private static final String AUDIT_QUERY =
+      "SELECT \n"
+          + " change_type, \n"
+          + " change_date, \n"
+          + " actor_email, \n"
+          + " workspace_id, \n"
+          + "FROM \n"
+          + " %s \n"
+          + "WHERE \n"
+          + " change_subject_id=@WORKSPACE_ID "
+          + "ORDER BY change_date ASC ";
+
   @Autowired
   public VwbAdminQueryServiceImpl(
       Provider<WorkbenchConfig> workbenchConfigProvider, BigQueryService bigQueryService) {
@@ -93,7 +106,11 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   public List<VwbWorkspace> queryVwbWorkspacesByCreator(String email) {
 
     final String queryString =
-        String.format(QUERY, getTableName(VWB_WORKSPACE_TABLE), VWB_WORKSPACE_CREATOR_COLUMN);
+        String.format(
+            QUERY,
+            getTableName(VWB_WORKSPACE_TABLE),
+            getTableName(VWB_PODS_TABLE),
+            VWB_WORKSPACE_CREATOR_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -179,6 +196,23 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<VwbWorkspaceAuditLog> queryVwbWorkspaceActivity(String workspaceId) {
+
+    final String queryString =
+        String.format(AUDIT_QUERY, getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("WORKSPACE_ID", QueryParameterValue.string(workspaceId))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToVwbWorkspaceAuditLog)
+        .collect(Collectors.toList());
+  }
+
   private String getTableName(String table) {
     final VwbConfig vwbConfig = workbenchConfigProvider.get().vwb;
     return String.format(
@@ -215,5 +249,16 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .ifPresent(userRole::setRole);
     FieldValues.getString(row, "user_email").ifPresent(userRole::setEmail);
     return userRole;
+  }
+
+  private VwbWorkspaceAuditLog fieldValueListToVwbWorkspaceAuditLog(FieldValueList row) {
+    VwbWorkspaceAuditLog auditLog = new VwbWorkspaceAuditLog();
+    FieldValues.getString(row, "workspace_id").ifPresent(auditLog::setWorkspaceId);
+    FieldValues.getString(row, "change_type").ifPresent(auditLog::setChangeType);
+    FieldValues.getDateTime(row, "change_date")
+        .map(OffsetDateTime::toString)
+        .ifPresent(auditLog::setChangeTime);
+    FieldValues.getString(row, "actor_email").ifPresent(auditLog::setActorEmail);
+    return auditLog;
   }
 }

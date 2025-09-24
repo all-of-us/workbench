@@ -181,6 +181,51 @@ ENVIRONMENTS = {
         :auth_domain_group_email => "all-of-us-controlled-prod@firecloud.org",
       }
     }
+  }),
+  "vwb-dev-stable" => env_with_defaults("vwb-dev-stable", {
+    :source_cdr_project => "all-of-us-ehr-dev",
+    :source_cdr_wgs_project => "all-of-us-workbench-test",
+    :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
+    :skip_acl => true,
+    :accessTiers => {
+      "registered" => {
+        :dest_cdr_project => "vwb-dev-rapid-kale-4145",
+      },
+      "controlled" => {
+        :dest_cdr_project => "vwb-dev-buoyant-apple-6238",
+        :dest_cdr_bucket => "<PLACEHOLDER FOR VWB DEV-STABLE CONTROLLED BUCKET>",
+      }
+    }
+  }),
+  "vwb-stable" => env_with_defaults("vwb-stable", {
+    :source_cdr_project => "all-of-us-ehr-dev",
+    :source_cdr_wgs_project => "all-of-us-workbench-test",
+    :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
+    :skip_acl => true,
+    :accessTiers => {
+      "registered" => {
+        :dest_cdr_project => "wb-ardent-leek-9025",
+      },
+      "controlled" => {
+        :dest_cdr_project => "wb-agile-corn-797",
+        :dest_cdr_bucket => "<PLACEHOLDER FOR VWB STABLE ORG CONTROLLED BUCKET>",
+      }
+    }
+  }),
+  "vwb-prod" => env_with_defaults("vwb-prod", {
+    :source_cdr_project => "aou-res-curation-output-prod",
+    :source_cdr_wgs_project => "aou-genomics-curation-prod",
+    :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
+    :skip_acl => true,
+    :accessTiers => {
+      "registered" => {
+        :dest_cdr_project => "wb-affable-acorn-7941",
+      },
+      "controlled" => {
+        :dest_cdr_project => "wb-silky-artichoke-2408",
+        :dest_cdr_bucket => "<PLACEHOLDER FOR VWB PROD CONTROLLED BUCKET>",
+      }
+    }
   })
 }
 

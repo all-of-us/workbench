@@ -126,7 +126,8 @@
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": false,
     "enableVWBUserAccessManagement": false,
-    "enableVWBUserAndPodCreation": false,
+    "enableVWBUserCreation": false,
+    "enableVWBPodCreation": false,
     "enableVWBInitialCreditsExhaustion": false
   },
   "actionAudit": {
