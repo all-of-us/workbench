@@ -18,7 +18,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class VwbAccessServiceTest {
-  @MockBean private VwbSamClient mockVwbSamClient;
   @MockBean private VwbUserManagerClient mockVwbUserManagerClient;
   @MockBean private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkbenchConfig workbenchConfig = createEmptyConfig();
@@ -30,14 +29,13 @@ public class VwbAccessServiceTest {
     workbenchConfig.featureFlags.enableVWBUserAccessManagement = true;
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
     vwbAccessService =
-        new VwbAccessService(mockVwbSamClient, mockVwbUserManagerClient, workbenchConfigProvider);
+        new VwbAccessService(mockVwbUserManagerClient, workbenchConfigProvider);
   }
 
   @Test
   public void testAddUserIntoVwbTier_vwbUm() {
     vwbAccessService.addUserIntoVwbTier("test-user", "test-group");
     verify(mockVwbUserManagerClient).addUserToGroup("test-group", "test-user");
-    verify(mockVwbSamClient, never()).addUserToGroup(anyString(), anyString());
   }
 
   @Test
@@ -47,14 +45,12 @@ public class VwbAccessServiceTest {
         .addUserToGroup(anyString(), anyString());
     vwbAccessService.addUserIntoVwbTier("test-user", "test-group");
     verify(mockVwbUserManagerClient).addUserToGroup("test-group", "test-user");
-    verify(mockVwbSamClient).addUserToGroup("test-group", "test-user");
   }
 
   @Test
   public void testRemoveUserFromVwbTier_vwbUm() {
     vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
     verify(mockVwbUserManagerClient).removeUserFromGroup("test-group", "test-user");
-    verify(mockVwbSamClient, never()).removeUserFromGroup(anyString(), anyString());
   }
 
   @Test
@@ -64,7 +60,6 @@ public class VwbAccessServiceTest {
         .removeUserFromGroup(anyString(), anyString());
     vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
     verify(mockVwbUserManagerClient).removeUserFromGroup("test-group", "test-user");
-    verify(mockVwbSamClient).removeUserFromGroup("test-group", "test-user");
   }
 
   @Test
@@ -73,6 +68,5 @@ public class VwbAccessServiceTest {
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
     vwbAccessService.removeUserFromVwbTier("test-user", "test-group");
     verify(mockVwbUserManagerClient, never()).removeUserFromGroup(anyString(), anyString());
-    verify(mockVwbSamClient, never()).removeUserFromGroup(anyString(), anyString());
   }
 }

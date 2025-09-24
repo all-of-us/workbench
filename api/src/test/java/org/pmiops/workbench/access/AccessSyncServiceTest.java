@@ -6,6 +6,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForControlledTierAccess;
+import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
 import static org.pmiops.workbench.utils.PresetData.createDbUser;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
@@ -25,13 +27,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
@@ -39,10 +42,10 @@ import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.user.VwbUserService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 
 @ExtendWith(MockitoExtension.class)
 public class AccessSyncServiceTest {
-
   @Mock private AccessTierService accessTierService;
 
   @Mock private UserDao userDao;
@@ -58,7 +61,9 @@ public class AccessSyncServiceTest {
   @Mock InitialCreditsService initialCreditsService;
 
   @Mock UserServiceAuditor userServiceAuditor;
+
   @Mock VwbUserService vwbUserService;
+
   @Mock TaskQueueService taskQueueService;
 
   Instant now = Instant.parse("2000-01-01T00:00:00.00Z");
@@ -66,6 +71,7 @@ public class AccessSyncServiceTest {
   @InjectMocks private AccessSyncServiceImpl accessSyncService;
 
   private DbAccessTier registeredTier;
+  private DbAccessTier controlledTier;
   private DbUser dbUser;
   private Agent agent;
 
@@ -81,30 +87,39 @@ public class AccessSyncServiceTest {
         userServiceAuditor,
         vwbUserService,
         taskQueueService);
+
     registeredTier = createRegisteredTier();
-    when(accessTierService.getAllTiers()).thenReturn(List.of(registeredTier));
-    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+    controlledTier = createControlledTier();
+
+    // Mock dependencies so that updateUserAccessTiers can function
+    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
+    when(accessTierService.getAccessTierByName("controlled")).thenReturn(Optional.of(controlledTier));
 
     dbUser = createDbUser();
     dbUser.setDisabled(false);
+    dbUser.setContactEmail("test@example.com"); // Set contact email for tier validation
     Institution institution = new Institution();
     agent = Agent.asUser(dbUser);
 
-    // Ensures that users meets all requirements for any tier
-    when(accessModuleService.isModuleCompliant(any(), any())).thenReturn(true);
+    // Mock institution service to return valid institution
     when(institutionService.getByUser(any())).thenReturn(Optional.of(institution));
     when(institutionService.validateInstitutionalEmail(any(), any(), any())).thenReturn(true);
+
+    // Mock VWB services - only when needed
+    // doNothing().when(vwbUserService).createUser(any());
+    // doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
+
+    // Setup default compliance for all modules
+    when(accessModuleService.isModuleCompliant(any(), any())).thenReturn(true);
 
     when(userDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
   }
 
   private void stubWorkbenchConfig_enableInitialCreditsExpiration(boolean enable) {
-
     WorkbenchConfig workbenchConfig = createEmptyConfig();
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = enable;
     workbenchConfig.access.enableRasLoginGovLinking = false;
     workbenchConfig.billing.initialCreditsValidityPeriodDays = 57L;
-
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
   }
 
@@ -112,15 +127,17 @@ public class AccessSyncServiceTest {
   @CsvSource({"false", "true"})
   public void testUpdateUserAccessTiers_whenRTGranted(boolean enableInitialCreditsExpiration) {
     stubWorkbenchConfig_enableInitialCreditsExpiration(enableInitialCreditsExpiration);
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
 
-    // User starts with access to no tiers
-    List<DbAccessTier> oldAccessTiers = List.of();
-    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
+    // User starts with access to no tiers.
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
 
     accessSyncService.updateUserAccessTiers(dbUser, agent);
 
     verify(initialCreditsService, times(enableInitialCreditsExpiration ? 1 : 0))
         .createInitialCreditsExpiration(dbUser);
+    verify(accessTierService).addUserToTier(dbUser, registeredTier);
+    verify(accessTierService).addUserToTier(dbUser, controlledTier);
   }
 
   @ParameterizedTest
@@ -129,24 +146,70 @@ public class AccessSyncServiceTest {
       boolean enableInitialCreditsExpiration) {
     stubWorkbenchConfig_enableInitialCreditsExpiration(enableInitialCreditsExpiration);
 
-    // User starts with access to no tiers
-    List<DbAccessTier> oldAccessTiers = List.of(registeredTier);
+    // User starts and ends with access to the same tiers.
+    // The `isModuleCompliant` setup in `setUp()` ensures the "new" list will also contain these tiers.
+    List<DbAccessTier> oldAccessTiers = List.of(registeredTier, controlledTier);
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
 
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
     assertEquals(updatedUser, dbUser);
+    verify(accessTierService, times(0)).addUserToTier(any(), any());
+    verify(accessTierService, times(0)).removeUserFromTier(any(), any());
+  }
+
+  @Test
+  public void testUpdateUserAccessTiers_whenTierIsRemoved() {
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+
+    List<DbAccessTier> oldAccessTiers = List.of(registeredTier, controlledTier);
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
+
+    // User remains compliant for RT but loses CT compliance
+    // First set RT modules to compliant
+    getRequiredModulesForRegisteredTierAccess().forEach(moduleName ->
+        when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(true));
+    // Then set CT-specific module to non-compliant
+    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING)).thenReturn(false);
+
+    stubWorkbenchConfig_enableInitialCreditsExpiration(true);
+
+    accessSyncService.updateUserAccessTiers(dbUser, agent);
+
+    // Verify that the user was removed from the controlled tier.
+    verify(accessTierService).removeUserFromTier(dbUser, controlledTier);
+    verify(accessTierService, times(0)).addUserToTier(any(), any());
+  }
+
+  @Test
+  public void testUpdateUserAccessTiers_whenTiersAreAddedAndRemoved() {
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+
+    // A user starts with only controlled tier access.
+    List<DbAccessTier> oldAccessTiers = List.of(controlledTier);
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
+
+    // User remains compliant for RT but loses CT compliance
+    // First set RT modules to compliant
+    getRequiredModulesForRegisteredTierAccess().forEach(moduleName ->
+        when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(true));
+    // Then set CT-specific module to non-compliant
+    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING)).thenReturn(false);
+
+    stubWorkbenchConfig_enableInitialCreditsExpiration(true);
+
+    accessSyncService.updateUserAccessTiers(dbUser, agent);
+
+    // Verify that the user was added to the registered tier and removed from the controlled tier.
+    verify(accessTierService).addUserToTier(dbUser, registeredTier);
+    verify(accessTierService).removeUserFromTier(dbUser, controlledTier);
   }
 
   @Test
   public void
-      testUpdateUserAccessTiers_existingCreditExpirationDoesNotChangeWithAdditionalAccess() {
+  testUpdateUserAccessTiers_existingCreditExpirationDoesNotChangeWithAdditionalAccess() {
     stubWorkbenchConfig_enableInitialCreditsExpiration(true);
-
-    DbAccessTier controlledTier = createControlledTier();
-    when(accessTierService.getAllTiers()).thenReturn(List.of(registeredTier, controlledTier));
-    when(accessTierService.getAccessTierByName(controlledTier.getShortName()))
-        .thenReturn(Optional.of(controlledTier));
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
 
     // User starts with access to registered tier
     List<DbAccessTier> oldAccessTiers = List.of(registeredTier);
@@ -170,11 +233,7 @@ public class AccessSyncServiceTest {
   @Test
   public void testUpdateUserAccessTiers_noExpirationForSubsequentAccessIfNoneToBeginWith() {
     stubWorkbenchConfig_enableInitialCreditsExpiration(true);
-
-    DbAccessTier controlledTier = createControlledTier();
-    when(accessTierService.getAllTiers()).thenReturn(List.of(registeredTier, controlledTier));
-    when(accessTierService.getAccessTierByName(controlledTier.getShortName()))
-        .thenReturn(Optional.of(controlledTier));
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
 
     // User starts with access to registered tier
     List<DbAccessTier> oldAccessTiers = List.of(registeredTier);
@@ -183,7 +242,65 @@ public class AccessSyncServiceTest {
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
     assertEquals(updatedUser, dbUser);
-
     verify(accessTierService).addUserToTier(dbUser, controlledTier);
+  }
+
+  @Test
+  public void testUpdateUserAccessTiers_userWithNoTierGainsTierAccess() {
+    stubWorkbenchConfig_enableInitialCreditsExpiration(false);
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+    // Mock VWB services for first tier access
+    doNothing().when(vwbUserService).createUser(any());
+    doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
+
+    // User starts with access to no tiers.
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
+
+    // User is compliant for RT modules but not CT (CT module is false)
+    when(accessModuleService.isModuleCompliant(dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING)).thenReturn(false);
+
+    accessSyncService.updateUserAccessTiers(dbUser, agent);
+
+    // Verify that the user was added to the registered tier only
+    verify(accessTierService).addUserToTier(dbUser, registeredTier);
+    verify(accessTierService, times(0)).addUserToTier(dbUser, controlledTier);
+    verify(accessTierService, times(0)).removeUserFromTier(any(), any());
+  }
+
+  @Test
+  public void testUpdateUserAccessTiers_userWithNoTierGainsBothTiers() {
+    stubWorkbenchConfig_enableInitialCreditsExpiration(false);
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+    // Mock VWB services for first tier access
+    doNothing().when(vwbUserService).createUser(any());
+    doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
+
+    // User starts with access to no tiers.
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
+
+    // User is compliant for all modules (RT + CT) - using default setup from setUp()
+
+    accessSyncService.updateUserAccessTiers(dbUser, agent);
+
+    // Verify that the user was added to both tiers
+    verify(accessTierService).addUserToTier(dbUser, registeredTier);
+    verify(accessTierService).addUserToTier(dbUser, controlledTier);
+    verify(accessTierService, times(0)).removeUserFromTier(any(), any());
+  }
+
+  private void setupModuleComplianceForAllTiers(boolean compliant) {
+    setupModuleComplianceForRegisteredTier(compliant);
+    setupModuleComplianceForControlledTier(compliant);
+  }
+
+  private void setupModuleComplianceForRegisteredTier(boolean compliant) {
+    getRequiredModulesForRegisteredTierAccess().forEach(moduleName ->
+        when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(compliant));
+  }
+
+  private void setupModuleComplianceForControlledTier(boolean compliant) {
+    // CT requires all RT modules plus CT-specific modules
+    getRequiredModulesForControlledTierAccess().forEach(moduleName ->
+        when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(compliant));
   }
 }

@@ -132,7 +132,8 @@
     "enableVWBUserAccessManagement": false,
     "enableVWBUserCreation": false,
     "enableVWBPodCreation": false,
-    "enableVWBInitialCreditsExhaustion": false
+    "enableVWBInitialCreditsExhaustion": false,
+    "enableTierAccessCheckInDb": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
