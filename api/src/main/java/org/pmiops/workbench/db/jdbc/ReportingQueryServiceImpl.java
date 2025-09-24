@@ -1,15 +1,6 @@
 package org.pmiops.workbench.db.jdbc;
 
-import static org.pmiops.workbench.db.model.DbStorageEnums.degreeFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.ethnicityFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.genderIdentityFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.workspaceActiveStatusToStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.*;
 import static org.pmiops.workbench.db.model.DbUser.USER_APP_NAME_PREFIX;
 import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 import static org.pmiops.workbench.utils.BillingUtils.getBillingAccountType;
@@ -617,14 +608,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  rp_social_behavioral,\n"
             + "  rp_time_requested,\n"
             + "  w.workspace_id,\n"
-            + "  workspace_namespace\n"
+            + "  workspace_namespace,\n"
+            + "  w.active_status\n"
             + "FROM workspace w\n"
             // some Tanagra workspaces don't have CDR version IDs
             + "  LEFT JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
             + "  LEFT JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
             // most workspaces are not Featured
             + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
-            + "WHERE active_status = ? \n"
             + "ORDER BY w.workspace_id\n"
             + "LIMIT ? \n"
             + "OFFSET ?";
@@ -668,8 +659,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
                 .workspaceId(rs.getLong("workspace_id"))
-                .workspaceNamespace(rs.getString("workspace_namespace")),
-        workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
+                .workspaceNamespace(rs.getString("workspace_namespace"))
+                .activeStatus(workspaceActiveStatusFromStorage(rs.getShort("active_status")).toString()),
         limit,
         offset);
   }
