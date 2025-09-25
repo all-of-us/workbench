@@ -78,7 +78,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   public void addUserToTier(DbUser user, DbAccessTier accessTier) {
     addToAuthDomainIdempotent(user, accessTier);
 
-    vwbAccessService.addUserIntoVwbTier(user.getUsername(), accessTier.getVwbTierGroupName());
+    vwbAccessService.addUserIntoVwbTier(user, accessTier.getVwbTierGroupName());
 
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
@@ -113,7 +113,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   public void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
     removeFromAuthDomainIdempotent(user, accessTier);
 
-    vwbAccessService.removeUserFromVwbTier(user.getUsername(), accessTier.getVwbTierGroupName());
+    vwbAccessService.removeUserFromVwbTier(user, accessTier.getVwbTierGroupName());
 
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)

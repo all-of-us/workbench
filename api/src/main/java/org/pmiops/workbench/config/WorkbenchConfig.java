@@ -342,6 +342,8 @@ public class WorkbenchConfig {
     public boolean enableVWBPodCreation;
     // If true, AoU will include VWB costs in the initial credits usage calculation.
     public boolean enableVWBInitialCreditsExhaustion;
+    // If true, AoU will include VWB costs in the initial credits usage calculation.
+    public boolean enableTierAccessCheckInDb;
   }
 
   public static class ActionAuditConfig {
