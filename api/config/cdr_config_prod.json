@@ -7,7 +7,8 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
       "authDomainName": "all-of-us-registered-prod",
       "authDomainGroupEmail": "all-of-us-registered-prod@firecloud.org",
-      "enableUserWorkflows": false
+      "enableUserWorkflows": false,
+      "vwbTierGroupName": "aou-prod-rt"
     },
     {
       "accessTierId": 2,
@@ -17,7 +18,8 @@
       "authDomainName": "all-of-us-controlled-prod",
       "authDomainGroupEmail": "all-of-us-controlled-prod@firecloud.org",
       "datasetsBucket": "gs://fc-aou-datasets-controlled/",
-      "enableUserWorkflows": true
+      "enableUserWorkflows": true,
+      "vwbTierGroupName": "aou-prod-ct"
     }
   ],
   "cdrVersions": [

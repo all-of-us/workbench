@@ -128,11 +128,11 @@
     "enableUnlinkBillingForInitialCredits": false,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
-    "enableVWBEgressMonitor": false,
+    "enableVWBEgressMonitor": true,
     "enableVWBUserAccessManagement": false,
     "enableVWBUserCreation": false,
-    "enableVWBPodCreation": false,
-    "enableVWBInitialCreditsExhaustion": false,
+    "enableVWBPodCreation": true,
+    "enableVWBInitialCreditsExhaustion": true,
     "enableTierAccessCheckInDb": false
   },
   "actionAudit": {
@@ -208,5 +208,13 @@
   },
   "banner": {
     "enableLoginIssueBanner": false
+  },
+  "vwb": {
+    "wsmBaseUrl": "https:\/\/workbench.verily.com\/api\/wsm",
+    "exfilManagerBaseUrl": "https:\/\/workbench.verily.com\/api\/exfil",
+    "vwbSamBaseUrl": "https:\/\/workbench.verily.com\/api\/sam",
+    "userManagerBaseUrl": "https:\/\/workbench.verily.com\/api\/user",
+    "organizationId": "d37dc97e-f8d1-4a43-8a30-669b81a397e9",
+    "exfilManagerServiceAccount": "workbench-exfil-manager@@prj-p-1v-s0i.iam.gserviceaccount.com"
   }
 }
