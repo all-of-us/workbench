@@ -8,7 +8,7 @@
       "authDomainName": "all-of-us-registered-prod",
       "authDomainGroupEmail": "all-of-us-registered-prod@firecloud.org",
       "enableUserWorkflows": false,
-      "vwbTierGroupName": "P_b_aou-prod-rt"
+      "vwbTierGroupName": "aou-prod-rt"
     },
     {
       "accessTierId": 2,
@@ -19,7 +19,7 @@
       "authDomainGroupEmail": "all-of-us-controlled-prod@firecloud.org",
       "datasetsBucket": "gs://fc-aou-datasets-controlled/",
       "enableUserWorkflows": true,
-      "vwbTierGroupName": "P_b_aou-prod-ct"
+      "vwbTierGroupName": "aou-prod-ct"
     }
   ],
   "cdrVersions": [
