@@ -1,10 +1,9 @@
 package org.pmiops.workbench.access;
 
 import jakarta.inject.Provider;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.vwb.sam.VwbSamClient;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,16 +12,13 @@ import org.springframework.stereotype.Service;
 public class VwbAccessService {
   private static final Logger log = Logger.getLogger(VwbAccessService.class.getName());
 
-  private final VwbSamClient vwbSamClient;
   private final VwbUserManagerClient vwbUserManagerClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public VwbAccessService(
-      VwbSamClient vwbSamClient,
       VwbUserManagerClient vwbUserManagerClient,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.vwbSamClient = vwbSamClient;
     this.vwbUserManagerClient = vwbUserManagerClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -34,21 +30,15 @@ public class VwbAccessService {
    * @param userName the username of the user to be added
    * @param vwbGroupName the access tier to which the user is being added
    */
-  public void addUserIntoVwbTier(String userName, String vwbGroupName) {
+  public void addUserIntoVwbTier(DbUser user, String vwbGroupName) {
     if (workbenchConfigProvider.get().featureFlags.enableVWBUserAccessManagement) {
-      // First, try with VWB UM API first.
-      try {
-        vwbUserManagerClient.addUserToGroup(vwbGroupName, userName);
-      } catch (Exception e) {
-        log.log(Level.WARNING, "Failed to add user to Vwb tier group using UM" + e.getMessage());
-        // If failed, fall off to SAM API
-        try {
-          vwbSamClient.addUserToGroup(vwbGroupName, userName);
-        } catch (Exception samException) {
-          log.log(
-              Level.WARNING, "Failed to add user to Vwb tier group using SAM: " + e.getMessage());
-        }
+      if (user.getVwbUserPod() == null) {
+        log.info(String.format("User %s does not exist in VWB skipping...'", user.getUsername()));
+        return;
       }
+      log.info(
+          String.format("Added user %s to VWB Tier group '%s'", user.getUsername(), vwbGroupName));
+      vwbUserManagerClient.addUserToGroup(vwbGroupName, user.getUsername());
     }
   }
 
@@ -56,25 +46,19 @@ public class VwbAccessService {
    * Removes a user from the Vwb tier group. Exceptions are logged and swallowed to allow the
    * program to proceed since the Vwb feature is still under development.
    *
-   * @param userName the username of the user to be removed
+   * @param user the DbUser of the user to be removed
    * @param vwbGroupName the access tier from which the user is being removed
    */
-  public void removeUserFromVwbTier(String userName, String vwbGroupName) {
+  public void removeUserFromVwbTier(DbUser user, String vwbGroupName) {
     if (workbenchConfigProvider.get().featureFlags.enableVWBUserAccessManagement) {
-      // First, try with VWB UM API first.
-      try {
-        vwbUserManagerClient.removeUserFromGroup(vwbGroupName, userName);
-      } catch (Exception e) {
-        log.log(Level.WARNING, "Failed to add user to Vwb tier group using UM" + e.getMessage());
-        // If failed, fall off to SAM API
-        try {
-          vwbSamClient.removeUserFromGroup(vwbGroupName, userName);
-        } catch (Exception samException) {
-          log.log(
-              Level.WARNING,
-              "Failed to remove user from Vwb tier group using SAM: " + e.getMessage());
-        }
+      if (user.getVwbUserPod() == null) {
+        log.info(String.format("User %s does not exist in VWB skipping...'", user.getUsername()));
+        return;
       }
+      log.info(
+          String.format(
+              "Remove user %s from VWB Tier group '%s'", user.getUsername(), vwbGroupName));
+      vwbUserManagerClient.removeUserFromGroup(vwbGroupName, user.getUsername());
     }
   }
 }

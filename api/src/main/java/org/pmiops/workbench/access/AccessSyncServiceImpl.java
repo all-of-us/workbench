@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-import org.javers.common.collections.Lists;
+import org.apache.commons.collections4.ListUtils;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -83,13 +83,20 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
-    // add user to each Access Tier DB table and the tiers' Terra Auth Domains
-    newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
+    // Tiers to add are those present in the new set of tiers but not in the previous set.
+    // We use ListUtils.subtract() to find the difference: (new - previous) = toAdd.
+    final List<DbAccessTier> tiersToAdd = ListUtils.subtract(newAccessTiers, previousAccessTiers);
+
+    // Tiers to remove are those present in the previous set of tiers but not in the new set.
+    // We use ListUtils.subtract() to find the difference: (previous - new) = toRemove.
+    final List<DbAccessTier> tiersToRemove =
+        ListUtils.subtract(previousAccessTiers, newAccessTiers);
 
     // remove user from all other Access Tier DB tables and the tiers' Terra Auth Domains
-    final List<DbAccessTier> tiersForRemoval =
-        Lists.difference(accessTierService.getAllTiers(), newAccessTiers);
-    tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
+    tiersToRemove.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
+
+    // add user to each Access Tier DB table and the tiers' Terra Auth Domains
+    tiersToAdd.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
     return userDao.save(dbUser);
   }
