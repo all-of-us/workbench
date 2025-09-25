@@ -693,14 +693,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getActiveWorkspaceCount() {
-    return jdbcTemplate.queryForObject(
-        "SELECT count(*) FROM workspace WHERE active_status = "
-            + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
-        Integer.class);
-  }
-
-  @Override
   public List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset) {
     if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
       // Skip querying data if not enabled, and just return empty list instead.
