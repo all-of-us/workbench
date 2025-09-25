@@ -92,11 +92,12 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     final List<DbAccessTier> tiersToRemove =
         ListUtils.subtract(previousAccessTiers, newAccessTiers);
 
-    // add user to each Access Tier DB table and the tiers' Terra Auth Domains
-    tiersToAdd.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
     // remove user from all other Access Tier DB tables and the tiers' Terra Auth Domains
     tiersToRemove.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
+
+    // add user to each Access Tier DB table and the tiers' Terra Auth Domains
+    tiersToAdd.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
     return userDao.save(dbUser);
   }
