@@ -34,7 +34,6 @@ import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -660,7 +659,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
                 .workspaceId(rs.getLong("workspace_id"))
                 .workspaceNamespace(rs.getString("workspace_namespace"))
-                .activeStatus(workspaceActiveStatusFromStorage(rs.getShort("active_status")).toString()),
+                .activeStatus(
+                    workspaceActiveStatusFromStorage(rs.getShort("active_status")).toString()),
         limit,
         offset);
   }
