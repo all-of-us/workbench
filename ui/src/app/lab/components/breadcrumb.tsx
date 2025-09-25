@@ -407,7 +407,7 @@ export const Breadcrumb = fp.flow(
   );
 
   // Use feature flag to render initial credits banners
-  const { enableInitialCreditsExpiration = false } =
+  const { enableUnlinkBillingForInitialCredits = false } =
     serverConfigStore.get().config;
 
   useEffect(() => {
@@ -511,14 +511,14 @@ export const Breadcrumb = fp.flow(
 
   return (
     <>
-      {!enableInitialCreditsExpiration && showInvalidBillingBanner && (
+      {!enableUnlinkBillingForInitialCredits && showInvalidBillingBanner && (
         <InvalidBillingBanner
           profile={profile}
           workspace={props.workspace}
           onClose={() => setShowInvalidBillingBanner(false)}
         />
       )}
-      {enableInitialCreditsExpiration && creditBannerData && (
+      {enableUnlinkBillingForInitialCredits && creditBannerData && (
         <CreditBanner
           banners={creditBannerData.map((data, idx) => ({
             ...data,

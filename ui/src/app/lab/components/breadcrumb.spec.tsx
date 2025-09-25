@@ -207,7 +207,7 @@ describe('InvalidBillingBanner Component', () => {
     routeDataStore.set({ breadcrumb: BreadcrumbType.Workspace });
     serverConfigStore.set({
       config: {
-        enableInitialCreditsExpiration: false,
+        enableUnlinkBillingForInitialCredits: false,
         gsuiteDomain: '',
       },
     });
@@ -370,7 +370,7 @@ describe('CreditBanner Component', () => {
     routeDataStore.set({ breadcrumb: BreadcrumbType.Workspace });
     serverConfigStore.set({
       config: {
-        enableInitialCreditsExpiration: true,
+        enableUnlinkBillingForInitialCredits: true,
         gsuiteDomain: '',
       },
     });
