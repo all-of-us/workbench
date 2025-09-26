@@ -32,10 +32,10 @@ parameters:
 # -------------------------
 anchors:
   env-default: &env-default
-    JAVA_TOOL_OPTIONS: -Xmx2g
+    JAVA_TOOL_OPTIONS: -Xmx4g
     # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
     # https://stackoverflow.com/questions/38967991/why-are-my-gradle-builds-dying-with-exit-code-137
-    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs=-XX:+UseContainerSupport
+    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+UseContainerSupport'
     TERM: dumb
 
   env-db: &env-db
