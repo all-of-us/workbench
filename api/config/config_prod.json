@@ -24,12 +24,13 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "defaultInitialCreditsDollarLimit": 300.0,
     "initialCreditsCostAlertThresholds": [
-      0.5,
-      0.75
+      0.25,
+      0.5
     ],
     "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
+    "initialCreditsExpirationWarningDaysList": [30, 90],
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "minutesBeforeLastInitialCreditsJob": 60,
     "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 7,
