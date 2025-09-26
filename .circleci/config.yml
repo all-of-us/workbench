@@ -620,7 +620,7 @@ jobs:
             - run:
                 name: Scan dependencies for vulnerabilities
                 working_directory: ~/workbench/api
-                command: ./gradlew dependencyCheckAnalyze --info
+                command: ./gradlew dependencyCheckAnalyze --debug
 
   api-integration-test:
     executor: workbench-executor
