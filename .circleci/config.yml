@@ -620,7 +620,8 @@ jobs:
             - run:
                 name: Scan dependencies for vulnerabilities
                 working_directory: ~/workbench/api
-                command: ./gradlew dependencyCheckAnalyze --info
+                command: ./gradlew dependencyCheckAnalyze --debug --stacktrace
+                no_output_timeout: 30m
 
   api-integration-test:
     executor: workbench-executor
