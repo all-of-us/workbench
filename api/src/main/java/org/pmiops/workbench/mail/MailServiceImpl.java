@@ -33,7 +33,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoAppUtils;
@@ -282,9 +281,9 @@ public class MailServiceImpl implements MailService {
   @Override
   public void alertUserInitialCreditsExpired(DbUser user) throws MessagingException {
     if (!checkEnableUnlinkBillingForInitialCreditsFlag()) {
-      // This is a safety check to avoid sending expired emails when the feature flag is off.
+      // Feature flag is off; do not send the expired email.
       log.info("Initial credits expiration feature flag is disabled. Not sending expired email.");
-      throw new BadRequestException("Initial credits expiration feature flag is disabled.");
+      return;
     }
     final String logMsg =
         String.format(
