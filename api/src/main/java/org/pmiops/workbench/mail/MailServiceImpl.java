@@ -195,8 +195,8 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
-  private boolean checkEnabledInitialCreditsExpirationFlag() {
-    return workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
+  private boolean checkEnableUnlinkBillingForInitialCreditsFlag() {
+    return workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits;
   }
 
   @Override
@@ -211,7 +211,7 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        checkEnabledInitialCreditsExpirationFlag()
+        checkEnableUnlinkBillingForInitialCreditsFlag()
             ? buildHtml(
                 INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2,
                 initialCreditsDollarThresholdSubstitutionMapV2(
@@ -240,7 +240,7 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        checkEnabledInitialCreditsExpirationFlag()
+        checkEnableUnlinkBillingForInitialCreditsFlag()
             ? buildHtml(
                 INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2,
                 initialCreditsExhaustionSubstitutionMapV1(user))
@@ -266,7 +266,7 @@ public class MailServiceImpl implements MailService {
 
     final String htmlMessage =
         buildHtml(
-            checkEnabledInitialCreditsExpirationFlag()
+            checkEnableUnlinkBillingForInitialCreditsFlag()
                 ? INITIAL_CREDITS_EXPIRING_RESOURCE_V2
                 : INITIAL_CREDITS_EXPIRING_RESOURCE_V1,
             initialCreditsExpiringSubstitutionMap(user));
@@ -281,7 +281,7 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void alertUserInitialCreditsExpired(DbUser user) throws MessagingException {
-    if (!checkEnabledInitialCreditsExpirationFlag()) {
+    if (!checkEnableUnlinkBillingForInitialCreditsFlag()) {
       // This is a safety check to avoid sending expired emails when the feature flag is off.
       log.info("Initial credits expiration feature flag is disabled. Not sending expired email.");
       throw new BadRequestException("Initial credits expiration feature flag is disabled.");

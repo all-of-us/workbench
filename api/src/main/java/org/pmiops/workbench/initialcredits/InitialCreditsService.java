@@ -368,13 +368,13 @@ public class InitialCreditsService {
         .orElse(false);
   }
 
-  private boolean checkEnabledInitialCreditsExpirationFlag() {
-    return workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
+  private boolean checkEnableUnlinkBillingForInitialCreditsFlag() {
+    return workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits;
   }
 
   // Returns true if the user's credits expiry matches the initialCreditsExpirationWarningDays.
   private boolean areCreditsExpiringSoon(DbUser user) {
-    if (checkEnabledInitialCreditsExpirationFlag()) {
+    if (checkEnableUnlinkBillingForInitialCreditsFlag()) {
       List<Long> initialCreditsExpirationWarningDaysList =
           workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDaysList;
       return getCreditsExpiration(user)
@@ -439,7 +439,7 @@ public class InitialCreditsService {
   }
 
   public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
-    if (checkEnabledInitialCreditsExpirationFlag()) {
+    if (checkEnableUnlinkBillingForInitialCreditsFlag()) {
       return false; // Feature is effectively disabled
     }
 
