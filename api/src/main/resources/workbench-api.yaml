@@ -7418,6 +7418,10 @@ components:
           type: boolean
           default: false
           description: If true, allow for user's initial credits to expire.
+        enableUnlinkBillingForInitialCredits:
+            type: boolean
+            default: false
+            description: If true, allow unlinking billing accounts when initial credits are expired or used up.
         initialCreditsValidityPeriodDays:
           type: integer
           description: The number of days that a user's initial credits are valid for.

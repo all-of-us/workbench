@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 import { Link, matchPath } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { Cohort, CohortReview, ConceptSet } from 'generated/fetch';
+import { Cohort, CohortReview, ConceptSet, Profile } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { BannerScenario } from 'app/lab/pages/workspace/initial-credits/banner-config';
+import { CreditBanner } from 'app/lab/pages/workspace/initial-credits/credit-banner';
 import { InvalidBillingBanner } from 'app/lab/pages/workspace/invalid-billing-banner';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import {
@@ -27,6 +29,7 @@ import {
   profileStore,
   RouteDataStore,
   routeDataStore,
+  serverConfigStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -297,7 +300,10 @@ const BreadcrumbLink = ({ href, ...props }) => {
   return <Link to={href} {...props} />;
 };
 
-const shouldShowInvalidBillingBanner = (workspace, profile) => {
+const shouldShowInvalidBillingBanner = (
+  workspace: WorkspaceData,
+  profile: Profile
+) => {
   if (!workspace || !profile) {
     return false;
   }
@@ -311,6 +317,70 @@ const shouldShowInvalidBillingBanner = (workspace, profile) => {
     creatorUser?.familyName &&
     (isExhausted || (!workspace.initialCredits.expirationBypassed && isExpired))
   );
+};
+
+const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
+  if (!workspace || !profile) {
+    return null;
+  }
+
+  const { initialCreditsLimit = 0, initialCreditsUsage = 0 } = profile;
+  const {
+    initialCredits: {
+      exhausted,
+      expirationBypassed,
+      expirationEpochMillis,
+      balance,
+    },
+  } = workspace;
+
+  const now = Date.now();
+  const givenName = workspace?.creatorUser?.givenName;
+  const familyName = workspace?.creatorUser?.familyName;
+  const creditBalance = balance ?? initialCreditsLimit - initialCreditsUsage;
+
+  const scenarios = [
+    {
+      cond: exhausted,
+      scenario: BannerScenario.Exhausted,
+    },
+    {
+      cond: !expirationBypassed && expirationEpochMillis < now,
+      scenario: BannerScenario.Expired,
+    },
+    {
+      cond:
+        !expirationBypassed &&
+        expirationEpochMillis - now < 24 * 60 * 60 * 1000 * 90, // < 90 days
+      scenario: BannerScenario.ExpiringSoon,
+    },
+    {
+      cond: creditBalance <= 150, // $150 is 50% of $300 initial credits
+      scenario: BannerScenario.LowBalance,
+    },
+  ];
+
+  const matches = scenarios.filter((s) => s.cond).map((s) => s.scenario);
+  if (matches.length === 0 || !givenName || !familyName) {
+    return null;
+  }
+
+  return matches.map((match) => ({
+    scenario: match,
+    expirationDate: new Date(expirationEpochMillis).toLocaleDateString(
+      'en-US',
+      {
+        weekday: 'short', // e.g., 'Mon'
+        year: 'numeric', // e.g., '2025'
+        month: 'short', // e.g., 'Jan'
+        day: '2-digit', // e.g., '01'
+      }
+    ), // e.g., 'Mon, Jan 01, 2025'
+    creatorName: `${givenName} ${familyName}`.trim(),
+    creditBalance: creditBalance.toFixed(2),
+    workspace,
+    profile,
+  }));
 };
 
 interface Props {
@@ -332,12 +402,20 @@ export const Breadcrumb = fp.flow(
   const [showInvalidBillingBanner, setShowInvalidBillingBanner] = useState(
     shouldShowInvalidBillingBanner(props.workspace, profile)
   );
+  const [creditBannerData, setCreditBannerData] = useState(
+    getCreditBannerData(props.workspace, profile)
+  );
+
+  // Use feature flag to render initial credits banners
+  const { enableUnlinkBillingForInitialCredits = false } =
+    serverConfigStore.get().config;
 
   useEffect(() => {
-    // When user navigates to a different workspace, show the invalid billing banner even if dismissed in the past
+    // When user navigates to a different workspace, show the credit banner even if dismissed in the past
     setShowInvalidBillingBanner(
       shouldShowInvalidBillingBanner(props.workspace, profile)
     );
+    setCreditBannerData(getCreditBannerData(props.workspace, profile));
   }, [props?.workspace, profile]);
 
   const trail = (): Array<BreadcrumbData> => {
@@ -425,13 +503,27 @@ export const Breadcrumb = fp.flow(
     return fp.last(trail());
   };
 
+  const handleBannerClose = (idx: number) => {
+    setCreditBannerData((prev) =>
+      prev ? prev.filter((_, i) => i !== idx) : null
+    );
+  };
+
   return (
     <>
-      {showInvalidBillingBanner && (
+      {!enableUnlinkBillingForInitialCredits && showInvalidBillingBanner && (
         <InvalidBillingBanner
           profile={profile}
           workspace={props.workspace}
           onClose={() => setShowInvalidBillingBanner(false)}
+        />
+      )}
+      {enableUnlinkBillingForInitialCredits && creditBannerData && (
+        <CreditBanner
+          banners={creditBannerData.map((data, idx) => ({
+            ...data,
+            onClose: () => handleBannerClose(idx),
+          }))}
         />
       )}
       <div
