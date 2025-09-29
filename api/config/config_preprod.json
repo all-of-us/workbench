@@ -53,7 +53,7 @@
       "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-after_master_merge-247-g5128841-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-preprod",
       "methodName": "GvsExtractCohortFromSampleNames",
-      "methodRepoVersion": 5,
+      "methodRepoVersion": 6,
       "methodLogicalVersion": 3
     },
     "cdrv8plus": {
