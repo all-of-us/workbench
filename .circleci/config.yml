@@ -1302,8 +1302,6 @@ workflows:
           <<: *filter-release-tags
       - api-bigquery-test:
           <<: *filter-release-tags
-      - api-deps-check:
-          <<: *filter-release-tags
       - api-integration-test:
           <<: *filter-release-tags
       - deploy-to-staging:
@@ -1312,7 +1310,6 @@ workflows:
             - api-local-test
             - api-unit-test
             - api-bigquery-test
-            - api-deps-check
             - api-integration-test
             - ui-unit-test
       - puppeteer-env-setup:
