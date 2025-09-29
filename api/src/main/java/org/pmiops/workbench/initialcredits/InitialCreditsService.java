@@ -471,8 +471,8 @@ public class InitialCreditsService {
   }
 
   private boolean shouldCheckApproachingExpirationNotification(DbUserInitialCreditsExpiration exp) {
-    return !checkEnableUnlinkBillingForInitialCreditsFlag()
-        && exp.getApproachingExpirationNotificationTime() == null;
+    return checkEnableUnlinkBillingForInitialCreditsFlag()
+        || exp.getApproachingExpirationNotificationTime() == null;
   }
 
   private void checkExpiration(DbUser user) {
