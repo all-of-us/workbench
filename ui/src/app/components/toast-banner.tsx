@@ -66,7 +66,7 @@ export enum ToastType {
 
 const styleForType = (
   toastType: ToastType,
-  zIndex,
+  zIndex: any,
   styleOverrides?: React.CSSProperties
 ): React.CSSProperties =>
   switchCase(
@@ -92,7 +92,7 @@ const styleForType = (
 
 interface ToastProps {
   title: string;
-  message: string | JSX.Element;
+  message: React.ReactNode;
   onClose: Function;
   toastType: ToastType;
   zIndex: any; // TODO better type

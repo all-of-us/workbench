@@ -16,7 +16,11 @@ import {
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { minusDays, plusDays } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { profileStore, routeDataStore } from 'app/utils/stores';
+import {
+  profileStore,
+  routeDataStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 import { cohortReviewStubs } from 'testing/stubs/cohort-review-service-stub';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
@@ -28,11 +32,11 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { Breadcrumb, getTrail } from './breadcrumb';
 import { BreadcrumbType } from './breadcrumb-type';
 
-// Mock ReactDOM.createPortal since InvalidBillingBanner uses portals
+// Mock ReactDOM.createPortal since CreditBanner uses portals
 jest.mock('react-dom', () => {
   return {
     ...jest.requireActual('react-dom'),
-    createPortal: (element) => element,
+    createPortal: (element: any) => element,
   };
 });
 
@@ -43,6 +47,15 @@ jest.mock('app/lab/pages/workspace/invalid-billing-banner', () => {
       <div data-testid='invalid-billing-banner'>
         Invalid Billing Banner (Mocked)
       </div>
+    ),
+  };
+});
+
+// Mock the CreditBanner component
+jest.mock('app/lab/pages/workspace/initial-credits/credit-banner', () => {
+  return {
+    CreditBanner: () => (
+      <div data-testid='credit-banner'>Credit Banner (Mocked)</div>
     ),
   };
 });
@@ -184,7 +197,7 @@ describe('getTrail', () => {
   });
 });
 
-describe('Breadcrumb Component', () => {
+describe('InvalidBillingBanner Component', () => {
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -192,6 +205,12 @@ describe('Breadcrumb Component', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     routeDataStore.set({ breadcrumb: BreadcrumbType.Workspace });
+    serverConfigStore.set({
+      config: {
+        enableUnlinkBillingForInitialCredits: false,
+        gsuiteDomain: '',
+      },
+    });
   });
 
   it('should display InvalidBillingBanner when credits are exhausted', () => {
@@ -338,5 +357,160 @@ describe('Breadcrumb Component', () => {
     expect(
       screen.queryByTestId('invalid-billing-banner')
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('CreditBanner Component', () => {
+  const load = jest.fn();
+  const reload = jest.fn();
+  const updateCache = jest.fn();
+
+  beforeEach(() => {
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
+    routeDataStore.set({ breadcrumb: BreadcrumbType.Workspace });
+    serverConfigStore.set({
+      config: {
+        enableUnlinkBillingForInitialCredits: true,
+        gsuiteDomain: '',
+      },
+    });
+  });
+
+  it('should display CreditBanner when credits are exhausted', async () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: true,
+      expirationEpochMillis: plusDays(Date.now(), 1), // not expired
+      expirationBypassed: false,
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(screen.queryByTestId('credit-banner')).not.toBeInTheDocument();
+  });
+
+  it('should display CreditBanner when credits are expired and not bypassed', async () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: false,
+      expirationEpochMillis: minusDays(Date.now(), 1), // expired
+      expirationBypassed: false,
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(
+      await screen.findByText('Credit Banner (Mocked)')
+    ).toBeInTheDocument();
+  });
+
+  it('should not display CreditBanner when credits are expired but bypassed', () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: false,
+      expirationEpochMillis: minusDays(Date.now(), 1), // expired
+      expirationBypassed: true, // but bypassed
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(screen.queryByTestId('credit-banner')).not.toBeInTheDocument();
+  });
+
+  it('should not display CreditBanner when credits are not expired and not exhausted', () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: false,
+      expirationEpochMillis: plusDays(Date.now(), 1), // not expired
+      expirationBypassed: false,
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(screen.queryByTestId('credit-banner')).not.toBeInTheDocument();
   });
 });
