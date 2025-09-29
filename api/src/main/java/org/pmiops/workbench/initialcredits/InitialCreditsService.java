@@ -470,6 +470,11 @@ public class InitialCreditsService {
     return usage >= limit;
   }
 
+  private boolean shouldCheckApproachingExpirationNotification(DbUserInitialCreditsExpiration exp) {
+    return !checkEnableUnlinkBillingForInitialCreditsFlag()
+        && exp.getApproachingExpirationNotificationTime() == null;
+  }
+
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
@@ -477,7 +482,7 @@ public class InitialCreditsService {
     if (areUserCreditsExpired(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
-        && null == userInitialCreditsExpiration.getApproachingExpirationNotificationTime()) {
+        && shouldCheckApproachingExpirationNotification(userInitialCreditsExpiration)) {
       handleExpiringSoonCredits(user, userInitialCreditsExpiration);
     }
   }
