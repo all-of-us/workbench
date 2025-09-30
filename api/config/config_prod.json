@@ -129,11 +129,11 @@
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": true,
-    "enableVWBUserAccessManagement": false,
+    "enableVWBUserAccessManagement": true,
     "enableVWBUserCreation": false,
     "enableVWBPodCreation": true,
     "enableVWBInitialCreditsExhaustion": true,
-    "enableTierAccessCheckInDb": false
+    "enableTierAccessCheckInDb": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
@@ -215,6 +215,6 @@
     "vwbSamBaseUrl": "https:\/\/workbench.verily.com\/api\/sam",
     "userManagerBaseUrl": "https:\/\/workbench.verily.com\/api\/user",
     "organizationId": "d37dc97e-f8d1-4a43-8a30-669b81a397e9",
-    "exfilManagerServiceAccount": "workbench-exfil-manager@@prj-p-1v-s0i.iam.gserviceaccount.com"
+    "exfilManagerServiceAccount": "workbench-exfil-manager@prj-p-1v-s0i.iam.gserviceaccount.com"
   }
 }
