@@ -28,6 +28,7 @@ import {
   routeDataStore,
   runtimeDiskStore,
   runtimeStore,
+  serverConfigStore,
   userAppsStore,
   useStore,
 } from 'app/utils/stores';
@@ -57,9 +58,9 @@ const styles = reactStyles({
 // single-region buckets.
 const MULTI_REGION_BUCKET_END_DATE = new Date(2022, 5, 15); // June 15th, 2022. Months are 0-indexed.
 
-const BannerNotification = ({ children }) => {
+const BannerNotification = ({ children, customStyle = {} }) => {
   return (
-    <div style={styles.bannerNotification}>
+    <div style={{ ...styles.bannerNotification, ...customStyle }}>
       <FlexRow style={{ justifyContent: 'space-between' }}>{children}</FlexRow>
     </div>
   );
@@ -129,6 +130,41 @@ const MultiRegionWorkspaceNotification = () => {
           buckets, which incur additional costs. To prevent this, we recommend
           duplicating the workspace (using single-region buckets) to save costs.
           Contact support for assistance.
+        </div>
+      </FlexColumn>
+    </BannerNotification>
+  );
+};
+
+const UnlinkedBillingNotification = () => {
+  const billingAccountLink = (
+    <StyledExternalLink
+      target='_blank'
+      href='https://cloud.google.com/billing/docs/how-to/create-billing-account#create-new-billing-account'
+    >
+      Cloud billing account
+    </StyledExternalLink>
+  );
+  const billingProjectLink = (
+    <StyledExternalLink
+      target='_blank'
+      href='https://cloud.google.com/billing/docs/how-to/modify-project#enable_billing_for_an_existing_project'
+    >
+      billing project
+    </StyledExternalLink>
+  );
+  return (
+    <BannerNotification
+      customStyle={{ backgroundColor: colorWithWhiteness(colors.danger, 0.4) }}
+    >
+      <FlexColumn>
+        <div>
+          <b>Add a payment method</b>
+        </div>
+        <div>
+          Without a new payment method to cover ongoing costs, your workspace
+          will be deleted. Create a {billingAccountLink} and link it to your{' '}
+          {billingProjectLink} to continue your analysis.
         </div>
       </FlexColumn>
     </BannerNotification>
@@ -221,6 +257,8 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   const [pollAborter, setPollAborter] = useState(new AbortController());
   const [workspace, setWorkspace] = useState<Workspace>(undefined);
   const [showNewCtNotification, setShowNewCtNotification] = useState(false);
+  const [showUnlinkedBillingNotification, setShowUnlinkedBillingNotification] =
+    useState(false);
 
   useEffect(() => {
     hideSpinner();
@@ -289,12 +327,26 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
     }
   }, [ns, terraName]);
 
+  const isWorkspaceBillingUnlinked = (): boolean => {
+    const { enableUnlinkBillingForInitialCredits = false } =
+      serverConfigStore.get().config;
+    if (!enableUnlinkBillingForInitialCredits || !workspace?.initialCredits) {
+      return false;
+    }
+    const { exhausted, expirationBypassed, expirationEpochMillis } =
+      workspace.initialCredits;
+    return (
+      exhausted || (!expirationBypassed && expirationEpochMillis < Date.now())
+    );
+  };
+
   useEffect(() => {
     const isControlled =
       workspace?.accessTierShortName === AccessTierShortNames.Controlled;
     const tenMinutesAgo = Date.now() - 10 * 60 * 1000; // arbitrary notion of 'new' workspace
     const isNew = workspace?.creationTime > tenMinutesAgo;
     setShowNewCtNotification(isControlled && isNew);
+    setShowUnlinkedBillingNotification(isWorkspaceBillingUnlinked());
   }, [workspace]);
 
   const showMultiRegionWorkspaceNotification =
@@ -316,6 +368,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
           {showMultiRegionWorkspaceNotification && (
             <MultiRegionWorkspaceNotification />
           )}
+          {showUnlinkedBillingNotification && <UnlinkedBillingNotification />}
           <HelpSidebar pageKey={routeData.pageKey} />
           <div
             style={{
