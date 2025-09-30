@@ -19,9 +19,8 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.base.Strings;
 import jakarta.inject.Provider;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
@@ -617,11 +616,19 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  rp_social_behavioral,\n"
             + "  rp_time_requested,\n"
             + "  w.workspace_id,\n"
-            + "  workspace_namespace\n"
+            + "  workspace_namespace,\n"
+            + "  sp.specific_populations\n"
             + "FROM workspace w\n"
             // some Tanagra workspaces don't have CDR version IDs
             + "  LEFT JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
             + "  LEFT JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+            // retrieve specific populations data
+            + "  LEFT JOIN (\n" +
+                "    SELECT workspace_id,\n" +
+                "    GROUP_CONCAT(specific_population ORDER BY specific_population SEPARATOR ',') AS specific_populations\n" +
+                "    FROM specific_populations\n" +
+                "    GROUP BY workspace_id\n" +
+                ") sp ON w.workspace_id = sp.workspace_id\n"
             // most workspaces are not Featured
             + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
             + "WHERE active_status = ? \n"
@@ -630,45 +637,56 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "OFFSET ?";
     return jdbcTemplate.query(
         sql,
-        (rs, unused) ->
-            new ReportingWorkspace()
-                .accessTierShortName(rs.getString("access_tier_short_name"))
-                .billingAccountType(
-                    getBillingAccountType(
-                        rs.getString("billing_account_name"), workbenchConfigProvider.get()))
-                .cdrVersionId(rs.getLong("cdr_version_id"))
-                .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
-                .creatorId(rs.getLong("creator_id"))
-                .disseminateResearchOther(rs.getString("disseminate_research_other"))
-                .featuredWorkspaceCategory(rs.getString("featured_workspace_category"))
-                .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
-                .name(rs.getString("name"))
-                .rpAdditionalNotes(rs.getString("rp_additional_notes"))
-                .rpAianResearchType(rs.getString("rp_aian_research_type"))
-                .rpAianResearchDetails(rs.getString("rp_aian_research_details"))
-                .rpAncestry(rs.getBoolean("rp_ancestry"))
-                .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))
-                .rpApproved(rs.getBoolean("rp_approved"))
-                .rpCommercialPurpose(rs.getBoolean("rp_commercial_purpose"))
-                .rpControlSet(rs.getBoolean("rp_control_set"))
-                .rpDiseaseFocusedResearch(rs.getBoolean("rp_disease_focused_research"))
-                .rpDiseaseOfFocus(rs.getString("rp_disease_of_focus"))
-                .rpDrugDevelopment(rs.getBoolean("rp_drug_development"))
-                .rpEducational(rs.getBoolean("rp_educational"))
-                .rpEthics(rs.getBoolean("rp_ethics"))
-                .rpIntendedStudy(rs.getString("rp_intended_study"))
-                .rpMethodsDevelopment(rs.getBoolean("rp_methods_development"))
-                .rpOtherPopulationDetails(rs.getString("rp_other_population_details"))
-                .rpOtherPurpose(rs.getBoolean("rp_other_purpose"))
-                .rpOtherPurposeDetails(rs.getString("rp_other_purpose_details"))
-                .rpPopulationHealth(rs.getBoolean("rp_population_health"))
-                .rpReasonForAllOfUs(rs.getString("rp_reason_for_all_of_us"))
-                .rpReviewRequested(rs.getBoolean("rp_review_requested"))
-                .rpScientificApproach(rs.getString("rp_scientific_approach"))
-                .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
-                .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
-                .workspaceId(rs.getLong("workspace_id"))
-                .workspaceNamespace(rs.getString("workspace_namespace")),
+        (rs, unused) -> {
+//          Set<Short> specificPopulations = new HashSet<>();
+          String specificPopulationsStr = rs.getString("specific_populations");
+          boolean focusOnUnderrepresentedPopulations  = specificPopulationsStr != null && !specificPopulationsStr.isEmpty();
+//          if (focusOnUnderrepresentedPopulations) {
+//            Arrays.stream(specificPopulationsStr.split(","))
+//                    .map(String::trim)
+//                    .map(Short::parseShort)
+//                    .forEach(specificPopulations::add);
+//          }
+          return new ReportingWorkspace()
+                  .accessTierShortName(rs.getString("access_tier_short_name"))
+                  .billingAccountType(
+                          getBillingAccountType(
+                                  rs.getString("billing_account_name"), workbenchConfigProvider.get()))
+                  .cdrVersionId(rs.getLong("cdr_version_id"))
+                  .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
+                  .creatorId(rs.getLong("creator_id"))
+                  .disseminateResearchOther(rs.getString("disseminate_research_other"))
+                  .featuredWorkspaceCategory(rs.getString("featured_workspace_category"))
+                  .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
+                  .name(rs.getString("name"))
+                  .rpAdditionalNotes(rs.getString("rp_additional_notes"))
+                  .rpAianResearchType(rs.getString("rp_aian_research_type"))
+                  .rpAianResearchDetails(rs.getString("rp_aian_research_details"))
+                  .rpAncestry(rs.getBoolean("rp_ancestry"))
+                  .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))
+                  .rpApproved(rs.getBoolean("rp_approved"))
+                  .rpCommercialPurpose(rs.getBoolean("rp_commercial_purpose"))
+                  .rpControlSet(rs.getBoolean("rp_control_set"))
+                  .rpDiseaseFocusedResearch(rs.getBoolean("rp_disease_focused_research"))
+                  .rpDiseaseOfFocus(rs.getString("rp_disease_of_focus"))
+                  .rpDrugDevelopment(rs.getBoolean("rp_drug_development"))
+                  .rpEducational(rs.getBoolean("rp_educational"))
+                  .rpEthics(rs.getBoolean("rp_ethics"))
+                  .rpIntendedStudy(rs.getString("rp_intended_study"))
+                  .rpMethodsDevelopment(rs.getBoolean("rp_methods_development"))
+                  .rpOtherPopulationDetails(rs.getString("rp_other_population_details"))
+                  .rpOtherPurpose(rs.getBoolean("rp_other_purpose"))
+                  .rpOtherPurposeDetails(rs.getString("rp_other_purpose_details"))
+                  .rpPopulationHealth(rs.getBoolean("rp_population_health"))
+                  .rpReasonForAllOfUs(rs.getString("rp_reason_for_all_of_us"))
+                  .rpReviewRequested(rs.getBoolean("rp_review_requested"))
+                  .rpScientificApproach(rs.getString("rp_scientific_approach"))
+                  .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
+                  .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
+                  .workspaceId(rs.getLong("workspace_id"))
+                  .workspaceNamespace(rs.getString("workspace_namespace"))
+                  .focusOnUnderrepresentedPopulations(focusOnUnderrepresentedPopulations);
+        },
         workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
         limit,
         offset);
