@@ -215,6 +215,10 @@
     "vwbSamBaseUrl": "https:\/\/workbench.verily.com\/api\/sam",
     "userManagerBaseUrl": "https:\/\/workbench.verily.com\/api\/user",
     "organizationId": "d37dc97e-f8d1-4a43-8a30-669b81a397e9",
-    "exfilManagerServiceAccount": "workbench-exfil-manager@prj-p-1v-s0i.iam.gserviceaccount.com"
+    "exfilManagerServiceAccount": "workbench-exfil-manager@prj-p-1v-s0i.iam.gserviceaccount.com",
+    "adminBigQuery": {
+      "logProjectId": "workbench-bq-log-sink",
+      "bigQueryDataset": "workbench_monitoring_org_logs_prod"
+    }
   }
 }
