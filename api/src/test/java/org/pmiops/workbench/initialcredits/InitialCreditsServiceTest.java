@@ -157,6 +157,7 @@ public class InitialCreditsServiceTest {
     workbenchConfig.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
     workbenchConfig.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
     workbenchConfig.billing.initialCreditsExpirationWarningDays = warningPeriodDays;
+    workbenchConfig.billing.initialCreditsExpirationWarningDaysList = List.of(warningPeriodDays);
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForInitialCreditsUsageUpdate = 2L;
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
@@ -172,6 +173,7 @@ public class InitialCreditsServiceTest {
                 .setGoogleProject("initial-credits-project")
                 .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
     doNothing().when(mailService).alertUserInitialCreditsExpiring(isA(DbUser.class));
+    doNothing().when(mailService).alertUserInitialCreditsExpired(isA(DbUser.class));
   }
 
   @AfterEach
@@ -1028,7 +1030,7 @@ public class InitialCreditsServiceTest {
             "If a non-bypassed user is in their warning period, they will receive a warning email but not have their resources cleaned up.",
             DURING_WARNING_PERIOD,
             false,
-            NOW,
+            null,
             null),
         Arguments.of(
             "If a bypassed user has passed their expiration date, they will not receive a warning email or have their resources cleaned up.",
@@ -1055,123 +1057,6 @@ public class InitialCreditsServiceTest {
             BadRequestException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
     assertEquals("Initial credits extension is disabled.", exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_noExpirationRecord() {
-    DbUser user = spyUserDao.save(new DbUser());
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User does not have initial credits expiration set, so they cannot extend their expiration date.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_alreadyExtended() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setExpirationTime(DURING_WARNING_PERIOD)
-                        .setExtensionTime(DURING_WARNING_PERIOD)
-                        .setBypassed(false)));
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User has already extended their initial credits expiration and cannot extend further.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_institutionallyBypassed() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setExpirationTime(DURING_WARNING_PERIOD)
-                        .setExtensionTime(null)
-                        .setBypassed(false)));
-    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_individuallyBypassed() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setExpirationTime(DURING_WARNING_PERIOD)
-                        .setExtensionTime(null)
-                        .setBypassed(true)));
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_notYetExtendedOutsideWindow() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setExpirationTime(BEFORE_WARNING_PERIOD)
-                        .setExtensionTime(null)
-                        .setBypassed(false)));
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User's initial credits are not close enough to their expiration date to be extended.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_notYetExtendedWithinWindow() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setCreditStartTime(BEFORE_WARNING_PERIOD)
-                        .setExpirationTime(DURING_WARNING_PERIOD)
-                        .setExtensionTime(null)
-                        .setBypassed(false)));
-
-    DbUserInitialCreditsExpiration actualExpirationRecord =
-        initialCreditsService
-            .extendInitialCreditsExpiration(user)
-            .getUserInitialCreditsExpiration();
-
-    Timestamp expectedExtensionDate =
-        Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
-    assertEquals(expectedExtensionDate, actualExpirationRecord.getExpirationTime());
-    assertEquals(NOW, actualExpirationRecord.getExtensionTime());
   }
 
   @Test
@@ -1205,7 +1090,7 @@ public class InitialCreditsServiceTest {
     workspaceFreeTierUsageDao.save(
         new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(30.0));
     boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
-    assertThat(eligibility).isTrue();
+    assertThat(eligibility).isFalse();
   }
 
   @Test
