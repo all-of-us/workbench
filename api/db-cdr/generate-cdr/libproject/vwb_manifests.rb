@@ -89,8 +89,20 @@ def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, dis
   storage_class = input_section.fetch("storageClass", "STANDARD")
 
   source_uris.each do |source_path|
-    source_name = File.basename(source_path)
-    dest_name = source_name
+    # Check if source is a folder (ends with /)
+    if source_path.end_with?("/")
+      # For folders, copy the folder contents directly to the destination
+      # without appending the source folder name
+      copy_manifest.push({
+        "source" => source_path,
+        "destination" => destination_base.end_with?("/") ? destination_base : "#{destination_base}/",
+        "outputFileName" => nil,
+        "storageClass" => storage_class
+      })
+    else
+      # For files, handle normally
+      source_name = File.basename(source_path)
+      dest_name = source_name
 
       # Apply filename replacements if specified
       if input_section["filenameReplace"]
@@ -104,12 +116,13 @@ def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, dis
 
       destination_path = File.join(destination_base, dest_name)
 
-    copy_manifest.push({
-      "source" => source_path,
-      "destination" => destination_path,
-      "outputFileName" => dest_name,
-      "storageClass" => storage_class
-    })
+      copy_manifest.push({
+        "source" => source_path,
+        "destination" => destination_path,
+        "outputFileName" => dest_name,
+        "storageClass" => storage_class
+      })
+    end
   end
 
   return copy_manifest
