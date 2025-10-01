@@ -275,13 +275,17 @@ end
 
 
 # Generate Storage Transfer Service job configurations from manifest files
-def generate_sts_job_configs(project, manifest_files, jira_ticket = nil, service_account = nil)
+def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket = nil, service_account = nil)
   common = Common.new
   common.status "Generating Storage Transfer Service job configurations..."
 
   configs = build_vwb_publish_configs(manifest_files)
   job_configs = []
   job_index = 1
+
+  # Create directory for STS manifests
+  sts_manifests_dir = File.join(working_dir, "sts_manifests")
+  FileUtils.mkdir_p(sts_manifests_dir)
 
   # Process folder transfers
   configs[:folder_transfers].each do |transfer|
@@ -312,6 +316,21 @@ def generate_sts_job_configs(project, manifest_files, jira_ticket = nil, service
     job_name = "vwb-files-transfer-#{job_index}"
     job_name = "#{jira_ticket}-#{job_name}" if jira_ticket
 
+    # Create the manifest file locally for review
+    manifest_filename = "#{job_name}-manifest.txt"
+    local_manifest_path = File.join(sts_manifests_dir, manifest_filename)
+
+    # Write source file paths to manifest
+    File.open(local_manifest_path, 'w') do |f|
+      file_group[:files].each do |file|
+        # Extract object path from full GCS URL
+        object_path = file[:source].gsub(/^gs:\/\/[^\/]+\//, "")
+        f.puts(object_path)
+      end
+    end
+
+    common.status "Created STS manifest: #{manifest_filename} (#{file_group[:files].length} files)"
+
     config = generate_file_list_transfer_config(
       project,
       file_group,
@@ -323,11 +342,13 @@ def generate_sts_job_configs(project, manifest_files, jira_ticket = nil, service
       "job_name" => job_name,
       "job_type" => "file_list_transfer",
       "file_group" => file_group,
-      "config" => config
+      "config" => config,
+      "local_manifest_path" => local_manifest_path
     })
     job_index += 1
   end
 
+  common.status "Created #{configs[:file_transfer_groups].select { |g| !g[:files].empty? }.length} STS manifest files in #{sts_manifests_dir}"
   return job_configs
 end
 
@@ -571,34 +592,53 @@ end
 # Helper to create manifest and execute file list transfer
 def create_and_execute_file_list_transfer(project, job)
   common = Common.new
-  file_group = job['file_group']
 
   # Get service account from the job config for impersonation
   service_account = job['config']['serviceAccount']
   impersonate_args = service_account ? ["-i", service_account] : []
 
-  # Create a temporary manifest file
-  manifest_file = Tempfile.new(["vwb-transfer-manifest-", ".txt"])
+  # Get the manifest path from config
+  manifest_path = job['config']['transferSpec']['transferManifest']['location']
+
+  # Check if we have a pre-created local manifest
+  if job['local_manifest_path'] && File.exist?(job['local_manifest_path'])
+    # Upload the pre-created manifest to GCS using SA impersonation
+    common.status "Uploading pre-created manifest to GCS: #{File.basename(job['local_manifest_path'])}"
+    common.run_inline(["gsutil"] + impersonate_args + ["cp", job['local_manifest_path'], manifest_path])
+  else
+    # Fallback: create manifest on the fly (shouldn't happen in normal flow)
+    common.warning "No pre-created manifest found, generating on the fly"
+    file_group = job['file_group']
+
+    # Create a temporary manifest file
+    manifest_file = Tempfile.new(["vwb-transfer-manifest-", ".txt"])
+
+    begin
+      # Write source file paths to manifest
+      file_group['files'].each do |file|
+        object_path = file['source'].gsub(/^gs:\/\/[^\/]+\//, "")
+        manifest_file.puts(object_path)
+      end
+      manifest_file.close
+
+      # Upload manifest to GCS using SA impersonation
+      common.run_inline(["gsutil"] + impersonate_args + ["cp", manifest_file.path, manifest_path])
+    ensure
+      manifest_file.unlink if manifest_file
+    end
+  end
 
   begin
-    # Write source file paths to manifest
-    file_group['files'].each do |file|
-      object_path = file['source'].gsub(/^gs:\/\/[^\/]+\//, "")
-      manifest_file.puts(object_path)
-    end
-    manifest_file.close
-
-    # Upload manifest to the location specified in config using SA impersonation
-    manifest_path = job['config']['transferSpec']['transferManifest']['location']
-    common.run_inline(["gsutil"] + impersonate_args + ["cp", manifest_file.path, manifest_path])
-
     # Create the transfer job
     create_transfer_job_via_api(project, job['config'])
 
-    # Clean up temporary manifest using SA impersonation
+    # Clean up temporary manifest from GCS using SA impersonation
+    common.status "Cleaning up manifest from GCS"
     common.run_inline(["gsutil"] + impersonate_args + ["rm", manifest_path])
-  ensure
-    manifest_file.unlink if manifest_file
+  rescue => e
+    # If job creation fails, still try to clean up the manifest
+    common.run_inline(["gsutil"] + impersonate_args + ["rm", manifest_path]) rescue nil
+    raise e
   end
 end
 
@@ -702,6 +742,7 @@ def vwb_create_copy_manifests_mode(opts, tier, working_dir)
   job_configs = generate_sts_job_configs(
     publishing_project,
     copy_manifest_files,
+    working_dir,
     opts.jira_ticket,
     service_account
   )
@@ -709,6 +750,14 @@ def vwb_create_copy_manifests_mode(opts, tier, working_dir)
   # Save the STS configs to files
   config_dir = save_sts_configs(working_dir, job_configs)
   common.status "STS job configurations saved to: #{config_dir}"
+
+  # Count file list transfers for summary
+  file_list_jobs = job_configs.select { |j| j["job_type"] == "file_list_transfer" }
+  if file_list_jobs.length > 0
+    sts_manifests_dir = File.join(working_dir, "sts_manifests")
+    common.status "STS file manifests saved to: #{sts_manifests_dir}"
+  end
+
   common.status "You can review and modify these configurations before running PUBLISH"
 
   copy_manifest_files
