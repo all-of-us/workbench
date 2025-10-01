@@ -26,23 +26,10 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
-import org.pmiops.workbench.model.AppType;
-import org.pmiops.workbench.model.InstitutionMembershipRequirement;
-import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
-import org.pmiops.workbench.model.PartnerDiscoverySource;
-import org.pmiops.workbench.model.ReportingCohort;
-import org.pmiops.workbench.model.ReportingDataset;
-import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
-import org.pmiops.workbench.model.ReportingInstitution;
-import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
-import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingUser;
-import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
-import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
-import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -638,15 +625,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.query(
         sql,
         (rs, unused) -> {
-//          Set<Short> specificPopulations = new HashSet<>();
           String specificPopulationsStr = rs.getString("specific_populations");
           boolean focusOnUnderrepresentedPopulations  = specificPopulationsStr != null && !specificPopulationsStr.isEmpty();
-//          if (focusOnUnderrepresentedPopulations) {
-//            Arrays.stream(specificPopulationsStr.split(","))
-//                    .map(String::trim)
-//                    .map(Short::parseShort)
-//                    .forEach(specificPopulations::add);
-//          }
+
           return new ReportingWorkspace()
                   .accessTierShortName(rs.getString("access_tier_short_name"))
                   .billingAccountType(
@@ -685,7 +666,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                   .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
                   .workspaceId(rs.getLong("workspace_id"))
                   .workspaceNamespace(rs.getString("workspace_namespace"))
-                  .focusOnUnderrepresentedPopulations(focusOnUnderrepresentedPopulations);
+                  .focusOnUnderrepresentedPopulations(focusOnUnderrepresentedPopulations)
+                  .workspaceDemographic(toModelWorkspaceDemographic(getSpecificPopulationsSet(specificPopulationsStr)));
         },
         workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
         limit,
@@ -788,5 +770,128 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return Arrays.stream(stringEnums.split(","))
         .map(e -> convertDbEnum.apply(Short.parseShort(e)))
         .collect(Collectors.joining(","));
+  }
+
+  private Set<Short> getSpecificPopulationsSet(String specificPopulationsStr) {
+    Set<Short> specificPopulationsSet = new HashSet<>();
+
+    if (specificPopulationsStr != null && !specificPopulationsStr.isEmpty()) {
+      Arrays.stream(specificPopulationsStr.split(","))
+              .map(String::trim)
+              .map(Short::parseShort)
+              .forEach(specificPopulationsSet::add);
+    } else {
+      specificPopulationsSet = null;
+    }
+
+    return specificPopulationsSet;
+  }
+
+  private WorkspaceDemographic.RaceEthnicityEnum toRaceEthnicity(SpecificPopulationEnum specificPopulationEnum) {
+    if ( specificPopulationEnum == null ) {
+      return null;
+    }
+
+    return switch (specificPopulationEnum) {
+      case RACE_MORE_THAN_ONE -> WorkspaceDemographic.RaceEthnicityEnum.MULTI;
+      case RACE_ASIAN -> WorkspaceDemographic.RaceEthnicityEnum.ASIAN;
+      case RACE_AA -> WorkspaceDemographic.RaceEthnicityEnum.AA;
+      case RACE_HISPANIC -> WorkspaceDemographic.RaceEthnicityEnum.HISPANIC;
+      case RACE_AIAN -> WorkspaceDemographic.RaceEthnicityEnum.AIAN;
+      case RACE_MENA -> WorkspaceDemographic.RaceEthnicityEnum.MENA;
+      case RACE_NHPI -> WorkspaceDemographic.RaceEthnicityEnum.NHPI;
+      default -> null;
+    };
+  }
+
+  private WorkspaceDemographic.AgeEnum toAge(SpecificPopulationEnum specificPopulationEnum) {
+    if ( specificPopulationEnum == null ) {
+      return null;
+    }
+
+    return switch (specificPopulationEnum) {
+      case AGE_CHILDREN -> WorkspaceDemographic.AgeEnum.AGE_0_11;
+      case AGE_ADOLESCENTS -> WorkspaceDemographic.AgeEnum.AGE_12_17;
+      case AGE_OLDER -> WorkspaceDemographic.AgeEnum.AGE_65_74;
+      case AGE_OLDER_MORE_THAN_75 -> WorkspaceDemographic.AgeEnum.AGE_75_AND_MORE;
+      default -> null;
+    };
+  }
+
+  private WorkspaceDemographic toModelWorkspaceDemographic(
+          Set<Short> specificPopulationSet) {
+    if (specificPopulationSet == null) {
+      return null;
+    }
+
+    Set<SpecificPopulationEnum> specificPopulationEnum = specificPopulationSet.stream()
+              .map(DbStorageEnums::specificPopulationFromStorage)
+              .collect(Collectors.toSet());
+
+
+    WorkspaceDemographic workspaceDemographic = new WorkspaceDemographic();
+
+    workspaceDemographic.setAccessToCare(
+            specificPopulationEnum.contains(SpecificPopulationEnum.ACCESS_TO_CARE)
+                    ? WorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
+                    : WorkspaceDemographic.AccessToCareEnum.UNSET);
+
+    workspaceDemographic.setDisabilityStatus(
+            specificPopulationEnum.contains(SpecificPopulationEnum.DISABILITY_STATUS)
+                    ? WorkspaceDemographic.DisabilityStatusEnum.DISABILITY
+                    : WorkspaceDemographic.DisabilityStatusEnum.UNSET);
+
+    workspaceDemographic.setEducationLevel(
+            specificPopulationEnum.contains(SpecificPopulationEnum.EDUCATION_LEVEL)
+                    ? WorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
+                    : WorkspaceDemographic.EducationLevelEnum.UNSET);
+
+    workspaceDemographic.setIncomeLevel(
+            specificPopulationEnum.contains(SpecificPopulationEnum.INCOME_LEVEL)
+                    ? WorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
+                    : WorkspaceDemographic.IncomeLevelEnum.UNSET);
+
+    workspaceDemographic.setGeography(
+            specificPopulationEnum.contains(SpecificPopulationEnum.GEOGRAPHY)
+                    ? WorkspaceDemographic.GeographyEnum.RURAL
+                    : WorkspaceDemographic.GeographyEnum.UNSET);
+
+    workspaceDemographic.setSexualOrientation(
+            specificPopulationEnum.contains(SpecificPopulationEnum.SEXUAL_ORIENTATION)
+                    ? WorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
+                    : WorkspaceDemographic.SexualOrientationEnum.UNSET);
+
+    workspaceDemographic.setGenderIdentity(
+            specificPopulationEnum.contains(SpecificPopulationEnum.GENDER_IDENTITY)
+                    ? WorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
+                    : WorkspaceDemographic.GenderIdentityEnum.UNSET);
+
+    workspaceDemographic.setSexAtBirth(
+            specificPopulationEnum.contains(SpecificPopulationEnum.SEX)
+                    ? WorkspaceDemographic.SexAtBirthEnum.INTERSEX
+                    : WorkspaceDemographic.SexAtBirthEnum.UNSET);
+
+    workspaceDemographic.setRaceEthnicity(
+            specificPopulationEnum.stream()
+                    .map(this::toRaceEthnicity)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
+
+    if (workspaceDemographic.getRaceEthnicity().isEmpty()) {
+      workspaceDemographic.setRaceEthnicity(
+              Collections.singletonList(WorkspaceDemographic.RaceEthnicityEnum.UNSET));
+    }
+
+    workspaceDemographic.setAge(
+            specificPopulationEnum.stream()
+                    .map(this::toAge)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
+
+    if (workspaceDemographic.getAge().isEmpty()) {
+      workspaceDemographic.setAge(Collections.singletonList(WorkspaceDemographic.AgeEnum.UNSET));
+    }
+
+    return workspaceDemographic;
   }
 }
