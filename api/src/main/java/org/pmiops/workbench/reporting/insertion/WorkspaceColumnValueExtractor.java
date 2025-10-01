@@ -51,7 +51,9 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   RP_TIME_REQUESTED("rp_time_requested", w -> toInsertRowString(w.getRpTimeRequested())),
   WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId),
   WORKSPACE_NAMESPACE("workspace_namespace", ReportingWorkspace::getWorkspaceNamespace),
-  FOCUS_ON_UNDER_REPRESENTED_POPULATIONS("focusOnUnderrepresentedPopulations", ReportingWorkspace::isFocusOnUnderrepresentedPopulations),
+  FOCUS_ON_UNDER_REPRESENTED_POPULATIONS(
+      "focusOnUnderrepresentedPopulations",
+      ReportingWorkspace::isFocusOnUnderrepresentedPopulations),
   WORKSPACE_DEMOGRAPHIC("workspaceDemographic", ReportingWorkspace::getWorkspaceDemographic);
 
   private final String parameterName;
