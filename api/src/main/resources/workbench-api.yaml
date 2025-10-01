@@ -13048,11 +13048,11 @@ components:
             the workspace.
         focusOnUnderrepresentedPopulations:
           type: boolean
-          description: !-
+          description: |-
             Represents if researchers has selected YES for question 'Will your study focus on any historically underrepresented populations?'
         workspaceDemographic:
           $ref: '#/components/schemas/WorkspaceDemographic'
-          description: !-
+          description: |-
             Demographic information about the populations being studied in this workspace.
       x-aou-note: |-
         This code was generated using reporting-wizard.rb at 2020-09-30T16:18:28-04:00.
