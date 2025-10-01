@@ -668,9 +668,7 @@ Common.register_command({
                           :fn => ->(*args) { publish_cdr_files("publish-cdr-files", args) }
                         })
 
-def publish_cdr_files_vwb(cmd_name, args)
-  op = WbOptionsParser.new(cmd_name, args)
-
+def setup_vwb_publish_options(op)
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v },
@@ -717,7 +715,7 @@ def publish_cdr_files_vwb(cmd_name, args)
   )
   op.add_option(
     "--dry-run",
-    ->(opts, v) { opts.dry_run = true },
+    ->(opts, _v) { opts.dry_run = true },
     "Preview the Storage Transfer Service jobs that would be created without actually creating them. " +
       "Shows the source, destination, storage class, and number of files for each transfer job."
   )
@@ -736,11 +734,44 @@ def publish_cdr_files_vwb(cmd_name, args)
       "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
 
+  return supported_tasks
+end
+
+def setup_vwb_publish_validators(op, supported_tasks)
   op.add_validator ->(opts) { raise ArgumentError unless opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("--input-manifest-file,--display-version-id are required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and (not opts.display_version_id or not opts.input_manifest_file) }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty? }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
+end
+
+def execute_vwb_tasks(op, tier, working_dir)
+  copy_manifest_files = []
+
+  # Execute tasks
+  if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
+    copy_manifest_files = vwb_create_copy_manifests_mode(op.opts, tier, working_dir)
+  end
+
+  if op.opts.tasks.include? "PUBLISH"
+    copy_manifest_files = vwb_publish_mode(op.opts, copy_manifest_files, working_dir)
+  end
+
+  if op.opts.tasks.include? "POST_PROCESS"
+    vwb_post_process_mode(op.opts, copy_manifest_files, working_dir)
+  end
+
+  return copy_manifest_files
+end
+
+def publish_cdr_files_vwb(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+
+  # Setup options
+  supported_tasks = setup_vwb_publish_options(op)
+
+  # Setup validators
+  setup_vwb_publish_validators(op, supported_tasks)
   op.parse.validate
 
   env = ENVIRONMENTS[op.opts.project]
@@ -761,20 +792,8 @@ def publish_cdr_files_vwb(cmd_name, args)
   logs_dir = FileUtils.makedirs(File.join(working_dir, "logs"))
   common.status "Writing logs to #{logs_dir}"
 
-  copy_manifest_files = []
-
   # Execute tasks
-  if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
-    copy_manifest_files = vwb_create_copy_manifests_mode(op.opts, tier, working_dir)
-  end
-
-  if op.opts.tasks.include? "PUBLISH"
-    copy_manifest_files = vwb_publish_mode(op.opts, copy_manifest_files, working_dir)
-  end
-
-  if op.opts.tasks.include? "POST_PROCESS"
-    vwb_post_process_mode(op.opts, copy_manifest_files, working_dir)
-  end
+  execute_vwb_tasks(op, tier, working_dir)
 end
 
 Common.register_command({

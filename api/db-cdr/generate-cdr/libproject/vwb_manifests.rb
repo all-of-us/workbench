@@ -13,8 +13,7 @@ require_relative "../../../libproject/affirm"
 #   Source (Genome Centers / Broad genomic curation) -> VWB CDR bucket
 
 # Build VWB copy manifest for AW4 sections (Microarray and WGS)
-def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_version_id, aw4_rows, output_manifest_path)
-  common = Common.new
+def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_version_id, aw4_rows, _output_manifest_path)
   copy_manifest = []
   output_manifest = []
 
@@ -66,18 +65,58 @@ def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_
   return copy_manifest, output_manifest
 end
 
+# Helper to determine destination base path
+def determine_destination_base(input_section, dest_bucket, display_version_id)
+  if input_section['destination'].start_with?("gs://")
+    return input_section['destination']
+  else
+    path_prefix = "#{display_version_id}/#{input_section['destination']}"
+    return File.join(dest_bucket, path_prefix)
+  end
+end
+
+# Helper to process folder source for VWB copy manifest
+def process_folder_source(source_path, destination_base, storage_class)
+  return {
+    "source" => source_path,
+    "destination" => destination_base.end_with?("/") ? destination_base : "#{destination_base}/",
+    "outputFileName" => nil,
+    "storageClass" => storage_class
+  }
+end
+
+# Helper to process file source for VWB copy manifest
+def process_file_source(source_path, destination_base, storage_class, input_section)
+  source_name = File.basename(source_path)
+  dest_name = source_name
+
+  # Apply filename replacements if specified
+  if input_section["filenameReplace"]
+    dest_name = _apply_vwb_filename_replacement(
+      source_name,
+      input_section["filenameMatch"],
+      input_section["filenameReplace"],
+      nil
+    )
+  end
+
+  destination_path = File.join(destination_base, dest_name)
+
+  return {
+    "source" => source_path,
+    "destination" => destination_path,
+    "outputFileName" => dest_name,
+    "storageClass" => storage_class
+  }
+end
+
 # Build VWB copy manifest for curation sections
 def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, display_version_id)
   common = Common.new
   copy_manifest = []
 
-  # Handle absolute or relative destination paths
-  if input_section['destination'].start_with?("gs://")
-    destination_base = input_section['destination']
-  else
-    path_prefix = "#{display_version_id}/#{input_section['destination']}"
-    destination_base = File.join(dest_bucket, path_prefix)
-  end
+  # Determine destination base path
+  destination_base = determine_destination_base(input_section, dest_bucket, display_version_id)
 
   # Get source files matching the pattern
   source_uris = common.capture_stdout(["gsutil", "ls", "-d", input_section["sourcePattern"]]).split("\n")
@@ -89,40 +128,14 @@ def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, dis
   storage_class = input_section.fetch("storageClass", "STANDARD")
 
   source_uris.each do |source_path|
-    # Check if source is a folder (ends with /)
     if source_path.end_with?("/")
-      # For folders, copy the folder contents directly to the destination
-      # without appending the source folder name
-      copy_manifest.push({
-        "source" => source_path,
-        "destination" => destination_base.end_with?("/") ? destination_base : "#{destination_base}/",
-        "outputFileName" => nil,
-        "storageClass" => storage_class
-      })
+      # Process folder
+      manifest_entry = process_folder_source(source_path, destination_base, storage_class)
     else
-      # For files, handle normally
-      source_name = File.basename(source_path)
-      dest_name = source_name
-
-      # Apply filename replacements if specified
-      if input_section["filenameReplace"]
-        dest_name = _apply_vwb_filename_replacement(
-          source_name,
-          input_section["filenameMatch"],
-          input_section["filenameReplace"],
-          nil
-        )
-      end
-
-      destination_path = File.join(destination_base, dest_name)
-
-      copy_manifest.push({
-        "source" => source_path,
-        "destination" => destination_path,
-        "outputFileName" => dest_name,
-        "storageClass" => storage_class
-      })
+      # Process file
+      manifest_entry = process_file_source(source_path, destination_base, storage_class, input_section)
     end
+    copy_manifest.push(manifest_entry)
   end
 
   return copy_manifest
@@ -274,23 +287,12 @@ def create_transfer_job_via_api(project, job_config, service_account = nil)
 end
 
 
-# Generate Storage Transfer Service job configurations from manifest files
-def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket = nil, service_account = nil)
-  common = Common.new
-  common.status "Generating Storage Transfer Service job configurations..."
-
-  configs = build_vwb_publish_configs(manifest_files)
+# Helper to process folder transfers and generate job configs
+def process_folder_transfers(configs, project, jira_ticket, service_account, job_index)
   job_configs = []
-  job_index = 1
 
-  # Create directory for STS manifests
-  sts_manifests_dir = File.join(working_dir, "sts_manifests")
-  FileUtils.mkdir_p(sts_manifests_dir)
-
-  # Process folder transfers
   configs[:folder_transfers].each do |transfer|
-    job_name = "vwb-folder-transfer-#{job_index}"
-    job_name = "#{jira_ticket}-#{job_name}" if jira_ticket
+    job_name = generate_job_name("vwb-folder-transfer", job_index, jira_ticket)
 
     config = generate_folder_transfer_config(
       project,
@@ -309,27 +311,20 @@ def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket =
     job_index += 1
   end
 
-  # Process grouped file transfers
+  return job_configs, job_index
+end
+
+# Helper to process file list transfers and generate job configs
+def process_file_list_transfers(configs, project, jira_ticket, service_account, job_index, sts_manifests_dir, common)
+  job_configs = []
+
   configs[:file_transfer_groups].each do |file_group|
     next if file_group[:files].empty?
 
-    job_name = "vwb-files-transfer-#{job_index}"
-    job_name = "#{jira_ticket}-#{job_name}" if jira_ticket
+    job_name = generate_job_name("vwb-files-transfer", job_index, jira_ticket)
 
     # Create the manifest file locally for review
-    manifest_filename = "#{job_name}-manifest.txt"
-    local_manifest_path = File.join(sts_manifests_dir, manifest_filename)
-
-    # Write source file paths to manifest
-    File.open(local_manifest_path, 'w') do |f|
-      file_group[:files].each do |file|
-        # Extract object path from full GCS URL
-        object_path = file[:source].gsub(/^gs:\/\/[^\/]+\//, "")
-        f.puts(object_path)
-      end
-    end
-
-    common.status "Created STS manifest: #{manifest_filename} (#{file_group[:files].length} files)"
+    local_manifest_path = create_local_manifest_file(file_group, job_name, sts_manifests_dir, common)
 
     config = generate_file_list_transfer_config(
       project,
@@ -348,7 +343,55 @@ def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket =
     job_index += 1
   end
 
-  common.status "Created #{configs[:file_transfer_groups].select { |g| !g[:files].empty? }.length} STS manifest files in #{sts_manifests_dir}"
+  return job_configs, job_index
+end
+
+# Helper to generate job name with optional jira ticket prefix
+def generate_job_name(base_name, index, jira_ticket = nil)
+  job_name = "#{base_name}-#{index}"
+  jira_ticket ? "#{jira_ticket}-#{job_name}" : job_name
+end
+
+# Helper to create local manifest file for file list transfers
+def create_local_manifest_file(file_group, job_name, sts_manifests_dir, common)
+  manifest_filename = "#{job_name}-manifest.txt"
+  local_manifest_path = File.join(sts_manifests_dir, manifest_filename)
+
+  # Write source file paths to manifest
+  File.open(local_manifest_path, 'w') do |f|
+    file_group[:files].each do |file|
+      # Extract object path from full GCS URL
+      object_path = file[:source].gsub(/^gs:\/\/[^\/]+\//, "")
+      f.puts(object_path)
+    end
+  end
+
+  common.status "Created STS manifest: #{manifest_filename} (#{file_group[:files].length} files)"
+  return local_manifest_path
+end
+
+# Generate Storage Transfer Service job configurations from manifest files
+def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket = nil, service_account = nil)
+  common = Common.new
+  common.status "Generating Storage Transfer Service job configurations..."
+
+  configs = build_vwb_publish_configs(manifest_files)
+  job_configs = []
+  job_index = 1
+
+  # Create directory for STS manifests
+  sts_manifests_dir = File.join(working_dir, "sts_manifests")
+  FileUtils.mkdir_p(sts_manifests_dir)
+
+  # Process folder transfers
+  folder_configs, job_index = process_folder_transfers(configs, project, jira_ticket, service_account, job_index)
+  job_configs.concat(folder_configs)
+
+  # Process file list transfers
+  file_configs, job_index = process_file_list_transfers(configs, project, jira_ticket, service_account, job_index, sts_manifests_dir, common)
+  job_configs.concat(file_configs)
+
+  common.status "Created #{configs[:file_transfer_groups].count { |g| !g[:files].empty? }} STS manifest files in #{sts_manifests_dir}"
   return job_configs
 end
 
@@ -518,35 +561,51 @@ def load_sts_configs(config_dir)
   return job_configs
 end
 
-# Execute STS job configurations
-def execute_sts_configs(project, job_configs, dry_run = false)
-  common = Common.new
-
+# Helper to display dry run summary for STS jobs
+def display_sts_dry_run_summary(common, job_configs)
   total_jobs = job_configs.length
 
-  if dry_run
-    common.status "="*60
-    common.status "DRY RUN SUMMARY: Would create #{total_jobs} Storage Transfer Service job(s)"
+  common.status "="*60
+  common.status "DRY RUN SUMMARY: Would create #{total_jobs} Storage Transfer Service job(s)"
 
-    job_configs.each_with_index do |job, index|
-      common.status "\n[Transfer Job #{index + 1}/#{total_jobs}]"
-      common.status "Job Name: #{job['job_name']}"
-      common.status "Job Type: #{job['job_type']}"
+  job_configs.each_with_index do |job, index|
+    common.status "\n[Transfer Job #{index + 1}/#{total_jobs}]"
+    common.status "Job Name: #{job['job_name']}"
+    common.status "Job Type: #{job['job_type']}"
 
-      if job['job_type'] == 'folder_transfer'
-        source = "gs://#{job['config']['transferSpec']['gcsDataSource']['bucketName']}/#{job['config']['transferSpec']['gcsDataSource']['path']}"
-        dest = "gs://#{job['config']['transferSpec']['gcsDataSink']['bucketName']}/#{job['config']['transferSpec']['gcsDataSink']['path']}"
-        common.status "  Source: #{source}"
-        common.status "  Destination: #{dest}"
-      elsif job['job_type'] == 'file_list_transfer'
-        common.status "  Number of files: #{job['file_group']['files'].length}" if job['file_group']
-      end
-    end
-
-    common.status "\n" + "="*60
-    common.status "DRY RUN COMPLETE: No transfer jobs were created"
-    return
+    display_job_details(common, job)
   end
+
+  common.status "\n" + "="*60
+  common.status "DRY RUN COMPLETE: No transfer jobs were created"
+end
+
+# Helper to display job details based on type
+def display_job_details(common, job)
+  if job['job_type'] == 'folder_transfer'
+    source = "gs://#{job['config']['transferSpec']['gcsDataSource']['bucketName']}/#{job['config']['transferSpec']['gcsDataSource']['path']}"
+    dest = "gs://#{job['config']['transferSpec']['gcsDataSink']['bucketName']}/#{job['config']['transferSpec']['gcsDataSink']['path']}"
+    common.status "  Source: #{source}"
+    common.status "  Destination: #{dest}"
+  elsif job['job_type'] == 'file_list_transfer' && job['file_group']
+    common.status "  Number of files: #{job['file_group']['files'].length}"
+  end
+end
+
+# Helper to execute a single STS job
+def execute_single_sts_job(project, job, index, total_jobs, common)
+  common.status "\n[#{index + 1}/#{total_jobs}] Creating transfer job: #{job['job_name']}"
+
+  if job['job_type'] == 'file_list_transfer' && job['file_group']
+    create_and_execute_file_list_transfer(project, job)
+  else
+    create_transfer_job_via_api(project, job['config'])
+  end
+end
+
+# Helper to execute all STS jobs with confirmation
+def execute_sts_jobs_with_confirmation(project, job_configs, common)
+  total_jobs = job_configs.length
 
   # Get user confirmation
   common.status "="*60
@@ -565,16 +624,7 @@ def execute_sts_configs(project, job_configs, dry_run = false)
 
   job_configs.each_with_index do |job, index|
     begin
-      common.status "\n[#{index + 1}/#{total_jobs}] Creating transfer job: #{job['job_name']}"
-
-      if job['job_type'] == 'file_list_transfer' && job['file_group']
-        # For file list transfers, we need to create the manifest first
-        create_and_execute_file_list_transfer(project, job)
-      else
-        # For folder transfers, just execute the config
-        create_transfer_job_via_api(project, job['config'])
-      end
-
+      execute_single_sts_job(project, job, index, total_jobs, common)
       successful_jobs += 1
     rescue => e
       common.error "Failed to create job #{job['job_name']}: #{e.message}"
@@ -582,11 +632,23 @@ def execute_sts_configs(project, job_configs, dry_run = false)
     end
   end
 
+  # Display summary
   common.status "\n" + "="*60
   common.status "Transfer job creation complete:"
   common.status "  Successful: #{successful_jobs} job(s)"
   common.status "  Failed: #{failed_jobs} job(s)" if failed_jobs > 0
   common.status "="*60
+end
+
+# Execute STS job configurations
+def execute_sts_configs(project, job_configs, dry_run = false)
+  common = Common.new
+
+  if dry_run
+    display_sts_dry_run_summary(common, job_configs)
+  else
+    execute_sts_jobs_with_confirmation(project, job_configs, common)
+  end
 end
 
 # Helper to create manifest and execute file list transfer
@@ -642,72 +704,63 @@ def create_and_execute_file_list_transfer(project, job)
   end
 end
 
-# Post-process VWB files to rename them if needed
-# Helper method to create VWB copy manifests
-def vwb_create_copy_manifests_mode(opts, tier, working_dir)
-  common = Common.new
-  common.status "Starting: VWB copy manifest creation"
-
-  copy_manifests = {}
-  output_manifests = {}
-  output_manifest_path = -> (source_name) { "#{working_dir}/#{source_name}_output_manifest.csv" }
-  copy_manifest_files = []
-
-  input_manifest = parse_input_manifest(opts.input_manifest_file)
-
-  # Process AW4 Microarray sources
+# Helper to process AW4 Microarray sources
+def process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
   aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
-  unless aw4_microarray_sources.nil? or aw4_microarray_sources.empty?
-    if opts.microarray_rids_file.to_s.empty?
-      raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
-    end
-    microarray_aw4_rows = read_all_microarray_aw4s(opts.project, read_research_ids_file(opts.microarray_rids_file))
+  return if aw4_microarray_sources.nil? || aw4_microarray_sources.empty?
 
-    aw4_microarray_sources.each do |source_name, section|
-      common.status("building VWB manifest for '#{source_name}'")
-      copy, output = build_vwb_copy_manifest_for_aw4_section(
-        section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name))
-      key_name = "aw4_microarray_" + source_name
-      copy_manifests[key_name] = copy
-      unless output.nil?
-        output_manifests[key_name] = output
-      end
-    end
+  if opts.microarray_rids_file.to_s.empty?
+    raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
   end
 
-  # Process AW4 WGS sources
+  microarray_aw4_rows = read_all_microarray_aw4s(opts.project, read_research_ids_file(opts.microarray_rids_file))
+
+  aw4_microarray_sources.each do |source_name, section|
+    common.status("building VWB manifest for '#{source_name}'")
+    copy, output = build_vwb_copy_manifest_for_aw4_section(
+      section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name))
+    key_name = "aw4_microarray_" + source_name
+    copy_manifests[key_name] = copy
+    output_manifests[key_name] = output unless output.nil?
+  end
+end
+
+# Helper to process AW4 WGS sources
+def process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
   aw4_wgs_sources = input_manifest["aw4WgsSources"]
-  unless aw4_wgs_sources.nil? or aw4_wgs_sources.empty?
-    if opts.wgs_rids_file.to_s.empty?
-      raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
-    end
-    wgs_aw4_rows = read_all_wgs_aw4s(opts.project, read_research_ids_file(opts.wgs_rids_file))
+  return if aw4_wgs_sources.nil? || aw4_wgs_sources.empty?
 
-    aw4_wgs_sources.each do |source_name, section|
-      common.status("building VWB manifest for '#{source_name}'")
-      copy, output = build_vwb_copy_manifest_for_aw4_section(
-        section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name))
-      key_name = "aw4_wgs_" + source_name
-      copy_manifests[key_name] = copy
-      unless output.nil?
-        output_manifests[key_name] = output
-      end
-    end
+  if opts.wgs_rids_file.to_s.empty?
+    raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
   end
 
-  # Process curation sources
+  wgs_aw4_rows = read_all_wgs_aw4s(opts.project, read_research_ids_file(opts.wgs_rids_file))
+
+  aw4_wgs_sources.each do |source_name, section|
+    common.status("building VWB manifest for '#{source_name}'")
+    copy, output = build_vwb_copy_manifest_for_aw4_section(
+      section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name))
+    key_name = "aw4_wgs_" + source_name
+    copy_manifests[key_name] = copy
+    output_manifests[key_name] = output unless output.nil?
+  end
+end
+
+# Helper to process curation sources
+def process_curation_sources(input_manifest, tier, opts, common, copy_manifests)
   curation_sources = input_manifest["curationSources"]
-  unless curation_sources.nil? or curation_sources.empty?
-    curation_sources.each do |source_name, section|
-      common.status("building VWB manifest for '#{source_name}'")
-      copy_manifests["curation_" + source_name] = build_vwb_copy_manifest_for_curation_section(
-        section, tier[:dest_cdr_bucket], opts.display_version_id)
-    end
-  end
+  return if curation_sources.nil? || curation_sources.empty?
 
-  if copy_manifests.empty?
-    raise ArgumentError.new("CREATE_COPY_MANIFESTS was requested, but no copy manifests were created, input manifest may be empty")
+  curation_sources.each do |source_name, section|
+    common.status("building VWB manifest for '#{source_name}'")
+    copy_manifests["curation_" + source_name] = build_vwb_copy_manifest_for_curation_section(
+      section, tier[:dest_cdr_bucket], opts.display_version_id)
   end
+end
+
+# Helper to write manifests to files
+def write_manifests_to_files(copy_manifests, output_manifests, working_dir, output_manifest_path)
+  copy_manifest_files = []
 
   # Write copy manifests to files
   copy_manifests.each do |source_name, copy_manifest|
@@ -728,9 +781,11 @@ def vwb_create_copy_manifests_mode(opts, tier, working_dir)
     end
   end
 
-  common.status "Finished: VWB manifests created"
+  return copy_manifest_files
+end
 
-  # Generate and save Storage Transfer Service job configurations
+# Helper to generate and save STS configurations
+def generate_and_save_sts_configs(opts, working_dir, copy_manifest_files, common)
   common.status "Generating Storage Transfer Service job configurations..."
 
   # Get the environment configuration
@@ -759,6 +814,36 @@ def vwb_create_copy_manifests_mode(opts, tier, working_dir)
   end
 
   common.status "You can review and modify these configurations before running PUBLISH"
+end
+
+# Post-process VWB files to rename them if needed
+# Helper method to create VWB copy manifests
+def vwb_create_copy_manifests_mode(opts, tier, working_dir)
+  common = Common.new
+  common.status "Starting: VWB copy manifest creation"
+
+  copy_manifests = {}
+  output_manifests = {}
+  output_manifest_path = -> (source_name) { "#{working_dir}/#{source_name}_output_manifest.csv" }
+
+  input_manifest = parse_input_manifest(opts.input_manifest_file)
+
+  # Process different source types
+  process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
+  process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
+  process_curation_sources(input_manifest, tier, opts, common, copy_manifests)
+
+  if copy_manifests.empty?
+    raise ArgumentError.new("CREATE_COPY_MANIFESTS was requested, but no copy manifests were created, input manifest may be empty")
+  end
+
+  # Write manifests to files
+  copy_manifest_files = write_manifests_to_files(copy_manifests, output_manifests, working_dir, output_manifest_path)
+
+  common.status "Finished: VWB manifests created"
+
+  # Generate and save STS configurations
+  generate_and_save_sts_configs(opts, working_dir, copy_manifest_files, common)
 
   copy_manifest_files
 end
@@ -830,23 +915,10 @@ def vwb_post_process_mode(opts, copy_manifest_files, working_dir)
   end
 end
 
-def post_process_vwb_files(project, manifest_files, dry_run = false)
-  common = Common.new
-
-  # Get the publisher account for impersonation
-  env = ENVIRONMENTS[project]
-  deploy_account = env.fetch(:publisher_account)
-
-  if dry_run
-    common.status "Starting VWB post-processing (DRY RUN)..."
-  else
-    common.status "Starting VWB post-processing..."
-  end
-
-  total_files_to_rename = 0
+# Helper to collect files that need renaming from manifest files
+def collect_files_to_rename(manifest_files)
   files_to_rename = []
 
-  # Read all manifest files and identify files that need renaming
   manifest_files.each do |manifest_file|
     CSV.foreach(manifest_file, headers: true) do |row|
       source = row["source"]
@@ -867,53 +939,42 @@ def post_process_vwb_files(project, manifest_files, dry_run = false)
           :dest_name => dest_filename,
           :destination_path => destination
         })
-        total_files_to_rename += 1
       end
     end
   end
 
-  if total_files_to_rename == 0
-    common.status "No files need renaming. Post-processing complete."
-    return
+  return files_to_rename
+end
+
+# Helper to display dry run summary for file renaming
+def display_rename_dry_run(common, files_to_rename)
+  total_files = files_to_rename.length
+
+  common.status "="*60
+  common.status "DRY RUN: Would rename #{total_files} file(s)"
+  common.status "="*60
+  common.status ""
+
+  # Show sample of files to be renamed
+  sample_size = [5, total_files].min
+  common.status "Sample files to be renamed (showing #{sample_size} of #{total_files}):"
+
+  files_to_rename.take(sample_size).each do |file|
+    common.status "  #{file[:source_name]} -> #{file[:dest_name]}"
+    common.status "    at: #{file[:destination_path]}"
   end
 
-  if dry_run
-    common.status "="*60
-    common.status "DRY RUN: Would rename #{total_files_to_rename} file(s)"
-    common.status "="*60
-    common.status ""
-
-    # Show sample of files to be renamed
-    sample_size = [5, total_files_to_rename].min
-    common.status "Sample files to be renamed (showing #{sample_size} of #{total_files_to_rename}):"
-    files_to_rename.take(sample_size).each do |file|
-      common.status "  #{file[:source_name]} -> #{file[:dest_name]}"
-      common.status "    at: #{file[:destination_path]}"
-    end
-
-    if total_files_to_rename > sample_size
-      common.status "  ... and #{total_files_to_rename - sample_size} more file(s)"
-    end
-
-    common.status ""
-    common.status "DRY RUN COMPLETE: No files were renamed"
-    return
+  if total_files > sample_size
+    common.status "  ... and #{total_files - sample_size} more file(s)"
   end
-
-  # Get user confirmation for actual renaming
-  common.status "="*60
-  common.status "POST-PROCESSING: About to rename #{total_files_to_rename} file(s)"
-  common.status "="*60
-
-  get_user_confirmation(
-    "\nAbout to rename #{total_files_to_rename} file(s) in the VWB CDR bucket.\n" +
-    "This will modify file names in place.\n\n" +
-    "Are you sure you want to proceed?"
-  )
 
   common.status ""
-  common.status "Renaming files..."
+  common.status "DRY RUN COMPLETE: No files were renamed"
+end
 
+# Helper to perform actual file renaming
+def perform_file_renaming(common, files_to_rename, deploy_account)
+  total_files = files_to_rename.length
   successful_renames = 0
   failed_renames = 0
 
@@ -928,7 +989,7 @@ def post_process_vwb_files(project, manifest_files, dry_run = false)
     new_path = file[:destination_path]
 
     begin
-      common.status "[#{index + 1}/#{total_files_to_rename}] Renaming: #{file[:source_name]} -> #{file[:dest_name]}"
+      common.status "[#{index + 1}/#{total_files}] Renaming: #{file[:source_name]} -> #{file[:dest_name]}"
 
       # Use gcloud storage mv with impersonation to rename the file
       cmd = [
@@ -946,6 +1007,50 @@ def post_process_vwb_files(project, manifest_files, dry_run = false)
     end
   end
 
+  return successful_renames, failed_renames
+end
+
+def post_process_vwb_files(project, manifest_files, dry_run = false)
+  common = Common.new
+
+  # Get the publisher account for impersonation
+  env = ENVIRONMENTS[project]
+  deploy_account = env.fetch(:publisher_account)
+
+  common.status dry_run ? "Starting VWB post-processing (DRY RUN)..." : "Starting VWB post-processing..."
+
+  # Collect files that need renaming
+  files_to_rename = collect_files_to_rename(manifest_files)
+  total_files_to_rename = files_to_rename.length
+
+  if total_files_to_rename == 0
+    common.status "No files need renaming. Post-processing complete."
+    return
+  end
+
+  if dry_run
+    display_rename_dry_run(common, files_to_rename)
+    return
+  end
+
+  # Get user confirmation for actual renaming
+  common.status "="*60
+  common.status "POST-PROCESSING: About to rename #{total_files_to_rename} file(s)"
+  common.status "="*60
+
+  get_user_confirmation(
+    "\nAbout to rename #{total_files_to_rename} file(s) in the VWB CDR bucket.\n" +
+    "This will modify file names in place.\n\n" +
+    "Are you sure you want to proceed?"
+  )
+
+  common.status ""
+  common.status "Renaming files..."
+
+  # Perform the actual renaming
+  successful_renames, failed_renames = perform_file_renaming(common, files_to_rename, deploy_account)
+
+  # Display summary
   common.status ""
   common.status "="*60
   common.status "Post-processing complete:"
