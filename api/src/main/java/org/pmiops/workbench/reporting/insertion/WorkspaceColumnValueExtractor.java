@@ -52,9 +52,9 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId),
   WORKSPACE_NAMESPACE("workspace_namespace", ReportingWorkspace::getWorkspaceNamespace),
   FOCUS_ON_UNDER_REPRESENTED_POPULATIONS(
-      "focusOnUnderrepresentedPopulations",
+      "focus_on_under_represented_populations",
       ReportingWorkspace::isFocusOnUnderrepresentedPopulations),
-  WORKSPACE_DEMOGRAPHIC("workspaceDemographic", ReportingWorkspace::getWorkspaceDemographic);
+  WORKSPACE_DEMOGRAPHIC("workspace_demographic", w -> w.getWorkspaceDemographic().toString());
 
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;
