@@ -273,207 +273,6 @@ def create_transfer_job_via_api(project, job_config, service_account = nil)
   end
 end
 
-# Create Storage Transfer Service job for VWB folder transfers
-def create_vwb_folder_transfer(project, source, destination, storage_class, job_name, dry_run = false, service_account = nil)
-  common = Common.new
-
-  # Extract bucket and path components
-  source_bucket = source.gsub("gs://", "").split("/")[0]
-  source_path = source.gsub(/^gs:\/\/[^\/]+\//, "")
-
-  dest_bucket = destination.gsub("gs://", "").split("/")[0]
-  dest_path = destination.gsub(/^gs:\/\/[^\/]+\//, "")
-
-  if dry_run
-    # Ensure paths end with / for display
-    source_path_display = source_path.end_with?("/") ? source_path : "#{source_path}/"
-    dest_path_display = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
-
-    common.status "DRY RUN: Would create folder transfer job: #{job_name}"
-    common.status "  Source: gs://#{source_bucket}/#{source_path_display}"
-    common.status "  Destination: gs://#{dest_bucket}/#{dest_path_display}"
-    common.status "  Storage Class: #{storage_class || 'STANDARD'}"
-    common.status "  Transfer Project: #{project}"
-
-    # Try to count objects in the source folder
-    begin
-      count_cmd = ["gsutil", "ls", "-r", source]
-      result = common.capture_stdout(count_cmd).split("\n")
-      file_count = result.select { |line| !line.end_with?("/") && !line.end_with?(":") }.count
-      common.status "  Estimated files: #{file_count}"
-    rescue => e
-      common.status "  Estimated files: Unable to count (#{e.message})"
-    end
-
-    common.status ""
-    return
-  end
-
-  # Ensure paths end with / for folder transfers
-  source_path_with_slash = source_path.end_with?("/") ? source_path : "#{source_path}/"
-  dest_path_with_slash = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
-
-  # Build transfer job configuration
-  # Note: The API doesn't accept a 'name' field - it generates one automatically
-  job_config = {
-    "description" => "VWB folder transfer: #{source_path} to #{dest_path} (#{job_name})",
-    "status" => "ENABLED",
-    "schedule" => {
-      "scheduleStartDate" => {
-        "year" => Time.now.year,
-        "month" => Time.now.month,
-        "day" => Time.now.day
-      },
-      "scheduleEndDate" => {
-        "year" => Time.now.year,
-        "month" => Time.now.month,
-        "day" => Time.now.day
-      }
-    },
-    "transferSpec" => {
-      "gcsDataSource" => {
-        "bucketName" => source_bucket,
-        "path" => source_path_with_slash
-      },
-      "gcsDataSink" => {
-        "bucketName" => dest_bucket,
-        "path" => dest_path_with_slash
-      },
-      "transferOptions" => {
-        "overwriteObjectsAlreadyExistingInSink" => true
-      }
-    }
-  }
-
-  # Add the service account at the root level if provided
-  if service_account
-    job_config["serviceAccount"] = service_account
-  end
-
-  # Add storage class if not STANDARD
-  if storage_class && storage_class != "STANDARD"
-    job_config["transferSpec"]["objectConditions"] = {
-      "storageClass" => storage_class
-    }
-  end
-
-  # Create the transfer job via REST API
-  create_transfer_job_via_api(project, job_config, service_account)
-end
-
-# Create Storage Transfer Service job for grouped file transfers
-def create_vwb_file_list_transfer(project, file_group, job_name, dry_run = false, service_account = nil)
-  common = Common.new
-
-  if dry_run
-    common.status "DRY RUN: Would create file list transfer job: #{job_name}"
-    common.status "  Number of files: #{file_group[:files].length}"
-    common.status "  Storage Class: #{file_group[:storage_class] || 'STANDARD'}"
-
-    # Show sample files (first 3 and last 2)
-    if file_group[:files].length > 0
-      common.status "  Sample files:"
-      sample_files = file_group[:files].take(3)
-      sample_files.each do |file|
-        common.status "    #{file[:source]} -> #{file[:destination]}"
-      end
-
-      if file_group[:files].length > 5
-        common.status "    ... (#{file_group[:files].length - 5} more files) ..."
-        file_group[:files].last(2).each do |file|
-          common.status "    #{file[:source]} -> #{file[:destination]}"
-        end
-      elsif file_group[:files].length > 3
-        file_group[:files].drop(3).each do |file|
-          common.status "    #{file[:source]} -> #{file[:destination]}"
-        end
-      end
-    end
-
-    common.status ""
-    return
-  end
-
-  # Create a temporary manifest file listing all files to transfer
-  manifest_file = Tempfile.new(["vwb-transfer-manifest-", ".txt"])
-
-  begin
-    # Write source file paths to manifest
-    file_group[:files].each do |file|
-      # Extract object path from full GCS URL
-      object_path = file[:source].gsub(/^gs:\/\/[^\/]+\//, "")
-      manifest_file.puts(object_path)
-    end
-    manifest_file.close
-
-    # Get source and destination buckets (assuming all files in group share same buckets)
-    first_file = file_group[:files].first
-    source_bucket = first_file[:source].gsub("gs://", "").split("/")[0]
-    dest_bucket = first_file[:destination].gsub("gs://", "").split("/")[0]
-
-    # Upload manifest to a temporary location in the destination bucket
-    # Using the destination bucket with a temp folder to avoid permission issues
-    # NOTE: Remember to manually clean up the temp-manifests folder after transfers complete
-    temp_manifest_path = "gs://#{dest_bucket}/temp-manifests/#{job_name}-manifest.txt"
-
-    # Upload manifest file (no need to create bucket since we're using the existing destination bucket)
-    common.run_inline(["gsutil", "cp", manifest_file.path, temp_manifest_path])
-
-    # Build transfer job configuration for file list transfer
-    # Note: The API doesn't accept a 'name' field - it generates one automatically
-    job_config = {
-      "description" => "VWB file list transfer: #{file_group[:files].length} files (#{job_name})",
-      "status" => "ENABLED",
-      "schedule" => {
-        "scheduleStartDate" => {
-          "year" => Time.now.year,
-          "month" => Time.now.month,
-          "day" => Time.now.day
-        },
-        "scheduleEndDate" => {
-          "year" => Time.now.year,
-          "month" => Time.now.month,
-          "day" => Time.now.day
-        }
-      },
-      "transferSpec" => {
-        "gcsDataSource" => {
-          "bucketName" => source_bucket
-        },
-        "gcsDataSink" => {
-          "bucketName" => dest_bucket
-        },
-        "transferManifest" => {
-          "location" => temp_manifest_path
-        },
-        "transferOptions" => {
-          "overwriteObjectsAlreadyExistingInSink" => true
-        }
-      }
-    }
-
-    # Add the service account at the root level if provided
-    if service_account
-      job_config["serviceAccount"] = service_account
-    end
-
-    # Add storage class if not STANDARD
-    if file_group[:storage_class] && file_group[:storage_class] != "STANDARD"
-      job_config["transferSpec"]["objectConditions"] = {
-        "storageClass" => file_group[:storage_class]
-      }
-    end
-
-    # Create the transfer job via REST API
-    create_transfer_job_via_api(project, job_config, service_account)
-
-    # Clean up temporary manifest
-    common.run_inline(["gsutil", "rm", temp_manifest_path])
-
-  ensure
-    manifest_file.unlink if manifest_file
-  end
-end
 
 # Generate Storage Transfer Service job configurations from manifest files
 def generate_sts_job_configs(project, manifest_files, jira_ticket = nil, service_account = nil)
@@ -774,6 +573,10 @@ def create_and_execute_file_list_transfer(project, job)
   common = Common.new
   file_group = job['file_group']
 
+  # Get service account from the job config for impersonation
+  service_account = job['config']['serviceAccount']
+  impersonate_args = service_account ? ["-i", service_account] : []
+
   # Create a temporary manifest file
   manifest_file = Tempfile.new(["vwb-transfer-manifest-", ".txt"])
 
@@ -785,107 +588,17 @@ def create_and_execute_file_list_transfer(project, job)
     end
     manifest_file.close
 
-    # Upload manifest to the location specified in config
+    # Upload manifest to the location specified in config using SA impersonation
     manifest_path = job['config']['transferSpec']['transferManifest']['location']
-    common.run_inline(["gsutil", "cp", manifest_file.path, manifest_path])
+    common.run_inline(["gsutil"] + impersonate_args + ["cp", manifest_file.path, manifest_path])
 
     # Create the transfer job
     create_transfer_job_via_api(project, job['config'])
 
-    # Clean up temporary manifest
-    common.run_inline(["gsutil", "rm", manifest_path])
+    # Clean up temporary manifest using SA impersonation
+    common.run_inline(["gsutil"] + impersonate_args + ["rm", manifest_path])
   ensure
     manifest_file.unlink if manifest_file
-  end
-end
-
-# Execute VWB publishing using Storage Transfer Service
-def publish_vwb_manifests(project, manifest_files, jira_ticket = nil, dry_run = false, service_account = nil)
-  common = Common.new
-
-  if dry_run
-    common.status "Building VWB publish configurations (DRY RUN)..."
-  else
-    common.status "Building VWB publish configurations..."
-  end
-
-  configs = build_vwb_publish_configs(manifest_files)
-
-  job_index = 1
-  total_folder_transfers = configs[:folder_transfers].length
-  total_file_groups = configs[:file_transfer_groups].select { |g| !g[:files].empty? }.length
-  total_transfers = total_folder_transfers + total_file_groups
-
-  if dry_run
-    common.status "="*60
-    common.status "DRY RUN SUMMARY: Would create #{total_transfers} Storage Transfer Service job(s)"
-    common.status "  - #{total_folder_transfers} folder transfer(s)"
-    common.status "  - #{total_file_groups} file group transfer(s)"
-    common.status "="*60
-    common.status ""
-  else
-    # Get user confirmation before creating actual transfer jobs
-    common.status "="*60
-    common.status "TRANSFER SUMMARY: About to create #{total_transfers} Storage Transfer Service job(s)"
-    common.status "  - #{total_folder_transfers} folder transfer(s)"
-    common.status "  - #{total_file_groups} file group transfer(s)"
-    common.status "="*60
-
-    get_user_confirmation(
-      "\nAbout to create #{total_transfers} VWB Storage Transfer Service job(s).\n" +
-      "These transfers will copy data to the VWB CDR bucket.\n\n" +
-      "Are you sure you want to proceed?"
-    )
-    common.status ""
-  end
-
-  # Process folder transfers
-  configs[:folder_transfers].each do |transfer|
-    job_name = "vwb-folder-transfer-#{job_index}"
-    job_name = "#{jira_ticket}-#{job_name}" if jira_ticket
-
-    if dry_run
-      common.status "[Transfer Job #{job_index}/#{total_transfers}]"
-    else
-      common.status "Creating folder transfer job: #{job_name}"
-    end
-
-    create_vwb_folder_transfer(
-      project,
-      transfer[:source],
-      transfer[:destination],
-      transfer[:storage_class],
-      job_name,
-      dry_run,
-      service_account
-    )
-    job_index += 1
-  end
-
-  # Process grouped file transfers
-  configs[:file_transfer_groups].each do |file_group|
-    next if file_group[:files].empty?
-
-    job_name = "vwb-files-transfer-#{job_index}"
-    job_name = "#{jira_ticket}-#{job_name}" if jira_ticket
-
-    if dry_run
-      common.status "[Transfer Job #{job_index}/#{total_transfers}]"
-    else
-      common.status "Creating file list transfer job: #{job_name} (#{file_group[:files].length} files)"
-    end
-
-    create_vwb_file_list_transfer(project, file_group, job_name, dry_run, service_account)
-    job_index += 1
-  end
-
-  if dry_run
-    common.status "="*60
-    common.status "DRY RUN COMPLETE: No transfer jobs were created"
-    common.status "To create the transfer jobs, run the command again without --dry-run"
-    common.status "="*60
-  else
-    common.status "Created #{job_index - 1} transfer jobs"
   end
 end
 
@@ -1014,36 +727,13 @@ def vwb_publish_mode(opts, copy_manifest_files, working_dir)
   # Load STS job configurations from the storage_transfer_configs directory
   config_dir = File.join(working_dir, "storage_transfer_configs")
 
-  begin
-    job_configs = load_sts_configs(config_dir)
-  rescue ArgumentError => e
-    # Fallback to old behavior if configs don't exist
-    common.status "No STS config files found, falling back to generating from manifests..."
-
-    # Find manifest files if not provided
-    if copy_manifest_files.empty?
-      copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
-      if copy_manifest_files.empty?
-        raise ArgumentError.new(
-          "no copy manifests generated or found in the working dir #{working_dir}; if you " +
-            "are running PUBLISH without CREATE_COPY_MANIFESTS, be sure to " +
-            "specify an existing --working-dir which contains copy manifest CSV files")
-      end
-    end
-
-    # Get the environment configuration
-    env = ENVIRONMENTS[opts.project]
-    service_account = env.fetch(:publisher_account)
-    publishing_project = env.fetch(:publishing_project, opts.project)
-
-    # Generate configs on the fly
-    job_configs = generate_sts_job_configs(
-      publishing_project,
-      copy_manifest_files,
-      opts.jira_ticket,
-      service_account
-    )
+  unless File.directory?(config_dir)
+    raise ArgumentError.new(
+      "STS config directory not found: #{config_dir}\n" +
+      "Please run with CREATE_COPY_MANIFESTS task first to generate the configurations.")
   end
+
+  job_configs = load_sts_configs(config_dir)
 
   # Get the publishing project for execution
   env = ENVIRONMENTS[opts.project]
