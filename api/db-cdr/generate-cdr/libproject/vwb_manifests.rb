@@ -238,7 +238,7 @@ def build_vwb_publish_configs(manifest_files)
   }
 end
 
-# Helper function to get OAuth token for the current user
+# Helper function to get OAuth token for the current user1
 def get_token()
   common = Common.new
   # Use gcloud to get an access token for the current logged-in user
@@ -667,48 +667,45 @@ def execute_sts_configs(project, job_configs, dry_run = false)
   end
 end
 
-# Helper to create manifest and execute file list transfer
-def create_and_execute_file_list_transfer(project, job)
-  common = Common.new
+# Helper to get impersonation arguments for service account
+def get_impersonation_args(service_account)
+  service_account ? ["-i", service_account] : []
+end
 
-  # Get service account from the job config for impersonation
-  service_account = job['config']['serviceAccount']
-  impersonate_args = service_account ? ["-i", service_account] : []
+# Helper to upload pre-created manifest to GCS
+def upload_pre_created_manifest(common, local_path, gcs_path, impersonate_args)
+  common.status "Uploading pre-created manifest to GCS: #{File.basename(local_path)}"
+  common.run_inline(["gsutil"] + impersonate_args + ["cp", local_path, gcs_path])
+end
 
-  # Get the manifest path from config
-  manifest_path = job['config']['transferSpec']['transferManifest']['location']
+# Helper to create and upload manifest on the fly
+def create_and_upload_manifest_on_fly(common, job, manifest_path, impersonate_args)
+  common.warning "No pre-created manifest found, generating on the fly"
+  file_group = job['file_group']
 
-  # Check if we have a pre-created local manifest
-  if job['local_manifest_path'] && File.exist?(job['local_manifest_path'])
-    # Upload the pre-created manifest to GCS using SA impersonation
-    common.status "Uploading pre-created manifest to GCS: #{File.basename(job['local_manifest_path'])}"
-    common.run_inline(["gsutil"] + impersonate_args + ["cp", job['local_manifest_path'], manifest_path])
-  else
-    # Fallback: create manifest on the fly (shouldn't happen in normal flow)
-    common.warning "No pre-created manifest found, generating on the fly"
-    file_group = job['file_group']
-
-    # Create a temporary manifest file
-    manifest_file = Tempfile.new(["vwb-transfer-manifest-", ".txt"])
-
-    begin
-      # Write source file paths to manifest
-      file_group['files'].each do |file|
-        object_path = file['source'].gsub(/^gs:\/\/[^\/]+\//, "")
-        manifest_file.puts(object_path)
-      end
-      manifest_file.close
-
-      # Upload manifest to GCS using SA impersonation
-      common.run_inline(["gsutil"] + impersonate_args + ["cp", manifest_file.path, manifest_path])
-    ensure
-      manifest_file.unlink if manifest_file
-    end
-  end
+  # Create a temporary manifest file
+  manifest_file = Tempfile.new(["vwb-transfer-manifest-", ".txt"])
 
   begin
+    # Write source file paths to manifest
+    file_group['files'].each do |file|
+      object_path = file['source'].gsub(/^gs:\/\/[^\/]+\//, "")
+      manifest_file.puts(object_path)
+    end
+    manifest_file.close
+
+    # Upload manifest to GCS using SA impersonation
+    common.run_inline(["gsutil"] + impersonate_args + ["cp", manifest_file.path, manifest_path])
+  ensure
+    manifest_file.unlink if manifest_file
+  end
+end
+
+# Helper to execute transfer job and cleanup
+def execute_transfer_and_cleanup(common, project, job_config, manifest_path, impersonate_args)
+  begin
     # Create the transfer job
-    create_transfer_job_via_api(project, job['config'])
+    create_transfer_job_via_api(project, job_config)
 
     # Clean up temporary manifest from GCS using SA impersonation
     common.status "Cleaning up manifest from GCS"
@@ -718,6 +715,28 @@ def create_and_execute_file_list_transfer(project, job)
     common.run_inline(["gsutil"] + impersonate_args + ["rm", manifest_path]) rescue nil
     raise e
   end
+end
+
+# Helper to create manifest and execute file list transfer
+def create_and_execute_file_list_transfer(project, job)
+  common = Common.new
+
+  # Get service account and impersonation args
+  service_account = job['config']['serviceAccount']
+  impersonate_args = get_impersonation_args(service_account)
+
+  # Get the manifest path from config
+  manifest_path = job['config']['transferSpec']['transferManifest']['location']
+
+  # Upload manifest to GCS
+  if job['local_manifest_path'] && File.exist?(job['local_manifest_path'])
+    upload_pre_created_manifest(common, job['local_manifest_path'], manifest_path, impersonate_args)
+  else
+    create_and_upload_manifest_on_fly(common, job, manifest_path, impersonate_args)
+  end
+
+  # Execute transfer job and cleanup
+  execute_transfer_and_cleanup(common, project, job['config'], manifest_path, impersonate_args)
 end
 
 # Helper to process AW4 Microarray sources
