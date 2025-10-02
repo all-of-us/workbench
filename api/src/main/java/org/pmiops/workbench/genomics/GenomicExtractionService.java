@@ -358,21 +358,18 @@ public class GenomicExtractionService {
 
     if (useLegacyWorkflow) {
       // Added in https://github.com/broadinstitute/gatk/pull/7698
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"");
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
       maybeInputs.put(
           EXTRACT_WORKFLOW_NAME + ".gatk_override",
           "\"" + cohortExtractionConfig.legacyVersions.gatkJarUri + "\"");
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatterCount));
-    } else {
-      // Added Nov 2024 for v8
-      // replaces extraction_uuid and cohort_table_prefix which are now set to this value
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".call_set_identifier", "\"" + extractionUuid + "\"");
-      // added Jan 2025: new parameter name for scatter count override in v8
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".extract_scatter_count_override",
-          Integer.toString(scatterCount));
     }
+
+    // Added Nov 2024 for v8 and incorporated into v7 Aug 2025
+    // replaces extraction_uuid and cohort_table_prefix which are now set to this value
+    maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".call_set_identifier", "\"" + extractionUuid + "\"");
+    // added Jan 2025: new parameter name for scatter count override in v8
+    // added to v7 in Aug 2025
+    maybeInputs.put(
+        EXTRACT_WORKFLOW_NAME + ".extract_scatter_count_override", Integer.toString(scatterCount));
 
     Blob personIdsFile =
         extractionServiceAccountCloudStorageClientProvider
