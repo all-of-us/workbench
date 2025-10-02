@@ -12,6 +12,60 @@ require_relative "../../../libproject/affirm"
 # This module handles the data flow for VWB environments without an ingest step:
 #   Source (Genome Centers / Broad genomic curation) -> VWB CDR bucket
 
+# Helper to process a single AW4 column for copy manifest
+def process_aw4_column(aw4_row, aw4_column, input_section, destination_base, copy_manifest, output_manifest)
+  source_path = aw4_row[aw4_column]
+  return if source_path.nil? || source_path.empty?
+
+  # Build copy manifest entry
+  manifest_entry = build_aw4_manifest_entry(source_path, input_section, destination_base, aw4_row["research_id"])
+  copy_manifest.push(manifest_entry)
+
+  # Build output manifest entry if needed
+  build_aw4_output_manifest_entry(input_section, aw4_row, aw4_column, manifest_entry["destination"], output_manifest)
+end
+
+# Helper to build manifest entry for AW4 files
+def build_aw4_manifest_entry(source_path, input_section, destination_base, rid)
+  source_name = File.basename(source_path)
+  dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
+  destination_path = File.join(destination_base, dest_name)
+  storage_class = input_section.fetch("storageClass", "STANDARD")
+
+  {
+    "source" => source_path,
+    "destination" => destination_path,
+    "outputFileName" => dest_name,
+    "storageClass" => storage_class
+  }
+end
+
+# Helper to apply filename replacement for AW4 files
+def apply_aw4_filename_replacement(source_name, input_section, rid)
+  return source_name unless input_section["filenameReplace"]
+
+  _apply_vwb_filename_replacement(
+    source_name,
+    input_section["filenameMatch"],
+    input_section["filenameReplace"],
+    rid
+  )
+end
+
+# Helper to build output manifest entry for AW4 files
+def build_aw4_output_manifest_entry(input_section, aw4_row, aw4_column, destination_path, output_manifest)
+  return unless input_section["outputManifestSpec"]
+
+  output_row = {"research_id" => aw4_row["research_id"]}
+  input_section["outputManifestSpec"].each do |aw4_col, output_col|
+    if aw4_col == aw4_column
+      output_row[output_col] = destination_path
+    end
+  end
+
+  output_manifest.push(output_row) unless output_row.keys.size == 1
+end
+
 # Build VWB copy manifest for AW4 sections (Microarray and WGS)
 def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_version_id, aw4_rows, _output_manifest_path)
   copy_manifest = []
@@ -22,43 +76,7 @@ def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_
 
   aw4_rows.each do |aw4_row|
     input_section["aw4Columns"].each do |aw4_column|
-      source_path = aw4_row[aw4_column]
-      next if source_path.nil? or source_path.empty?
-
-      # Extract filename and apply replacements if specified
-      source_name = File.basename(source_path)
-      dest_name = source_name
-
-      if input_section["filenameReplace"]
-        rid = aw4_row["research_id"]
-        dest_name = _apply_vwb_filename_replacement(
-          source_name,
-          input_section["filenameMatch"],
-          input_section["filenameReplace"],
-          rid
-        )
-      end
-
-      destination_path = File.join(destination_base, dest_name)
-      storage_class = input_section.fetch("storageClass", "STANDARD")
-
-      copy_manifest.push({
-        "source" => source_path,
-        "destination" => destination_path,
-        "outputFileName" => dest_name,
-        "storageClass" => storage_class
-      })
-
-      # Build output manifest if specified
-      if input_section["outputManifestSpec"]
-        output_row = {"research_id" => aw4_row["research_id"]}
-        input_section["outputManifestSpec"].each do |aw4_col, output_col|
-          if aw4_col == aw4_column
-            output_row[output_col] = destination_path
-          end
-        end
-        output_manifest.push(output_row) unless output_row.keys.size == 1
-      end
+      process_aw4_column(aw4_row, aw4_column, input_section, destination_base, copy_manifest, output_manifest)
     end
   end
 
@@ -163,7 +181,6 @@ end
 # Build VWB publish configurations from manifest files
 # Groups transfers into folder transfers and file transfers for Storage Transfer Service
 def build_vwb_publish_configs(manifest_files)
-  common = Common.new
   folder_transfers = []
   file_transfers = []
 
@@ -222,10 +239,9 @@ def build_vwb_publish_configs(manifest_files)
 end
 
 # Helper function to get OAuth token for the current user
-def get_token(service_account)
+def get_token()
   common = Common.new
   # Use gcloud to get an access token for the current logged-in user
-  # (ignoring the service_account parameter, but keeping it for compatibility)
   token = common.capture_stdout([
     "gcloud", "auth", "print-access-token"
   ]).strip
@@ -388,7 +404,7 @@ def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket =
   job_configs.concat(folder_configs)
 
   # Process file list transfers
-  file_configs, job_index = process_file_list_transfers(configs, project, jira_ticket, service_account, job_index, sts_manifests_dir, common)
+  file_configs, _ = process_file_list_transfers(configs, project, jira_ticket, service_account, job_index, sts_manifests_dir, common)
   job_configs.concat(file_configs)
 
   common.status "Created #{configs[:file_transfer_groups].count { |g| !g[:files].empty? }} STS manifest files in #{sts_manifests_dir}"
