@@ -737,12 +737,46 @@ def setup_vwb_publish_options(op)
   return supported_tasks
 end
 
+# Helper validator for project requirement
+def validate_project_required(opts)
+  raise ArgumentError unless opts.project
+end
+
+# Helper validator for CREATE_COPY_MANIFESTS requirements
+def validate_copy_manifests_requirements(opts)
+  if opts.tasks.include?("CREATE_COPY_MANIFESTS") && (!opts.display_version_id || !opts.input_manifest_file)
+    raise ArgumentError.new("--input-manifest-file,--display-version-id are required for the CREATE_COPY_MANIFESTS task")
+  end
+end
+
+# Helper validator for supported tasks
+def validate_supported_tasks(opts, supported_tasks)
+  unsupported = opts.tasks - supported_tasks
+  unless unsupported.empty?
+    raise ArgumentError.new("unsupported tasks: #{opts.tasks}")
+  end
+end
+
+# Helper validator for supported project
+def validate_supported_project(opts)
+  unless ENVIRONMENTS.key?(opts.project)
+    raise ArgumentError.new("unsupported project: #{opts.project}")
+  end
+end
+
+# Helper validator for supported tier
+def validate_supported_tier(opts)
+  unless ENVIRONMENTS[opts.project][:accessTiers].key?(opts.tier)
+    raise ArgumentError.new("unsupported tier: #{opts.tier}")
+  end
+end
+
 def setup_vwb_publish_validators(op, supported_tasks)
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
-  op.add_validator ->(opts) { raise ArgumentError.new("--input-manifest-file,--display-version-id are required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and (not opts.display_version_id or not opts.input_manifest_file) }
-  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty? }
-  op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
-  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
+  op.add_validator ->(opts) { validate_project_required(opts) }
+  op.add_validator ->(opts) { validate_copy_manifests_requirements(opts) }
+  op.add_validator ->(opts) { validate_supported_tasks(opts, supported_tasks) }
+  op.add_validator ->(opts) { validate_supported_project(opts) }
+  op.add_validator ->(opts) { validate_supported_tier(opts) }
 end
 
 def execute_vwb_tasks(op, tier, working_dir)
