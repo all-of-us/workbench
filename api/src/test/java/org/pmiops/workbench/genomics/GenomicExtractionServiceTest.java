@@ -524,7 +524,10 @@ public class GenomicExtractionServiceTest {
     verify(mockMethodConfigurationsApi)
         .createWorkspaceMethodConfig(argument.capture(), any(), any());
     String actualScatter =
-        argument.getValue().getInputs().get(EXTRACT_WORKFLOW_NAME + ".extract_scatter_count_override");
+        argument
+            .getValue()
+            .getInputs()
+            .get(EXTRACT_WORKFLOW_NAME + ".extract_scatter_count_override");
     assertThat(actualScatter).isEqualTo("1500");
   }
 
