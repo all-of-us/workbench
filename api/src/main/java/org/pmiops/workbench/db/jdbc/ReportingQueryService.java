@@ -112,6 +112,4 @@ public interface ReportingQueryService {
   int getTableRowCount(String rwbTableName);
 
   int getAppUsageRowCount();
-
-  int getActiveWorkspaceCount();
 }

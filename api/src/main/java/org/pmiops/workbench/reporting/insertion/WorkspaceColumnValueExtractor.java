@@ -50,7 +50,8 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   RP_SOCIAL_BEHAVIORAL("rp_social_behavioral", ReportingWorkspace::isRpSocialBehavioral),
   RP_TIME_REQUESTED("rp_time_requested", w -> toInsertRowString(w.getRpTimeRequested())),
   WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId),
-  WORKSPACE_NAMESPACE("workspace_namespace", ReportingWorkspace::getWorkspaceNamespace);
+  WORKSPACE_NAMESPACE("workspace_namespace", ReportingWorkspace::getWorkspaceNamespace),
+  ACTIVE_STATUS("active_status", ReportingWorkspace::getActiveStatus);
 
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;
