@@ -86,10 +86,11 @@ export const EgressEventsTable = ({
       await Promise.all(
         uniqueUuidNamespaces.map(async (workspaceId) => {
           try {
-            const resp = await vwbWorkspaceAdminApi().getVwbWorkspacesBySearchParam(
-              VwbWorkspaceSearchParamType.WORKSPACEID,
-              workspaceId
-            );
+            const resp =
+              await vwbWorkspaceAdminApi().getVwbWorkspacesBySearchParam(
+                VwbWorkspaceSearchParamType.ID,
+                workspaceId
+              );
             if (resp.items?.length > 0) {
               newVwbIds.set(workspaceId, resp.items[0].userFacingId);
             }
@@ -210,7 +211,9 @@ export const EgressEventsTable = ({
             const userFacingId = vwbWorkspaceUserFacingIds.get(namespace);
             if (userFacingId) {
               return (
-                <StyledRouterLink path={`/admin/vwb/workspaces/${userFacingId}`}>
+                <StyledRouterLink
+                  path={`/admin/vwb/workspaces/${userFacingId}`}
+                >
                   {namespace}
                 </StyledRouterLink>
               );
