@@ -5,11 +5,14 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
 
-import { EgressEvent } from 'generated/fetch';
+import { EgressEvent, VwbWorkspaceSearchParamType } from 'generated/fetch';
 
 import { AdminUserLink } from 'app/components/admin/admin-user-link';
 import { StyledRouterLink } from 'app/components/buttons';
-import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
+import {
+  egressEventsAdminApi,
+  vwbWorkspaceAdminApi,
+} from 'app/services/swagger-fetch-clients';
 import { mutableEgressEventStatuses } from 'app/utils/egress-events';
 
 interface Props {
@@ -17,6 +20,13 @@ interface Props {
   sourceWorkspaceNamespace?: string;
   displayPageSize?: number;
 }
+
+// Helper function to check if a string is a UUID
+const isUUID = (str: string): boolean => {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+};
 
 export const EgressEventsTable = ({
   sourceUserEmail,
@@ -30,6 +40,10 @@ export const EgressEventsTable = ({
   const [totalRecords, setTotalRecords] = useState<number>(null);
   const [pendingUpdateEvent, setPendingUpdateEvent] =
     useState<EgressEvent>(null);
+  // Map of workspace UUID to user-facing ID for VWB workspaces
+  const [vwbWorkspaceUserFacingIds, setVwbWorkspaceUserFacingIds] = useState<
+    Map<string, string>
+  >(new Map());
 
   // This callback fetches more events and appends to the events array, if needed.
   // This works by continuing to walk the paginated stream until the given event count
@@ -61,9 +75,40 @@ export const EgressEventsTable = ({
       } while (pageToken && allLoadedEvents.length < atLeastCount);
       setEvents(allLoadedEvents);
       setNextPageToken(pageToken);
+
+      // Fetch VWB workspace user-facing IDs for any UUID namespaces
+      const newVwbIds = new Map(vwbWorkspaceUserFacingIds);
+      const uuidNamespaces = allLoadedEvents
+        .map((e) => e.sourceWorkspaceNamespace)
+        .filter((ns) => ns && isUUID(ns) && !newVwbIds.has(ns));
+
+      const uniqueUuidNamespaces = Array.from(new Set(uuidNamespaces));
+      await Promise.all(
+        uniqueUuidNamespaces.map(async (workspaceId) => {
+          try {
+            const resp = await vwbWorkspaceAdminApi().getVwbWorkspacesBySearchParam(
+              VwbWorkspaceSearchParamType.WORKSPACEID,
+              workspaceId
+            );
+            if (resp.items?.length > 0) {
+              newVwbIds.set(workspaceId, resp.items[0].userFacingId);
+            }
+          } catch (error) {
+            console.error(
+              `Failed to fetch VWB workspace for ${workspaceId}:`,
+              error
+            );
+          }
+        })
+      );
+
+      if (newVwbIds.size > vwbWorkspaceUserFacingIds.size) {
+        setVwbWorkspaceUserFacingIds(newVwbIds);
+      }
+
       setLoading(false);
     },
-    [loading, events, nextPageToken]
+    [loading, events, nextPageToken, vwbWorkspaceUserFacingIds]
   );
 
   const onRowEditSave = useCallback(async () => {
@@ -160,6 +205,20 @@ export const EgressEventsTable = ({
       <Column
         field='sourceWorkspaceNamespace'
         body={({ sourceWorkspaceNamespace: namespace }) => {
+          // Check if this is a VWB workspace (UUID format)
+          if (isUUID(namespace)) {
+            const userFacingId = vwbWorkspaceUserFacingIds.get(namespace);
+            if (userFacingId) {
+              return (
+                <StyledRouterLink path={`/admin/vwb/workspaces/${userFacingId}`}>
+                  {namespace}
+                </StyledRouterLink>
+              );
+            }
+            // If we don't have the user-facing ID yet, just show the UUID
+            return namespace;
+          }
+          // Regular RWB workspace
           return (
             <StyledRouterLink path={`/admin/workspaces/${namespace}`}>
               {namespace}
