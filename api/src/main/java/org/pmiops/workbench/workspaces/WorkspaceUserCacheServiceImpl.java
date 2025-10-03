@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -78,5 +79,10 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
   @Transactional
   public void removeInactiveWorkspaces() {
     workspaceUserCacheDao.deleteAllInactiveWorkspaces();
+  }
+
+  @Override
+  public Set<String> getWorkspaceUsers(Long workspaceId) {
+    return workspaceUserCacheDao.findAllUsersByWorkspaceId(workspaceId);
   }
 }
