@@ -13769,6 +13769,7 @@ components:
       enum:
         - WORKSPACE_CREATOR
         - WORKSPACE_USER_FACING_ID
+        - WORKSPACE_ID
         - WORKSPACE_NAME
         - WORKSPACE_SHARED
     VwbWorkspaceAdminView:
