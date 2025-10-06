@@ -12,34 +12,6 @@ require_relative "../../../libproject/affirm"
 # This module handles the data flow for VWB environments without an ingest step:
 #   Source (Genome Centers / Broad genomic curation) -> VWB CDR bucket
 
-# Helper to process a single AW4 column for copy manifest
-def process_aw4_column(aw4_row, aw4_column, input_section, destination_base, copy_manifest, output_manifest)
-  source_path = aw4_row[aw4_column]
-  return if source_path.nil? || source_path.empty?
-
-  # Build copy manifest entry
-  manifest_entry = build_aw4_manifest_entry(source_path, input_section, destination_base, aw4_row["research_id"])
-  copy_manifest.push(manifest_entry)
-
-  # Build output manifest entry if needed
-  build_aw4_output_manifest_entry(input_section, aw4_row, aw4_column, manifest_entry["destination"], output_manifest)
-end
-
-# Helper to build manifest entry for AW4 files
-def build_aw4_manifest_entry(source_path, input_section, destination_base, rid)
-  source_name = File.basename(source_path)
-  dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
-  destination_path = File.join(destination_base, dest_name)
-  storage_class = input_section.fetch("storageClass", "STANDARD")
-
-  {
-    "source" => source_path,
-    "destination" => destination_path,
-    "outputFileName" => dest_name,
-    "storageClass" => storage_class
-  }
-end
-
 # Helper to apply filename replacement for AW4 files
 def apply_aw4_filename_replacement(source_name, input_section, rid)
   return source_name unless input_section["filenameReplace"]
@@ -52,33 +24,146 @@ def apply_aw4_filename_replacement(source_name, input_section, rid)
   )
 end
 
-# Helper to build output manifest entry for AW4 files
-def build_aw4_output_manifest_entry(input_section, aw4_row, aw4_column, destination_path, output_manifest)
-  return unless input_section["outputManifestSpec"]
+# Helper to get pooled path with delta/base suffix
+def _get_vwb_pooled_path(path_infix, display_version_id, is_delta_release)
+  version_postfix = "base"
 
-  output_row = {"research_id" => aw4_row["research_id"]}
-  input_section["outputManifestSpec"].each do |aw4_col, output_col|
-    if aw4_col == aw4_column
-      output_row[output_col] = destination_path
+  unless is_delta_release.nil?
+    version_postfix = "delta"
+  end
+
+  return "pooled/#{path_infix}/#{display_version_id}_#{version_postfix}"
+end
+
+# Helper to read previous manifest for delta releases
+def _read_vwb_previous_manifest(project, dest_bucket, delta_release_manifest_path, delta_release, path_infix)
+  common = Common.new
+  prev_manifest = ""
+
+  # Get the deploy account for impersonation
+  env = ENVIRONMENTS[project]
+  deploy_account = env.fetch(:publisher_account)
+
+  manifest_path = delta_release_manifest_path
+
+  # If deltaReleaseManifestPath is specified, try to use it.
+  unless delta_release_manifest_path.nil?
+    if delta_release_manifest_path.start_with?("gs://")
+      prev_manifest = common.capture_stdout(["gsutil", "-i", deploy_account, "cat", delta_release_manifest_path])
+    else
+      prev_manifest = IO.read(delta_release_manifest_path)
     end
   end
 
-  output_manifest.push(output_row) unless output_row.keys.size == 1
+  # Try to find the manifest given the deltaRelease field.
+  if !delta_release.nil? && prev_manifest.empty?
+    manifest_path = "#{dest_bucket}/#{delta_release}/#{path_infix}/manifest.csv"
+    prev_manifest = common.capture_stdout(["gsutil", "-u", project, "-i", deploy_account, "cat", manifest_path])
+  end
+
+  # If the manifest still cannot be read then throw an error because config is not correct.
+  unless delta_release.nil? && delta_release_manifest_path.nil?
+    if prev_manifest.empty?
+      raise ArgumentError.new("failed to read previous manifest from #{manifest_path}, " +
+        "make sure to provide the correct previous release in the input manifest")
+    end
+  end
+
+  # Convert the prev_manifest to dict of research ID -> CSV::Row
+  return {} if prev_manifest.empty?
+
+  prev_manifest_csv = CSV.parse(prev_manifest, headers: true)
+  prev_manifest_hash = {}
+  prev_manifest_csv.each do |manifest_row|
+    # Use person_id to match genomic_manifests logic
+    rid = manifest_row["person_id"]
+    prev_manifest_hash[rid] = manifest_row
+  end
+
+  return prev_manifest_hash
 end
 
 # Build VWB copy manifest for AW4 sections (Microarray and WGS)
-def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_version_id, aw4_rows, _output_manifest_path)
+def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_version_id, aw4_rows, output_manifest_path, project = nil)
   copy_manifest = []
   output_manifest = []
 
-  path_prefix = "#{display_version_id}/#{input_section['pooledDestPathInfix']}"
+  # Use pooled path for delta releases
+  use_pooled = !input_section["deltaRelease"].nil?
+
+  if use_pooled
+    path_prefix = _get_vwb_pooled_path(input_section['pooledDestPathInfix'], display_version_id, input_section["deltaRelease"])
+  else
+    path_prefix = "#{display_version_id}/#{input_section['pooledDestPathInfix']}"
+  end
+
   destination_base = File.join(dest_bucket, path_prefix)
 
+  # Read previous manifest for delta releases
+  prev_manifest = {}
+  if !input_section["deltaRelease"].nil? && !project.nil?
+    prev_manifest = _read_vwb_previous_manifest(
+      project,
+      dest_bucket,
+      input_section["deltaReleaseManifestPath"],
+      input_section["deltaRelease"],
+      input_section["pooledDestPathInfix"]
+    )
+  end
+
+  # Track output rows by research_id to accumulate all columns
+  output_rows_by_rid = {}
+
   aw4_rows.each do |aw4_row|
+    rid = aw4_row["research_id"]
+
+    # Check if this research_id exists in previous manifest
+    if !prev_manifest.empty? && prev_manifest.key?(rid)
+      # For delta releases, if research_id exists in previous manifest,
+      # include it in output manifest with previous values but skip copy manifest
+      if input_section["outputManifestSpec"]
+        output_rows_by_rid[rid] = prev_manifest[rid].to_h
+      end
+      next  # Skip copy manifest generation for existing research_ids
+    end
+
+    # Initialize output row for this research_id if needed
+    if input_section["outputManifestSpec"] && !output_rows_by_rid.key?(rid)
+      # Use person_id to match genomic_manifests field naming
+      output_rows_by_rid[rid] = {"person_id" => rid}
+    end
+
     input_section["aw4Columns"].each do |aw4_column|
-      process_aw4_column(aw4_row, aw4_column, input_section, destination_base, copy_manifest, output_manifest)
+      source_path = aw4_row[aw4_column]
+      next if source_path.nil? || source_path.empty?
+
+      # Build copy manifest entry
+      source_name = File.basename(source_path)
+      dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
+      destination_path = File.join(destination_base, dest_name)
+      storage_class = input_section.fetch("storageClass", "STANDARD")
+
+      manifest_entry = {
+        "source" => source_path,
+        "destination" => destination_path,
+        "outputFileName" => dest_name,
+        "storageClass" => storage_class
+      }
+      copy_manifest.push(manifest_entry)
+
+      # Add to output manifest if specified
+      if input_section["outputManifestSpec"]
+        input_section["outputManifestSpec"].each do |aw4_col, output_col|
+          if aw4_col == aw4_column
+            output_rows_by_rid[rid][output_col] = destination_path
+          end
+        end
+      end
     end
   end
+
+  # Convert output rows hash to array
+  output_manifest = output_rows_by_rid.values unless output_rows_by_rid.empty?
 
   return copy_manifest, output_manifest
 end
@@ -129,12 +214,23 @@ def process_file_source(source_path, destination_base, storage_class, input_sect
 end
 
 # Build VWB copy manifest for curation sections
-def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, display_version_id)
+def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, display_version_id, project = nil)
   common = Common.new
   copy_manifest = []
 
+  # Check if this is a delta release
+  use_pooled = !input_section["deltaRelease"].nil?
+
   # Determine destination base path
-  destination_base = determine_destination_base(input_section, dest_bucket, display_version_id)
+  if use_pooled
+    # For delta releases with pooled path
+    path_infix = input_section['destination']
+    path_prefix = _get_vwb_pooled_path(path_infix, display_version_id, input_section["deltaRelease"])
+    destination_base = File.join(dest_bucket, path_prefix)
+  else
+    # Use normal path determination
+    destination_base = determine_destination_base(input_section, dest_bucket, display_version_id)
+  end
 
   # Get source files matching the pattern
   source_uris = common.capture_stdout(["gsutil", "ls", "-d", input_section["sourcePattern"]]).split("\n")
@@ -145,7 +241,40 @@ def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, dis
 
   storage_class = input_section.fetch("storageClass", "STANDARD")
 
+  # For delta releases, read previous manifest to check which files already exist
+  prev_files = {}
+  if !input_section["deltaRelease"].nil? && !project.nil?
+    prev_manifest_path = input_section["deltaReleaseManifestPath"]
+    delta_release = input_section["deltaRelease"]
+
+    # Try to read previous manifest
+    begin
+      env = ENVIRONMENTS[project]
+      deploy_account = env.fetch(:publisher_account)
+
+      if !prev_manifest_path.nil? && prev_manifest_path.start_with?("gs://")
+        prev_manifest_content = common.capture_stdout(["gsutil", "-i", deploy_account, "cat", prev_manifest_path])
+      elsif !delta_release.nil?
+        # Try to find manifest based on delta release version
+        manifest_path = "#{dest_bucket}/#{delta_release}/#{input_section['destination']}/manifest.csv"
+        prev_manifest_content = common.capture_stdout(["gsutil", "-u", project, "-i", deploy_account, "cat", manifest_path])
+      end
+
+      unless prev_manifest_content.nil? || prev_manifest_content.empty?
+        CSV.parse(prev_manifest_content, headers: true).each do |row|
+          # Store the source file path as key
+          prev_files[row["source"]] = true if row["source"]
+        end
+      end
+    rescue => e
+      common.warning "Could not read previous manifest for delta release: #{e.message}"
+    end
+  end
+
   source_uris.each do |source_path|
+    # Skip if file already exists in previous release (for delta releases)
+    next if !prev_files.empty? && prev_files.key?(source_path)
+
     if source_path.end_with?("/")
       # Process folder
       manifest_entry = process_folder_source(source_path, destination_base, storage_class)
@@ -753,7 +882,7 @@ def process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_mani
   aw4_microarray_sources.each do |source_name, section|
     common.status("building VWB manifest for '#{source_name}'")
     copy, output = build_vwb_copy_manifest_for_aw4_section(
-      section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name))
+      section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name), opts.project)
     key_name = "aw4_microarray_" + source_name
     copy_manifests[key_name] = copy
     output_manifests[key_name] = output unless output.nil?
@@ -774,7 +903,7 @@ def process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, 
   aw4_wgs_sources.each do |source_name, section|
     common.status("building VWB manifest for '#{source_name}'")
     copy, output = build_vwb_copy_manifest_for_aw4_section(
-      section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name))
+      section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name), opts.project)
     key_name = "aw4_wgs_" + source_name
     copy_manifests[key_name] = copy
     output_manifests[key_name] = output unless output.nil?
@@ -789,7 +918,7 @@ def process_curation_sources(input_manifest, tier, opts, common, copy_manifests)
   curation_sources.each do |source_name, section|
     common.status("building VWB manifest for '#{source_name}'")
     copy_manifests["curation_" + source_name] = build_vwb_copy_manifest_for_curation_section(
-      section, tier[:dest_cdr_bucket], opts.display_version_id)
+      section, tier[:dest_cdr_bucket], opts.display_version_id, opts.project)
   end
 end
 
