@@ -65,7 +65,7 @@ def _read_vwb_previous_manifest(project, dest_bucket, delta_release_manifest_pat
   unless delta_release.nil? && delta_release_manifest_path.nil?
     if prev_manifest.empty?
       raise ArgumentError.new("failed to read previous manifest from #{manifest_path}, " +
-        "make sure to provide the correct previous release in the input manifest")
+                              "make sure to provide the correct previous release in the input manifest")
     end
   end
 
@@ -88,14 +88,9 @@ def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_
   copy_manifest = []
   output_manifest = []
 
-  # Use pooled path for delta releases
-  use_pooled = !input_section["deltaRelease"].nil?
-
-  if use_pooled
-    path_prefix = _get_vwb_pooled_path(input_section['pooledDestPathInfix'], display_version_id, input_section["deltaRelease"])
-  else
-    path_prefix = "#{display_version_id}/#{input_section['pooledDestPathInfix']}"
-  end
+  # Always use pooled path (matching genomic_manifests behavior)
+  # For non-delta releases, use "base" suffix; for delta releases, use "delta" suffix
+  path_prefix = _get_vwb_pooled_path(input_section['pooledDestPathInfix'], display_version_id, input_section["deltaRelease"])
 
   destination_base = File.join(dest_bucket, path_prefix)
 
@@ -120,9 +115,23 @@ def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_
     # Check if this research_id exists in previous manifest
     if !prev_manifest.empty? && prev_manifest.key?(rid)
       # For delta releases, if research_id exists in previous manifest,
-      # include it in output manifest with previous values but skip copy manifest
+      # include it in output manifest with renamed URIs but skip copy manifest
       if input_section["outputManifestSpec"]
-        output_rows_by_rid[rid] = prev_manifest[rid].to_h
+        # Start with person_id
+        output_row = {"person_id" => rid}
+
+        # Generate the correct renamed destination URIs for each column
+        input_section["outputManifestSpec"].each do |aw4_col, output_col|
+          source_path = aw4_row[aw4_col]
+          next if source_path.nil? || source_path.empty?
+
+          source_name = File.basename(source_path)
+          dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
+          destination_path = File.join(destination_base, dest_name)
+          output_row[output_col] = destination_path
+        end
+
+        output_rows_by_rid[rid] = output_row
       end
       next  # Skip copy manifest generation for existing research_ids
     end
@@ -290,7 +299,7 @@ end
 
 # Helper method for VWB filename replacement
 def _apply_vwb_filename_replacement(source_name, match_pattern, replace_pattern, rid)
-  return source_name if match_pattern.nil? || replace_pattern.nil?
+  return source_name if replace_pattern.nil?
 
   dest_name = source_name
   begin
@@ -298,8 +307,16 @@ def _apply_vwb_filename_replacement(source_name, match_pattern, replace_pattern,
     actual_replace = replace_pattern.dup
     actual_replace.gsub!("{RID}", rid) if rid
 
-    # Apply regex replacement
-    dest_name = source_name.gsub(Regexp.new(match_pattern), actual_replace)
+    # If no match pattern is specified, match the entire filename once
+    # Use .+ instead of .* to avoid matching empty strings
+    effective_match_pattern = match_pattern.nil? ? ".+" : match_pattern
+
+    # Apply regex replacement (use sub for single replacement when no pattern specified)
+    if match_pattern.nil?
+      dest_name = source_name.sub(Regexp.new(effective_match_pattern), actual_replace)
+    else
+      dest_name = source_name.gsub(Regexp.new(effective_match_pattern), actual_replace)
+    end
   rescue => e
     Common.new.warning "Failed to apply filename replacement: #{e.message}"
   end
@@ -323,17 +340,17 @@ def build_vwb_publish_configs(manifest_files)
       if source.end_with?("/")
         # Add as a folder transfer
         folder_transfers.push({
-          :source => source,
-          :destination => destination,
-          :storage_class => storage_class
-        })
+                                :source => source,
+                                :destination => destination,
+                                :storage_class => storage_class
+                              })
       else
         # Add to file transfers list
         file_transfers.push({
-          :source => source,
-          :destination => destination,
-          :storage_class => storage_class
-        })
+                              :source => source,
+                              :destination => destination,
+                              :storage_class => storage_class
+                            })
       end
     end
   end
@@ -367,15 +384,23 @@ def build_vwb_publish_configs(manifest_files)
   }
 end
 
-# Helper function to get OAuth token for the current user1
-def get_token()
+# Helper function to get OAuth token for the current user or service account
+def get_token(service_account = nil)
   common = Common.new
-  # Use gcloud to get an access token for the current logged-in user
-  token = common.capture_stdout([
-    "gcloud", "auth", "print-access-token"
-  ]).strip
 
-
+  # Build the gcloud command based on whether we have a service account
+  if service_account
+    # Get access token for the service account via impersonation
+    token = common.capture_stdout([
+                                    "gcloud", "auth", "print-access-token",
+                                    "--impersonate-service-account", service_account
+                                  ]).strip
+  else
+    # Use gcloud to get an access token for the current logged-in user
+    token = common.capture_stdout([
+                                    "gcloud", "auth", "print-access-token"
+                                  ]).strip
+  end
 
   return token
 end
@@ -449,10 +474,10 @@ def process_folder_transfers(configs, project, jira_ticket, service_account, job
     )
 
     job_configs.push({
-      "job_name" => job_name,
-      "job_type" => "folder_transfer",
-      "config" => config
-    })
+                       "job_name" => job_name,
+                       "job_type" => "folder_transfer",
+                       "config" => config
+                     })
     job_index += 1
   end
 
@@ -479,12 +504,12 @@ def process_file_list_transfers(configs, project, jira_ticket, service_account, 
     )
 
     job_configs.push({
-      "job_name" => job_name,
-      "job_type" => "file_list_transfer",
-      "file_group" => file_group,
-      "config" => config,
-      "local_manifest_path" => local_manifest_path
-    })
+                       "job_name" => job_name,
+                       "job_type" => "file_list_transfer",
+                       "file_group" => file_group,
+                       "config" => config,
+                       "local_manifest_path" => local_manifest_path
+                     })
     job_index += 1
   end
 
@@ -553,6 +578,31 @@ def generate_folder_transfer_config(project, source, destination, storage_class,
   source_path_with_slash = source_path.end_with?("/") ? source_path : "#{source_path}/"
   dest_path_with_slash = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
 
+  # Build gcsDataSink with optional object conditions for storage class
+  gcs_data_sink = {
+    "bucketName" => dest_bucket,
+    "path" => dest_path_with_slash
+  }
+
+  # Add object conditions for storage class if not STANDARD
+  if storage_class && storage_class != "STANDARD"
+    gcs_data_sink["objectConditions"] = {
+      "minTimeElapsedSinceLastModification" => "0s"
+    }
+  end
+
+  # Build transfer options
+  transfer_options = {
+    "overwriteObjectsAlreadyExistingInSink" => false
+  }
+
+  # Add metadata options for storage class if not STANDARD
+  if storage_class && storage_class != "STANDARD"
+    transfer_options["metadataOptions"] = {
+      "storageClass" => "STORAGE_CLASS_#{storage_class}"
+    }
+  end
+
   # Build transfer job configuration
   job_config = {
     "description" => "VWB folder transfer: #{source_path} to #{dest_path} (#{job_name})",
@@ -574,13 +624,8 @@ def generate_folder_transfer_config(project, source, destination, storage_class,
         "bucketName" => source_bucket,
         "path" => source_path_with_slash
       },
-      "gcsDataSink" => {
-        "bucketName" => dest_bucket,
-        "path" => dest_path_with_slash
-      },
-      "transferOptions" => {
-        "overwriteObjectsAlreadyExistingInSink" => true
-      }
+      "gcsDataSink" => gcs_data_sink,
+      "transferOptions" => transfer_options
     },
     "projectId" => project
   }
@@ -588,13 +633,6 @@ def generate_folder_transfer_config(project, source, destination, storage_class,
   # Add the service account at the root level if provided
   if service_account
     job_config["serviceAccount"] = service_account
-  end
-
-  # Add storage class if not STANDARD
-  if storage_class && storage_class != "STANDARD"
-    job_config["transferSpec"]["objectConditions"] = {
-      "storageClass" => storage_class
-    }
   end
 
   return job_config
@@ -609,6 +647,19 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
 
   # The manifest path will be created during publish
   temp_manifest_path = "gs://#{dest_bucket}/temp-manifests/#{job_name}-manifest.txt"
+
+  # Build transfer options
+  transfer_options = {
+    "overwriteObjectsAlreadyExistingInSink" => false
+  }
+
+  # Add metadata options for storage class if not STANDARD
+  storage_class = file_group[:storage_class]
+  if storage_class && storage_class != "STANDARD"
+    transfer_options["metadataOptions"] = {
+      "storageClass" => "STORAGE_CLASS_#{storage_class}"
+    }
+  end
 
   # Build transfer job configuration
   job_config = {
@@ -636,9 +687,7 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
       "transferManifest" => {
         "location" => temp_manifest_path
       },
-      "transferOptions" => {
-        "overwriteObjectsAlreadyExistingInSink" => true
-      }
+      "transferOptions" => transfer_options
     },
     "projectId" => project
   }
@@ -646,13 +695,6 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
   # Add the service account at the root level if provided
   if service_account
     job_config["serviceAccount"] = service_account
-  end
-
-  # Add storage class if not STANDARD
-  if file_group[:storage_class] && file_group[:storage_class] != "STANDARD"
-    job_config["transferSpec"]["objectConditions"] = {
-      "storageClass" => file_group[:storage_class]
-    }
   end
 
   return job_config
@@ -719,6 +761,10 @@ def display_sts_dry_run_summary(common, job_configs)
     common.status "Job Type: #{job['job_type']}"
 
     display_job_details(common, job)
+
+    # Display the full job configuration JSON
+    common.status "\nJob Configuration JSON:"
+    common.status JSON.pretty_generate(job['config'])
   end
 
   common.status "\n" + "="*60
@@ -884,12 +930,12 @@ def process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_mani
     copy, output = build_vwb_copy_manifest_for_aw4_section(
       section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name), opts.project)
     key_name = "aw4_microarray_" + source_name
-    copy_manifests[key_name] = copy
-    output_manifests[key_name] = output unless output.nil?
+    copy_manifests[key_name] = copy unless copy.nil? || copy.empty?
+    output_manifests[key_name] = output unless output.nil? || output.empty?
   end
 end
 
-# Helper to process AW4 WGS sources
+# Helper to process AW4 WGS sources with combined output manifest
 def process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
   aw4_wgs_sources = input_manifest["aw4WgsSources"]
   return if aw4_wgs_sources.nil? || aw4_wgs_sources.empty?
@@ -900,14 +946,36 @@ def process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, 
 
   wgs_aw4_rows = read_all_wgs_aw4s(opts.project, read_research_ids_file(opts.wgs_rids_file))
 
+  # Collect output rows from all WGS sections for combined manifest
+  combined_output_rows = {}
+
   aw4_wgs_sources.each do |source_name, section|
     common.status("building VWB manifest for '#{source_name}'")
     copy, output = build_vwb_copy_manifest_for_aw4_section(
       section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name), opts.project)
+
     key_name = "aw4_wgs_" + source_name
-    copy_manifests[key_name] = copy
-    output_manifests[key_name] = output unless output.nil?
+    copy_manifests[key_name] = copy unless copy.nil? || copy.empty?
+
+    # Merge output rows into combined manifest
+    if output && !output.empty?
+      output.each do |row|
+        rid = row["person_id"]
+        if combined_output_rows[rid].nil?
+          combined_output_rows[rid] = row
+        else
+          # Merge columns from this section into existing row
+          row.each do |k, v|
+            combined_output_rows[rid][k] = v unless k == "person_id"
+          end
+        end
+      end
+    end
   end
+
+  # Store the combined output manifest with a single key
+  combined_output = combined_output_rows.values
+  output_manifests["aw4_wgs_combined"] = combined_output unless combined_output.empty?
 end
 
 # Helper to process curation sources
@@ -917,8 +985,9 @@ def process_curation_sources(input_manifest, tier, opts, common, copy_manifests)
 
   curation_sources.each do |source_name, section|
     common.status("building VWB manifest for '#{source_name}'")
-    copy_manifests["curation_" + source_name] = build_vwb_copy_manifest_for_curation_section(
+    copy = build_vwb_copy_manifest_for_curation_section(
       section, tier[:dest_cdr_bucket], opts.display_version_id, opts.project)
+    copy_manifests["curation_" + source_name] = copy unless copy.nil? || copy.empty?
   end
 end
 
@@ -928,6 +997,9 @@ def write_manifests_to_files(copy_manifests, output_manifests, working_dir, outp
 
   # Write copy manifests to files
   copy_manifests.each do |source_name, copy_manifest|
+    # Skip empty copy manifests
+    next if copy_manifest.nil? || copy_manifest.empty?
+
     path = "#{working_dir}/#{source_name}_copy_manifest.csv"
     CSV.open(path, 'wb') do |f|
       f << copy_manifest.first.keys
@@ -938,6 +1010,9 @@ def write_manifests_to_files(copy_manifests, output_manifests, working_dir, outp
 
   # Write output manifests to files
   output_manifests.each do |source_name, output_manifest|
+    # Skip empty output manifests
+    next if output_manifest.nil? || output_manifest.empty?
+
     path = output_manifest_path.call(source_name)
     CSV.open(path, 'wb') do |f|
       f << output_manifest.first.keys
@@ -1096,14 +1171,15 @@ def collect_files_to_rename(manifest_files)
       source_filename = File.basename(source)
       dest_filename = output_filename || File.basename(destination)
 
-      # Check if renaming is needed
-      if source_filename != dest_filename
-        files_to_rename.push({
-          :source_name => source_filename,
-          :dest_name => dest_filename,
-          :destination_path => destination
-        })
-      end
+      # Check if renaming or moving is needed
+      # STS preserves the source path structure in the destination bucket
+      # So we need to handle both rename and move operations
+      files_to_rename.push({
+                             :source_path => source,
+                             :source_name => source_filename,
+                             :dest_name => dest_filename,
+                             :destination_path => destination
+                           })
     end
   end
 
@@ -1115,60 +1191,170 @@ def display_rename_dry_run(common, files_to_rename)
   total_files = files_to_rename.length
 
   common.status "="*60
-  common.status "DRY RUN: Would rename #{total_files} file(s)"
+  common.status "DRY RUN: Would move/rename #{total_files} file(s)"
   common.status "="*60
   common.status ""
 
   # Show sample of files to be renamed
   sample_size = [5, total_files].min
-  common.status "Sample files to be renamed (showing #{sample_size} of #{total_files}):"
+  common.status "Sample files to be moved/renamed (showing #{sample_size} of #{total_files}):"
 
   files_to_rename.take(sample_size).each do |file|
-    common.status "  #{file[:source_name]} -> #{file[:dest_name]}"
-    common.status "    at: #{file[:destination_path]}"
+    # Calculate where STS actually copied the file
+    dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
+    source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
+    current_path = "gs://#{dest_bucket}/#{source_object_path}"
+
+    common.status "\n  File: #{file[:source_name]} -> #{file[:dest_name]}"
+    common.status "    From: #{current_path}"
+    common.status "    To:   #{file[:destination_path]}"
   end
 
   if total_files > sample_size
-    common.status "  ... and #{total_files - sample_size} more file(s)"
+    common.status "\n  ... and #{total_files - sample_size} more file(s)"
   end
 
   common.status ""
-  common.status "DRY RUN COMPLETE: No files were renamed"
+  common.status "DRY RUN COMPLETE: No files were moved/renamed"
 end
 
-# Helper to perform actual file renaming
-def perform_file_renaming(common, files_to_rename, deploy_account)
+# Helper to perform actual file renaming with parallel processing
+def perform_file_renaming(common, files_to_rename, deploy_account, num_threads = 32, failure_log_path = nil)
   total_files = files_to_rename.length
   successful_renames = 0
   failed_renames = 0
+  skipped_count = 0
 
-  files_to_rename.each_with_index do |file, index|
-    # Get the directory path from the destination
-    dest_dir = File.dirname(file[:destination_path])
+  # Thread-safe counters and mutex for logging
+  mutex = Mutex.new
+  processed_count = 0
 
-    # Construct the current path (where the file was transferred with original name)
-    current_path = File.join(dest_dir, file[:source_name])
+  # Open failure log file if path is provided
+  failure_log = nil
+  if failure_log_path
+    failure_log = File.open(failure_log_path, 'w')
+    failure_log.puts("timestamp,source_path,destination_path,error_type,error_message")
+  end
 
-    # The destination path already has the correct name
-    new_path = file[:destination_path]
+  # Create success log to track completed renames
+  success_log_path = failure_log_path ? failure_log_path.sub('.csv', '_success.csv') : nil
+  success_log = nil
+  if success_log_path
+    success_log = File.open(success_log_path, 'w')
+    success_log.puts("timestamp,source_path,destination_path")
+  end
 
-    begin
-      common.status "[#{index + 1}/#{total_files}] Renaming: #{file[:source_name]} -> #{file[:dest_name]}"
+  # Create a queue of files to process
+  file_queue = Queue.new
+  files_to_rename.each { |file| file_queue.push(file) }
 
-      # Use gcloud storage mv with impersonation to rename the file
-      cmd = [
-        "gcloud", "storage", "mv",
-        "--impersonate-service-account", deploy_account,
-        current_path,
-        new_path
-      ]
+  # Create worker threads
+  threads = []
+  num_threads.times do
+    threads << Thread.new do
+      loop do
+        # Get next file from queue (exit if queue is empty)
+        file = file_queue.pop(true) rescue break
 
-      common.run_inline(cmd)
-      successful_renames += 1
-    rescue => e
-      common.error "Failed to rename #{current_path}: #{e.message}"
-      failed_renames += 1
+        # STS preserves the source directory structure in the destination bucket
+        # Extract the destination bucket from the destination path
+        dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
+
+        # Extract the source object path (without bucket) from the source
+        source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
+
+        # Construct the current path (where STS actually copied the file)
+        # STS copies to: gs://dest-bucket/<same-path-as-source>
+        current_path = "gs://#{dest_bucket}/#{source_object_path}"
+
+        # The destination path already has the correct name and location
+        new_path = file[:destination_path]
+
+        # Skip if the file is already in the correct location
+        if current_path == new_path
+          mutex.synchronize do
+            processed_count += 1
+            successful_renames += 1
+            common.status "[#{processed_count}/#{total_files}] Skipping (already correct): #{file[:dest_name]}"
+          end
+          next
+        end
+
+        begin
+          mutex.synchronize do
+            processed_count += 1
+            common.status "[#{processed_count}/#{total_files}] Moving/renaming:"
+            common.status "  From: #{current_path}"
+            common.status "  To:   #{new_path}"
+          end
+
+          # Use gcloud storage mv with impersonation to move/rename the file
+          # Run command and capture output/error without raising exception
+          cmd = [
+            "gcloud", "storage", "mv",
+            "--impersonate-service-account", deploy_account,
+            current_path,
+            new_path
+          ]
+
+          # Use system command with output capture to avoid exit on error
+          require 'open3'
+          stdout, stderr, status = Open3.capture3(*cmd)
+
+          if status.success?
+            mutex.synchronize do
+              successful_renames += 1
+            end
+          else
+            # Command failed - handle the error
+            mutex.synchronize do
+              # Combine stdout and stderr for error message
+              error_msg = (stderr + stdout).strip
+
+              # Determine error type
+              error_type = if error_msg.include?("NotFound") || error_msg.include?("No such") || error_msg.include?("404") || error_msg.include?("matched no objects")
+                             "NOT_FOUND"
+                           else
+                             "ERROR"
+                           end
+
+              # Log to console
+              if error_type == "NOT_FOUND"
+                common.warning "File not found (skipping): #{current_path}"
+              else
+                common.error "Failed to move/rename #{current_path}: #{error_msg}"
+              end
+
+              # Log to file if logging is enabled
+              if failure_log
+                timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+                # Escape commas and quotes in error message for CSV
+                escaped_msg = error_msg.gsub('"', '""')
+                failure_log.puts("\"#{timestamp}\",\"#{current_path}\",\"#{new_path}\",\"#{error_type}\",\"#{escaped_msg}\"")
+                failure_log.flush
+              end
+
+              failed_renames += 1
+            end
+          end
+        rescue => outer_e
+          # Catch any other unexpected errors
+          mutex.synchronize do
+            common.error "Unexpected error processing #{current_path}: #{outer_e.message}"
+            failed_renames += 1
+          end
+        end
+      end
     end
+  end
+
+  # Wait for all threads to complete
+  threads.each(&:join)
+
+  # Close failure log file
+  if failure_log
+    failure_log.close
+    common.status "Failure log written to: #{failure_log_path}"
   end
 
   return successful_renames, failed_renames
@@ -1211,8 +1397,12 @@ def post_process_vwb_files(project, manifest_files, dry_run = false)
   common.status ""
   common.status "Renaming files..."
 
-  # Perform the actual renaming
-  successful_renames, failed_renames = perform_file_renaming(common, files_to_rename, deploy_account)
+  # Create failure log path in the same directory as manifest files
+  working_dir = File.dirname(manifest_files.first)
+  failure_log_path = File.join(working_dir, "post_process_failures.csv")
+
+  # Perform the actual renaming with failure logging
+  successful_renames, failed_renames = perform_file_renaming(common, files_to_rename, deploy_account, 32, failure_log_path)
 
   # Display summary
   common.status ""
