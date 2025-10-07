@@ -256,7 +256,6 @@ export const EgressEventsTable = ({
           if (isUUID(namespace)) {
             const userFacingId = vwbWorkspaceUserFacingIds.get(namespace);
             const isLoading = loadingVwbIds.has(namespace);
-            const hasFailed = failedVwbIds.has(namespace);
 
             if (userFacingId) {
               return (
