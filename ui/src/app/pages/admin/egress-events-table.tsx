@@ -255,33 +255,16 @@ export const EgressEventsTable = ({
           // Check if this is a VWB workspace (UUID format)
           if (isUUID(namespace)) {
             const userFacingId = vwbWorkspaceUserFacingIds.get(namespace);
-            const isLoading = loadingVwbIds.has(namespace);
 
-            if (userFacingId) {
-              return (
-                <StyledRouterLink
-                  path={`/admin/vwb/workspaces/${userFacingId}`}
-                >
-                  {namespace}
-                </StyledRouterLink>
-              );
-            }
+            // Always show a clickable link - if we have the user-facing ID, use it
+            // Otherwise, use the UUID itself and let the VWB workspace page handle the error
+            const linkPath = userFacingId
+              ? `/admin/vwb/workspaces/${userFacingId}`
+              : `/admin/vwb/workspaces/${namespace}`;
 
-            // If we're loading, show the UUID with a spinner
-            if (isLoading) {
-              return (
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                >
-                  {namespace}
-                  <Spinner size={12} />
-                </div>
-              );
-            }
-
-            // If lookup failed or no user-facing ID, just show the UUID
-            // (e.g., deleted workspace)
-            return namespace;
+            return (
+              <StyledRouterLink path={linkPath}>{namespace}</StyledRouterLink>
+            );
           }
           // Regular RWB workspace
           return (
