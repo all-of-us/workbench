@@ -9,7 +9,6 @@ import { EgressEvent, VwbWorkspaceSearchParamType } from 'generated/fetch';
 
 import { AdminUserLink } from 'app/components/admin/admin-user-link';
 import { StyledRouterLink } from 'app/components/buttons';
-import { Spinner } from 'app/components/spinners';
 import {
   egressEventsAdminApi,
   vwbWorkspaceAdminApi,
