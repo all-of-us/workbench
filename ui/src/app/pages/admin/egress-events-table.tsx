@@ -44,6 +44,10 @@ export const EgressEventsTable = ({
   const [vwbWorkspaceUserFacingIds, setVwbWorkspaceUserFacingIds] = useState<
     Map<string, string>
   >(new Map());
+  // Track which UUIDs we're currently loading
+  const [loadingVwbIds, setLoadingVwbIds] = useState<Set<string>>(new Set());
+  // Track which UUIDs failed to load (e.g., deleted workspaces)
+  const [failedVwbIds, setFailedVwbIds] = useState<Set<string>>(new Set());
 
   // This callback fetches more events and appends to the events array, if needed.
   // This works by continuing to walk the paginated stream until the given event count
@@ -78,12 +82,29 @@ export const EgressEventsTable = ({
 
       // Fetch VWB workspace user-facing IDs for any UUID namespaces
       const newVwbIds = new Map(vwbWorkspaceUserFacingIds);
+      const newLoadingIds = new Set(loadingVwbIds);
+      const newFailedIds = new Set(failedVwbIds);
       const uuidNamespaces = allLoadedEvents
         .map((e) => e.sourceWorkspaceNamespace)
-        .filter((ns) => ns && isUUID(ns) && !newVwbIds.has(ns));
+        .filter(
+          (ns) =>
+            ns &&
+            isUUID(ns) &&
+            !newVwbIds.has(ns) &&
+            !newLoadingIds.has(ns) &&
+            !newFailedIds.has(ns)
+        );
 
       const uniqueUuidNamespaces = Array.from(new Set(uuidNamespaces));
-      await Promise.all(
+
+      // Mark these UUIDs as loading
+      uniqueUuidNamespaces.forEach((id) => newLoadingIds.add(id));
+      setLoadingVwbIds(newLoadingIds);
+
+      setLoading(false);
+
+      // Fetch in the background (don't block the UI)
+      Promise.all(
         uniqueUuidNamespaces.map(async (workspaceId) => {
           try {
             const resp =
@@ -92,24 +113,48 @@ export const EgressEventsTable = ({
                 workspaceId
               );
             if (resp.items?.length > 0) {
-              newVwbIds.set(workspaceId, resp.items[0].userFacingId);
+              setVwbWorkspaceUserFacingIds((prev) => {
+                const updated = new Map(prev);
+                updated.set(workspaceId, resp.items[0].userFacingId);
+                return updated;
+              });
+            } else {
+              // No workspace found (e.g., deleted workspace)
+              setFailedVwbIds((prev) => {
+                const updated = new Set(prev);
+                updated.add(workspaceId);
+                return updated;
+              });
             }
           } catch (error) {
             console.error(
               `Failed to fetch VWB workspace for ${workspaceId}:`,
               error
             );
+            // Mark as failed so we don't keep retrying
+            setFailedVwbIds((prev) => {
+              const updated = new Set(prev);
+              updated.add(workspaceId);
+              return updated;
+            });
+          } finally {
+            setLoadingVwbIds((prev) => {
+              const updated = new Set(prev);
+              updated.delete(workspaceId);
+              return updated;
+            });
           }
         })
       );
-
-      if (newVwbIds.size > vwbWorkspaceUserFacingIds.size) {
-        setVwbWorkspaceUserFacingIds(newVwbIds);
-      }
-
-      setLoading(false);
     },
-    [loading, events, nextPageToken, vwbWorkspaceUserFacingIds]
+    [
+      loading,
+      events,
+      nextPageToken,
+      vwbWorkspaceUserFacingIds,
+      loadingVwbIds,
+      failedVwbIds,
+    ]
   );
 
   const onRowEditSave = useCallback(async () => {
@@ -209,17 +254,16 @@ export const EgressEventsTable = ({
           // Check if this is a VWB workspace (UUID format)
           if (isUUID(namespace)) {
             const userFacingId = vwbWorkspaceUserFacingIds.get(namespace);
-            if (userFacingId) {
-              return (
-                <StyledRouterLink
-                  path={`/admin/vwb/workspaces/${userFacingId}`}
-                >
-                  {namespace}
-                </StyledRouterLink>
-              );
-            }
-            // If we don't have the user-facing ID yet, just show the UUID
-            return namespace;
+
+            // Always show a clickable link - if we have the user-facing ID, use it
+            // Otherwise, use the UUID itself and let the VWB workspace page handle the error
+            const linkPath = userFacingId
+              ? `/admin/vwb/workspaces/${userFacingId}`
+              : `/admin/vwb/workspaces/${namespace}`;
+
+            return (
+              <StyledRouterLink path={linkPath}>{namespace}</StyledRouterLink>
+            );
           }
           // Regular RWB workspace
           return (
