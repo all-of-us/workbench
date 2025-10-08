@@ -20,9 +20,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceUserCacheDao;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceUserCache;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,8 +35,8 @@ public class WorkspaceUserCacheServiceTest {
 
   private WorkspaceUserCacheService workspaceUserCacheService;
 
-  private DbWorkspace testWorkspace1;
-  private DbWorkspace testWorkspace2;
+  @Mock private WorkspaceDao.WorkspaceUserCacheView testWorkspace1;
+  @Mock private WorkspaceDao.WorkspaceUserCacheView testWorkspace2;
   private DbUser testUser1;
   private DbUser testUser2;
 
@@ -47,23 +45,6 @@ public class WorkspaceUserCacheServiceTest {
     workspaceUserCacheService =
         new WorkspaceUserCacheServiceImpl(mockUserDao, mockWorkspaceDao, mockWorkspaceUserCacheDao);
 
-    // Set up test data
-    testWorkspace1 =
-        new DbWorkspace()
-            .setWorkspaceId(1L)
-            .setName("Test Workspace 1")
-            .setWorkspaceNamespace("test-ws-1")
-            .setFirecloudName("test-ws-1-fc")
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-
-    testWorkspace2 =
-        new DbWorkspace()
-            .setWorkspaceId(2L)
-            .setName("Test Workspace 2")
-            .setWorkspaceNamespace("test-ws-2")
-            .setFirecloudName("test-ws-2-fc")
-            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-
     testUser1 = new DbUser().setUserId(101L).setUsername("user1@example.com");
 
     testUser2 = new DbUser().setUserId(102L).setUsername("user2@example.com");
@@ -71,11 +52,12 @@ public class WorkspaceUserCacheServiceTest {
 
   @Test
   public void testFindAllActiveWorkspacesNeedingCacheUpdate() {
-    List<DbWorkspace> expectedWorkspaces = List.of(testWorkspace1, testWorkspace2);
+    List<WorkspaceDao.WorkspaceUserCacheView> expectedWorkspaces =
+        List.of(testWorkspace1, testWorkspace2);
     when(mockWorkspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate())
         .thenReturn(expectedWorkspaces);
 
-    List<DbWorkspace> result =
+    List<WorkspaceDao.WorkspaceUserCacheView> result =
         workspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate();
 
     assertThat(result).containsExactlyElementsIn(expectedWorkspaces);
