@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   public ResponseEntity<Void> cacheWorkspaceAcls() {
     log.info("Starting cacheWorkspaceAcls cron job");
     log.info("Finding all workspaces in need of a cache update");
-    List<DbWorkspace> workspaces =
+    List<WorkspaceDao.WorkspaceUserCacheView> workspaces =
         workspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate();
     log.info("Found " + workspaces.size() + " workspaces in need of a cache update");
     log.info("Removing inactive workspaces from cache");
