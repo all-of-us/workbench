@@ -10,7 +10,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceUserCacheDao;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceUserCache;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
   }
 
   @Override
-  public List<DbWorkspace> findAllActiveWorkspacesNeedingCacheUpdate() {
+  public List<WorkspaceDao.WorkspaceUserCacheView> findAllActiveWorkspacesNeedingCacheUpdate() {
     return workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
   }
 
