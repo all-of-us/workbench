@@ -67,12 +67,14 @@ public class AbsorbServiceImpl implements AbsorbService {
 
   private Enrollment convertToEnrollment(UserCourseEnrollmentResource e) {
     if (e.getDateCompleted() == null) {
-      return new Enrollment(e.getCourseId(), null, null);
+      return new Enrollment(e.getCourseId(), null, null, null);
     } else {
       Instant dateCompleted =
           LocalDateTime.parse(e.getDateCompleted(), ISO_DATE_TIME).toInstant(ZoneOffset.UTC);
       Integer score = e.getScore() != null ? Math.toIntExact(Math.round(e.getScore())) : null;
-      return new Enrollment(e.getCourseId(), dateCompleted, score);
+      EnrollmentStatus status =
+          e.getStatus() != null ? EnrollmentStatus.fromValue(e.getStatus()) : null;
+      return new Enrollment(e.getCourseId(), dateCompleted, score, status);
     }
   }
 

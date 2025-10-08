@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.absorb.Credentials;
+import org.pmiops.workbench.absorb.EnrollmentStatus;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -102,10 +103,11 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
       maybeEnrollment.ifPresentOrElse(
           enrollment -> {
-            // If the course is incomplete or the user does not have a passing score, do not update
-            // the user access module
+            // Update the user access module if the user has a completion time and either a passing
+            // score OR a complete status.
             if (enrollment.completionTime != null
-                && (enrollment.score != null && enrollment.score >= PASSING_SCORE)) {
+                && ((enrollment.score != null && enrollment.score >= PASSING_SCORE)
+                    || enrollment.status == EnrollmentStatus.COMPLETE)) {
               var updatedUserAccessModule =
                   accessModuleService.updateCompletionTime(
                       dbUser, accessModuleName, Timestamp.from(enrollment.completionTime));

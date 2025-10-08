@@ -12,10 +12,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.absorb.AbsorbService;
-import org.pmiops.workbench.absorb.ApiException;
-import org.pmiops.workbench.absorb.Credentials;
-import org.pmiops.workbench.absorb.Enrollment;
+import org.pmiops.workbench.absorb.*;
 import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
@@ -463,7 +460,12 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
-            List.of(new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null, null)));
+            List.of(
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId,
+                    null,
+                    null,
+                    EnrollmentStatus.IN_PROGRESS)));
   }
 
   private void stubAbsorbOnlyRTComplete(Instant rtCompletionTime) throws ApiException {
@@ -472,8 +474,15 @@ public class ComplianceTrainingServiceTest {
         .thenReturn(
             List.of(
                 new Enrollment(
-                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
-                new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null, null)));
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId,
+                    rtCompletionTime,
+                    100,
+                    EnrollmentStatus.COMPLETE),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.ctTrainingCourseId,
+                    null,
+                    null,
+                    EnrollmentStatus.IN_PROGRESS)));
   }
 
   private void stubAbsorbRTExpiredCTComplete(Instant ctCompletionTime) throws ApiException {
@@ -481,9 +490,16 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null, null),
                 new Enrollment(
-                    ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime, 100)));
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId,
+                    null,
+                    null,
+                    EnrollmentStatus.IN_PROGRESS),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.ctTrainingCourseId,
+                    ctCompletionTime,
+                    100,
+                    EnrollmentStatus.COMPLETE)));
   }
 
   private void stubAbsorbRTCompleteCTFailed(Instant rtCompletionTime) throws ApiException {
@@ -492,8 +508,15 @@ public class ComplianceTrainingServiceTest {
         .thenReturn(
             List.of(
                 new Enrollment(
-                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
-                new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null, 50)));
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId,
+                    rtCompletionTime,
+                    100,
+                    EnrollmentStatus.COMPLETE),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.ctTrainingCourseId,
+                    null,
+                    50,
+                    EnrollmentStatus.FAILED)));
   }
 
   private void stubAbsorbAllTrainingsComplete(Instant rtCompletionTime, Instant ctCompletionTime)
@@ -503,9 +526,15 @@ public class ComplianceTrainingServiceTest {
         .thenReturn(
             List.of(
                 new Enrollment(
-                    ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime, 100),
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId,
+                    rtCompletionTime,
+                    100,
+                    EnrollmentStatus.COMPLETE),
                 new Enrollment(
-                    ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime, 100)));
+                    ComplianceTrainingServiceImpl.ctTrainingCourseId,
+                    ctCompletionTime,
+                    100,
+                    EnrollmentStatus.COMPLETE)));
   }
 
   private Optional<DbComplianceTrainingVerification> getVerification(

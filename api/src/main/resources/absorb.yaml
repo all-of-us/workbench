@@ -257,3 +257,6 @@ components:
           type: "number"
           description: "Score in percentage."
           format: "double"
+        status:
+          type: "integer"
+          description: "`Sortable` `Filterable` \n\nThe current status of the enrollment."

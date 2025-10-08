@@ -8,11 +8,17 @@ public class Enrollment {
   public final String courseId;
   @Nullable public final Instant completionTime;
   @Nullable public final Integer score;
+  @Nullable public final EnrollmentStatus status;
 
-  public Enrollment(String courseId, @Nullable Instant dateCompleted, @Nullable Integer score) {
+  public Enrollment(
+      String courseId,
+      @Nullable Instant dateCompleted,
+      @Nullable Integer score,
+      @Nullable EnrollmentStatus status) {
     this.courseId = courseId;
     this.completionTime = dateCompleted;
     this.score = score;
+    this.status = status;
   }
 
   public String toString() {
@@ -20,6 +26,7 @@ public class Enrollment {
         .append("courseId", courseId)
         .append("completionTime", completionTime)
         .append("score", score)
+        .append("status", status)
         .toString();
   }
 }
