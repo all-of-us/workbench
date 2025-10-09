@@ -256,7 +256,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     FieldValues.getString(row, "description").ifPresent(vwbWorkspace::setDescription);
     FieldValues.getString(row, "created_by_email").ifPresent(vwbWorkspace::setCreatedBy);
     FieldValues.getString(row, "gcp_project_id").ifPresent(vwbWorkspace::setGoogleProjectId);
-    FieldValues.getString(row, "workspace_metadata_policy").ifPresent(vwbWorkspace::setResearchPurpose);
+    FieldValues.getString(row, "workspace_metadata_policy")
+        .ifPresent(vwbWorkspace::setResearchPurpose);
     FieldValues.getString(row, "billing_account_id").ifPresent(vwbWorkspace::billingAccountId);
 
     FieldValues.getDateTime(row, "created_date")
