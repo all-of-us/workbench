@@ -441,6 +441,64 @@ public class ComplianceTrainingServiceTest {
         .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
   }
 
+  @Test
+  public void testSyncComplianceTrainingStatus_RtPassingScoreIncorrectStatus() throws Exception {
+    // User completes RT training in Absorb, with a passing score but incorrect status (FAILED)
+    // This is a known Absorb bug where the score is correct but status is wrong
+    var rtCompletionTime = currentInstant();
+    stubAbsorbRtPassingScoreIncorrectStatus(rtCompletionTime);
+
+    // User syncs training
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    // Despite the incorrect status, the user should be marked as complete since they have a passing score
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+
+    // There should be an Absorb verification record for RT
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+  }
+
+  @Test
+  public void testSyncComplianceTrainingStatus_RtMissingScoreCompletedStatus() throws Exception {
+    // User completes RT training in Absorb, with a missing score but correct completed status
+    // This is a known Absorb bug where the status is correct but score is null
+    var rtCompletionTime = currentInstant();
+    stubAbsorbRtMissingScoreCompletedStatus(rtCompletionTime);
+
+    // User syncs training
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    // Despite the missing score, the user should be marked as complete since they have COMPLETE status
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+
+    // There should be an Absorb verification record for RT
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+  }
+
+  @Test
+  public void testSyncComplianceTrainingStatus_RtFailingScoreCompletedStatus() throws Exception {
+    // User completes RT training in Absorb, with a failing score but incorrect completed status
+    // No known users in this state, but if it happens we should not mark them as complete
+    var rtCompletionTime = currentInstant();
+    stubAbsorbRtFailingScoreCompletedStatus(rtCompletionTime);
+
+    // User syncs training
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    // The user should NOT be marked as complete since they have a failing score
+    assertModuleNotCompleted(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
+  }
+
   private void assertModuleCompletionEqual(DbAccessModuleName moduleName, Timestamp timestamp) {
     assertThat(getModuleCompletionTime(moduleName)).isEqualTo(timestamp);
   }
@@ -535,6 +593,45 @@ public class ComplianceTrainingServiceTest {
                     ctCompletionTime,
                     100,
                     EnrollmentStatus.COMPLETE)));
+  }
+
+  // Known Absorb bug where user has a passing score but status is Failed. Score is correct, unclear why status is wrong.
+  private void stubAbsorbRtPassingScoreIncorrectStatus(Instant rtCompletionTime) throws ApiException {
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
+        .thenReturn(
+            List.of(
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId,
+                    rtCompletionTime,
+                    100,
+                    EnrollmentStatus.FAILED)));
+  }
+
+  // Known Absorb bug where user's score is null, but status is Complete. Absorb admins can see passing score, but manual intervention is required for us to be able to see it too.
+  private void stubAbsorbRtMissingScoreCompletedStatus(Instant rtCompletionTime) throws ApiException {
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
+        .thenReturn(
+            List.of(
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.rtTrainingCourseId,
+                    rtCompletionTime,
+                    null,
+                    EnrollmentStatus.COMPLETE)));
+  }
+
+  // No known users in this state, but if a user has a failing score and a Complete status, we should not mark them as complete.
+  private void stubAbsorbRtFailingScoreCompletedStatus(Instant rtCompletionTime) throws ApiException {
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
+        .thenReturn(
+                List.of(
+                        new Enrollment(
+                                ComplianceTrainingServiceImpl.rtTrainingCourseId,
+                                rtCompletionTime,
+                                50,
+                                EnrollmentStatus.COMPLETE)));
   }
 
   private Optional<DbComplianceTrainingVerification> getVerification(
