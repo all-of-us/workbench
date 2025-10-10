@@ -137,8 +137,7 @@ public class InitialCreditsService {
         getWorkspaceByProjectCache(dbCostsForNotRecentlyUpdatedWorkspaces);
 
     // RW-15247 Get not recently updated BQ costs for VWB google projects
-    final List<DbVwbUserPod> vwbPodsForUsers =
-            getAllVwbPodsForUsers(users);
+    final List<DbVwbUserPod> vwbPodsForUsers = getAllVwbPodsForUsers(users);
 
     if (workspaceByProject.isEmpty() && vwbPodsForUsers.isEmpty()) {
       logger.info("No workspaces or pods require updates");
@@ -148,8 +147,7 @@ public class InitialCreditsService {
     updateInitialCreditsUsageInDb(
         dbCostsForNotRecentlyUpdatedWorkspaces, liveCostsInBQ, workspaceByProject);
 
-    updateVwbInitialCreditsUsageAndInitialCreditsActive(
-        vwbPodsForUsers, vwbUserLiveCosts);
+    updateVwbInitialCreditsUsageAndInitialCreditsActive(vwbPodsForUsers, vwbUserLiveCosts);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
@@ -810,26 +808,22 @@ public class InitialCreditsService {
         .toList();
   }
 
-    /**
-     * Get all VWB pods for the passed users.
-     *
-     * @param users the users to get the VWB pods for
-     * @return a List of {@link DbVwbUserPod} for all the users
-     */
-    @NotNull
-    private List<DbVwbUserPod> getAllVwbPodsForUsers(Set<DbUser> users) {
-        if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
-            return Collections.emptyList();
-        }
-
-        return users.stream()
-                .map(DbUser::getVwbUserPod)
-                .filter(Objects::nonNull)
-                .toList();
+  /**
+   * Get all VWB pods for the passed users.
+   *
+   * @param users the users to get the VWB pods for
+   * @return a List of {@link DbVwbUserPod} for all the users
+   */
+  @NotNull
+  private List<DbVwbUserPod> getAllVwbPodsForUsers(Set<DbUser> users) {
+    if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+      return Collections.emptyList();
     }
 
+    return users.stream().map(DbUser::getVwbUserPod).filter(Objects::nonNull).toList();
+  }
 
-    private void updateVwbInitialCreditsUsageAndInitialCreditsActive(
+  private void updateVwbInitialCreditsUsageAndInitialCreditsActive(
       List<DbVwbUserPod> vwbDbCostsNotRecentlyUpdated, Map<Long, Double> vwbUserLiveCosts) {
     Map<Long, DbVwbUserPod> userIdToPod =
         vwbDbCostsNotRecentlyUpdated.stream()

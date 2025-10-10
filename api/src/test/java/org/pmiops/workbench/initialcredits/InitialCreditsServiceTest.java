@@ -1219,7 +1219,8 @@ public class InitialCreditsServiceTest {
         Sets.newHashSet(user), terraBQCosts, vwbLiveCosts);
 
     // Assert: The DB cost should include the VWB pod cost even though it was recently updated
-    // The total DB cost should be: terraWorkspaceCost (0 initially, will be set to 100) + vwbPodCostInDb (50)
+    // The total DB cost should be: terraWorkspaceCost (0 initially, will be set to 100) +
+    // vwbPodCostInDb (50)
     // The total live cost should be: terraWorkspaceCost (100) + vwbPodLiveCost (50) = 150
 
     // Before the fix, the VWB pod cost would NOT be included in DB cost calculation
