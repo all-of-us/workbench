@@ -137,19 +137,19 @@ public class InitialCreditsService {
         getWorkspaceByProjectCache(dbCostsForNotRecentlyUpdatedWorkspaces);
 
     // RW-15247 Get not recently updated BQ costs for VWB google projects
-    final List<DbVwbUserPod> vwbNotRecentlyUpdatedPods =
-        getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(users);
+    final List<DbVwbUserPod> vwbPodsForUsers =
+            getAllVwbPodsForUsers(users);
 
-    if (workspaceByProject.isEmpty() && vwbNotRecentlyUpdatedPods.isEmpty()) {
+    if (workspaceByProject.isEmpty() && vwbPodsForUsers.isEmpty()) {
       logger.info("No workspaces or pods require updates");
       return;
     }
-    final Map<Long, Double> userIdToVwbCostMap = getVwbPodsDbCostCache(vwbNotRecentlyUpdatedPods);
+    final Map<Long, Double> userIdToVwbCostMap = getVwbPodsDbCostCache(vwbPodsForUsers);
     updateInitialCreditsUsageInDb(
         dbCostsForNotRecentlyUpdatedWorkspaces, liveCostsInBQ, workspaceByProject);
 
     updateVwbInitialCreditsUsageAndInitialCreditsActive(
-        vwbNotRecentlyUpdatedPods, vwbUserLiveCosts);
+        vwbPodsForUsers, vwbUserLiveCosts);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
@@ -810,35 +810,26 @@ public class InitialCreditsService {
         .toList();
   }
 
-  /**
-   * Get the VWB pods that were not recently updated. This is used to update the initial credits
-   * usage for VWB pods.
-   *
-   * @param users the users to get the VWB pods for
-   * @return a List of {@link DbVwbUserPod} that were not recently updated
-   */
-  @NotNull
-  private List<DbVwbUserPod> getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(
-      Set<DbUser> users) {
-    if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
-      return Collections.emptyList();
+    /**
+     * Get all VWB pods for the passed users.
+     *
+     * @param users the users to get the VWB pods for
+     * @return a List of {@link DbVwbUserPod} for all the users
+     */
+    @NotNull
+    private List<DbVwbUserPod> getAllVwbPodsForUsers(Set<DbUser> users) {
+        if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
+            return Collections.emptyList();
+        }
+
+        return users.stream()
+                .map(DbUser::getVwbUserPod)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
-    Timestamp minusMinutes =
-        Timestamp.valueOf(
-            LocalDateTime.now().minusMinutes(getMinutesBeforeLastInitialCreditsJob()));
 
-    return users.stream()
-        .map(DbUser::getVwbUserPod)
-        .filter(Objects::nonNull)
-        .filter(
-            c ->
-                c.getInitialCreditsLastUpdateTime() == null
-                    || c.getInitialCreditsLastUpdateTime().before(minusMinutes))
-        .toList();
-  }
-
-  private void updateVwbInitialCreditsUsageAndInitialCreditsActive(
+    private void updateVwbInitialCreditsUsageAndInitialCreditsActive(
       List<DbVwbUserPod> vwbDbCostsNotRecentlyUpdated, Map<Long, Double> vwbUserLiveCosts) {
     Map<Long, DbVwbUserPod> userIdToPod =
         vwbDbCostsNotRecentlyUpdated.stream()
