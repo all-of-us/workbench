@@ -719,6 +719,13 @@ def setup_vwb_publish_options(op)
     "Preview the Storage Transfer Service jobs that would be created without actually creating them. " +
       "Shows the source, destination, storage class, and number of files for each transfer job."
   )
+  op.add_option(
+    "--use-v2",
+    ->(opts, _v) { opts.use_v2 = true },
+    "Use V2 mode for file transfers: STS copies files to the correct destination directory " +
+      "(not preserving source paths), and POST_PROCESS renames files in place. " +
+      "Default is V1 mode (STS preserves source paths, POST_PROCESS moves and renames)."
+  )
   supported_tasks = ["CREATE_COPY_MANIFESTS", "PUBLISH", "POST_PROCESS"]
   op.opts.tasks = supported_tasks
   op.add_option(
