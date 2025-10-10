@@ -485,7 +485,7 @@ def process_folder_transfers(configs, project, jira_ticket, service_account, job
 end
 
 # Helper to process file list transfers and generate job configs
-def process_file_list_transfers(configs, project, jira_ticket, service_account, job_index, sts_manifests_dir, common)
+def process_file_list_transfers(configs, project, jira_ticket, service_account, job_index, sts_manifests_dir, common, use_v2 = false)
   job_configs = []
 
   configs[:file_transfer_groups].each do |file_group|
@@ -500,7 +500,8 @@ def process_file_list_transfers(configs, project, jira_ticket, service_account, 
       project,
       file_group,
       job_name,
-      service_account
+      service_account,
+      use_v2
     )
 
     job_configs.push({
@@ -508,7 +509,8 @@ def process_file_list_transfers(configs, project, jira_ticket, service_account, 
                        "job_type" => "file_list_transfer",
                        "file_group" => file_group,
                        "config" => config,
-                       "local_manifest_path" => local_manifest_path
+                       "local_manifest_path" => local_manifest_path,
+                       "use_v2" => use_v2
                      })
     job_index += 1
   end
@@ -541,7 +543,7 @@ def create_local_manifest_file(file_group, job_name, sts_manifests_dir, common)
 end
 
 # Generate Storage Transfer Service job configurations from manifest files
-def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket = nil, service_account = nil)
+def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket = nil, service_account = nil, use_v2 = false)
   common = Common.new
   common.status "Generating Storage Transfer Service job configurations..."
 
@@ -557,8 +559,8 @@ def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket =
   folder_configs, job_index = process_folder_transfers(configs, project, jira_ticket, service_account, job_index)
   job_configs.concat(folder_configs)
 
-  # Process file list transfers
-  file_configs, _ = process_file_list_transfers(configs, project, jira_ticket, service_account, job_index, sts_manifests_dir, common)
+  # Process file list transfers with v2 flag
+  file_configs, _ = process_file_list_transfers(configs, project, jira_ticket, service_account, job_index, sts_manifests_dir, common, use_v2)
   job_configs.concat(file_configs)
 
   common.status "Created #{configs[:file_transfer_groups].count { |g| !g[:files].empty? }} STS manifest files in #{sts_manifests_dir}"
@@ -639,7 +641,7 @@ def generate_folder_transfer_config(project, source, destination, storage_class,
 end
 
 # Generate file list transfer configuration (without creating the job)
-def generate_file_list_transfer_config(project, file_group, job_name, service_account = nil)
+def generate_file_list_transfer_config(project, file_group, job_name, service_account = nil, use_v2 = false)
   # Get source and destination buckets
   first_file = file_group[:files].first
   source_bucket = first_file[:source].gsub("gs://", "").split("/")[0]
@@ -647,6 +649,21 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
 
   # The manifest path will be created during publish
   temp_manifest_path = "gs://#{dest_bucket}/temp-manifests/#{job_name}-manifest.txt"
+
+  # Build gcsDataSink
+  gcs_data_sink = {
+    "bucketName" => dest_bucket
+  }
+
+  # V2: Add destination path to gcsDataSink so files go to correct directory
+  # V1: No path specified, STS preserves source directory structure
+  if use_v2
+    # Extract the destination directory from the first file
+    # All files in a group go to the same directory
+    dest_path = File.dirname(first_file[:destination].gsub(/^gs:\/\/[^\/]+\//, ""))
+    dest_path_with_slash = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
+    gcs_data_sink["path"] = dest_path_with_slash
+  end
 
   # Build transfer options
   transfer_options = {
@@ -681,9 +698,7 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
       "gcsDataSource" => {
         "bucketName" => source_bucket
       },
-      "gcsDataSink" => {
-        "bucketName" => dest_bucket
-      },
+      "gcsDataSink" => gcs_data_sink,
       "transferManifest" => {
         "location" => temp_manifest_path
       },
@@ -1024,7 +1039,7 @@ def write_manifests_to_files(copy_manifests, output_manifests, working_dir, outp
 end
 
 # Helper to generate and save STS configurations
-def generate_and_save_sts_configs(opts, working_dir, copy_manifest_files, common)
+def generate_and_save_sts_configs(opts, working_dir, copy_manifest_files, common, use_v2 = false)
   common.status "Generating Storage Transfer Service job configurations..."
 
   # Get the environment configuration
@@ -1032,13 +1047,14 @@ def generate_and_save_sts_configs(opts, working_dir, copy_manifest_files, common
   service_account = env.fetch(:publisher_account)
   publishing_project = env.fetch(:publishing_project, opts.project)
 
-  # Generate STS job configs from the manifest files
+  # Generate STS job configs from the manifest files with v2 flag
   job_configs = generate_sts_job_configs(
     publishing_project,
     copy_manifest_files,
     working_dir,
     opts.jira_ticket,
-    service_account
+    service_account,
+    use_v2
   )
 
   # Save the STS configs to files
@@ -1081,8 +1097,11 @@ def vwb_create_copy_manifests_mode(opts, tier, working_dir)
 
   common.status "Finished: VWB manifests created"
 
-  # Generate and save STS configurations
-  generate_and_save_sts_configs(opts, working_dir, copy_manifest_files, common)
+  # Get use_v2 flag from opts (defaults to false if not set)
+  use_v2 = opts.respond_to?(:use_v2) && opts.use_v2 ? true : false
+
+  # Generate and save STS configurations with v2 flag
+  generate_and_save_sts_configs(opts, working_dir, copy_manifest_files, common, use_v2)
 
   copy_manifest_files
 end
@@ -1144,8 +1163,27 @@ def vwb_post_process_mode(opts, copy_manifest_files, working_dir)
     end
   end
 
+  # Detect v2 mode from saved STS job configs
+  use_v2 = false
+  config_dir = File.join(working_dir, "storage_transfer_configs")
+  if File.directory?(config_dir)
+    begin
+      job_configs = load_sts_configs(config_dir)
+      # Check if any job config has use_v2 flag set
+      use_v2 = job_configs.any? { |job| job["use_v2"] == true }
+      if use_v2
+        common.status "Detected V2 mode: Files are in destination directories, renaming in place"
+      else
+        common.status "Detected V1 mode: Files preserve source structure, moving and renaming"
+      end
+    rescue => e
+      common.warning "Could not load STS configs to detect V2 mode: #{e.message}"
+      common.warning "Defaulting to V1 mode (move and rename)"
+    end
+  end
+
   # Post-process files to rename them if needed
-  post_process_vwb_files(opts.project, copy_manifest_files, opts.dry_run)
+  post_process_vwb_files(opts.project, copy_manifest_files, opts.dry_run, use_v2)
 
   if opts.dry_run
     common.status "Finished: VWB post-processing dry run"
@@ -1219,7 +1257,7 @@ def display_rename_dry_run(common, files_to_rename)
 end
 
 # Helper to perform actual file renaming with parallel processing
-def perform_file_renaming(common, files_to_rename, deploy_account, num_threads = 32, failure_log_path = nil)
+def perform_file_renaming(common, files_to_rename, deploy_account, num_threads = 32, failure_log_path = nil, use_v2 = false)
   total_files = files_to_rename.length
   successful_renames = 0
   failed_renames = 0
@@ -1256,16 +1294,25 @@ def perform_file_renaming(common, files_to_rename, deploy_account, num_threads =
         # Get next file from queue (exit if queue is empty)
         file = file_queue.pop(true) rescue break
 
-        # STS preserves the source directory structure in the destination bucket
-        # Extract the destination bucket from the destination path
-        dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
+        # Determine current path based on v1 or v2 behavior
+        if use_v2
+          # V2: Files are already in the correct destination directory with original names
+          # We just need to rename them in place
+          dest_dir = File.dirname(file[:destination_path])
+          original_filename = file[:source_name]
+          current_path = File.join(dest_dir, original_filename)
+        else
+          # V1: STS preserves the source directory structure in the destination bucket
+          # Extract the destination bucket from the destination path
+          dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
 
-        # Extract the source object path (without bucket) from the source
-        source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
+          # Extract the source object path (without bucket) from the source
+          source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
 
-        # Construct the current path (where STS actually copied the file)
-        # STS copies to: gs://dest-bucket/<same-path-as-source>
-        current_path = "gs://#{dest_bucket}/#{source_object_path}"
+          # Construct the current path (where STS actually copied the file)
+          # STS copies to: gs://dest-bucket/<same-path-as-source>
+          current_path = "gs://#{dest_bucket}/#{source_object_path}"
+        end
 
         # The destination path already has the correct name and location
         new_path = file[:destination_path]
@@ -1360,7 +1407,7 @@ def perform_file_renaming(common, files_to_rename, deploy_account, num_threads =
   return successful_renames, failed_renames
 end
 
-def post_process_vwb_files(project, manifest_files, dry_run = false)
+def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = false)
   common = Common.new
 
   # Get the publisher account for impersonation
@@ -1401,8 +1448,8 @@ def post_process_vwb_files(project, manifest_files, dry_run = false)
   working_dir = File.dirname(manifest_files.first)
   failure_log_path = File.join(working_dir, "post_process_failures.csv")
 
-  # Perform the actual renaming with failure logging
-  successful_renames, failed_renames = perform_file_renaming(common, files_to_rename, deploy_account, 32, failure_log_path)
+  # Perform the actual renaming with failure logging and v2 flag
+  successful_renames, failed_renames = perform_file_renaming(common, files_to_rename, deploy_account, 32, failure_log_path, use_v2)
 
   # Display summary
   common.status ""
