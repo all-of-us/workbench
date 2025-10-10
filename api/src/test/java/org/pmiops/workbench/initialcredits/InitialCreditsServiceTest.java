@@ -1177,6 +1177,77 @@ public class InitialCreditsServiceTest {
     assertThat(updatedPod.isInitialCreditsActive()).isTrue();
   }
 
+  @Test
+  public void checkInitialCreditsUsage_includesAllVwbPodsForAccurateDbCostCalculation() {
+    // This test verifies that VWB pod costs are included in DB cost calculations
+    // regardless of when they were recently updated. Before the fix, only "not recently updated"
+    // pods were included, which caused inaccurate DB cost calculations and incorrect
+    // downstream comparisons with live costs.
+
+    final String proj1 = "proj-1";
+    final double terraWorkspaceCost = 100.0;
+    final double vwbPodCostInDb = 50.0;
+    final double vwbPodLiveCost = 50.0; // Same as DB cost (recently updated)
+
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 200.0;
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
+    workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 60;
+
+    // Create user with Terra workspace and VWB pod
+    DbUser user = createUser("user@test.com");
+    DbWorkspace ws1 = createWorkspace(user, proj1);
+    DbVwbUserPod vwbPod = createVwbPodForUser(user, true);
+
+    // Set the pod cost to 50.0 and mark it as recently updated
+    vwbPod.setCost(vwbPodCostInDb);
+    vwbUserPodDao.save(vwbPod);
+
+    user.setVwbUserPod(vwbPod);
+    userDao.save(user);
+
+    commitTransaction();
+
+    // Live costs from BigQuery
+    Map<String, Double> terraBQCosts = Maps.newHashMap();
+    terraBQCosts.put(proj1, terraWorkspaceCost);
+
+    Map<Long, Double> vwbLiveCosts = new HashMap<>();
+    vwbLiveCosts.put(user.getUserId(), vwbPodLiveCost);
+
+    // Act: Check initial credits usage
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), terraBQCosts, vwbLiveCosts);
+
+    // Assert: The DB cost should include the VWB pod cost even though it was recently updated
+    // The total DB cost should be: terraWorkspaceCost (0 initially, will be set to 100) +
+    // vwbPodCostInDb (50)
+    // The total live cost should be: terraWorkspaceCost (100) + vwbPodLiveCost (50) = 150
+
+    // Before the fix, the VWB pod cost would NOT be included in DB cost calculation
+    // because it was recently updated, leading to incorrect comparison:
+    // - dbCostByCreator would be 0.0 (missing the 50.0 from VWB pod)
+    // - liveCostByCreator would be 150.0
+    // This would cause incorrect threshold calculations
+
+    // After the fix, all VWB pods are included:
+    // - dbCostByCreator includes the VWB pod cost: 50.0
+    // - liveCostByCreator is 150.0
+    // This ensures accurate cost comparison
+
+    verify(taskQueueService)
+        .pushInitialCreditsExhaustionTask(
+            argThat(new UserListMatcher(List.of(user.getUserId()))),
+            // DB cost should include VWB pod cost (50.0) + initial workspace cost (0.0) = 50.0
+            argThat(new MapMatcher(Map.of(user.getUserId(), vwbPodCostInDb))),
+            // Live cost is terra (100) + vwb (50) = 150.0
+            argThat(new MapMatcher(Map.of(user.getUserId(), terraWorkspaceCost + vwbPodLiveCost))));
+
+    // Verify the workspace was updated
+    final DbWorkspaceFreeTierUsage usage1 = workspaceFreeTierUsageDao.findOneByWorkspace(ws1);
+    assertThat(usage1.getUser()).isEqualTo(user);
+    assertWithinBillingTolerance(usage1.getCost(), terraWorkspaceCost);
+  }
+
   private void assertSingleWorkspaceTestDbState(
       DbUser user, DbWorkspace workspaceForQuerying, double cost) {
 
