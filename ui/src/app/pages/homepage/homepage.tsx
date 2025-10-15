@@ -82,32 +82,46 @@ export const styles = reactStyles({
 
 const WelcomeHeader = () => {
   return (
-    <FlexColumn style={{ marginLeft: '3%', width: '50%' }}>
-      <FlexRow>
-        <FlexColumn>
-          <Header
-            style={{
-              fontWeight: 500,
-              color: colors.secondary,
-              fontSize: '1.38rem',
-            }}
-          >
-            Welcome to the
-          </Header>
-          <Header style={{ textTransform: 'uppercase', marginTop: '0.3rem' }}>
-            Researcher Workbench
-          </Header>
-        </FlexColumn>
-        <FlexRow style={{ alignItems: 'flex-end', marginLeft: '1.5rem' }}>
-          <img style={styles.welcomeMessageIcon} src={workspaceIcon} />
-          <img style={styles.welcomeMessageIcon} src={cohortIcon} />
-          <img style={styles.welcomeMessageIcon} src={analysisIcon} />
-        </FlexRow>
-      </FlexRow>
-      <SmallHeader style={{ color: colors.primary, marginTop: '0.375rem' }}>
-        The secure platform to analyze <AoU /> data
-      </SmallHeader>
-    </FlexColumn>
+    <FlexRow>
+      <FlexColumn
+        style={{ color: colors.primary, marginLeft: '3%', width: '50%' }}
+      >
+        <Header
+          style={{
+            fontWeight: 600,
+            fontSize: '32px',
+          }}
+        >
+          A more powerful way to work with <AoU /> data
+        </Header>
+        <SmallHeader style={{ marginTop: '1rem' }}>
+          The new All of Us Researcher experience, built on the Verily Platform
+          offers expanded data exploration and analysis tools, an updated
+          interface, and access to enhanced cloud capabilities.
+          <ul>
+            <li>
+              You can explore the updated Workbench now and get early access to
+              new tools
+            </li>
+            <li>
+              In the coming months, researchers will gradually transition to the
+              new Workbench
+            </li>
+            <li>
+              Until then, the legacy environment remains available for you to
+              use
+            </li>
+            <li>
+              For details on the update and transition timeline, visit the User
+              Support Hub
+            </li>
+          </ul>
+        </SmallHeader>
+      </FlexColumn>
+      <FlexColumn style={{ marginLeft: '3%', width: '45%' }}>
+        Carousel ...
+      </FlexColumn>
+    </FlexRow>
   );
 };
 
@@ -303,7 +317,7 @@ export const Homepage = fp.flow(
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
             <WelcomeHeader />
-            <FadeBox style={styles.fadeBox}>
+            <div style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
                 <Workspaces onChange={() => this.fetchWorkspaces()} />
@@ -316,7 +330,7 @@ export const Homepage = fp.flow(
                     <GettingStarted />
                   ))}
               </FlexColumn>
-            </FadeBox>
+            </div>
           </FlexColumn>
           <QuickTourAndVideos showQuickTourInitially={firstVisit} />
         </React.Fragment>
