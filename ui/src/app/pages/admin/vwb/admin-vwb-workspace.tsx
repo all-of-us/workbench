@@ -18,29 +18,11 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { RESEARCH_PURPOSE_MAPPING } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import { WorkspaceInfoField } from 'app/pages/admin/workspace/workspace-info-field';
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
 
 const styles = reactStyles({
-  editIcon: {
-    marginTop: '0.15rem',
-    height: 22,
-    width: 22,
-    fill: colors.light,
-    backgroundColor: colors.accent,
-    padding: '5px',
-    borderRadius: '23px',
-  },
-  mainHeader: {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: colors.primary,
-    marginBottom: '0.75rem',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   sectionContentContainer: {
     marginLeft: '1.5rem',
   },
@@ -49,13 +31,6 @@ const styles = reactStyles({
     fontWeight: 600,
     color: colors.primary,
     marginTop: '1.5rem',
-  },
-  sectionItemWithBackground: {
-    padding: '10px',
-    backgroundColor: 'transparent',
-    color: colors.primary,
-    marginLeft: '0.75rem',
-    borderRadius: '3px',
   },
   sectionSubHeader: {
     fontSize: '14px',
@@ -68,24 +43,6 @@ const styles = reactStyles({
     fontWeight: 400,
     color: colors.primary,
     lineHeight: '22px',
-  },
-  sectionText: {
-    fontSize: '14px',
-    lineHeight: '24px',
-    color: colors.primary,
-    marginTop: '0.45rem',
-  },
-  reviewPurposeReminder: {
-    marginTop: '0.45rem',
-    borderStyle: 'solid',
-    height: '3.75rem',
-    color: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderColor: colors.warning,
-    borderRadius: '0.6rem',
-    borderWidth: '0.15rem',
-    backgroundColor: colorWithWhiteness(colors.highlight, 0.7),
   },
 });
 
@@ -142,10 +99,6 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     vwbWorkspaceAdminApi()
       .getVwbWorkspaceAdminView(ufid)
       .then((resp) => {
-        const test = JSON.parse(resp.workspace.researchPurpose);
-        console.log(test);
-        console.log(typeof test[0].form_data.fitNone);
-        console.log(typeof test[0].form_data.populationYesNo);
         setWorkspaceDetails(resp);
         setResearchPurpose(
           (JSON.parse(resp.workspace.researchPurpose)?.[0]
