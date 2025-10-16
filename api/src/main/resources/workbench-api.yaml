@@ -13757,6 +13757,9 @@ components:
         description:
           type: string
           description: The description of the workspace
+        researchPurpose:
+          type: string
+          description: JSON string containing all research purpose description data
         createdBy:
           type: string
           description: Username of the workspace creator
