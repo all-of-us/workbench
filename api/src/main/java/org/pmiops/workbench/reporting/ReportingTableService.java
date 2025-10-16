@@ -206,14 +206,12 @@ public class ReportingTableService {
         reportingQueryService::getAppUsageRowCount);
   }
 
-  // workspace only queries for active workspaces, so a simple row count won't match
-
   public final ReportingTableParams<ReportingWorkspace> workspace() {
     return new ReportingTableParams<>(
         WORKSPACE_TABLE_NAME,
         batchSize(WORKSPACE_TABLE_NAME),
         WorkspaceColumnValueExtractor::values,
         reportingQueryService::getWorkspaceBatch,
-        reportingQueryService::getActiveWorkspaceCount);
+        () -> reportingQueryService.getTableRowCount(WORKSPACE_TABLE_NAME));
   }
 }

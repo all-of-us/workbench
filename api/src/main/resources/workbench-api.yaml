@@ -12987,6 +12987,10 @@ components:
           description: |-
             The workspace "namespace", which corresponds to the Terra Billing Project ID associated with
             the workspace.
+        activeStatus:
+          type: string
+          description: |-
+            Indicates the status of the workspace. It can be either "Active" or "Deleted".
       x-aou-note: |-
         This code was generated using reporting-wizard.rb at 2020-09-30T16:18:28-04:00.
         Manual modification should be avoided if possible as this is a one-time generation
