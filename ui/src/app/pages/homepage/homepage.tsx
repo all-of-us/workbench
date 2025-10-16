@@ -1,11 +1,17 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
+import { faUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Profile, WorkspaceResponseListResponse } from 'generated/fetch';
 
-import { StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
-import { FadeBox } from 'app/components/containers';
+import { environment } from 'environments/environment';
+import {
+  Button,
+  StyledExternalLink,
+  StyledRouterLink,
+} from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SemiBoldHeader, SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
@@ -22,9 +28,6 @@ import { fetchWithSystemErrorHandler } from 'app/utils/errors';
 import { NavigationProps, useNavigation } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { supportUrls } from 'app/utils/zendesk';
-import analysisIcon from 'assets/images/analysis-icon.svg';
-import cohortIcon from 'assets/images/cohort-icon.svg';
-import workspaceIcon from 'assets/images/workspace-icon.svg';
 
 import { QuickTourAndVideos } from './quick-tour-and-videos';
 
@@ -80,25 +83,46 @@ export const styles = reactStyles({
   },
 });
 
+const VWB_USER_SUPPORT_HUB_URL =
+  'https://support.researchallofus.org/hc/en-us/articles/39985865987732-What-to-expect-during-the-Researcher-Workbench-Migration';
+
 const WelcomeHeader = () => {
   return (
-    <FlexRow>
-      <FlexColumn
-        style={{ color: colors.primary, marginLeft: '3%', width: '50%' }}
-      >
+    <FlexRow
+      style={{
+        background: colors.banner,
+        borderRadius: '0.5rem',
+        margin: '1.5rem 3% 0 3%',
+        padding: '1.5rem',
+      }}
+    >
+      <FlexColumn style={{ color: colors.primary, width: '50%' }}>
         <Header
           style={{
             fontWeight: 600,
             fontSize: '32px',
+            lineHeight: '40px',
+            margin: 0,
           }}
         >
           A more powerful way to work with <AoU /> data
         </Header>
         <SmallHeader style={{ marginTop: '1rem' }}>
-          The new All of Us Researcher experience, built on the Verily Platform
+          The new{' '}
+          <span style={{ fontWeight: 700 }}>
+            {' '}
+            <AoU /> Researcher experience, built on the{' '}
+            <StyledExternalLink
+              href={environment.vwbUiUrl}
+              style={{ color: colors.primary, textDecoration: 'underline' }}
+              target='_blank'
+            >
+              Verily Platform
+            </StyledExternalLink>
+          </span>{' '}
           offers expanded data exploration and analysis tools, an updated
           interface, and access to enhanced cloud capabilities.
-          <ul>
+          <ul style={{ paddingLeft: '1.5rem' }}>
             <li>
               You can explore the updated Workbench now and get early access to
               new tools
@@ -112,13 +136,33 @@ const WelcomeHeader = () => {
               use
             </li>
             <li>
-              For details on the update and transition timeline, visit the User
-              Support Hub
+              For details on the update and transition timeline, visit the{' '}
+              <StyledExternalLink
+                href={VWB_USER_SUPPORT_HUB_URL}
+                style={{ color: colors.primary, textDecoration: 'underline' }}
+                target='_blank'
+              >
+                User Support Hub
+              </StyledExternalLink>
             </li>
           </ul>
         </SmallHeader>
+        <Button style={{ height: '45px', width: '300px' }}>
+          <a
+            href={environment.vwbUiUrl}
+            target='_blank'
+            style={{ color: colors.white }}
+          >
+            Explore the Verily Platform
+            <FontAwesomeIcon
+              icon={faUpRightFromSquare}
+              title='Explore the Verily Platform'
+              style={{ marginLeft: '0.5rem' }}
+            />
+          </a>
+        </Button>
       </FlexColumn>
-      <FlexColumn style={{ marginLeft: '3%', width: '45%' }}>
+      <FlexColumn style={{ marginLeft: '1.5rem', width: '45%' }}>
         Carousel ...
       </FlexColumn>
     </FlexRow>
