@@ -47,33 +47,10 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
                 .flatMap(entry -> entry.keySet().stream())
                 .collect(Collectors.toSet()));
 
-    // Fetch and log records before deletion
-    var recordsBeforeDeletion =
+    var existingCacheEntries =
         workspaceUserCacheDao.findAllByWorkspaceIdIn(newEntriesByWorkspaceId.keySet());
-    log.info(String.format("Records before deletion (count: %d):", recordsBeforeDeletion.size()));
-    recordsBeforeDeletion.forEach(
-        record ->
-            log.info(
-                String.format(
-                    "  Workspace ID: %d, User ID: %d, role: %s",
-                    record.getWorkspaceId(), record.getUserId(), record.getRole())));
 
-    int deletedCount =
-        workspaceUserCacheDao.deleteAllByWorkspaceIdIn(newEntriesByWorkspaceId.keySet());
-    log.info(String.format("Deleted %d records", deletedCount));
-
-    // Fetch and log records after deletion (should be empty or minimal)
-    var recordsAfterDeletion =
-        workspaceUserCacheDao.findAllByWorkspaceIdIn(newEntriesByWorkspaceId.keySet());
-    log.info(String.format("Records after deletion (count: %d):", recordsAfterDeletion.size()));
-    recordsAfterDeletion.forEach(
-        record ->
-            log.info(
-                String.format(
-                    "  Workspace ID: %d, User ID: %d, role: %s",
-                    record.getWorkspaceId(), record.getUserId(), record.getRole())));
-
-    var newRecords =
+    var newCacheEntries =
         newEntriesByWorkspaceId.entrySet().stream()
             .flatMap(
                 workspaceWithAcl ->
@@ -81,7 +58,28 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
                         workspaceWithAcl.getKey(), workspaceWithAcl.getValue(), usernameMap))
             .toList();
 
-    workspaceUserCacheDao.saveAll(newRecords);
+    var entriesToDelete =
+        existingCacheEntries.stream()
+            .filter(
+                existingEntry ->
+                    newCacheEntries.stream()
+                        .noneMatch(
+                            newEntry ->
+                                newEntry.getWorkspaceId() == existingEntry.getWorkspaceId()
+                                    && newEntry.getUserId() == existingEntry.getUserId()))
+            .toList();
+
+    log.info(
+        String.format(
+            "Removing %d stale entries from workspace user cache", entriesToDelete.size()));
+    workspaceUserCacheDao.deleteAllByWorkspaceIdIn(
+        entriesToDelete.stream()
+            .map(DbWorkspaceUserCache::getWorkspaceId)
+            .collect(Collectors.toSet()));
+
+    log.info(
+        String.format("Upserting %d entries into workspace user cache", newCacheEntries.size()));
+    workspaceUserCacheDao.upsertAll(newCacheEntries);
   }
 
   private Stream<DbWorkspaceUserCache> getWorkspaceUserCacheEntries(

@@ -137,6 +137,8 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
     workspaceUserCacheService.updateWorkspaceUserCache(wsAcls);
 
+    LOGGER.info("Finished processing workspace user cache queue task.");
+
     return ResponseEntity.ok().build();
   }
 }
