@@ -162,7 +162,8 @@
     "exportTerraDataWarehouse": false,
     "batchSizeOverrides": {
       "cohort": 10000,
-      "user": 500
+      "user": 500,
+      "workspace": 500
     }
   },
   "ras": {

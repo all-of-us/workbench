@@ -160,7 +160,8 @@
     "dataset": "reporting_test",
     "maxRowsPerInsert": 50000,
     "batchSizeOverrides": {
-      "cohort": 10000
+      "cohort": 10000,
+      "workspace": 500
     },
     "exportTerraDataWarehouse": true,
     "terraWarehouseLeoAppTableId": "broad-dsde-dev-analytics-dev.warehouse.leonardo_app",

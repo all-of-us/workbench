@@ -149,7 +149,10 @@
   "reporting": {
     "dataset": "reporting_staging",
     "maxRowsPerInsert": 50000,
-    "exportTerraDataWarehouse": false
+    "exportTerraDataWarehouse": false,
+    "batchSizeOverrides": {
+      "workspace": 500
+    }
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",
