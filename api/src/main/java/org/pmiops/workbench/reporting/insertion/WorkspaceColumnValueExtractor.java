@@ -3,8 +3,10 @@ package org.pmiops.workbench.reporting.insertion;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
 
+import java.util.Optional;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.WorkspaceDemographic;
 
 /*
  * Column data and metadata convertors for BigQuery workspace table in reporting dataset.
@@ -54,7 +56,7 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   FOCUS_ON_UNDER_REPRESENTED_POPULATIONS(
       "focus_on_under_represented_populations",
       ReportingWorkspace::isFocusOnUnderrepresentedPopulations),
-  WORKSPACE_DEMOGRAPHIC("workspace_demographic", w -> w.getWorkspaceDemographic().toString());
+  WORKSPACE_DEMOGRAPHIC("workspace_demographic", w -> Optional.ofNullable(w.getWorkspaceDemographic()).map(WorkspaceDemographic::toString).orElse(null));
 
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;
