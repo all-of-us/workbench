@@ -30,8 +30,7 @@ public class WorkspaceUserCacheServiceTest {
   @Mock private WorkspaceDao mockWorkspaceDao;
   @Mock private WorkspaceUserCacheDao mockWorkspaceUserCacheDao;
 
-  @Captor private ArgumentCaptor<List<DbWorkspaceUserCache>> cacheEntriesCaptor;
-  @Captor private ArgumentCaptor<Set<Long>> workspaceIdsCaptor;
+  @Captor private ArgumentCaptor<Iterable<DbWorkspaceUserCache>> cacheEntriesIterableCaptor;
 
   private WorkspaceUserCacheService workspaceUserCacheService;
 
@@ -78,24 +77,33 @@ public class WorkspaceUserCacheServiceTest {
 
     when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com", "user2@example.com")))
         .thenReturn(Map.of(testUser1.getUsername(), testUser1, testUser2.getUsername(), testUser2));
+    when(mockWorkspaceUserCacheDao.findAllByWorkspaceIdIn(Set.of(1L))).thenReturn(List.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of(1L));
-    verify(mockWorkspaceUserCacheDao).saveAll(cacheEntriesCaptor.capture());
+    // With no existing entries, nothing should be deleted
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
+    verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
-    List<DbWorkspaceUserCache> savedEntries = cacheEntriesCaptor.getValue();
-    assertThat(savedEntries).hasSize(2);
+    List<DbWorkspaceUserCache> upsertedEntries =
+        (List<DbWorkspaceUserCache>) cacheEntriesIterableCaptor.getValue();
+    assertThat(upsertedEntries).hasSize(2);
 
     // Verify the cache entries were created correctly
     DbWorkspaceUserCache user1Entry =
-        savedEntries.stream().filter(entry -> entry.getUserId() == 101L).findFirst().orElseThrow();
+        upsertedEntries.stream()
+            .filter(entry -> entry.getUserId() == 101L)
+            .findFirst()
+            .orElseThrow();
     assertThat(user1Entry.getWorkspaceId()).isEqualTo(1L);
     assertThat(user1Entry.getRole()).isEqualTo("OWNER");
     assertThat(user1Entry.getLastUpdated()).isNotNull();
 
     DbWorkspaceUserCache user2Entry =
-        savedEntries.stream().filter(entry -> entry.getUserId() == 102L).findFirst().orElseThrow();
+        upsertedEntries.stream()
+            .filter(entry -> entry.getUserId() == 102L)
+            .findFirst()
+            .orElseThrow();
     assertThat(user2Entry.getWorkspaceId()).isEqualTo(1L);
     assertThat(user2Entry.getRole()).isEqualTo("READER");
     assertThat(user2Entry.getLastUpdated()).isNotNull();
@@ -113,18 +121,20 @@ public class WorkspaceUserCacheServiceTest {
 
     when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com", "user2@example.com")))
         .thenReturn(Map.of(testUser1.getUsername(), testUser1, testUser2.getUsername(), testUser2));
+    when(mockWorkspaceUserCacheDao.findAllByWorkspaceIdIn(Set.of(1L, 2L))).thenReturn(List.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of(1L, 2L));
-    verify(mockWorkspaceUserCacheDao).saveAll(cacheEntriesCaptor.capture());
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
+    verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
-    List<DbWorkspaceUserCache> savedEntries = cacheEntriesCaptor.getValue();
-    assertThat(savedEntries).hasSize(2);
+    List<DbWorkspaceUserCache> upsertedEntries =
+        (List<DbWorkspaceUserCache>) cacheEntriesIterableCaptor.getValue();
+    assertThat(upsertedEntries).hasSize(2);
 
     // Verify workspace 1 entry
     DbWorkspaceUserCache ws1Entry =
-        savedEntries.stream()
+        upsertedEntries.stream()
             .filter(entry -> entry.getWorkspaceId() == 1L)
             .findFirst()
             .orElseThrow();
@@ -133,7 +143,7 @@ public class WorkspaceUserCacheServiceTest {
 
     // Verify workspace 2 entry
     DbWorkspaceUserCache ws2Entry =
-        savedEntries.stream()
+        upsertedEntries.stream()
             .filter(entry -> entry.getWorkspaceId() == 2L)
             .findFirst()
             .orElseThrow();
@@ -148,13 +158,26 @@ public class WorkspaceUserCacheServiceTest {
 
     when(mockUserDao.getUsersMappedByUsernames(Set.of())).thenReturn(Map.of());
 
+    // Mock existing entry that should be deleted
+    DbWorkspaceUserCache existingEntry =
+        new DbWorkspaceUserCache()
+            .setId(1001L)
+            .setWorkspaceId(1L)
+            .setUserId(101L)
+            .setRole("OWNER")
+            .setLastUpdated(Timestamp.from(Instant.now()));
+    when(mockWorkspaceUserCacheDao.findAllByWorkspaceIdIn(Set.of(1L)))
+        .thenReturn(List.of(existingEntry));
+
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of(1L));
-    verify(mockWorkspaceUserCacheDao).saveAll(cacheEntriesCaptor.capture());
+    // Should delete the existing entry since the new ACL is empty
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of(1001L));
+    verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
-    List<DbWorkspaceUserCache> savedEntries = cacheEntriesCaptor.getValue();
-    assertThat(savedEntries).isEmpty();
+    List<DbWorkspaceUserCache> upsertedEntries =
+        (List<DbWorkspaceUserCache>) cacheEntriesIterableCaptor.getValue();
+    assertThat(upsertedEntries).isEmpty();
   }
 
   @Test
@@ -162,14 +185,16 @@ public class WorkspaceUserCacheServiceTest {
     Map<Long, Map<String, RawlsWorkspaceAccessEntry>> emptyMap = Map.of();
 
     when(mockUserDao.getUsersMappedByUsernames(Set.of())).thenReturn(Map.of());
+    when(mockWorkspaceUserCacheDao.findAllByWorkspaceIdIn(Set.of())).thenReturn(List.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(emptyMap);
 
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of());
-    verify(mockWorkspaceUserCacheDao).saveAll(cacheEntriesCaptor.capture());
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
+    verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
-    List<DbWorkspaceUserCache> savedEntries = cacheEntriesCaptor.getValue();
-    assertThat(savedEntries).isEmpty();
+    List<DbWorkspaceUserCache> upsertedEntries =
+        (List<DbWorkspaceUserCache>) cacheEntriesIterableCaptor.getValue();
+    assertThat(upsertedEntries).isEmpty();
   }
 
   @Test
@@ -184,20 +209,22 @@ public class WorkspaceUserCacheServiceTest {
 
     when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com")))
         .thenReturn(Map.of(testUser1.getUsername(), testUser1));
+    when(mockWorkspaceUserCacheDao.findAllByWorkspaceIdIn(Set.of(1L, 2L))).thenReturn(List.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of(1L, 2L));
-    verify(mockWorkspaceUserCacheDao).saveAll(cacheEntriesCaptor.capture());
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
+    verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
-    List<DbWorkspaceUserCache> savedEntries = cacheEntriesCaptor.getValue();
-    assertThat(savedEntries).hasSize(2);
+    List<DbWorkspaceUserCache> upsertedEntries =
+        (List<DbWorkspaceUserCache>) cacheEntriesIterableCaptor.getValue();
+    assertThat(upsertedEntries).hasSize(2);
 
     // Verify both entries are for the same user but different workspaces and roles
-    assertThat(savedEntries.stream().allMatch(entry -> entry.getUserId() == 101L)).isTrue();
-    assertThat(savedEntries.stream().map(DbWorkspaceUserCache::getWorkspaceId).toList())
+    assertThat(upsertedEntries.stream().allMatch(entry -> entry.getUserId() == 101L)).isTrue();
+    assertThat(upsertedEntries.stream().map(DbWorkspaceUserCache::getWorkspaceId).toList())
         .containsExactly(1L, 2L);
-    assertThat(savedEntries.stream().map(DbWorkspaceUserCache::getRole).toList())
+    assertThat(upsertedEntries.stream().map(DbWorkspaceUserCache::getRole).toList())
         .containsExactly("OWNER", "READER");
   }
 
@@ -211,17 +238,19 @@ public class WorkspaceUserCacheServiceTest {
 
     when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com")))
         .thenReturn(Map.of(testUser1.getUsername(), testUser1));
+    when(mockWorkspaceUserCacheDao.findAllByWorkspaceIdIn(Set.of(1L))).thenReturn(List.of());
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
     Instant afterCall = Instant.now();
 
-    verify(mockWorkspaceUserCacheDao).saveAll(cacheEntriesCaptor.capture());
+    verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
-    List<DbWorkspaceUserCache> savedEntries = cacheEntriesCaptor.getValue();
-    assertThat(savedEntries).hasSize(1);
+    List<DbWorkspaceUserCache> upsertedEntries =
+        (List<DbWorkspaceUserCache>) cacheEntriesIterableCaptor.getValue();
+    assertThat(upsertedEntries).hasSize(1);
 
-    Timestamp lastUpdated = savedEntries.get(0).getLastUpdated();
+    Timestamp lastUpdated = upsertedEntries.get(0).getLastUpdated();
     assertThat(lastUpdated.toInstant()).isAtLeast(beforeCall);
     assertThat(lastUpdated.toInstant()).isAtMost(afterCall);
   }
@@ -234,17 +263,60 @@ public class WorkspaceUserCacheServiceTest {
 
     when(mockUserDao.getUsersMappedByUsernames(Set.of("nonexistent@example.com")))
         .thenReturn(Map.of()); // User not found
+    when(mockWorkspaceUserCacheDao.findAllByWorkspaceIdIn(Set.of(1L))).thenReturn(List.of());
 
     // Method should complete without throwing exception
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
-    // Verify workspace cache entries are deleted
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of(1L));
+    // Verify workspace cache entries deletion is called (even if empty set)
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
 
     // Verify no new entries are saved since user doesn't exist
-    verify(mockWorkspaceUserCacheDao).saveAll(cacheEntriesCaptor.capture());
-    List<DbWorkspaceUserCache> savedEntries = cacheEntriesCaptor.getValue();
-    assertThat(savedEntries).isEmpty();
+    verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
+    List<DbWorkspaceUserCache> upsertedEntries =
+        (List<DbWorkspaceUserCache>) cacheEntriesIterableCaptor.getValue();
+    assertThat(upsertedEntries).isEmpty();
+  }
+
+  @Test
+  public void testUpdateWorkspaceUserCache_removesStaleEntries() {
+    // Test that entries that exist in the cache but not in the new ACL are deleted
+    RawlsWorkspaceAccessEntry ownerEntry = new RawlsWorkspaceAccessEntry().accessLevel("OWNER");
+    Map<Long, Map<String, RawlsWorkspaceAccessEntry>> newEntriesByWorkspaceId =
+        Map.of(1L, Map.of("user1@example.com", ownerEntry));
+
+    when(mockUserDao.getUsersMappedByUsernames(Set.of("user1@example.com")))
+        .thenReturn(Map.of(testUser1.getUsername(), testUser1));
+
+    // Mock existing entries - user2 should be removed as they're not in the new ACL
+    DbWorkspaceUserCache existingUser1Entry =
+        new DbWorkspaceUserCache()
+            .setId(1001L)
+            .setWorkspaceId(1L)
+            .setUserId(101L)
+            .setRole("READER")
+            .setLastUpdated(Timestamp.from(Instant.now()));
+    DbWorkspaceUserCache existingUser2Entry =
+        new DbWorkspaceUserCache()
+            .setId(1002L)
+            .setWorkspaceId(1L)
+            .setUserId(102L)
+            .setRole("OWNER")
+            .setLastUpdated(Timestamp.from(Instant.now()));
+    when(mockWorkspaceUserCacheDao.findAllByWorkspaceIdIn(Set.of(1L)))
+        .thenReturn(List.of(existingUser1Entry, existingUser2Entry));
+
+    workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
+
+    // Should delete the stale entry for user2
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of(1002L));
+
+    verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
+    List<DbWorkspaceUserCache> upsertedEntries =
+        (List<DbWorkspaceUserCache>) cacheEntriesIterableCaptor.getValue();
+    assertThat(upsertedEntries).hasSize(1);
+    assertThat(upsertedEntries.get(0).getUserId()).isEqualTo(101L);
+    assertThat(upsertedEntries.get(0).getRole()).isEqualTo("OWNER");
   }
 
   @Test

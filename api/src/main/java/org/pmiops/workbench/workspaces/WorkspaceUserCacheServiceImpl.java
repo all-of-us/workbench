@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService {
-
+  private static final Logger log = Logger.getLogger(WorkspaceUserCacheServiceImpl.class.getName());
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceUserCacheDao workspaceUserCacheDao;
@@ -46,16 +47,37 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
                 .flatMap(entry -> entry.keySet().stream())
                 .collect(Collectors.toSet()));
 
-    workspaceUserCacheDao.deleteAllByWorkspaceIdIn(newEntriesByWorkspaceId.keySet());
+    var existingCacheEntries =
+        workspaceUserCacheDao.findAllByWorkspaceIdIn(newEntriesByWorkspaceId.keySet());
 
-    var newRecords =
+    var newCacheEntries =
         newEntriesByWorkspaceId.entrySet().stream()
             .flatMap(
                 workspaceWithAcl ->
                     getWorkspaceUserCacheEntries(
                         workspaceWithAcl.getKey(), workspaceWithAcl.getValue(), usernameMap))
             .toList();
-    workspaceUserCacheDao.saveAll(newRecords);
+
+    var entriesToDelete =
+        existingCacheEntries.stream()
+            .filter(
+                existingEntry ->
+                    newCacheEntries.stream()
+                        .noneMatch(
+                            newEntry ->
+                                newEntry.getWorkspaceId() == existingEntry.getWorkspaceId()
+                                    && newEntry.getUserId() == existingEntry.getUserId()))
+            .toList();
+
+    log.info(
+        String.format(
+            "Removing %d stale entries from workspace user cache", entriesToDelete.size()));
+    workspaceUserCacheDao.deleteAllById(
+        entriesToDelete.stream().map(DbWorkspaceUserCache::getId).toList());
+
+    log.info(
+        String.format("Upserting %d entries into workspace user cache", newCacheEntries.size()));
+    workspaceUserCacheDao.upsertAll(newCacheEntries);
   }
 
   private Stream<DbWorkspaceUserCache> getWorkspaceUserCacheEntries(

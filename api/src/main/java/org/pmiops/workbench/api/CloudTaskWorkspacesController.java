@@ -133,7 +133,11 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
                             workspace.getWorkspaceNamespace(),
                             workspace.getWorkspaceFirecloudName())));
 
+    LOGGER.info(String.format("Updating cache for %d workspaces...", wsAcls.size()));
+
     workspaceUserCacheService.updateWorkspaceUserCache(wsAcls);
+
+    LOGGER.info("Finished processing workspace user cache queue task.");
 
     return ResponseEntity.ok().build();
   }
