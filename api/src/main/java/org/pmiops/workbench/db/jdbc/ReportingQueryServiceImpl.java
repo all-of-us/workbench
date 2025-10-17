@@ -608,7 +608,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  rp_time_requested,\n"
             + "  w.workspace_id,\n"
             + "  workspace_namespace,\n"
-            + "  w.active_status\n"
+            + "  w.active_status,\n"
             + "  sp.specific_populations\n"
             + "FROM workspace w\n"
             // some Tanagra workspaces don't have CDR version IDs
