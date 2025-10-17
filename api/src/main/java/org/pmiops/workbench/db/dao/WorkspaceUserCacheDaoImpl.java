@@ -29,6 +29,10 @@ public class WorkspaceUserCacheDaoImpl implements WorkspaceUserCacheDaoCustom {
             ? (List<DbWorkspaceUserCache>) entries
             : StreamSupport.stream(entries.spliterator(), false).toList();
 
+    if (entryList.isEmpty()) {
+      return 0;
+    }
+
     int[][] results =
         jdbcTemplate.batchUpdate(
             sql,
