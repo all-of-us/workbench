@@ -76,7 +76,7 @@ describe('HomepageComponent', () => {
 
   it('should render the homepage', () => {
     component();
-    expect(screen.getByText('Welcome to the')).toBeInTheDocument();
+    expect(screen.getByText('Legacy Workspaces')).toBeInTheDocument();
   });
 
   it('should display quick tour when clicked', () => {
