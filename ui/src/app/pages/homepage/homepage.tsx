@@ -1,25 +1,24 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { faUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Profile, WorkspaceResponseListResponse } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import {
   Button,
   StyledExternalLink,
   StyledRouterLink,
 } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { Header, SemiBoldHeader, SmallHeader } from 'app/components/headers';
-import { ClrIcon } from 'app/components/icons';
+import { SemiBoldHeader } from 'app/components/headers';
 import { CustomBulletList, CustomBulletListItem } from 'app/components/lists';
 import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { RecentResources } from 'app/pages/homepage/recent-resources';
 import { RecentWorkspaces } from 'app/pages/homepage/recent-workspaces';
+import { VwbBanner } from 'app/pages/homepage/vwb-banner';
 import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
@@ -32,44 +31,10 @@ import { supportUrls } from 'app/utils/zendesk';
 import { QuickTourAndVideos } from './quick-tour-and-videos';
 
 export const styles = reactStyles({
-  bottomBanner: {
-    width: '100%',
-    display: 'flex',
-    backgroundColor: colors.primary,
-    paddingLeft: '5.25rem',
-    alignItems: 'center',
-    marginTop: '3rem',
-  },
-  bottomLinks: {
-    color: colors.white,
-    fontSize: '.75rem',
-    height: '1.5rem',
-    marginLeft: '3.75rem',
-    fontWeight: 400,
-  },
-  contentWrapperLeft: {
-    paddingLeft: '3%',
-    width: '40%',
-  },
-  contentWrapperRight: {
-    justifyContent: 'space-between',
-    width: '60%',
-  },
   fadeBox: {
     margin: '1.5rem 0 0 3%',
     width: '95%',
     padding: '0 0.15rem',
-  },
-  logo: {
-    height: '5.25rem',
-    width: '10.5rem',
-    lineHeight: '85px',
-  },
-  mainHeader: {
-    color: colors.primary,
-    fontSize: 28,
-    fontWeight: 400,
-    letterSpacing: 'normal',
   },
   pageWrapper: {
     marginLeft: '-1.5rem',
@@ -77,97 +42,7 @@ export const styles = reactStyles({
     justifyContent: 'space-between',
     fontSize: '1.2em',
   },
-  welcomeMessageIcon: {
-    height: '3.375rem',
-    width: '4.125rem',
-  },
 });
-
-const VWB_USER_SUPPORT_HUB_URL =
-  'https://support.researchallofus.org/hc/en-us/articles/39985865987732-What-to-expect-during-the-Researcher-Workbench-Migration';
-
-const WelcomeHeader = () => {
-  return (
-    <FlexRow
-      style={{
-        background: colors.banner,
-        borderRadius: '0.5rem',
-        margin: '1.5rem 3% 0 3%',
-        padding: '1.5rem',
-      }}
-    >
-      <FlexColumn style={{ color: colors.primary, width: '50%' }}>
-        <Header
-          style={{
-            fontWeight: 600,
-            fontSize: '32px',
-            lineHeight: '40px',
-            margin: 0,
-          }}
-        >
-          A more powerful way to work with <AoU /> data
-        </Header>
-        <SmallHeader style={{ marginTop: '1rem' }}>
-          The new{' '}
-          <span style={{ fontWeight: 700 }}>
-            {' '}
-            <AoU /> Researcher experience, built on the{' '}
-            <StyledExternalLink
-              href={environment.vwbUiUrl}
-              style={{ color: colors.primary, textDecoration: 'underline' }}
-              target='_blank'
-            >
-              Verily Platform
-            </StyledExternalLink>
-          </span>{' '}
-          offers expanded data exploration and analysis tools, an updated
-          interface, and access to enhanced cloud capabilities.
-          <ul style={{ paddingLeft: '1.5rem' }}>
-            <li>
-              You can explore the updated Workbench now and get early access to
-              new tools
-            </li>
-            <li>
-              In the coming months, researchers will gradually transition to the
-              new Workbench
-            </li>
-            <li>
-              Until then, the legacy environment remains available for you to
-              use
-            </li>
-            <li>
-              For details on the update and transition timeline, visit the{' '}
-              <StyledExternalLink
-                href={VWB_USER_SUPPORT_HUB_URL}
-                style={{ color: colors.primary, textDecoration: 'underline' }}
-                target='_blank'
-              >
-                User Support Hub
-              </StyledExternalLink>
-            </li>
-          </ul>
-        </SmallHeader>
-        <Button style={{ height: '45px', width: '300px' }}>
-          <a
-            href={environment.vwbUiUrl}
-            target='_blank'
-            style={{ color: colors.white }}
-          >
-            Explore the Verily Platform
-            <FontAwesomeIcon
-              icon={faUpRightFromSquare}
-              title='Explore the Verily Platform'
-              style={{ marginLeft: '0.5rem' }}
-            />
-          </a>
-        </Button>
-      </FlexColumn>
-      <FlexColumn style={{ marginLeft: '1.5rem', width: '45%' }}>
-        Carousel ...
-      </FlexColumn>
-    </FlexRow>
-  );
-};
 
 const Workspaces = ({ onChange }: { onChange: () => void }) => {
   const [navigate] = useNavigation();
@@ -178,24 +53,30 @@ const Workspaces = ({ onChange }: { onChange: () => void }) => {
         style={{ justifyContent: 'space-between', alignItems: 'center' }}
       >
         <FlexRow style={{ alignItems: 'center' }}>
-          <SemiBoldHeader style={{ marginTop: '0px' }}>
-            Workspaces
+          <SemiBoldHeader style={{ fontSize: '28px', marginTop: '0px' }}>
+            Legacy Workspaces
           </SemiBoldHeader>
-          <ClrIcon
-            aria-label='Create Workspace'
-            shape='plus-circle'
-            size={30}
-            className={'is-solid'}
+          <Button
+            aria-label='Create Legacy Workspace'
             style={{
-              color: colors.accent,
+              background: colors.accent,
+              borderRadius: '2rem',
+              height: '2.5rem',
               marginLeft: '1.5rem',
-              cursor: 'pointer',
+              padding: '0 1rem',
             }}
             onClick={() => {
               AnalyticsTracker.Workspaces.OpenCreatePage();
               navigate(['workspaces', 'build']);
             }}
-          />
+          >
+            <FontAwesomeIcon
+              icon={faPlus}
+              style={{ marginRight: '0.5rem' }}
+              size='lg'
+            />
+            Create Legacy Workspace
+          </Button>
         </FlexRow>
         <span
           style={{
@@ -360,7 +241,7 @@ export const Homepage = fp.flow(
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
-            <WelcomeHeader />
+            <VwbBanner />
             <div style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
