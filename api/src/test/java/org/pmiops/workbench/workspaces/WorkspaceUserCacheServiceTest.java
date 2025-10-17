@@ -82,7 +82,7 @@ public class WorkspaceUserCacheServiceTest {
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
     // With no existing entries, nothing should be deleted
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of());
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
     verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
     List<DbWorkspaceUserCache> upsertedEntries =
@@ -125,7 +125,7 @@ public class WorkspaceUserCacheServiceTest {
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of());
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
     verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
     List<DbWorkspaceUserCache> upsertedEntries =
@@ -161,6 +161,7 @@ public class WorkspaceUserCacheServiceTest {
     // Mock existing entry that should be deleted
     DbWorkspaceUserCache existingEntry =
         new DbWorkspaceUserCache()
+            .setId(1001L)
             .setWorkspaceId(1L)
             .setUserId(101L)
             .setRole("OWNER")
@@ -171,7 +172,7 @@ public class WorkspaceUserCacheServiceTest {
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
     // Should delete the existing entry since the new ACL is empty
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of(1L));
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of(1001L));
     verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
     List<DbWorkspaceUserCache> upsertedEntries =
@@ -188,7 +189,7 @@ public class WorkspaceUserCacheServiceTest {
 
     workspaceUserCacheService.updateWorkspaceUserCache(emptyMap);
 
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of());
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
     verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
     List<DbWorkspaceUserCache> upsertedEntries =
@@ -212,7 +213,7 @@ public class WorkspaceUserCacheServiceTest {
 
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of());
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
     verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
 
     List<DbWorkspaceUserCache> upsertedEntries =
@@ -268,7 +269,7 @@ public class WorkspaceUserCacheServiceTest {
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
     // Verify workspace cache entries deletion is called (even if empty set)
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of());
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of());
 
     // Verify no new entries are saved since user doesn't exist
     verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
@@ -290,12 +291,14 @@ public class WorkspaceUserCacheServiceTest {
     // Mock existing entries - user2 should be removed as they're not in the new ACL
     DbWorkspaceUserCache existingUser1Entry =
         new DbWorkspaceUserCache()
+            .setId(1001L)
             .setWorkspaceId(1L)
             .setUserId(101L)
             .setRole("READER")
             .setLastUpdated(Timestamp.from(Instant.now()));
     DbWorkspaceUserCache existingUser2Entry =
         new DbWorkspaceUserCache()
+            .setId(1002L)
             .setWorkspaceId(1L)
             .setUserId(102L)
             .setRole("OWNER")
@@ -306,7 +309,7 @@ public class WorkspaceUserCacheServiceTest {
     workspaceUserCacheService.updateWorkspaceUserCache(newEntriesByWorkspaceId);
 
     // Should delete the stale entry for user2
-    verify(mockWorkspaceUserCacheDao).deleteAllByWorkspaceIdIn(Set.of(1L));
+    verify(mockWorkspaceUserCacheDao).deleteAllById(List.of(1002L));
 
     verify(mockWorkspaceUserCacheDao).upsertAll(cacheEntriesIterableCaptor.capture());
     List<DbWorkspaceUserCache> upsertedEntries =

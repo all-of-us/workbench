@@ -72,10 +72,8 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
     log.info(
         String.format(
             "Removing %d stale entries from workspace user cache", entriesToDelete.size()));
-    workspaceUserCacheDao.deleteAllByWorkspaceIdIn(
-        entriesToDelete.stream()
-            .map(DbWorkspaceUserCache::getWorkspaceId)
-            .collect(Collectors.toSet()));
+    workspaceUserCacheDao.deleteAllById(
+        entriesToDelete.stream().map(DbWorkspaceUserCache::getId).toList());
 
     log.info(
         String.format("Upserting %d entries into workspace user cache", newCacheEntries.size()));
