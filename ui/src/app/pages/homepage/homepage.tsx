@@ -93,7 +93,7 @@ const Workspaces = ({ onChange }: { onChange: () => void }) => {
         style={{ justifyContent: 'space-between', alignItems: 'center' }}
       >
         <FlexRow style={{ alignItems: 'center' }}>
-          {!serverConfigStore.get().config.enableVWBHomepageBanner ? (
+          {serverConfigStore.get().config.enableVWBHomepageBanner ? (
             <>
               <SemiBoldHeader style={{ fontSize: '28px', marginTop: '0px' }}>
                 Legacy Workspaces
@@ -306,7 +306,7 @@ export const Homepage = fp.flow(
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
-            {!serverConfigStore.get().config.enableVWBHomepageBanner ? (
+            {serverConfigStore.get().config.enableVWBHomepageBanner ? (
               <VwbBanner />
             ) : (
               <WelcomeHeader />
