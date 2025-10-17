@@ -347,6 +347,8 @@ public class WorkbenchConfig {
     public boolean enableVWBInitialCreditsExhaustion;
     // If true, AoU will include VWB costs in the initial credits usage calculation.
     public boolean enableTierAccessCheckInDb;
+    // If true, will display the VWB banner on RW homepage
+    public boolean enableVWBHomepageBanner;
   }
 
   public static class ActionAuditConfig {

@@ -20,6 +20,8 @@ export default {
   accent: '#216FB4',
   disabled: '#9B9B9B',
   select: '#659F3D',
+  // Background for VWB banner
+  banner: '#E3F1F2',
   resourceCardHighlights: {
     cohort: '#F8C954',
     cohortReview: '#A8385D',

@@ -134,7 +134,8 @@
     "enableVWBUserCreation": false,
     "enableVWBPodCreation": true,
     "enableVWBInitialCreditsExhaustion": false,
-    "enableTierAccessCheckInDb": true
+    "enableTierAccessCheckInDb": true,
+    "enableVWBHomepageBanner": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
