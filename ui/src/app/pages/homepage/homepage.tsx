@@ -12,7 +12,8 @@ import {
   StyledRouterLink,
 } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { SemiBoldHeader } from 'app/components/headers';
+import { Header, SemiBoldHeader, SmallHeader } from 'app/components/headers';
+import { ClrIcon } from 'app/components/icons';
 import { CustomBulletList, CustomBulletListItem } from 'app/components/lists';
 import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -25,8 +26,12 @@ import { reactStyles, withUserProfile } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { fetchWithSystemErrorHandler } from 'app/utils/errors';
 import { NavigationProps, useNavigation } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { supportUrls } from 'app/utils/zendesk';
+import analysisIcon from 'assets/images/analysis-icon.svg';
+import cohortIcon from 'assets/images/cohort-icon.svg';
+import workspaceIcon from 'assets/images/workspace-icon.svg';
 
 import { QuickTourAndVideos } from './quick-tour-and-videos';
 
@@ -42,7 +47,42 @@ export const styles = reactStyles({
     justifyContent: 'space-between',
     fontSize: '1.2em',
   },
+  welcomeMessageIcon: {
+    height: '3.375rem',
+    width: '4.125rem',
+  },
 });
+
+const WelcomeHeader = () => {
+  return (
+    <FlexColumn style={{ marginLeft: '3%', width: '50%' }}>
+      <FlexRow>
+        <FlexColumn>
+          <Header
+            style={{
+              fontWeight: 500,
+              color: colors.secondary,
+              fontSize: '1.38rem',
+            }}
+          >
+            Welcome to the
+          </Header>
+          <Header style={{ textTransform: 'uppercase', marginTop: '0.3rem' }}>
+            Researcher Workbench
+          </Header>
+        </FlexColumn>
+        <FlexRow style={{ alignItems: 'flex-end', marginLeft: '1.5rem' }}>
+          <img style={styles.welcomeMessageIcon} src={workspaceIcon} />
+          <img style={styles.welcomeMessageIcon} src={cohortIcon} />
+          <img style={styles.welcomeMessageIcon} src={analysisIcon} />
+        </FlexRow>
+      </FlexRow>
+      <SmallHeader style={{ color: colors.primary, marginTop: '0.375rem' }}>
+        The secure platform to analyze <AoU /> data
+      </SmallHeader>
+    </FlexColumn>
+  );
+};
 
 const Workspaces = ({ onChange }: { onChange: () => void }) => {
   const [navigate] = useNavigation();
@@ -53,30 +93,55 @@ const Workspaces = ({ onChange }: { onChange: () => void }) => {
         style={{ justifyContent: 'space-between', alignItems: 'center' }}
       >
         <FlexRow style={{ alignItems: 'center' }}>
-          <SemiBoldHeader style={{ fontSize: '28px', marginTop: '0px' }}>
-            Legacy Workspaces
-          </SemiBoldHeader>
-          <Button
-            aria-label='Create Legacy Workspace'
-            style={{
-              background: colors.accent,
-              borderRadius: '2rem',
-              height: '2.5rem',
-              marginLeft: '1.5rem',
-              padding: '0 1rem',
-            }}
-            onClick={() => {
-              AnalyticsTracker.Workspaces.OpenCreatePage();
-              navigate(['workspaces', 'build']);
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faPlus}
-              style={{ marginRight: '0.5rem' }}
-              size='lg'
-            />
-            Create Legacy Workspace
-          </Button>
+          {!serverConfigStore.get().config.enableVWBHomepageBanner ? (
+            <>
+              <SemiBoldHeader style={{ fontSize: '28px', marginTop: '0px' }}>
+                Legacy Workspaces
+              </SemiBoldHeader>
+              <Button
+                aria-label='Create Legacy Workspace'
+                style={{
+                  background: colors.accent,
+                  borderRadius: '2rem',
+                  height: '2.5rem',
+                  marginLeft: '1.5rem',
+                  padding: '0 1rem',
+                }}
+                onClick={() => {
+                  AnalyticsTracker.Workspaces.OpenCreatePage();
+                  navigate(['workspaces', 'build']);
+                }}
+              >
+                <FontAwesomeIcon
+                  icon={faPlus}
+                  style={{ marginRight: '0.5rem' }}
+                  size='lg'
+                />
+                Create Legacy Workspace
+              </Button>
+            </>
+          ) : (
+            <>
+              <SemiBoldHeader style={{ marginTop: '0px' }}>
+                Workspaces
+              </SemiBoldHeader>
+              <ClrIcon
+                aria-label='Create Workspace'
+                shape='plus-circle'
+                size={30}
+                className={'is-solid'}
+                style={{
+                  color: colors.accent,
+                  marginLeft: '1.5rem',
+                  cursor: 'pointer',
+                }}
+                onClick={() => {
+                  AnalyticsTracker.Workspaces.OpenCreatePage();
+                  navigate(['workspaces', 'build']);
+                }}
+              />
+            </>
+          )}
         </FlexRow>
         <span
           style={{
@@ -241,7 +306,11 @@ export const Homepage = fp.flow(
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
-            <VwbBanner />
+            {!serverConfigStore.get().config.enableVWBHomepageBanner ? (
+              <VwbBanner />
+            ) : (
+              <WelcomeHeader />
+            )}
             <div style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>

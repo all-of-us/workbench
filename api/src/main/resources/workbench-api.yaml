@@ -7456,6 +7456,10 @@ components:
           type: boolean
           default: false
           description: If true, enable the creating workspaces in Verily Workbench
+        enableVWBHomepageBanner:
+          type: boolean
+          default: false
+          description: If true, will display the VWB banner on RW homepage
     AccessModuleConfig:
       required:
       - expirable

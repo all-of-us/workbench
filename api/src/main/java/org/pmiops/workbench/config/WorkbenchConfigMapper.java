@@ -77,5 +77,8 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableVWBWorkspaceCreation",
       source = "config.featureFlags.enableVWBWorkspaceCreation")
+  @Mapping(
+      target = "enableVWBHomepageBanner",
+      source = "config.featureFlags.enableVWBHomepageBanner")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }
