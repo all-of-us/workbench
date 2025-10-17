@@ -671,8 +671,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
               .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
               .workspaceId(rs.getLong("workspace_id"))
               .workspaceNamespace(rs.getString("workspace_namespace"))
-                  .activeStatus(
-                          workspaceActiveStatusFromStorage(rs.getShort("active_status")).toString())
+              .activeStatus(
+                  workspaceActiveStatusFromStorage(rs.getShort("active_status")).toString())
               .focusOnUnderrepresentedPopulations(focusOnUnderrepresentedPopulations)
               .workspaceDemographic(
                   toModelWorkspaceDemographic(getSpecificPopulationsSet(specificPopulationsStr)));

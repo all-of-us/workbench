@@ -57,7 +57,12 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   FOCUS_ON_UNDER_REPRESENTED_POPULATIONS(
       "focus_on_under_represented_populations",
       ReportingWorkspace::isFocusOnUnderrepresentedPopulations),
-  WORKSPACE_DEMOGRAPHIC("workspace_demographic", w -> Optional.ofNullable(w.getWorkspaceDemographic()).map(WorkspaceDemographic::toString).orElse(null));
+  WORKSPACE_DEMOGRAPHIC(
+      "workspace_demographic",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::toString)
+              .orElse(null));
 
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;

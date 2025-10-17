@@ -18,7 +18,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.AIANResearchType;
 import org.pmiops.workbench.model.*;
-import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 
 public class ReportingTestUtils {
 
@@ -67,7 +66,9 @@ public class ReportingTestUtils {
       FeaturedWorkspaceCategory.COMMUNITY.toString();
   public static final String WORKSPACE__ACTIVE_STATUS = "Active";
   public static final Boolean WORKSPACE__FOCUS_ON_UNDER_REPRESENTED_POPULATIONS = true;
-  public static final WorkspaceDemographic WORKSPACE__WORKSPACE_DEMOGRAPHIC = new WorkspaceDemographic().raceEthnicity(ImmutableList.of(WorkspaceDemographic.RaceEthnicityEnum.ASIAN));
+  public static final WorkspaceDemographic WORKSPACE__WORKSPACE_DEMOGRAPHIC =
+      new WorkspaceDemographic()
+          .raceEthnicity(ImmutableList.of(WorkspaceDemographic.RaceEthnicityEnum.ASIAN));
 
   public static final Long COHORT__COHORT_ID = 0L;
   public static final Timestamp COHORT__CREATION_TIME =
