@@ -30,9 +30,7 @@ public class WorkspaceUserCacheServiceTest {
   @Mock private WorkspaceDao mockWorkspaceDao;
   @Mock private WorkspaceUserCacheDao mockWorkspaceUserCacheDao;
 
-  @Captor private ArgumentCaptor<List<DbWorkspaceUserCache>> cacheEntriesCaptor;
   @Captor private ArgumentCaptor<Iterable<DbWorkspaceUserCache>> cacheEntriesIterableCaptor;
-  @Captor private ArgumentCaptor<Set<Long>> workspaceIdsCaptor;
 
   private WorkspaceUserCacheService workspaceUserCacheService;
 
