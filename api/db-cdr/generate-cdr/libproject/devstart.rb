@@ -1,4 +1,5 @@
 require_relative "genomic_manifests"
+require_relative "vwb_manifests"
 require_relative "../../../../aou-utils/serviceaccounts"
 require_relative "../../../../aou-utils/utils/common"
 require_relative "../../../libproject/affirm"
@@ -665,6 +666,181 @@ Common.register_command({
                           :invocation => "publish-cdr-files",
                           :description => "Copies and/or publishes CDR files to the researcher-accessible CDR bucket",
                           :fn => ->(*args) { publish_cdr_files("publish-cdr-files", args) }
+                        })
+
+def setup_vwb_publish_options(op)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v },
+    "The Google Cloud project associated with this workbench environment, " +
+      "e.g. all-of-us-vwb-preprod. Required."
+  )
+  op.add_option(
+    "--input-manifest-file [file.yaml]",
+    ->(opts, v) { opts.input_manifest_file = v },
+    "The input manifest YAML file which describes a logical mapping of the files to be " +
+      "published. For details on the YAML format see genomic_manifests.rb"
+  )
+  op.add_option(
+    "--microarray-rids-file [file]",
+    ->(opts, v) { opts.microarray_rids_file = v },
+    "A file containing all research IDs for which Microarray data should be published. " +
+      "Only applicable and required for task CREATE_COPY_MANIFESTS where " +
+      "aw4MicroarraySources are specified."
+  )
+  op.add_option(
+    "--wgs-rids-file [file]",
+    ->(opts, v) { opts.wgs_rids_file = v },
+    "A file containing all research IDs for which WGS data should be published. " +
+      "Only applicable and required for task CREATE_COPY_MANIFESTS where " +
+      "aw4WgsSources are specified."
+  )
+  op.add_option(
+    "--working-dir [path]",
+    ->(opts, v) { opts.working_dir = v },
+    "Directory for intermediate manifest files and logs."
+  )
+  op.add_option(
+    "--jira-ticket [RW-XXX]",
+    ->(opts, v) { opts.jira_ticket = v },
+    "Optional RW jira ticket associated with this publish; used for provenance."
+  )
+  op.add_option(
+    "--display-version-id [version]",
+    ->(opts, v) { opts.display_version_id = v },
+    "A version 'id' suitable for display in the published GCS directory. Conventionally " +
+      "this matches the CDR version display name in the product, e.g. 'v5'. This ID will be " +
+      "included in the published file directory structure. " +
+      "Only applicable and required for task CREATE_COPY_MANIFESTS."
+  )
+  op.add_option(
+    "--dry-run",
+    ->(opts, _v) { opts.dry_run = true },
+    "Preview the Storage Transfer Service jobs that would be created without actually creating them. " +
+      "Shows the source, destination, storage class, and number of files for each transfer job."
+  )
+  op.add_option(
+    "--use-v2",
+    ->(opts, _v) { opts.use_v2 = true },
+    "Use V2 mode for file transfers: STS copies files to the correct destination directory " +
+      "(not preserving source paths), and POST_PROCESS renames files in place. " +
+      "Default is V1 mode (STS preserves source paths, POST_PROCESS moves and renames)."
+  )
+  supported_tasks = ["CREATE_COPY_MANIFESTS", "PUBLISH", "POST_PROCESS"]
+  op.opts.tasks = supported_tasks
+  op.add_option(
+    "--tasks [CREATE_COPY_MANIFESTS,PUBLISH,POST_PROCESS]",
+    ->(opts, v) { opts.tasks = v.split(",") },
+    "Publishing tasks to execute; defaults to all tasks: #{supported_tasks}"
+  )
+  op.opts.tier = "controlled"
+  op.add_option(
+    "--tier [tier]",
+    ->(opts, v) { opts.tier = v },
+    "The access tier associated with this CDR, e.g. controlled." +
+      "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
+  )
+
+  return supported_tasks
+end
+
+# Helper validator for project requirement
+def validate_project_required(opts)
+  raise ArgumentError unless opts.project
+end
+
+# Helper validator for CREATE_COPY_MANIFESTS requirements
+def validate_copy_manifests_requirements(opts)
+  if opts.tasks.include?("CREATE_COPY_MANIFESTS") && (!opts.display_version_id || !opts.input_manifest_file)
+    raise ArgumentError.new("--input-manifest-file,--display-version-id are required for the CREATE_COPY_MANIFESTS task")
+  end
+end
+
+# Helper validator for supported tasks
+def validate_supported_tasks(opts, supported_tasks)
+  unsupported = opts.tasks - supported_tasks
+  unless unsupported.empty?
+    raise ArgumentError.new("unsupported tasks: #{opts.tasks}")
+  end
+end
+
+# Helper validator for supported project
+def validate_supported_project(opts)
+  unless ENVIRONMENTS.key?(opts.project)
+    raise ArgumentError.new("unsupported project: #{opts.project}")
+  end
+end
+
+# Helper validator for supported tier
+def validate_supported_tier(opts)
+  unless ENVIRONMENTS[opts.project][:accessTiers].key?(opts.tier)
+    raise ArgumentError.new("unsupported tier: #{opts.tier}")
+  end
+end
+
+def setup_vwb_publish_validators(op, supported_tasks)
+  op.add_validator ->(opts) { validate_project_required(opts) }
+  op.add_validator ->(opts) { validate_copy_manifests_requirements(opts) }
+  op.add_validator ->(opts) { validate_supported_tasks(opts, supported_tasks) }
+  op.add_validator ->(opts) { validate_supported_project(opts) }
+  op.add_validator ->(opts) { validate_supported_tier(opts) }
+end
+
+def execute_vwb_tasks(op, tier, working_dir)
+  copy_manifest_files = []
+
+  # Execute tasks
+  if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
+    copy_manifest_files = vwb_create_copy_manifests_mode(op.opts, tier, working_dir)
+  end
+
+  if op.opts.tasks.include? "PUBLISH"
+    copy_manifest_files = vwb_publish_mode(op.opts, copy_manifest_files, working_dir)
+  end
+
+  if op.opts.tasks.include? "POST_PROCESS"
+    vwb_post_process_mode(op.opts, copy_manifest_files, working_dir)
+  end
+
+  return copy_manifest_files
+end
+
+def publish_cdr_files_vwb(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+
+  # Setup options
+  supported_tasks = setup_vwb_publish_options(op)
+
+  # Setup validators
+  setup_vwb_publish_validators(op, supported_tasks)
+  op.parse.validate
+
+  env = ENVIRONMENTS[op.opts.project]
+  tier = env.fetch(:accessTiers)[op.opts.tier]
+
+  common = Common.new
+
+  # Setup working directory
+  working_dir = op.opts.working_dir
+  if working_dir.nil?
+    working_dir = Dir.mktmpdir("cdr-file-publish-vwb")
+  else
+    FileUtils.makedirs(working_dir)
+  end
+  common.status("local working directory: '#{working_dir}'")
+
+  # Setup logs directory
+  logs_dir = FileUtils.makedirs(File.join(working_dir, "logs"))
+  common.status "Writing logs to #{logs_dir}"
+
+  # Execute tasks
+  execute_vwb_tasks(op, tier, working_dir)
+end
+
+Common.register_command({
+                          :invocation => "publish-cdr-files-vwb",
+                          :description => "Copies and/or publishes CDR files to VWB environments with three modes: CREATE_COPY_MANIFESTS, PUBLISH, and POST_PROCESS",
+                          :fn => ->(*args) { publish_cdr_files_vwb("publish-cdr-files-vwb", args) }
                         })
 
 def create_wgs_extraction_datasets(cmd_name, args)
