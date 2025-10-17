@@ -68,6 +68,7 @@ public class ReportingTestUtils {
   public static final String WORKSPACE__WORKSPACE_NAMESPACE = "aou-rw-12345";
   public static final String WORKSPACE__FEATURED_WORKSPACE_CATEGORY =
       FeaturedWorkspaceCategory.COMMUNITY.toString();
+  public static final String WORKSPACE__ACTIVE_STATUS = "Active";
 
   public static final Long COHORT__COHORT_ID = 0L;
   public static final Timestamp COHORT__CREATION_TIME =
@@ -140,7 +141,8 @@ public class ReportingTestUtils {
         .rpSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL)
         .rpTimeRequested(offsetDateTimeUtc(WORKSPACE__RP_TIME_REQUESTED))
         .workspaceId(WORKSPACE__WORKSPACE_ID)
-        .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
+        .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE)
+        .activeStatus(WORKSPACE__ACTIVE_STATUS);
   }
 
   public static DbWorkspace createDbWorkspace(DbUser creator, DbCdrVersion cdrVersion) {

@@ -41,6 +41,10 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
         return ResponseEntity.ok(
             new VwbWorkspaceListResponse()
                 .items(vwbAdminQueryService.queryVwbWorkspacesByUserFacingId(searchParam)));
+      case ID:
+        return ResponseEntity.ok(
+            new VwbWorkspaceListResponse()
+                .items(vwbAdminQueryService.queryVwbWorkspacesByWorkspaceId(searchParam)));
       case NAME:
         return ResponseEntity.ok(
             new VwbWorkspaceListResponse()

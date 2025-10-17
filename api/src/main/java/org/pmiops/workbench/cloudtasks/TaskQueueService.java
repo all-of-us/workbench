@@ -17,7 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.OfflineBatchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.springframework.stereotype.Service;
@@ -271,7 +271,7 @@ public class TaskQueueService {
             .snapshotTimestamp(captureSnapshotTime));
   }
 
-  public void pushWorkspaceUserCacheTask(List<DbWorkspace> workspaces) {
+  public void pushWorkspaceUserCacheTask(List<WorkspaceDao.WorkspaceUserCacheView> workspaces) {
     OfflineBatchConfig config = workbenchConfigProvider.get().offlineBatch;
     var request =
         workspaces.stream()

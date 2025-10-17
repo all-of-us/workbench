@@ -137,19 +137,17 @@ public class InitialCreditsService {
         getWorkspaceByProjectCache(dbCostsForNotRecentlyUpdatedWorkspaces);
 
     // RW-15247 Get not recently updated BQ costs for VWB google projects
-    final List<DbVwbUserPod> vwbNotRecentlyUpdatedPods =
-        getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(users);
+    final List<DbVwbUserPod> vwbPodsForUsers = getAllVwbPodsForUsers(users);
 
-    if (workspaceByProject.isEmpty() && vwbNotRecentlyUpdatedPods.isEmpty()) {
+    if (workspaceByProject.isEmpty() && vwbPodsForUsers.isEmpty()) {
       logger.info("No workspaces or pods require updates");
       return;
     }
-    final Map<Long, Double> userIdToVwbCostMap = getVwbPodsDbCostCache(vwbNotRecentlyUpdatedPods);
+    final Map<Long, Double> userIdToVwbCostMap = getVwbPodsDbCostCache(vwbPodsForUsers);
     updateInitialCreditsUsageInDb(
         dbCostsForNotRecentlyUpdatedWorkspaces, liveCostsInBQ, workspaceByProject);
 
-    updateVwbInitialCreditsUsageAndInitialCreditsActive(
-        vwbNotRecentlyUpdatedPods, vwbUserLiveCosts);
+    updateVwbInitialCreditsUsageAndInitialCreditsActive(vwbPodsForUsers, vwbUserLiveCosts);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
@@ -368,8 +366,24 @@ public class InitialCreditsService {
         .orElse(false);
   }
 
-  // Returns true if the user's credits are expiring within the initialCreditsExpirationWarningDays.
+  private boolean checkEnableUnlinkBillingForInitialCreditsFlag() {
+    return workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits;
+  }
+
+  // Returns true if the user's credits expiry matches the initialCreditsExpirationWarningDays.
   private boolean areCreditsExpiringSoon(DbUser user) {
+    if (checkEnableUnlinkBillingForInitialCreditsFlag()) {
+      List<Long> initialCreditsExpirationWarningDaysList =
+          workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDaysList;
+      return getCreditsExpiration(user)
+          .map(
+              expirationTime -> {
+                long millisDiff = expirationTime.getTime() - clockNow().getTime();
+                long daysDiff = TimeUnit.MILLISECONDS.toDays(millisDiff);
+                return initialCreditsExpirationWarningDaysList.contains(daysDiff);
+              })
+          .orElse(false);
+    }
     long initialCreditsExpirationWarningDays =
         workbenchConfigProvider.get().billing.initialCreditsExpirationWarningDays;
     return getCreditsExpiration(user)
@@ -419,46 +433,14 @@ public class InitialCreditsService {
   }
 
   public DbUser extendInitialCreditsExpiration(DbUser user) {
-    if (!workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration) {
-      throw new BadRequestException("Initial credits extension is disabled.");
-    }
-    DbUserInitialCreditsExpiration userInitialCreditsExpiration =
-        user.getUserInitialCreditsExpiration();
-    // This handles the case existing users that have not yet been migrated but also those who have
-    // not yet completed RT training.
-    if (userInitialCreditsExpiration == null) {
-      throw new BadRequestException(
-          "User does not have initial credits expiration set, so they cannot extend their expiration date.");
-    }
-
-    if (institutionService.shouldBypassForCreditsExpiration(user)) {
-      throw new BadRequestException(
-          "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.");
-    }
-
-    if (userInitialCreditsExpiration.isBypassed()) {
-      throw new BadRequestException(
-          "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.");
-    }
-
-    if (userInitialCreditsExpiration.getExtensionTime() != null) {
-      throw new BadRequestException(
-          "User has already extended their initial credits expiration and cannot extend further.");
-    }
-    if (!areCreditsExpiringSoon(user)) {
-      throw new BadRequestException(
-          "User's initial credits are not close enough to their expiration date to be extended.");
-    }
-    userInitialCreditsExpiration.setExpirationTime(
-        new Timestamp(
-            userInitialCreditsExpiration.getCreditStartTime().getTime()
-                + TimeUnit.DAYS.toMillis(
-                    workbenchConfigProvider.get().billing.initialCreditsExtensionPeriodDays)));
-    userInitialCreditsExpiration.setExtensionTime(clockNow());
-    return userDao.save(user);
+    throw new BadRequestException("Initial credits extension is disabled.");
   }
 
   public boolean checkInitialCreditsExtensionEligibility(DbUser dbUser) {
+    if (checkEnableUnlinkBillingForInitialCreditsFlag()) {
+      return false; // Feature is effectively disabled
+    }
+
     DbUserInitialCreditsExpiration initialCreditsExpiration =
         dbUser.getUserInitialCreditsExpiration();
     Instant now = clock.instant();
@@ -486,6 +468,11 @@ public class InitialCreditsService {
     return usage >= limit;
   }
 
+  private boolean shouldCheckApproachingExpirationNotification(DbUserInitialCreditsExpiration exp) {
+    return checkEnableUnlinkBillingForInitialCreditsFlag()
+        || exp.getApproachingExpirationNotificationTime() == null;
+  }
+
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
@@ -493,7 +480,7 @@ public class InitialCreditsService {
     if (areUserCreditsExpired(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
-        && null == userInitialCreditsExpiration.getApproachingExpirationNotificationTime()) {
+        && shouldCheckApproachingExpirationNotification(userInitialCreditsExpiration)) {
       handleExpiringSoonCredits(user, userInitialCreditsExpiration);
     }
   }
@@ -516,8 +503,15 @@ public class InitialCreditsService {
       vwbUserService.unlinkBillingAccountForUserPod(user);
     }
 
-    userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
-    userDao.save(user);
+    try {
+      mailService.alertUserInitialCreditsExpired(user);
+      userInitialCreditsExpiration.setExpirationCleanupTime(clockNow());
+      userDao.save(user);
+    } catch (MessagingException e) {
+      logger.error(
+          "Failed to send initial credits expired warning notification for user {}",
+          user.getUserId());
+    }
   }
 
   private void handleExpiringSoonCredits(
@@ -815,31 +809,18 @@ public class InitialCreditsService {
   }
 
   /**
-   * Get the VWB pods that were not recently updated. This is used to update the initial credits
-   * usage for VWB pods.
+   * Get all VWB pods for the passed users.
    *
    * @param users the users to get the VWB pods for
-   * @return a List of {@link DbVwbUserPod} that were not recently updated
+   * @return a List of {@link DbVwbUserPod} for all the users
    */
   @NotNull
-  private List<DbVwbUserPod> getVwbPodsInitialCreditsUsagesThatWereNotRecentlyUpdated(
-      Set<DbUser> users) {
+  private List<DbVwbUserPod> getAllVwbPodsForUsers(Set<DbUser> users) {
     if (!workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
       return Collections.emptyList();
     }
 
-    Timestamp minusMinutes =
-        Timestamp.valueOf(
-            LocalDateTime.now().minusMinutes(getMinutesBeforeLastInitialCreditsJob()));
-
-    return users.stream()
-        .map(DbUser::getVwbUserPod)
-        .filter(Objects::nonNull)
-        .filter(
-            c ->
-                c.getInitialCreditsLastUpdateTime() == null
-                    || c.getInitialCreditsLastUpdateTime().before(minusMinutes))
-        .toList();
+    return users.stream().map(DbUser::getVwbUserPod).filter(Objects::nonNull).toList();
   }
 
   private void updateVwbInitialCreditsUsageAndInitialCreditsActive(

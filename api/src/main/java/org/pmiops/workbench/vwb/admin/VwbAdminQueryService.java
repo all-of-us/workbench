@@ -16,6 +16,8 @@ public interface VwbAdminQueryService {
 
   List<VwbWorkspace> queryVwbWorkspacesByUserFacingId(String id);
 
+  List<VwbWorkspace> queryVwbWorkspacesByWorkspaceId(String workspaceId);
+
   List<VwbWorkspace> queryVwbWorkspacesByName(String name);
 
   List<VwbWorkspace> queryVwbWorkspacesByShareActivity(String email);

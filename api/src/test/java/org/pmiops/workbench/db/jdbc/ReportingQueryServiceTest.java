@@ -355,7 +355,7 @@ public class ReportingQueryServiceTest {
     entityManager.flush();
 
     final int totalRows = getBatchedWorkspaceStream().mapToInt(List::size).sum();
-    assertThat(totalRows).isEqualTo(numWorkspaces - 1);
+    assertThat(totalRows).isEqualTo(numWorkspaces);
 
     final long totalBatches = getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
@@ -366,7 +366,7 @@ public class ReportingQueryServiceTest {
             .flatMap(List::stream)
             .map(ReportingWorkspace::getWorkspaceId)
             .collect(ImmutableSet.toImmutableSet());
-    assertThat(ids).hasSize(numWorkspaces - 1);
+    assertThat(ids).hasSize(numWorkspaces);
   }
 
   @Test
@@ -382,7 +382,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testWorkspaceCount() {
     createWorkspaces(5);
-    assertThat(reportingQueryService.getActiveWorkspaceCount()).isEqualTo(5);
+    assertThat(reportingQueryService.getTableRowCount("workspace")).isEqualTo(5);
   }
 
   @Test
@@ -391,7 +391,7 @@ public class ReportingQueryServiceTest {
     workspaceDao.save(
         workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
     entityManager.flush();
-    assertThat(reportingQueryService.getActiveWorkspaceCount()).isEqualTo(4);
+    assertThat(reportingQueryService.getTableRowCount("workspace")).isEqualTo(5);
   }
 
   @Test

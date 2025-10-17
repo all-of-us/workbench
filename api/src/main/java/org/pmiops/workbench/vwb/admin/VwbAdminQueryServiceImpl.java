@@ -32,6 +32,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String VWB_PODS_TABLE = "um_pods";
   private static final String VWB_WORKSPACE_CREATOR_COLUMN = "created_by_email";
   private static final String VWB_WORKSPACE_ID_COLUMN = "workspace_user_facing_id";
+  private static final String VWB_WORKSPACE_UUID_COLUMN = "workspace_id";
   private static final String VWB_WORKSPACE_NAME_COLUMN = "workspace_display_name";
 
   private static final String QUERY =
@@ -43,6 +44,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  w.created_by_email, \n"
           + "  w.created_date, \n"
           + "  w.gcp_project_id, \n"
+          + "  w.workspace_metadata_policy, \n"
           + "  p.billing_account_id, \n"
           + "FROM \n"
           + "  %s w \n"
@@ -71,6 +73,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  w.created_by_email, \n"
           + "  w.created_date, \n"
           + "  w.gcp_project_id, \n"
+          + "  w.workspace_metadata_policy, \n"
           + "  p.billing_account_id, \n"
           + "FROM \n"
           + " %s w \n"
@@ -134,6 +137,25 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(id))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return tableResultToVwbWorkspace(result);
+  }
+
+  @Override
+  public List<VwbWorkspace> queryVwbWorkspacesByWorkspaceId(String workspaceId) {
+
+    final String queryString =
+        String.format(
+            QUERY,
+            getTableName(VWB_WORKSPACE_TABLE),
+            getTableName(VWB_PODS_TABLE),
+            VWB_WORKSPACE_UUID_COLUMN);
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(workspaceId))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
@@ -234,6 +256,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     FieldValues.getString(row, "description").ifPresent(vwbWorkspace::setDescription);
     FieldValues.getString(row, "created_by_email").ifPresent(vwbWorkspace::setCreatedBy);
     FieldValues.getString(row, "gcp_project_id").ifPresent(vwbWorkspace::setGoogleProjectId);
+    FieldValues.getString(row, "workspace_metadata_policy")
+        .ifPresent(vwbWorkspace::setResearchPurpose);
     FieldValues.getString(row, "billing_account_id").ifPresent(vwbWorkspace::billingAccountId);
 
     FieldValues.getDateTime(row, "created_date")

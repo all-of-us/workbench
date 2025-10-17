@@ -7418,6 +7418,10 @@ components:
           type: boolean
           default: false
           description: If true, allow for user's initial credits to expire.
+        enableUnlinkBillingForInitialCredits:
+            type: boolean
+            default: false
+            description: If true, allow unlinking billing accounts when initial credits are expired or used up.
         initialCreditsValidityPeriodDays:
           type: integer
           description: The number of days that a user's initial credits are valid for.
@@ -7426,6 +7430,11 @@ components:
           description: The number of days that a user's initial credits can be extended for.
         initialCreditsExpirationWarningDays:
           type: integer
+          description: The number of days before a user's initial credits expire that they will receive a warning.
+        initialCreditsExpirationWarningDaysList:
+          type: array
+          items:
+            type: integer
           description: The number of days before a user's initial credits expire that they will receive a warning.
         blockComplianceTraining:
           type: boolean
@@ -7447,6 +7456,10 @@ components:
           type: boolean
           default: false
           description: If true, enable the creating workspaces in Verily Workbench
+        enableVWBHomepageBanner:
+          type: boolean
+          default: false
+          description: If true, will display the VWB banner on RW homepage
     AccessModuleConfig:
       required:
       - expirable
@@ -13046,6 +13059,10 @@ components:
           description: |-
             The workspace "namespace", which corresponds to the Terra Billing Project ID associated with
             the workspace.
+        activeStatus:
+          type: string
+          description: |-
+            Indicates the status of the workspace. It can be either "Active" or "Deleted".
         focusOnUnderrepresentedPopulations:
           type: boolean
           description: |-
@@ -13824,6 +13841,9 @@ components:
         description:
           type: string
           description: The description of the workspace
+        researchPurpose:
+          type: string
+          description: JSON string containing all research purpose description data
         createdBy:
           type: string
           description: Username of the workspace creator
@@ -13836,6 +13856,7 @@ components:
       enum:
         - WORKSPACE_CREATOR
         - WORKSPACE_USER_FACING_ID
+        - WORKSPACE_ID
         - WORKSPACE_NAME
         - WORKSPACE_SHARED
     VwbWorkspaceAdminView:

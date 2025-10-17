@@ -1,11 +1,16 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Profile, WorkspaceResponseListResponse } from 'generated/fetch';
 
-import { StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
-import { FadeBox } from 'app/components/containers';
+import {
+  Button,
+  StyledExternalLink,
+  StyledRouterLink,
+} from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SemiBoldHeader, SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
@@ -14,12 +19,14 @@ import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { RecentResources } from 'app/pages/homepage/recent-resources';
 import { RecentWorkspaces } from 'app/pages/homepage/recent-workspaces';
+import { VwbBanner } from 'app/pages/homepage/vwb-banner';
 import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { fetchWithSystemErrorHandler } from 'app/utils/errors';
 import { NavigationProps, useNavigation } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { supportUrls } from 'app/utils/zendesk';
 import analysisIcon from 'assets/images/analysis-icon.svg';
@@ -29,44 +36,10 @@ import workspaceIcon from 'assets/images/workspace-icon.svg';
 import { QuickTourAndVideos } from './quick-tour-and-videos';
 
 export const styles = reactStyles({
-  bottomBanner: {
-    width: '100%',
-    display: 'flex',
-    backgroundColor: colors.primary,
-    paddingLeft: '5.25rem',
-    alignItems: 'center',
-    marginTop: '3rem',
-  },
-  bottomLinks: {
-    color: colors.white,
-    fontSize: '.75rem',
-    height: '1.5rem',
-    marginLeft: '3.75rem',
-    fontWeight: 400,
-  },
-  contentWrapperLeft: {
-    paddingLeft: '3%',
-    width: '40%',
-  },
-  contentWrapperRight: {
-    justifyContent: 'space-between',
-    width: '60%',
-  },
   fadeBox: {
     margin: '1.5rem 0 0 3%',
     width: '95%',
     padding: '0 0.15rem',
-  },
-  logo: {
-    height: '5.25rem',
-    width: '10.5rem',
-    lineHeight: '85px',
-  },
-  mainHeader: {
-    color: colors.primary,
-    fontSize: 28,
-    fontWeight: 400,
-    letterSpacing: 'normal',
   },
   pageWrapper: {
     marginLeft: '-1.5rem',
@@ -120,24 +93,55 @@ const Workspaces = ({ onChange }: { onChange: () => void }) => {
         style={{ justifyContent: 'space-between', alignItems: 'center' }}
       >
         <FlexRow style={{ alignItems: 'center' }}>
-          <SemiBoldHeader style={{ marginTop: '0px' }}>
-            Workspaces
-          </SemiBoldHeader>
-          <ClrIcon
-            aria-label='Create Workspace'
-            shape='plus-circle'
-            size={30}
-            className={'is-solid'}
-            style={{
-              color: colors.accent,
-              marginLeft: '1.5rem',
-              cursor: 'pointer',
-            }}
-            onClick={() => {
-              AnalyticsTracker.Workspaces.OpenCreatePage();
-              navigate(['workspaces', 'build']);
-            }}
-          />
+          {serverConfigStore.get().config.enableVWBHomepageBanner ? (
+            <>
+              <SemiBoldHeader style={{ fontSize: '28px', marginTop: '0px' }}>
+                Legacy Workspaces
+              </SemiBoldHeader>
+              <Button
+                aria-label='Create Legacy Workspace'
+                style={{
+                  background: colors.accent,
+                  borderRadius: '2rem',
+                  height: '2.5rem',
+                  marginLeft: '1.5rem',
+                  padding: '0 1rem',
+                }}
+                onClick={() => {
+                  AnalyticsTracker.Workspaces.OpenCreatePage();
+                  navigate(['workspaces', 'build']);
+                }}
+              >
+                <FontAwesomeIcon
+                  icon={faPlus}
+                  style={{ marginRight: '0.5rem' }}
+                  size='lg'
+                />
+                Create Legacy Workspace
+              </Button>
+            </>
+          ) : (
+            <>
+              <SemiBoldHeader style={{ marginTop: '0px' }}>
+                Workspaces
+              </SemiBoldHeader>
+              <ClrIcon
+                aria-label='Create Workspace'
+                shape='plus-circle'
+                size={30}
+                className={'is-solid'}
+                style={{
+                  color: colors.accent,
+                  marginLeft: '1.5rem',
+                  cursor: 'pointer',
+                }}
+                onClick={() => {
+                  AnalyticsTracker.Workspaces.OpenCreatePage();
+                  navigate(['workspaces', 'build']);
+                }}
+              />
+            </>
+          )}
         </FlexRow>
         <span
           style={{
@@ -302,8 +306,12 @@ export const Homepage = fp.flow(
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
-            <WelcomeHeader />
-            <FadeBox style={styles.fadeBox}>
+            {serverConfigStore.get().config.enableVWBHomepageBanner ? (
+              <VwbBanner />
+            ) : (
+              <WelcomeHeader />
+            )}
+            <div style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
                 <Workspaces onChange={() => this.fetchWorkspaces()} />
@@ -316,7 +324,7 @@ export const Homepage = fp.flow(
                     <GettingStarted />
                   ))}
               </FlexColumn>
-            </FadeBox>
+            </div>
           </FlexColumn>
           <QuickTourAndVideos showQuickTourInitially={firstVisit} />
         </React.Fragment>

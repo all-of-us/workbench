@@ -62,3 +62,4 @@ gradle.properties
 **/.vscode
 /tanagra-aou-utils/appengine/
 /tanagra-aou-utils/tanagra/
+.python-version

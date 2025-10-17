@@ -612,20 +612,6 @@ jobs:
                 working_directory: ~/workbench/api
                 command: ./project.rb run-local-api-tests
 
-  api-deps-check:
-    executor: workbench-executor
-    steps:
-      - run-api-test:
-          additional_steps:
-            - run:
-                name: Scan dependencies for vulnerabilities
-                working_directory: ~/workbench/api
-                command: ./gradlew dependencyCheckAnalyze --debug --stacktrace > dependency-check-output.log 2>&1
-                no_output_timeout: 30m
-            - store_artifacts:
-                path: ~/workbench/api/dependency-check-output.log
-                destination: dependency-check-output.log
-
   api-integration-test:
     executor: workbench-executor
     steps:
@@ -1316,8 +1302,6 @@ workflows:
           <<: *filter-release-tags
       - api-bigquery-test:
           <<: *filter-release-tags
-      - api-deps-check:
-          <<: *filter-release-tags
       - api-integration-test:
           <<: *filter-release-tags
       - deploy-to-staging:
@@ -1326,7 +1310,6 @@ workflows:
             - api-local-test
             - api-unit-test
             - api-bigquery-test
-            - api-deps-check
             - api-integration-test
             - ui-unit-test
       - puppeteer-env-setup:

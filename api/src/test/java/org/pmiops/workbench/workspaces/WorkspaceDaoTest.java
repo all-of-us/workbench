@@ -479,8 +479,14 @@ public class WorkspaceDaoTest {
             .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     activeWorkspace = workspaceDao.save(activeWorkspace);
 
-    List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
-    assertThat(result).containsExactly(activeWorkspace);
+    List<WorkspaceDao.WorkspaceUserCacheView> result =
+        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    assertThat(result.size()).isEqualTo(1);
+    var resultWorkspace = result.get(0);
+    assertThat(resultWorkspace.getWorkspaceId()).isEqualTo(activeWorkspace.getWorkspaceId());
+    assertThat(resultWorkspace.getWorkspaceNamespace())
+        .isEqualTo(activeWorkspace.getWorkspaceNamespace());
+    assertThat(resultWorkspace.getFirecloudName()).isEqualTo(activeWorkspace.getFirecloudName());
   }
 
   @Test
@@ -493,6 +499,7 @@ public class WorkspaceDaoTest {
     // Create workspace
     DbWorkspace workspace =
         new DbWorkspace()
+            .setWorkspaceId(1L)
             .setName("Workspace")
             .setWorkspaceNamespace("ws-namespace")
             .setFirecloudName("ws-firecloud")
@@ -510,8 +517,14 @@ public class WorkspaceDaoTest {
             new Timestamp(baseTime)); // Cache updated before workspace modification
     workspaceUserCacheDao.save(cacheEntry);
 
-    List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
-    assertThat(result).containsExactly(workspace);
+    List<WorkspaceDao.WorkspaceUserCacheView> result =
+        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    assertThat(result.size()).isEqualTo(1);
+    var resultWorkspace = result.get(0);
+    assertThat(resultWorkspace.getWorkspaceId()).isEqualTo(workspace.getWorkspaceId());
+    assertThat(resultWorkspace.getWorkspaceNamespace())
+        .isEqualTo(workspace.getWorkspaceNamespace());
+    assertThat(resultWorkspace.getFirecloudName()).isEqualTo(workspace.getFirecloudName());
   }
 
   @Test
@@ -541,7 +554,8 @@ public class WorkspaceDaoTest {
             new Timestamp(baseTime + 1000)); // Cache updated after workspace modification
     workspaceUserCacheDao.save(cacheEntry);
 
-    List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    List<WorkspaceDao.WorkspaceUserCacheView> result =
+        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
     assertThat(result).isEmpty();
   }
 
@@ -561,7 +575,8 @@ public class WorkspaceDaoTest {
             .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspaceDao.save(inactiveWorkspace);
 
-    List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    List<WorkspaceDao.WorkspaceUserCacheView> result =
+        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
     assertThat(result).isEmpty();
   }
 
@@ -620,8 +635,11 @@ public class WorkspaceDaoTest {
             "OWNER",
             new Timestamp(baseTime + 1000))); // Newer than workspace modification
 
-    List<DbWorkspace> result = workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
-    assertThat(result).containsExactly(workspaceNoCache, workspaceStaleCache);
+    List<WorkspaceDao.WorkspaceUserCacheView> result =
+        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.stream().map(WorkspaceDao.WorkspaceUserCacheView::getWorkspaceId).toList())
+        .containsExactly(workspaceNoCache.getWorkspaceId(), workspaceStaleCache.getWorkspaceId());
   }
 
   private DbWorkspace createWorkspace() {

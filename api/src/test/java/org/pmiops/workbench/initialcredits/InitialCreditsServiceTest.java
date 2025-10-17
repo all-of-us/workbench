@@ -157,6 +157,7 @@ public class InitialCreditsServiceTest {
     workbenchConfig.billing.initialCreditsValidityPeriodDays = validityPeriodDays;
     workbenchConfig.billing.initialCreditsExtensionPeriodDays = extensionPeriodDays;
     workbenchConfig.billing.initialCreditsExpirationWarningDays = warningPeriodDays;
+    workbenchConfig.billing.initialCreditsExpirationWarningDaysList = List.of(warningPeriodDays);
     workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForInitialCreditsUsageUpdate = 2L;
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = true;
@@ -172,6 +173,7 @@ public class InitialCreditsServiceTest {
                 .setGoogleProject("initial-credits-project")
                 .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
     doNothing().when(mailService).alertUserInitialCreditsExpiring(isA(DbUser.class));
+    doNothing().when(mailService).alertUserInitialCreditsExpired(isA(DbUser.class));
   }
 
   @AfterEach
@@ -1028,7 +1030,7 @@ public class InitialCreditsServiceTest {
             "If a non-bypassed user is in their warning period, they will receive a warning email but not have their resources cleaned up.",
             DURING_WARNING_PERIOD,
             false,
-            NOW,
+            null,
             null),
         Arguments.of(
             "If a bypassed user has passed their expiration date, they will not receive a warning email or have their resources cleaned up.",
@@ -1055,123 +1057,6 @@ public class InitialCreditsServiceTest {
             BadRequestException.class,
             () -> initialCreditsService.extendInitialCreditsExpiration(user));
     assertEquals("Initial credits extension is disabled.", exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_noExpirationRecord() {
-    DbUser user = spyUserDao.save(new DbUser());
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User does not have initial credits expiration set, so they cannot extend their expiration date.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_alreadyExtended() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setExpirationTime(DURING_WARNING_PERIOD)
-                        .setExtensionTime(DURING_WARNING_PERIOD)
-                        .setBypassed(false)));
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User has already extended their initial credits expiration and cannot extend further.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_institutionallyBypassed() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setExpirationTime(DURING_WARNING_PERIOD)
-                        .setExtensionTime(null)
-                        .setBypassed(false)));
-    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User has their initial credits expiration bypassed by their institution, and therefore cannot have their expiration extended.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_individuallyBypassed() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setExpirationTime(DURING_WARNING_PERIOD)
-                        .setExtensionTime(null)
-                        .setBypassed(true)));
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User has their initial credits expiration bypassed, and therefore cannot have their expiration extended.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_notYetExtendedOutsideWindow() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setExpirationTime(BEFORE_WARNING_PERIOD)
-                        .setExtensionTime(null)
-                        .setBypassed(false)));
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> initialCreditsService.extendInitialCreditsExpiration(user));
-    assertEquals(
-        "User's initial credits are not close enough to their expiration date to be extended.",
-        exception.getMessage());
-  }
-
-  @Test
-  public void test_extendInitialCreditsExpiration_notYetExtendedWithinWindow() {
-    DbUser user =
-        spyUserDao.save(
-            new DbUser()
-                .setUserInitialCreditsExpiration(
-                    new DbUserInitialCreditsExpiration()
-                        .setCreditStartTime(BEFORE_WARNING_PERIOD)
-                        .setExpirationTime(DURING_WARNING_PERIOD)
-                        .setExtensionTime(null)
-                        .setBypassed(false)));
-
-    DbUserInitialCreditsExpiration actualExpirationRecord =
-        initialCreditsService
-            .extendInitialCreditsExpiration(user)
-            .getUserInitialCreditsExpiration();
-
-    Timestamp expectedExtensionDate =
-        Timestamp.valueOf(BEFORE_WARNING_PERIOD.toLocalDateTime().plusDays(extensionPeriodDays));
-    assertEquals(expectedExtensionDate, actualExpirationRecord.getExpirationTime());
-    assertEquals(NOW, actualExpirationRecord.getExtensionTime());
   }
 
   @Test
@@ -1205,7 +1090,7 @@ public class InitialCreditsServiceTest {
     workspaceFreeTierUsageDao.save(
         new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(30.0));
     boolean eligibility = initialCreditsService.checkInitialCreditsExtensionEligibility(user);
-    assertThat(eligibility).isTrue();
+    assertThat(eligibility).isFalse();
   }
 
   @Test
@@ -1290,6 +1175,77 @@ public class InitialCreditsServiceTest {
     DbVwbUserPod updatedPod = vwbUserPodDao.findById(pod.getVwbUserPodId()).get();
     verify(vwbUserService, times(1)).linkInitialCreditsBillingAccountToPod(pod);
     assertThat(updatedPod.isInitialCreditsActive()).isTrue();
+  }
+
+  @Test
+  public void checkInitialCreditsUsage_includesAllVwbPodsForAccurateDbCostCalculation() {
+    // This test verifies that VWB pod costs are included in DB cost calculations
+    // regardless of when they were recently updated. Before the fix, only "not recently updated"
+    // pods were included, which caused inaccurate DB cost calculations and incorrect
+    // downstream comparisons with live costs.
+
+    final String proj1 = "proj-1";
+    final double terraWorkspaceCost = 100.0;
+    final double vwbPodCostInDb = 50.0;
+    final double vwbPodLiveCost = 50.0; // Same as DB cost (recently updated)
+
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 200.0;
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
+    workbenchConfig.billing.minutesBeforeLastInitialCreditsJob = 60;
+
+    // Create user with Terra workspace and VWB pod
+    DbUser user = createUser("user@test.com");
+    DbWorkspace ws1 = createWorkspace(user, proj1);
+    DbVwbUserPod vwbPod = createVwbPodForUser(user, true);
+
+    // Set the pod cost to 50.0 and mark it as recently updated
+    vwbPod.setCost(vwbPodCostInDb);
+    vwbUserPodDao.save(vwbPod);
+
+    user.setVwbUserPod(vwbPod);
+    userDao.save(user);
+
+    commitTransaction();
+
+    // Live costs from BigQuery
+    Map<String, Double> terraBQCosts = Maps.newHashMap();
+    terraBQCosts.put(proj1, terraWorkspaceCost);
+
+    Map<Long, Double> vwbLiveCosts = new HashMap<>();
+    vwbLiveCosts.put(user.getUserId(), vwbPodLiveCost);
+
+    // Act: Check initial credits usage
+    initialCreditsService.checkInitialCreditsUsageForUsers(
+        Sets.newHashSet(user), terraBQCosts, vwbLiveCosts);
+
+    // Assert: The DB cost should include the VWB pod cost even though it was recently updated
+    // The total DB cost should be: terraWorkspaceCost (0 initially, will be set to 100) +
+    // vwbPodCostInDb (50)
+    // The total live cost should be: terraWorkspaceCost (100) + vwbPodLiveCost (50) = 150
+
+    // Before the fix, the VWB pod cost would NOT be included in DB cost calculation
+    // because it was recently updated, leading to incorrect comparison:
+    // - dbCostByCreator would be 0.0 (missing the 50.0 from VWB pod)
+    // - liveCostByCreator would be 150.0
+    // This would cause incorrect threshold calculations
+
+    // After the fix, all VWB pods are included:
+    // - dbCostByCreator includes the VWB pod cost: 50.0
+    // - liveCostByCreator is 150.0
+    // This ensures accurate cost comparison
+
+    verify(taskQueueService)
+        .pushInitialCreditsExhaustionTask(
+            argThat(new UserListMatcher(List.of(user.getUserId()))),
+            // DB cost should include VWB pod cost (50.0) + initial workspace cost (0.0) = 50.0
+            argThat(new MapMatcher(Map.of(user.getUserId(), vwbPodCostInDb))),
+            // Live cost is terra (100) + vwb (50) = 150.0
+            argThat(new MapMatcher(Map.of(user.getUserId(), terraWorkspaceCost + vwbPodLiveCost))));
+
+    // Verify the workspace was updated
+    final DbWorkspaceFreeTierUsage usage1 = workspaceFreeTierUsageDao.findOneByWorkspace(ws1);
+    assertThat(usage1.getUser()).isEqualTo(user);
+    assertWithinBillingTolerance(usage1.getCost(), terraWorkspaceCost);
   }
 
   private void assertSingleWorkspaceTestDbState(

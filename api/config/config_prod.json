@@ -24,12 +24,13 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "defaultInitialCreditsDollarLimit": 300.0,
     "initialCreditsCostAlertThresholds": [
-      0.5,
-      0.75
+      0.25,
+      0.5
     ],
     "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
+    "initialCreditsExpirationWarningDaysList": [30, 90],
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "minutesBeforeLastInitialCreditsJob": 60,
     "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 7,
@@ -51,10 +52,10 @@
     "minExtractionScatterTasks": 350,
     "extractionScatterTasksPerSample": 4,
     "legacyVersions": {
-      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
+      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-after_master_merge-247-g5128841-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-prod",
       "methodName": "GvsExtractCohortFromSampleNames",
-      "methodRepoVersion": 4,
+      "methodRepoVersion": 7,
       "methodLogicalVersion": 3
     },
     "cdrv8plus": {
@@ -129,11 +130,12 @@
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": true,
-    "enableVWBUserAccessManagement": false,
+    "enableVWBUserAccessManagement": true,
     "enableVWBUserCreation": false,
     "enableVWBPodCreation": true,
     "enableVWBInitialCreditsExhaustion": true,
-    "enableTierAccessCheckInDb": false
+    "enableTierAccessCheckInDb": true,
+    "enableVWBHomepageBanner": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
@@ -215,6 +217,10 @@
     "vwbSamBaseUrl": "https:\/\/workbench.verily.com\/api\/sam",
     "userManagerBaseUrl": "https:\/\/workbench.verily.com\/api\/user",
     "organizationId": "d37dc97e-f8d1-4a43-8a30-669b81a397e9",
-    "exfilManagerServiceAccount": "workbench-exfil-manager@@prj-p-1v-s0i.iam.gserviceaccount.com"
+    "exfilManagerServiceAccount": "workbench-exfil-manager@prj-p-1v-s0i.iam.gserviceaccount.com",
+    "adminBigQuery": {
+      "logProjectId": "workbench-bq-log-sink",
+      "bigQueryDataset": "workbench_monitoring_org_logs_prod"
+    }
   }
 }

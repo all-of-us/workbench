@@ -203,4 +203,82 @@ describe(WorkspaceWrapper.name, () => {
       )
     ).not.toBeInTheDocument();
   });
+
+  it('should show UnlinkedBillingNotification when workspace billing is unlinked', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableUnlinkBillingForInitialCredits: true,
+      },
+    });
+
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      initialCredits: {
+        exhausted: true,
+        expirationBypassed: false,
+        expirationEpochMillis: Date.now() - 1000,
+      },
+    });
+
+    await createWrapperAndWaitForLoad();
+
+    expect(screen.getByText(/Add a payment method/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Without a new payment method to cover ongoing costs/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /Cloud billing account/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /billing project/i })
+    ).toBeInTheDocument();
+  });
+
+  it('should not show UnlinkedBillingNotification when feature flag is disabled', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableUnlinkBillingForInitialCredits: false,
+      },
+    });
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      initialCredits: {
+        exhausted: true,
+        expirationBypassed: false,
+        expirationEpochMillis: Date.now() - 1000,
+      },
+    });
+    await createWrapperAndWaitForLoad();
+    expect(screen.queryByText(/Add a payment method/i)).not.toBeInTheDocument();
+  });
+
+  it('should not show UnlinkedBillingNotification when initialCredits is missing', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableUnlinkBillingForInitialCredits: true,
+      },
+    });
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      initialCredits: undefined,
+    });
+    await createWrapperAndWaitForLoad();
+    expect(screen.queryByText(/Add a payment method/i)).not.toBeInTheDocument();
+  });
+
+  it('should not show UnlinkedBillingNotification when initialCredits not exhausted and not expired', async () => {
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      initialCredits: {
+        exhausted: false,
+        expirationBypassed: false,
+        expirationEpochMillis: Date.now() + 100000,
+      },
+    });
+    await createWrapperAndWaitForLoad();
+    expect(screen.queryByText(/Add a payment method/i)).not.toBeInTheDocument();
+  });
 });

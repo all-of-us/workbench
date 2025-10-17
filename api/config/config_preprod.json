@@ -24,12 +24,13 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "defaultInitialCreditsDollarLimit": 300.0,
     "initialCreditsCostAlertThresholds": [
-      0.5,
-      0.75
+      0.25,
+      0.5
     ],
     "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
+    "initialCreditsExpirationWarningDaysList": [30, 90],
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "minutesBeforeLastInitialCreditsJob": 60,
     "numberOfDaysToConsiderForInitialCreditsUsageUpdate": 2
@@ -50,10 +51,10 @@
     "minExtractionScatterTasks": 350,
     "extractionScatterTasksPerSample": 4,
     "legacyVersions": {
-      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
+      "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-after_master_merge-247-g5128841-SNAPSHOT-local.jar",
       "methodNamespace": "aouwgscohortextraction-preprod",
       "methodName": "GvsExtractCohortFromSampleNames",
-      "methodRepoVersion": 5,
+      "methodRepoVersion": 6,
       "methodLogicalVersion": 3
     },
     "cdrv8plus": {
@@ -132,7 +133,8 @@
     "enableVWBUserCreation": false,
     "enableVWBPodCreation": false,
     "enableVWBInitialCreditsExhaustion": false,
-    "enableTierAccessCheckInDb": false
+    "enableTierAccessCheckInDb": false,
+    "enableVWBHomepageBanner": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",

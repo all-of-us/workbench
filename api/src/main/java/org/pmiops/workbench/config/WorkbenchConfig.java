@@ -121,7 +121,10 @@ public class WorkbenchConfig {
     public Long initialCreditsExtensionPeriodDays;
 
     // The number of days before initial credits expire that a warning email should be sent.
-    public Long initialCreditsExpirationWarningDays;
+    public long initialCreditsExpirationWarningDays;
+
+    // The list of days before initial credits expire that warning emails should be sent.
+    public List<Long> initialCreditsExpirationWarningDaysList;
 
     // The name of the view in the BigQuery billing export dataset that contains the VWB workspaces
     // usage costs.
@@ -344,6 +347,8 @@ public class WorkbenchConfig {
     public boolean enableVWBInitialCreditsExhaustion;
     // If true, AoU will include VWB costs in the initial credits usage calculation.
     public boolean enableTierAccessCheckInDb;
+    // If true, will display the VWB banner on RW homepage
+    public boolean enableVWBHomepageBanner;
   }
 
   public static class ActionAuditConfig {

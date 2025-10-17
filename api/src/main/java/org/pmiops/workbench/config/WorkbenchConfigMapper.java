@@ -54,6 +54,9 @@ public interface WorkbenchConfigMapper {
       target = "enableInitialCreditsExpiration",
       source = "config.featureFlags.enableInitialCreditsExpiration")
   @Mapping(
+      target = "enableUnlinkBillingForInitialCredits",
+      source = "config.featureFlags.enableUnlinkBillingForInitialCredits")
+  @Mapping(
       target = "initialCreditsValidityPeriodDays",
       source = "config.billing.initialCreditsValidityPeriodDays")
   @Mapping(
@@ -63,6 +66,9 @@ public interface WorkbenchConfigMapper {
       target = "initialCreditsExpirationWarningDays",
       source = "config.billing.initialCreditsExpirationWarningDays")
   @Mapping(
+      target = "initialCreditsExpirationWarningDaysList",
+      source = "config.billing.initialCreditsExpirationWarningDaysList")
+  @Mapping(
       target = "blockComplianceTraining",
       source = "config.featureFlags.blockComplianceTraining")
   @Mapping(target = "isDownForMaintenance", source = "config.server.isDownForMaintenance")
@@ -71,5 +77,8 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableVWBWorkspaceCreation",
       source = "config.featureFlags.enableVWBWorkspaceCreation")
+  @Mapping(
+      target = "enableVWBHomepageBanner",
+      source = "config.featureFlags.enableVWBHomepageBanner")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

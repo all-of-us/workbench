@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.time.temporal.ChronoUnit.DAYS;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -1664,17 +1663,10 @@ public class ProfileControllerTest extends BaseControllerTest {
             .setExpirationTime(initialCreditExpirationTime));
     when(mockUserProvider.get()).thenReturn(dbUser);
 
-    Profile profile = profileController.extendInitialCreditExpiration().getBody();
-
-    assertNotNull(profile);
-    assertThat(profile.getUserId()).isEqualTo(dbUser.getUserId());
-    DbUserInitialCreditsExpiration extendedUserInitialCreditsExpiration =
-        dbUser.getUserInitialCreditsExpiration();
-    assertThat(extendedUserInitialCreditsExpiration.getExpirationTime().toInstant())
-        .isEqualTo(
-            creditStartTime
-                .toInstant()
-                .plus(config.billing.initialCreditsExtensionPeriodDays, DAYS));
+    BadRequestException ex =
+        assertThrows(
+            BadRequestException.class, () -> profileController.extendInitialCreditExpiration());
+    assertThat(ex.getMessage()).isEqualTo("Initial credits extension is disabled.");
   }
 
   private Profile createAccountAndDbUserWithAffiliation(

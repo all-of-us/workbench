@@ -22,6 +22,10 @@ const VwbWorkspaceSearchParamTypeOptions = [
     label: 'Workspace User Facing ID',
   },
   {
+    value: VwbWorkspaceSearchParamType.ID,
+    label: 'Workspace ID (UUID)',
+  },
+  {
     value: VwbWorkspaceSearchParamType.NAME,
     label: 'Workspace Name',
   },
@@ -34,6 +38,7 @@ const VwbWorkspaceSearchParamTypeOptions = [
 const SearchParamTypeLabel = {
   [VwbWorkspaceSearchParamType.CREATOR]: 'Creator Username',
   [VwbWorkspaceSearchParamType.USER_FACING_ID]: 'Workspace User Facing ID',
+  [VwbWorkspaceSearchParamType.ID]: 'Workspace ID (UUID)',
   [VwbWorkspaceSearchParamType.NAME]: 'Workspace Name',
   [VwbWorkspaceSearchParamType.SHARED]: 'Collaborator Username',
 };
