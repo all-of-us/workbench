@@ -154,7 +154,10 @@
   "reporting": {
     "dataset": "reporting_preprod",
     "maxRowsPerInsert": 10000,
-    "exportTerraDataWarehouse": false
+    "exportTerraDataWarehouse": false,
+    "batchSizeOverrides": {
+      "workspace": 500
+    }
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",
