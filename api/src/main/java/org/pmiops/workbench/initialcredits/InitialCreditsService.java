@@ -225,7 +225,20 @@ public class InitialCreditsService {
    */
   @Nullable
   public Double getCachedInitialCreditsUsage(DbUser user) {
-    return workspaceFreeTierUsageDao.totalCostByUser(user);
+    double totalCost = 0.0d;
+    if (user != null && user.getVwbUserPod() != null) {
+      totalCost += Optional.ofNullable(user.getVwbUserPod().getCost()).orElse(0.0d);
+    }
+    Double legacyInitialCreditsCost = workspaceFreeTierUsageDao.totalCostByUser(user);
+    if (legacyInitialCreditsCost != null) {
+      totalCost += legacyInitialCreditsCost;
+    }
+
+    if (totalCost == 0.0d) {
+      return null;
+    }
+
+    return totalCost;
   }
 
   /**
