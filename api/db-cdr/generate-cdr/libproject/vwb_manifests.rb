@@ -4,6 +4,7 @@ require "tempfile"
 require "net/http"
 require "uri"
 require "fileutils"
+require "digest"
 require_relative "../../../../aou-utils/utils/common"
 require_relative "../../../libproject/environments"
 require_relative "../../../libproject/affirm"
@@ -324,6 +325,140 @@ def _apply_vwb_filename_replacement(source_name, match_pattern, replace_pattern,
   return dest_name
 end
 
+# Helper to get AW4 cache directory
+def get_aw4_cache_dir(working_dir)
+  cache_dir = File.join(working_dir, "aw4_cache")
+  FileUtils.mkdir_p(cache_dir) unless File.directory?(cache_dir)
+  return cache_dir
+end
+
+# Helper to generate cache key from AW4 prefix and RIDs
+def generate_aw4_cache_key(aw4_prefix, rids)
+  # Create a hash from the prefix and sorted RIDs to ensure consistent cache keys
+  prefix_hash = Digest::SHA256.hexdigest(aw4_prefix)[0..15]
+  rids_hash = Digest::SHA256.hexdigest(rids.sort.join(","))[0..15]
+  return "aw4_#{prefix_hash}_rids_#{rids_hash}"
+end
+
+# Helper to read cached AW4 rows
+def read_cached_aw4_rows(cache_dir, cache_key, common)
+  cache_file = File.join(cache_dir, "#{cache_key}.json")
+
+  unless File.exist?(cache_file)
+    return nil
+  end
+
+  begin
+    common.status "Reading AW4 rows from cache: #{File.basename(cache_file)}"
+    cached_data = JSON.parse(File.read(cache_file))
+
+    # Convert back to CSV::Row objects
+    cached_rows = cached_data.map do |row_hash|
+      CSV::Row.new(row_hash.keys, row_hash.values)
+    end
+
+    common.status "Loaded #{cached_rows.length} AW4 rows from cache"
+    return cached_rows
+  rescue => e
+    common.warning "Failed to read cache file: #{e.message}"
+    return nil
+  end
+end
+
+# Helper to write AW4 rows to cache
+def write_aw4_rows_to_cache(cache_dir, cache_key, aw4_rows, common)
+  cache_file = File.join(cache_dir, "#{cache_key}.json")
+
+  begin
+    # Convert CSV::Row objects to hashes for JSON serialization
+    rows_as_hashes = aw4_rows.map(&:to_h)
+
+    File.open(cache_file, 'w') do |f|
+      f.write(JSON.pretty_generate(rows_as_hashes))
+    end
+
+    common.status "Cached #{aw4_rows.length} AW4 rows to: #{File.basename(cache_file)}"
+  rescue => e
+    common.warning "Failed to write cache file: #{e.message}"
+  end
+end
+
+# Helper to clear AW4 cache
+def clear_aw4_cache(working_dir, common)
+  cache_dir = get_aw4_cache_dir(working_dir)
+
+  if File.directory?(cache_dir)
+    cache_files = Dir.glob(File.join(cache_dir, "aw4_*.json"))
+
+    if cache_files.empty?
+      common.status "No AW4 cache files to clear"
+    else
+      cache_files.each { |f| File.delete(f) }
+      common.status "Cleared #{cache_files.length} AW4 cache file(s)"
+    end
+  else
+    common.status "No AW4 cache directory found"
+  end
+end
+
+# Cached version of read_all_microarray_aw4s
+def read_all_microarray_aw4s_cached(project, rids, working_dir, clear_cache = false)
+  common = Common.new
+  cache_dir = get_aw4_cache_dir(working_dir)
+
+  # Get AW4 prefix from genomic_manifests
+  require_relative 'genomic_manifests'
+  raise ArgumentError.new("manifest generation is unconfigured for #{project}") unless FILE_ENVIRONMENTS.key? project
+  aw4_prefix = FILE_ENVIRONMENTS[project][:source_config][:microarray_aw4_prefix]
+
+  # Generate cache key
+  cache_key = generate_aw4_cache_key(aw4_prefix, rids)
+
+  # Try to read from cache unless clearing
+  unless clear_cache
+    cached_rows = read_cached_aw4_rows(cache_dir, cache_key, common)
+    return cached_rows if cached_rows
+  end
+
+  # Cache miss or clear requested - read from source
+  common.status "Reading microarray AW4 manifests from source..."
+  aw4_rows = read_all_microarray_aw4s(project, rids)
+
+  # Write to cache
+  write_aw4_rows_to_cache(cache_dir, cache_key, aw4_rows, common)
+
+  return aw4_rows
+end
+
+# Cached version of read_all_wgs_aw4s
+def read_all_wgs_aw4s_cached(project, rids, working_dir, clear_cache = false)
+  common = Common.new
+  cache_dir = get_aw4_cache_dir(working_dir)
+
+  # Get AW4 prefix from genomic_manifests
+  require_relative 'genomic_manifests'
+  raise ArgumentError.new("manifest generation is unconfigured for #{project}") unless FILE_ENVIRONMENTS.key? project
+  aw4_prefix = FILE_ENVIRONMENTS[project][:source_config][:wgs_aw4_prefix]
+
+  # Generate cache key
+  cache_key = generate_aw4_cache_key(aw4_prefix, rids)
+
+  # Try to read from cache unless clearing
+  unless clear_cache
+    cached_rows = read_cached_aw4_rows(cache_dir, cache_key, common)
+    return cached_rows if cached_rows
+  end
+
+  # Cache miss or clear requested - read from source
+  common.status "Reading WGS AW4 manifests from source..."
+  aw4_rows = read_all_wgs_aw4s(project, rids)
+
+  # Write to cache
+  write_aw4_rows_to_cache(cache_dir, cache_key, aw4_rows, common)
+
+  return aw4_rows
+end
+
 # Build VWB publish configurations from manifest files
 # Groups transfers into folder transfers and file transfers for Storage Transfer Service
 def build_vwb_publish_configs(manifest_files)
@@ -355,21 +490,24 @@ def build_vwb_publish_configs(manifest_files)
     end
   end
 
-  # Group file transfers by source bucket, storage class and destination directory
+  # Group file transfers by source bucket, source folder, storage class and destination directory
   grouped_file_transfers = {}
   file_transfers.each do |transfer|
     # Extract source bucket from the GCS path
     source_bucket = transfer[:source].gsub("gs://", "").split("/")[0]
+    # Extract source folder (directory containing the file)
+    source_folder = File.dirname(transfer[:source].gsub(/^gs:\/\/[^\/]+\//, ""))
     dest_dir = File.dirname(transfer[:destination])
     storage_class = transfer[:storage_class]
 
-    # Create a key based on source bucket, destination directory and storage class
-    key = "#{source_bucket}_#{dest_dir}_#{storage_class}"
+    # Create a key based on source bucket, source folder, destination directory and storage class
+    key = "#{source_bucket}_#{source_folder}_#{dest_dir}_#{storage_class}"
 
     if grouped_file_transfers[key].nil?
       grouped_file_transfers[key] = {
         :files => [],
         :source_bucket => source_bucket,
+        :source_folder => source_folder,
         :dest_dir => dest_dir,
         :storage_class => storage_class
       }
@@ -494,7 +632,7 @@ def process_file_list_transfers(configs, project, jira_ticket, service_account, 
     job_name = generate_job_name("vwb-files-transfer", job_index, jira_ticket)
 
     # Create the manifest file locally for review
-    local_manifest_path = create_local_manifest_file(file_group, job_name, sts_manifests_dir, common)
+    local_manifest_path = create_local_manifest_file(file_group, job_name, sts_manifests_dir, common, use_v2)
 
     config = generate_file_list_transfer_config(
       project,
@@ -525,7 +663,7 @@ def generate_job_name(base_name, index, jira_ticket = nil)
 end
 
 # Helper to create local manifest file for file list transfers
-def create_local_manifest_file(file_group, job_name, sts_manifests_dir, common)
+def create_local_manifest_file(file_group, job_name, sts_manifests_dir, common, use_v2 = false)
   manifest_filename = "#{job_name}-manifest.txt"
   local_manifest_path = File.join(sts_manifests_dir, manifest_filename)
 
@@ -534,6 +672,20 @@ def create_local_manifest_file(file_group, job_name, sts_manifests_dir, common)
     file_group[:files].each do |file|
       # Extract object path from full GCS URL
       object_path = file[:source].gsub(/^gs:\/\/[^\/]+\//, "")
+
+      # In V2 mode, paths in manifest should be relative to the source folder
+      # because gcsDataSource.path is set to the source folder
+      if use_v2 && file_group[:source_folder]
+        source_folder = file_group[:source_folder]
+        # Remove the source folder prefix to get relative path
+        source_folder_with_slash = source_folder.end_with?("/") ? source_folder : "#{source_folder}/"
+        if object_path.start_with?(source_folder_with_slash)
+          object_path = object_path.sub(source_folder_with_slash, "")
+        elsif object_path.start_with?(source_folder)
+          object_path = object_path.sub("#{source_folder}/", "")
+        end
+      end
+
       f.puts(object_path)
     end
   end
@@ -650,6 +802,20 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
   # The manifest path will be created during publish
   temp_manifest_path = "gs://#{dest_bucket}/temp-manifests/#{job_name}-manifest.txt"
 
+  # Build gcsDataSource
+  gcs_data_source = {
+    "bucketName" => source_bucket
+  }
+
+  # V2: Add source folder path to gcsDataSource so STS knows which folder to read from
+  # V1: No path specified, STS reads files from their full paths
+  if use_v2 && file_group[:source_folder]
+    # Add the source folder path
+    source_folder = file_group[:source_folder]
+    source_folder_with_slash = source_folder.end_with?("/") ? source_folder : "#{source_folder}/"
+    gcs_data_source["path"] = source_folder_with_slash
+  end
+
   # Build gcsDataSink
   gcs_data_sink = {
     "bucketName" => dest_bucket
@@ -695,9 +861,7 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
       }
     },
     "transferSpec" => {
-      "gcsDataSource" => {
-        "bucketName" => source_bucket
-      },
+      "gcsDataSource" => gcs_data_source,
       "gcsDataSink" => gcs_data_sink,
       "transferManifest" => {
         "location" => temp_manifest_path
@@ -930,7 +1094,7 @@ def create_and_execute_file_list_transfer(project, job)
 end
 
 # Helper to process AW4 Microarray sources
-def process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
+def process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path, working_dir)
   aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
   return if aw4_microarray_sources.nil? || aw4_microarray_sources.empty?
 
@@ -938,7 +1102,9 @@ def process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_mani
     raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
   end
 
-  microarray_aw4_rows = read_all_microarray_aw4s(opts.project, read_research_ids_file(opts.microarray_rids_file))
+  # Use cached version - check if clear_cache option is set
+  clear_cache = opts.respond_to?(:clear_cache) && opts.clear_cache ? true : false
+  microarray_aw4_rows = read_all_microarray_aw4s_cached(opts.project, read_research_ids_file(opts.microarray_rids_file), working_dir, clear_cache)
 
   aw4_microarray_sources.each do |source_name, section|
     common.status("building VWB manifest for '#{source_name}'")
@@ -951,7 +1117,7 @@ def process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_mani
 end
 
 # Helper to process AW4 WGS sources with combined output manifest
-def process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
+def process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path, working_dir)
   aw4_wgs_sources = input_manifest["aw4WgsSources"]
   return if aw4_wgs_sources.nil? || aw4_wgs_sources.empty?
 
@@ -959,7 +1125,9 @@ def process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, 
     raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
   end
 
-  wgs_aw4_rows = read_all_wgs_aw4s(opts.project, read_research_ids_file(opts.wgs_rids_file))
+  # Use cached version - check if clear_cache option is set
+  clear_cache = opts.respond_to?(:clear_cache) && opts.clear_cache ? true : false
+  wgs_aw4_rows = read_all_wgs_aw4s_cached(opts.project, read_research_ids_file(opts.wgs_rids_file), working_dir, clear_cache)
 
   # Collect output rows from all WGS sections for combined manifest
   combined_output_rows = {}
@@ -1083,9 +1251,15 @@ def vwb_create_copy_manifests_mode(opts, tier, working_dir)
 
   input_manifest = parse_input_manifest(opts.input_manifest_file)
 
+  # Handle --clear-cache flag if specified
+  if opts.respond_to?(:clear_cache) && opts.clear_cache
+    common.status "Clearing AW4 cache..."
+    clear_aw4_cache(working_dir, common)
+  end
+
   # Process different source types
-  process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
-  process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path)
+  process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path, working_dir)
+  process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path, working_dir)
   process_curation_sources(input_manifest, tier, opts, common, copy_manifests)
 
   if copy_manifests.empty?
@@ -1163,22 +1337,30 @@ def vwb_post_process_mode(opts, copy_manifest_files, working_dir)
     end
   end
 
-  # Detect v2 mode from saved STS job configs
+  # Detect v2 mode from command line flag or saved STS job configs
   use_v2 = false
-  config_dir = File.join(working_dir, "storage_transfer_configs")
-  if File.directory?(config_dir)
-    begin
-      job_configs = load_sts_configs(config_dir)
-      # Check if any job config has use_v2 flag set
-      use_v2 = job_configs.any? { |job| job["use_v2"] == true }
-      if use_v2
-        common.status "Detected V2 mode: Files are in destination directories, renaming in place"
-      else
-        common.status "Detected V1 mode: Files preserve source structure, moving and renaming"
+
+  # First check if use_v2 flag was passed via command line
+  if opts.respond_to?(:use_v2) && opts.use_v2
+    use_v2 = true
+    common.status "Using V2 mode from command line flag: Files are in destination directories, renaming in place"
+  else
+    # Otherwise try to detect from saved STS job configs
+    config_dir = File.join(working_dir, "storage_transfer_configs")
+    if File.directory?(config_dir)
+      begin
+        job_configs = load_sts_configs(config_dir)
+        # Check if any job config has use_v2 flag set
+        use_v2 = job_configs.any? { |job| job["use_v2"] == true }
+        if use_v2
+          common.status "Detected V2 mode from saved configs: Files are in destination directories, renaming in place"
+        else
+          common.status "Detected V1 mode from saved configs: Files preserve source structure, moving and renaming"
+        end
+      rescue => e
+        common.warning "Could not load STS configs to detect V2 mode: #{e.message}"
+        common.warning "Defaulting to V1 mode (move and rename)"
       end
-    rescue => e
-      common.warning "Could not load STS configs to detect V2 mode: #{e.message}"
-      common.warning "Defaulting to V1 mode (move and rename)"
     end
   end
 
@@ -1225,7 +1407,7 @@ def collect_files_to_rename(manifest_files)
 end
 
 # Helper to display dry run summary for file renaming
-def display_rename_dry_run(common, files_to_rename)
+def display_rename_dry_run(common, files_to_rename, use_v2 = false)
   total_files = files_to_rename.length
 
   common.status "="*60
@@ -1238,10 +1420,19 @@ def display_rename_dry_run(common, files_to_rename)
   common.status "Sample files to be moved/renamed (showing #{sample_size} of #{total_files}):"
 
   files_to_rename.take(sample_size).each do |file|
-    # Calculate where STS actually copied the file
-    dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
-    source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
-    current_path = "gs://#{dest_bucket}/#{source_object_path}"
+    # Calculate where STS actually copied the file based on v1 or v2 behavior
+    if use_v2
+      # V2: Files are already in the correct destination directory with original names
+      dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
+      dest_path = File.dirname(file[:destination_path].gsub(/^gs:\/\/[^\/]+\//, ""))
+      original_filename = file[:source_name]
+      current_path = "gs://#{dest_bucket}/#{dest_path}/#{original_filename}"
+    else
+      # V1: STS preserves the source directory structure in the destination bucket
+      dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
+      source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
+      current_path = "gs://#{dest_bucket}/#{source_object_path}"
+    end
 
     common.status "\n  File: #{file[:source_name]} -> #{file[:dest_name]}"
     common.status "    From: #{current_path}"
@@ -1298,9 +1489,10 @@ def perform_file_renaming(common, files_to_rename, deploy_account, num_threads =
         if use_v2
           # V2: Files are already in the correct destination directory with original names
           # We just need to rename them in place
-          dest_dir = File.dirname(file[:destination_path])
+          dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
+          dest_path = File.dirname(file[:destination_path].gsub(/^gs:\/\/[^\/]+\//, ""))
           original_filename = file[:source_name]
-          current_path = File.join(dest_dir, original_filename)
+          current_path = "gs://#{dest_bucket}/#{dest_path}/#{original_filename}"
         else
           # V1: STS preserves the source directory structure in the destination bucket
           # Extract the destination bucket from the destination path
@@ -1426,7 +1618,7 @@ def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = fa
   end
 
   if dry_run
-    display_rename_dry_run(common, files_to_rename)
+    display_rename_dry_run(common, files_to_rename, use_v2)
     return
   end
 
