@@ -1248,6 +1248,184 @@ public class InitialCreditsServiceTest {
     assertWithinBillingTolerance(usage1.getCost(), terraWorkspaceCost);
   }
 
+  @Test
+  public void getCachedInitialCreditsUsage_withVwbPodCost() {
+    // Test that getCachedInitialCreditsUsage returns VWB pod cost + workspace costs
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 500.0;
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
+
+    final double workspaceCost = 123.45;
+    final double vwbPodCost = 67.89;
+
+    DbUser user = createUser("user@test.com");
+    DbWorkspace workspace = createWorkspace(user, "test-project");
+    DbVwbUserPod vwbPod = createVwbPodForUser(user, true);
+    vwbPod.setCost(vwbPodCost);
+    vwbUserPodDao.save(vwbPod);
+
+    user.setVwbUserPod(vwbPod);
+    userDao.save(user);
+
+    // Create workspace usage
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(workspaceCost));
+
+    commitTransaction();
+
+    // Verify that getCachedInitialCreditsUsage returns the sum
+    Double totalUsage = initialCreditsService.getCachedInitialCreditsUsage(user);
+    assertThat(totalUsage).isNotNull();
+    assertWithinBillingTolerance(totalUsage, workspaceCost + vwbPodCost);
+  }
+
+  @Test
+  public void getCachedInitialCreditsUsage_withNullVwbPod() {
+    // Test that getCachedInitialCreditsUsage works when user has no VWB pod
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 500.0;
+
+    final double workspaceCost = 123.45;
+
+    DbUser user = createUser("user@test.com");
+    DbWorkspace workspace = createWorkspace(user, "test-project");
+
+    // No VWB pod for this user
+    assertThat(user.getVwbUserPod()).isNull();
+
+    // Create workspace usage
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(workspaceCost));
+
+    commitTransaction();
+
+    // Verify that getCachedInitialCreditsUsage returns only workspace cost
+    Double totalUsage = initialCreditsService.getCachedInitialCreditsUsage(user);
+    assertThat(totalUsage).isNotNull();
+    assertWithinBillingTolerance(totalUsage, workspaceCost);
+  }
+
+  @Test
+  public void getCachedInitialCreditsUsage_withZeroVwbPodCost() {
+    // Test that getCachedInitialCreditsUsage handles zero VWB pod cost correctly
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 500.0;
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
+
+    final double workspaceCost = 100.0;
+    final double vwbPodCost = 0.0;
+
+    DbUser user = createUser("user@test.com");
+    DbWorkspace workspace = createWorkspace(user, "test-project");
+    DbVwbUserPod vwbPod = createVwbPodForUser(user, true);
+    vwbPod.setCost(vwbPodCost);
+    vwbUserPodDao.save(vwbPod);
+
+    user.setVwbUserPod(vwbPod);
+    userDao.save(user);
+
+    // Create workspace usage
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(workspaceCost));
+
+    commitTransaction();
+
+    // Verify that getCachedInitialCreditsUsage returns workspace cost (VWB cost is 0)
+    Double totalUsage = initialCreditsService.getCachedInitialCreditsUsage(user);
+    assertThat(totalUsage).isNotNull();
+    assertWithinBillingTolerance(totalUsage, workspaceCost);
+  }
+
+  @Test
+  public void getCachedInitialCreditsUsage_withNullVwbPodCost() {
+    // Test that getCachedInitialCreditsUsage handles null VWB pod cost correctly
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 500.0;
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
+
+    final double workspaceCost = 75.0;
+
+    DbUser user = createUser("user@test.com");
+    DbWorkspace workspace = createWorkspace(user, "test-project");
+    DbVwbUserPod vwbPod = createVwbPodForUser(user, true);
+    // Cost is null by default
+    assertThat(vwbPod.getCost()).isNull();
+
+    user.setVwbUserPod(vwbPod);
+    userDao.save(user);
+
+    // Create workspace usage
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(workspaceCost));
+
+    commitTransaction();
+
+    // Verify that getCachedInitialCreditsUsage treats null as 0 and returns workspace cost
+    Double totalUsage = initialCreditsService.getCachedInitialCreditsUsage(user);
+    assertThat(totalUsage).isNotNull();
+    assertWithinBillingTolerance(totalUsage, workspaceCost);
+  }
+
+  @Test
+  public void getCachedInitialCreditsUsage_onlyVwbPodCostNoWorkspaces() {
+    // Test that getCachedInitialCreditsUsage works when user has only VWB pod cost
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 500.0;
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
+
+    final double vwbPodCost = 50.0;
+
+    DbUser user = createUser("user@test.com");
+    DbVwbUserPod vwbPod = createVwbPodForUser(user, true);
+    vwbPod.setCost(vwbPodCost);
+    vwbUserPodDao.save(vwbPod);
+
+    user.setVwbUserPod(vwbPod);
+    userDao.save(user);
+
+    commitTransaction();
+
+    // Verify that getCachedInitialCreditsUsage returns only VWB pod cost
+    Double totalUsage = initialCreditsService.getCachedInitialCreditsUsage(user);
+    assertThat(totalUsage).isNotNull();
+    assertWithinBillingTolerance(totalUsage, vwbPodCost);
+  }
+
+  @Test
+  public void getCachedInitialCreditsUsage_multipleWorkspacesAndVwbPod() {
+    // Test that getCachedInitialCreditsUsage correctly sums multiple workspace costs + VWB pod cost
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 1000.0;
+    workbenchConfig.featureFlags.enableVWBInitialCreditsExhaustion = true;
+
+    final double workspace1Cost = 100.0;
+    final double workspace2Cost = 150.0;
+    final double workspace3Cost = 200.0;
+    final double vwbPodCost = 75.5;
+
+    DbUser user = createUser("user@test.com");
+    DbWorkspace workspace1 = createWorkspace(user, "project-1");
+    DbWorkspace workspace2 = createWorkspace(user, "project-2");
+    DbWorkspace workspace3 = createWorkspace(user, "project-3");
+
+    DbVwbUserPod vwbPod = createVwbPodForUser(user, true);
+    vwbPod.setCost(vwbPodCost);
+    vwbUserPodDao.save(vwbPod);
+
+    user.setVwbUserPod(vwbPod);
+    userDao.save(user);
+
+    // Create workspace usages
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace1).setUser(user).setCost(workspace1Cost));
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace2).setUser(user).setCost(workspace2Cost));
+    workspaceFreeTierUsageDao.save(
+        new DbWorkspaceFreeTierUsage(workspace3).setUser(user).setCost(workspace3Cost));
+
+    commitTransaction();
+
+    // Verify that getCachedInitialCreditsUsage returns the sum of all costs
+    Double totalUsage = initialCreditsService.getCachedInitialCreditsUsage(user);
+    assertThat(totalUsage).isNotNull();
+    assertWithinBillingTolerance(
+        totalUsage, workspace1Cost + workspace2Cost + workspace3Cost + vwbPodCost);
+  }
+
   private void assertSingleWorkspaceTestDbState(
       DbUser user, DbWorkspace workspaceForQuerying, double cost) {
 
