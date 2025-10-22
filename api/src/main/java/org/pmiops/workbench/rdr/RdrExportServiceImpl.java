@@ -84,9 +84,10 @@ public class RdrExportServiceImpl implements RdrExportService {
   }
 
   private List<String> excludedExportUserEmails() {
-    List<String> excludedUserEmails = new ArrayList<>(workbenchConfigProvider.get().auth.serviceAccountApiUsers);
+    List<String> excludedUserEmails =
+        new ArrayList<>(workbenchConfigProvider.get().auth.serviceAccountApiUsers);
     excludedUserEmails.add(workbenchConfigProvider.get().vwb.exfilManagerServiceAccount);
-     return excludedUserEmails;
+    return excludedUserEmails;
   }
 
   @Override
