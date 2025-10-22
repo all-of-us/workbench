@@ -6,6 +6,7 @@ import jakarta.inject.Provider;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -83,7 +84,9 @@ public class RdrExportServiceImpl implements RdrExportService {
   }
 
   private List<String> excludedExportUserEmails() {
-    return workbenchConfigProvider.get().auth.serviceAccountApiUsers;
+    List<String> excludedUserEmails = new ArrayList<>(workbenchConfigProvider.get().auth.serviceAccountApiUsers);
+    excludedUserEmails.add(workbenchConfigProvider.get().vwb.exfilManagerServiceAccount);
+     return excludedUserEmails;
   }
 
   @Override
