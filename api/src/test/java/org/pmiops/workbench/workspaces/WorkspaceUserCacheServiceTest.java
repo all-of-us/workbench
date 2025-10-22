@@ -53,14 +53,14 @@ public class WorkspaceUserCacheServiceTest {
   public void testFindAllActiveWorkspacesNeedingCacheUpdate() {
     List<WorkspaceDao.WorkspaceUserCacheView> expectedWorkspaces =
         List.of(testWorkspace1, testWorkspace2);
-    when(mockWorkspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate())
+    when(mockWorkspaceDao.findAllActiveWorkspacesNeedingCacheUpdate())
         .thenReturn(expectedWorkspaces);
 
     List<WorkspaceDao.WorkspaceUserCacheView> result =
         workspaceUserCacheService.findAllActiveWorkspacesNeedingCacheUpdate();
 
     assertThat(result).containsExactlyElementsIn(expectedWorkspaces);
-    verify(mockWorkspaceDao).findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    verify(mockWorkspaceDao).findAllActiveWorkspacesNeedingCacheUpdate();
   }
 
   @Test
