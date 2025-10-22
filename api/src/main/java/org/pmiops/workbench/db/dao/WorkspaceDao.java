@@ -174,10 +174,10 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   }
 
   @Query(
-      "SELECT w.workspaceId as workspaceId, w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
+      "SELECT DISTINCT w.workspaceId as workspaceId, w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
           + "from DbWorkspace w "
           + "left join DbWorkspaceUserCache wuc on w.workspaceId = wuc.workspaceId "
           + "where w.activeStatus = 0 "
           + "and (wuc.workspaceId is null or w.lastModifiedTime > wuc.lastUpdated)")
-  List<WorkspaceUserCacheView> findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+  List<WorkspaceUserCacheView> findAllActiveWorkspacesNeedingCacheUpdate();
 }

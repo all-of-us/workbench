@@ -34,7 +34,7 @@ public class WorkspaceUserCacheServiceImpl implements WorkspaceUserCacheService 
 
   @Override
   public List<WorkspaceDao.WorkspaceUserCacheView> findAllActiveWorkspacesNeedingCacheUpdate() {
-    return workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+    return workspaceDao.findAllActiveWorkspacesNeedingCacheUpdate();
   }
 
   @Override

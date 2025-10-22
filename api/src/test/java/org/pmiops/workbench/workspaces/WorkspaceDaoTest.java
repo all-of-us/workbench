@@ -464,7 +464,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void findAllActiveWorkspaceNamespacesNeedingCacheUpdate_noCache() {
+  public void findAllActiveWorkspacesNeedingCacheUpdate_noCache() {
     workspaceDao.deleteAll();
     workspaceUserCacheDao.deleteAll();
 
@@ -480,7 +480,7 @@ public class WorkspaceDaoTest {
     activeWorkspace = workspaceDao.save(activeWorkspace);
 
     List<WorkspaceDao.WorkspaceUserCacheView> result =
-        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+        workspaceDao.findAllActiveWorkspacesNeedingCacheUpdate();
     assertThat(result.size()).isEqualTo(1);
     var resultWorkspace = result.get(0);
     assertThat(resultWorkspace.getWorkspaceId()).isEqualTo(activeWorkspace.getWorkspaceId());
@@ -490,7 +490,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void findAllActiveWorkspaceNamespacesNeedingCacheUpdate_staleCache() {
+  public void findAllActiveWorkspacesNeedingCacheUpdate_staleCache() {
     workspaceDao.deleteAll();
     workspaceUserCacheDao.deleteAll();
 
@@ -518,7 +518,7 @@ public class WorkspaceDaoTest {
     workspaceUserCacheDao.save(cacheEntry);
 
     List<WorkspaceDao.WorkspaceUserCacheView> result =
-        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+        workspaceDao.findAllActiveWorkspacesNeedingCacheUpdate();
     assertThat(result.size()).isEqualTo(1);
     var resultWorkspace = result.get(0);
     assertThat(resultWorkspace.getWorkspaceId()).isEqualTo(workspace.getWorkspaceId());
@@ -528,7 +528,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void findAllActiveWorkspaceNamespacesNeedingCacheUpdate_freshCache() {
+  public void findAllActiveWorkspacesNeedingCacheUpdate_freshCache() {
     workspaceDao.deleteAll();
     workspaceUserCacheDao.deleteAll();
 
@@ -555,7 +555,7 @@ public class WorkspaceDaoTest {
     workspaceUserCacheDao.save(cacheEntry);
 
     List<WorkspaceDao.WorkspaceUserCacheView> result =
-        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+        workspaceDao.findAllActiveWorkspacesNeedingCacheUpdate();
     assertThat(result).isEmpty();
   }
 
@@ -576,12 +576,12 @@ public class WorkspaceDaoTest {
     workspaceDao.save(inactiveWorkspace);
 
     List<WorkspaceDao.WorkspaceUserCacheView> result =
-        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+        workspaceDao.findAllActiveWorkspacesNeedingCacheUpdate();
     assertThat(result).isEmpty();
   }
 
   @Test
-  public void findAllActiveWorkspaceNamespacesNeedingCacheUpdate_mixed() {
+  public void findAllActiveWorkspacesNeedingCacheUpdate_mixed() {
     workspaceDao.deleteAll();
     workspaceUserCacheDao.deleteAll();
 
@@ -636,10 +636,53 @@ public class WorkspaceDaoTest {
             new Timestamp(baseTime + 1000))); // Newer than workspace modification
 
     List<WorkspaceDao.WorkspaceUserCacheView> result =
-        workspaceDao.findAllActiveWorkspaceNamespacesNeedingCacheUpdate();
+        workspaceDao.findAllActiveWorkspacesNeedingCacheUpdate();
     assertThat(result.size()).isEqualTo(2);
     assertThat(result.stream().map(WorkspaceDao.WorkspaceUserCacheView::getWorkspaceId).toList())
         .containsExactly(workspaceNoCache.getWorkspaceId(), workspaceStaleCache.getWorkspaceId());
+  }
+
+  @Test
+  public void findAllActiveWorkspacesNeedingCacheUpdate_noDuplicates() {
+    workspaceDao.deleteAll();
+    workspaceUserCacheDao.deleteAll();
+
+    long baseTime = System.currentTimeMillis();
+
+    // Create a workspace with stale cache
+    DbWorkspace workspace =
+        new DbWorkspace()
+            .setName("Workspace with Multiple Cache Entries")
+            .setWorkspaceNamespace("multi-cache-ws")
+            .setFirecloudName("multi-cache-ws")
+            .setCreationTime(new Timestamp(baseTime))
+            .setLastModifiedTime(new Timestamp(baseTime + 2000))
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    workspace = workspaceDao.save(workspace);
+
+    DbUser user2 = userDao.save(new DbUser());
+
+    // Create multiple stale cache entries for the same workspace (different users)
+    workspaceUserCacheDao.save(
+        new DbWorkspaceUserCache(
+            workspace.getWorkspaceId(),
+            dbUser.getUserId(),
+            "OWNER",
+            new Timestamp(baseTime + 1000)));
+
+    workspaceUserCacheDao.save(
+        new DbWorkspaceUserCache(
+            workspace.getWorkspaceId(),
+            user2.getUserId(),
+            "WRITER",
+            new Timestamp(baseTime + 1000)));
+
+    List<WorkspaceDao.WorkspaceUserCacheView> result =
+        workspaceDao.findAllActiveWorkspacesNeedingCacheUpdate();
+
+    // Should only return the workspace once, despite multiple cache entries
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0).getWorkspaceId()).isEqualTo(workspace.getWorkspaceId());
   }
 
   private DbWorkspace createWorkspace() {
