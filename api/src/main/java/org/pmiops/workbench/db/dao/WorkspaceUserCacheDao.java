@@ -6,6 +6,7 @@ import org.pmiops.workbench.db.model.DbWorkspaceUserCache;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Cache of workspace access control lists. This cache is NOT to be used for any authorization. This
@@ -25,4 +26,8 @@ public interface WorkspaceUserCacheDao
           "delete from workspace_user_cache where exists (select 1 from workspace where workspace.workspace_id = workspace_user_cache.workspace_id and workspace.active_status = 1)",
       nativeQuery = true)
   void deleteAllInactiveWorkspaces();
+
+  @Query(
+      "select u.username from DbWorkspaceUserCache wuc join DbUser u on wuc.userId = u.userId where wuc.workspaceId = :workspaceId")
+  Set<String> findAllUsersByWorkspaceId(@Param("workspaceId") Long workspaceId);
 }
