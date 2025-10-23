@@ -66,7 +66,7 @@ public class ReportingTableService {
   private static final String USER_TABLE_NAME = "user";
   private static final String WORKSPACE_FREE_TIER_USAGE_TABLE_NAME = "workspace_free_tier_usage";
   private static final String WORKSPACE_TABLE_NAME = "workspace";
-  private static final String WORKSPACE_USER_TABLE_NAME = "workspace_user";
+  private static final String WORKSPACE_USER_CACHE_TABLE_NAME = "workspace_user_cache";
 
   private final ReportingQueryService reportingQueryService;
 
@@ -221,10 +221,10 @@ public class ReportingTableService {
 
   public final ReportingTableParams<ReportingWorkspaceUser> workspaceUser() {
     return new ReportingTableParams<>(
-        WORKSPACE_USER_TABLE_NAME,
-        batchSize(WORKSPACE_USER_TABLE_NAME),
+            WORKSPACE_USER_CACHE_TABLE_NAME,
+        batchSize(WORKSPACE_USER_CACHE_TABLE_NAME),
         WorkspaceUserColumnValueExtractor::values,
         reportingQueryService::getWorkspaceUserBatch,
-        () -> reportingQueryService.getTableRowCount(WORKSPACE_USER_TABLE_NAME));
+        () -> reportingQueryService.getTableRowCount(WORKSPACE_USER_CACHE_TABLE_NAME));
   }
 }

@@ -698,7 +698,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             new ReportingWorkspaceUser()
                 .workspaceId(rs.getLong("workspace_id"))
                 .userId(rs.getLong("user_id"))
-                .role(rs.getString("access_level")));
+                .role(rs.getString("role")));
   }
 
   @Override
