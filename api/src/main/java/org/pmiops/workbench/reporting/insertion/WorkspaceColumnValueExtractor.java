@@ -92,49 +92,57 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
       "wd_access_to_care",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(wd -> wd.getAccessToCare().toString())
+              .map(WorkspaceDemographic::getAccessToCare)
+                  .map(Object::toString)
               .orElse(null)),
   WD_DISABILITY_STATUS(
       "wd_disability_status",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(wd -> wd.getDisabilityStatus().toString())
+              .map(WorkspaceDemographic::getDisabilityStatus)
+                  .map(Object::toString)
               .orElse(null)),
   WD_EDUCATION_LEVEL(
       "wd_education_level",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(wd -> wd.getEducationLevel().toString())
+              .map(WorkspaceDemographic::getEducationLevel)
+                  .map(Object::toString)
               .orElse(null)),
   WD_INCOME_LEVEL(
       "wd_income_level",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(wd -> wd.getIncomeLevel().toString())
+              .map(WorkspaceDemographic::getIncomeLevel)
+                  .map(Object::toString)
               .orElse(null)),
   WD_GEOGRAPHY(
       "wd_geography",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(wd -> wd.getGeography().toString())
+              .map(WorkspaceDemographic::getGeography)
+                  .map(Object::toString)
               .orElse(null)),
   WD_SEXUAL_ORIENTATION(
       "wd_sexual_orientation",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(wd -> wd.getSexualOrientation().toString())
+              .map(WorkspaceDemographic::getSexualOrientation)
+                  .map(Object::toString)
               .orElse(null)),
   WD_GENDER_IDENTITY(
       "wd_gender_identity",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(wd -> wd.getGenderIdentity().toString())
+              .map(WorkspaceDemographic::getGenderIdentity)
+                  .map(Object::toString)
               .orElse(null)),
   WD_SEX_AT_BIRTH(
       "wd_sex_at_birth",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(wd -> wd.getSexAtBirth().toString())
+              .map(WorkspaceDemographic::getSexAtBirth)
+                  .map(Object::toString)
               .orElse(null));
 
   private final String parameterName;
