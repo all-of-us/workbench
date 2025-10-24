@@ -26,4 +26,8 @@ public interface ReportingUploadVerificationDao
       "INSERT INTO DbReportingUploadVerification (tableName, snapshotTimestamp) VALUES (:tableName, :snapshotTimestamp)")
   int createVerificationEntry(
       @Param("tableName") String tableName, @Param("snapshotTimestamp") Long snapshotTimestamp);
+
+  @Query(
+      "SELECT COUNT(u) = 0 FROM DbReportingUploadVerification u WHERE u.snapshotTimestamp = (SELECT MAX(u2.snapshotTimestamp) FROM DbReportingUploadVerification u2) AND u.uploaded = false")
+  boolean hasLatestSnapshotUploaded();
 }

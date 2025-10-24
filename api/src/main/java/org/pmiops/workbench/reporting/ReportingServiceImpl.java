@@ -84,6 +84,11 @@ public class ReportingServiceImpl implements ReportingService {
   public void splitUploadIntoTasksAndQueue() {
     final long captureTimestamp = clock.millis();
 
+    boolean hasLatestSnapshotUploaded = reportingUploadVerificationDao.hasLatestSnapshotUploaded();
+    if (!hasLatestSnapshotUploaded) {
+      logger.severe("Previous snapshot upload did not complete successfully.");
+    }
+
     reportingTableService
         .getAll()
         .forEach(
