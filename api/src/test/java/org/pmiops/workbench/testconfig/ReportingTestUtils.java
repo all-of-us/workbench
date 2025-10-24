@@ -4,10 +4,9 @@ import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
-
-import com.google.common.collect.ImmutableSet;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -189,10 +188,15 @@ public class ReportingTestUtils {
     return workspace;
   }
 
-  public static DbWorkspace createDbWorkspaceWithDemographicData(DbUser creator, DbCdrVersion cdrVersion) {
+  public static DbWorkspace createDbWorkspaceWithDemographicData(
+      DbUser creator, DbCdrVersion cdrVersion) {
     DbWorkspace workspace = createDbWorkspace(creator, cdrVersion);
-    workspace = workspace.setSpecificPopulationsEnum(ImmutableSet.of(
-            SpecificPopulationEnum.RACE_ASIAN, SpecificPopulationEnum.AGE_OLDER, SpecificPopulationEnum.GEOGRAPHY));
+    workspace =
+        workspace.setSpecificPopulationsEnum(
+            ImmutableSet.of(
+                SpecificPopulationEnum.RACE_ASIAN,
+                SpecificPopulationEnum.AGE_OLDER,
+                SpecificPopulationEnum.GEOGRAPHY));
     return workspace;
   }
 

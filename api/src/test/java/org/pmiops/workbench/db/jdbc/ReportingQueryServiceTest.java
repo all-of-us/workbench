@@ -198,11 +198,11 @@ public class ReportingQueryServiceTest {
   }
 
   @Transactional
-  public DbWorkspace createDbWorkspaceWithDemographicData(
-      DbUser user1, DbCdrVersion cdrVersion1) {
+  public DbWorkspace createDbWorkspaceWithDemographicData(DbUser user1, DbCdrVersion cdrVersion1) {
     final long initialWorkspaceCount = workspaceDao.count();
     DbWorkspace workspace1 =
-        workspaceDao.save(ReportingTestUtils.createDbWorkspaceWithDemographicData(user1, cdrVersion1));
+        workspaceDao.save(
+            ReportingTestUtils.createDbWorkspaceWithDemographicData(user1, cdrVersion1));
     assertThat(workspaceDao.count()).isEqualTo(initialWorkspaceCount + 1);
     return workspace1;
   }
@@ -287,14 +287,20 @@ public class ReportingQueryServiceTest {
     assertThat(demographic.getAge().size()).isEqualTo(1);
     assertThat(demographic.getAge().get(0)).isEqualTo(WorkspaceDemographic.AgeEnum.AGE_65_74);
     assertThat(demographic.getRaceEthnicity().size()).isEqualTo(1);
-    assertThat(demographic.getRaceEthnicity().get(0)).isEqualTo(WorkspaceDemographic.RaceEthnicityEnum.ASIAN);
+    assertThat(demographic.getRaceEthnicity().get(0))
+        .isEqualTo(WorkspaceDemographic.RaceEthnicityEnum.ASIAN);
     assertThat(demographic.getSexAtBirth()).isEqualTo(WorkspaceDemographic.SexAtBirthEnum.UNSET);
-    assertThat(demographic.getGenderIdentity()).isEqualTo(WorkspaceDemographic.GenderIdentityEnum.UNSET);
-    assertThat(demographic.getSexualOrientation()).isEqualTo(WorkspaceDemographic.SexualOrientationEnum.UNSET);
+    assertThat(demographic.getGenderIdentity())
+        .isEqualTo(WorkspaceDemographic.GenderIdentityEnum.UNSET);
+    assertThat(demographic.getSexualOrientation())
+        .isEqualTo(WorkspaceDemographic.SexualOrientationEnum.UNSET);
     assertThat(demographic.getGeography()).isEqualTo(WorkspaceDemographic.GeographyEnum.RURAL);
-    assertThat(demographic.getDisabilityStatus()).isEqualTo(WorkspaceDemographic.DisabilityStatusEnum.UNSET);
-    assertThat(demographic.getAccessToCare()).isEqualTo(WorkspaceDemographic.AccessToCareEnum.UNSET);
-    assertThat(demographic.getEducationLevel()).isEqualTo(WorkspaceDemographic.EducationLevelEnum.UNSET);
+    assertThat(demographic.getDisabilityStatus())
+        .isEqualTo(WorkspaceDemographic.DisabilityStatusEnum.UNSET);
+    assertThat(demographic.getAccessToCare())
+        .isEqualTo(WorkspaceDemographic.AccessToCareEnum.UNSET);
+    assertThat(demographic.getEducationLevel())
+        .isEqualTo(WorkspaceDemographic.EducationLevelEnum.UNSET);
     assertThat(demographic.getIncomeLevel()).isEqualTo(WorkspaceDemographic.IncomeLevelEnum.UNSET);
   }
 
