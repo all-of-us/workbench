@@ -1,10 +1,14 @@
 openapi: 3.0.3
 info:
-  title: Verily Workbench Exfil Manager
+  title: Terra Exfil Manager
   description: |
     Terra Exfil Manager
 
   version: 0.0.1
+
+security:
+  - authorization: [ openid, email, profile ]
+  - bearerAuth: [ ]
 
 paths:
   # Unauthenticated Paths
@@ -22,6 +26,21 @@ paths:
             Service cannot process requests. That might be because dependent services are
             unavailable, or because there is a problem with the service itself.
 
+  /version:
+    get:
+      security: [ ]
+      summary: Returns the deployed version of the service
+      operationId: serviceVersion
+      tags: [ Public ]
+      responses:
+        '200':
+          description: Version properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionProperties'
+
+  # Authenticated Paths
   /api/egress-events/v1/{egressEventId}/status:
     patch:
       summary: Update an egress event status. Currently, only status (REMEDIATED or VERIFIED_FALSE_POSITIVE) is allow, other status will be rejected
@@ -49,6 +68,61 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /api/egress-threshold-overrides/v1:
+    post:
+      summary: Create an egress threshold override for a user and workspace
+      operationId: createEgressThresholdOverride
+      tags: [EgressThresholdOverride]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEgressThresholdOverrideBody'
+      responses:
+        '201':
+          description: Egress threshold override created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EgressThresholdOverride'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/egress-threshold-overrides/v1/user/{username}/workspace/{workspaceUserFacingId}:
+    get:
+      summary: Get all egress threshold overrides for a user and workspace
+      operationId: getEgressThresholdOverridesByUserAndWorkspace
+      tags: [EgressThresholdOverride]
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: workspaceUserFacingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of egress threshold overrides
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EgressThresholdOverride'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
 components:
   schemas:
     UpdateEgressEventStatusBody:
@@ -60,6 +134,60 @@ components:
           enum:
             - REMEDIATED
             - VERIFIED_FALSE_POSITIVE
+            - CONFIRMED_VIOLATION
+
+    CreateEgressThresholdOverrideBody:
+      type: object
+      required: [ username, workspaceUserFacingId ]
+      properties:
+        username:
+          type: string
+          description: The username for the override
+        workspaceUserFacingId:
+          type: string
+          description: The workspace user-facing ID
+        endTime:
+          type: string
+          format: date-time
+          description: Optional end time for the override. If not provided, defaults to 48 hours from creation. Cannot be more than 48 hours in the future.
+        description:
+          type: string
+          description: Optional description of why the override was created
+
+    EgressThresholdOverride:
+      type: object
+      required: [ egressThresholdOverrideId, username, workspaceUserFacingId, creationTime, endTime ]
+      properties:
+        egressThresholdOverrideId:
+          type: string
+          format: uuid
+          description: The unique identifier for the override
+        username:
+          type: string
+          description: The username for the override
+        workspaceUserFacingId:
+          type: string
+          description: The workspace user-facing ID
+        creationTime:
+          type: string
+          format: date-time
+          description: When the override was created
+        endTime:
+          type: string
+          format: date-time
+          description: When the override expires
+        description:
+          type: string
+          description: Description of why the override was created
+
+    VersionProperties:
+      type: object
+      properties:
+        version:
+          type: string
+        gitHash:
+          type: string
+
     ErrorReport:
       type: object
       required: [ message, statusCode, causes ]
@@ -119,8 +247,6 @@ components:
             openid: open id authorization
             email: email authorization
             profile: profile authorization
-security:
-  - authorization:
-      - openid
-      - email
-      - profile
+    bearerAuth:
+      type: http
+      scheme: bearer

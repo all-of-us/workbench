@@ -8,11 +8,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDisabledEventDao;
 import org.pmiops.workbench.db.dao.UserEgressBypassWindowDao;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
 import org.pmiops.workbench.model.EgressBypassWindow;
+import org.pmiops.workbench.model.EgressVwbBypassWindow;
 import org.pmiops.workbench.model.UserDisabledEvent;
 import org.pmiops.workbench.utils.mappers.EgressBypassWindowMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
+import org.pmiops.workbench.vwb.exfil.ExfilManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +27,8 @@ public class UserAdminService {
   private final EgressBypassWindowMapper egressBypassWindowMapper;
   private final UserDisabledEventDao userDisabledEventDao;
   private final UserMapper userMapper;
+  private final UserService userService;
+  private final ExfilManagerClient exfilManagerClient;
   private final Clock clock;
 
   @Autowired
@@ -31,11 +37,15 @@ public class UserAdminService {
       EgressBypassWindowMapper egressBypassWindowMapper,
       UserDisabledEventDao userDisabledEventDao,
       UserMapper userMapper,
+      UserService userService,
+      ExfilManagerClient exfilManagerClient,
       Clock clock) {
     this.userEgressBypassWindowDao = userEgressBypassWindowDao;
     this.egressBypassWindowMapper = egressBypassWindowMapper;
     this.userDisabledEventDao = userDisabledEventDao;
     this.userMapper = userMapper;
+    this.userService = userService;
+    this.exfilManagerClient = exfilManagerClient;
     this.clock = clock;
   }
 
@@ -68,5 +78,31 @@ public class UserAdminService {
     return userDisabledEventDao.getByUserIdOrderByUpdateTimeDesc(userId).stream()
         .map(userMapper::toApiUserDisabledEvent)
         .toList();
+  }
+
+  public void createVwbEgressBypassWindow(
+      Long userId, Instant startTime, String description, String vwbWorkspaceUfid) {
+    Instant endTime = startTime.plus(BYPASS_PERIOD_IN_DAY, ChronoUnit.DAYS);
+
+    // Save to database
+    userEgressBypassWindowDao.save(
+        new DbUserEgressBypassWindow()
+            .setUserId(userId)
+            .setStartTime(Timestamp.from(startTime))
+            .setEndTime(Timestamp.from(endTime))
+            .setDescription(description)
+            .setVwbWorkspaceUfid(vwbWorkspaceUfid));
+
+    // Call exfil manager to create egress threshold override
+    DbUser user = userService.getByDatabaseId(userId).orElseThrow();
+    exfilManagerClient.createEgressThresholdOverride(
+        user.getUsername(), vwbWorkspaceUfid, endTime, description);
+  }
+
+  public List<EgressVwbBypassWindow> listAllVwbEgressBypassWindows(Long userId) {
+    return userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(userId).stream()
+        .filter(window -> window.getVwbWorkspaceUfid() != null)
+        .map(egressBypassWindowMapper::toApiEgressVwbBypassWindow)
+        .collect(Collectors.toList());
   }
 }

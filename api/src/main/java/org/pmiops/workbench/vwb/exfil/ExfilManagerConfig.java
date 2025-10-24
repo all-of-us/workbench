@@ -6,6 +6,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.vwb.common.VwbApiClientUtils;
 import org.pmiops.workbench.vwb.exfil.api.EgressEventApi;
+import org.pmiops.workbench.vwb.exfil.api.EgressThresholdOverrideApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,5 +36,12 @@ public class ExfilManagerConfig {
   public EgressEventApi egressEventApi(
       @Qualifier(EXFIL_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     return new EgressEventApi(apiClient);
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public EgressThresholdOverrideApi egressThresholdOverrideApi(
+      @Qualifier(EXFIL_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+    return new EgressThresholdOverrideApi(apiClient);
   }
 }
