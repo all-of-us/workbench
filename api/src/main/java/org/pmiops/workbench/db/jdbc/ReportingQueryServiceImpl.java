@@ -10,15 +10,15 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.base.Strings;
 import jakarta.inject.Provider;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
@@ -608,11 +608,19 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  rp_time_requested,\n"
             + "  w.workspace_id,\n"
             + "  workspace_namespace,\n"
-            + "  w.active_status\n"
+            + "  w.active_status,\n"
+            + "  sp.specific_populations\n"
             + "FROM workspace w\n"
             // some Tanagra workspaces don't have CDR version IDs
             + "  LEFT JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
             + "  LEFT JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+            // retrieve specific populations data
+            + "  LEFT JOIN (\n"
+            + "    SELECT workspace_id,\n"
+            + "    GROUP_CONCAT(specific_population ORDER BY specific_population SEPARATOR ',') AS specific_populations\n"
+            + "    FROM specific_populations\n"
+            + "    GROUP BY workspace_id\n"
+            + ") sp ON w.workspace_id = sp.workspace_id\n"
             // most workspaces are not Featured
             + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
             + "ORDER BY w.workspace_id\n"
@@ -620,47 +628,55 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "OFFSET ?";
     return jdbcTemplate.query(
         sql,
-        (rs, unused) ->
-            new ReportingWorkspace()
-                .accessTierShortName(rs.getString("access_tier_short_name"))
-                .billingAccountType(
-                    getBillingAccountType(
-                        rs.getString("billing_account_name"), workbenchConfigProvider.get()))
-                .cdrVersionId(rs.getLong("cdr_version_id"))
-                .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
-                .creatorId(rs.getLong("creator_id"))
-                .disseminateResearchOther(rs.getString("disseminate_research_other"))
-                .featuredWorkspaceCategory(rs.getString("featured_workspace_category"))
-                .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
-                .name(rs.getString("name"))
-                .rpAdditionalNotes(rs.getString("rp_additional_notes"))
-                .rpAianResearchType(rs.getString("rp_aian_research_type"))
-                .rpAianResearchDetails(rs.getString("rp_aian_research_details"))
-                .rpAncestry(rs.getBoolean("rp_ancestry"))
-                .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))
-                .rpApproved(rs.getBoolean("rp_approved"))
-                .rpCommercialPurpose(rs.getBoolean("rp_commercial_purpose"))
-                .rpControlSet(rs.getBoolean("rp_control_set"))
-                .rpDiseaseFocusedResearch(rs.getBoolean("rp_disease_focused_research"))
-                .rpDiseaseOfFocus(rs.getString("rp_disease_of_focus"))
-                .rpDrugDevelopment(rs.getBoolean("rp_drug_development"))
-                .rpEducational(rs.getBoolean("rp_educational"))
-                .rpEthics(rs.getBoolean("rp_ethics"))
-                .rpIntendedStudy(rs.getString("rp_intended_study"))
-                .rpMethodsDevelopment(rs.getBoolean("rp_methods_development"))
-                .rpOtherPopulationDetails(rs.getString("rp_other_population_details"))
-                .rpOtherPurpose(rs.getBoolean("rp_other_purpose"))
-                .rpOtherPurposeDetails(rs.getString("rp_other_purpose_details"))
-                .rpPopulationHealth(rs.getBoolean("rp_population_health"))
-                .rpReasonForAllOfUs(rs.getString("rp_reason_for_all_of_us"))
-                .rpReviewRequested(rs.getBoolean("rp_review_requested"))
-                .rpScientificApproach(rs.getString("rp_scientific_approach"))
-                .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
-                .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
-                .workspaceId(rs.getLong("workspace_id"))
-                .workspaceNamespace(rs.getString("workspace_namespace"))
-                .activeStatus(
-                    workspaceActiveStatusFromStorage(rs.getShort("active_status")).toString()),
+        (rs, unused) -> {
+          String specificPopulationsStr = rs.getString("specific_populations");
+          boolean focusOnUnderrepresentedPopulations =
+              specificPopulationsStr != null && !specificPopulationsStr.isEmpty();
+
+          return new ReportingWorkspace()
+              .accessTierShortName(rs.getString("access_tier_short_name"))
+              .billingAccountType(
+                  getBillingAccountType(
+                      rs.getString("billing_account_name"), workbenchConfigProvider.get()))
+              .cdrVersionId(rs.getLong("cdr_version_id"))
+              .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
+              .creatorId(rs.getLong("creator_id"))
+              .disseminateResearchOther(rs.getString("disseminate_research_other"))
+              .featuredWorkspaceCategory(rs.getString("featured_workspace_category"))
+              .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
+              .name(rs.getString("name"))
+              .rpAdditionalNotes(rs.getString("rp_additional_notes"))
+              .rpAianResearchType(rs.getString("rp_aian_research_type"))
+              .rpAianResearchDetails(rs.getString("rp_aian_research_details"))
+              .rpAncestry(rs.getBoolean("rp_ancestry"))
+              .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))
+              .rpApproved(rs.getBoolean("rp_approved"))
+              .rpCommercialPurpose(rs.getBoolean("rp_commercial_purpose"))
+              .rpControlSet(rs.getBoolean("rp_control_set"))
+              .rpDiseaseFocusedResearch(rs.getBoolean("rp_disease_focused_research"))
+              .rpDiseaseOfFocus(rs.getString("rp_disease_of_focus"))
+              .rpDrugDevelopment(rs.getBoolean("rp_drug_development"))
+              .rpEducational(rs.getBoolean("rp_educational"))
+              .rpEthics(rs.getBoolean("rp_ethics"))
+              .rpIntendedStudy(rs.getString("rp_intended_study"))
+              .rpMethodsDevelopment(rs.getBoolean("rp_methods_development"))
+              .rpOtherPopulationDetails(rs.getString("rp_other_population_details"))
+              .rpOtherPurpose(rs.getBoolean("rp_other_purpose"))
+              .rpOtherPurposeDetails(rs.getString("rp_other_purpose_details"))
+              .rpPopulationHealth(rs.getBoolean("rp_population_health"))
+              .rpReasonForAllOfUs(rs.getString("rp_reason_for_all_of_us"))
+              .rpReviewRequested(rs.getBoolean("rp_review_requested"))
+              .rpScientificApproach(rs.getString("rp_scientific_approach"))
+              .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
+              .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
+              .workspaceId(rs.getLong("workspace_id"))
+              .workspaceNamespace(rs.getString("workspace_namespace"))
+              .activeStatus(
+                  workspaceActiveStatusFromStorage(rs.getShort("active_status")).toString())
+              .focusOnUnderrepresentedPopulations(focusOnUnderrepresentedPopulations)
+              .workspaceDemographic(
+                  toModelWorkspaceDemographic(getSpecificPopulationsSet(specificPopulationsStr)));
+        },
         limit,
         offset);
   }
@@ -753,5 +769,128 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return Arrays.stream(stringEnums.split(","))
         .map(e -> convertDbEnum.apply(Short.parseShort(e)))
         .collect(Collectors.joining(","));
+  }
+
+  private Set<Short> getSpecificPopulationsSet(String specificPopulationsStr) {
+    Set<Short> specificPopulationsSet = new HashSet<>();
+
+    if (specificPopulationsStr != null && !specificPopulationsStr.isEmpty()) {
+      Arrays.stream(specificPopulationsStr.split(","))
+          .map(String::trim)
+          .map(Short::parseShort)
+          .forEach(specificPopulationsSet::add);
+    } else {
+      specificPopulationsSet = null;
+    }
+
+    return specificPopulationsSet;
+  }
+
+  private WorkspaceDemographic.RaceEthnicityEnum toRaceEthnicity(
+      SpecificPopulationEnum specificPopulationEnum) {
+    if (specificPopulationEnum == null) {
+      return null;
+    }
+
+    return switch (specificPopulationEnum) {
+      case RACE_MORE_THAN_ONE -> WorkspaceDemographic.RaceEthnicityEnum.MULTI;
+      case RACE_ASIAN -> WorkspaceDemographic.RaceEthnicityEnum.ASIAN;
+      case RACE_AA -> WorkspaceDemographic.RaceEthnicityEnum.AA;
+      case RACE_HISPANIC -> WorkspaceDemographic.RaceEthnicityEnum.HISPANIC;
+      case RACE_AIAN -> WorkspaceDemographic.RaceEthnicityEnum.AIAN;
+      case RACE_MENA -> WorkspaceDemographic.RaceEthnicityEnum.MENA;
+      case RACE_NHPI -> WorkspaceDemographic.RaceEthnicityEnum.NHPI;
+      default -> null;
+    };
+  }
+
+  private WorkspaceDemographic.AgeEnum toAge(SpecificPopulationEnum specificPopulationEnum) {
+    if (specificPopulationEnum == null) {
+      return null;
+    }
+
+    return switch (specificPopulationEnum) {
+      case AGE_CHILDREN -> WorkspaceDemographic.AgeEnum.AGE_0_11;
+      case AGE_ADOLESCENTS -> WorkspaceDemographic.AgeEnum.AGE_12_17;
+      case AGE_OLDER -> WorkspaceDemographic.AgeEnum.AGE_65_74;
+      case AGE_OLDER_MORE_THAN_75 -> WorkspaceDemographic.AgeEnum.AGE_75_AND_MORE;
+      default -> null;
+    };
+  }
+
+  private WorkspaceDemographic toModelWorkspaceDemographic(Set<Short> specificPopulationSet) {
+    if (specificPopulationSet == null) {
+      return null;
+    }
+
+    Set<SpecificPopulationEnum> specificPopulationEnum =
+        specificPopulationSet.stream()
+            .map(DbStorageEnums::specificPopulationFromStorage)
+            .collect(Collectors.toSet());
+
+    WorkspaceDemographic workspaceDemographic = new WorkspaceDemographic();
+
+    workspaceDemographic.setAccessToCare(
+        specificPopulationEnum.contains(SpecificPopulationEnum.ACCESS_TO_CARE)
+            ? WorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
+            : WorkspaceDemographic.AccessToCareEnum.UNSET);
+
+    workspaceDemographic.setDisabilityStatus(
+        specificPopulationEnum.contains(SpecificPopulationEnum.DISABILITY_STATUS)
+            ? WorkspaceDemographic.DisabilityStatusEnum.DISABILITY
+            : WorkspaceDemographic.DisabilityStatusEnum.UNSET);
+
+    workspaceDemographic.setEducationLevel(
+        specificPopulationEnum.contains(SpecificPopulationEnum.EDUCATION_LEVEL)
+            ? WorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
+            : WorkspaceDemographic.EducationLevelEnum.UNSET);
+
+    workspaceDemographic.setIncomeLevel(
+        specificPopulationEnum.contains(SpecificPopulationEnum.INCOME_LEVEL)
+            ? WorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
+            : WorkspaceDemographic.IncomeLevelEnum.UNSET);
+
+    workspaceDemographic.setGeography(
+        specificPopulationEnum.contains(SpecificPopulationEnum.GEOGRAPHY)
+            ? WorkspaceDemographic.GeographyEnum.RURAL
+            : WorkspaceDemographic.GeographyEnum.UNSET);
+
+    workspaceDemographic.setSexualOrientation(
+        specificPopulationEnum.contains(SpecificPopulationEnum.SEXUAL_ORIENTATION)
+            ? WorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
+            : WorkspaceDemographic.SexualOrientationEnum.UNSET);
+
+    workspaceDemographic.setGenderIdentity(
+        specificPopulationEnum.contains(SpecificPopulationEnum.GENDER_IDENTITY)
+            ? WorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
+            : WorkspaceDemographic.GenderIdentityEnum.UNSET);
+
+    workspaceDemographic.setSexAtBirth(
+        specificPopulationEnum.contains(SpecificPopulationEnum.SEX)
+            ? WorkspaceDemographic.SexAtBirthEnum.INTERSEX
+            : WorkspaceDemographic.SexAtBirthEnum.UNSET);
+
+    workspaceDemographic.setRaceEthnicity(
+        specificPopulationEnum.stream()
+            .map(this::toRaceEthnicity)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()));
+
+    if (workspaceDemographic.getRaceEthnicity().isEmpty()) {
+      workspaceDemographic.setRaceEthnicity(
+          Collections.singletonList(WorkspaceDemographic.RaceEthnicityEnum.UNSET));
+    }
+
+    workspaceDemographic.setAge(
+        specificPopulationEnum.stream()
+            .map(this::toAge)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()));
+
+    if (workspaceDemographic.getAge().isEmpty()) {
+      workspaceDemographic.setAge(Collections.singletonList(WorkspaceDemographic.AgeEnum.UNSET));
+    }
+
+    return workspaceDemographic;
   }
 }

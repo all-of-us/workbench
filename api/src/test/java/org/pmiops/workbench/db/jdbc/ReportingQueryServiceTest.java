@@ -83,19 +83,7 @@ import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.InstitutionMembershipRequirement;
-import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
-import org.pmiops.workbench.model.PartnerDiscoverySource;
-import org.pmiops.workbench.model.ReportingCohort;
-import org.pmiops.workbench.model.ReportingInstitution;
-import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
-import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingUser;
-import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
-import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
-import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.model.TierAccessStatus;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
@@ -210,6 +198,16 @@ public class ReportingQueryServiceTest {
   }
 
   @Transactional
+  public DbWorkspace createDbWorkspaceWithDemographicData(DbUser user1, DbCdrVersion cdrVersion1) {
+    final long initialWorkspaceCount = workspaceDao.count();
+    DbWorkspace workspace1 =
+        workspaceDao.save(
+            ReportingTestUtils.createDbWorkspaceWithDemographicData(user1, cdrVersion1));
+    assertThat(workspaceDao.count()).isEqualTo(initialWorkspaceCount + 1);
+    return workspace1;
+  }
+
+  @Transactional
   public DbCdrVersion createCdrVersion(DbAccessTier accessTier) {
     DbCdrVersion cdrVersion1 = new DbCdrVersion();
     cdrVersion1.setName("foo");
@@ -265,6 +263,64 @@ public class ReportingQueryServiceTest {
     assertThat(firstBatch).hasSize(1);
     assertThat(firstBatch.get(0).getName()).isEqualTo(workspace.getName());
     assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void testWorkspace_withDemographicData() {
+    final DbUser user = createDbUserWithInstitute();
+    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
+    DbWorkspace workspace = createDbWorkspaceWithDemographicData(user, cdrVersion);
+
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    List<ReportingWorkspace> firstBatch = iterator.next();
+    assertThat(firstBatch).hasSize(1);
+    assertThat(firstBatch.get(0).getName()).isEqualTo(workspace.getName());
+    assertThat(iterator.hasNext()).isFalse();
+
+    // verify demographic data fields
+    assertThat(firstBatch.get(0).isFocusOnUnderrepresentedPopulations()).isTrue();
+    assertThat(firstBatch.get(0).getWorkspaceDemographic()).isNotNull();
+
+    WorkspaceDemographic demographic = firstBatch.get(0).getWorkspaceDemographic();
+    assertThat(demographic.getAge().size()).isEqualTo(1);
+    assertThat(demographic.getAge().get(0)).isEqualTo(WorkspaceDemographic.AgeEnum.AGE_65_74);
+    assertThat(demographic.getRaceEthnicity().size()).isEqualTo(1);
+    assertThat(demographic.getRaceEthnicity().get(0))
+        .isEqualTo(WorkspaceDemographic.RaceEthnicityEnum.ASIAN);
+    assertThat(demographic.getSexAtBirth()).isEqualTo(WorkspaceDemographic.SexAtBirthEnum.UNSET);
+    assertThat(demographic.getGenderIdentity())
+        .isEqualTo(WorkspaceDemographic.GenderIdentityEnum.UNSET);
+    assertThat(demographic.getSexualOrientation())
+        .isEqualTo(WorkspaceDemographic.SexualOrientationEnum.UNSET);
+    assertThat(demographic.getGeography()).isEqualTo(WorkspaceDemographic.GeographyEnum.RURAL);
+    assertThat(demographic.getDisabilityStatus())
+        .isEqualTo(WorkspaceDemographic.DisabilityStatusEnum.UNSET);
+    assertThat(demographic.getAccessToCare())
+        .isEqualTo(WorkspaceDemographic.AccessToCareEnum.UNSET);
+    assertThat(demographic.getEducationLevel())
+        .isEqualTo(WorkspaceDemographic.EducationLevelEnum.UNSET);
+    assertThat(demographic.getIncomeLevel()).isEqualTo(WorkspaceDemographic.IncomeLevelEnum.UNSET);
+  }
+
+  @Test
+  public void testWorkspace_withoutDemographicData() {
+    final DbUser user = createDbUserWithInstitute();
+    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
+    DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
+
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    List<ReportingWorkspace> firstBatch = iterator.next();
+    assertThat(firstBatch).hasSize(1);
+    assertThat(firstBatch.get(0).getName()).isEqualTo(workspace.getName());
+    assertThat(iterator.hasNext()).isFalse();
+
+    // verify demographic data is not set
+    assertThat(firstBatch.get(0).isFocusOnUnderrepresentedPopulations()).isFalse();
+    assertThat(firstBatch.get(0).getWorkspaceDemographic()).isNull();
   }
 
   @Transactional
