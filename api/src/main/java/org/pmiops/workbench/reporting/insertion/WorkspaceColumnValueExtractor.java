@@ -57,11 +57,84 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   FOCUS_ON_UNDER_REPRESENTED_POPULATIONS(
       "focus_on_under_represented_populations",
       ReportingWorkspace::isFocusOnUnderrepresentedPopulations),
-  WORKSPACE_DEMOGRAPHIC(
-      "workspace_demographic",
+
+  WD_RACE_ETHNICITY(
+      "wd_race_ethnicity",
       w ->
           Optional.ofNullable(w.getWorkspaceDemographic())
-              .map(WorkspaceDemographic::toString)
+              .map(
+                  wd -> {
+                    if (wd.getRaceEthnicity() == null) {
+                      return null;
+                    }
+                    return String.join(
+                        ",",
+                        wd.getRaceEthnicity().stream()
+                            .map(WorkspaceDemographic.RaceEthnicityEnum::toString)
+                            .toList());
+                  })
+              .orElse(null)),
+  WD_AGE(
+      "wd_age",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(
+                  wd -> {
+                    if (wd.getAge() == null) {
+                      return null;
+                    }
+                    return String.join(
+                        ",",
+                        wd.getAge().stream().map(WorkspaceDemographic.AgeEnum::toString).toList());
+                  })
+              .orElse(null)),
+  WD_ACCESS_TO_CARE(
+      "wd_access_to_care",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(wd -> wd.getAccessToCare().toString())
+              .orElse(null)),
+  WD_DISABILITY_STATUS(
+      "wd_disability_status",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(wd -> wd.getDisabilityStatus().toString())
+              .orElse(null)),
+  WD_EDUCATION_LEVEL(
+      "wd_education_level",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(wd -> wd.getEducationLevel().toString())
+              .orElse(null)),
+  WD_INCOME_LEVEL(
+      "wd_income_level",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(wd -> wd.getIncomeLevel().toString())
+              .orElse(null)),
+  WD_GEOGRAPHY(
+      "wd_geography",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(wd -> wd.getGeography().toString())
+              .orElse(null)),
+  WD_SEXUAL_ORIENTATION(
+      "wd_sexual_orientation",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(wd -> wd.getSexualOrientation().toString())
+              .orElse(null)),
+  WD_GENDER_IDENTITY(
+      "wd_gender_identity",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(wd -> wd.getGenderIdentity().toString())
+              .orElse(null)),
+  WD_SEX_AT_BIRTH(
+      "wd_sex_at_birth",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(wd -> wd.getSexAtBirth().toString())
               .orElse(null));
 
   private final String parameterName;
