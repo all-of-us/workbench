@@ -151,7 +151,10 @@ public class UserAdminController implements UserAdminApiDelegate {
   public ResponseEntity<Void> createVwbEgressBypassWindow(
       Long userId, CreateVwbEgressBypassWindowRequest request) {
     userAdminService.createVwbEgressBypassWindow(
-        userId, Instant.ofEpochMilli(request.getStartTime()), request.getByPassDescription(), request.getVwbWorkspaceUfid());
+        userId,
+        Instant.ofEpochMilli(request.getStartTime()),
+        request.getByPassDescription(),
+        request.getVwbWorkspaceUfid());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
