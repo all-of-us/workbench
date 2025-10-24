@@ -147,6 +147,24 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.SECURITY_ADMIN})
+  public ResponseEntity<Void> createVwbEgressBypassWindow(
+      Long userId, CreateVwbEgressBypassWindowRequest request) {
+    userAdminService.createVwbEgressBypassWindow(
+        userId, Instant.ofEpochMilli(request.getStartTime()), request.getByPassDescription(), request.getVwbWorkspaceUfid());
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.SECURITY_ADMIN})
+  public ResponseEntity<ListVwbEgressBypassWindowResponse> listVwbEgressBypassWindows(Long userId) {
+    return ResponseEntity.ok(
+        new ListVwbEgressBypassWindowResponse()
+            .bypassWindows(userAdminService.listAllVwbEgressBypassWindows(userId)));
+  }
+
+  @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<ListUserDisabledEventsResponse> listUserDisabledEvents(Long userId) {
     return ResponseEntity.ok(
