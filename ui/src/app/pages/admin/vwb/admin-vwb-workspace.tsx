@@ -12,6 +12,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import { Button } from 'app/components/buttons';
 import { Error as ErrorDiv } from 'app/components/inputs';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -74,6 +75,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [researchPurpose, setResearchPurpose] = useState<ResearchPurposeItem>();
+  const [requestingAod, setRequestingAod] = useState<boolean>(false);
 
   const handleDataLoadError = async (error) => {
     if (error instanceof Response) {
@@ -167,6 +169,28 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Description'>
               {workspace.description}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Access On Demand'>
+              <Button
+                type='primary'
+                onClick={() => {
+                  setRequestingAod(true);
+                  vwbWorkspaceAdminApi()
+                    .enableAccessOnDemandByUserFacingId(
+                      workspace.userFacingId,
+                      {
+                        reason: 'test',
+                      }
+                    )
+                    .catch((err) => console.error(err))
+                    .finally(() => setRequestingAod(false));
+                }}
+              >
+                Request AoD
+                {requestingAod && (
+                  <Spinner size={18} style={{ marginLeft: '0.75rem' }} />
+                )}
+              </Button>
             </WorkspaceInfoField>
             <Accordion>
               <AccordionTab header='Research Purpose'>

@@ -14,6 +14,7 @@ import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
 import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
 import org.pmiops.workbench.vwb.user.api.WorkbenchGroupApi;
+import org.pmiops.workbench.vwb.user.api.WorkspaceApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,8 @@ public class VwbUserManagerConfig {
   public static final String VWB_SERVICE_ACCOUNT_GROUP_API = "VWB_SERVICE_ACCOUNT_GROUP_API";
   public static final String VWB_SERVICE_ACCOUNT_ORGANIZATION_API =
       "VWB_SERVICE_ACCOUNT_ORGANIZATION_API";
+  public static final String VWB_SERVICE_ACCOUNT_WORKSPACE_API =
+      "VWB_SERVICE_ACCOUNT_WORKSPACE_API";
 
   public static final List<String> SCOPES =
       ImmutableList.<String>builder().addAll(RawlsApiClientFactory.SCOPES).build();
@@ -99,5 +102,12 @@ public class VwbUserManagerConfig {
   public PodApi podApi(
       @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT_BILLING) ApiClient apiClient) {
     return new PodApi(apiClient);
+  }
+
+  @Bean(name = VWB_SERVICE_ACCOUNT_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspaceApi workspaceApi(
+      @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT) ApiClient apiClient) {
+    return new WorkspaceApi(apiClient);
   }
 }
