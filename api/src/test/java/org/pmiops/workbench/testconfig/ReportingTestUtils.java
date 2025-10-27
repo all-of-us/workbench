@@ -70,15 +70,15 @@ public class ReportingTestUtils {
   public static final WorkspaceDemographic WORKSPACE__WORKSPACE_DEMOGRAPHIC =
       new WorkspaceDemographic()
           .raceEthnicity(ImmutableList.of(WorkspaceDemographic.RaceEthnicityEnum.ASIAN))
-              .age(ImmutableList.of(WorkspaceDemographic.AgeEnum.AGE_65_74))
-              .accessToCare(WorkspaceDemographic.AccessToCareEnum.UNSET)
-              .educationLevel(WorkspaceDemographic.EducationLevelEnum.UNSET)
-              .disabilityStatus(WorkspaceDemographic.DisabilityStatusEnum.UNSET)
-              .geography(WorkspaceDemographic.GeographyEnum.RURAL)
-              .incomeLevel(WorkspaceDemographic.IncomeLevelEnum.UNSET)
-              .sexAtBirth(WorkspaceDemographic.SexAtBirthEnum.UNSET)
-              .sexualOrientation(WorkspaceDemographic.SexualOrientationEnum.UNSET)
-              .genderIdentity(WorkspaceDemographic.GenderIdentityEnum.UNSET);
+          .age(ImmutableList.of(WorkspaceDemographic.AgeEnum.AGE_65_74))
+          .accessToCare(WorkspaceDemographic.AccessToCareEnum.UNSET)
+          .educationLevel(WorkspaceDemographic.EducationLevelEnum.UNSET)
+          .disabilityStatus(WorkspaceDemographic.DisabilityStatusEnum.UNSET)
+          .geography(WorkspaceDemographic.GeographyEnum.RURAL)
+          .incomeLevel(WorkspaceDemographic.IncomeLevelEnum.UNSET)
+          .sexAtBirth(WorkspaceDemographic.SexAtBirthEnum.UNSET)
+          .sexualOrientation(WorkspaceDemographic.SexualOrientationEnum.UNSET)
+          .genderIdentity(WorkspaceDemographic.GenderIdentityEnum.UNSET);
 
   public static final Long COHORT__COHORT_ID = 0L;
   public static final Timestamp COHORT__CREATION_TIME =

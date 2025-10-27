@@ -9841,8 +9841,6 @@ components:
           enum:
             - UNSET
             - BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
-        others:
-          type: string
     NotebookLockingMetadataResponse:
       type: object
       properties:
