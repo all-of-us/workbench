@@ -19,7 +19,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
 import org.pmiops.workbench.model.EgressBypassWindow;
-import org.pmiops.workbench.model.EgressVwbBypassWindow;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.EgressBypassWindowMapperImpl;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -176,8 +175,7 @@ public class UserAdminServiceTest {
     Instant startTime = FakeClockConfiguration.NOW.toInstant();
     Instant expectedEndTime = startTime.plus(2, ChronoUnit.DAYS);
 
-    userAdminService.createEgressBypassWindow(
-        USER_ID, startTime, DESCRIPTION, VWB_WORKSPACE_UFID);
+    userAdminService.createEgressBypassWindow(USER_ID, startTime, DESCRIPTION, VWB_WORKSPACE_UFID);
 
     // Verify DB record was created
     Set<DbUserEgressBypassWindow> dbResults =
@@ -196,22 +194,13 @@ public class UserAdminServiceTest {
   }
 
   @Test
-  public void testListAllVwbEgressBypassWindows() {
+  public void testListWindows_withMixedWindowTypes() {
     Instant startTime1 = FakeClockConfiguration.NOW.toInstant().minus(1, ChronoUnit.DAYS);
     Instant endTime = FakeClockConfiguration.NOW.toInstant().plus(1, ChronoUnit.DAYS);
     Instant startTime2 = FakeClockConfiguration.NOW.toInstant();
 
     // Create VWB bypass window (has vwbWorkspaceUfid)
-    DbUserEgressBypassWindow vwbWindow1 =
-        new DbUserEgressBypassWindow()
-            .setUserId(USER_ID)
-            .setStartTime(Timestamp.from(startTime1))
-            .setEndTime(Timestamp.from(endTime))
-            .setDescription(DESCRIPTION)
-            .setVwbWorkspaceUfid(VWB_WORKSPACE_UFID);
-
-    // Create another VWB bypass window
-    DbUserEgressBypassWindow vwbWindow2 =
+    DbUserEgressBypassWindow vwbWindow =
         new DbUserEgressBypassWindow()
             .setUserId(USER_ID)
             .setStartTime(Timestamp.from(startTime2))
@@ -219,7 +208,7 @@ public class UserAdminServiceTest {
             .setDescription(DESCRIPTION)
             .setVwbWorkspaceUfid(VWB_WORKSPACE_UFID);
 
-    // Create regular bypass window (no vwbWorkspaceUfid) - should be filtered out
+    // Create regular bypass window (no vwbWorkspaceUfid)
     DbUserEgressBypassWindow regularWindow =
         new DbUserEgressBypassWindow()
             .setUserId(USER_ID)
@@ -227,44 +216,21 @@ public class UserAdminServiceTest {
             .setEndTime(Timestamp.from(endTime))
             .setDescription(DESCRIPTION);
 
-    userEgressBypassWindowDao.saveAll(ImmutableList.of(vwbWindow1, vwbWindow2, regularWindow));
+    userEgressBypassWindowDao.saveAll(ImmutableList.of(vwbWindow, regularWindow));
 
-    // Should only return VWB windows (with vwbWorkspaceUfid)
-    assertThat(userAdminService.listAllVwbEgressBypassWindows(USER_ID))
+    // Should return ALL windows (both VWB and regular), ordered by start time descending
+    assertThat(userAdminService.listAllEgressBypassWindows(USER_ID))
         .containsExactly(
-            new EgressVwbBypassWindow()
+            new EgressBypassWindow()
                 .description(DESCRIPTION)
                 .startTime(startTime2.toEpochMilli())
                 .endTime(endTime.toEpochMilli())
                 .vwbWorkspaceUfid(VWB_WORKSPACE_UFID),
-            new EgressVwbBypassWindow()
+            new EgressBypassWindow()
                 .description(DESCRIPTION)
                 .startTime(startTime1.toEpochMilli())
                 .endTime(endTime.toEpochMilli())
-                .vwbWorkspaceUfid(VWB_WORKSPACE_UFID))
+                .vwbWorkspaceUfid(null))
         .inOrder();
-  }
-
-  @Test
-  public void testListAllVwbEgressBypassWindows_emptyResult() {
-    assertThat(userAdminService.listAllVwbEgressBypassWindows(USER_ID)).isEmpty();
-  }
-
-  @Test
-  public void testListAllVwbEgressBypassWindows_onlyRegularWindows() {
-    // Create only regular bypass windows (no vwbWorkspaceUfid)
-    Instant startTime = FakeClockConfiguration.NOW.toInstant();
-    Instant endTime = FakeClockConfiguration.NOW.toInstant().plus(1, ChronoUnit.DAYS);
-    DbUserEgressBypassWindow regularWindow =
-        new DbUserEgressBypassWindow()
-            .setUserId(USER_ID)
-            .setStartTime(Timestamp.from(startTime))
-            .setEndTime(Timestamp.from(endTime))
-            .setDescription(DESCRIPTION);
-
-    userEgressBypassWindowDao.save(regularWindow);
-
-    // Should return empty list since no VWB windows exist
-    assertThat(userAdminService.listAllVwbEgressBypassWindows(USER_ID)).isEmpty();
   }
 }

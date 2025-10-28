@@ -20,11 +20,9 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BatchSyncAccessRequest;
 import org.pmiops.workbench.model.BatchSyncAccessResponse;
 import org.pmiops.workbench.model.CreateEgressBypassWindowRequest;
-import org.pmiops.workbench.model.CreateVwbEgressBypassWindowRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListEgressBypassWindowResponse;
 import org.pmiops.workbench.model.ListUserDisabledEventsResponse;
-import org.pmiops.workbench.model.ListVwbEgressBypassWindowResponse;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
@@ -135,24 +133,6 @@ public class UserAdminController implements UserAdminApiDelegate {
   public ResponseEntity<Void> createEgressBypassWindow(
       Long userId, CreateEgressBypassWindowRequest request) {
     userAdminService.createEgressBypassWindow(
-        userId, Instant.ofEpochMilli(request.getStartTime()), request.getByPassDescription());
-
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  @Override
-  @AuthorityRequired({Authority.SECURITY_ADMIN})
-  public ResponseEntity<ListEgressBypassWindowResponse> listEgressBypassWindows(Long userId) {
-    return ResponseEntity.ok(
-        new ListEgressBypassWindowResponse()
-            .bypassWindows(userAdminService.listAllEgressBypassWindows(userId)));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.SECURITY_ADMIN})
-  public ResponseEntity<Void> createVwbEgressBypassWindow(
-      Long userId, CreateVwbEgressBypassWindowRequest request) {
-    userAdminService.createEgressBypassWindow(
         userId,
         Instant.ofEpochMilli(request.getStartTime()),
         request.getByPassDescription(),
@@ -163,10 +143,10 @@ public class UserAdminController implements UserAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.SECURITY_ADMIN})
-  public ResponseEntity<ListVwbEgressBypassWindowResponse> listVwbEgressBypassWindows(Long userId) {
+  public ResponseEntity<ListEgressBypassWindowResponse> listEgressBypassWindows(Long userId) {
     return ResponseEntity.ok(
-        new ListVwbEgressBypassWindowResponse()
-            .bypassWindows(userAdminService.listAllVwbEgressBypassWindows(userId)));
+        new ListEgressBypassWindowResponse()
+            .bypassWindows(userAdminService.listAllEgressBypassWindows(userId)));
   }
 
   @Override

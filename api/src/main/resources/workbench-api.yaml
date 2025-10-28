@@ -6802,51 +6802,6 @@ paths:
           description: The egress event was successfully handled.
           content: { }
       x-codegen-request-body-name: request
-  /v2/admin/vwb/users/{userId}/egressBypassWindow:
-    get:
-      tags:
-        - userAdmin
-      description: |
-        List all of the user's Verily Workbench egress bypass windows.  Requires SECURITY_ADMIN authority
-      operationId: listVwbEgressBypassWindows
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        200:
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListVwbEgressBypassWindowResponse'
-    post:
-      tags:
-        - userAdmin
-      description: |
-        Administrative API to add egress bypass window in Verily Workbench to allow user download files without triggering egress alerts. Require SECURITY_ADMIN authority
-      operationId: createVwbEgressBypassWindow
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/CreateVwbEgressBypassWindowRequest'
-        required: false
-      responses:
-        204:
-          description: success
-          content: {}
-      x-codegen-request-body-name: request
   /v2/admin/vwb/workspaces:
     get:
       tags:
@@ -10029,6 +9984,9 @@ components:
           description: |
             Timestamp when user egress bypass window begins in milliseconds since the UNIX epoch
           format: int64
+        vwbWorkspaceUfid:
+          type: string
+          description: Optional VWB workspace user facing ID. If provided, also creates egress threshold override in exfil manager.
         byPassDescription:
           type: string
           description: Brief description of this bypass request.
@@ -10052,46 +10010,9 @@ components:
           description: |
             Timestamp when user egress bypass window ends in milliseconds since the UNIX epoch
           format: int64
-        description:
-          type: string
-          description: Brief description of this bypass request.
-    CreateVwbEgressBypassWindowRequest:
-      type: object
-      properties:
-        startTime:
-          type: integer
-          description: |
-            Timestamp when user egress bypass window begins in milliseconds since the UNIX epoch
-          format: int64
         vwbWorkspaceUfid:
           type: string
-          description: VWB workspace user facing ID.
-        byPassDescription:
-          type: string
-          description: Brief description of this bypass request.
-    ListVwbEgressBypassWindowResponse:
-      type: object
-      properties:
-        bypassWindows:
-          type: array
-          items:
-            $ref: '#/components/schemas/EgressVwbBypassWindow'
-    EgressVwbBypassWindow:
-      type: object
-      properties:
-        startTime:
-          type: integer
-          description: |
-            Timestamp when user egress bypass window begins in milliseconds since the UNIX epoch
-          format: int64
-        endTime:
-          type: integer
-          description: |
-            Timestamp when user egress bypass window ends in milliseconds since the UNIX epoch
-          format: int64
-        vwbWorkspaceUfid:
-          type: string
-          description: VWB workspace user facing ID.
+          description: VWB workspace user facing ID (optional).
         description:
           type: string
           description: Brief description of this bypass request.

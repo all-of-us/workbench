@@ -12,7 +12,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
 import org.pmiops.workbench.model.EgressBypassWindow;
-import org.pmiops.workbench.model.EgressVwbBypassWindow;
 import org.pmiops.workbench.model.UserDisabledEvent;
 import org.pmiops.workbench.utils.mappers.EgressBypassWindowMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -109,12 +108,5 @@ public class UserAdminService {
     return userDisabledEventDao.getByUserIdOrderByUpdateTimeDesc(userId).stream()
         .map(userMapper::toApiUserDisabledEvent)
         .toList();
-  }
-
-  public List<EgressVwbBypassWindow> listAllVwbEgressBypassWindows(Long userId) {
-    return userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(userId).stream()
-        .filter(window -> window.getVwbWorkspaceUfid() != null)
-        .map(egressBypassWindowMapper::toApiEgressVwbBypassWindow)
-        .collect(Collectors.toList());
   }
 }
