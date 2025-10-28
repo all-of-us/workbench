@@ -78,17 +78,6 @@ public class UserAdminService {
     }
   }
 
-  /**
-   * Creates a regular egress bypass window (without VWB workspace).
-   *
-   * @param userId The user ID
-   * @param startTime The start time of the bypass window
-   * @param description A description of the bypass request
-   */
-  public void createEgressBypassWindow(Long userId, Instant startTime, String description) {
-    createEgressBypassWindow(userId, startTime, description, null);
-  }
-
   public EgressBypassWindow getCurrentEgressBypassWindow(Long userId) {
     Timestamp now = Timestamp.from(clock.instant());
     return userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(userId).stream()
