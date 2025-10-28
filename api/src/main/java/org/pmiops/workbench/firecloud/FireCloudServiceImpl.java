@@ -326,6 +326,17 @@ public class FireCloudServiceImpl implements FireCloudService {
         });
   }
 
+  @Override
+  public void repairWorkspaceAsService(String workspaceNamespace, String firecloudName) {
+    rawlsRetryHandler.run(
+        (context) -> {
+          serviceAccountWorkspaceApiProvider
+              .get()
+              .repairWorkspace(workspaceNamespace, firecloudName);
+          return null;
+        });
+  }
+
   private void addRoleToBillingProject(String email, String projectName, String role) {
     Preconditions.checkArgument(email.contains("@"));
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
