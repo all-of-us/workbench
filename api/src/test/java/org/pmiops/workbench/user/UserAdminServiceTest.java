@@ -1,6 +1,8 @@
 package org.pmiops.workbench.user;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,9 +67,13 @@ public class UserAdminServiceTest {
     DbUserEgressBypassWindow dbEntity = dbResults.stream().findFirst().get();
     assertThat(dbEntity.getUserId()).isEqualTo(USER_ID);
     assertThat(dbEntity.getDescription()).isEqualTo(DESCRIPTION);
+    assertThat(dbEntity.getVwbWorkspaceUfid()).isNull();
     assertThat(dbEntity.getStartTime()).isEqualTo(FakeClockConfiguration.NOW);
     assertThat(dbEntity.getEndTime())
         .isEqualTo(Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(2, ChronoUnit.DAYS)));
+
+    // Verify exfil manager was NOT called for regular bypass window
+    verify(exfilManagerClient, never()).createEgressThresholdOverride(any(), any(), any(), any());
   }
 
   @Test
@@ -161,7 +167,7 @@ public class UserAdminServiceTest {
   }
 
   @Test
-  public void testCreateVwbEgressBypassWindow() {
+  public void testCreateEgressBypassWindow_withVwbWorkspace() {
     DbUser dbUser = new DbUser();
     dbUser.setUserId(USER_ID);
     dbUser.setUsername(USERNAME);
@@ -170,7 +176,7 @@ public class UserAdminServiceTest {
     Instant startTime = FakeClockConfiguration.NOW.toInstant();
     Instant expectedEndTime = startTime.plus(2, ChronoUnit.DAYS);
 
-    userAdminService.createVwbEgressBypassWindow(
+    userAdminService.createEgressBypassWindow(
         USER_ID, startTime, DESCRIPTION, VWB_WORKSPACE_UFID);
 
     // Verify DB record was created

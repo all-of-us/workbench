@@ -49,14 +49,45 @@ public class UserAdminService {
     this.clock = clock;
   }
 
-  public void createEgressBypassWindow(Long userId, Instant startTime, String description) {
+  /**
+   * Creates an egress bypass window for a user.
+   *
+   * @param userId The user ID
+   * @param startTime The start time of the bypass window
+   * @param description A description of the bypass request
+   * @param vwbWorkspaceUfid Optional VWB workspace UFID. If provided, also creates an egress
+   *     threshold override in the exfil manager.
+   */
+  public void createEgressBypassWindow(
+      Long userId, Instant startTime, String description, String vwbWorkspaceUfid) {
     Instant endTime = startTime.plus(BYPASS_PERIOD_IN_DAY, ChronoUnit.DAYS);
+
+    // Save to database
     userEgressBypassWindowDao.save(
         new DbUserEgressBypassWindow()
             .setUserId(userId)
             .setStartTime(Timestamp.from(startTime))
             .setEndTime(Timestamp.from(endTime))
-            .setDescription(description));
+            .setDescription(description)
+            .setVwbWorkspaceUfid(vwbWorkspaceUfid));
+
+    // If VWB workspace UFID is provided, call exfil manager to create egress threshold override
+    if (vwbWorkspaceUfid != null) {
+      DbUser user = userService.getByDatabaseId(userId).orElseThrow();
+      exfilManagerClient.createEgressThresholdOverride(
+          user.getUsername(), vwbWorkspaceUfid, endTime, description);
+    }
+  }
+
+  /**
+   * Creates a regular egress bypass window (without VWB workspace).
+   *
+   * @param userId The user ID
+   * @param startTime The start time of the bypass window
+   * @param description A description of the bypass request
+   */
+  public void createEgressBypassWindow(Long userId, Instant startTime, String description) {
+    createEgressBypassWindow(userId, startTime, description, null);
   }
 
   public EgressBypassWindow getCurrentEgressBypassWindow(Long userId) {
@@ -78,25 +109,6 @@ public class UserAdminService {
     return userDisabledEventDao.getByUserIdOrderByUpdateTimeDesc(userId).stream()
         .map(userMapper::toApiUserDisabledEvent)
         .toList();
-  }
-
-  public void createVwbEgressBypassWindow(
-      Long userId, Instant startTime, String description, String vwbWorkspaceUfid) {
-    Instant endTime = startTime.plus(BYPASS_PERIOD_IN_DAY, ChronoUnit.DAYS);
-
-    // Save to database
-    userEgressBypassWindowDao.save(
-        new DbUserEgressBypassWindow()
-            .setUserId(userId)
-            .setStartTime(Timestamp.from(startTime))
-            .setEndTime(Timestamp.from(endTime))
-            .setDescription(description)
-            .setVwbWorkspaceUfid(vwbWorkspaceUfid));
-
-    // Call exfil manager to create egress threshold override
-    DbUser user = userService.getByDatabaseId(userId).orElseThrow();
-    exfilManagerClient.createEgressThresholdOverride(
-        user.getUsername(), vwbWorkspaceUfid, endTime, description);
   }
 
   public List<EgressVwbBypassWindow> listAllVwbEgressBypassWindows(Long userId) {

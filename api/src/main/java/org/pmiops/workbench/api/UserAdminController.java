@@ -152,7 +152,7 @@ public class UserAdminController implements UserAdminApiDelegate {
   @AuthorityRequired({Authority.SECURITY_ADMIN})
   public ResponseEntity<Void> createVwbEgressBypassWindow(
       Long userId, CreateVwbEgressBypassWindowRequest request) {
-    userAdminService.createVwbEgressBypassWindow(
+    userAdminService.createEgressBypassWindow(
         userId,
         Instant.ofEpochMilli(request.getStartTime()),
         request.getByPassDescription(),
