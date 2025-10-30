@@ -877,7 +877,8 @@ public class InitialCreditsService {
         .forEach(
             ws -> {
               try {
-                // This call is asynchronous, but we will time out if we wait for the call for every workspace to
+                // This call is asynchronous, but we will time out if we wait for the call for every
+                // workspace to
                 // complete so we're going to do our best and just fire and forget.
                 fireCloudService.updateBillingAccountAsService(
                     ws.getWorkspaceNamespace(), ws.getBillingAccountName());
