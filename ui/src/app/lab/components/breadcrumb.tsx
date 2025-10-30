@@ -326,6 +326,7 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
 
   const { initialCreditsLimit = 0, initialCreditsUsage = 0 } = profile;
   const {
+    billingAccountName,
     initialCredits: {
       exhausted,
       expirationBypassed,
@@ -334,6 +335,13 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
     },
   } = workspace;
 
+  const { initialCreditsBillingAccountId } = serverConfigStore.get().config;
+
+  const usingInitialCreditsBillingAccount =
+    billingAccountName === `billingAccounts/${initialCreditsBillingAccountId}`;
+  if (!usingInitialCreditsBillingAccount) {
+    return null;
+  }
   const now = Date.now();
   const givenName = workspace?.creatorUser?.givenName;
   const familyName = workspace?.creatorUser?.familyName;
