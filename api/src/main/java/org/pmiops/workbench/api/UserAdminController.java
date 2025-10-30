@@ -136,7 +136,7 @@ public class UserAdminController implements UserAdminApiDelegate {
         userId,
         Instant.ofEpochMilli(request.getStartTime()),
         request.getByPassDescription(),
-        request.getVwbWorkspaceUfid());
+        request.getVwbWorkspaceId() != null ? request.getVwbWorkspaceId().toString() : null);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }

@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.UserEgressBypassWindowDao;
@@ -225,7 +226,7 @@ public class UserAdminServiceTest {
                 .description(DESCRIPTION)
                 .startTime(startTime2.toEpochMilli())
                 .endTime(endTime.toEpochMilli())
-                .vwbWorkspaceId(VWB_WORKSPACE_ID),
+                .vwbWorkspaceId(UUID.fromString(VWB_WORKSPACE_ID)),
             new EgressBypassWindow()
                 .description(DESCRIPTION)
                 .startTime(startTime1.toEpochMilli())

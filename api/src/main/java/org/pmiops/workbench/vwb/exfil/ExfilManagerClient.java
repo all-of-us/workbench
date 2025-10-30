@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -74,7 +75,9 @@ public class ExfilManagerClient {
   public void createEgressThresholdOverride(
       String username, String workspaceId, Instant endTime, String description) {
     CreateEgressThresholdOverrideBody body =
-        new CreateEgressThresholdOverrideBody().username(username).workspaceId(workspaceId);
+        new CreateEgressThresholdOverrideBody()
+            .username(username)
+            .workspaceId(UUID.fromString(workspaceId));
 
     if (endTime != null) {
       body.endTime(OffsetDateTime.ofInstant(endTime, ZoneOffset.UTC));
