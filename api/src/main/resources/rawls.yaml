@@ -2129,23 +2129,6 @@ paths:
           content: {}
         500:
           $ref: '#/components/responses/RawlsInternalError'
-  /api/workspaces/v2/{workspaceNamespace}/{workspaceName}/repair:
-    post:
-      tags:
-        - workspaces
-      summary: Repair workspace
-      description: Attempt to repair a workspace asynchronously
-      operationId: repairWorkspace
-      parameters:
-        - $ref: '#/components/parameters/workspaceNamespacePathParam'
-        - $ref: '#/components/parameters/workspaceNamePathParam'
-      responses:
-        202:
-          description: |
-            A request to repair this workspace has successfully been submitted
-          content: { }
-        500:
-          $ref: '#/components/responses/RawlsInternalError'
   /api/workflows/{workflowId}/genomics/{operationId}:
     get:
       tags:

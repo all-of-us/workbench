@@ -141,9 +141,6 @@ public interface FireCloudService {
   /** Remove billing account from billing project using APP's service account. */
   void removeBillingAccountFromBillingProjectAsService(String billingProjectName);
 
-  /** Repairs a workspace in Firecloud. */
-  void repairWorkspaceAsService(String workspaceNamespace, String firecloudName);
-
   /**
    * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.
    *
