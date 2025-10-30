@@ -327,7 +327,6 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
 
   const { initialCreditsLimit = 0, initialCreditsUsage = 0 } = profile;
   const {
-    billingAccountName,
     initialCredits: {
       exhausted,
       expirationBypassed,
