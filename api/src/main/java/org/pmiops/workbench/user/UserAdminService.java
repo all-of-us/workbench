@@ -54,11 +54,11 @@ public class UserAdminService {
    * @param userId The user ID
    * @param startTime The start time of the bypass window
    * @param description A description of the bypass request
-   * @param vwbWorkspaceUfid Optional VWB workspace UFID. If provided, also creates an egress
-   *     threshold override in the exfil manager.
+   * @param vwbWorkspaceId Optional VWB workspace ID (UUID format). If provided, also creates an
+   *     egress threshold override in the exfil manager.
    */
   public void createEgressBypassWindow(
-      Long userId, Instant startTime, String description, String vwbWorkspaceUfid) {
+      Long userId, Instant startTime, String description, String vwbWorkspaceId) {
     Instant endTime = startTime.plus(BYPASS_PERIOD_IN_DAY, ChronoUnit.DAYS);
 
     // Save to database
@@ -68,13 +68,13 @@ public class UserAdminService {
             .setStartTime(Timestamp.from(startTime))
             .setEndTime(Timestamp.from(endTime))
             .setDescription(description)
-            .setVwbWorkspaceUfid(vwbWorkspaceUfid));
+            .setVwbWorkspaceId(vwbWorkspaceId));
 
-    // If VWB workspace UFID is provided, call exfil manager to create egress threshold override
-    if (vwbWorkspaceUfid != null) {
+    // If VWB workspace ID is provided, call exfil manager to create egress threshold override
+    if (vwbWorkspaceId != null) {
       DbUser user = userService.getByDatabaseId(userId).orElseThrow();
       exfilManagerClient.createEgressThresholdOverride(
-          user.getUsername(), vwbWorkspaceUfid, endTime, description);
+          user.getUsername(), vwbWorkspaceId, endTime, description);
     }
   }
 

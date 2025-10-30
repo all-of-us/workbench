@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
 public class UserAdminServiceTest {
   private static final Long USER_ID = 123L;
   private static final String DESCRIPTION = "description";
-  private static final String VWB_WORKSPACE_UFID = "vwb-workspace-123";
+  private static final String VWB_WORKSPACE_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final String USERNAME = "test@example.com";
 
   @TestConfiguration
@@ -59,14 +59,14 @@ public class UserAdminServiceTest {
   @Test
   public void testCreateEgressByPassWindow() {
     userAdminService.createEgressBypassWindow(
-        USER_ID, FakeClockConfiguration.NOW.toInstant(), DESCRIPTION);
+        USER_ID, FakeClockConfiguration.NOW.toInstant(), DESCRIPTION, null);
     Set<DbUserEgressBypassWindow> dbResults =
         userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(USER_ID);
     assertThat(dbResults.size()).isEqualTo(1);
     DbUserEgressBypassWindow dbEntity = dbResults.stream().findFirst().get();
     assertThat(dbEntity.getUserId()).isEqualTo(USER_ID);
     assertThat(dbEntity.getDescription()).isEqualTo(DESCRIPTION);
-    assertThat(dbEntity.getVwbWorkspaceUfid()).isNull();
+    assertThat(dbEntity.getVwbWorkspaceId()).isNull();
     assertThat(dbEntity.getStartTime()).isEqualTo(FakeClockConfiguration.NOW);
     assertThat(dbEntity.getEndTime())
         .isEqualTo(Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(2, ChronoUnit.DAYS)));
@@ -175,7 +175,7 @@ public class UserAdminServiceTest {
     Instant startTime = FakeClockConfiguration.NOW.toInstant();
     Instant expectedEndTime = startTime.plus(2, ChronoUnit.DAYS);
 
-    userAdminService.createEgressBypassWindow(USER_ID, startTime, DESCRIPTION, VWB_WORKSPACE_UFID);
+    userAdminService.createEgressBypassWindow(USER_ID, startTime, DESCRIPTION, VWB_WORKSPACE_ID);
 
     // Verify DB record was created
     Set<DbUserEgressBypassWindow> dbResults =
@@ -184,13 +184,13 @@ public class UserAdminServiceTest {
     DbUserEgressBypassWindow dbEntity = dbResults.stream().findFirst().get();
     assertThat(dbEntity.getUserId()).isEqualTo(USER_ID);
     assertThat(dbEntity.getDescription()).isEqualTo(DESCRIPTION);
-    assertThat(dbEntity.getVwbWorkspaceUfid()).isEqualTo(VWB_WORKSPACE_UFID);
+    assertThat(dbEntity.getVwbWorkspaceId()).isEqualTo(VWB_WORKSPACE_ID);
     assertThat(dbEntity.getStartTime()).isEqualTo(Timestamp.from(startTime));
     assertThat(dbEntity.getEndTime()).isEqualTo(Timestamp.from(expectedEndTime));
 
     // Verify exfil manager was called
     verify(exfilManagerClient)
-        .createEgressThresholdOverride(USERNAME, VWB_WORKSPACE_UFID, expectedEndTime, DESCRIPTION);
+        .createEgressThresholdOverride(USERNAME, VWB_WORKSPACE_ID, expectedEndTime, DESCRIPTION);
   }
 
   @Test
@@ -199,16 +199,16 @@ public class UserAdminServiceTest {
     Instant endTime = FakeClockConfiguration.NOW.toInstant().plus(1, ChronoUnit.DAYS);
     Instant startTime2 = FakeClockConfiguration.NOW.toInstant();
 
-    // Create VWB bypass window (has vwbWorkspaceUfid)
+    // Create VWB bypass window (has vwbWorkspaceId)
     DbUserEgressBypassWindow vwbWindow =
         new DbUserEgressBypassWindow()
             .setUserId(USER_ID)
             .setStartTime(Timestamp.from(startTime2))
             .setEndTime(Timestamp.from(endTime))
             .setDescription(DESCRIPTION)
-            .setVwbWorkspaceUfid(VWB_WORKSPACE_UFID);
+            .setVwbWorkspaceId(VWB_WORKSPACE_ID);
 
-    // Create regular bypass window (no vwbWorkspaceUfid)
+    // Create regular bypass window (no vwbWorkspaceId)
     DbUserEgressBypassWindow regularWindow =
         new DbUserEgressBypassWindow()
             .setUserId(USER_ID)
@@ -225,12 +225,12 @@ public class UserAdminServiceTest {
                 .description(DESCRIPTION)
                 .startTime(startTime2.toEpochMilli())
                 .endTime(endTime.toEpochMilli())
-                .vwbWorkspaceUfid(VWB_WORKSPACE_UFID),
+                .vwbWorkspaceId(VWB_WORKSPACE_ID),
             new EgressBypassWindow()
                 .description(DESCRIPTION)
                 .startTime(startTime1.toEpochMilli())
                 .endTime(endTime.toEpochMilli())
-                .vwbWorkspaceUfid(null))
+                .vwbWorkspaceId(null))
         .inOrder();
   }
 }

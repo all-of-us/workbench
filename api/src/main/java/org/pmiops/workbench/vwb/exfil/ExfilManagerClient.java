@@ -66,17 +66,15 @@ public class ExfilManagerClient {
    * Creates an egress threshold override for a user and workspace in VWB Exfil Manager.
    *
    * @param username The username for the override
-   * @param workspaceUserFacingId The workspace user-facing ID
+   * @param workspaceId The workspace ID (UUID format)
    * @param endTime Optional end time for the override. If not provided, defaults to 48 hours from
    *     creation
    * @param description Optional description of why the override was created
    */
   public void createEgressThresholdOverride(
-      String username, String workspaceUserFacingId, Instant endTime, String description) {
+      String username, String workspaceId, Instant endTime, String description) {
     CreateEgressThresholdOverrideBody body =
-        new CreateEgressThresholdOverrideBody()
-            .username(username)
-            .workspaceUserFacingId(workspaceUserFacingId);
+        new CreateEgressThresholdOverrideBody().username(username).workspaceId(workspaceId);
 
     if (endTime != null) {
       body.endTime(OffsetDateTime.ofInstant(endTime, ZoneOffset.UTC));

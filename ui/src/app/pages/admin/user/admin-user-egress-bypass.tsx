@@ -33,7 +33,7 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
   const [bypassing, setBypassing] = useState(false);
   const [startTime, setStartTime] = useState(new Date());
   const [bypassDescription, setBypassDescription] = useState('');
-  const [vwbWorkspaceUfid, setVwbWorkspaceUfid] = useState('');
+  const [vwbWorkspaceId, setVwbWorkspaceId] = useState('');
   const [bypassWindowsList, setBypassWindowsList] = useState<
     EgressBypassWindow[]
   >([]);
@@ -78,10 +78,10 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
       startTime: startTime.valueOf(),
       byPassDescription: bypassDescription,
-      vwbWorkspaceUfid: vwbWorkspaceUfid || undefined,
+      vwbWorkspaceId: vwbWorkspaceId || undefined,
     };
     setBypassDescription('');
-    setVwbWorkspaceUfid('');
+    setVwbWorkspaceId('');
 
     userAdminApi()
       .createEgressBypassWindow(targetUserId, createEgressBypassWindowRequest)
@@ -132,24 +132,24 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
           />
         </FlexColumn>
 
-        {/* VWB Workspace UFID (optional) */}
+        {/* VWB Workspace ID (optional) */}
         <FlexRow style={{ paddingTop: '1rem' }}>
           <label
-            htmlFor='VWB Workspace UFID'
+            htmlFor='VWB Workspace ID'
             style={{ fontWeight: 'bold', color: colors.primary }}
           >
-            VWB Workspace UFID (optional - for VWB workspaces only)
+            VWB Workspace ID (optional - for VWB workspaces only)
           </label>
         </FlexRow>
         <FlexRow>
           <TextInput
-            id='VWB Workspace UFID'
-            value={vwbWorkspaceUfid}
+            id='VWB Workspace ID'
+            value={vwbWorkspaceId}
             onChange={(s: string) => {
               setApiError(false);
-              setVwbWorkspaceUfid(s);
+              setVwbWorkspaceId(s);
             }}
-            placeholder='Enter VWB workspace UFID if applicable'
+            placeholder='Enter VWB workspace ID (UUID) if applicable'
             style={{ width: '60%' }}
           />
         </FlexRow>
@@ -209,7 +209,7 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
               header='End Time'
               body={(row, opt) => <div>{displayDate(row[opt.field])}</div>}
             />
-            <Column field={'vwbWorkspaceUfid'} header={'VWB Workspace UFID'} />
+            <Column field={'vwbWorkspaceId'} header={'VWB Workspace ID'} />
             <Column field={'description'} header={'Description'} />
           </DataTable>
         </FlexRow>

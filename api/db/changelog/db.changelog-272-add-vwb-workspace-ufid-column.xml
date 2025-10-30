@@ -4,9 +4,9 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="yonghao" id="changelog-272-add-vwb-workspace-ufid-column">
+  <changeSet author="yonghao" id="changelog-272-add-vwb-workspace-id-column">
     <addColumn tableName="user_egress_bypass_window">
-      <column name="vwb_workspace_ufid" type="varchar(255)">
+      <column name="vwb_workspace_id" type="varchar(36)">
         <constraints nullable="true"/>
       </column>
     </addColumn>

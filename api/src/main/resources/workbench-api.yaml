@@ -9984,9 +9984,10 @@ components:
           description: |
             Timestamp when user egress bypass window begins in milliseconds since the UNIX epoch
           format: int64
-        vwbWorkspaceUfid:
+        vwbWorkspaceId:
           type: string
-          description: Optional VWB workspace user facing ID. If provided, also creates egress threshold override in exfil manager.
+          format: uuid
+          description: Optional VWB workspace ID. If provided, also creates egress threshold override in exfil manager.
         byPassDescription:
           type: string
           description: Brief description of this bypass request.
@@ -10010,9 +10011,10 @@ components:
           description: |
             Timestamp when user egress bypass window ends in milliseconds since the UNIX epoch
           format: int64
-        vwbWorkspaceUfid:
+        vwbWorkspaceId:
           type: string
-          description: VWB workspace user facing ID (optional).
+          format: uuid
+          description: VWB workspace ID (optional).
         description:
           type: string
           description: Brief description of this bypass request.

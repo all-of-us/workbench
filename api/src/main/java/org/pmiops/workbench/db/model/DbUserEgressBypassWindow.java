@@ -23,7 +23,7 @@ public class DbUserEgressBypassWindow {
   private Timestamp endTime;
 
   private String description;
-  private String vwbWorkspaceUfid;
+  private String vwbWorkspaceId;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,13 +77,13 @@ public class DbUserEgressBypassWindow {
     return this;
   }
 
-  @Column(name = "vwb_workspace_ufid")
-  public String getVwbWorkspaceUfid() {
-    return vwbWorkspaceUfid;
+  @Column(name = "vwb_workspace_id")
+  public String getVwbWorkspaceId() {
+    return vwbWorkspaceId;
   }
 
-  public DbUserEgressBypassWindow setVwbWorkspaceUfid(String vwbWorkspaceUfid) {
-    this.vwbWorkspaceUfid = vwbWorkspaceUfid;
+  public DbUserEgressBypassWindow setVwbWorkspaceId(String vwbWorkspaceId) {
+    this.vwbWorkspaceId = vwbWorkspaceId;
     return this;
   }
 
@@ -101,7 +101,7 @@ public class DbUserEgressBypassWindow {
         .append(startTime, dbUserEgressBypassWindow.startTime)
         .append(endTime, dbUserEgressBypassWindow.endTime)
         .append(description, dbUserEgressBypassWindow.description)
-        .append(vwbWorkspaceUfid, dbUserEgressBypassWindow.vwbWorkspaceUfid)
+        .append(vwbWorkspaceId, dbUserEgressBypassWindow.vwbWorkspaceId)
         .isEquals();
   }
 
@@ -113,7 +113,7 @@ public class DbUserEgressBypassWindow {
         .append(endTime)
         .append(egressBypassId)
         .append(description)
-        .append(vwbWorkspaceUfid)
+        .append(vwbWorkspaceId)
         .toHashCode();
   }
 }
