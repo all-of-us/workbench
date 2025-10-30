@@ -361,6 +361,15 @@ describe('InvalidBillingBanner Component', () => {
 });
 
 describe('CreditBanner Component', () => {
+  function makeWorkspaceWithInitialCreditsBillingAccount(
+    base = workspaceDataStub
+  ) {
+    const ws = fp.cloneDeep(base);
+    ws.billingAccountName = `billingAccounts/${
+      serverConfigStore.get().config.initialCreditsBillingAccountId
+    }`;
+    return ws;
+  }
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -414,10 +423,7 @@ describe('CreditBanner Component', () => {
 
   it('should display CreditBanner when credits are exhausted', async () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
-    modifiedWorkspace.billingAccountName = `billingAccounts/${
-      serverConfigStore.get().config.initialCreditsBillingAccountId
-    }`;
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -453,10 +459,7 @@ describe('CreditBanner Component', () => {
 
   it('should display CreditBanner when credits are expired and not bypassed', async () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
-    modifiedWorkspace.billingAccountName = `billingAccounts/${
-      serverConfigStore.get().config.initialCreditsBillingAccountId
-    }`;
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -492,10 +495,7 @@ describe('CreditBanner Component', () => {
 
   it('should not display CreditBanner when credits are expired but bypassed', () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
-    modifiedWorkspace.billingAccountName = `billingAccounts/${
-      serverConfigStore.get().config.initialCreditsBillingAccountId
-    }`;
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -529,10 +529,7 @@ describe('CreditBanner Component', () => {
 
   it('should not display CreditBanner when credits are not expired and not exhausted', () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
-    modifiedWorkspace.billingAccountName = `billingAccounts/${
-      serverConfigStore.get().config.initialCreditsBillingAccountId
-    }`;
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
