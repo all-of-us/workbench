@@ -3,8 +3,10 @@ package org.pmiops.workbench.reporting.insertion;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
 
+import java.util.Optional;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.WorkspaceDemographic;
 
 /*
  * Column data and metadata convertors for BigQuery workspace table in reporting dataset.
@@ -51,7 +53,97 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   RP_TIME_REQUESTED("rp_time_requested", w -> toInsertRowString(w.getRpTimeRequested())),
   WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId),
   WORKSPACE_NAMESPACE("workspace_namespace", ReportingWorkspace::getWorkspaceNamespace),
-  ACTIVE_STATUS("active_status", ReportingWorkspace::getActiveStatus);
+  ACTIVE_STATUS("active_status", ReportingWorkspace::getActiveStatus),
+  FOCUS_ON_UNDER_REPRESENTED_POPULATIONS(
+      "focus_on_under_represented_populations",
+      ReportingWorkspace::isFocusOnUnderrepresentedPopulations),
+
+  WD_RACE_ETHNICITY(
+      "wd_race_ethnicity",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(
+                  wd -> {
+                    if (wd.getRaceEthnicity() == null) {
+                      return null;
+                    }
+                    return String.join(
+                        ",",
+                        wd.getRaceEthnicity().stream()
+                            .map(WorkspaceDemographic.RaceEthnicityEnum::toString)
+                            .toList());
+                  })
+              .orElse(null)),
+  WD_AGE(
+      "wd_age",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(
+                  wd -> {
+                    if (wd.getAge() == null) {
+                      return null;
+                    }
+                    return String.join(
+                        ",",
+                        wd.getAge().stream().map(WorkspaceDemographic.AgeEnum::toString).toList());
+                  })
+              .orElse(null)),
+  WD_ACCESS_TO_CARE(
+      "wd_access_to_care",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::getAccessToCare)
+              .map(Object::toString)
+              .orElse(null)),
+  WD_DISABILITY_STATUS(
+      "wd_disability_status",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::getDisabilityStatus)
+              .map(Object::toString)
+              .orElse(null)),
+  WD_EDUCATION_LEVEL(
+      "wd_education_level",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::getEducationLevel)
+              .map(Object::toString)
+              .orElse(null)),
+  WD_INCOME_LEVEL(
+      "wd_income_level",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::getIncomeLevel)
+              .map(Object::toString)
+              .orElse(null)),
+  WD_GEOGRAPHY(
+      "wd_geography",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::getGeography)
+              .map(Object::toString)
+              .orElse(null)),
+  WD_SEXUAL_ORIENTATION(
+      "wd_sexual_orientation",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::getSexualOrientation)
+              .map(Object::toString)
+              .orElse(null)),
+  WD_GENDER_IDENTITY(
+      "wd_gender_identity",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::getGenderIdentity)
+              .map(Object::toString)
+              .orElse(null)),
+  WD_SEX_AT_BIRTH(
+      "wd_sex_at_birth",
+      w ->
+          Optional.ofNullable(w.getWorkspaceDemographic())
+              .map(WorkspaceDemographic::getSexAtBirth)
+              .map(Object::toString)
+              .orElse(null));
 
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;
