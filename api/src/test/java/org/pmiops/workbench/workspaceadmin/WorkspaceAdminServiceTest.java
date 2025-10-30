@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -26,11 +27,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.VwbAccessService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
@@ -52,6 +55,8 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -74,6 +79,7 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.ErrorResponse;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
@@ -305,6 +311,39 @@ public class WorkspaceAdminServiceTest {
 
     assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory())
         .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+  }
+
+  @Test
+  public void testGetWorkspaceAdminView_notebook_404() {
+    // Arrange
+    ErrorResponse exception404 = new ErrorResponse();
+    exception404.setStatusCode(404);
+    exception404.setMessage("Not Found");
+    when(mockNotebooksService.getNotebooksAsService(any(), any(), any())).thenThrow(new NotFoundException());
+    
+    // Act
+    WorkspaceAdminView workspaceDetailsResponse =
+        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
+    
+    // Asserr
+    assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
+        .isEqualTo(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_DISPLAY_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
+        .isEqualTo(WORKSPACE_DISPLAY_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getGoogleBucketName()).isEqualTo("bucket");
+
+    AdminWorkspaceResources resources = workspaceDetailsResponse.getResources();
+    AdminWorkspaceObjectsCounts objectsCounts = resources.getWorkspaceObjects();
+    assertThat(objectsCounts.getCohortCount()).isEqualTo(null);
+    assertThat(objectsCounts.getConceptSetCount()).isEqualTo(null);
+    assertThat(objectsCounts.getDatasetCount()).isEqualTo(null);
+
+    AdminWorkspaceCloudStorageCounts cloudStorageCounts = resources.getCloudStorage();
+    assertThat(cloudStorageCounts.getStorageBucketPath()).isEqualTo(null);
+    assertThat(cloudStorageCounts.getNotebookFileCount()).isEqualTo(null);
+    assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(null);
+    assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(null);
   }
 
   private final long dummyTime = Instant.now().toEpochMilli();
