@@ -33,6 +33,7 @@ import {
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 
 import { BreadcrumbType } from './breadcrumb-type';
 
@@ -335,10 +336,7 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
     },
   } = workspace;
 
-  const { initialCreditsBillingAccountId } = serverConfigStore.get().config;
-
-  const usingInitialCreditsBillingAccount =
-    billingAccountName === `billingAccounts/${initialCreditsBillingAccountId}`;
+  const usingInitialCreditsBillingAccount = isUsingInitialCredits(workspace);
   if (!usingInitialCreditsBillingAccount) {
     return null;
   }
