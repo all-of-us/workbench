@@ -1,30 +1,42 @@
 package org.pmiops.workbench.user;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.UserEgressBypassWindowDao;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
 import org.pmiops.workbench.model.EgressBypassWindow;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.EgressBypassWindowMapperImpl;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
+import org.pmiops.workbench.vwb.exfil.ExfilManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 public class UserAdminServiceTest {
   private static final Long USER_ID = 123L;
   private static final String DESCRIPTION = "description";
+  private static final String VWB_WORKSPACE_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final String USERNAME = "test@example.com";
 
   @TestConfiguration
   @Import({
@@ -41,19 +53,27 @@ public class UserAdminServiceTest {
 
   @Autowired UserAdminService userAdminService;
 
+  @MockBean UserService userService;
+
+  @MockBean ExfilManagerClient exfilManagerClient;
+
   @Test
   public void testCreateEgressByPassWindow() {
     userAdminService.createEgressBypassWindow(
-        USER_ID, FakeClockConfiguration.NOW.toInstant(), DESCRIPTION);
+        USER_ID, FakeClockConfiguration.NOW.toInstant(), DESCRIPTION, null);
     Set<DbUserEgressBypassWindow> dbResults =
         userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(USER_ID);
     assertThat(dbResults.size()).isEqualTo(1);
     DbUserEgressBypassWindow dbEntity = dbResults.stream().findFirst().get();
     assertThat(dbEntity.getUserId()).isEqualTo(USER_ID);
     assertThat(dbEntity.getDescription()).isEqualTo(DESCRIPTION);
+    assertThat(dbEntity.getVwbWorkspaceId()).isNull();
     assertThat(dbEntity.getStartTime()).isEqualTo(FakeClockConfiguration.NOW);
     assertThat(dbEntity.getEndTime())
         .isEqualTo(Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(2, ChronoUnit.DAYS)));
+
+    // Verify exfil manager was NOT called for regular bypass window
+    verify(exfilManagerClient, never()).createEgressThresholdOverride(any(), any(), any(), any());
   }
 
   @Test
@@ -144,5 +164,74 @@ public class UserAdminServiceTest {
   @Test
   public void testListWindows_emptyResult() {
     assertThat(userAdminService.listAllEgressBypassWindows(USER_ID)).isEmpty();
+  }
+
+  @Test
+  public void testCreateEgressBypassWindow_withVwbWorkspace() {
+    DbUser dbUser = new DbUser();
+    dbUser.setUserId(USER_ID);
+    dbUser.setUsername(USERNAME);
+    when(userService.getByDatabaseId(USER_ID)).thenReturn(Optional.of(dbUser));
+
+    Instant startTime = FakeClockConfiguration.NOW.toInstant();
+    Instant expectedEndTime = startTime.plus(2, ChronoUnit.DAYS);
+
+    userAdminService.createEgressBypassWindow(USER_ID, startTime, DESCRIPTION, VWB_WORKSPACE_ID);
+
+    // Verify DB record was created
+    Set<DbUserEgressBypassWindow> dbResults =
+        userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(USER_ID);
+    assertThat(dbResults.size()).isEqualTo(1);
+    DbUserEgressBypassWindow dbEntity = dbResults.stream().findFirst().get();
+    assertThat(dbEntity.getUserId()).isEqualTo(USER_ID);
+    assertThat(dbEntity.getDescription()).isEqualTo(DESCRIPTION);
+    assertThat(dbEntity.getVwbWorkspaceId()).isEqualTo(VWB_WORKSPACE_ID);
+    assertThat(dbEntity.getStartTime()).isEqualTo(Timestamp.from(startTime));
+    assertThat(dbEntity.getEndTime()).isEqualTo(Timestamp.from(expectedEndTime));
+
+    // Verify exfil manager was called
+    verify(exfilManagerClient)
+        .createEgressThresholdOverride(USERNAME, VWB_WORKSPACE_ID, expectedEndTime, DESCRIPTION);
+  }
+
+  @Test
+  public void testListWindows_withMixedWindowTypes() {
+    Instant startTime1 = FakeClockConfiguration.NOW.toInstant().minus(1, ChronoUnit.DAYS);
+    Instant endTime = FakeClockConfiguration.NOW.toInstant().plus(1, ChronoUnit.DAYS);
+    Instant startTime2 = FakeClockConfiguration.NOW.toInstant();
+
+    // Create VWB bypass window (has vwbWorkspaceId)
+    DbUserEgressBypassWindow vwbWindow =
+        new DbUserEgressBypassWindow()
+            .setUserId(USER_ID)
+            .setStartTime(Timestamp.from(startTime2))
+            .setEndTime(Timestamp.from(endTime))
+            .setDescription(DESCRIPTION)
+            .setVwbWorkspaceId(VWB_WORKSPACE_ID);
+
+    // Create regular bypass window (no vwbWorkspaceId)
+    DbUserEgressBypassWindow regularWindow =
+        new DbUserEgressBypassWindow()
+            .setUserId(USER_ID)
+            .setStartTime(Timestamp.from(startTime1))
+            .setEndTime(Timestamp.from(endTime))
+            .setDescription(DESCRIPTION);
+
+    userEgressBypassWindowDao.saveAll(ImmutableList.of(vwbWindow, regularWindow));
+
+    // Should return ALL windows (both VWB and regular), ordered by start time descending
+    assertThat(userAdminService.listAllEgressBypassWindows(USER_ID))
+        .containsExactly(
+            new EgressBypassWindow()
+                .description(DESCRIPTION)
+                .startTime(startTime2.toEpochMilli())
+                .endTime(endTime.toEpochMilli())
+                .vwbWorkspaceId(UUID.fromString(VWB_WORKSPACE_ID)),
+            new EgressBypassWindow()
+                .description(DESCRIPTION)
+                .startTime(startTime1.toEpochMilli())
+                .endTime(endTime.toEpochMilli())
+                .vwbWorkspaceId(null))
+        .inOrder();
   }
 }

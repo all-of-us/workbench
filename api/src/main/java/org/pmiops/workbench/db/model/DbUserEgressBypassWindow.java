@@ -23,6 +23,7 @@ public class DbUserEgressBypassWindow {
   private Timestamp endTime;
 
   private String description;
+  private String vwbWorkspaceId;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -76,6 +77,16 @@ public class DbUserEgressBypassWindow {
     return this;
   }
 
+  @Column(name = "vwb_workspace_id")
+  public String getVwbWorkspaceId() {
+    return vwbWorkspaceId;
+  }
+
+  public DbUserEgressBypassWindow setVwbWorkspaceId(String vwbWorkspaceId) {
+    this.vwbWorkspaceId = vwbWorkspaceId;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -90,6 +101,7 @@ public class DbUserEgressBypassWindow {
         .append(startTime, dbUserEgressBypassWindow.startTime)
         .append(endTime, dbUserEgressBypassWindow.endTime)
         .append(description, dbUserEgressBypassWindow.description)
+        .append(vwbWorkspaceId, dbUserEgressBypassWindow.vwbWorkspaceId)
         .isEquals();
   }
 
@@ -101,6 +113,7 @@ public class DbUserEgressBypassWindow {
         .append(endTime)
         .append(egressBypassId)
         .append(description)
+        .append(vwbWorkspaceId)
         .toHashCode();
   }
 }

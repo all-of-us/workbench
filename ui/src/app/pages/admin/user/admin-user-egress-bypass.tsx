@@ -11,7 +11,10 @@ import {
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
+import {
+  TextAreaWithLengthValidationMessage,
+  TextInput,
+} from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -30,6 +33,7 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
   const [bypassing, setBypassing] = useState(false);
   const [startTime, setStartTime] = useState(new Date());
   const [bypassDescription, setBypassDescription] = useState('');
+  const [vwbWorkspaceId, setVwbWorkspaceId] = useState('');
   const [bypassWindowsList, setBypassWindowsList] = useState<
     EgressBypassWindow[]
   >([]);
@@ -74,8 +78,10 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
       startTime: startTime.valueOf(),
       byPassDescription: bypassDescription,
+      vwbWorkspaceId: vwbWorkspaceId || undefined,
     };
     setBypassDescription('');
+    setVwbWorkspaceId('');
 
     userAdminApi()
       .createEgressBypassWindow(targetUserId, createEgressBypassWindowRequest)
@@ -125,6 +131,28 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
             tooShortWarning={`Bypass Egress Request Reason should be at least ${MIN_BYPASS_DESCRIPTION} characters long`}
           />
         </FlexColumn>
+
+        {/* VWB Workspace ID (optional) */}
+        <FlexRow style={{ paddingTop: '1rem' }}>
+          <label
+            htmlFor='VWB Workspace ID'
+            style={{ fontWeight: 'bold', color: colors.primary }}
+          >
+            VWB Workspace ID (optional - for VWB workspaces only)
+          </label>
+        </FlexRow>
+        <FlexRow>
+          <TextInput
+            id='VWB Workspace ID'
+            value={vwbWorkspaceId}
+            onChange={(s: string) => {
+              setApiError(false);
+              setVwbWorkspaceId(s);
+            }}
+            placeholder='Enter VWB workspace ID (UUID) if applicable'
+            style={{ width: '60%' }}
+          />
+        </FlexRow>
 
         {/* Bypass request Date*/}
         <FlexRow style={{ paddingTop: '1rem' }}>
@@ -181,6 +209,7 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
               header='End Time'
               body={(row, opt) => <div>{displayDate(row[opt.field])}</div>}
             />
+            <Column field={'vwbWorkspaceId'} header={'VWB Workspace ID'} />
             <Column field={'description'} header={'Description'} />
           </DataTable>
         </FlexRow>
