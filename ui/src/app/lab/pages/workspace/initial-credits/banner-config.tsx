@@ -26,7 +26,7 @@ interface BannerConfig {
 
 const creditsAndBillingLink = (
   <a
-    href='https://support.researchallofus.org/hc/en-us/categories/5942730401428-Credits-and-Billing'
+    href='https://support.researchallofus.org/hc/en-us/sections/6000172946708-Paying-for-Your-Research'
     target='_blank'
     rel='noopener noreferrer'
   >
