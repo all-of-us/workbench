@@ -279,7 +279,7 @@
   <include file="changelog/db.changelog-269-add-reporting-upload-verification-table.xml"/>
   <include file="changelog/db.changelog-270-replace-reporting-upload-verification-timestamp.xml"/>
   <include file="changelog/db.changelog-271-add-workspace-user-cache-table.xml"/>
-  <include file="changelog/db.changelog-272-add-vwb-workspace-ufid-column.xml"/>
+  <include file="changelog/db.changelog-272-add-vwb-workspace-id-column.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
