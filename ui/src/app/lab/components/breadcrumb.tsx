@@ -33,6 +33,7 @@ import {
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 
 import { BreadcrumbType } from './breadcrumb-type';
 
@@ -334,6 +335,10 @@ const getCreditBannerData = (workspace: WorkspaceData, profile: Profile) => {
     },
   } = workspace;
 
+  const usingInitialCreditsBillingAccount = isUsingInitialCredits(workspace);
+  if (!usingInitialCreditsBillingAccount) {
+    return null;
+  }
   const now = Date.now();
   const givenName = workspace?.creatorUser?.givenName;
   const familyName = workspace?.creatorUser?.familyName;

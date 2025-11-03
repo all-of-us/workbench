@@ -361,6 +361,15 @@ describe('InvalidBillingBanner Component', () => {
 });
 
 describe('CreditBanner Component', () => {
+  function makeWorkspaceWithInitialCreditsBillingAccount(
+    base = workspaceDataStub
+  ) {
+    const ws = fp.cloneDeep(base);
+    ws.billingAccountName = `billingAccounts/${
+      serverConfigStore.get().config.initialCreditsBillingAccountId
+    }`;
+    return ws;
+  }
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -372,13 +381,49 @@ describe('CreditBanner Component', () => {
       config: {
         enableUnlinkBillingForInitialCredits: true,
         gsuiteDomain: '',
+        initialCreditsBillingAccountId: 'test-billing-id',
       },
     });
+  });
+  it('should not display CreditBanner if billingAccountName does not match initialCreditsBillingAccountId', () => {
+    // Arrange
+    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: false,
+      expirationEpochMillis: plusDays(Date.now(), 1), // not expired
+      expirationBypassed: false,
+    };
+    // billingAccountName does not match initialCreditsBillingAccountId
+    modifiedWorkspace.billingAccountName = 'billingAccounts/some-other-id';
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(screen.queryByTestId('credit-banner')).not.toBeInTheDocument();
   });
 
   it('should display CreditBanner when credits are exhausted', async () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -407,12 +452,14 @@ describe('CreditBanner Component', () => {
     );
 
     // Assert
-    expect(screen.queryByTestId('credit-banner')).not.toBeInTheDocument();
+    expect(
+      await screen.findByText('Credit Banner (Mocked)')
+    ).toBeInTheDocument();
   });
 
   it('should display CreditBanner when credits are expired and not bypassed', async () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -448,7 +495,7 @@ describe('CreditBanner Component', () => {
 
   it('should not display CreditBanner when credits are expired but bypassed', () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -482,7 +529,7 @@ describe('CreditBanner Component', () => {
 
   it('should not display CreditBanner when credits are not expired and not exhausted', () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBillingAccount();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
