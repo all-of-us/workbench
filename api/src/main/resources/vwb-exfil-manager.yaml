@@ -8,7 +8,6 @@ info:
 
 security:
   - authorization: [ openid, email, profile ]
-  - bearerAuth: [ ]
 
 paths:
   # Unauthenticated Paths
@@ -250,6 +249,3 @@ components:
             openid: open id authorization
             email: email authorization
             profile: profile authorization
-    bearerAuth:
-      type: http
-      scheme: bearer
