@@ -4,6 +4,7 @@ import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
 import org.pmiops.workbench.access.AccessTierService;
@@ -17,11 +18,7 @@ import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.AIANResearchType;
-import org.pmiops.workbench.model.BillingAccountType;
-import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
-import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.*;
 
 public class ReportingTestUtils {
 
@@ -69,6 +66,19 @@ public class ReportingTestUtils {
   public static final String WORKSPACE__FEATURED_WORKSPACE_CATEGORY =
       FeaturedWorkspaceCategory.COMMUNITY.toString();
   public static final String WORKSPACE__ACTIVE_STATUS = "Active";
+  public static final Boolean WORKSPACE__FOCUS_ON_UNDER_REPRESENTED_POPULATIONS = true;
+  public static final WorkspaceDemographic WORKSPACE__WORKSPACE_DEMOGRAPHIC =
+      new WorkspaceDemographic()
+          .raceEthnicity(ImmutableList.of(WorkspaceDemographic.RaceEthnicityEnum.ASIAN))
+          .age(ImmutableList.of(WorkspaceDemographic.AgeEnum.AGE_65_74))
+          .accessToCare(WorkspaceDemographic.AccessToCareEnum.UNSET)
+          .educationLevel(WorkspaceDemographic.EducationLevelEnum.UNSET)
+          .disabilityStatus(WorkspaceDemographic.DisabilityStatusEnum.UNSET)
+          .geography(WorkspaceDemographic.GeographyEnum.RURAL)
+          .incomeLevel(WorkspaceDemographic.IncomeLevelEnum.UNSET)
+          .sexAtBirth(WorkspaceDemographic.SexAtBirthEnum.UNSET)
+          .sexualOrientation(WorkspaceDemographic.SexualOrientationEnum.UNSET)
+          .genderIdentity(WorkspaceDemographic.GenderIdentityEnum.UNSET);
 
   public static final Long COHORT__COHORT_ID = 0L;
   public static final Timestamp COHORT__CREATION_TIME =
@@ -142,7 +152,9 @@ public class ReportingTestUtils {
         .rpTimeRequested(offsetDateTimeUtc(WORKSPACE__RP_TIME_REQUESTED))
         .workspaceId(WORKSPACE__WORKSPACE_ID)
         .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE)
-        .activeStatus(WORKSPACE__ACTIVE_STATUS);
+        .activeStatus(WORKSPACE__ACTIVE_STATUS)
+        .focusOnUnderrepresentedPopulations(WORKSPACE__FOCUS_ON_UNDER_REPRESENTED_POPULATIONS)
+        .workspaceDemographic(WORKSPACE__WORKSPACE_DEMOGRAPHIC);
   }
 
   public static DbWorkspace createDbWorkspace(DbUser creator, DbCdrVersion cdrVersion) {
@@ -182,6 +194,18 @@ public class ReportingTestUtils {
     workspace.setBillingAccountName(fullBillingAccountName(WORKSPACE__BILLING_ACCOUNT_ID));
     workspace.setFeaturedCategory(
         DbFeaturedCategory.valueOf(WORKSPACE__FEATURED_WORKSPACE_CATEGORY));
+    return workspace;
+  }
+
+  public static DbWorkspace createDbWorkspaceWithDemographicData(
+      DbUser creator, DbCdrVersion cdrVersion) {
+    DbWorkspace workspace = createDbWorkspace(creator, cdrVersion);
+    workspace =
+        workspace.setSpecificPopulationsEnum(
+            ImmutableSet.of(
+                SpecificPopulationEnum.RACE_ASIAN,
+                SpecificPopulationEnum.AGE_OLDER,
+                SpecificPopulationEnum.GEOGRAPHY));
     return workspace;
   }
 

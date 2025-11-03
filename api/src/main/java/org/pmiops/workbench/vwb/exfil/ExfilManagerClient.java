@@ -71,6 +71,7 @@ public class ExfilManagerClient {
    * @param endTime Optional end time for the override. If not provided, defaults to 48 hours from
    *     creation
    * @param description Optional description of why the override was created
+<<<<<<< HEAD
    * @throws BadRequestException if workspaceId is not a valid UUID
    */
   public void createEgressThresholdOverride(
@@ -88,6 +89,15 @@ public class ExfilManagerClient {
 
     CreateEgressThresholdOverrideBody body =
         new CreateEgressThresholdOverrideBody().username(username).workspaceId(workspaceUuid);
+=======
+   */
+  public void createEgressThresholdOverride(
+      String username, String workspaceId, Instant endTime, String description) {
+    CreateEgressThresholdOverrideBody body =
+        new CreateEgressThresholdOverrideBody()
+            .username(username)
+            .workspaceId(UUID.fromString(workspaceId));
+>>>>>>> origin
 
     if (endTime != null) {
       body.endTime(OffsetDateTime.ofInstant(endTime, ZoneOffset.UTC));

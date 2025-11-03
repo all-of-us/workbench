@@ -162,7 +162,7 @@
     "batchSizeOverrides": {
       "dataset_domain_value": 50000,
       "leonardo_app_usage": 500,
-      "user": 5000,
+      "user": 2500,
       "workspace": 500
     },
     "exportTerraDataWarehouse": true,

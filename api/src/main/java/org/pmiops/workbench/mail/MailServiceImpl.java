@@ -242,10 +242,10 @@ public class MailServiceImpl implements MailService {
         checkEnableUnlinkBillingForInitialCreditsFlag()
             ? buildHtml(
                 INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2,
-                initialCreditsExhaustionSubstitutionMapV1(user))
+                initialCreditsExhaustionSubstitutionMapV2(user))
             : buildHtml(
                 INITIAL_CREDITS_EXHAUSTION_RESOURCE_V1,
-                initialCreditsExhaustionSubstitutionMapV2(user));
+                initialCreditsExhaustionSubstitutionMapV1(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
