@@ -35,28 +35,6 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   }
 
   @Override
-  public boolean verifyBatchesAndLog(long captureSnapshotTime) {
-    final StringBuilder sb =
-        new StringBuilder(String.format("Verifying batches at %d:\n", captureSnapshotTime));
-
-    sb.append("Table\tSource\tDestination\tDifference(%)\n");
-
-    // fails-fast due to allMatch() so logs may be incomplete on failure
-    boolean verified =
-        reportingTableService.getAll().stream()
-            .allMatch(
-                table -> {
-                  final String bqTableName = table.bqTableName();
-                  long sourceCount = table.rwbTableCountFn().getAsInt();
-                  long destCount = getBigQueryRowCount(bqTableName, captureSnapshotTime);
-                  return verifyCount(bqTableName, sourceCount, destCount, sb);
-                });
-
-    logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
-    return verified;
-  }
-
-  @Override
   public void verifyBatchesAndLog(List<String> tables, long captureSnapshotTime) {
     final StringBuilder sb =
         new StringBuilder(String.format("Verifying batches at %d:\n", captureSnapshotTime));

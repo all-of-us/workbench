@@ -221,7 +221,7 @@ public class ReportingTableService {
 
   public final ReportingTableParams<ReportingWorkspaceUser> workspaceUser() {
     return new ReportingTableParams<>(
-            WORKSPACE_USER_CACHE_TABLE_NAME,
+        WORKSPACE_USER_CACHE_TABLE_NAME,
         batchSize(WORKSPACE_USER_CACHE_TABLE_NAME),
         WorkspaceUserColumnValueExtractor::values,
         reportingQueryService::getWorkspaceUserBatch,

@@ -8,8 +8,6 @@ import java.util.List;
  * daily) uploads, and aggregate and time-series metrics are computed in BigQuery.
  */
 public interface ReportingService {
-  void collectRecordsAndUpload();
-
   void splitUploadIntoTasksAndQueue();
 
   void collectRecordsAndUpload(List<String> tables, long captureTimestamp);
