@@ -6,13 +6,6 @@ info:
 
   version: 0.0.1
 
-security:
-  - authorization: [ openid, email, profile ]
-<<<<<<< HEAD
-=======
-  - bearerAuth: [ ]
->>>>>>> origin
-
 paths:
   # Unauthenticated Paths
   /status:
@@ -253,9 +246,6 @@ components:
             openid: open id authorization
             email: email authorization
             profile: profile authorization
-<<<<<<< HEAD
-=======
     bearerAuth:
       type: http
       scheme: bearer
->>>>>>> origin
