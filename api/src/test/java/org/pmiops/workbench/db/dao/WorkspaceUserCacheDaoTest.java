@@ -32,6 +32,7 @@ public class WorkspaceUserCacheDaoTest {
   private DbWorkspace activeWorkspace;
   private DbWorkspace inactiveWorkspace;
   private DbUser user1;
+  private DbUser user2;
   private DbWorkspaceUserCache cache1;
   private DbWorkspaceUserCache cache2;
   private DbWorkspaceUserCache cache3;
@@ -41,7 +42,7 @@ public class WorkspaceUserCacheDaoTest {
     Timestamp now = Timestamp.from(Instant.now());
 
     user1 = userDao.save(new DbUser().setUsername("user1@example.com"));
-    DbUser user2 = userDao.save(new DbUser().setUsername("user2@example.com"));
+    user2 = userDao.save(new DbUser().setUsername("user2@example.com"));
 
     activeWorkspace =
         new DbWorkspace()
@@ -163,5 +164,22 @@ public class WorkspaceUserCacheDaoTest {
     assertThrows(
         org.springframework.dao.DataIntegrityViolationException.class,
         () -> workspaceUserCacheDao.save(duplicateCache));
+  }
+
+  @Test
+  public void testGetWorkspaceUsers() {
+    Set<String> users =
+        workspaceUserCacheDao.findAllUsersByWorkspaceId(activeWorkspace.getWorkspaceId());
+
+    assertThat(users).hasSize(2);
+    assertThat(users).containsExactly(user1.getUsername(), user2.getUsername());
+  }
+
+  @Test
+  public void testGetWorkspaceUsers_noUsers() {
+    // Look for users in a workspace with no cache entries
+    Set<String> users = workspaceUserCacheDao.findAllUsersByWorkspaceId(Long.MAX_VALUE);
+
+    assertThat(users).isEmpty();
   }
 }
