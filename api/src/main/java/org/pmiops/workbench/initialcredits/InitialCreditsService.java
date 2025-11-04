@@ -547,12 +547,7 @@ public class InitialCreditsService {
   private void stopInitialCreditSpendInWorkspace(DbWorkspace workspace) {
     String namespace = workspace.getWorkspaceNamespace();
     String googleProject = workspace.getGoogleProject();
-    try {
-      leonardoApiClient.deleteAllResources(googleProject, false);
-      logger.info("Deleted apps and runtimes for workspace {}", namespace);
-    } catch (WorkbenchException e) {
-      logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
-    }
+
     if (workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits) {
       try {
         fireCloudService.removeBillingAccountFromBillingProjectAsService(namespace);
