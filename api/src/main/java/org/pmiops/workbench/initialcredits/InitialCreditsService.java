@@ -556,6 +556,13 @@ public class InitialCreditsService {
         logger.error(
             "Failed to remove initial credits billing account from workspace {}", namespace, e);
       }
+    } else {
+      try {
+        leonardoApiClient.deleteAllResources(googleProject, false);
+        logger.info("Deleted apps and runtimes for workspace {}", namespace);
+      } catch (WorkbenchException e) {
+        logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
+      }
     }
   }
 
