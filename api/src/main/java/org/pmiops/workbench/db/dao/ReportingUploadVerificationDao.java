@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbReportingUploadVerification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,6 +29,6 @@ public interface ReportingUploadVerificationDao
       @Param("tableName") String tableName, @Param("snapshotTimestamp") Long snapshotTimestamp);
 
   @Query(
-      "SELECT COUNT(u) = 0 FROM DbReportingUploadVerification u WHERE u.snapshotTimestamp = (SELECT MAX(u2.snapshotTimestamp) FROM DbReportingUploadVerification u2) AND u.uploaded = false")
-  boolean hasLatestSnapshotUploaded();
+      "SELECT distinct u.snapshotTimestamp FROM DbReportingUploadVerification u WHERE u.snapshotTimestamp = (SELECT MAX(u2.snapshotTimestamp) FROM DbReportingUploadVerification u2) AND u.uploaded = false")
+  Optional<Long> findLatestSnapshotTimestampIfAnyTableUploadFailed();
 }
