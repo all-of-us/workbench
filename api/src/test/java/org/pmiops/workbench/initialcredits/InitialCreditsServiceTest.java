@@ -1519,8 +1519,6 @@ public class InitialCreditsServiceTest {
     // Call the method being tested
     initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
-    // ASSERT
-    verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
     // Verify the appropriate behavior based on the flag
     if (unlinkBillingEnabled) {
       // When flag is enabled, the billing account should be unlinked.
@@ -1592,12 +1590,6 @@ public class InitialCreditsServiceTest {
     DbWorkspace updatedNonInitialWorkspace =
         workspaceDao.findById(nonInitialCreditsWorkspace.getWorkspaceId()).get();
     assertThat(updatedNonInitialWorkspace.isInitialCreditsExhausted()).isFalse();
-
-    // Verify that resources were stopped for initial credits workspaces
-    verify(leonardoApiClient)
-        .deleteAllResources(initialCreditsWorkspace1.getGoogleProject(), false);
-    verify(leonardoApiClient)
-        .deleteAllResources(initialCreditsWorkspace2.getGoogleProject(), false);
 
     // Verify that appropriate billing account behavior occurs based on flag
     if (workbenchConfig.featureFlags.enableUnlinkBillingForInitialCredits) {
@@ -1721,9 +1713,6 @@ public class InitialCreditsServiceTest {
     DbWorkspace updatedWorkspace =
         workspaceDao.findById(initialCreditsWorkspace.getWorkspaceId()).get();
     assertThat(updatedWorkspace.isInitialCreditsExhausted()).isTrue();
-
-    // Verify that resources were stopped
-    verify(leonardoApiClient).deleteAllResources(initialCreditsWorkspace.getGoogleProject(), false);
 
     // Verify the appropriate behavior based on the flag
     if (unlinkBillingEnabled) {

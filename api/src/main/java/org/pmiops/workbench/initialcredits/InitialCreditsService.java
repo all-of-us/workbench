@@ -549,12 +549,7 @@ public class InitialCreditsService {
   private void stopInitialCreditSpendInWorkspace(DbWorkspace workspace) {
     String namespace = workspace.getWorkspaceNamespace();
     String googleProject = workspace.getGoogleProject();
-    try {
-      leonardoApiClient.deleteAllResources(googleProject, false);
-      logger.info("Deleted apps and runtimes for workspace {}", namespace);
-    } catch (WorkbenchException e) {
-      logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
-    }
+
     if (workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits) {
       try {
         fireCloudService.removeBillingAccountFromBillingProjectAsService(namespace);
@@ -562,6 +557,25 @@ public class InitialCreditsService {
       } catch (WorkbenchException e) {
         logger.error(
             "Failed to remove initial credits billing account from workspace {}", namespace, e);
+
+        try {
+          leonardoApiClient.deleteAllResources(googleProject, false);
+          logger.info(
+              "Deleted apps and runtimes for workspace {} because we failed to unlink billing",
+              namespace);
+        } catch (WorkbenchException we) {
+          logger.error(
+              "Failed to delete apps and runtimes for workspace {} and we failed to unlink billing",
+              namespace,
+              we);
+        }
+      }
+    } else {
+      try {
+        leonardoApiClient.deleteAllResources(googleProject, false);
+        logger.info("Deleted apps and runtimes for workspace {}", namespace);
+      } catch (WorkbenchException e) {
+        logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
       }
     }
   }
