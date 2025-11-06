@@ -559,8 +559,8 @@ public class InitialCreditsService {
         try {
           leonardoApiClient.deleteAllResources(googleProject, false);
           logger.info("Deleted apps and runtimes for workspace {} because we failed to unlink billing", namespace);
-        } catch (WorkbenchException e) {
-          logger.error("Failed to delete apps and runtimes for workspace {} and we failed to unlink billing", namespace, e);
+        } catch (WorkbenchException we) {
+          logger.error("Failed to delete apps and runtimes for workspace {} and we failed to unlink billing", namespace, we);
         }    
       }
     } else {
