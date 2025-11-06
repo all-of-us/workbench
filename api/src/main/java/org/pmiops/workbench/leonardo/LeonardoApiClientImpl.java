@@ -377,7 +377,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                         String.format(
                             "failed to stop runtime '%s/%s'", googleProject, r.getRuntimeName()),
                         e);
-                    return false;
+                    return e.getCode() != 404; // consider 404 a success for stopping
                   }
                   return true;
                 })
@@ -741,7 +741,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                             "failed to stop runtime '%s/%s'",
                             r.getCloudContext().getCloudResource(), r.getAppName()),
                         e);
-                    return false;
+                    return e.getCode() != 404; // consider 404 a success for stopping
                   }
                   return true;
                 })
