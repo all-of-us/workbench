@@ -3,8 +3,12 @@ import * as React from 'react';
 import { RuntimeStatus } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { toAnalysisConfig } from 'app/utils/analysis-config';
-import { machineRunningCost, machineStorageCost } from 'app/utils/machines';
+import {
+  ComputeType,
+  findMachineByName,
+  machineRunningCostPerHour,
+  machineStorageCostPerHour,
+} from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 import { isVisible } from 'app/utils/runtime-utils';
 import { runtimeDiskStore, runtimeStore, useStore } from 'app/utils/stores';
@@ -17,9 +21,29 @@ export const RuntimeCost = () => {
     return null;
   }
 
-  const analysisConfig = toAnalysisConfig(runtime, gcePersistentDisk);
-  const runningCost = formatUsd(machineRunningCost(analysisConfig));
-  const storageCost = formatUsd(machineStorageCost(analysisConfig));
+  const storageCostParams = {
+    dataprocConfig: runtime.dataprocConfig,
+    persistentDisk: gcePersistentDisk,
+  };
+
+  const machineType =
+    runtime.gceConfig?.machineType ??
+    runtime.gceWithPdConfig?.machineType ??
+    runtime.dataprocConfig.masterMachineType;
+
+  const runningCostParams = {
+    ...storageCostParams,
+    computeType: runtime.dataprocConfig
+      ? ComputeType.Dataproc
+      : ComputeType.Standard,
+    machine: findMachineByName(machineType),
+    gpuConfig:
+      // not available for dataproc
+      runtime.gceConfig?.gpuConfig ?? runtime.gceWithPdConfig?.gpuConfig,
+  };
+
+  const runningCost = formatUsd(machineRunningCostPerHour(runningCostParams));
+  const storageCost = formatUsd(machineStorageCostPerHour(storageCostParams));
 
   // display running cost or stopped (storage) cost
   // Error and Deleted statuses are not included because they're not "visible" [isVisible() = false]
