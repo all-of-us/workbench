@@ -6,7 +6,7 @@ import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
-import org.pmiops.workbench.wsmanager.model.IamRole;
+import org.pmiops.workbench.vwb.wsmanager.model.IamRole;
 
 @Mapper(componentModel = "spring", suppressTimestampInGenerated = true)
 public interface FirecloudMapper {
