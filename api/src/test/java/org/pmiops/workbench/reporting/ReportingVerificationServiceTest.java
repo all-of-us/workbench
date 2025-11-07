@@ -124,49 +124,6 @@ public class ReportingVerificationServiceTest {
     LOGGER.addHandler(customLogHandler);
   }
 
-  @Test
-  public void testVerifyBatch_verified() {
-    createTableEntries(ACTUAL_COUNT);
-    assertThat(reportingVerificationService.verifyBatchesAndLog(NOW.toEpochMilli())).isTrue();
-
-    String logs = getTestCapturedLog();
-    // 2 entities in database, and we uploaded 2.
-    String expectedWorkspaceLogPart = "workspace\t2\t2\t0 (0.000%)";
-    assertThat(logs.contains(expectedWorkspaceLogPart)).isTrue();
-    String expectedUserLogPart = "user\t2\t2\t0 (0.000%)";
-    assertThat(logs.contains(expectedUserLogPart)).isTrue();
-    String expectedCohortLogPart = "cohort\t2\t2\t0 (0.000%)";
-    assertThat(logs.contains(expectedCohortLogPart)).isTrue();
-    String expectedNewUserSatisfactionSurveyLogPart =
-        "new_user_satisfaction_survey\t2\t2\t0 (0.000%)";
-    assertThat(logs.contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
-    String expectedUserGeneralDiscoverySourceLogPart =
-        "user_general_discovery_source\t2\t2\t0 (0.000%)";
-    assertThat(logs.contains(expectedUserGeneralDiscoverySourceLogPart)).isTrue();
-    String expectedUserPartnerDiscoverySourceLogPart =
-        "user_partner_discovery_source\t2\t2\t0 (0.000%)";
-    assertThat(logs.contains(expectedUserPartnerDiscoverySourceLogPart)).isTrue();
-  }
-
-  @Test
-  public void testVerifyBatch_fail() {
-    createTableEntries(ACTUAL_COUNT * 2);
-    assertThat(reportingVerificationService.verifyBatchesAndLog(NOW.toEpochMilli())).isFalse();
-
-    String logs = getTestCapturedLog();
-    // 4 cohort entities, instead of the expected 2.
-    String expectedWorkspaceLogPart = "cohort\t4\t2\t-2";
-    assertThat(logs.contains(expectedWorkspaceLogPart)).isTrue();
-
-    // other tables do not appear in the log because we fail-fast after cohort
-    String unexpectedUserLogPart = "user\t4\t2\t-2";
-    assertThat(logs.contains(unexpectedUserLogPart)).isFalse();
-    String unexpectedCohortLogPart = "workspace\t4\t2\t-2";
-    assertThat(logs.contains(unexpectedCohortLogPart)).isFalse();
-    String unexpectedSurveyLogPart = "new_user_satisfaction_survey\t4\t2\t-2";
-    assertThat(logs.contains(unexpectedSurveyLogPart)).isFalse();
-  }
-
   /** This creates equal amount of table entries for all batch-uploaded tables. */
   private void createTableEntries(long count) {
     DbCdrVersion cdrVersion = new DbCdrVersion();

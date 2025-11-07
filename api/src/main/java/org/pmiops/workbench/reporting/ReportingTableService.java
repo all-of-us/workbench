@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
+import org.pmiops.workbench.model.ReportingWorkspaceUser;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
@@ -34,6 +35,7 @@ import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumn
 import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceUserColumnValueExtractor;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -64,6 +66,8 @@ public class ReportingTableService {
   private static final String USER_TABLE_NAME = "user";
   private static final String WORKSPACE_FREE_TIER_USAGE_TABLE_NAME = "workspace_free_tier_usage";
   private static final String WORKSPACE_TABLE_NAME = "workspace";
+  private static final String WORKSPACE_USER_CACHE_TABLE_NAME = "workspace_user_cache";
+  private static final String WORKSPACE_USER_CACHE_BQ_TABLE_NAME = "workspace_user";
 
   private final ReportingQueryService reportingQueryService;
 
@@ -88,6 +92,7 @@ public class ReportingTableService {
         userGeneralDiscoverySource(),
         userPartnerDiscoverySource(),
         workspace(),
+        workspaceUser(),
         workspaceFreeTierUsage());
   }
 
@@ -213,5 +218,14 @@ public class ReportingTableService {
         WorkspaceColumnValueExtractor::values,
         reportingQueryService::getWorkspaceBatch,
         () -> reportingQueryService.getTableRowCount(WORKSPACE_TABLE_NAME));
+  }
+
+  public final ReportingTableParams<ReportingWorkspaceUser> workspaceUser() {
+    return new ReportingTableParams<>(
+        WORKSPACE_USER_CACHE_BQ_TABLE_NAME,
+        batchSize(WORKSPACE_USER_CACHE_BQ_TABLE_NAME),
+        WorkspaceUserColumnValueExtractor::values,
+        reportingQueryService::getWorkspaceUserBatch,
+        () -> reportingQueryService.getTableRowCount(WORKSPACE_USER_CACHE_TABLE_NAME));
   }
 }

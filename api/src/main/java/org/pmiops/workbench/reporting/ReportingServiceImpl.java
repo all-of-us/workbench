@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.ReportingUploadVerificationDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.ReportingBase;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -51,32 +50,6 @@ public class ReportingServiceImpl implements ReportingService {
     reportingQueryService
         .getBatchedStream(tableParams.rwbBatchQueryFn(), tableParams.batchSize())
         .forEach(batch -> reportingUploadService.uploadBatch(tableParams, batch, captureTimestamp));
-  }
-
-  // upload data in batches, verify the counts, and mark this snapshot valid.
-  @Transactional
-  @Override
-  public void collectRecordsAndUpload() {
-    logger.info("Uploading workbench tables in batches");
-
-    final long captureTimestamp = clock.millis();
-
-    // First: Upload the data in batches.
-
-    reportingTableService
-        .getAll()
-        .forEach(tableParams -> uploadBatchesForTable(tableParams, captureTimestamp));
-
-    // Second: Verify the counts.
-    boolean batchUploadSuccess = reportingVerificationService.verifyBatchesAndLog(captureTimestamp);
-
-    // Finally: Mark this snapshot valid by inserting one record into verified_snapshot table.
-    if (batchUploadSuccess) {
-      reportingUploadService.uploadVerifiedSnapshot(captureTimestamp);
-    } else {
-      logger.severe("Failed to verify batch upload result");
-      throw new ServerErrorException("Failed to verify batch upload result");
-    }
   }
 
   @Transactional

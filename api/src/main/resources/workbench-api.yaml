@@ -13081,6 +13081,24 @@ components:
         This code was generated using reporting-wizard.rb at 2020-09-30T16:18:28-04:00.
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
+    ReportingWorkspaceUser:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
+      type: object
+      properties:
+        workspaceId:
+          type: integer
+          description: |-
+            Primary key of the workspace table in Workbench application database. Along with
+            snapshot_timestamp, serves as a pseudo-primary key for this table.
+          format: int64
+        userId:
+          type: integer
+          description: User ID of the user in the workspace.
+          format: int64
+        role:
+          type: string
+          description: User's role in the workspace.
     ReportingWorkspaceFreeTierUsage:
       allOf:
         - $ref: '#/components/schemas/ReportingBase'
