@@ -13,7 +13,7 @@ import vwbCarousel1 from 'assets/images/vwb-carousel-1.png';
 import vwbCarousel2 from 'assets/images/vwb-carousel-2.png';
 import vwbCarousel3 from 'assets/images/vwb-carousel-3.png';
 
-const VERILY_PRE_URL = 'https://verily.com/solutions/pre-platform'
+const VERILY_PRE_URL = 'https://verily.com/solutions/pre-platform';
 const VWB_USER_SUPPORT_HUB_URL =
   'https://support.researchallofus.org/hc/en-us/articles/39985865987732-What-to-expect-during-the-Researcher-Workbench-Migration';
 const VWB_CAROUSEL_ITEMS = [vwbCarousel1, vwbCarousel2, vwbCarousel3];
