@@ -162,8 +162,8 @@ def parse_input_manifest(filename)
       unless missing_keys.empty? and extra_keys.empty?
         raise ArgumentError.new(
           "bad section definition '#{section_key}'\n" +
-            "missing required keys: #{missing_keys.join(',')}\n" +
-            "had unknown keys: #{extra_keys.join(',')}")
+            "missing required keys: #{missing_keys.to_a.join(',')}\n" +
+            "had unknown keys: #{extra_keys.to_a.join(',')}")
       end
 
       section_value.each do |inner_k, inner_v|
@@ -539,6 +539,7 @@ def build_copy_manifest_for_preprod_section(input_section, ingest_bucket, dest_b
     _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, nil, preprod_cdr_base_path, preprod_ingest_base_path)
   end
 end
+
 
 # Concurrently run the given process block over all rows in the provided manifest.
 # The block should have the following signature:
