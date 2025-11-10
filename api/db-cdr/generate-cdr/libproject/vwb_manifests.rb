@@ -36,144 +36,228 @@ def _get_vwb_pooled_path(path_infix, display_version_id, is_delta_release)
   return "pooled/#{path_infix}/#{display_version_id}_#{version_postfix}"
 end
 
-# Helper to read previous manifest for delta releases
-def _read_vwb_previous_manifest(project, dest_bucket, delta_release_manifest_path, delta_release, path_infix)
-  common = Common.new
-  prev_manifest = ""
-
-  # Get the deploy account for impersonation
-  env = ENVIRONMENTS[project]
-  deploy_account = env.fetch(:publisher_account)
-
-  manifest_path = delta_release_manifest_path
-
-  # If deltaReleaseManifestPath is specified, try to use it.
-  unless delta_release_manifest_path.nil?
-    if delta_release_manifest_path.start_with?("gs://")
-      prev_manifest = common.capture_stdout(["gsutil", "-i", deploy_account, "cat", delta_release_manifest_path])
-    else
-      prev_manifest = IO.read(delta_release_manifest_path)
-    end
+# Helper to read manifest from GCS or local file
+def read_manifest_content_from_path(manifest_path, deploy_account, common, project = nil)
+  if manifest_path.start_with?("gs://")
+    args = project ? ["gsutil", "-u", project, "-i", deploy_account, "cat", manifest_path] : ["gsutil", "-i", deploy_account, "cat", manifest_path]
+    common.capture_stdout(args)
+  else
+    IO.read(manifest_path)
   end
+end
 
-  # Try to find the manifest given the deltaRelease field.
-  if !delta_release.nil? && prev_manifest.empty?
-    manifest_path = "#{dest_bucket}/#{delta_release}/#{path_infix}/manifest.csv"
-    prev_manifest = common.capture_stdout(["gsutil", "-u", project, "-i", deploy_account, "cat", manifest_path])
-  end
+# Helper to read manifest from explicit path if provided
+def read_manifest_from_explicit_path(delta_release_manifest_path, deploy_account, common)
+  return "" if delta_release_manifest_path.nil?
+  read_manifest_content_from_path(delta_release_manifest_path, deploy_account, common)
+end
 
-  # If the manifest still cannot be read then throw an error because config is not correct.
-  unless delta_release.nil? && delta_release_manifest_path.nil?
-    if prev_manifest.empty?
-      raise ArgumentError.new("failed to read previous manifest from #{manifest_path}, " +
-                              "make sure to provide the correct previous release in the input manifest")
-    end
-  end
+# Helper to construct and read manifest from delta release version
+def read_manifest_from_delta_release(delta_release, dest_bucket, path_infix, project, deploy_account, common)
+  return "" if delta_release.nil?
 
-  # Convert the prev_manifest to dict of research ID -> CSV::Row
+  manifest_path = "#{dest_bucket}/#{delta_release}/#{path_infix}/manifest.csv"
+  read_manifest_content_from_path(manifest_path, deploy_account, common, project)
+end
+
+# Helper to validate that manifest was successfully read
+def validate_manifest_read(prev_manifest, manifest_path, delta_release, delta_release_manifest_path)
+  # Only validate if either delta_release or delta_release_manifest_path was provided
+  return unless delta_release || delta_release_manifest_path
+  return unless prev_manifest.empty?
+
+  raise ArgumentError.new("failed to read previous manifest from #{manifest_path}, " +
+                          "make sure to provide the correct previous release in the input manifest")
+end
+
+# Helper to convert manifest CSV to hash by person_id
+def convert_manifest_to_hash(prev_manifest)
   return {} if prev_manifest.empty?
 
   prev_manifest_csv = CSV.parse(prev_manifest, headers: true)
   prev_manifest_hash = {}
+
   prev_manifest_csv.each do |manifest_row|
-    # Use person_id to match genomic_manifests logic
     rid = manifest_row["person_id"]
     prev_manifest_hash[rid] = manifest_row
   end
 
-  return prev_manifest_hash
+  prev_manifest_hash
+end
+
+# Helper to read previous manifest for delta releases
+def _read_vwb_previous_manifest(project, dest_bucket, delta_release_manifest_path, delta_release, path_infix)
+  common = Common.new
+  env = ENVIRONMENTS[project]
+  deploy_account = env.fetch(:publisher_account)
+
+  # Try reading from explicit path first
+  prev_manifest = read_manifest_from_explicit_path(delta_release_manifest_path, deploy_account, common)
+  manifest_path = delta_release_manifest_path
+
+  # If not found, try delta release version
+  if prev_manifest.empty?
+    prev_manifest = read_manifest_from_delta_release(delta_release, dest_bucket, path_infix, project, deploy_account, common)
+    manifest_path = "#{dest_bucket}/#{delta_release}/#{path_infix}/manifest.csv" unless delta_release.nil?
+  end
+
+  # Validate that manifest was read successfully
+  validate_manifest_read(prev_manifest, manifest_path, delta_release, delta_release_manifest_path)
+
+  # Convert to hash
+  convert_manifest_to_hash(prev_manifest)
+end
+
+# Helper to load previous manifest for AW4 delta releases
+def load_aw4_previous_manifest(input_section, dest_bucket, project)
+  return {} unless !input_section["deltaRelease"].nil? && !project.nil?
+
+  _read_vwb_previous_manifest(
+    project,
+    dest_bucket,
+    input_section["deltaReleaseManifestPath"],
+    input_section["deltaRelease"],
+    input_section["pooledDestPathInfix"]
+  )
+end
+
+# Helper to check if RID exists in previous manifest
+def rid_exists_in_previous_manifest?(rid, prev_manifest)
+  !prev_manifest.empty? && prev_manifest.key?(rid)
+end
+
+# Helper to generate destination path for AW4 file
+def generate_aw4_destination_path(source_path, input_section, rid, destination_base)
+  source_name = File.basename(source_path)
+  dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
+  File.join(destination_base, dest_name)
+end
+
+# Helper to build output row for existing RID in delta release
+def build_output_row_for_existing_rid(rid, aw4_row, input_section, destination_base)
+  return nil unless input_section["outputManifestSpec"]
+
+  output_row = {"person_id" => rid}
+
+  input_section["outputManifestSpec"].each do |aw4_col, output_col|
+    source_path = aw4_row[aw4_col]
+    next if source_path.nil? || source_path.empty?
+
+    destination_path = generate_aw4_destination_path(source_path, input_section, rid, destination_base)
+    output_row[output_col] = destination_path
+  end
+
+  output_row
+end
+
+# Helper to process existing RID from previous manifest
+def process_existing_rid_from_previous_manifest(rid, aw4_row, input_section, destination_base, output_rows_by_rid)
+  output_row = build_output_row_for_existing_rid(rid, aw4_row, input_section, destination_base)
+  output_rows_by_rid[rid] = output_row if output_row
+end
+
+# Helper to initialize output row for new RID
+def initialize_output_row_if_needed(rid, input_section, output_rows_by_rid)
+  return unless input_section["outputManifestSpec"]
+  return if output_rows_by_rid.key?(rid)
+
+  output_rows_by_rid[rid] = {"person_id" => rid}
+end
+
+# Helper to check if source path is valid
+def valid_source_path?(source_path)
+  !source_path.nil? && !source_path.empty?
+end
+
+# Helper to create copy manifest entry for AW4 file
+def create_aw4_copy_manifest_entry(source_path, destination_path, dest_name, storage_class)
+  {
+    "source" => source_path,
+    "destination" => destination_path,
+    "outputFileName" => dest_name,
+    "storageClass" => storage_class
+  }
+end
+
+# Helper to map output column for AW4 file
+def map_aw4_output_column(aw4_column, destination_path, input_section, rid, output_rows_by_rid)
+  return unless input_section["outputManifestSpec"]
+
+  input_section["outputManifestSpec"].each do |aw4_col, output_col|
+    if aw4_col == aw4_column
+      output_rows_by_rid[rid][output_col] = destination_path
+    end
+  end
+end
+
+# Helper to process single AW4 column
+def process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid)
+  source_path = aw4_row[aw4_column]
+  return unless valid_source_path?(source_path)
+
+  # Build copy manifest entry
+  source_name = File.basename(source_path)
+  dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
+  destination_path = File.join(destination_base, dest_name)
+  storage_class = input_section.fetch("storageClass", "STANDARD")
+
+  manifest_entry = create_aw4_copy_manifest_entry(source_path, destination_path, dest_name, storage_class)
+  copy_manifest.push(manifest_entry)
+
+  # Map to output manifest if specified
+  map_aw4_output_column(aw4_column, destination_path, input_section, rid, output_rows_by_rid)
+end
+
+# Helper to process all AW4 columns for a single row
+def process_aw4_columns_for_row(aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid)
+  input_section["aw4Columns"].each do |aw4_column|
+    process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid)
+  end
+end
+
+# Helper to process single AW4 row
+def process_single_aw4_row(aw4_row, input_section, destination_base, prev_manifest, copy_manifest, output_rows_by_rid)
+  rid = aw4_row["research_id"]
+
+  # Check if RID exists in previous manifest
+  if rid_exists_in_previous_manifest?(rid, prev_manifest)
+    process_existing_rid_from_previous_manifest(rid, aw4_row, input_section, destination_base, output_rows_by_rid)
+    return # Skip copy manifest generation for existing research_ids
+  end
+
+  # Initialize output row for new RID
+  initialize_output_row_if_needed(rid, input_section, output_rows_by_rid)
+
+  # Process all columns
+  process_aw4_columns_for_row(aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid)
+end
+
+# Helper to convert output rows hash to array
+def convert_output_rows_to_array(output_rows_by_rid)
+  return [] if output_rows_by_rid.empty?
+  output_rows_by_rid.values
 end
 
 # Build VWB copy manifest for AW4 sections (Microarray and WGS)
-def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_version_id, aw4_rows, output_manifest_path, project = nil)
-  copy_manifest = []
-  output_manifest = []
-
-  # Always use pooled path (matching genomic_manifests behavior)
-  # For non-delta releases, use "base" suffix; for delta releases, use "delta" suffix
+def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_version_id, aw4_rows, project = nil)
+  # Calculate destination base path
   path_prefix = _get_vwb_pooled_path(input_section['pooledDestPathInfix'], display_version_id, input_section["deltaRelease"])
-
   destination_base = File.join(dest_bucket, path_prefix)
 
-  # Read previous manifest for delta releases
-  prev_manifest = {}
-  if !input_section["deltaRelease"].nil? && !project.nil?
-    prev_manifest = _read_vwb_previous_manifest(
-      project,
-      dest_bucket,
-      input_section["deltaReleaseManifestPath"],
-      input_section["deltaRelease"],
-      input_section["pooledDestPathInfix"]
-    )
-  end
+  # Load previous manifest for delta releases
+  prev_manifest = load_aw4_previous_manifest(input_section, dest_bucket, project)
 
-  # Track output rows by research_id to accumulate all columns
+  # Initialize manifests
+  copy_manifest = []
   output_rows_by_rid = {}
 
+  # Process each AW4 row
   aw4_rows.each do |aw4_row|
-    rid = aw4_row["research_id"]
-
-    # Check if this research_id exists in previous manifest
-    if !prev_manifest.empty? && prev_manifest.key?(rid)
-      # For delta releases, if research_id exists in previous manifest,
-      # include it in output manifest with renamed URIs but skip copy manifest
-      if input_section["outputManifestSpec"]
-        # Start with person_id
-        output_row = {"person_id" => rid}
-
-        # Generate the correct renamed destination URIs for each column
-        input_section["outputManifestSpec"].each do |aw4_col, output_col|
-          source_path = aw4_row[aw4_col]
-          next if source_path.nil? || source_path.empty?
-
-          source_name = File.basename(source_path)
-          dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
-          destination_path = File.join(destination_base, dest_name)
-          output_row[output_col] = destination_path
-        end
-
-        output_rows_by_rid[rid] = output_row
-      end
-      next  # Skip copy manifest generation for existing research_ids
-    end
-
-    # Initialize output row for this research_id if needed
-    if input_section["outputManifestSpec"] && !output_rows_by_rid.key?(rid)
-      # Use person_id to match genomic_manifests field naming
-      output_rows_by_rid[rid] = {"person_id" => rid}
-    end
-
-    input_section["aw4Columns"].each do |aw4_column|
-      source_path = aw4_row[aw4_column]
-      next if source_path.nil? || source_path.empty?
-
-      # Build copy manifest entry
-      source_name = File.basename(source_path)
-      dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
-      destination_path = File.join(destination_base, dest_name)
-      storage_class = input_section.fetch("storageClass", "STANDARD")
-
-      manifest_entry = {
-        "source" => source_path,
-        "destination" => destination_path,
-        "outputFileName" => dest_name,
-        "storageClass" => storage_class
-      }
-      copy_manifest.push(manifest_entry)
-
-      # Add to output manifest if specified
-      if input_section["outputManifestSpec"]
-        input_section["outputManifestSpec"].each do |aw4_col, output_col|
-          if aw4_col == aw4_column
-            output_rows_by_rid[rid][output_col] = destination_path
-          end
-        end
-      end
-    end
+    process_single_aw4_row(aw4_row, input_section, destination_base, prev_manifest, copy_manifest, output_rows_by_rid)
   end
 
-  # Convert output rows hash to array
-  output_manifest = output_rows_by_rid.values unless output_rows_by_rid.empty?
+  # Convert output rows to array
+  output_manifest = convert_output_rows_to_array(output_rows_by_rid)
 
   return copy_manifest, output_manifest
 end
@@ -223,79 +307,125 @@ def process_file_source(source_path, destination_base, storage_class, input_sect
   }
 end
 
-# Build VWB copy manifest for curation sections
-def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, display_version_id, project = nil)
-  common = Common.new
-  copy_manifest = []
+# Helper to check if this is a delta release
+def is_delta_release?(input_section)
+  !input_section["deltaRelease"].nil?
+end
 
-  # Check if this is a delta release
-  use_pooled = !input_section["deltaRelease"].nil?
-
-  # Determine destination base path
-  if use_pooled
-    # For delta releases with pooled path
+# Helper to determine destination base for curation section
+def determine_curation_destination_base(input_section, dest_bucket, display_version_id)
+  if is_delta_release?(input_section)
     path_infix = input_section['destination']
     path_prefix = _get_vwb_pooled_path(path_infix, display_version_id, input_section["deltaRelease"])
-    destination_base = File.join(dest_bucket, path_prefix)
+    File.join(dest_bucket, path_prefix)
   else
-    # Use normal path determination
-    destination_base = determine_destination_base(input_section, dest_bucket, display_version_id)
+    determine_destination_base(input_section, dest_bucket, display_version_id)
   end
+end
 
-  # Get source files matching the pattern
-  source_uris = common.capture_stdout(["gsutil", "ls", "-d", input_section["sourcePattern"]]).split("\n")
+# Helper to get and validate source URIs
+def get_source_uris_from_pattern(source_pattern, common)
+  source_uris = common.capture_stdout(["gsutil", "ls", "-d", source_pattern]).split("\n")
+
   if source_uris.empty?
-    raise ArgumentError.new("sourcePattern '#{input_section["sourcePattern"]}' did not match any files")
+    raise ArgumentError.new("sourcePattern '#{source_pattern}' did not match any files")
   end
+
   source_uris.reject!(&:empty?)
+  source_uris
+end
 
-  storage_class = input_section.fetch("storageClass", "STANDARD")
+# Helper to read previous manifest content for curation
+def read_previous_curation_manifest(input_section, dest_bucket, project, common)
+  prev_manifest_path = input_section["deltaReleaseManifestPath"]
+  delta_release = input_section["deltaRelease"]
 
-  # For delta releases, read previous manifest to check which files already exist
-  prev_files = {}
-  if !input_section["deltaRelease"].nil? && !project.nil?
-    prev_manifest_path = input_section["deltaReleaseManifestPath"]
-    delta_release = input_section["deltaRelease"]
+  env = ENVIRONMENTS[project]
+  deploy_account = env.fetch(:publisher_account)
 
-    # Try to read previous manifest
-    begin
-      env = ENVIRONMENTS[project]
-      deploy_account = env.fetch(:publisher_account)
-
-      if !prev_manifest_path.nil? && prev_manifest_path.start_with?("gs://")
-        prev_manifest_content = common.capture_stdout(["gsutil", "-i", deploy_account, "cat", prev_manifest_path])
-      elsif !delta_release.nil?
-        # Try to find manifest based on delta release version
-        manifest_path = "#{dest_bucket}/#{delta_release}/#{input_section['destination']}/manifest.csv"
-        prev_manifest_content = common.capture_stdout(["gsutil", "-u", project, "-i", deploy_account, "cat", manifest_path])
-      end
-
-      unless prev_manifest_content.nil? || prev_manifest_content.empty?
-        CSV.parse(prev_manifest_content, headers: true).each do |row|
-          # Store the source file path as key
-          prev_files[row["source"]] = true if row["source"]
-        end
-      end
-    rescue => e
-      common.warning "Could not read previous manifest for delta release: #{e.message}"
-    end
+  if !prev_manifest_path.nil? && prev_manifest_path.start_with?("gs://")
+    common.capture_stdout(["gsutil", "-i", deploy_account, "cat", prev_manifest_path])
+  elsif !delta_release.nil?
+    manifest_path = "#{dest_bucket}/#{delta_release}/#{input_section['destination']}/manifest.csv"
+    common.capture_stdout(["gsutil", "-u", project, "-i", deploy_account, "cat", manifest_path])
+  else
+    ""
   end
+end
+
+# Helper to parse previous files from manifest content
+def parse_previous_files_from_manifest(prev_manifest_content)
+  prev_files = {}
+  return prev_files if prev_manifest_content.nil? || prev_manifest_content.empty?
+
+  CSV.parse(prev_manifest_content, headers: true).each do |row|
+    prev_files[row["source"]] = true if row["source"]
+  end
+
+  prev_files
+end
+
+# Helper to load previous files for delta release
+def load_previous_files_for_delta_release(input_section, dest_bucket, project, common)
+  prev_files = {}
+  return prev_files unless is_delta_release?(input_section) && !project.nil?
+
+  begin
+    prev_manifest_content = read_previous_curation_manifest(input_section, dest_bucket, project, common)
+    prev_files = parse_previous_files_from_manifest(prev_manifest_content)
+  rescue => e
+    common.warning "Could not read previous manifest for delta release: #{e.message}"
+  end
+
+  prev_files
+end
+
+# Helper to check if source should be skipped
+def should_skip_source?(source_path, prev_files)
+  !prev_files.empty? && prev_files.key?(source_path)
+end
+
+# Helper to process single source URI
+def process_source_uri(source_path, destination_base, storage_class, input_section)
+  if source_path.end_with?("/")
+    process_folder_source(source_path, destination_base, storage_class)
+  else
+    process_file_source(source_path, destination_base, storage_class, input_section)
+  end
+end
+
+# Helper to build copy manifest from source URIs
+def build_copy_manifest_from_sources(source_uris, prev_files, destination_base, storage_class, input_section)
+  copy_manifest = []
 
   source_uris.each do |source_path|
-    # Skip if file already exists in previous release (for delta releases)
-    next if !prev_files.empty? && prev_files.key?(source_path)
+    next if should_skip_source?(source_path, prev_files)
 
-    if source_path.end_with?("/")
-      # Process folder
-      manifest_entry = process_folder_source(source_path, destination_base, storage_class)
-    else
-      # Process file
-      manifest_entry = process_file_source(source_path, destination_base, storage_class, input_section)
-    end
+    manifest_entry = process_source_uri(source_path, destination_base, storage_class, input_section)
     copy_manifest.push(manifest_entry)
   end
 
-  return copy_manifest
+  copy_manifest
+end
+
+# Build VWB copy manifest for curation sections
+def build_vwb_copy_manifest_for_curation_section(input_section, dest_bucket, display_version_id, project = nil)
+  common = Common.new
+
+  # Determine destination base path
+  destination_base = determine_curation_destination_base(input_section, dest_bucket, display_version_id)
+
+  # Get source files matching the pattern
+  source_uris = get_source_uris_from_pattern(input_section["sourcePattern"], common)
+
+  # Get storage class
+  storage_class = input_section.fetch("storageClass", "STANDARD")
+
+  # Load previous files for delta releases
+  prev_files = load_previous_files_for_delta_release(input_section, dest_bucket, project, common)
+
+  # Build and return copy manifest
+  build_copy_manifest_from_sources(source_uris, prev_files, destination_base, storage_class, input_section)
 end
 
 # Helper method for VWB filename replacement
@@ -719,20 +849,13 @@ def generate_sts_job_configs(project, manifest_files, working_dir, jira_ticket =
   return job_configs
 end
 
-# Generate folder transfer configuration (without creating the job)
-def generate_folder_transfer_config(project, source, destination, storage_class, job_name, service_account = nil)
-  # Extract bucket and path components
-  source_bucket = source.gsub("gs://", "").split("/")[0]
-  source_path = source.gsub(/^gs:\/\/[^\/]+\//, "")
+# Helper to ensure path ends with slash for folder transfers
+def ensure_path_ends_with_slash(path)
+  path.end_with?("/") ? path : "#{path}/"
+end
 
-  dest_bucket = destination.gsub("gs://", "").split("/")[0]
-  dest_path = destination.gsub(/^gs:\/\/[^\/]+\//, "")
-
-  # Ensure paths end with / for folder transfers
-  source_path_with_slash = source_path.end_with?("/") ? source_path : "#{source_path}/"
-  dest_path_with_slash = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
-
-  # Build gcsDataSink with optional object conditions for storage class
+# Helper to build gcsDataSink for folder transfer
+def build_gcs_data_sink_for_folder(dest_bucket, dest_path_with_slash, storage_class)
   gcs_data_sink = {
     "bucketName" => dest_bucket,
     "path" => dest_path_with_slash
@@ -745,7 +868,11 @@ def generate_folder_transfer_config(project, source, destination, storage_class,
     }
   end
 
-  # Build transfer options
+  gcs_data_sink
+end
+
+# Helper to build transfer options for folder transfer
+def build_transfer_options_for_folder(storage_class)
   transfer_options = {
     "overwriteObjectsAlreadyExistingInSink" => false
   }
@@ -756,6 +883,26 @@ def generate_folder_transfer_config(project, source, destination, storage_class,
       "storageClass" => "STORAGE_CLASS_#{storage_class}"
     }
   end
+
+  transfer_options
+end
+
+# Generate folder transfer configuration (without creating the job)
+def generate_folder_transfer_config(project, source, destination, storage_class, job_name, service_account = nil)
+  # Extract bucket and path components
+  source_bucket = source.gsub("gs://", "").split("/")[0]
+  source_path = source.gsub(/^gs:\/\/[^\/]+\//, "")
+
+  dest_bucket = destination.gsub("gs://", "").split("/")[0]
+  dest_path = destination.gsub(/^gs:\/\/[^\/]+\//, "")
+
+  # Ensure paths end with / for folder transfers
+  source_path_with_slash = ensure_path_ends_with_slash(source_path)
+  dest_path_with_slash = ensure_path_ends_with_slash(dest_path)
+
+  # Build config components
+  gcs_data_sink = build_gcs_data_sink_for_folder(dest_bucket, dest_path_with_slash, storage_class)
+  transfer_options = build_transfer_options_for_folder(storage_class)
 
   # Build transfer job configuration
   job_config = {
@@ -785,11 +932,64 @@ def generate_folder_transfer_config(project, source, destination, storage_class,
   }
 
   # Add the service account at the root level if provided
-  if service_account
-    job_config["serviceAccount"] = service_account
+  add_service_account_to_job_config(job_config, service_account)
+end
+
+# Helper to build gcsDataSource for file list transfer
+def build_gcs_data_source_for_file_list(source_bucket, file_group, use_v2)
+  gcs_data_source = {
+    "bucketName" => source_bucket
+  }
+
+  # V2: Add source folder path to gcsDataSource so STS knows which folder to read from
+  # V1: No path specified, STS reads files from their full paths
+  if use_v2 && file_group[:source_folder]
+    source_folder = file_group[:source_folder]
+    source_folder_with_slash = source_folder.end_with?("/") ? source_folder : "#{source_folder}/"
+    gcs_data_source["path"] = source_folder_with_slash
   end
 
-  return job_config
+  gcs_data_source
+end
+
+# Helper to build gcsDataSink for file list transfer
+def build_gcs_data_sink_for_file_list(dest_bucket, first_file, use_v2)
+  gcs_data_sink = {
+    "bucketName" => dest_bucket
+  }
+
+  # V2: Add destination path to gcsDataSink so files go to correct directory
+  # V1: No path specified, STS preserves source directory structure
+  if use_v2
+    dest_path = File.dirname(first_file[:destination].gsub(/^gs:\/\/[^\/]+\//, ""))
+    dest_path_with_slash = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
+    gcs_data_sink["path"] = dest_path_with_slash
+  end
+
+  gcs_data_sink
+end
+
+# Helper to build transfer options with storage class
+def build_transfer_options_with_storage_class(storage_class)
+  transfer_options = {
+    "overwriteObjectsAlreadyExistingInSink" => false
+  }
+
+  # Add metadata options for storage class if not STANDARD
+  if storage_class && storage_class != "STANDARD"
+    transfer_options["metadataOptions"] = {
+      "storageClass" => "STORAGE_CLASS_#{storage_class}"
+    }
+  end
+
+  transfer_options
+end
+
+# Helper to add service account to job config
+def add_service_account_to_job_config(job_config, service_account)
+  return job_config unless service_account
+  job_config["serviceAccount"] = service_account
+  job_config
 end
 
 # Generate file list transfer configuration (without creating the job)
@@ -802,47 +1002,10 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
   # The manifest path will be created during publish
   temp_manifest_path = "gs://#{dest_bucket}/temp-manifests/#{job_name}-manifest.txt"
 
-  # Build gcsDataSource
-  gcs_data_source = {
-    "bucketName" => source_bucket
-  }
-
-  # V2: Add source folder path to gcsDataSource so STS knows which folder to read from
-  # V1: No path specified, STS reads files from their full paths
-  if use_v2 && file_group[:source_folder]
-    # Add the source folder path
-    source_folder = file_group[:source_folder]
-    source_folder_with_slash = source_folder.end_with?("/") ? source_folder : "#{source_folder}/"
-    gcs_data_source["path"] = source_folder_with_slash
-  end
-
-  # Build gcsDataSink
-  gcs_data_sink = {
-    "bucketName" => dest_bucket
-  }
-
-  # V2: Add destination path to gcsDataSink so files go to correct directory
-  # V1: No path specified, STS preserves source directory structure
-  if use_v2
-    # Extract the destination directory from the first file
-    # All files in a group go to the same directory
-    dest_path = File.dirname(first_file[:destination].gsub(/^gs:\/\/[^\/]+\//, ""))
-    dest_path_with_slash = dest_path.end_with?("/") ? dest_path : "#{dest_path}/"
-    gcs_data_sink["path"] = dest_path_with_slash
-  end
-
-  # Build transfer options
-  transfer_options = {
-    "overwriteObjectsAlreadyExistingInSink" => false
-  }
-
-  # Add metadata options for storage class if not STANDARD
-  storage_class = file_group[:storage_class]
-  if storage_class && storage_class != "STANDARD"
-    transfer_options["metadataOptions"] = {
-      "storageClass" => "STORAGE_CLASS_#{storage_class}"
-    }
-  end
+  # Build config components
+  gcs_data_source = build_gcs_data_source_for_file_list(source_bucket, file_group, use_v2)
+  gcs_data_sink = build_gcs_data_sink_for_file_list(dest_bucket, first_file, use_v2)
+  transfer_options = build_transfer_options_with_storage_class(file_group[:storage_class])
 
   # Build transfer job configuration
   job_config = {
@@ -872,11 +1035,7 @@ def generate_file_list_transfer_config(project, file_group, job_name, service_ac
   }
 
   # Add the service account at the root level if provided
-  if service_account
-    job_config["serviceAccount"] = service_account
-  end
-
-  return job_config
+  add_service_account_to_job_config(job_config, service_account)
 end
 
 # Save STS job configurations to files
@@ -1093,27 +1252,106 @@ def create_and_execute_file_list_transfer(project, job)
   execute_transfer_and_cleanup(common, project, job['config'], manifest_path, impersonate_args)
 end
 
+# Helper to validate microarray RIDs file is provided
+def validate_microarray_rids_file(opts)
+  return unless opts.microarray_rids_file.to_s.empty?
+  raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
+end
+
+# Helper to load microarray AW4 rows
+def load_microarray_aw4_rows(opts, working_dir)
+  clear_cache = determine_cache_clearing_flag(opts)
+  read_all_microarray_aw4s_cached(opts.project, read_research_ids_file(opts.microarray_rids_file), working_dir, clear_cache)
+end
+
+# Helper to process single microarray source
+def process_single_microarray_source(source_name, section, tier, opts, microarray_aw4_rows, output_manifest_path, common, copy_manifests, output_manifests)
+  common.status("building VWB manifest for '#{source_name}'")
+  copy, output = build_vwb_copy_manifest_for_aw4_section(
+    section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name), opts.project)
+
+  key_name = "aw4_microarray_" + source_name
+  store_copy_manifest_if_present(copy_manifests, key_name, copy)
+  store_copy_manifest_if_present(output_manifests, key_name, output)
+end
+
+# Helper to process all microarray sources
+def process_all_microarray_sources(aw4_microarray_sources, tier, opts, microarray_aw4_rows, output_manifest_path, common, copy_manifests, output_manifests)
+  aw4_microarray_sources.each do |source_name, section|
+    process_single_microarray_source(source_name, section, tier, opts, microarray_aw4_rows, output_manifest_path, common, copy_manifests, output_manifests)
+  end
+end
+
 # Helper to process AW4 Microarray sources
 def process_aw4_microarray_sources(input_manifest, opts, tier, common, copy_manifests, output_manifests, output_manifest_path, working_dir)
   aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
   return if aw4_microarray_sources.nil? || aw4_microarray_sources.empty?
 
-  if opts.microarray_rids_file.to_s.empty?
-    raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
-  end
+  validate_microarray_rids_file(opts)
+  microarray_aw4_rows = load_microarray_aw4_rows(opts, working_dir)
+  process_all_microarray_sources(aw4_microarray_sources, tier, opts, microarray_aw4_rows, output_manifest_path, common, copy_manifests, output_manifests)
+end
 
-  # Use cached version - check if clear_cache option is set
-  clear_cache = opts.respond_to?(:clear_cache) && opts.clear_cache ? true : false
-  microarray_aw4_rows = read_all_microarray_aw4s_cached(opts.project, read_research_ids_file(opts.microarray_rids_file), working_dir, clear_cache)
+# Helper to determine if cache should be cleared
+def determine_cache_clearing_flag(opts)
+  opts.respond_to?(:clear_cache) && opts.clear_cache
+end
 
-  aw4_microarray_sources.each do |source_name, section|
-    common.status("building VWB manifest for '#{source_name}'")
-    copy, output = build_vwb_copy_manifest_for_aw4_section(
-      section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name), opts.project)
-    key_name = "aw4_microarray_" + source_name
-    copy_manifests[key_name] = copy unless copy.nil? || copy.empty?
-    output_manifests[key_name] = output unless output.nil? || output.empty?
+# Helper to merge a single output row into combined manifest
+def merge_output_row_into_combined(combined_output_rows, row)
+  rid = row["person_id"]
+
+  if combined_output_rows[rid].nil?
+    combined_output_rows[rid] = row
+  else
+    merge_row_columns(combined_output_rows[rid], row)
   end
+end
+
+# Helper to merge columns from one row into another
+def merge_row_columns(existing_row, new_row)
+  new_row.each do |k, v|
+    existing_row[k] = v unless k == "person_id"
+  end
+end
+
+# Helper to store copy manifest if not empty
+def store_copy_manifest_if_present(copy_manifests, key_name, copy)
+  return if copy.nil? || copy.empty?
+  copy_manifests[key_name] = copy
+end
+
+# Helper to merge output rows into combined manifest
+def merge_output_rows(combined_output_rows, output)
+  return if output.nil? || output.empty?
+
+  output.each do |row|
+    merge_output_row_into_combined(combined_output_rows, row)
+  end
+end
+
+# Helper to process a single WGS source
+def process_single_wgs_source(source_name, section, tier, opts, wgs_aw4_rows, output_manifest_path, common, copy_manifests, combined_output_rows)
+  common.status("building VWB manifest for '#{source_name}'")
+  copy, output = build_vwb_copy_manifest_for_aw4_section(
+    section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name), opts.project)
+
+  key_name = "aw4_wgs_" + source_name
+  store_copy_manifest_if_present(copy_manifests, key_name, copy)
+  merge_output_rows(combined_output_rows, output)
+end
+
+# Helper to store combined output manifest if not empty
+def store_combined_output_manifest(output_manifests, combined_output_rows)
+  combined_output = combined_output_rows.values
+  return if combined_output.empty?
+  output_manifests["aw4_wgs_combined"] = combined_output
+end
+
+# Helper to validate WGS RIDs file is provided
+def validate_wgs_rids_file(opts)
+  return unless opts.wgs_rids_file.to_s.empty?
+  raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
 end
 
 # Helper to process AW4 WGS sources with combined output manifest
@@ -1121,44 +1359,18 @@ def process_aw4_wgs_sources(input_manifest, opts, tier, common, copy_manifests, 
   aw4_wgs_sources = input_manifest["aw4WgsSources"]
   return if aw4_wgs_sources.nil? || aw4_wgs_sources.empty?
 
-  if opts.wgs_rids_file.to_s.empty?
-    raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
-  end
+  validate_wgs_rids_file(opts)
 
-  # Use cached version - check if clear_cache option is set
-  clear_cache = opts.respond_to?(:clear_cache) && opts.clear_cache ? true : false
+  clear_cache = determine_cache_clearing_flag(opts)
   wgs_aw4_rows = read_all_wgs_aw4s_cached(opts.project, read_research_ids_file(opts.wgs_rids_file), working_dir, clear_cache)
 
-  # Collect output rows from all WGS sections for combined manifest
   combined_output_rows = {}
 
   aw4_wgs_sources.each do |source_name, section|
-    common.status("building VWB manifest for '#{source_name}'")
-    copy, output = build_vwb_copy_manifest_for_aw4_section(
-      section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name), opts.project)
-
-    key_name = "aw4_wgs_" + source_name
-    copy_manifests[key_name] = copy unless copy.nil? || copy.empty?
-
-    # Merge output rows into combined manifest
-    if output && !output.empty?
-      output.each do |row|
-        rid = row["person_id"]
-        if combined_output_rows[rid].nil?
-          combined_output_rows[rid] = row
-        else
-          # Merge columns from this section into existing row
-          row.each do |k, v|
-            combined_output_rows[rid][k] = v unless k == "person_id"
-          end
-        end
-      end
-    end
+    process_single_wgs_source(source_name, section, tier, opts, wgs_aw4_rows, output_manifest_path, common, copy_manifests, combined_output_rows)
   end
 
-  # Store the combined output manifest with a single key
-  combined_output = combined_output_rows.values
-  output_manifests["aw4_wgs_combined"] = combined_output unless combined_output.empty?
+  store_combined_output_manifest(output_manifests, combined_output_rows)
 end
 
 # Helper to process curation sources
@@ -1174,36 +1386,63 @@ def process_curation_sources(input_manifest, tier, opts, common, copy_manifests)
   end
 end
 
-# Helper to write manifests to files
-def write_manifests_to_files(copy_manifests, output_manifests, working_dir, output_manifest_path)
+# Helper to check if manifest is empty
+def manifest_empty?(manifest)
+  manifest.nil? || manifest.empty?
+end
+
+# Helper to write manifest rows to CSV file
+def write_manifest_rows_to_csv(path, manifest)
+  CSV.open(path, 'wb') do |f|
+    f << manifest.first.keys
+    manifest.each { |c| f << c.values }
+  end
+end
+
+# Helper to write single copy manifest to file
+def write_single_copy_manifest(source_name, copy_manifest, working_dir, copy_manifest_files)
+  return if manifest_empty?(copy_manifest)
+
+  path = "#{working_dir}/#{source_name}_copy_manifest.csv"
+  write_manifest_rows_to_csv(path, copy_manifest)
+  copy_manifest_files.push(path)
+end
+
+# Helper to write all copy manifests to files
+def write_copy_manifests_to_files(copy_manifests, working_dir)
   copy_manifest_files = []
 
-  # Write copy manifests to files
   copy_manifests.each do |source_name, copy_manifest|
-    # Skip empty copy manifests
-    next if copy_manifest.nil? || copy_manifest.empty?
-
-    path = "#{working_dir}/#{source_name}_copy_manifest.csv"
-    CSV.open(path, 'wb') do |f|
-      f << copy_manifest.first.keys
-      copy_manifest.each { |c| f << c.values }
-    end
-    copy_manifest_files.push(path)
+    write_single_copy_manifest(source_name, copy_manifest, working_dir, copy_manifest_files)
   end
 
-  # Write output manifests to files
+  copy_manifest_files
+end
+
+# Helper to write single output manifest to file
+def write_single_output_manifest(source_name, output_manifest, output_manifest_path)
+  return if manifest_empty?(output_manifest)
+
+  path = output_manifest_path.call(source_name)
+  write_manifest_rows_to_csv(path, output_manifest)
+end
+
+# Helper to write all output manifests to files
+def write_output_manifests_to_files(output_manifests, output_manifest_path)
   output_manifests.each do |source_name, output_manifest|
-    # Skip empty output manifests
-    next if output_manifest.nil? || output_manifest.empty?
-
-    path = output_manifest_path.call(source_name)
-    CSV.open(path, 'wb') do |f|
-      f << output_manifest.first.keys
-      output_manifest.each { |c| f << c.values }
-    end
+    write_single_output_manifest(source_name, output_manifest, output_manifest_path)
   end
+end
 
-  return copy_manifest_files
+# Helper to write manifests to files
+def write_manifests_to_files(copy_manifests, output_manifests, working_dir, output_manifest_path)
+  # Write copy manifests and collect file paths
+  copy_manifest_files = write_copy_manifests_to_files(copy_manifests, working_dir)
+
+  # Write output manifests
+  write_output_manifests_to_files(output_manifests, output_manifest_path)
+
+  copy_manifest_files
 end
 
 # Helper to generate and save STS configurations
@@ -1317,61 +1556,85 @@ def vwb_publish_mode(opts, copy_manifest_files, working_dir)
   copy_manifest_files
 end
 
+# Helper to get starting status message for post-processing
+def get_post_process_start_message(dry_run)
+  dry_run ? "Starting: VWB post-processing phase (DRY RUN)" : "Starting: VWB post-processing phase"
+end
+
+# Helper to get finishing status message for post-processing
+def get_post_process_finish_message(dry_run)
+  dry_run ? "Finished: VWB post-processing dry run" : "Finished: VWB post-processing"
+end
+
+# Helper to ensure manifest files exist
+def ensure_manifest_files_exist(copy_manifest_files, working_dir)
+  return copy_manifest_files unless copy_manifest_files.empty?
+
+  found_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
+  if found_files.empty?
+    raise ArgumentError.new(
+      "no copy manifests found in the working dir #{working_dir}; " +
+      "POST_PROCESS requires manifest files from CREATE_COPY_MANIFESTS")
+  end
+
+  found_files
+end
+
+# Helper to check if v2 mode is enabled via command line
+def check_v2_from_command_line(opts)
+  opts.respond_to?(:use_v2) && opts.use_v2
+end
+
+# Helper to detect v2 mode from saved STS configs
+def detect_v2_from_saved_configs(config_dir, common)
+  return false unless File.directory?(config_dir)
+
+  begin
+    job_configs = load_sts_configs(config_dir)
+    job_configs.any? { |job| job["use_v2"] == true }
+  rescue => e
+    common.warning "Could not load STS configs to detect V2 mode: #{e.message}"
+    common.warning "Defaulting to V1 mode (move and rename)"
+    false
+  end
+end
+
+# Helper to log v2 mode detection result
+def log_v2_mode_detection(use_v2, from_command_line, common)
+  if from_command_line
+    common.status "Using V2 mode from command line flag: Files are in destination directories, renaming in place"
+  elsif use_v2
+    common.status "Detected V2 mode from saved configs: Files are in destination directories, renaming in place"
+  else
+    common.status "Detected V1 mode from saved configs: Files preserve source structure, moving and renaming"
+  end
+end
+
+# Helper to determine v2 mode from opts and configs
+def determine_v2_mode(opts, working_dir, common)
+  # Check command line flag first
+  from_command_line = check_v2_from_command_line(opts)
+  return true if from_command_line
+
+  # Otherwise detect from saved configs
+  config_dir = File.join(working_dir, "storage_transfer_configs")
+  detect_v2_from_saved_configs(config_dir, common)
+end
+
 # Helper method to post-process VWB files
 def vwb_post_process_mode(opts, copy_manifest_files, working_dir)
   common = Common.new
+  common.status get_post_process_start_message(opts.dry_run)
 
-  if opts.dry_run
-    common.status "Starting: VWB post-processing phase (DRY RUN)"
-  else
-    common.status "Starting: VWB post-processing phase"
-  end
+  copy_manifest_files = ensure_manifest_files_exist(copy_manifest_files, working_dir)
 
-  # Ensure we have manifest files to process
-  if copy_manifest_files.empty?
-    copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
-    if copy_manifest_files.empty?
-      raise ArgumentError.new(
-        "no copy manifests found in the working dir #{working_dir}; " +
-        "POST_PROCESS requires manifest files from CREATE_COPY_MANIFESTS")
-    end
-  end
+  from_command_line = check_v2_from_command_line(opts)
+  use_v2 = from_command_line || determine_v2_mode(opts, working_dir, common)
+  log_v2_mode_detection(use_v2, from_command_line, common)
 
-  # Detect v2 mode from command line flag or saved STS job configs
-  use_v2 = false
-
-  # First check if use_v2 flag was passed via command line
-  if opts.respond_to?(:use_v2) && opts.use_v2
-    use_v2 = true
-    common.status "Using V2 mode from command line flag: Files are in destination directories, renaming in place"
-  else
-    # Otherwise try to detect from saved STS job configs
-    config_dir = File.join(working_dir, "storage_transfer_configs")
-    if File.directory?(config_dir)
-      begin
-        job_configs = load_sts_configs(config_dir)
-        # Check if any job config has use_v2 flag set
-        use_v2 = job_configs.any? { |job| job["use_v2"] == true }
-        if use_v2
-          common.status "Detected V2 mode from saved configs: Files are in destination directories, renaming in place"
-        else
-          common.status "Detected V1 mode from saved configs: Files preserve source structure, moving and renaming"
-        end
-      rescue => e
-        common.warning "Could not load STS configs to detect V2 mode: #{e.message}"
-        common.warning "Defaulting to V1 mode (move and rename)"
-      end
-    end
-  end
-
-  # Post-process files to rename them if needed
   post_process_vwb_files(opts.project, copy_manifest_files, opts.dry_run, use_v2)
 
-  if opts.dry_run
-    common.status "Finished: VWB post-processing dry run"
-  else
-    common.status "Finished: VWB post-processing"
-  end
+  common.status get_post_process_finish_message(opts.dry_run)
 end
 
 # Helper to collect files that need renaming from manifest files
@@ -1447,156 +1710,177 @@ def display_rename_dry_run(common, files_to_rename, use_v2 = false)
   common.status "DRY RUN COMPLETE: No files were moved/renamed"
 end
 
+# Helper to execute file renaming with log files using block version
+def execute_with_log_files(failure_log_path, &block)
+  if failure_log_path
+    File.open(failure_log_path, 'w') do |failure_log|
+      failure_log.puts("timestamp,source_path,destination_path,error_type,error_message")
+
+      success_log_path = failure_log_path.sub('.csv', '_success.csv')
+      File.open(success_log_path, 'w') do |success_log|
+        success_log.puts("timestamp,source_path,destination_path")
+
+        yield(failure_log, success_log)
+      end
+    end
+  else
+    yield(nil, nil)
+  end
+end
+
+# Helper to calculate current file path based on v1/v2 mode
+def calculate_current_file_path(file, use_v2)
+  dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
+
+  if use_v2
+    # V2: Files are in destination directory with original names
+    dest_path = File.dirname(file[:destination_path].gsub(/^gs:\/\/[^\/]+\//, ""))
+    original_filename = file[:source_name]
+    "gs://#{dest_bucket}/#{dest_path}/#{original_filename}"
+  else
+    # V1: STS preserves source directory structure
+    source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
+    "gs://#{dest_bucket}/#{source_object_path}"
+  end
+end
+
+# Helper to classify error type from error message
+def classify_rename_error(error_msg)
+  if error_msg.include?("NotFound") || error_msg.include?("No such") || error_msg.include?("404") || error_msg.include?("matched no objects")
+    "NOT_FOUND"
+  else
+    "ERROR"
+  end
+end
+
+# Helper to log error to console
+def log_error_to_console(common, error_type, current_path, error_msg)
+  if error_type == "NOT_FOUND"
+    common.warning "File not found (skipping): #{current_path}"
+  else
+    common.error "Failed to move/rename #{current_path}: #{error_msg}"
+  end
+end
+
+# Helper to log error to file
+def log_error_to_file(failure_log, current_path, new_path, error_type, error_msg)
+  return unless failure_log
+
+  timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+  escaped_msg = error_msg.gsub('"', '""')
+  failure_log.puts("\"#{timestamp}\",\"#{current_path}\",\"#{new_path}\",\"#{error_type}\",\"#{escaped_msg}\"")
+  failure_log.flush
+end
+
+# Helper to handle rename failure
+def handle_rename_failure(stdout, stderr, current_path, new_path, failure_log, common)
+  error_msg = (stderr + stdout).strip
+  error_type = classify_rename_error(error_msg)
+  log_error_to_console(common, error_type, current_path, error_msg)
+  log_error_to_file(failure_log, current_path, new_path, error_type, error_msg)
+end
+
+# Helper to execute file rename command
+def execute_file_rename(current_path, new_path, deploy_account)
+  require 'open3'
+  cmd = ["gcloud", "storage", "mv", "--impersonate-service-account", deploy_account, current_path, new_path]
+  Open3.capture3(*cmd)
+end
+
+# Helper to handle already-correct file
+def handle_already_correct_file(mutex, processed_count, total_files, successful_renames, common, file)
+  mutex.synchronize do
+    processed_count[0] += 1
+    successful_renames[0] += 1
+    common.status "[#{processed_count[0]}/#{total_files}] Skipping (already correct): #{file[:dest_name]}"
+  end
+end
+
+# Helper to log rename progress
+def log_rename_progress(mutex, processed_count, total_files, common, current_path, new_path)
+  mutex.synchronize do
+    processed_count[0] += 1
+    common.status "[#{processed_count[0]}/#{total_files}] Moving/renaming:"
+    common.status "  From: #{current_path}"
+    common.status "  To:   #{new_path}"
+  end
+end
+
+# Helper to process single file rename
+def process_single_file_rename(file, use_v2, deploy_account, mutex, processed_count, total_files, successful_renames, failed_renames, failure_log, common)
+  current_path = calculate_current_file_path(file, use_v2)
+  new_path = file[:destination_path]
+
+  # Skip if already in correct location
+  if current_path == new_path
+    handle_already_correct_file(mutex, processed_count, total_files, successful_renames, common, file)
+    return
+  end
+
+  begin
+    log_rename_progress(mutex, processed_count, total_files, common, current_path, new_path)
+    stdout, stderr, status = execute_file_rename(current_path, new_path, deploy_account)
+
+    if status.success?
+      mutex.synchronize { successful_renames[0] += 1 }
+    else
+      mutex.synchronize do
+        handle_rename_failure(stdout, stderr, current_path, new_path, failure_log, common)
+        failed_renames[0] += 1
+      end
+    end
+  rescue => e
+    mutex.synchronize do
+      common.error "Unexpected error processing #{current_path}: #{e.message}"
+      failed_renames[0] += 1
+    end
+  end
+end
+
+# Helper to create worker thread for file renaming
+def create_rename_worker_thread(file_queue, use_v2, deploy_account, mutex, counters, failure_log, common)
+  processed_count, successful_renames, failed_renames, total_files = counters
+
+  Thread.new do
+    loop do
+      file = file_queue.pop(true) rescue break
+      process_single_file_rename(file, use_v2, deploy_account, mutex, processed_count, total_files, successful_renames, failed_renames, failure_log, common)
+    end
+  end
+end
+
 # Helper to perform actual file renaming with parallel processing
 def perform_file_renaming(common, files_to_rename, deploy_account, num_threads = 32, failure_log_path = nil, use_v2 = false)
   total_files = files_to_rename.length
-  successful_renames = 0
-  failed_renames = 0
-  skipped_count = 0
-
-  # Thread-safe counters and mutex for logging
   mutex = Mutex.new
-  processed_count = 0
 
-  # Open failure log file if path is provided
-  failure_log = nil
-  if failure_log_path
-    failure_log = File.open(failure_log_path, 'w')
-    failure_log.puts("timestamp,source_path,destination_path,error_type,error_message")
-  end
+  # Use arrays for thread-safe counters
+  processed_count = [0]
+  successful_renames = [0]
+  failed_renames = [0]
 
-  # Create success log to track completed renames
-  success_log_path = failure_log_path ? failure_log_path.sub('.csv', '_success.csv') : nil
-  success_log = nil
-  if success_log_path
-    success_log = File.open(success_log_path, 'w')
-    success_log.puts("timestamp,source_path,destination_path")
-  end
+  # Execute with log files using block version for automatic closing
+  execute_with_log_files(failure_log_path) do |failure_log|
+    # Create file queue
+    file_queue = Queue.new
+    files_to_rename.each { |file| file_queue.push(file) }
 
-  # Create a queue of files to process
-  file_queue = Queue.new
-  files_to_rename.each { |file| file_queue.push(file) }
+    # Create worker threads
+    counters = [processed_count, successful_renames, failed_renames, total_files]
+    threads = num_threads.times.map do
+      create_rename_worker_thread(file_queue, use_v2, deploy_account, mutex, counters, failure_log, common)
+    end
 
-  # Create worker threads
-  threads = []
-  num_threads.times do
-    threads << Thread.new do
-      loop do
-        # Get next file from queue (exit if queue is empty)
-        file = file_queue.pop(true) rescue break
+    # Wait for completion
+    threads.each(&:join)
 
-        # Determine current path based on v1 or v2 behavior
-        if use_v2
-          # V2: Files are already in the correct destination directory with original names
-          # We just need to rename them in place
-          dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
-          dest_path = File.dirname(file[:destination_path].gsub(/^gs:\/\/[^\/]+\//, ""))
-          original_filename = file[:source_name]
-          current_path = "gs://#{dest_bucket}/#{dest_path}/#{original_filename}"
-        else
-          # V1: STS preserves the source directory structure in the destination bucket
-          # Extract the destination bucket from the destination path
-          dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
-
-          # Extract the source object path (without bucket) from the source
-          source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
-
-          # Construct the current path (where STS actually copied the file)
-          # STS copies to: gs://dest-bucket/<same-path-as-source>
-          current_path = "gs://#{dest_bucket}/#{source_object_path}"
-        end
-
-        # The destination path already has the correct name and location
-        new_path = file[:destination_path]
-
-        # Skip if the file is already in the correct location
-        if current_path == new_path
-          mutex.synchronize do
-            processed_count += 1
-            successful_renames += 1
-            common.status "[#{processed_count}/#{total_files}] Skipping (already correct): #{file[:dest_name]}"
-          end
-          next
-        end
-
-        begin
-          mutex.synchronize do
-            processed_count += 1
-            common.status "[#{processed_count}/#{total_files}] Moving/renaming:"
-            common.status "  From: #{current_path}"
-            common.status "  To:   #{new_path}"
-          end
-
-          # Use gcloud storage mv with impersonation to move/rename the file
-          # Run command and capture output/error without raising exception
-          cmd = [
-            "gcloud", "storage", "mv",
-            "--impersonate-service-account", deploy_account,
-            current_path,
-            new_path
-          ]
-
-          # Use system command with output capture to avoid exit on error
-          require 'open3'
-          stdout, stderr, status = Open3.capture3(*cmd)
-
-          if status.success?
-            mutex.synchronize do
-              successful_renames += 1
-            end
-          else
-            # Command failed - handle the error
-            mutex.synchronize do
-              # Combine stdout and stderr for error message
-              error_msg = (stderr + stdout).strip
-
-              # Determine error type
-              error_type = if error_msg.include?("NotFound") || error_msg.include?("No such") || error_msg.include?("404") || error_msg.include?("matched no objects")
-                             "NOT_FOUND"
-                           else
-                             "ERROR"
-                           end
-
-              # Log to console
-              if error_type == "NOT_FOUND"
-                common.warning "File not found (skipping): #{current_path}"
-              else
-                common.error "Failed to move/rename #{current_path}: #{error_msg}"
-              end
-
-              # Log to file if logging is enabled
-              if failure_log
-                timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S")
-                # Escape commas and quotes in error message for CSV
-                escaped_msg = error_msg.gsub('"', '""')
-                failure_log.puts("\"#{timestamp}\",\"#{current_path}\",\"#{new_path}\",\"#{error_type}\",\"#{escaped_msg}\"")
-                failure_log.flush
-              end
-
-              failed_renames += 1
-            end
-          end
-        rescue => outer_e
-          # Catch any other unexpected errors
-          mutex.synchronize do
-            common.error "Unexpected error processing #{current_path}: #{outer_e.message}"
-            failed_renames += 1
-          end
-        end
-      end
+    # Log completion message if failure log was created
+    if failure_log_path
+      common.status "Failure log written to: #{failure_log_path}"
     end
   end
 
-  # Wait for all threads to complete
-  threads.each(&:join)
-
-  # Close failure log file
-  if failure_log
-    failure_log.close
-    common.status "Failure log written to: #{failure_log_path}"
-  end
-
-  return successful_renames, failed_renames
+  return successful_renames[0], failed_renames[0]
 end
 
 def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = false)
