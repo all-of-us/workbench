@@ -47,13 +47,13 @@ export const VwbBanner = () => {
             The new{' '}
             <span style={{ fontWeight: 700 }}>
               {' '}
-              <AoU /> Researcher experience, built on the{' '}
+              <AoU /> Researcher experience, built on{' '}
               <StyledExternalLink
-                href={environment.vwbUiUrl}
+                href={environment.verilyPreUrl}
                 style={{ color: colors.primary, textDecoration: 'underline' }}
                 target='_blank'
               >
-                Verily Platform
+                Verily Pre
               </StyledExternalLink>
             </span>{' '}
             offers expanded data exploration and analysis tools, an updated

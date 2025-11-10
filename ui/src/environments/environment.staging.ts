@@ -20,5 +20,6 @@ export const environment: Environment = {
   allowTestAccessTokenOverride: true,
   tanagraLocalAuth: false,
   vwbUiUrl: 'https://terra-devel-ui-terra.api.verily.com',
+  verilyPreUrl: 'https://verily.com/solutions/pre-platform',
   enableVwbAdmin: false,
 };

@@ -22,5 +22,6 @@ export const environment: Environment = {
   allowTestAccessTokenOverride: true,
   tanagraLocalAuth: true,
   vwbUiUrl: 'https://workbench-dev.verily.com',
+  verilyPreUrl: 'https://verily.com/solutions/pre-platform',
   enableVwbAdmin: true,
 };
