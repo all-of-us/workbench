@@ -59,7 +59,10 @@ const DataExplorerPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(DataExplorer);
-const DataComponentPage = fp.flow(withRouteData)(DataComponent);
+const DataComponentPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(DataComponent);
 const DataSetComponentPage = fp.flow(
   withRouteData,
   withRoutingSpinner
