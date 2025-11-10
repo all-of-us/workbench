@@ -21,10 +21,8 @@ import { QueryReport } from 'app/pages/data/cohort-review/query-report.component
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
 import { ConceptSearch } from 'app/pages/data/concept/concept-search';
 import { ConceptSetActions } from 'app/pages/data/concept/concept-set-actions';
+import { DataComponent } from 'app/pages/data/data-component';
 import { DatasetPage } from 'app/pages/data/data-set/dataset-page';
-import { DataComponentSplitter } from 'app/pages/data/tanagra-dev/data-component-splitter';
-import { TanagraContainer } from 'app/pages/data/tanagra-dev/tanagra-container';
-import { TanagraDev } from 'app/pages/data/tanagra-dev/tanagra-dev';
 import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
 import { WorkspaceAbout } from 'app/pages/workspace/workspace-about';
 import {
@@ -61,15 +59,11 @@ const DataExplorerPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(DataExplorer);
-const DataComponentPage = fp.flow(withRouteData)(DataComponentSplitter);
+const DataComponentPage = fp.flow(withRouteData)(DataComponent);
 const DataSetComponentPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(DatasetPage);
-const TanagraContainerPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(TanagraContainer);
 const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
 const InteractiveNotebookPage = fp.flow(
   withRouteData,
@@ -99,7 +93,6 @@ const GKEAppRedirectPage = fp.flow(
   withRoutingSpinner
 )(GKEAppLauncher);
 const AppsListPage = fp.flow(withRouteData)(AppFilesList);
-const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
@@ -448,20 +441,6 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/data/tanagra/*`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <TanagraContainerPage
-          routeData={{
-            title: 'Data Page',
-            breadcrumb: BreadcrumbType.Workspace,
-            workspaceNavBarTab: 'data',
-            pageKey: 'data',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
         path={`${path}/data-explorer`}
         guards={[adminLockedGuard(ns, terraName)]}
       >
@@ -471,20 +450,6 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: 'data',
             workspaceNavBarTab: 'data-explorer',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/tanagra`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <TanagraDevPage
-          routeData={{
-            title: 'Tanagra Dev Env',
-            breadcrumb: BreadcrumbType.Workspace,
-            pageKey: 'data',
-            workspaceNavBarTab: 'tanagra',
           }}
         />
       </AppRoute>
