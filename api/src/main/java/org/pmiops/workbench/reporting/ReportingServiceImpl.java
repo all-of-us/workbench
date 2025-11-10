@@ -2,6 +2,7 @@ package org.pmiops.workbench.reporting;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.ReportingUploadVerificationDao;
@@ -56,6 +57,18 @@ public class ReportingServiceImpl implements ReportingService {
   @Override
   public void splitUploadIntoTasksAndQueue() {
     final long captureTimestamp = clock.millis();
+
+    Optional<Long> maybeLatestFailedSnapshotTimestamp =
+        reportingUploadVerificationDao.findLatestSnapshotTimestampIfAnyTableUploadFailed();
+    maybeLatestFailedSnapshotTimestamp.ifPresent(
+        snapshotTimestamp ->
+            // We use this log message to monitor for upload failures. It's brittle, but simple.
+            // Specifically, the monitoring depends on the message starting with 'Reporting Upload
+            // Failure:' and containing a timestamp.
+            logger.severe(
+                String.format(
+                    "Reporting Upload Failure: Previous snapshot upload did not complete successfully. [snapshotTimestamp=%d]",
+                    snapshotTimestamp)));
 
     reportingTableService
         .getAll()
