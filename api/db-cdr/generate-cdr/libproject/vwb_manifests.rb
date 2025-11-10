@@ -1711,7 +1711,7 @@ def display_rename_dry_run(common, files_to_rename, use_v2 = false)
 end
 
 # Helper to execute file renaming with log files using block version
-def execute_with_log_files(failure_log_path, &block)
+def execute_with_log_files(failure_log_path)
   if failure_log_path
     File.open(failure_log_path, 'w') do |failure_log|
       failure_log.puts("timestamp,source_path,destination_path,error_type,error_message")
