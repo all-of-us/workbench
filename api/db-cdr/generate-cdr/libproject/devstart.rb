@@ -259,6 +259,12 @@ def publish_cdr(cmd_name, args)
       "'2019Q4R3'. Required."
   )
   op.add_option(
+    "--dest-bq-dataset [dataset]",
+    ->(opts, v) { opts.dest_bq_dataset = v },
+    "Destination BigQuery dataset name for the CDR version (project not included), e.g. " +
+      "'2019Q4R3'. Defaults to --bq-dataset."
+  )
+  op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v },
     "The Google Cloud project associated with this workbench environment, " +
@@ -291,6 +297,11 @@ def publish_cdr(cmd_name, args)
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
   op.parse.validate
 
+  # Allowing divergence lets us effectively rename the dataset, if desired.
+  unless op.opts.dest_bq_dataset
+    op.opts.dest_bq_dataset = op.opts.bq_dataset
+  end
+
   # This is a grep filter. It matches all tables, by default.
   table_match_filter = ""
   if op.opts.table_prefixes
@@ -306,14 +317,14 @@ def publish_cdr(cmd_name, args)
   env = ENVIRONMENTS[op.opts.project]
   tier = env.fetch(:accessTiers)[op.opts.tier]
   source_cdr_project = env.fetch(:source_cdr_project)
-  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
+  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.dest_bq_dataset}"
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account), op.opts.key_file) do
     # Use direct copy if no ingest project is configured (e.g., for VWB environments)
     if tier.has_key?(:ingest_cdr_project)
-      bq_ingest(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.bq_dataset, table_match_filter, table_skip_filter)
+      bq_ingest(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.dest_bq_dataset, table_match_filter, table_skip_filter)
     else
-      bq_direct_copy(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.bq_dataset, table_match_filter, table_skip_filter)
+      bq_direct_copy(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.dest_bq_dataset, table_match_filter, table_skip_filter)
     end
 
     # Skip ACL changes if configured in the environment (defaults to false)
