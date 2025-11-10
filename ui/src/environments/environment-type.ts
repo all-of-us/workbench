@@ -69,8 +69,6 @@ export interface EnvironmentBase {
   // The URL to use when making API requests against the vwb UI.
   // This is used to redirect users to the vwb UI after creating a workspace.
   vwbUiUrl: string;
-  // This is used to redirect users for more info on VWB
-  verilyPreUrl: string;
   // Whether to show the VWB Admin menu item
   enableVwbAdmin: boolean;
 }
