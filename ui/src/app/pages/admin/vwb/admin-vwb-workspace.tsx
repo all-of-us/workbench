@@ -12,7 +12,9 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
+import { ClrIcon, NewWindowIcon } from 'app/components/icons';
 import { Error as ErrorDiv } from 'app/components/inputs';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -76,6 +78,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [researchPurpose, setResearchPurpose] = useState<ResearchPurposeItem>();
   const [requestingAod, setRequestingAod] = useState<boolean>(false);
+  const [aodEnabled, setAodEnabled] = useState<boolean>(false);
 
   const handleDataLoadError = async (error) => {
     if (error instanceof Response) {
@@ -173,15 +176,18 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             <WorkspaceInfoField labelText='Access On Demand'>
               <Button
                 type='primary'
+                style={{ height: '2.25rem' }}
+                disabled={aodEnabled}
                 onClick={() => {
                   setRequestingAod(true);
                   vwbWorkspaceAdminApi()
                     .enableAccessOnDemandByUserFacingId(
                       workspace.userFacingId,
                       {
-                        reason: 'test',
+                        reason: 'AoU Prod Support',
                       }
                     )
+                    .then(() => setAodEnabled(true))
                     .catch((err) => console.error(err))
                     .finally(() => setRequestingAod(false));
                 }}
@@ -191,8 +197,24 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                   <Spinner size={18} style={{ marginLeft: '0.75rem' }} />
                 )}
               </Button>
+              {aodEnabled && (
+                <Button
+                  type='primary'
+                  style={{ marginLeft: '0.5rem', height: '2.25rem' }}
+                  onClick={() => {
+                    window.open(
+                      `${environment.vwbUiUrl}/workspaces/${workspace.id}`,
+                      '_blank',
+                      'noopener noreferrer'
+                    );
+                  }}
+                >
+                  Open in Verily Workbench{' '}
+                  <NewWindowIcon style={{ marginLeft: '5px' }} />
+                </Button>
+              )}
             </WorkspaceInfoField>
-            <Accordion>
+            <Accordion style={{ marginTop: '0.5rem' }}>
               <AccordionTab header='Research Purpose'>
                 {RESEARCH_PURPOSE_MAPPING.map((section, s) => (
                   <div key={s}>
