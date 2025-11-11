@@ -14,7 +14,7 @@ import {
 
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
-import { ClrIcon, NewWindowIcon } from 'app/components/icons';
+import { NewWindowIcon } from 'app/components/icons';
 import { Error as ErrorDiv } from 'app/components/inputs';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
