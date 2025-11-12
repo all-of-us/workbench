@@ -182,7 +182,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                   setRequestingAod(true);
                   vwbWorkspaceAdminApi()
                     .enableAccessOnDemandByUserFacingId(
-                      workspace.userFacingId,
+                      `~${workspace.userFacingId}`,
                       {
                         reason: 'AoU Prod Support',
                       }
