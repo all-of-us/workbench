@@ -32,7 +32,9 @@ public class VwbUserManagerClient {
 
   private final Provider<PodApi> podApiProvider;
 
-  private final Provider<WorkspaceApi> workspaceApiProvider;
+  private final Provider<WorkspaceApi> serviceAccountWorkspaceApiProvider;
+
+  private final Provider<WorkspaceApi> endUserWorkspaceApiProvider;
 
   public VwbUserManagerClient(
       @Qualifier(VwbUserManagerConfig.VWB_SERVICE_ACCOUNT_USER_API)
@@ -42,14 +44,18 @@ public class VwbUserManagerClient {
       VwbUserManagerRetryHandler vwbUserManagerRetryHandler,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<PodApi> podApiProvider,
-      Provider<WorkspaceApi> workspaceApiProvider) {
+      @Qualifier(VwbUserManagerConfig.VWB_SERVICE_ACCOUNT_WORKSPACE_API)
+          Provider<WorkspaceApi> serviceAccountWorkspaceApiProvider,
+      @Qualifier(VwbUserManagerConfig.VWB_END_USER_WORKSPACE_API)
+          Provider<WorkspaceApi> endUserWorkspaceApiProvider) {
     this.userV2ApiProvider = userV2ApiProvider;
     this.organizationV2ApiProvider = organizationV2ApiProvider;
     this.groupApiProvider = groupApiProvider;
     this.vwbUserManagerRetryHandler = vwbUserManagerRetryHandler;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.podApiProvider = podApiProvider;
-    this.workspaceApiProvider = workspaceApiProvider;
+    this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
+    this.endUserWorkspaceApiProvider = endUserWorkspaceApiProvider;
   }
 
   public OrganizationMember getOrganizationMember(String userName) {
@@ -194,12 +200,21 @@ public class VwbUserManagerClient {
                     vwbPodId));
   }
 
-  public void workspaceAccessOnDemandByUserFacingId(String userFacingId, String reason) {
+  public void workspaceAccessOnDemandByUserFacingId(
+      String userFacingId, String reason, Boolean asUser) {
     AccessOnDemandRequest accessOnDemandRequest =
         new AccessOnDemandRequest().reason(reason).role(WorkbenchRole.SUPPORT);
     vwbUserManagerRetryHandler.run(
         context -> {
-          workspaceApiProvider.get().workspaceAccessOnDemand(accessOnDemandRequest, userFacingId);
+          if (asUser) {
+            endUserWorkspaceApiProvider
+                .get()
+                .workspaceAccessOnDemand(accessOnDemandRequest, userFacingId);
+          } else {
+            serviceAccountWorkspaceApiProvider
+                .get()
+                .workspaceAccessOnDemand(accessOnDemandRequest, userFacingId);
+          }
           return null;
         });
   }
