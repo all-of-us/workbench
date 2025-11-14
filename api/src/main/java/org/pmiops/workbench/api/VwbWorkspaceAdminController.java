@@ -6,11 +6,13 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.VwbAodRequest;
 import org.pmiops.workbench.model.VwbWorkspaceAdminView;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
 import org.pmiops.workbench.model.VwbWorkspaceListResponse;
 import org.pmiops.workbench.model.VwbWorkspaceSearchParamType;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,13 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate {
   private final VwbAdminQueryService vwbAdminQueryService;
+  private final VwbUserManagerClient vwbUserManagerClient;
 
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
   @Autowired
-  public VwbWorkspaceAdminController(VwbAdminQueryService vwbAdminQueryService) {
+  public VwbWorkspaceAdminController(
+      VwbAdminQueryService vwbAdminQueryService, VwbUserManagerClient vwbUserManagerClient) {
     this.vwbAdminQueryService = vwbAdminQueryService;
+    this.vwbUserManagerClient = vwbUserManagerClient;
   }
 
   @Override
@@ -79,6 +84,15 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<List<VwbWorkspaceAuditLog>> getVwbWorkspaceAuditLogs(String workspaceId) {
     return ResponseEntity.ok(vwbAdminQueryService.queryVwbWorkspaceActivity(workspaceId));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<Void> enableAccessOnDemandByUserFacingId(
+      String userFacingId, VwbAodRequest request) {
+    vwbUserManagerClient.workspaceAccessOnDemandByUserFacingId(
+        userFacingId, request.getReason(), request.isAsUser());
+    return ResponseEntity.ok().build();
   }
 
   protected VwbWorkspaceSearchParamType validateSearchParamType(String param) {

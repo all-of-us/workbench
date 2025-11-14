@@ -12,6 +12,9 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
+import { Button } from 'app/components/buttons';
+import { NewWindowIcon } from 'app/components/icons';
 import { Error as ErrorDiv } from 'app/components/inputs';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -74,6 +77,8 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [researchPurpose, setResearchPurpose] = useState<ResearchPurposeItem>();
+  const [requestingAod, setRequestingAod] = useState<boolean>(false);
+  const [aodEnabled, setAodEnabled] = useState<boolean>(false);
 
   const handleDataLoadError = async (error) => {
     if (error instanceof Response) {
@@ -168,7 +173,49 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             <WorkspaceInfoField labelText='Description'>
               {workspace.description}
             </WorkspaceInfoField>
-            <Accordion>
+            <WorkspaceInfoField labelText='Access On Demand'>
+              <Button
+                type='primary'
+                style={{ height: '2.25rem' }}
+                disabled={aodEnabled}
+                onClick={() => {
+                  setRequestingAod(true);
+                  vwbWorkspaceAdminApi()
+                    .enableAccessOnDemandByUserFacingId(
+                      `~${workspace.userFacingId}`,
+                      {
+                        reason: 'AoU Prod Support',
+                        asUser: true,
+                      }
+                    )
+                    .then(() => setAodEnabled(true))
+                    .catch((err) => console.error(err))
+                    .finally(() => setRequestingAod(false));
+                }}
+              >
+                Request AoD
+                {requestingAod && (
+                  <Spinner size={18} style={{ marginLeft: '0.75rem' }} />
+                )}
+              </Button>
+              {aodEnabled && (
+                <Button
+                  type='primary'
+                  style={{ marginLeft: '0.5rem', height: '2.25rem' }}
+                  onClick={() => {
+                    window.open(
+                      `${environment.vwbUiUrl}/workspaces/${workspace.id}`,
+                      '_blank',
+                      'noopener noreferrer'
+                    );
+                  }}
+                >
+                  Open in Verily Workbench{' '}
+                  <NewWindowIcon style={{ marginLeft: '5px' }} />
+                </Button>
+              )}
+            </WorkspaceInfoField>
+            <Accordion style={{ marginTop: '0.5rem' }}>
               <AccordionTab header='Research Purpose'>
                 {RESEARCH_PURPOSE_MAPPING.map((section, s) => (
                   <div key={s}>

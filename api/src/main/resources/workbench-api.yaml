@@ -6862,6 +6862,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v2/admin/vwb/workspaces/{workspaceUserFacingId}/aod:
+    post:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Given a workspace user facing id, requests access on demand on the workspace.
+        Requires RESEARCHER_DATA_VIEW authority.
+      operationId: enableAccessOnDemandByUserFacingId
+      parameters:
+        - name: workspaceUserFacingId
+          in: path
+          description: The workspace user facing id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VwbAodRequest'
+      responses:
+        200:
+          description: The access on demand request was successfully granted.
+          content: { }
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v2/admin/vwb/workspaces/{workspaceId}/audit:
     get:
       tags:
@@ -13914,6 +13945,16 @@ components:
         changeTime:
           type: string
           description: Timestamp the workspace was changed
+    VwbAodRequest:
+      type: object
+      description: Access on demand request
+      properties:
+        reason:
+          description: required reason for access demand
+          type: string
+        asUser:
+          description: Call VWB as end user
+          type: boolean
 
   parameters:
     userId:

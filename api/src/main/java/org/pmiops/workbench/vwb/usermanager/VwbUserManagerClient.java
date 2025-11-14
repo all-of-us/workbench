@@ -9,6 +9,7 @@ import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
 import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
 import org.pmiops.workbench.vwb.user.api.WorkbenchGroupApi;
+import org.pmiops.workbench.vwb.user.api.WorkspaceApi;
 import org.pmiops.workbench.vwb.user.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,10 @@ public class VwbUserManagerClient {
 
   private final Provider<PodApi> podApiProvider;
 
+  private final Provider<WorkspaceApi> serviceAccountWorkspaceApiProvider;
+
+  private final Provider<WorkspaceApi> endUserWorkspaceApiProvider;
+
   public VwbUserManagerClient(
       @Qualifier(VwbUserManagerConfig.VWB_SERVICE_ACCOUNT_USER_API)
           Provider<UserV2Api> userV2ApiProvider,
@@ -38,13 +43,19 @@ public class VwbUserManagerClient {
       Provider<WorkbenchGroupApi> groupApiProvider,
       VwbUserManagerRetryHandler vwbUserManagerRetryHandler,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      Provider<PodApi> podApiProvider) {
+      Provider<PodApi> podApiProvider,
+      @Qualifier(VwbUserManagerConfig.VWB_SERVICE_ACCOUNT_WORKSPACE_API)
+          Provider<WorkspaceApi> serviceAccountWorkspaceApiProvider,
+      @Qualifier(VwbUserManagerConfig.VWB_END_USER_WORKSPACE_API)
+          Provider<WorkspaceApi> endUserWorkspaceApiProvider) {
     this.userV2ApiProvider = userV2ApiProvider;
     this.organizationV2ApiProvider = organizationV2ApiProvider;
     this.groupApiProvider = groupApiProvider;
     this.vwbUserManagerRetryHandler = vwbUserManagerRetryHandler;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.podApiProvider = podApiProvider;
+    this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
+    this.endUserWorkspaceApiProvider = endUserWorkspaceApiProvider;
   }
 
   public OrganizationMember getOrganizationMember(String userName) {
@@ -187,6 +198,25 @@ public class VwbUserManagerClient {
                                     new PodEnvironmentDataGcp().billingAccountId(billingAccount))),
                     organizationId,
                     vwbPodId));
+  }
+
+  public void workspaceAccessOnDemandByUserFacingId(
+      String userFacingId, String reason, Boolean asUser) {
+    AccessOnDemandRequest accessOnDemandRequest =
+        new AccessOnDemandRequest().reason(reason).role(WorkbenchRole.SUPPORT);
+    vwbUserManagerRetryHandler.run(
+        context -> {
+          if (asUser) {
+            endUserWorkspaceApiProvider
+                .get()
+                .workspaceAccessOnDemand(accessOnDemandRequest, userFacingId);
+          } else {
+            serviceAccountWorkspaceApiProvider
+                .get()
+                .workspaceAccessOnDemand(accessOnDemandRequest, userFacingId);
+          }
+          return null;
+        });
   }
 
   private static JobControl generateJobControlWithUUID() {
