@@ -1,7 +1,12 @@
 import * as fp from 'lodash/fp';
 import { SelectItem } from 'primereact/selectitem';
 
-import { Disk, DiskType } from 'generated/fetch';
+import {
+  DataprocConfig,
+  DiskType,
+  GpuConfig,
+  PersistentDiskRequest,
+} from 'generated/fetch';
 
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 
@@ -371,24 +376,29 @@ export const DEFAULT_MACHINE_TYPE: Machine =
 export const DEFAULT_DISK_SIZE = MIN_DISK_SIZE_GB;
 
 const approxHoursPerMonth = 730;
-export const diskPricePerMonth = 0.04; // per GB month
-export const diskPrice = diskPricePerMonth / approxHoursPerMonth; // per GB hour, from https://cloud.google.com/compute/pricing
-export const ssdPricePerMonth = 0.17; // per GB month
-export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
+const standardDiskPricePerMonth = 0.04; // per GB month, from https://cloud.google.com/compute/pricing
+const ssdPricePerMonth = 0.17; // per GB month
+const dataprocCpuPricePerHour = 0.01; // dataproc costs $0.01 per cpu per hour
 
-const dataprocSurcharge = ({
+interface DataprocSurcharge {
+  masterMachine: Machine;
+  workerMachine: Machine;
+  numberOfWorkers: number;
+  numberOfPreemptibleWorkers: number;
+}
+const dataprocCpuSurchargePerHour = ({
   masterMachine,
+  workerMachine,
   numberOfWorkers,
   numberOfPreemptibleWorkers,
-  workerMachine,
-}) => {
-  const costs = [masterMachine.cpu * dataprocCpuPrice];
+}: DataprocSurcharge) => {
+  const costs = [masterMachine.cpu * dataprocCpuPricePerHour];
   if (workerMachine && numberOfWorkers) {
-    costs.push(numberOfWorkers * workerMachine.cpu * dataprocCpuPrice);
+    costs.push(numberOfWorkers * workerMachine.cpu * dataprocCpuPricePerHour);
   }
   if (workerMachine && numberOfPreemptibleWorkers) {
     costs.push(
-      numberOfPreemptibleWorkers * workerMachine.cpu * dataprocCpuPrice
+      numberOfPreemptibleWorkers * workerMachine.cpu * dataprocCpuPricePerHour
     );
   }
   return fp.sum(costs);
@@ -397,87 +407,123 @@ const dataprocSurcharge = ({
 // The following calculations were based off of Terra UI's cost estimator:
 // https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
 
-export const diskConfigPricePerMonth = ({
-  size,
-  detachableType,
-}: Partial<DiskConfig>) => {
+const diskPricePerMonth = ({ size, detachableType }: Partial<DiskConfig>) => {
   return (
     size *
-    (detachableType === DiskType.SSD ? ssdPricePerMonth : diskPricePerMonth)
+    // also covers the case where the disk is not detachable/persistent (type is undefined)
+    (detachableType === DiskType.SSD
+      ? ssdPricePerMonth
+      : standardDiskPricePerMonth)
   );
 };
 
-export const detachableDiskPricePerMonth = (disk: Disk) => {
-  return diskConfigPricePerMonth({
+export const persistentDiskPricePerMonth = (disk: PersistentDiskRequest) => {
+  return diskPricePerMonth({
     size: disk.size,
     detachableType: disk.diskType,
   });
 };
 
-export const diskConfigPrice = (config: Partial<DiskConfig>) => {
-  return diskConfigPricePerMonth(config) / approxHoursPerMonth;
+const persistentDiskPricePerHour = (disk: PersistentDiskRequest) => {
+  return persistentDiskPricePerMonth(disk) / approxHoursPerMonth;
 };
 
-const detachableDiskPrice = (disk: Disk) => {
-  return detachableDiskPricePerMonth(disk) / approxHoursPerMonth;
+const dataprocDiskPricePerHour = (size: number) => {
+  return diskPricePerMonth({ size }) / approxHoursPerMonth;
 };
 
-export const machineStorageCost = ({
-  diskConfig,
+// temp until we can stop using AnalysisConfig in locations which need to calculate storage/running costs
+export const derivePdFromAnalysisConfig = (
+  analysisConfig: AnalysisConfig
+): PersistentDiskRequest => {
+  // detachable means: is the diskConfig a PD?
+  // - yes when there's an active GceWithPd
+  // detachedDisk is only present when the diskConfig is NOT a PD
+  return analysisConfig.diskConfig.detachable
+    ? {
+        name: analysisConfig.diskConfig.existingDiskName,
+        size: analysisConfig.diskConfig.size,
+        diskType: analysisConfig.diskConfig.detachableType,
+      }
+    : analysisConfig.detachedDisk;
+};
+
+interface StorageCost {
+  dataprocConfig: DataprocConfig;
+  persistentDisk: PersistentDiskRequest;
+}
+export const machineStorageCostPerHour = ({
   dataprocConfig,
-  detachedDisk,
-}: AnalysisConfig) => {
-  const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
-    dataprocConfig ?? {};
+  persistentDisk,
+}: StorageCost) => {
+  const {
+    numberOfWorkers,
+    numberOfPreemptibleWorkers,
+    masterDiskSize,
+    workerDiskSize,
+  } = dataprocConfig ?? {};
   return fp.sum([
-    diskConfigPrice(diskConfig),
-    detachedDisk ? detachableDiskPrice(detachedDisk) : 0,
-    numberOfWorkers ? numberOfWorkers * workerDiskSize * diskPrice : 0,
+    persistentDisk ? persistentDiskPricePerHour(persistentDisk) : 0,
+    masterDiskSize ? dataprocDiskPricePerHour(masterDiskSize) : 0,
+    numberOfWorkers
+      ? numberOfWorkers * dataprocDiskPricePerHour(workerDiskSize)
+      : 0,
     numberOfPreemptibleWorkers
-      ? numberOfPreemptibleWorkers * workerDiskSize * diskPrice
+      ? numberOfPreemptibleWorkers * dataprocDiskPricePerHour(workerDiskSize)
       : 0,
   ]);
 };
 
 export const machineStorageCostBreakdown = ({
-  diskConfig,
   dataprocConfig,
-  detachedDisk,
-}: AnalysisConfig) => {
-  const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
-    dataprocConfig ?? {};
+  persistentDisk,
+}: StorageCost) => {
+  const {
+    numberOfWorkers,
+    numberOfPreemptibleWorkers,
+    masterDiskSize,
+    workerDiskSize,
+  } = dataprocConfig ?? {};
   const costs = [];
   if (dataprocConfig) {
-    costs.push(`${formatUsd(diskConfigPrice(diskConfig))}/hr Master Disk`);
+    costs.push(
+      `${formatUsd(dataprocDiskPricePerHour(masterDiskSize))}/hr Master Disk`
+    );
     if (numberOfWorkers) {
       costs.push(
         `${formatUsd(
-          numberOfWorkers * workerDiskSize * diskPrice
+          numberOfWorkers * dataprocDiskPricePerHour(workerDiskSize)
         )}/hr Worker Disk(s)`
       );
     }
     if (numberOfPreemptibleWorkers) {
       costs.push(
         `${formatUsd(
-          numberOfPreemptibleWorkers * workerDiskSize * diskPrice
+          numberOfPreemptibleWorkers * dataprocDiskPricePerHour(workerDiskSize)
         )}/hr Preemptible Worker Disk(s)`
       );
     }
-  } else {
-    costs.push(`${formatUsd(diskConfigPrice(diskConfig))}/hr Disk`);
   }
-  if (detachedDisk) {
+  // note: there may still be a detached PD if there's an active Dataproc runtime
+  if (persistentDisk) {
     costs.push(
-      `${formatUsd(detachableDiskPrice(detachedDisk))}/hr Detached Disk`
+      `${formatUsd(
+        persistentDiskPricePerHour(persistentDisk)
+      )}/hr Persistent Disk`
     );
   }
   return costs;
 };
 
-export const machineRunningCost = (analysisConfig: AnalysisConfig) => {
-  const { computeType, machine, gpuConfig, numNodes } = analysisConfig;
+export interface RunningCost extends StorageCost {
+  computeType: ComputeType;
+  machine: Machine;
+  gpuConfig: GpuConfig;
+}
+export const machineRunningCostPerHour = (props: RunningCost) => {
+  const { computeType, machine, gpuConfig, dataprocConfig } = props;
   const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
-    analysisConfig.dataprocConfig ?? {};
+    dataprocConfig ?? {};
 
   const workerMachine =
     workerMachineType && findMachineByName(workerMachineType);
@@ -485,7 +531,7 @@ export const machineRunningCost = (analysisConfig: AnalysisConfig) => {
   const dataprocPrice =
     computeType === ComputeType.Dataproc
       ? fp.sum([
-          dataprocSurcharge({
+          dataprocCpuSurchargePerHour({
             masterMachine: machine,
             numberOfWorkers,
             numberOfPreemptibleWorkers,
@@ -501,16 +547,16 @@ export const machineRunningCost = (analysisConfig: AnalysisConfig) => {
       : 0;
   return fp.sum([
     dataprocPrice,
-    machine.price * (numNodes ?? 1),
+    machine.price,
     gpu ? gpu.price : 0,
-    machineStorageCost(analysisConfig),
+    machineStorageCostPerHour(props),
   ]);
 };
 
-export const machineRunningCostBreakdown = (analysisConfig: AnalysisConfig) => {
-  const { computeType, machine, gpuConfig } = analysisConfig;
+export const machineRunningCostBreakdown = (props: RunningCost) => {
+  const { computeType, machine, gpuConfig, dataprocConfig } = props;
   const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
-    analysisConfig.dataprocConfig ?? {};
+    dataprocConfig ?? {};
 
   const workerMachine =
     workerMachineType && findMachineByName(workerMachineType);
@@ -534,7 +580,7 @@ export const machineRunningCostBreakdown = (analysisConfig: AnalysisConfig) => {
         );
       }
     }
-    const dataprocSurchargeAmount = dataprocSurcharge({
+    const dataprocSurchargeAmount = dataprocCpuSurchargePerHour({
       masterMachine: machine,
       numberOfWorkers: numberOfWorkers,
       numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
@@ -549,6 +595,6 @@ export const machineRunningCostBreakdown = (analysisConfig: AnalysisConfig) => {
       costs.push(`${formatUsd(gpu.price)}/hr GPU`);
     }
   }
-  costs.push(...machineStorageCostBreakdown(analysisConfig));
+  costs.push(...machineStorageCostBreakdown(props));
   return costs;
 };
