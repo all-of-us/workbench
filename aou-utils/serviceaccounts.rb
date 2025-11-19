@@ -69,6 +69,9 @@ class ServiceAccountContext
       common.status "Creating new key for #{@service_account} @ #{@keyfile_path}"
       common.run_inline %W{gcloud iam service-accounts keys create #{@keyfile_path}
           --iam-account=#{@service_account} --project=#{@project}}
+      # Wait for key to propagate to OAuth servers to avoid "Invalid JWT Signature" errors
+      # See: https://cloud.google.com/iam/docs/service-account-overview#key-consistency
+      sleep 3
       begin
         yield(self)
       ensure
