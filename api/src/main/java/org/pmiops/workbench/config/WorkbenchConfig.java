@@ -513,6 +513,7 @@ public class WorkbenchConfig {
     public String vwbSamBaseUrl;
     public String exfilManagerBaseUrl;
     public String organizationId;
+    public String organizationUfid;
     // This will only be used for preview release, later on, each user will have their own pod.
     public String defaultPodId;
     // The service account that will be calling AoU API to notify egress alerts. It will be used in
