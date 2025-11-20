@@ -34,6 +34,7 @@ import {
 } from 'app/utils/stores';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
+import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 
 const styles = reactStyles({
   bannerNotification: {
@@ -330,7 +331,11 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   const isWorkspaceBillingUnlinked = (): boolean => {
     const { enableUnlinkBillingForInitialCredits = false } =
       serverConfigStore.get().config;
-    if (!enableUnlinkBillingForInitialCredits || !workspace?.initialCredits) {
+    if (
+      !enableUnlinkBillingForInitialCredits ||
+      !workspace?.initialCredits ||
+      !isUsingInitialCredits(workspace)
+    ) {
       return false;
     }
     const { exhausted, expirationBypassed, expirationEpochMillis } =
