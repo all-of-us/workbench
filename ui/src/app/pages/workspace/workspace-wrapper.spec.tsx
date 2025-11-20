@@ -283,7 +283,7 @@ describe(WorkspaceWrapper.name, () => {
     expect(screen.queryByText(/Add a payment method/i)).not.toBeInTheDocument();
   });
 
-  it('should not show UnlinkedBillingNotification when workspace is NOT using initial credits billing account even if credits are exhausted', async () => {
+  it('should not show UnlinkedBillingNotification when workspace is not using initial credits billing account even if credits are exhausted', async () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
