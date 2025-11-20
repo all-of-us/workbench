@@ -26,10 +26,11 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
 
-  private static final String VWB_WORKSPACE_TABLE = "wsm_workspaces";
-  private static final String VWB_WORKSPACE_ACTIVITY_LOG_TABLE = "wsm_workspace_activity_logs";
-  private static final String VWB_WORKSPACE_SAM_USERS_TABLE = "sam_workspace_users";
-  private static final String VWB_PODS_TABLE = "um_pods";
+  private static final String VWB_WORKSPACE_TABLE_PREFIX = "wsm_workspaces";
+  private static final String VWB_WORKSPACE_ACTIVITY_LOG_TABLE_PREFIX =
+      "wsm_workspace_activity_logs";
+  private static final String VWB_WORKSPACE_SAM_USERS_TABLE_PREFIX = "sam_workspace_users";
+  private static final String VWB_PODS_TABLE_PREFIX = "um_pods";
   private static final String VWB_WORKSPACE_CREATOR_COLUMN = "created_by_email";
   private static final String VWB_WORKSPACE_ID_COLUMN = "workspace_user_facing_id";
   private static final String VWB_WORKSPACE_UUID_COLUMN = "workspace_id";
@@ -111,8 +112,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final String queryString =
         String.format(
             QUERY,
-            getTableName(VWB_WORKSPACE_TABLE),
-            getTableName(VWB_PODS_TABLE),
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX),
+            getTableName(VWB_PODS_TABLE_PREFIX),
             VWB_WORKSPACE_CREATOR_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
@@ -130,8 +131,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final String queryString =
         String.format(
             QUERY,
-            getTableName(VWB_WORKSPACE_TABLE),
-            getTableName(VWB_PODS_TABLE),
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX),
+            getTableName(VWB_PODS_TABLE_PREFIX),
             VWB_WORKSPACE_ID_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
@@ -149,8 +150,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final String queryString =
         String.format(
             QUERY,
-            getTableName(VWB_WORKSPACE_TABLE),
-            getTableName(VWB_PODS_TABLE),
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX),
+            getTableName(VWB_PODS_TABLE_PREFIX),
             VWB_WORKSPACE_UUID_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
@@ -168,8 +169,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final String queryString =
         String.format(
             QUERY,
-            getTableName(VWB_WORKSPACE_TABLE),
-            getTableName(VWB_PODS_TABLE),
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX),
+            getTableName(VWB_PODS_TABLE_PREFIX),
             VWB_WORKSPACE_NAME_COLUMN);
 
     final QueryJobConfiguration queryJobConfiguration =
@@ -187,9 +188,9 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final String queryString =
         String.format(
             SHARED_QUERY,
-            getTableName(VWB_WORKSPACE_TABLE),
-            getTableName(VWB_PODS_TABLE),
-            getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE));
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX),
+            getTableName(VWB_PODS_TABLE_PREFIX),
+            getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE_PREFIX));
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -205,8 +206,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final String queryString =
         String.format(
             COLLABORATOR_QUERY,
-            getTableName(VWB_WORKSPACE_SAM_USERS_TABLE),
-            getTableName(VWB_WORKSPACE_TABLE));
+            getTableName(VWB_WORKSPACE_SAM_USERS_TABLE_PREFIX),
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX));
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -222,7 +223,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   public List<VwbWorkspaceAuditLog> queryVwbWorkspaceActivity(String workspaceId) {
 
     final String queryString =
-        String.format(AUDIT_QUERY, getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE));
+        String.format(AUDIT_QUERY, getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE_PREFIX));
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -235,11 +236,14 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .collect(Collectors.toList());
   }
 
-  private String getTableName(String table) {
+  private String getTableName(String tablePrefix) {
     final VwbConfig vwbConfig = workbenchConfigProvider.get().vwb;
+    final String fullTableName = String.format("%s_%s", tablePrefix, vwbConfig.organizationUfid);
     return String.format(
         "`%s.%s.%s`",
-        vwbConfig.adminBigQuery.logProjectId, vwbConfig.adminBigQuery.bigQueryDataset, table);
+        vwbConfig.adminBigQuery.logProjectId,
+        vwbConfig.adminBigQuery.bigQueryDataset,
+        fullTableName);
   }
 
   private List<VwbWorkspace> tableResultToVwbWorkspace(TableResult tableResult) {

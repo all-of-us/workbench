@@ -203,6 +203,7 @@
     "vwbSamBaseUrl": "https:\/\/workbench.verily.com\/api\/sam",
     "userManagerBaseUrl": "https:\/\/workbench.verily.com\/api\/user",
     "organizationId": "965947ad-83d2-4f09-8a86-9896116704d1",
+    "organizationUfid": "aou_stable",
     "defaultPodId": "204caa47-e3fe-4745-bee6-dc443375b116",
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-p-1v-s0i.iam.gserviceaccount.com",
     "adminBigQuery": {
