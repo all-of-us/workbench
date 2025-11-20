@@ -33,8 +33,8 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
-import { zendeskBaseUrl } from 'app/utils/zendesk';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
+import { zendeskBaseUrl } from 'app/utils/zendesk';
 
 const styles = reactStyles({
   bannerNotification: {
