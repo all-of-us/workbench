@@ -214,6 +214,7 @@ describe(WorkspaceWrapper.name, () => {
 
     currentWorkspaceStore.next({
       ...workspaceDataStub,
+      billingAccountName: 'billingAccounts/initial-credits',
       initialCredits: {
         exhausted: true,
         expirationBypassed: false,
@@ -276,6 +277,86 @@ describe(WorkspaceWrapper.name, () => {
         exhausted: false,
         expirationBypassed: false,
         expirationEpochMillis: Date.now() + 100000,
+      },
+    });
+    await createWrapperAndWaitForLoad();
+    expect(screen.queryByText(/Add a payment method/i)).not.toBeInTheDocument();
+  });
+
+  it('should not show UnlinkedBillingNotification when workspace is NOT using initial credits billing account even if credits are exhausted', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableUnlinkBillingForInitialCredits: true,
+      },
+    });
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      billingAccountName: 'billingAccounts/some-other-billing-account',
+      initialCredits: {
+        exhausted: true,
+        expirationBypassed: false,
+        expirationEpochMillis: Date.now() - 1000,
+      },
+    });
+    await createWrapperAndWaitForLoad();
+    expect(screen.queryByText(/Add a payment method/i)).not.toBeInTheDocument();
+  });
+
+  it('should show UnlinkedBillingNotification when workspace IS using initial credits billing account and credits are exhausted', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableUnlinkBillingForInitialCredits: true,
+      },
+    });
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      billingAccountName: 'billingAccounts/initial-credits',
+      initialCredits: {
+        exhausted: true,
+        expirationBypassed: false,
+        expirationEpochMillis: Date.now() + 100000, // not expired
+      },
+    });
+    await createWrapperAndWaitForLoad();
+    expect(screen.getByText(/Add a payment method/i)).toBeInTheDocument();
+  });
+
+  it('should show UnlinkedBillingNotification when workspace IS using initial credits billing account and credits are expired', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableUnlinkBillingForInitialCredits: true,
+      },
+    });
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      billingAccountName: 'billingAccounts/initial-credits',
+      initialCredits: {
+        exhausted: false,
+        expirationBypassed: false,
+        expirationEpochMillis: Date.now() - 1000, // expired
+      },
+    });
+    await createWrapperAndWaitForLoad();
+    expect(screen.getByText(/Add a payment method/i)).toBeInTheDocument();
+  });
+
+  it('should not show UnlinkedBillingNotification when workspace IS using initial credits but expiration is bypassed', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableUnlinkBillingForInitialCredits: true,
+      },
+    });
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      billingAccountName: 'billingAccounts/initial-credits',
+      initialCredits: {
+        exhausted: false,
+        expirationBypassed: true, // bypassed
+        expirationEpochMillis: Date.now() - 1000, // expired but bypassed
       },
     });
     await createWrapperAndWaitForLoad();
