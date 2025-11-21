@@ -185,7 +185,6 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                       `~${workspace.userFacingId}`,
                       {
                         reason: 'AoU Prod Support',
-                        asUser: true,
                       }
                     )
                     .then(() => setAodEnabled(true))
