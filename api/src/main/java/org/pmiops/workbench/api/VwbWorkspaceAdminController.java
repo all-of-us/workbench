@@ -90,8 +90,7 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<Void> enableAccessOnDemandByUserFacingId(
       String userFacingId, VwbAodRequest request) {
-    vwbUserManagerClient.workspaceAccessOnDemandByUserFacingId(
-        userFacingId, request.getReason(), request.isAsUser());
+    vwbUserManagerClient.workspaceAccessOnDemandByUserFacingId(userFacingId, request.getReason());
     return ResponseEntity.ok().build();
   }
 
