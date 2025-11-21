@@ -283,7 +283,7 @@ describe(WorkspaceWrapper.name, () => {
     expect(screen.queryByText(/Add a payment method/i)).not.toBeInTheDocument();
   });
 
-  it('should not show UnlinkedBillingNotification when workspace is NOT using initial credits billing account even if credits are exhausted', async () => {
+  it('should not show UnlinkedBillingNotification when workspace is not using initial credits even if credits are exhausted', async () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
@@ -303,7 +303,7 @@ describe(WorkspaceWrapper.name, () => {
     expect(screen.queryByText(/Add a payment method/i)).not.toBeInTheDocument();
   });
 
-  it('should show UnlinkedBillingNotification when workspace IS using initial credits billing account and credits are exhausted', async () => {
+  it('should show UnlinkedBillingNotification when workspace is using initial credits and credits are exhausted', async () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
@@ -323,7 +323,7 @@ describe(WorkspaceWrapper.name, () => {
     expect(screen.getByText(/Add a payment method/i)).toBeInTheDocument();
   });
 
-  it('should show UnlinkedBillingNotification when workspace IS using initial credits billing account and credits are expired', async () => {
+  it('should show UnlinkedBillingNotification when workspace is using initial credits and credits are expired', async () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
