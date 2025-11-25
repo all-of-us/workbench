@@ -45,7 +45,7 @@ CURATION_SYNTHETIC_SOURCE_CONFIG = {
 
 CURATION_PROD_SOURCE_CONFIG = {
   # Optional: to speed up iteration with this script, download and run against a local directory instead.
-  :wgs_aw4_prefix => "#{PROD_BROAD_BUCKET}/AW4_wgs_manifest/AoU_DRCB_SEQ_",
+  :wgs_aw4_prefix => "#{PROD_BROAD_BUCKET}/AW4_wgs_manifest/dragen_3.7.8/AoU_DRCB_SEQ_",
   # This contains all AW4 manifests.
   :microarray_aw4_prefix => "#{PROD_BROAD_BUCKET}/AW4_array_manifest/AoU_DRCB_GEN_"
 }
@@ -64,6 +64,9 @@ FILE_ENVIRONMENTS = {
     :source_config => CURATION_PROD_SOURCE_CONFIG,
   },
   "all-of-us-rw-prod" => {
+    :source_config => CURATION_PROD_SOURCE_CONFIG
+  },
+  "vwb-prod" => {
     :source_config => CURATION_PROD_SOURCE_CONFIG
   }
 }
