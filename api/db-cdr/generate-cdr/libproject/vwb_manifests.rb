@@ -1209,8 +1209,18 @@ def create_and_upload_manifest_on_fly(common, job, manifest_path, impersonate_ar
     # Write source file paths to manifest
     file_group['files'].each do |file|
       object_path = file['source'].gsub(/^gs:\/\/[^\/]+\//, "")
-      manifest_file.puts(object_path)
-    end
+      # In V2 mode, manifest paths should be relative to the source folder
+      if job['v2_mode']
+        source_folder = file_group['source_folder'] || ""
+        # Remove any leading gs://bucket/ from source_folder for consistency
+        source_folder = source_folder.gsub(/^gs:\/\/[^\/]+\//, "")
+        # Ensure trailing slash for correct prefix removal
+        source_folder += "/" unless source_folder.empty? || source_folder.end_with?("/")
+        relative_path = object_path.start_with?(source_folder) ? object_path[source_folder.length..-1] : object_path
+        manifest_file.puts(relative_path)
+      else
+        manifest_file.puts(object_path)
+      end
     manifest_file.close
 
     # Upload manifest to GCS using SA impersonation
