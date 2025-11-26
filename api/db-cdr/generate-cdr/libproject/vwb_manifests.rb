@@ -491,6 +491,12 @@ def read_cached_aw4_rows(cache_dir, cache_key, common)
     return cached_rows
   rescue => e
     common.warning "Failed to read cache file: #{e.message}"
+    begin
+      File.delete(cache_file)
+      common.warning "Deleted corrupted cache file: #{File.basename(cache_file)}"
+    rescue => delete_err
+      common.warning "Failed to delete corrupted cache file: #{delete_err.message}"
+    end
     return nil
   end
 end
