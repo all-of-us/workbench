@@ -304,15 +304,15 @@ def publish_cdr(cmd_name, args)
 
   # Validation: If source and destination datasets differ, ensure both don't already exist with data.
   if op.opts.bq_dataset != op.opts.dest_bq_dataset
-    def dataset_has_tables?(project, dataset)
+    dataset_has_tables = lambda do |project, dataset|
       # Use bq CLI to list tables; returns true if any tables exist
       tables = `bq ls --project_id=#{project} #{dataset} 2>/dev/null`
       # The output has a header line; if more than one line, there are tables
       tables && tables.lines.count > 1
     end
 
-    src_has_tables = dataset_has_tables?(op.opts.project, op.opts.bq_dataset)
-    dest_has_tables = dataset_has_tables?(op.opts.project, op.opts.dest_bq_dataset)
+    src_has_tables = dataset_has_tables.call(op.opts.project, op.opts.bq_dataset)
+    dest_has_tables = dataset_has_tables.call(op.opts.project, op.opts.dest_bq_dataset)
     if src_has_tables && dest_has_tables
       raise "Both source dataset '#{op.opts.bq_dataset}' and destination dataset '#{op.opts.dest_bq_dataset}' exist and contain tables. This may cause data conflicts or overwrites. Please ensure at most one dataset contains data before proceeding."
     end
