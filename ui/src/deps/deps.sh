@@ -12,6 +12,4 @@ fi
 
 yarn install --frozen-lockfile
 
-./project.rb tanagra-dep --env "$1"
-
 yarn run codegen && yarn run build-terra-deps
