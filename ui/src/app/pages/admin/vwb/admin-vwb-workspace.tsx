@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { faCopy } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { faCopy } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   UserRole,
