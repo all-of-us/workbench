@@ -13952,9 +13952,6 @@ components:
         reason:
           description: required reason for access demand
           type: string
-        asUser:
-          description: Call VWB as end user
-          type: boolean
 
   parameters:
     userId:

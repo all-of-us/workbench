@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rawls.RawlsApiClientFactory;
@@ -110,15 +109,6 @@ public class VwbUserManagerConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspaceApi serviceAccountWorkspaceApi(
       @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT) ApiClient apiClient) {
-    return new WorkspaceApi(apiClient);
-  }
-
-  @Bean(name = VWB_END_USER_WORKSPACE_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspaceApi endUserWorkspaceApi(
-      UserAuthentication userAuthentication, WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = newApiClient(workbenchConfig);
-    apiClient.setAccessToken(userAuthentication.getCredentials());
     return new WorkspaceApi(apiClient);
   }
 }

@@ -4,6 +4,8 @@ import * as fp from 'lodash/fp';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { faCopy } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   UserRole,
@@ -13,7 +15,8 @@ import {
 } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
-import { Button } from 'app/components/buttons';
+import { Button, StyledExternalLink } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
 import { NewWindowIcon } from 'app/components/icons';
 import { Error as ErrorDiv } from 'app/components/inputs';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
@@ -21,7 +24,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { RESEARCH_PURPOSE_MAPPING } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import { WorkspaceInfoField } from 'app/pages/admin/workspace/workspace-info-field';
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
 
@@ -63,6 +66,9 @@ const collabList = (users: UserRole[]) => {
     : 'None';
 };
 
+const getCommandText = (id: string) =>
+  `wb workspace access --reason='AoU Prod Support' --workspace=${id}`;
+
 interface Props
   extends WithSpinnerOverlayProps,
     RouteComponentProps<MatchParams> {}
@@ -77,8 +83,6 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [researchPurpose, setResearchPurpose] = useState<ResearchPurposeItem>();
-  const [requestingAod, setRequestingAod] = useState<boolean>(false);
-  const [aodEnabled, setAodEnabled] = useState<boolean>(false);
 
   const handleDataLoadError = async (error) => {
     if (error instanceof Response) {
@@ -173,48 +177,6 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             <WorkspaceInfoField labelText='Description'>
               {workspace.description}
             </WorkspaceInfoField>
-            <WorkspaceInfoField labelText='Access On Demand'>
-              <Button
-                type='primary'
-                style={{ height: '2.25rem' }}
-                disabled={aodEnabled}
-                onClick={() => {
-                  setRequestingAod(true);
-                  vwbWorkspaceAdminApi()
-                    .enableAccessOnDemandByUserFacingId(
-                      `~${workspace.userFacingId}`,
-                      {
-                        reason: 'AoU Prod Support',
-                        asUser: true,
-                      }
-                    )
-                    .then(() => setAodEnabled(true))
-                    .catch((err) => console.error(err))
-                    .finally(() => setRequestingAod(false));
-                }}
-              >
-                Request AoD
-                {requestingAod && (
-                  <Spinner size={18} style={{ marginLeft: '0.75rem' }} />
-                )}
-              </Button>
-              {aodEnabled && (
-                <Button
-                  type='primary'
-                  style={{ marginLeft: '0.5rem', height: '2.25rem' }}
-                  onClick={() => {
-                    window.open(
-                      `${environment.vwbUiUrl}/workspaces/${workspace.id}`,
-                      '_blank',
-                      'noopener noreferrer'
-                    );
-                  }}
-                >
-                  Open in Verily Workbench{' '}
-                  <NewWindowIcon style={{ marginLeft: '5px' }} />
-                </Button>
-              )}
-            </WorkspaceInfoField>
             <Accordion style={{ marginTop: '0.5rem' }}>
               <AccordionTab header='Research Purpose'>
                 {RESEARCH_PURPOSE_MAPPING.map((section, s) => (
@@ -272,6 +234,67 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                 ))}
               </AccordionTab>
             </Accordion>
+            <h3>Access On Demand</h3>
+            <div
+              className='aod'
+              style={{ marginTop: '1.5rem', width: '800px' }}
+            >
+              <div style={{ marginBottom: '1rem' }}>
+                To enable Access On Demand for this workspace, run the following
+                command using Verily's{' '}
+                <StyledExternalLink
+                  href='https://support.workbench.verily.com/docs/guides/cli/cli_install_and_run/'
+                  target='_blank'
+                >
+                  Workbench CLI
+                </StyledExternalLink>
+                <FlexRow
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: colorWithWhiteness(
+                      colors.tableBorder,
+                      0.75
+                    ),
+                    border: `1px solid ${colors.tableBorder}`,
+                    borderRadius: '5px',
+                    color: colors.dark,
+                    marginTop: '.75rem',
+                    padding: '.75rem 0px',
+                  }}
+                >
+                  <div
+                    style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
+                  >
+                    {getCommandText(workspace.id)}
+                  </div>
+                  <FontAwesomeIcon
+                    icon={faCopy}
+                    style={{ marginRight: '0.6rem', cursor: 'pointer' }}
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        getCommandText(workspace.id)
+                      )
+                    }
+                    title='Copy CLI Command'
+                  />
+                </FlexRow>
+              </div>
+              <Button
+                type='primary'
+                style={{ marginLeft: '0.5rem', height: '2.25rem' }}
+                onClick={() => {
+                  window.open(
+                    `${environment.vwbUiUrl}/workspaces/${workspace.id}`,
+                    '_blank',
+                    'noopener noreferrer'
+                  );
+                }}
+              >
+                Open in Verily Workbench{' '}
+                <NewWindowIcon style={{ marginLeft: '5px' }} />
+              </Button>
+            </div>
             <h3>Collaborators</h3>
             <div className='collaborators' style={{ marginTop: '1.5rem' }}>
               <div style={{ marginBottom: '1rem' }}>
