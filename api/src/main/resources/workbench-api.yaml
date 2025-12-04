@@ -2448,6 +2448,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/cron/cleanupTemporarilyRelinkedWorkspaces:
+    get:
+      tags:
+        - offlineWorkspace
+        - cron
+      description: |
+        Endpoint to be called offline to monitor workspaces that have been temporarily relinked
+        to the initial credits billing account to allow them to be cloned. Will periodically check
+        for workspaces that are in this state. Any source workspaces that have finished cloning will be
+        unlinked from billing if they are not involved in any other clone operations.
+      operationId: cleanupTemporarilyRelinkedWorkspaces
+      security: []
+      response:
+        204:
+          description: Check and any necessary billing account removals succeeded.
+          content: {}
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/cron/deleteOldRuntimes:
     get:
       tags:

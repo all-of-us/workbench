@@ -60,7 +60,8 @@ public interface WorkspaceService {
    * account name to the given workspace. It will also update the billingAccountName
    * field on the workspace model.
    */
-  void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
+  void updateWorkspaceBillingAccount(
+      DbWorkspace workspace, String newBillingAccountName, Boolean forceResync);
 
   DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
 

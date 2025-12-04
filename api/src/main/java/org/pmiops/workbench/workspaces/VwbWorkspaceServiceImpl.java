@@ -129,7 +129,8 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+  public void updateWorkspaceBillingAccount(
+      DbWorkspace workspace, String newBillingAccountName, Boolean forceResync) {
     logger.warn("updateWorkspaceBillingAccount not implemented in VWB");
   }
 

@@ -654,7 +654,7 @@ public class WorkspaceServiceTest {
     assertThat(workspace.getBillingAccountName())
         .isEqualTo(workbenchConfig.billing.initialCreditsBillingAccountName());
 
-    workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount);
+    workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount, false);
 
     verify(mockFireCloudService)
         .updateBillingAccount(workspace.getWorkspaceNamespace(), newBillingAccount);
@@ -680,7 +680,7 @@ public class WorkspaceServiceTest {
             workbenchConfig.billing.initialCreditsBillingAccountName()))
         .thenReturn(projectBillingInfo);
     workspaceService.updateWorkspaceBillingAccount(
-        workspace, workbenchConfig.billing.initialCreditsBillingAccountName());
+        workspace, workbenchConfig.billing.initialCreditsBillingAccountName(), false);
 
     verify(mockFireCloudService)
         .updateBillingAccountAsService(
@@ -697,7 +697,7 @@ public class WorkspaceServiceTest {
     DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
     workspace.setBillingAccountName(newBillingAccount);
 
-    workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount);
+    workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount, false);
 
     verify(mockFireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
     verify(mockFireCloudService, never()).updateBillingAccount(anyString(), anyString());
@@ -720,7 +720,7 @@ public class WorkspaceServiceTest {
 
     assertThrows(
         FailedPreconditionException.class,
-        () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount));
+        () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount, false));
   }
 
   @Test

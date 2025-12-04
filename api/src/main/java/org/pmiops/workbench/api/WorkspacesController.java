@@ -17,16 +17,8 @@ import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
-import org.pmiops.workbench.db.model.DbAccessTier;
-import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspaceOperation;
+import org.pmiops.workbench.db.dao.*;
+import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -62,6 +54,7 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -96,6 +89,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceOperationMapper workspaceOperationMapper;
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
+  private final TemporaryInitialCreditsRelinkWorkspaceDao temporaryInitialCreditsRelinkWorkspaceDao;
 
   private final WorkspaceServiceFactory workspaceServiceFactory;
 
@@ -121,7 +115,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceResourcesService workspaceResourcesService,
       WorkspaceService workspaceService,
       WorkspaceServiceFactory workspaceServiceFactory,
-      WsmClient wsmClient) {
+      WsmClient wsmClient,
+      TemporaryInitialCreditsRelinkWorkspaceDao temporaryInitialCreditsRelinkWorkspaceDao) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -141,6 +136,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceServiceFactory = workspaceServiceFactory;
     this.wsmClient = wsmClient;
+    this.temporaryInitialCreditsRelinkWorkspaceDao = temporaryInitialCreditsRelinkWorkspaceDao;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -198,7 +194,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // There might be a refactoring opportunity here to separate out the Google Cloud
       // API calls so we can call just that instead of this which does that and a little more.
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
+          dbWorkspace,
+          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
+          false);
       throw e;
     }
     final Workspace createdWorkspace =
@@ -416,7 +414,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     try {
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workspace.getBillingAccountName());
+          dbWorkspace, workspace.getBillingAccountName(), false);
     } catch (ServerErrorException e) {
       throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
@@ -534,7 +532,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (workspace.getBillingAccountName() != null) {
       try {
         workspaceService.updateWorkspaceBillingAccount(
-            dbWorkspace, request.getWorkspace().getBillingAccountName());
+            dbWorkspace, request.getWorkspace().getBillingAccountName(), false);
       } catch (ServerErrorException e) {
         throw new ServerErrorException("Could not update the workspace's billing account", e);
       }
@@ -548,7 +546,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // Tell Google Cloud to set the billing account back to the original one since our
       // update database call failed
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, originalWorkspace.getBillingAccountName());
+          dbWorkspace, originalWorkspace.getBillingAccountName(), false);
       throw e;
     }
 
@@ -577,6 +575,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new NotFoundException(
           String.format(
               "DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceTerraName));
+    }
+
+    // Check if the source workspace is on initial credits and has exhausted or expired initial
+    // credits.
+    // If so, temporarily relink it to the initial credits billing account to allow duplication.
+    if (sourceWorkspaceRequiresTemporaryInitialCreditsRelink(fromWorkspace)) {
+      relinkSourceWorkspaceToInitialCredits(fromWorkspaceNamespace, fromWorkspaceTerraName, fromWorkspace, toWorkspace);
     }
 
     DbAccessTier accessTier = fromWorkspace.getCdrVersion().getAccessTier();
@@ -626,7 +631,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } catch (Exception e) {
       // Tell Google to set the billing account back to initial-credits if our clone fails
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
+          dbWorkspace,
+          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
+          false);
       throw e;
     }
 
@@ -663,6 +670,38 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
 
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
+  }
+
+  private boolean sourceWorkspaceRequiresTemporaryInitialCreditsRelink(DbWorkspace fromWorkspace) {
+    return workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits
+            && BillingUtils.isInitialCredits(fromWorkspace.getBillingAccountName(), workbenchConfigProvider.get())
+            && (fromWorkspace.isInitialCreditsExhausted() || initialCreditsService.areUserCreditsExpired(fromWorkspace.getCreator()));
+  }
+
+  private void relinkSourceWorkspaceToInitialCredits(String fromWorkspaceNamespace, String fromWorkspaceTerraName, DbWorkspace fromWorkspace, Workspace toWorkspace) {
+    log.info(
+        String.format(
+            "Source workspace %s/%s has exhausted/expired initial credits. "
+                + "Temporarily relinking to initial credits billing account for duplication.",
+                fromWorkspaceNamespace, fromWorkspaceTerraName));
+    temporaryInitialCreditsRelinkWorkspaceDao.save(
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceNamespace(fromWorkspaceNamespace)
+            .setDestinationWorkspaceNamespace(toWorkspace.getNamespace()));
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+              fromWorkspace,
+          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
+          true);
+    } catch (Exception e) {
+      log.log(
+          Level.WARNING,
+          String.format(
+              "Failed to temporarily relink source workspace %s/%s to initial credits billing account",
+                  fromWorkspaceNamespace, fromWorkspaceTerraName),
+          e);
+      throw e;
+    }
   }
 
   @Override
