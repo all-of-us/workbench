@@ -57,10 +57,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
+import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -89,7 +86,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceOperationMapper workspaceOperationMapper;
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
-  private final TemporaryInitialCreditsRelinkWorkspaceDao temporaryInitialCreditsRelinkWorkspaceDao;
+  private final TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
 
   private final WorkspaceServiceFactory workspaceServiceFactory;
 
@@ -116,7 +113,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       WorkspaceServiceFactory workspaceServiceFactory,
       WsmClient wsmClient,
-      TemporaryInitialCreditsRelinkWorkspaceDao temporaryInitialCreditsRelinkWorkspaceDao) {
+      TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -136,7 +133,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceServiceFactory = workspaceServiceFactory;
     this.wsmClient = wsmClient;
-    this.temporaryInitialCreditsRelinkWorkspaceDao = temporaryInitialCreditsRelinkWorkspaceDao;
+    this.temporaryInitialCreditsRelinkService = temporaryInitialCreditsRelinkService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -577,11 +574,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               "DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceTerraName));
     }
 
-    // Check if the source workspace is on initial credits and has exhausted or expired initial
-    // credits.
-    // If so, temporarily relink it to the initial credits billing account to allow duplication.
+    // Temporarily relink source workspace to initial credits if necessary
     if (sourceWorkspaceRequiresTemporaryInitialCreditsRelink(fromWorkspace)) {
-      relinkSourceWorkspaceToInitialCredits(fromWorkspaceNamespace, fromWorkspaceTerraName, fromWorkspace, toWorkspace);
+      temporaryInitialCreditsRelinkService.initiateTemporaryRelinking(
+          fromWorkspaceNamespace, fromWorkspace, toWorkspace);
     }
 
     DbAccessTier accessTier = fromWorkspace.getCdrVersion().getAccessTier();
@@ -672,36 +668,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
+  // Return true if the source workspace is on initial credits and has exhausted or expired initial
+  // credits
   private boolean sourceWorkspaceRequiresTemporaryInitialCreditsRelink(DbWorkspace fromWorkspace) {
     return workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits
-            && BillingUtils.isInitialCredits(fromWorkspace.getBillingAccountName(), workbenchConfigProvider.get())
-            && (fromWorkspace.isInitialCreditsExhausted() || initialCreditsService.areUserCreditsExpired(fromWorkspace.getCreator()));
-  }
-
-  private void relinkSourceWorkspaceToInitialCredits(String fromWorkspaceNamespace, String fromWorkspaceTerraName, DbWorkspace fromWorkspace, Workspace toWorkspace) {
-    log.info(
-        String.format(
-            "Source workspace %s/%s has exhausted/expired initial credits. "
-                + "Temporarily relinking to initial credits billing account for duplication.",
-                fromWorkspaceNamespace, fromWorkspaceTerraName));
-    temporaryInitialCreditsRelinkWorkspaceDao.save(
-        new DbTemporaryInitialCreditsRelinkWorkspace()
-            .setSourceWorkspaceNamespace(fromWorkspaceNamespace)
-            .setDestinationWorkspaceNamespace(toWorkspace.getNamespace()));
-    try {
-      workspaceService.updateWorkspaceBillingAccount(
-              fromWorkspace,
-          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
-          true);
-    } catch (Exception e) {
-      log.log(
-          Level.WARNING,
-          String.format(
-              "Failed to temporarily relink source workspace %s/%s to initial credits billing account",
-                  fromWorkspaceNamespace, fromWorkspaceTerraName),
-          e);
-      throw e;
-    }
+        && BillingUtils.isInitialCredits(
+            fromWorkspace.getBillingAccountName(), workbenchConfigProvider.get())
+        && (fromWorkspace.isInitialCreditsExhausted()
+            || initialCreditsService.areUserCreditsExpired(fromWorkspace.getCreator()));
   }
 
   @Override
