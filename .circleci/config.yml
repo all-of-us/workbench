@@ -333,14 +333,14 @@ commands:
               if [ ${diff} -eq 0 ]; then
                 changed=false
                 for dir_name in << parameters.dir_names >>; do
-                  echo "Checking dir '<< dir_name >>' for changes."
+                  echo "Checking dir ${dir_name} for changes."
                   dir_diff=$(git diff --name-only $(git merge-base origin/main ${CIRCLE_BRANCH}) -- ${dir_name} | wc -l | xargs)
                   if [ ${dir_diff} -gt 0 ]; then
-                    echo "Changes found in dir '<< dir_name >>'"
+                    echo "Changes found in dir ${dir_name}"
                     changed=true
                     break
                   fi
-                  echo "No changes found in dir '<< dir_name >>'"
+                  echo "No changes found in dir ${dir_name}"
                 done
                 if [[ $changed = false ]]; then
                   echo "Code in '<< parameters.dir_names >>' directories are not changed. Exiting job."
