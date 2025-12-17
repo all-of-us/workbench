@@ -33,6 +33,10 @@ const VwbWorkspaceSearchParamTypeOptions = [
     value: VwbWorkspaceSearchParamType.SHARED,
     label: 'Workspace Shared By/With',
   },
+  {
+    value: VwbWorkspaceSearchParamType.GCP_PROJECT_ID,
+    label: 'Workspace Google Project ID',
+  },
 ];
 
 const SearchParamTypeLabel = {
@@ -41,6 +45,7 @@ const SearchParamTypeLabel = {
   [VwbWorkspaceSearchParamType.ID]: 'Workspace ID (UUID)',
   [VwbWorkspaceSearchParamType.NAME]: 'Workspace Name',
   [VwbWorkspaceSearchParamType.SHARED]: 'Collaborator Username',
+  [VwbWorkspaceSearchParamType.GCP_PROJECT_ID]: 'Workspace Google Project ID',
 };
 
 export const AdminVwbWorkspaceSearch = (
