@@ -481,7 +481,7 @@ commands:
             ./skip-e2e-pr-checks.sh
       - halt-test-check:
           # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
-          dir_names: "ui"
+          dir_names: "ui e2e .circleci"
 
   puppeteer-access-test-user-setup:
     parameters:
