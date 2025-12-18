@@ -1261,8 +1261,10 @@ workflows:
           <<: *filter-pr-branch
           env_name: "local"
           parallel_num: 5
-          optional_steps:
-            - halt-puppeteer-check
+#          Commented out to unblock pr checks. TODO Ticket to investigate:
+#          https://precisionmedicineinitiative.atlassian.net/browse/DT-1055
+#          optional_steps:
+#            - halt-puppeteer-check
           requires:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
