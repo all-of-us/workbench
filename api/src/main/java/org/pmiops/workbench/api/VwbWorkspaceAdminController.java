@@ -58,6 +58,10 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
         return ResponseEntity.ok(
             new VwbWorkspaceListResponse()
                 .items(vwbAdminQueryService.queryVwbWorkspacesByShareActivity(searchParam)));
+      case GCP_PROJECT_ID:
+        return ResponseEntity.ok(
+            new VwbWorkspaceListResponse()
+                .items(vwbAdminQueryService.queryVwbWorkspaceByGcpProjectId(searchParam)));
       default:
         throw new BadRequestException("Search Param Type " + paramType + " is not supported");
     }

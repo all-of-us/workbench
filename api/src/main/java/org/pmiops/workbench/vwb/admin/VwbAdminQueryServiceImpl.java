@@ -33,6 +33,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String VWB_PODS_TABLE_PREFIX = "um_pods";
   private static final String VWB_WORKSPACE_CREATOR_COLUMN = "created_by_email";
   private static final String VWB_WORKSPACE_ID_COLUMN = "workspace_user_facing_id";
+  private static final String VWB_WORKSPACE_GCP_PROJECT_ID_COLUMN = "gcp_project_id";
   private static final String VWB_WORKSPACE_UUID_COLUMN = "workspace_id";
   private static final String VWB_WORKSPACE_NAME_COLUMN = "workspace_display_name";
 
@@ -195,6 +196,25 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(email))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return tableResultToVwbWorkspace(result);
+  }
+
+  @Override
+  public List<VwbWorkspace> queryVwbWorkspaceByGcpProjectId(String projectId) {
+
+    final String queryString =
+        String.format(
+            QUERY,
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX),
+            getTableName(VWB_PODS_TABLE_PREFIX),
+            VWB_WORKSPACE_GCP_PROJECT_ID_COLUMN);
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(projectId))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);

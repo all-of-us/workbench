@@ -13914,6 +13914,7 @@ components:
         - WORKSPACE_ID
         - WORKSPACE_NAME
         - WORKSPACE_SHARED
+        - WORKSPACE_GCP_PROJECT_ID
     VwbWorkspaceAdminView:
       type: object
       properties:
