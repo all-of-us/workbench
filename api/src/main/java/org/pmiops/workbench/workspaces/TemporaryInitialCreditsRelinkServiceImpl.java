@@ -45,25 +45,26 @@ public class TemporaryInitialCreditsRelinkServiceImpl
   }
 
   /**
-   * Relink the initial credits billing account to the source workspace and record temporary relinking for future cleanup.
+   * Relink the initial credits billing account to the source workspace and record temporary
+   * relinking for future cleanup.
    */
   @Override
   public void initiateTemporaryRelinking(
-      String sourceWorkspaceNamespace, DbWorkspace sourceWorkspace, Workspace destinationWorkspace) {
+      DbWorkspace sourceWorkspace, Workspace destinationWorkspace) {
     String initialCreditsBillingAccountName =
         workbenchConfigProvider.get().billing.initialCreditsBillingAccountName();
     log.info(
         String.format(
             "Source workspace has exhausted/expired initial credits. "
                 + "Temporarily relinking to initial credits billing account for duplication. [sourceWorkspaceNamespace=%s]",
-            sourceWorkspaceNamespace));
+            sourceWorkspace.getWorkspaceNamespace()));
     relinkWorkspaceDao.save(
         new DbTemporaryInitialCreditsRelinkWorkspace()
-            .setSourceWorkspaceNamespace(sourceWorkspaceNamespace)
+            .setSourceWorkspaceNamespace(sourceWorkspace.getWorkspaceNamespace())
             .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace()));
     try {
       fireCloudService.updateBillingAccountAsService(
-          sourceWorkspaceNamespace, initialCreditsBillingAccountName);
+          sourceWorkspace.getWorkspaceNamespace(), initialCreditsBillingAccountName);
       cloudBillingClient.pollUntilBillingAccountLinked(
           sourceWorkspace.getGoogleProject(), initialCreditsBillingAccountName);
     } catch (IOException | InterruptedException e) {
@@ -71,19 +72,18 @@ public class TemporaryInitialCreditsRelinkServiceImpl
           Level.WARNING,
           String.format(
               "Failed to temporarily relink source workspace to initial credits billing account. [sourceWorkspaceNamespace=%s]",
-              sourceWorkspaceNamespace),
+              sourceWorkspace.getWorkspaceNamespace()),
           e);
       throw new ServerErrorException(
           "Timed out while preparing source workspace for duplication.", e);
     }
   }
 
-
   /**
-   * Find all active clones and check if they're done cloning. If they are, remove billing from their respective source
-   * workspace as long as there are no other workspaces actively cloning the same source workspace. Mark the finished
-   * clones as complete in the database.
-   * */
+   * Find all active clones and check if they're done cloning. If they are, remove billing from
+   * their respective source workspace as long as there are no other workspaces actively cloning the
+   * same source workspace. Mark the finished clones as complete in the database.
+   */
   @Override
   public void cleanupTemporarilyRelinkedWorkspaces() {
     var workspacesToCheck = relinkWorkspaceDao.findByCloneCompletedIsNull();
@@ -102,7 +102,8 @@ public class TemporaryInitialCreditsRelinkServiceImpl
             .collect(Collectors.toSet());
     for (var completedWorkspace : completedWorkspaces) {
       var sourceNamespace = completedWorkspace.workspace.getSourceWorkspaceNamespace();
-      // Check for in progress clones from the same source workspace before attempting to unlink billing
+      // Check for in progress clones from the same source workspace before attempting to unlink
+      // billing
       if (!inProgressWorkspaces.contains(sourceNamespace)) {
         fireCloudService.removeBillingAccountFromBillingProjectAsService(sourceNamespace);
       }
@@ -111,7 +112,7 @@ public class TemporaryInitialCreditsRelinkServiceImpl
           Timestamp.from(
               completedWorkspace
                   .cloneCompleted
-                  .get() // safe because we partition by cloneCompleted.isPresent()
+                  .get() // safe because we partition by cloneCompleted.isPresent() above
                   .toInstant()));
       relinkWorkspaceDao.save(completedWorkspace.workspace);
     }
@@ -122,7 +123,7 @@ public class TemporaryInitialCreditsRelinkServiceImpl
       Optional<OffsetDateTime> cloneCompleted) {}
 
   /** Return workspace with optional cloneCompleted timestamp from Terra getWorkspace response. */
-  WorkspaceWithCloneCompletedTime getWorkspaceCloneCompletedTime(
+  private WorkspaceWithCloneCompletedTime getWorkspaceCloneCompletedTime(
       DbTemporaryInitialCreditsRelinkWorkspace workspace) {
     var dbWorkspace = workspaceDao.getByNamespace(workspace.getDestinationWorkspaceNamespace());
     var fcWorkspace =

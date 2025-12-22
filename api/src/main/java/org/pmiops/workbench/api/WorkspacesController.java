@@ -576,8 +576,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Temporarily relink source workspace to initial credits if necessary
     if (sourceWorkspaceRequiresTemporaryInitialCreditsRelink(fromWorkspace)) {
-      temporaryInitialCreditsRelinkService.initiateTemporaryRelinking(
-          fromWorkspaceNamespace, fromWorkspace, toWorkspace);
+      temporaryInitialCreditsRelinkService.initiateTemporaryRelinking(fromWorkspace, toWorkspace);
     }
 
     DbAccessTier accessTier = fromWorkspace.getCdrVersion().getAccessTier();
