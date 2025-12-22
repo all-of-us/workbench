@@ -4,6 +4,7 @@ import jakarta.inject.Provider;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,15 +97,18 @@ public class TemporaryInitialCreditsRelinkServiceImpl
             .collect(Collectors.partitioningBy(ws -> ws.cloneCompleted.isPresent()));
 
     var completedWorkspaces = partitioned.get(true);
-    var inProgressWorkspaces =
-        partitioned.get(false).stream()
+
+    List<WorkspaceWithCloneCompletedTime> inProgressWorkspaces = partitioned.get(false);
+    var inProgressWorkspaceSourceNamespaces =
+        inProgressWorkspaces.stream()
             .map(ic -> ic.workspace.getSourceWorkspaceNamespace())
             .collect(Collectors.toSet());
+
     for (var completedWorkspace : completedWorkspaces) {
       var sourceNamespace = completedWorkspace.workspace.getSourceWorkspaceNamespace();
       // Check for in progress clones from the same source workspace before attempting to unlink
-      // billing
-      if (!inProgressWorkspaces.contains(sourceNamespace)) {
+      // billing to avoid interrupting other in progress clones
+      if (!inProgressWorkspaceSourceNamespaces.contains(sourceNamespace)) {
         fireCloudService.removeBillingAccountFromBillingProjectAsService(sourceNamespace);
       }
 
