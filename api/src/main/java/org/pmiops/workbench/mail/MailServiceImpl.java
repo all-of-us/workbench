@@ -89,14 +89,20 @@ public class MailServiceImpl implements MailService {
       "emails/initial_credits_dollar_threshold/v1/content.html";
   private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2 =
       "emails/initial_credits_dollar_threshold/v2/content.html";
+  private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V3 =
+      "emails/initial_credits_dollar_threshold/v3/content.html";
   private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE_V1 =
       "emails/initial_credits_exhaustion/v1/content.html";
   private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2 =
       "emails/initial_credits_exhaustion/v2/content.html";
+  private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE_V3 =
+      "emails/initial_credits_exhaustion/v3/content.html";
   private static final String INITIAL_CREDITS_EXPIRING_RESOURCE_V1 =
       "emails/initial_credits_expiring/v1/content.html";
   private static final String INITIAL_CREDITS_EXPIRING_RESOURCE_V2 =
       "emails/initial_credits_expiring/v2/content.html";
+  private static final String INITIAL_CREDITS_EXPIRING_RESOURCE_V3 =
+      "emails/initial_credits_expiring/v3/content.html";
   private static final String INITIAL_CREDITS_EXPIRED_RESOURCE =
       "emails/initial_credits_expired/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
@@ -212,8 +218,8 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         checkEnableUnlinkBillingForInitialCreditsFlag()
             ? buildHtml(
-                INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2,
-                initialCreditsDollarThresholdSubstitutionMapV2(
+                INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V3,
+                initialCreditsDollarThresholdSubstitutionMapV3(
                     user, currentUsage, remainingBalance))
             : buildHtml(
                 INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V1,
@@ -241,7 +247,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         checkEnableUnlinkBillingForInitialCreditsFlag()
             ? buildHtml(
-                INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2,
+                INITIAL_CREDITS_EXHAUSTION_RESOURCE_V3,
                 initialCreditsExhaustionSubstitutionMapV2(user))
             : buildHtml(
                 INITIAL_CREDITS_EXHAUSTION_RESOURCE_V1,
@@ -266,7 +272,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             checkEnableUnlinkBillingForInitialCreditsFlag()
-                ? INITIAL_CREDITS_EXPIRING_RESOURCE_V2
+                ? INITIAL_CREDITS_EXPIRING_RESOURCE_V3
                 : INITIAL_CREDITS_EXPIRING_RESOURCE_V1,
             initialCreditsExpiringSubstitutionMap(user));
 
@@ -645,6 +651,20 @@ public class MailServiceImpl implements MailService {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
+        .build();
+  }
+
+  private ImmutableMap<EmailSubstitutionField, String>
+      initialCreditsDollarThresholdSubstitutionMapV3(
+          final DbUser user, double currentUsage, double remainingBalance) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
         .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
