@@ -34,7 +34,6 @@ public class TemporaryInitialCreditsRelinkServiceTest {
   @Mock private WorkspaceDao workspaceDao;
   @Mock private TemporaryInitialCreditsRelinkWorkspaceDao temporaryInitialCreditsRelinkWorkspaceDao;
   @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
-  @Mock private WorkbenchConfig workbenchConfig;
 
   private TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
   String initialCreditsBillingAccountId = "test-account-id";
@@ -52,7 +51,7 @@ public class TemporaryInitialCreditsRelinkServiceTest {
 
   @Test
   public void testInitiateTemporaryRelinking() throws IOException, InterruptedException {
-    workbenchConfig = new WorkbenchConfig();
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
     workbenchConfig.billing.accountId = initialCreditsBillingAccountId;
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
@@ -64,7 +63,7 @@ public class TemporaryInitialCreditsRelinkServiceTest {
     var destinationWorkspace = new Workspace().namespace("destinationWorkspaceNamespace");
 
     InOrder inOrder =
-        Mockito.inOrder(
+        inOrder(
             temporaryInitialCreditsRelinkWorkspaceDao, fireCloudService, cloudBillingClient);
     when(cloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
         .thenReturn(new ProjectBillingInfo());

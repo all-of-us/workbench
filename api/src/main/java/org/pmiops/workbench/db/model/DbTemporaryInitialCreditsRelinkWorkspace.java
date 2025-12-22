@@ -77,8 +77,8 @@ public class DbTemporaryInitialCreditsRelinkWorkspace {
     if (o == null || getClass() != o.getClass()) return false;
     DbTemporaryInitialCreditsRelinkWorkspace that = (DbTemporaryInitialCreditsRelinkWorkspace) o;
     return id == that.id
-        && sourceWorkspaceNamespace == that.sourceWorkspaceNamespace
-        && destinationWorkspaceNamespace == that.destinationWorkspaceNamespace
+        && Objects.equals(sourceWorkspaceNamespace, that.sourceWorkspaceNamespace)
+        && Objects.equals(destinationWorkspaceNamespace, that.destinationWorkspaceNamespace)
         && Objects.equals(created, that.created)
         && Objects.equals(cloneCompleted, that.cloneCompleted);
   }
