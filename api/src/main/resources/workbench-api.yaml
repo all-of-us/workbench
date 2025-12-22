@@ -2460,7 +2460,7 @@ paths:
         unlinked from billing if they are not involved in any other clone operations.
       operationId: cleanupTemporarilyRelinkedWorkspaces
       security: []
-      response:
+      responses:
         204:
           description: Check and any necessary billing account removals succeeded.
           content: {}
