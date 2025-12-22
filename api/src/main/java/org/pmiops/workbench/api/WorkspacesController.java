@@ -192,8 +192,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // API calls so we can call just that instead of this which does that and a little more.
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace,
-          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
-          false);
+          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName()
+      );
       throw e;
     }
     final Workspace createdWorkspace =
@@ -411,7 +411,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     try {
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workspace.getBillingAccountName(), false);
+          dbWorkspace, workspace.getBillingAccountName());
     } catch (ServerErrorException e) {
       throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
@@ -529,7 +529,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (workspace.getBillingAccountName() != null) {
       try {
         workspaceService.updateWorkspaceBillingAccount(
-            dbWorkspace, request.getWorkspace().getBillingAccountName(), false);
+            dbWorkspace, request.getWorkspace().getBillingAccountName());
       } catch (ServerErrorException e) {
         throw new ServerErrorException("Could not update the workspace's billing account", e);
       }
@@ -543,7 +543,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // Tell Google Cloud to set the billing account back to the original one since our
       // update database call failed
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, originalWorkspace.getBillingAccountName(), false);
+          dbWorkspace, originalWorkspace.getBillingAccountName());
       throw e;
     }
 
@@ -627,8 +627,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // Tell Google to set the billing account back to initial-credits if our clone fails
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace,
-          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
-          false);
+          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName()
+      );
       throw e;
     }
 

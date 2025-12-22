@@ -61,7 +61,7 @@ public interface WorkspaceService {
    * field on the workspace model.
    */
   void updateWorkspaceBillingAccount(
-      DbWorkspace workspace, String newBillingAccountName, Boolean forceResync);
+      DbWorkspace workspace, String newBillingAccountName);
 
   DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
 
