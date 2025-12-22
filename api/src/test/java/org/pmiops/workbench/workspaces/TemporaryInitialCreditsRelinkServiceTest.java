@@ -63,8 +63,7 @@ public class TemporaryInitialCreditsRelinkServiceTest {
     var destinationWorkspace = new Workspace().namespace("destinationWorkspaceNamespace");
 
     InOrder inOrder =
-        inOrder(
-            temporaryInitialCreditsRelinkWorkspaceDao, fireCloudService, cloudBillingClient);
+        inOrder(temporaryInitialCreditsRelinkWorkspaceDao, fireCloudService, cloudBillingClient);
     when(cloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
         .thenReturn(new ProjectBillingInfo());
 
