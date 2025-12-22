@@ -504,8 +504,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateWorkspaceBillingAccount(
-      DbWorkspace workspace, String newBillingAccountName) {
+  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
     if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
       return;
     }
