@@ -3122,7 +3122,7 @@ Common.register_command({
     :fn => ->(*args) {list_disks(LIST_DISKS_CMD, *args)}
 })
 
-VALID_EMAIL_OPTION = 'egress'
+VALID_EMAIL_OPTIONS = ['egress', 'initial_credits_dollar_threshold', 'initial_credits_exhaustion', 'initial_credits_expiring', 'initial_credits_expired']
 def send_email(cmd_name, *args)
   common = Common.new
 
@@ -3139,8 +3139,7 @@ def send_email(cmd_name, *args)
     '--email [which email to send]',
     String,
     ->(opts, v) { opts.email = v },
-    "Currently, 'egress' is the only valid option.")
-  op.opts.email = VALID_EMAIL_OPTION
+    "Valid options: #{VALID_EMAIL_OPTIONS.join(', ')}")
 
   op.add_typed_option(
     '--username [user name]',
@@ -3164,10 +3163,28 @@ def send_email(cmd_name, *args)
     '--disable',
     String,
     ->(opts, _) { opts.disable = true },
-    'If specified, sends the DISABLE_USER egress email.  Defaults to the SUSPEND_COMPUTE egress email.')
+    'For egress email: if true, sends DISABLE_USER; if false, sends SUSPEND_COMPUTE.')
   op.opts.disable = false
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.username and opts.given_name and opts.contact and opts.email == VALID_EMAIL_OPTION }
+  op.add_typed_option(
+    '--used_credits [amount]',
+    String,
+    ->(opts, v) { opts.used_credits = v },
+    'For initial_credits_dollar_threshold: amount of credits used (e.g., 150.00)')
+
+  op.add_typed_option(
+    '--remaining_balance [amount]',
+    String,
+    ->(opts, v) { opts.remaining_balance = v },
+    'For initial_credits_dollar_threshold: remaining balance (e.g., 150.00)')
+
+  op.add_typed_option(
+    '--expiration_date [YYYY-MM-DD]',
+    String,
+    ->(opts, v) { opts.expiration_date = v },
+    'For initial_credits_expiring/expired: expiration date in YYYY-MM-DD format')
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.username and opts.given_name and opts.contact and VALID_EMAIL_OPTIONS.include?(opts.email) }
 
   op.parse.validate
 
@@ -3177,7 +3194,10 @@ def send_email(cmd_name, *args)
     ["--contact", op.opts.contact],
     ["--disable", op.opts.disable],
     ["--email", op.opts.email],
- ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+    ["--used_credits", op.opts.used_credits],
+    ["--remaining_balance", op.opts.remaining_balance],
+    ["--expiration_date", op.opts.expiration_date],
+ ]).reject { |kv| kv[1].nil? }.map { |kv| "#{kv[0]}=#{kv[1]}" }
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }
 
@@ -3194,13 +3214,14 @@ end
 SEND_EMAIL_CMD = "send-email"
 
 # example usage:
-#   ./project.rb send-email \
-#   --username joel@fake-research-aou.org \
-#   --contact thibault@broadinstitute.org \
-#   --disable
+#   ./project.rb send-email --email egress --username joel@fake-research-aou.org --contact your@email.com --given_name Joel --disable
+#   ./project.rb send-email --email initial_credits_dollar_threshold --username joel@fake-research-aou.org --contact your@email.com --given_name Joel --used_credits 150.00 --remaining_balance 150.00
+#   ./project.rb send-email --email initial_credits_exhaustion --username joel@fake-research-aou.org --contact your@email.com --given_name Joel
+#   ./project.rb send-email --email initial_credits_expiring --username joel@fake-research-aou.org --contact your@email.com --given_name Joel --expiration_date 2025-03-15
+#   ./project.rb send-email --email initial_credits_expired --username joel@fake-research-aou.org --contact your@email.com --given_name Joel --expiration_date 2025-01-15
 Common.register_command({
     :invocation => SEND_EMAIL_CMD,
-    :description => "Sends a system email.  Currently limited to egress emails.",
+    :description => "Sends a system email (egress, initial_credits_dollar_threshold, initial_credits_exhaustion, initial_credits_expiring, initial_credits_expired).",
     :fn => ->(*args) {send_email(SEND_EMAIL_CMD, *args)}
 })
 

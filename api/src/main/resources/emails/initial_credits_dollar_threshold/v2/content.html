@@ -1,24 +1,27 @@
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Initial Credits (Dollar Threshold)</title>
-  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css?family=Montserrat"
+    rel="stylesheet"
+  />
   <style>
     body {
-      background-color: #F1F1F1;
+      background-color: #f1f1f1;
       padding-left: 1rem;
       padding-top: 1rem;
       width: 600px;
     }
     * {
-      font-family: 'Montserrat', sans-serif;
+      font-family: "Montserrat", sans-serif;
       font-weight: 300;
       margin-bottom: 6px;
     }
     div {
       margin-top: 2rem;
       margin-bottom: 1rem;
-      color: #302C71;
+      color: #302c71;
       font-size: 24px;
       font-weight: 300;
       line-height: 36px;
@@ -26,20 +29,76 @@
   </style>
 </head>
 <body>
-<img src="${HEADER_IMG}" alt="">
-<div>Hello ${FIRST_NAME},</div>
+  <img src="${HEADER_IMG}" alt="" />
+  <div>Hello ${FIRST_NAME},</div>
 
-<div>This is a reminder that you have used ${USED_CREDITS} of the initial credits offered to your <i>All of Us</i> Researcher Workbench account ${USERNAME} by the <i>All of Us</i> Research Program.</div>
+  <div>
+    This is a reminder that you have used ${USED_CREDITS} of the initial credits
+    offered to your ${ALL_OF_US} Researcher Workbench account ${USERNAME} by the
+    ${ALL_OF_US} Research Program.
+  </div>
 
-<div style="font-weight:bold">The remaining balance of your initial credits is ${CREDIT_BALANCE}.</div>
+  <div>
+    <span style="font-weight: bold; background-color: yellow; color: #000000"
+      >The remaining balance of your initial credits is ${CREDIT_BALANCE}.</span
+    >
+  </div>
 
-<div><i>To avoid any losses to your analyses and files, please add a valid Google Cloud Platform billing account to your workspace. If you haven’t yet established a Google Cloud Platform (GCP) billing account to pay for your research yet, we recommend you do that now.</i></div>
+  <div>
+    <i
+      >To avoid any losses to your analyses and files, please add a valid Google
+      Cloud Platform billing account to your workspace. If you haven't yet
+      established a Google Cloud Platform (GCP) billing account to pay for your
+      research yet, we recommend you do that now.</i
+    >
+  </div>
 
-<div>Once you use all of your initial credits, you will not be able to launch new analysis environments and any active cloud environments, data and storage resources (e.g., workspace buckets and persistent disks) may be deleted.</div>
+  <div>
+    Once you use all of your initial credits, you will not be able to launch new
+    analysis environments and any active cloud environments, data and storage
+    resources (e.g., workspace buckets and persistent disks) may be deleted.
+  </div>
 
-<div>For more information about using initial credits and setting up a billing account to pay for your research, visit the “<a href="https://support.researchallofus.org/hc/en-us/categories/5942730401428">Credits and Billing</a>” section of the User Support Hub.</div>
+  <div>
+    <div style="font-weight: bold; display: inline">
+      Researcher Workbench 1.0 Workspaces
+    </div>
+    <br />Workspace <b>creators</b> can edit billing in the "About" tab of the
+    workspace. To learn more about using a Google Cloud Platform (GCP) billing
+    account to pay for your research, review the "<a
+      href="https://support.researchallofus.org/hc/en-us/sections/6000172946708"
+      >Credits and Billing</a
+    >" section on the User Support Hub.
+  </div>
 
-<div><div style="font-weight:bold;display: inline">Questions?</div> Contact our support team by using the Help Desk widget in the Workbench or by emailing <a href="mailto:support@researchallofus.org">support@researchallofus.org</a></div>
+  <div>
+    <div style="font-weight: bold; display: inline">
+      Researcher Workbench 2.0 Workspaces
+    </div>
+    <br />In order to change your billing for a workspace in the Researcher
+    Workbench 2.0, you will be required to <b>duplicate</b> the workspace, and
+    add an updated billing pod. To learn more about creating a billing pod, see
+    the 'Billing and Managing Cost' in the support article '<a
+      href="https://support.researchallofus.org/hc/en-us/articles/41981050556564"
+      >Getting Started in the new Researcher Workbench</a
+    >'
+  </div>
 
-<div><i>All of Us</i> Researcher Workbench support team</div>
+  <div>
+    For more information about using initial credits and setting up a billing
+    account to pay for your research, visit the "<a
+      href="https://support.researchallofus.org/hc/en-us/categories/5942730401428"
+      >Credits and Billing</a
+    >" section of the User Support Hub.
+  </div>
+
+  <div>
+    <div style="font-weight: bold; display: inline">Questions?</div>
+    Contact our support team by using the Help Desk widget in the Workbench or
+    by emailing
+    <a href="mailto:support@researchallofus.org">support@researchallofus.org</a
+    >.
+  </div>
+
+  <div>${ALL_OF_US} Researcher Workbench support team</div>
 </body>
