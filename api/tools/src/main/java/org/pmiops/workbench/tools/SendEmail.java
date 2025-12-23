@@ -9,14 +9,14 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.mail.MailSender;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.mail.MailServiceImpl;
-import org.pmiops.workbench.mail.MailSender;
 import org.pmiops.workbench.mail.SendGridMailSender;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -86,8 +86,7 @@ public class SendEmail extends Tool {
   private static final Option disableOpt =
       Option.builder()
           .longOpt("disable")
-          .desc(
-              "For egress email: if true, sends DISABLE_USER; if false, sends SUSPEND_COMPUTE")
+          .desc("For egress email: if true, sends DISABLE_USER; if false, sends SUSPEND_COMPUTE")
           .hasArg()
           .build();
 
