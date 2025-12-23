@@ -204,6 +204,38 @@ public class VwbUserManagerClient {
         });
   }
 
+  public void podAccessOnDemand(String podId) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    vwbUserManagerRetryHandler.run(
+        context -> {
+          podApiProvider
+              .get()
+              .podAccessOnDemand(
+                  new AccessOnDemandRequest()
+                      .reason("On-demand access for initial credits unlinking")
+                      .role(WorkbenchRole.SUPPORT),
+                  organizationId,
+                  podId);
+          return null;
+        });
+  }
+
+  public void revokeSAPodAdminRoleFromPod(String podId) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    logger.info("Revoking SA Pod Admin role from pod {}", podId);
+    vwbUserManagerRetryHandler.run(
+        context -> {
+          podApiProvider
+              .get()
+              .revokeMemberPodRole(
+                  organizationId,
+                  podId,
+                  workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0),
+                  PodRole.ADMIN);
+          return null;
+        });
+  }
+
   private static JobControl generateJobControlWithUUID() {
     return new JobControl().id(UUID.randomUUID().toString());
   }
