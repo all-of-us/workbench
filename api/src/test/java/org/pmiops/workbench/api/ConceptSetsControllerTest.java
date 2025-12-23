@@ -269,7 +269,8 @@ public class ConceptSetsControllerTest {
     WsmClient.class,
     VwbAccessService.class,
     VwbUserService.class,
-    TaskQueueService.class
+    TaskQueueService.class,
+    TemporaryInitialCreditsRelinkService.class
   })
   static class Configuration {
     @Bean
