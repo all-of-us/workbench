@@ -61,7 +61,7 @@ public class TemporaryInitialCreditsRelinkServiceImpl
             sourceWorkspace.getWorkspaceNamespace()));
     relinkWorkspaceDao.save(
         new DbTemporaryInitialCreditsRelinkWorkspace()
-            .setSourceWorkspaceNamespace(sourceWorkspace.getWorkspaceNamespace())
+            .setSourceWorkspaceId(sourceWorkspace.getWorkspaceId())
             .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace()));
     try {
       fireCloudService.updateBillingAccountAsService(
@@ -99,17 +99,18 @@ public class TemporaryInitialCreditsRelinkServiceImpl
     var completedWorkspaces = partitioned.get(true);
 
     List<WorkspaceWithCloneCompletedTime> inProgressWorkspaces = partitioned.get(false);
-    var inProgressWorkspaceSourceNamespaces =
+    var inProgressWorkspaceSourceIds =
         inProgressWorkspaces.stream()
-            .map(ic -> ic.workspace.getSourceWorkspaceNamespace())
+            .map(ic -> ic.workspace.getSourceWorkspaceId())
             .collect(Collectors.toSet());
 
     for (var completedWorkspace : completedWorkspaces) {
-      var sourceNamespace = completedWorkspace.workspace.getSourceWorkspaceNamespace();
+      var sourceId = completedWorkspace.workspace.getSourceWorkspaceId();
       // Check for in progress clones from the same source workspace before attempting to unlink
       // billing to avoid interrupting other in progress clones
-      if (!inProgressWorkspaceSourceNamespaces.contains(sourceNamespace)) {
-        fireCloudService.removeBillingAccountFromBillingProjectAsService(sourceNamespace);
+      if (!inProgressWorkspaceSourceIds.contains(sourceId)) {
+        Optional<DbWorkspace> sourceWorkspace = workspaceDao.findActiveByWorkspaceId(sourceId);
+        sourceWorkspace.ifPresent(ws -> fireCloudService.removeBillingAccountFromBillingProjectAsService(ws.getWorkspaceNamespace()));
       }
 
       completedWorkspace.workspace.setCloneCompleted(

@@ -13,7 +13,7 @@ import java.util.Objects;
 @Table(name = "temporary_initial_credits_relink_workspace")
 public class DbTemporaryInitialCreditsRelinkWorkspace {
   private long id;
-  private String sourceWorkspaceNamespace;
+  private long sourceWorkspaceId;
   private String destinationWorkspaceNamespace;
   private Timestamp created;
   private Timestamp cloneCompleted;
@@ -29,14 +29,14 @@ public class DbTemporaryInitialCreditsRelinkWorkspace {
     return this;
   }
 
-  @Column(name = "source_workspace_namespace")
-  public String getSourceWorkspaceNamespace() {
-    return sourceWorkspaceNamespace;
+  @Column(name = "source_workspace_id")
+  public long getSourceWorkspaceId() {
+    return sourceWorkspaceId;
   }
 
-  public DbTemporaryInitialCreditsRelinkWorkspace setSourceWorkspaceNamespace(
-      String sourceWorkspaceNamespace) {
-    this.sourceWorkspaceNamespace = sourceWorkspaceNamespace;
+  public DbTemporaryInitialCreditsRelinkWorkspace setSourceWorkspaceId(
+      long sourceWorkspaceNamespace) {
+    this.sourceWorkspaceId = sourceWorkspaceNamespace;
     return this;
   }
 
@@ -77,7 +77,7 @@ public class DbTemporaryInitialCreditsRelinkWorkspace {
     if (o == null || getClass() != o.getClass()) return false;
     DbTemporaryInitialCreditsRelinkWorkspace that = (DbTemporaryInitialCreditsRelinkWorkspace) o;
     return id == that.id
-        && Objects.equals(sourceWorkspaceNamespace, that.sourceWorkspaceNamespace)
+        && sourceWorkspaceId == that.sourceWorkspaceId
         && Objects.equals(destinationWorkspaceNamespace, that.destinationWorkspaceNamespace)
         && Objects.equals(created, that.created)
         && Objects.equals(cloneCompleted, that.cloneCompleted);
@@ -86,17 +86,17 @@ public class DbTemporaryInitialCreditsRelinkWorkspace {
   @Override
   public int hashCode() {
     return Objects.hash(
-        id, sourceWorkspaceNamespace, destinationWorkspaceNamespace, created, cloneCompleted);
+        id, sourceWorkspaceId, destinationWorkspaceNamespace, created, cloneCompleted);
   }
 
   public DbTemporaryInitialCreditsRelinkWorkspace() {}
 
   public DbTemporaryInitialCreditsRelinkWorkspace(
-      String sourceWorkspaceNamespace,
+      long sourceWorkspaceId,
       String destinationWorkspaceNamespace,
       Timestamp created,
       Timestamp cloneCompleted) {
-    this.sourceWorkspaceNamespace = sourceWorkspaceNamespace;
+    this.sourceWorkspaceId = sourceWorkspaceId;
     this.destinationWorkspaceNamespace = destinationWorkspaceNamespace;
     this.created = created;
     this.cloneCompleted = cloneCompleted;

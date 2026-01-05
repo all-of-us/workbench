@@ -9,13 +9,13 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="source_workspace_namespace" type="varchar(255)">
-                <constraints nullable="false" foreignKeyName="fk_temporary_initial_credits_relink_workspace_source_workspace_namespace" references="workspace(workspace_namespace)" deleteCascade="true"/>
+            <column name="source_workspace_id" type="varchar(255)">
+                <constraints nullable="false" foreignKeyName="fk_temporary_initial_credits_relink_workspace_source_workspace_id" references="workspace(workspace_id)" deleteCascade="true"/>
             </column>
             <column name="destination_workspace_namespace" type="varchar(255)">
-                <constraints nullable="false" foreignKeyName="fk_temporary_initial_credits_relink_workspace_destination_workspace_namespace" references="workspace(workspace_namespace)" deleteCascade="true"/>
+                <constraints nullable="false" unique="true"/>
             </column>
-            <column name="created" type="datetime">
+            <column name="created" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="clone_completed" type="datetime">

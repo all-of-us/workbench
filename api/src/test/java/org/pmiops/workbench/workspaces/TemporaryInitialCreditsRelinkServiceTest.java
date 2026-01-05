@@ -74,7 +74,7 @@ public class TemporaryInitialCreditsRelinkServiceTest {
         .verify(temporaryInitialCreditsRelinkWorkspaceDao)
         .save(
             new DbTemporaryInitialCreditsRelinkWorkspace()
-                .setSourceWorkspaceNamespace(sourceWorkspace.getWorkspaceNamespace())
+                .setSourceWorkspaceId(sourceWorkspace.getWorkspaceId())
                 .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace()));
     inOrder
         .verify(fireCloudService)
@@ -90,6 +90,8 @@ public class TemporaryInitialCreditsRelinkServiceTest {
 
   @Test
   public void testCleanupTemporarilyRelinkedWorkspaces() throws IOException, InterruptedException {
+    long sourceId1 = 1L;
+    long sourceId2 = 2L;
     String sourceNs1 = "sourceNs1";
     String sourceNs2 = "sourceNs2";
     String destNs1 = "destNs1";
@@ -98,15 +100,15 @@ public class TemporaryInitialCreditsRelinkServiceTest {
 
     DbTemporaryInitialCreditsRelinkWorkspace workspace1 =
         new DbTemporaryInitialCreditsRelinkWorkspace()
-            .setSourceWorkspaceNamespace(sourceNs1)
+            .setSourceWorkspaceId(sourceId1)
             .setDestinationWorkspaceNamespace(destNs1);
     DbTemporaryInitialCreditsRelinkWorkspace workspace2 =
         new DbTemporaryInitialCreditsRelinkWorkspace()
-            .setSourceWorkspaceNamespace(sourceNs2)
+            .setSourceWorkspaceId(sourceId2)
             .setDestinationWorkspaceNamespace(destNs2);
     DbTemporaryInitialCreditsRelinkWorkspace workspace3 =
         new DbTemporaryInitialCreditsRelinkWorkspace()
-            .setSourceWorkspaceNamespace(sourceNs1)
+            .setSourceWorkspaceId(sourceId1)
             .setDestinationWorkspaceNamespace(destNs3);
     var workspacesToCheck = List.of(workspace1, workspace2, workspace3);
 
@@ -115,6 +117,7 @@ public class TemporaryInitialCreditsRelinkServiceTest {
     mockGetWorkspaceCalls(destNs1, cloneCompleted);
     mockGetWorkspaceCalls(destNs2, cloneCompleted);
     mockGetWorkspaceCalls(destNs3, null);
+    when(workspaceDao.findActiveByWorkspaceId(sourceId2)).thenReturn(Optional.of(new DbWorkspace().setWorkspaceNamespace(sourceNs2)));
     when(temporaryInitialCreditsRelinkWorkspaceDao.findByCloneCompletedIsNull())
         .thenReturn(workspacesToCheck);
 
