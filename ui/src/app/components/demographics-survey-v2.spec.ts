@@ -169,7 +169,9 @@ describe('DemographicsSurveyV2 form validation', () => {
     // Assert
     const minYear = new Date().getFullYear() - 125;
     const expectedErrors: Record<string, string[]> = {
-      yearOfBirth: [`Year of birth must be greater than or equal to ${minYear}`],
+      yearOfBirth: [
+        `Year of birth must be greater than or equal to ${minYear}`,
+      ],
     };
     expect(errors).toEqual(expectedErrors);
   });
