@@ -84,7 +84,7 @@
     "shortName": "Prod",
     "oauthClientId": "684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com",
     "appEngineLocationId": "us-central",
-    "isDownForMaintenance": false
+    "isDownForMaintenance": true
   },
   "admin": {
     "loginUrl": "https:\/\/workbench.researchallofus.org/login"
@@ -131,11 +131,11 @@
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": true,
     "enableVWBUserAccessManagement": true,
-    "enableVWBUserCreation": true,
+    "enableVWBUserCreation": false,
     "enableVWBPodCreation": true,
     "enableVWBInitialCreditsExhaustion": true,
     "enableTierAccessCheckInDb": true,
-    "enableVWBHomepageBanner": true
+    "enableVWBHomepageBanner": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
