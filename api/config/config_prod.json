@@ -131,11 +131,11 @@
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": true,
     "enableVWBUserAccessManagement": true,
-    "enableVWBUserCreation": false,
+    "enableVWBUserCreation": true,
     "enableVWBPodCreation": true,
     "enableVWBInitialCreditsExhaustion": true,
     "enableTierAccessCheckInDb": true,
-    "enableVWBHomepageBanner": false
+    "enableVWBHomepageBanner": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
