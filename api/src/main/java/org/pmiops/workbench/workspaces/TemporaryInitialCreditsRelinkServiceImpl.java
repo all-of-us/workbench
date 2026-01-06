@@ -59,7 +59,7 @@ public class TemporaryInitialCreditsRelinkServiceImpl
             "Source workspace has exhausted/expired initial credits. "
                 + "Temporarily relinking to initial credits billing account for duplication. [sourceWorkspaceNamespace=%s]",
             sourceWorkspace.getWorkspaceNamespace()));
-    relinkWorkspaceDao.save(
+    var saved = relinkWorkspaceDao.save(
         new DbTemporaryInitialCreditsRelinkWorkspace()
             .setSourceWorkspaceId(sourceWorkspace.getWorkspaceId())
             .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace()));
@@ -75,6 +75,7 @@ public class TemporaryInitialCreditsRelinkServiceImpl
               "Failed to temporarily relink source workspace to initial credits billing account. [sourceWorkspaceNamespace=%s]",
               sourceWorkspace.getWorkspaceNamespace()),
           e);
+      relinkWorkspaceDao.delete(saved);
       throw new ServerErrorException(
           "Timed out while preparing source workspace for duplication.", e);
     }
