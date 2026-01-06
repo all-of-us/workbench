@@ -106,21 +106,25 @@ public class TemporaryInitialCreditsRelinkServiceImpl
             .collect(Collectors.toSet());
 
     for (var completedWorkspace : completedWorkspaces) {
-      var sourceId = completedWorkspace.workspace.getSourceWorkspaceId();
-      // Check for in progress clones from the same source workspace before attempting to unlink
-      // billing to avoid interrupting other in progress clones
-      if (!inProgressWorkspaceSourceIds.contains(sourceId)) {
-        Optional<DbWorkspace> sourceWorkspace = workspaceDao.findActiveByWorkspaceId(sourceId);
-        sourceWorkspace.ifPresent(ws -> fireCloudService.removeBillingAccountFromBillingProjectAsService(ws.getWorkspaceNamespace()));
-      }
+      try {
+        var sourceId = completedWorkspace.workspace.getSourceWorkspaceId();
+        // Check for in progress clones from the same source workspace before attempting to unlink
+        // billing to avoid interrupting other in progress clones
+        if (!inProgressWorkspaceSourceIds.contains(sourceId)) {
+          Optional<DbWorkspace> sourceWorkspace = workspaceDao.findActiveByWorkspaceId(sourceId);
+          sourceWorkspace.ifPresent(ws -> fireCloudService.removeBillingAccountFromBillingProjectAsService(ws.getWorkspaceNamespace()));
+        }
 
-      completedWorkspace.workspace.setCloneCompleted(
-          Timestamp.from(
-              completedWorkspace
-                  .cloneCompleted
-                  .get() // safe because we partition by cloneCompleted.isPresent() above
-                  .toInstant()));
-      relinkWorkspaceDao.save(completedWorkspace.workspace);
+        completedWorkspace.workspace.setCloneCompleted(
+                Timestamp.from(
+                        completedWorkspace
+                                .cloneCompleted
+                                .get() // safe because we partition by cloneCompleted.isPresent() above
+                                .toInstant()));
+        relinkWorkspaceDao.save(completedWorkspace.workspace);
+      } catch (Exception e) {
+        log.log(Level.SEVERE, String.format("Failed to cleanup temporary relinking record. [temporaryRelinkWorkspaceRecordId=%d]", completedWorkspace.workspace.getId()), e);
+      }
     }
   }
 
