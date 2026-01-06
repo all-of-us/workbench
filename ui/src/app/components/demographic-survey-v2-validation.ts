@@ -11,8 +11,8 @@ import {
 } from 'app/utils/zod-validators';
 import { z } from 'zod';
 
-export const getMaxYear = () => new Date().getFullYear();
-export const getMinYear = () => getMaxYear() - 125;
+export const maxYear = new Date().getFullYear();
+export const minYear = maxYear - 125;
 
 export const OTHER_DISABILITY_MAX_LENGTH = 200;
 export const MAX_CHARACTERS_VALIDATION_MESSAGE =
@@ -54,11 +54,11 @@ export const demographicSurveySchema = refinedObject<DemographicSurveyV2>(
         ? noop
         : requiredNumber(needYearOfBirthMsg)
             .int()
-            .min(getMinYear(), {
-              message: `Year of birth must be greater than or equal to ${getMinYear()}`,
+            .min(minYear, {
+              message: `Year of birth must be greater than or equal to ${minYear}`,
             })
-            .max(getMaxYear(), {
-              message: `Year of birth must be less than or equal to ${getMaxYear()}`,
+            .max(maxYear, {
+              message: `Year of birth must be less than or equal to ${maxYear}`,
             }),
       education: requiredString("Education can't be blank"),
       disadvantaged: requiredYesNoPreferNot("Disadvantaged can't be blank"),

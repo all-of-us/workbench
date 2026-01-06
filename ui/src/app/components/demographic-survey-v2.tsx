@@ -34,8 +34,8 @@ import {
 } from 'app/utils/constants';
 
 import {
-  getMaxYear,
-  getMinYear,
+  maxYear,
+  minYear,
   NONE_FULLY_DESCRIBE_MAX_LENGTH,
   OTHER_DISABILITY_MAX_LENGTH,
   SURVEY_COMMENTS_MAX_LENGTH,
@@ -901,8 +901,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             <NumberInput
               onChange={(value) => onUpdate(YEAR_OF_BIRTH, value)}
               disabled={survey.yearOfBirthPreferNot}
-              min={getMinYear()}
-              max={getMaxYear()}
+              min={minYear}
+              max={maxYear}
               value={survey.yearOfBirth || ''}
               style={{ width: '6rem' }}
             />
