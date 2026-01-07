@@ -117,7 +117,8 @@ public class TemporaryInitialCreditsRelinkServiceTest {
     mockGetWorkspaceCalls(destNs1, cloneCompleted);
     mockGetWorkspaceCalls(destNs2, cloneCompleted);
     mockGetWorkspaceCalls(destNs3, null);
-    when(workspaceDao.findActiveByWorkspaceId(sourceId2)).thenReturn(Optional.of(new DbWorkspace().setWorkspaceNamespace(sourceNs2)));
+    when(workspaceDao.findActiveByWorkspaceId(sourceId2))
+        .thenReturn(Optional.of(new DbWorkspace().setWorkspaceNamespace(sourceNs2)));
     when(temporaryInitialCreditsRelinkWorkspaceDao.findByCloneCompletedIsNull())
         .thenReturn(workspacesToCheck);
 

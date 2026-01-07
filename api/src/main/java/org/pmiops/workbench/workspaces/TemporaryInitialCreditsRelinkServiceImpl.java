@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.temporal.TemporalAmount;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -62,10 +61,11 @@ public class TemporaryInitialCreditsRelinkServiceImpl
             "Source workspace has exhausted/expired initial credits. "
                 + "Temporarily relinking to initial credits billing account for duplication. [sourceWorkspaceNamespace=%s]",
             sourceWorkspace.getWorkspaceNamespace()));
-    var saved = relinkWorkspaceDao.save(
-        new DbTemporaryInitialCreditsRelinkWorkspace()
-            .setSourceWorkspaceId(sourceWorkspace.getWorkspaceId())
-            .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace()));
+    var saved =
+        relinkWorkspaceDao.save(
+            new DbTemporaryInitialCreditsRelinkWorkspace()
+                .setSourceWorkspaceId(sourceWorkspace.getWorkspaceId())
+                .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace()));
     try {
       fireCloudService.updateBillingAccountAsService(
           sourceWorkspace.getWorkspaceNamespace(), initialCreditsBillingAccountName);
@@ -115,18 +115,26 @@ public class TemporaryInitialCreditsRelinkServiceImpl
         // billing to avoid interrupting other in progress clones
         if (!inProgressWorkspaceSourceIds.contains(sourceId)) {
           Optional<DbWorkspace> sourceWorkspace = workspaceDao.findActiveByWorkspaceId(sourceId);
-          sourceWorkspace.ifPresent(ws -> fireCloudService.removeBillingAccountFromBillingProjectAsService(ws.getWorkspaceNamespace()));
+          sourceWorkspace.ifPresent(
+              ws ->
+                  fireCloudService.removeBillingAccountFromBillingProjectAsService(
+                      ws.getWorkspaceNamespace()));
         }
 
         completedWorkspace.workspace.setCloneCompleted(
-                Timestamp.from(
-                        completedWorkspace
-                                .cloneCompleted
-                                .get() // safe because we partition by cloneCompleted.isPresent() above
-                                .toInstant()));
+            Timestamp.from(
+                completedWorkspace
+                    .cloneCompleted
+                    .get() // safe because we partition by cloneCompleted.isPresent() above
+                    .toInstant()));
         relinkWorkspaceDao.save(completedWorkspace.workspace);
       } catch (Exception e) {
-        log.log(Level.SEVERE, String.format("Failed to cleanup temporary relinking record. [temporaryRelinkWorkspaceRecordId=%d]", completedWorkspace.workspace.getId()), e);
+        log.log(
+            Level.SEVERE,
+            String.format(
+                "Failed to cleanup temporary relinking record. [temporaryRelinkWorkspaceRecordId=%d]",
+                completedWorkspace.workspace.getId()),
+            e);
       }
     }
   }
@@ -140,31 +148,40 @@ public class TemporaryInitialCreditsRelinkServiceImpl
       DbTemporaryInitialCreditsRelinkWorkspace workspace) {
     var dbWorkspace = workspaceDao.getByNamespace(workspace.getDestinationWorkspaceNamespace());
 
-    // If the cloneOperation was started over an hour ago and there's no record in the database or Terra,
-    // something went wrong. We'll mark it as completed and cleanup billing as needed. We need to wait for
-    // a bit to avoid a race condition as the temporary relinking record is created before the workspace
-    // database record or the Terra workspace are created.
+    // If the cloneOperation was started over an hour ago and there's no record in the database or
+    // Terra, something went wrong. We'll mark it as completed and cleanup billing as needed. We
+    // need to wait for a bit to avoid a race condition as the temporary relinking record is created
+    // before the workspace database record or the Terra workspace are created.
     var timeoutThreshold = Timestamp.from(Instant.now().minus(Duration.ofHours(1)));
 
     if (dbWorkspace.isEmpty() && workspace.getCreated().before(timeoutThreshold)) {
-      log.warning(String.format("Destination workspace for temporary initial credits relink not found in DB. Marking relink record as completed. [temporaryRelinkWorkspaceRecordId=%d]", workspace.getId()));
+      log.warning(
+          String.format(
+              "Destination workspace for temporary initial credits relink not found in DB. Marking relink record as completed. [temporaryRelinkWorkspaceRecordId=%d]",
+              workspace.getId()));
       return new WorkspaceWithCloneCompletedTime(workspace, Optional.of(OffsetDateTime.now()));
     }
 
     Optional<OffsetDateTime> cloneCompleted;
     try {
       var fcWorkspace =
-              dbWorkspace.map(
-                      dbWs ->
-                              fireCloudService.getWorkspaceAsService(
-                                      dbWs.getWorkspaceNamespace(), dbWs.getFirecloudName()));
+          dbWorkspace.map(
+              dbWs ->
+                  fireCloudService.getWorkspaceAsService(
+                      dbWs.getWorkspaceNamespace(), dbWs.getFirecloudName()));
       cloneCompleted =
-              fcWorkspace.flatMap(
-                      fcWs ->
-                              Optional.ofNullable(fcWs.getWorkspace().getCompletedCloneWorkspaceFileTransfer()));
+          fcWorkspace.flatMap(
+              fcWs ->
+                  Optional.ofNullable(
+                      fcWs.getWorkspace().getCompletedCloneWorkspaceFileTransfer()));
     } catch (Exception e) {
       if (workspace.getCreated().before(timeoutThreshold)) {
-        log.log(Level.WARNING, String.format("Error retrieving Terra workspace for temporary initial credits relink. Marking relink record as completed. [temporaryRelinkWorkspaceRecordId=%d]", workspace.getId()), e);
+        log.log(
+            Level.WARNING,
+            String.format(
+                "Error retrieving Terra workspace for temporary initial credits relink. Marking relink record as completed. [temporaryRelinkWorkspaceRecordId=%d]",
+                workspace.getId()),
+            e);
         cloneCompleted = Optional.of(OffsetDateTime.now());
       } else {
         cloneCompleted = Optional.empty();
