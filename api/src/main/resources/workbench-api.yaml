@@ -2462,7 +2462,7 @@ paths:
       security: []
       responses:
         204:
-          description: Check and any necessary billing account removals succeeded.
+          description: Check was attempted and any necessary billing account removals were initiated.
           content: {}
         500:
           description: Internal Error
