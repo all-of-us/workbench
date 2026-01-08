@@ -280,6 +280,7 @@
   <include file="changelog/db.changelog-270-replace-reporting-upload-verification-timestamp.xml"/>
   <include file="changelog/db.changelog-271-add-workspace-user-cache-table.xml"/>
   <include file="changelog/db.changelog-272-add-vwb-workspace-id-column.xml"/>
+  <include file="changelog/db.changelog-273-add-unique-constraint-vwb-user-pod.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

@@ -12,6 +12,7 @@ import org.pmiops.workbench.vwb.user.model.PodRole;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -82,6 +83,13 @@ public class VwbUserService {
       userDao.save(dbUser);
 
       return dbVwbUserPod;
+    } catch (DataIntegrityViolationException e) {
+      // Another task already created a pod for this user - that's ok!
+      logger.info("Pod already created for user {} by another task, fetching existing pod", email);
+      vwbUserManagerClient.deletePod(initialCreditsPodForUser.getPodId());
+      // Refresh and return the existing pod
+      DbUser refreshedUser = userDao.findById(dbUser.getUserId()).orElseThrow();
+      return refreshedUser.getVwbUserPod();
     } catch (Throwable e) {
       logger.error("Error creating pod for user with email, deleting the pod {}", email, e);
       vwbUserManagerClient.deletePod(initialCreditsPodForUser.getPodId());
