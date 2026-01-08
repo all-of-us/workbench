@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -7,6 +8,8 @@ import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import jakarta.inject.Provider;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +23,7 @@ import org.pmiops.workbench.db.dao.TemporaryInitialCreditsRelinkWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbTemporaryInitialCreditsRelinkWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.Workspace;
@@ -50,7 +54,7 @@ public class TemporaryInitialCreditsRelinkServiceTest {
   }
 
   @Test
-  public void testInitiateTemporaryRelinking() throws IOException, InterruptedException {
+  public void testInitiateTemporaryRelinking_success() throws IOException, InterruptedException {
     WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
     workbenchConfig.billing.accountId = initialCreditsBillingAccountId;
@@ -89,7 +93,34 @@ public class TemporaryInitialCreditsRelinkServiceTest {
   }
 
   @Test
-  public void testCleanupTemporarilyRelinkedWorkspaces() throws IOException, InterruptedException {
+  public void testInitiateTemporaryRelinking_failure() throws IOException, InterruptedException {
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+    workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
+    workbenchConfig.billing.accountId = initialCreditsBillingAccountId;
+    when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
+
+    var sourceWorkspace =
+        new DbWorkspace()
+            .setWorkspaceNamespace("sourceWorkspaceNamespace")
+            .setGoogleProject("googleProject");
+    var destinationWorkspace = new Workspace().namespace("destinationWorkspaceNamespace");
+
+    when(cloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
+        .thenThrow(new IOException());
+
+    assertThrows(
+        ServerErrorException.class,
+        () ->
+            temporaryInitialCreditsRelinkService.initiateTemporaryRelinking(
+                sourceWorkspace, destinationWorkspace));
+
+    // Verify that we clean up after a failure
+    verify(temporaryInitialCreditsRelinkWorkspaceDao).delete(any());
+  }
+
+  @Test
+  public void testCleanupTemporarilyRelinkedWorkspaces_success()
+      throws IOException, InterruptedException {
     long sourceId1 = 1L;
     long sourceId2 = 2L;
     String sourceNs1 = "sourceNs1";
@@ -136,6 +167,126 @@ public class TemporaryInitialCreditsRelinkServiceTest {
         .save(workspace2.setCloneCompleted(Timestamp.from(cloneCompleted.toInstant())));
     // workspace3 is still in progress, it should not be updated
     verify(temporaryInitialCreditsRelinkWorkspaceDao, times(0)).save(workspace3);
+  }
+
+  @Test
+  public void testCleanupTemporarilyRelinkedWorkspaces_missingWorkspaces()
+      throws IOException, InterruptedException {
+    long sourceId = 1L;
+    String sourceNs = "sourceNs";
+    String missingInDatabaseTimedOutNs = "missingInDatabaseTimedOutNs";
+    String missingInDatabaseNewNs = "missingInDatabaseNewNs";
+    String missingInTerraTimedOutNs = "missingInTerraTimedOutNs";
+    String missingInTerraNewNs = "missingInTerraNewNs";
+
+    DbTemporaryInitialCreditsRelinkWorkspace missingInDatabaseTimedOut =
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceId(sourceId)
+            .setDestinationWorkspaceNamespace(missingInDatabaseTimedOutNs)
+            .setCreated(Timestamp.from(Instant.now().minus(Duration.ofHours(2))));
+    DbTemporaryInitialCreditsRelinkWorkspace missingInDatabaseNew =
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceId(sourceId)
+            .setDestinationWorkspaceNamespace(missingInDatabaseNewNs)
+            .setCreated(Timestamp.from(Instant.now()));
+    DbTemporaryInitialCreditsRelinkWorkspace missingInTerraTimedOut =
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceId(sourceId)
+            .setDestinationWorkspaceNamespace(missingInTerraTimedOutNs)
+            .setCreated(Timestamp.from(Instant.now().minus(Duration.ofHours(2))));
+    DbTemporaryInitialCreditsRelinkWorkspace missingInTerraNew =
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceId(sourceId)
+            .setDestinationWorkspaceNamespace(missingInTerraNewNs)
+            .setCreated(Timestamp.from(Instant.now()));
+    var workspacesToCheck =
+        List.of(
+            missingInDatabaseTimedOut,
+            missingInDatabaseNew,
+            missingInTerraTimedOut,
+            missingInTerraNew);
+
+    when(workspaceDao.getByNamespace(missingInDatabaseTimedOutNs)).thenReturn(Optional.empty());
+    when(workspaceDao.getByNamespace(missingInDatabaseNewNs)).thenReturn(Optional.empty());
+    when(workspaceDao.getByNamespace(missingInTerraTimedOutNs))
+        .thenReturn(
+            Optional.of(
+                new DbWorkspace()
+                    .setWorkspaceNamespace(missingInTerraTimedOutNs)
+                    .setFirecloudName("fc-" + missingInTerraTimedOutNs)));
+    when(fireCloudService.getWorkspaceAsService(
+            missingInTerraTimedOutNs, "fc-" + missingInTerraTimedOutNs))
+        .thenThrow(new RuntimeException("Missing workspace!"));
+    when(workspaceDao.getByNamespace(missingInTerraNewNs))
+        .thenReturn(
+            Optional.of(
+                new DbWorkspace()
+                    .setWorkspaceNamespace(missingInTerraNewNs)
+                    .setFirecloudName("fc-" + missingInTerraNewNs)));
+    when(fireCloudService.getWorkspaceAsService(missingInTerraNewNs, "fc-" + missingInTerraNewNs))
+        .thenThrow(new RuntimeException("Missing workspace!"));
+    when(temporaryInitialCreditsRelinkWorkspaceDao.findByCloneCompletedIsNull())
+        .thenReturn(workspacesToCheck);
+
+    temporaryInitialCreditsRelinkService.cleanupTemporarilyRelinkedWorkspaces();
+
+    verify(fireCloudService, never()).removeBillingAccountFromBillingProjectAsService(sourceNs);
+    verify(temporaryInitialCreditsRelinkWorkspaceDao, times(2)).save(any());
+    verify(temporaryInitialCreditsRelinkWorkspaceDao, never()).save(missingInDatabaseNew);
+    verify(temporaryInitialCreditsRelinkWorkspaceDao, never()).save(missingInTerraNew);
+  }
+
+  @Test
+  public void testCleanupTemporarilyRelinkedWorkspaces_cleanupFailure()
+      throws IOException, InterruptedException {
+    long failedRemovalSourceId = 1L;
+    long successfulRemovalSourceId = 2L;
+    String failedRemovalSourceNs = "failedRemovalSourceNs";
+    String successfulRemovalSourceNs = "successfulRemovalSourceNs";
+    String destNs1 = "destNs1";
+    String destNs2 = "destNs2";
+
+    DbTemporaryInitialCreditsRelinkWorkspace failedRemovalWorkspace =
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceId(failedRemovalSourceId)
+            .setDestinationWorkspaceNamespace(destNs1);
+    DbTemporaryInitialCreditsRelinkWorkspace successfulRemovalWorkspace =
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceId(successfulRemovalSourceId)
+            .setDestinationWorkspaceNamespace(destNs2);
+
+    var workspacesToCheck = List.of(failedRemovalWorkspace, successfulRemovalWorkspace);
+
+    var cloneCompleted = OffsetDateTime.now();
+
+    mockGetWorkspaceCalls(destNs1, cloneCompleted);
+    mockGetWorkspaceCalls(destNs2, cloneCompleted);
+    when(workspaceDao.findActiveByWorkspaceId(successfulRemovalSourceId))
+        .thenReturn(
+            Optional.of(new DbWorkspace().setWorkspaceNamespace(successfulRemovalSourceNs)));
+    when(workspaceDao.findActiveByWorkspaceId(failedRemovalSourceId))
+        .thenReturn(Optional.of(new DbWorkspace().setWorkspaceNamespace(failedRemovalSourceNs)));
+    when(temporaryInitialCreditsRelinkWorkspaceDao.findByCloneCompletedIsNull())
+        .thenReturn(workspacesToCheck);
+    doThrow(new RuntimeException("Failure!"))
+        .when(fireCloudService)
+        .removeBillingAccountFromBillingProjectAsService(failedRemovalSourceNs);
+
+    temporaryInitialCreditsRelinkService.cleanupTemporarilyRelinkedWorkspaces();
+
+    // We should attempt cleanup on both source namespaces, even if one fails
+    verify(fireCloudService).removeBillingAccountFromBillingProjectAsService(failedRemovalSourceNs);
+    verify(fireCloudService)
+        .removeBillingAccountFromBillingProjectAsService(successfulRemovalSourceNs);
+    // We will not mark a temporary grant as completed until we verify that we've successfully
+    // removed billing
+    verify(temporaryInitialCreditsRelinkWorkspaceDao, never())
+        .save(failedRemovalWorkspace.setCloneCompleted(Timestamp.from(cloneCompleted.toInstant())));
+    // This workspace cleaned up correctly, mark it as such.
+    verify(temporaryInitialCreditsRelinkWorkspaceDao)
+        .save(
+            successfulRemovalWorkspace.setCloneCompleted(
+                Timestamp.from(cloneCompleted.toInstant())));
   }
 
   private void mockGetWorkspaceCalls(String namespace, OffsetDateTime cloneCompleted) {
