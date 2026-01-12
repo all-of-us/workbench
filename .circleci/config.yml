@@ -9,6 +9,7 @@ orbs:
   queue: eddiewebb/queue@2.2.1
   coverage-reporter: codacy/coverage-reporter@13.13.7
   gcp-cli: circleci/gcp-cli@3.2.1
+  slack: circleci/slack@4.13.3
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -1381,7 +1382,12 @@ workflows:
               only:
                 - main
     jobs:
-      - api-bigquery-test
+      - api-bigquery-test:
+          post-steps:
+            - slack/notify:
+                channel: workbench-core
+                event: fail
+                template: basic_fail_1
       - puppeteer-env-setup
       - puppeteer-generate-access-tokens:
           env_name: "test"
@@ -1395,3 +1401,8 @@ workflows:
           requires:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
+          post-steps:
+            - slack/notify:
+                channel: workbench-core
+                event: fail
+                template: basic_fail_1
