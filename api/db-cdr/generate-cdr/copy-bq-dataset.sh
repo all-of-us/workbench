@@ -23,7 +23,7 @@ for f in $(bq ls -n 1000 $SOURCE_DATASET |
              grep TABLE |
              awk '{print $1}' |
              grep "${MATCH_FILTER}" |
-             grep -v "${SKIP_FILTER}")
+             grep -v -E "${SKIP_FILTER}")
 do
   ${bq_cmd} --project_id="${JOB_PROJECT}" cp -f "${SOURCE_DATASET}.${f}" "${DEST_DATASET}.${f}"
 done
