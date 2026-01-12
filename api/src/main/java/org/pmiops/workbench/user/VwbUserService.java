@@ -45,12 +45,17 @@ public class VwbUserService {
     if (!workbenchConfigProvider.get().featureFlags.enableVWBUserCreation) {
       return;
     }
-    OrganizationMember organizationMember = vwbUserManagerClient.getOrganizationMember(email);
-    if (organizationMember.getUserDescription() != null) {
+    if (doesUserExist(email)) {
       logger.info("User already exists in VWB with email {}", email);
       return;
     }
     vwbUserManagerClient.createUser(email);
+  }
+
+  /** Checks if the user already exists in VWB */
+  public boolean doesUserExist(String email) {
+    OrganizationMember organizationMember = vwbUserManagerClient.getOrganizationMember(email);
+    return organizationMember.getUserDescription() != null;
   }
 
   /**

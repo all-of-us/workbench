@@ -17,7 +17,11 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -289,5 +293,67 @@ public class AccessSyncServiceTest {
     verify(accessTierService).addUserToTier(dbUser, registeredTier);
     verify(accessTierService).addUserToTier(dbUser, controlledTier);
     verify(accessTierService, times(0)).removeUserFromTier(any(), any());
+  }
+
+  @Test
+  public void testUpdateUserAccessTiers_concurrentCallsForSameUser_onlyCreatesVwbPodOnce()
+      throws InterruptedException {
+    stubWorkbenchConfig_enableInitialCreditsExpiration(false);
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+
+    // Track how many times VWB user/pod creation is called
+    AtomicInteger vwbUserCreateCount = new AtomicInteger(0);
+    AtomicInteger vwbPodTaskCount = new AtomicInteger(0);
+
+    Mockito.doAnswer(
+            invocation -> {
+              vwbUserCreateCount.incrementAndGet();
+              // Simulate some processing time to increase chance of race condition
+              Thread.sleep(10);
+              return null;
+            })
+        .when(vwbUserService)
+        .createUser(any());
+
+    Mockito.doAnswer(
+            invocation -> {
+              vwbPodTaskCount.incrementAndGet();
+              return null;
+            })
+        .when(taskQueueService)
+        .pushVwbPodCreationTask(any());
+
+    // User starts with access to no tiers
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
+
+    // Simulate concurrent calls to updateUserAccessTiers for the same user
+    int numThreads = 5;
+    ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+    CountDownLatch latch = new CountDownLatch(numThreads);
+
+    for (int i = 0; i < numThreads; i++) {
+      executor.submit(
+          () -> {
+            try {
+              accessSyncService.updateUserAccessTiers(dbUser, agent);
+            } finally {
+              latch.countDown();
+            }
+          });
+    }
+
+    // Wait for all threads to complete
+    latch.await(10, TimeUnit.SECONDS);
+    executor.shutdown();
+
+    // Verify that VWB user and pod creation were only called once despite concurrent calls
+    assertEquals(
+        1,
+        vwbUserCreateCount.get(),
+        "VWB user creation should only be called once despite concurrent calls");
+    assertEquals(
+        1,
+        vwbPodTaskCount.get(),
+        "VWB pod creation task should only be pushed once despite concurrent calls");
   }
 }
