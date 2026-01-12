@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
@@ -140,7 +141,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       lock = vwbCreationLocks.get(userId, () -> new Object());
     } catch (Exception e) {
       // Should never happen as our callable doesn't throw
-      throw new RuntimeException("Failed to get lock for user " + userId, e);
+      throw new ServerErrorException("Failed to get lock for user " + userId, e);
     }
 
     synchronized (lock) {
