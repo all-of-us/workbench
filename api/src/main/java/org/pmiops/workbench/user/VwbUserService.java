@@ -1,6 +1,7 @@
 package org.pmiops.workbench.user;
 
 import jakarta.inject.Provider;
+import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbUserPodDao;
@@ -70,17 +71,19 @@ public class VwbUserService {
     }
 
     PodDescription initialCreditsPodForUser = vwbUserManagerClient.createPodForUserWithEmail(email);
+    UUID podId = initialCreditsPodForUser.getPodId();
     try {
-      vwbUserManagerClient.sharePodWithUserWithRole(
-          initialCreditsPodForUser.getPodId(), email, PodRole.ADMIN);
+      vwbUserManagerClient.sharePodWithUserWithRole(podId, email, PodRole.ADMIN);
 
       DbVwbUserPod dbVwbUserPod =
           new DbVwbUserPod()
-              .setVwbPodId(initialCreditsPodForUser.getPodId().toString())
+              .setVwbPodId(podId.toString())
               .setUser(dbUser)
               .setInitialCreditsActive(true);
       dbUser.setVwbUserPod(dbVwbUserPod);
       userDao.save(dbUser);
+
+      vwbUserManagerClient.revokeSAPodAdminRoleFromPod(podId.toString());
 
       return dbVwbUserPod;
     } catch (DataIntegrityViolationException e) {
@@ -92,7 +95,7 @@ public class VwbUserService {
       return refreshedUser.getVwbUserPod();
     } catch (Throwable e) {
       logger.error("Error creating pod for user with email, deleting the pod {}", email, e);
-      vwbUserManagerClient.deletePod(initialCreditsPodForUser.getPodId());
+      vwbUserManagerClient.deletePod(podId);
       return null;
     }
   }
@@ -118,13 +121,22 @@ public class VwbUserService {
    * @param user The user whose pod's billing account should be unlinked.
    */
   public void unlinkBillingAccountForUserPod(DbUser user) {
-    // If the user does not have a pod or the pod is not using initial credits, do nothing.
+    // If the user does not have a pod or the pod is not using initial credits, do
+    // nothing.
     DbVwbUserPod vwbUserPod = user.getVwbUserPod();
     if (vwbUserPod == null || !vwbUserPod.isInitialCreditsActive()) {
       return;
     }
+    // Check is the SA has access to the pod before attempting to unlink
+    // If not get then get access using AoD. This is possible because the AoU SA is
+    // and Org admin
+    if (vwbUserManagerClient.getPodById(vwbUserPod.getVwbPodId()).isEmpty()) {
+      vwbUserManagerClient.podAccessOnDemand(vwbUserPod.getVwbPodId());
+    }
+
     vwbUserManagerClient.unlinkBillingAccountFromPod(vwbUserPod.getVwbPodId());
-    // At this point, the pod is unlinked from the initial credits billing account, so we should set
+    // At this point, the pod is unlinked from the initial credits billing account,
+    // so we should set
     // the initial credits active flag to false.
     DbVwbUserPod dbVwbUserPod = vwbUserPod.setInitialCreditsActive(false);
     vwbUserPodDao.save(dbVwbUserPod);
