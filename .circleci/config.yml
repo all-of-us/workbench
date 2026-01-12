@@ -1227,6 +1227,16 @@ jobs:
           name: "Confirms successful security approval"
           command: echo "Security approval was successful"
 
+  # Temporary job to test Slack notifications - intentionally fails
+  test-slack-failure:
+    executor: workbench-executor
+    steps:
+      - run:
+          name: "Intentionally fail to test Slack notification"
+          command: |
+            echo "This job is designed to fail to test Slack notifications"
+            exit 1
+
 workflows:
   build-test-deploy:
     jobs:
@@ -1401,6 +1411,24 @@ workflows:
           requires:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
+          post-steps:
+            - slack/notify:
+                channel: workbench-core
+                event: fail
+                template: basic_fail_1
+
+  # Temporary workflow to test Slack notifications
+  # TODO: Remove after testing
+  test-slack-notification:
+    jobs:
+      - hold-for-slack-test:
+          type: approval
+          filters:
+            branches:
+              only: fix-demographic-survey-year-validation-tests
+      - test-slack-failure:
+          requires:
+            - hold-for-slack-test
           post-steps:
             - slack/notify:
                 channel: workbench-core
