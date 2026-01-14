@@ -28,7 +28,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.user.VwbUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +43,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final UserDao userDao;
   private final InitialCreditsService initialCreditsService;
   private final UserServiceAuditor userServiceAuditor;
-  private final VwbUserService vwbUserService;
   private final TaskQueueService taskQueueService;
 
   // Per-user locks to prevent concurrent VWB user/pod creation for the same user
@@ -72,7 +70,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       UserDao userDao,
       InitialCreditsService initialCreditsService,
       UserServiceAuditor userServiceAuditor,
-      VwbUserService vwbUserService,
       TaskQueueService taskQueueService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
@@ -81,7 +78,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.userDao = userDao;
     this.initialCreditsService = initialCreditsService;
     this.userServiceAuditor = userServiceAuditor;
-    this.vwbUserService = vwbUserService;
     this.taskQueueService = taskQueueService;
   }
 
@@ -158,10 +154,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       vwbCreationInitiated.put(userId, Boolean.TRUE);
 
       try {
-        // This call checks if the user already exists in VWB to avoid creating the user twice.
-        // Creating the user here is necessary to ensure that the user is created in VWB before
-        // adding them to the groups
-        vwbUserService.createUser(dbUser.getUsername());
         // Create the pod asynchronously to avoid blocking the user
         taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
       } catch (Exception e) {

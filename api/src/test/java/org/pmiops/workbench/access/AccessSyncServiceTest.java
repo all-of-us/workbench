@@ -44,7 +44,6 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.user.VwbUserService;
 
 @ExtendWith(MockitoExtension.class)
 public class AccessSyncServiceTest {
@@ -63,8 +62,6 @@ public class AccessSyncServiceTest {
   @Mock InitialCreditsService initialCreditsService;
 
   @Mock UserServiceAuditor userServiceAuditor;
-
-  @Mock VwbUserService vwbUserService;
 
   @Mock TaskQueueService taskQueueService;
 
@@ -87,7 +84,6 @@ public class AccessSyncServiceTest {
         institutionService,
         userService,
         userServiceAuditor,
-        vwbUserService,
         taskQueueService);
 
     registeredTier = createRegisteredTier();
@@ -256,7 +252,6 @@ public class AccessSyncServiceTest {
     stubWorkbenchConfig_enableInitialCreditsExpiration(false);
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
     // Mock VWB services for first tier access
-    doNothing().when(vwbUserService).createUser(any());
     doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
 
     // User starts with access to no tiers.
@@ -279,7 +274,6 @@ public class AccessSyncServiceTest {
     stubWorkbenchConfig_enableInitialCreditsExpiration(false);
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
     // Mock VWB services for first tier access
-    doNothing().when(vwbUserService).createUser(any());
     doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
 
     // User starts with access to no tiers.
@@ -302,18 +296,7 @@ public class AccessSyncServiceTest {
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
 
     // Track how many times VWB user/pod creation is called
-    AtomicInteger vwbUserCreateCount = new AtomicInteger(0);
     AtomicInteger vwbPodTaskCount = new AtomicInteger(0);
-
-    Mockito.doAnswer(
-            invocation -> {
-              vwbUserCreateCount.incrementAndGet();
-              // Simulate some processing time to increase chance of race condition
-              Thread.sleep(10);
-              return null;
-            })
-        .when(vwbUserService)
-        .createUser(any());
 
     Mockito.doAnswer(
             invocation -> {
@@ -346,11 +329,7 @@ public class AccessSyncServiceTest {
     latch.await(10, TimeUnit.SECONDS);
     executor.shutdown();
 
-    // Verify that VWB user and pod creation were only called once despite concurrent calls
-    assertEquals(
-        1,
-        vwbUserCreateCount.get(),
-        "VWB user creation should only be called once despite concurrent calls");
+    // Verify that VWB pod creation was only called once despite concurrent calls
     assertEquals(
         1,
         vwbPodTaskCount.get(),

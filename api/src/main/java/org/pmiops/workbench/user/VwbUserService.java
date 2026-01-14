@@ -1,6 +1,9 @@
 package org.pmiops.workbench.user;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import jakarta.inject.Provider;
+import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbUserPodDao;
@@ -24,6 +27,14 @@ public class VwbUserService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final VwbUserPodDao vwbUserPodDao;
+
+  // Cache for user existence checks to avoid repeated API calls
+  // Entries expire after 30 seconds to balance between API call reduction and data freshness
+  private final Cache<String, Boolean> userExistenceCache =
+      CacheBuilder.newBuilder()
+          .expireAfterWrite(30, TimeUnit.SECONDS)
+          .maximumSize(1000) // Limit cache size to prevent unbounded growth
+          .build();
 
   public VwbUserService(
       VwbUserManagerClient vwbUserManagerClient,
@@ -52,10 +63,32 @@ public class VwbUserService {
     vwbUserManagerClient.createUser(email);
   }
 
-  /** Checks if the user already exists in VWB */
+  /**
+   * Checks if the user already exists in VWB, using a cache to avoid repeated API calls.
+   *
+   * @param email the email/username to check
+   * @return true if the user exists in VWB, false otherwise
+   */
   public boolean doesUserExist(String email) {
-    OrganizationMember organizationMember = vwbUserManagerClient.getOrganizationMember(email);
-    return organizationMember.getUserDescription() != null;
+    try {
+      // Try to get from cache first, compute if absent
+      return userExistenceCache.get(
+          email,
+          () -> {
+            OrganizationMember organizationMember =
+                vwbUserManagerClient.getOrganizationMember(email);
+            return organizationMember.getUserDescription() != null;
+          });
+    } catch (Exception e) {
+      // If cache operation fails, fall back to direct call
+      logger.warn(
+          "Cache operation failed for user "
+              + email
+              + ", falling back to direct call: "
+              + e.getMessage());
+      OrganizationMember organizationMember = vwbUserManagerClient.getOrganizationMember(email);
+      return organizationMember.getUserDescription() != null;
+    }
   }
 
   /**

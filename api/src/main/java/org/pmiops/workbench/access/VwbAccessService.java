@@ -1,9 +1,6 @@
 package org.pmiops.workbench.access;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import jakarta.inject.Provider;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
@@ -19,14 +16,6 @@ public class VwbAccessService {
   private final VwbUserManagerClient vwbUserManagerClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final VwbUserService vwbUserService;
-
-  // Cache for user existence checks to avoid repeated API calls
-  // Entries expire after 30 seconds to balance between API call reduction and data freshness
-  private final Cache<String, Boolean> userExistenceCache =
-      CacheBuilder.newBuilder()
-          .expireAfterWrite(30, TimeUnit.SECONDS)
-          .maximumSize(1000) // Limit cache size to prevent unbounded growth
-          .build();
 
   @Autowired
   public VwbAccessService(
@@ -58,24 +47,14 @@ public class VwbAccessService {
   }
 
   /**
-   * Checks if a user exists in VWB, using a cache to avoid repeated API calls.
+   * Checks if a user exists in VWB.
    *
    * @param username the username to check
    * @return true if the user exists in VWB, false otherwise
    */
   private boolean checkUserExists(String username) {
-    try {
-      // Try to get from cache first, compute if absent
-      return userExistenceCache.get(username, () -> vwbUserService.doesUserExist(username));
-    } catch (Exception e) {
-      // If cache operation fails, fall back to direct call
-      log.warning(
-          "Cache operation failed for user "
-              + username
-              + ", falling back to direct call: "
-              + e.getMessage());
-      return vwbUserService.doesUserExist(username);
-    }
+    // Delegate to VwbUserService which handles caching internally
+    return vwbUserService.doesUserExist(username);
   }
 
   /**
