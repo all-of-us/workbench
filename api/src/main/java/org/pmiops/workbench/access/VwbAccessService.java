@@ -42,17 +42,6 @@ public class VwbAccessService {
   }
 
   /**
-   * Checks if a user exists in VWB.
-   *
-   * @param username the username to check
-   * @return true if the user exists in VWB, false otherwise
-   */
-  private boolean checkUserExists(String username) {
-    // Delegate to VwbUserService which handles caching internally
-    return vwbUserService.doesUserExist(username);
-  }
-
-  /**
    * Removes a user from the Vwb tier group. Exceptions are logged and swallowed to allow the
    * program to proceed since the Vwb feature is still under development.
    *
