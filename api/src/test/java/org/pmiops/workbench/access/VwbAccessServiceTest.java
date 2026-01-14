@@ -31,7 +31,7 @@ public class VwbAccessServiceTest {
     workbenchConfig.featureFlags.enableVWBUserAccessManagement = true;
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
     vwbAccessService =
-        new VwbAccessService(mockVwbUserManagerClient, workbenchConfigProvider, vwbUserService);
+        new VwbAccessService(mockVwbUserManagerClient, workbenchConfigProvider);
   }
 
   @Test
