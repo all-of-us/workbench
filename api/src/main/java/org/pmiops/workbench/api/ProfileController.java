@@ -312,22 +312,11 @@ public class ProfileController implements ProfileApiDelegate {
     // Create the user in VWB during account creation to avoid login delays.
     // This ensures the user exists in VWB before they can get access tiers,
     // preventing race conditions when assigning VWB group memberships.
-    try {
-      vwbUserService.createUser(gSuiteUsername);
-      log.info(
-          String.format(
-              "Successfully created VWB user for %s during account creation", gSuiteUsername));
-    } catch (Exception e) {
-      // Log the error but don't block account creation
-      // VWB user creation failures are logged for monitoring
-      // Users without VWB accounts won't be able to get VWB pods but can still use the platform
-      log.log(
-          Level.WARNING,
-          String.format(
-              "Failed to create VWB user for %s during account creation. User may not be able to access VWB features.",
-              gSuiteUsername),
-          e);
-    }
+
+    vwbUserService.createUser(gSuiteUsername);
+    log.info(
+        String.format(
+            "Successfully created VWB user for %s during account creation", gSuiteUsername));
 
     String institutionShortName =
         profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName();

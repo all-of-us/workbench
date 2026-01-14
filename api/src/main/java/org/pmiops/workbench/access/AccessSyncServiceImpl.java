@@ -5,14 +5,11 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForControlledTierAccess;
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import jakarta.inject.Provider;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.ListUtils;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -20,16 +17,19 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
-import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AccessSyncServiceImpl implements AccessSyncService {
@@ -41,25 +41,10 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final AccessModuleService accessModuleService;
   private final InstitutionService institutionService;
   private final UserDao userDao;
+  private final VwbUserPodDao vwbUserPodDao;
   private final InitialCreditsService initialCreditsService;
   private final UserServiceAuditor userServiceAuditor;
   private final TaskQueueService taskQueueService;
-
-  // Per-user locks to prevent concurrent VWB user/pod creation for the same user
-  // Uses Guava cache with TTL to prevent unbounded memory growth
-  private final Cache<Long, Object> vwbCreationLocks =
-      CacheBuilder.newBuilder()
-          .expireAfterWrite(1, TimeUnit.HOURS) // Locks expire after 1 hour of inactivity
-          .maximumSize(10000) // Safety limit: max 10k concurrent users
-          .build();
-
-  // Track users for whom VWB creation has been initiated to prevent duplicate creation
-  // TTL ensures we don't grow indefinitely - entries expire after 24 hours
-  private final Cache<Long, Boolean> vwbCreationInitiated =
-      CacheBuilder.newBuilder()
-          .expireAfterWrite(24, TimeUnit.HOURS) // Expire after 24 hours
-          .maximumSize(100000) // Safety limit for total users
-          .build();
 
   @Autowired
   public AccessSyncServiceImpl(
@@ -68,6 +53,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       AccessModuleService accessModuleService,
       InstitutionService institutionService,
       UserDao userDao,
+      VwbUserPodDao vwbUserPodDao,
       InitialCreditsService initialCreditsService,
       UserServiceAuditor userServiceAuditor,
       TaskQueueService taskQueueService) {
@@ -76,6 +62,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.accessModuleService = accessModuleService;
     this.institutionService = institutionService;
     this.userDao = userDao;
+    this.vwbUserPodDao = vwbUserPodDao;
     this.initialCreditsService = initialCreditsService;
     this.userServiceAuditor = userServiceAuditor;
     this.taskQueueService = taskQueueService;
@@ -85,6 +72,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
    * Ensures that the data access tiers for the user reflect the state of other fields on the user
    */
   @Override
+  @Transactional
   public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
@@ -125,42 +113,36 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       return;
     }
 
-    // Use per-user locking to prevent concurrent VWB user/pod creation for the same user.
-    // This prevents race conditions when updateUserAccessTiers() is called multiple times
-    // rapidly for the same user (e.g., when updating institution settings for multiple users).
+    // Use database-based locking to prevent concurrent VWB user/pod creation across all GAE
+    // instances.
+    // We insert a row with null vwb_pod_id as a lock, then the async task will update it with the
+    // actual pod_id.
     Long userId = dbUser.getUserId();
 
-    // Acquire or create the lock for this user
-    // get() with a callable is atomic and ensures all threads get the same lock object
-    Object lock;
-    try {
-      lock = vwbCreationLocks.get(userId, () -> new Object());
-    } catch (Exception e) {
-      // Should never happen as our callable doesn't throw
-      throw new ServerErrorException("Failed to get lock for user " + userId, e);
+    // Check if a pod record already exists (even with null pod_id)
+    DbVwbUserPod existingPod = vwbUserPodDao.findByUserId(userId);
+    if (existingPod != null) {
+      // Pod record already exists (either fully created or just a lock), skip
+      log.fine("VWB pod record already exists for user ID: " + userId + ", skipping");
+      return;
     }
 
-    synchronized (lock) {
-      // Double-check: has VWB creation already been initiated by another thread?
-      // Check if the flag is already present in the cache
-      Boolean alreadyInitiated = vwbCreationInitiated.getIfPresent(userId);
-      if (alreadyInitiated != null) {
-        // Another thread already initiated VWB creation for this user
-        log.fine("VWB creation already initiated for user ID: " + userId + ", skipping");
-        return;
-      }
+    try {
+      // Try to insert a "lock" row with null pod_id
+      DbVwbUserPod lockPod =
+          new DbVwbUserPod()
+              .setUser(dbUser)
+              .setVwbPodId(null) // Initially null, will be updated by the async task
+              .setInitialCreditsActive(false); // Will be set to true when pod is actually created
 
-      // Mark that we're initiating VWB creation for this user
-      vwbCreationInitiated.put(userId, Boolean.TRUE);
+      vwbUserPodDao.save(lockPod);
+      log.info("Created VWB pod lock for user ID: " + userId);
 
-      try {
-        // Create the pod asynchronously to avoid blocking the user
-        taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
-      } catch (Exception e) {
-        // If creation fails, remove the flag so it can be retried
-        vwbCreationInitiated.invalidate(userId);
-        throw e;
-      }
+      // Create the pod asynchronously to avoid blocking the user
+      taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
+    } catch (DataIntegrityViolationException e) {
+      // Another request already created the lock, that's ok
+      log.fine("VWB pod lock already created for user ID: " + userId + " by another request");
     }
   }
 

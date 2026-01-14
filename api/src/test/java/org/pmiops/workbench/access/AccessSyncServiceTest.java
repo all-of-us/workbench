@@ -37,6 +37,7 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
@@ -44,12 +45,15 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 public class AccessSyncServiceTest {
   @Mock private AccessTierService accessTierService;
 
   @Mock private UserDao userDao;
+
+  @Mock private VwbUserPodDao vwbUserPodDao;
 
   @Mock Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -79,6 +83,7 @@ public class AccessSyncServiceTest {
     Mockito.reset(
         accessTierService,
         userDao,
+        vwbUserPodDao,
         workbenchConfigProvider,
         accessModuleService,
         institutionService,
@@ -123,6 +128,9 @@ public class AccessSyncServiceTest {
   public void testUpdateUserAccessTiers_whenTierGranted(boolean enableInitialCreditsExpiration) {
     stubWorkbenchConfig_enableInitialCreditsExpiration(enableInitialCreditsExpiration);
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+    when(vwbUserPodDao.findByUserId(any())).thenReturn(null);
+    when(vwbUserPodDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
+    doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
 
     // User starts with access to no tiers.
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
@@ -253,6 +261,8 @@ public class AccessSyncServiceTest {
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
     // Mock VWB services for first tier access
     doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
+    when(vwbUserPodDao.findByUserId(any())).thenReturn(null);
+    when(vwbUserPodDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     // User starts with access to no tiers.
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
@@ -275,6 +285,8 @@ public class AccessSyncServiceTest {
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
     // Mock VWB services for first tier access
     doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
+    when(vwbUserPodDao.findByUserId(any())).thenReturn(null);
+    when(vwbUserPodDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     // User starts with access to no tiers.
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
@@ -297,6 +309,27 @@ public class AccessSyncServiceTest {
 
     // Track how many times VWB user/pod creation is called
     AtomicInteger vwbPodTaskCount = new AtomicInteger(0);
+    AtomicInteger dbSaveCount = new AtomicInteger(0);
+
+    // Mock database behavior: first call returns null (no pod), subsequent calls throw
+    // DataIntegrityViolationException
+    Mockito.doAnswer(
+            invocation -> {
+              int count = dbSaveCount.incrementAndGet();
+              if (count == 1) {
+                // First save succeeds
+                return invocation.getArguments()[0];
+              } else {
+                // Subsequent saves fail with unique constraint violation
+                throw new DataIntegrityViolationException(
+                    "Duplicate key value violates unique constraint");
+              }
+            })
+        .when(vwbUserPodDao)
+        .save(any());
+
+    // Mock the findByUserId to return null initially, simulating no existing pod
+    when(vwbUserPodDao.findByUserId(any())).thenReturn(null);
 
     Mockito.doAnswer(
             invocation -> {

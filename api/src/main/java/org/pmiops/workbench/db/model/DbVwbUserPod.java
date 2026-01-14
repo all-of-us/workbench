@@ -46,7 +46,7 @@ public class DbVwbUserPod {
     return this;
   }
 
-  @Column(name = "vwb_pod_id")
+  @Column(name = "vwb_pod_id", nullable = true)
   public String getVwbPodId() {
     return vwbPodId;
   }

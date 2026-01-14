@@ -1,9 +1,6 @@
 package org.pmiops.workbench.user;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import jakarta.inject.Provider;
-import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbUserPodDao;
@@ -15,6 +12,7 @@ import org.pmiops.workbench.vwb.user.model.PodRole;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -28,14 +26,7 @@ public class VwbUserService {
   private final UserDao userDao;
   private final VwbUserPodDao vwbUserPodDao;
 
-  // Cache for user existence checks to avoid repeated API calls
-  // Entries expire after 30 seconds to balance between API call reduction and data freshness
-  private final Cache<String, Boolean> userExistenceCache =
-      CacheBuilder.newBuilder()
-          .expireAfterWrite(30, TimeUnit.SECONDS)
-          .maximumSize(1000) // Limit cache size to prevent unbounded growth
-          .build();
-
+  @Autowired
   public VwbUserService(
       VwbUserManagerClient vwbUserManagerClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -64,31 +55,24 @@ public class VwbUserService {
   }
 
   /**
-   * Checks if the user already exists in VWB, using a cache to avoid repeated API calls.
+   * Checks if the user already exists in VWB
    *
    * @param email the email/username to check
    * @return true if the user exists in VWB, false otherwise
    */
   public boolean doesUserExist(String email) {
     try {
-      // Try to get from cache first, compute if absent
-      return userExistenceCache.get(
-          email,
-          () -> {
-            OrganizationMember organizationMember =
-                vwbUserManagerClient.getOrganizationMember(email);
-            return organizationMember.getUserDescription() != null;
-          });
+      OrganizationMember organizationMember = vwbUserManagerClient.getOrganizationMember(email);
+      return organizationMember.getUserDescription() != null;
+
     } catch (Exception e) {
-      // If cache operation fails, fall back to direct call
       logger.warn(
           "Cache operation failed for user "
               + email
               + ", falling back to direct call: "
               + e.getMessage());
-      OrganizationMember organizationMember = vwbUserManagerClient.getOrganizationMember(email);
-      return organizationMember.getUserDescription() != null;
     }
+    return false;
   }
 
   /**
@@ -102,9 +86,12 @@ public class VwbUserService {
       return null;
     }
     String email = dbUser.getUsername();
-    if (dbUser.getVwbUserPod() != null) {
+    DbVwbUserPod existingPod = dbUser.getVwbUserPod();
+
+    // Check if pod already exists and has a pod_id (not just a lock)
+    if (existingPod != null && existingPod.getVwbPodId() != null) {
       logger.info("User already has a pod with email {}", email);
-      return dbUser.getVwbUserPod();
+      return existingPod;
     }
 
     PodDescription initialCreditsPodForUser = vwbUserManagerClient.createPodForUserWithEmail(email);
@@ -112,15 +99,24 @@ public class VwbUserService {
       vwbUserManagerClient.sharePodWithUserWithRole(
           initialCreditsPodForUser.getPodId(), email, PodRole.ADMIN);
 
-      DbVwbUserPod dbVwbUserPod =
-          new DbVwbUserPod()
-              .setVwbPodId(initialCreditsPodForUser.getPodId().toString())
-              .setUser(dbUser)
-              .setInitialCreditsActive(true);
-      dbUser.setVwbUserPod(dbVwbUserPod);
-      userDao.save(dbUser);
-
-      return dbVwbUserPod;
+      // If there's an existing lock row (pod with null pod_id), update it
+      if (existingPod != null && existingPod.getVwbPodId() == null) {
+        existingPod.setVwbPodId(initialCreditsPodForUser.getPodId().toString());
+        existingPod.setInitialCreditsActive(true);
+        vwbUserPodDao.save(existingPod);
+        return existingPod;
+      } else {
+        // No existing pod at all, create new (shouldn't happen with new locking, but keep for
+        // safety)
+        DbVwbUserPod dbVwbUserPod =
+            new DbVwbUserPod()
+                .setVwbPodId(initialCreditsPodForUser.getPodId().toString())
+                .setUser(dbUser)
+                .setInitialCreditsActive(true);
+        dbUser.setVwbUserPod(dbVwbUserPod);
+        userDao.save(dbUser);
+        return dbVwbUserPod;
+      }
     } catch (DataIntegrityViolationException e) {
       // Another task already created a pod for this user - that's ok!
       logger.info("Pod already created for user {} by another task, fetching existing pod", email);
@@ -142,6 +138,10 @@ public class VwbUserService {
    * @return true if the pod is using initial credits billing account, false otherwise.
    */
   public boolean isPodUsingInitialCredits(DbVwbUserPod pod) {
+    // If pod doesn't have a pod_id yet (just a lock), it can't be using initial credits
+    if (pod.getVwbPodId() == null) {
+      return false;
+    }
     return workbenchConfigProvider
         .get()
         .billing
@@ -158,7 +158,9 @@ public class VwbUserService {
   public void unlinkBillingAccountForUserPod(DbUser user) {
     // If the user does not have a pod or the pod is not using initial credits, do nothing.
     DbVwbUserPod vwbUserPod = user.getVwbUserPod();
-    if (vwbUserPod == null || !vwbUserPod.isInitialCreditsActive()) {
+    if (vwbUserPod == null
+        || !vwbUserPod.isInitialCreditsActive()
+        || vwbUserPod.getVwbPodId() == null) {
       return;
     }
     vwbUserManagerClient.unlinkBillingAccountFromPod(vwbUserPod.getVwbPodId());
