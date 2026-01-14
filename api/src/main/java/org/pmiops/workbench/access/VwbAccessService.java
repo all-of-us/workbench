@@ -4,7 +4,6 @@ import jakarta.inject.Provider;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,16 +14,13 @@ public class VwbAccessService {
 
   private final VwbUserManagerClient vwbUserManagerClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final VwbUserService vwbUserService;
 
   @Autowired
   public VwbAccessService(
       VwbUserManagerClient vwbUserManagerClient,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      VwbUserService vwbUserService) {
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.vwbUserManagerClient = vwbUserManagerClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.vwbUserService = vwbUserService;
   }
 
   /**
