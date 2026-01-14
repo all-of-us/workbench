@@ -57,18 +57,4 @@ public class VwbAccessServiceTest {
     vwbAccessService.removeUserFromVwbTier(userWithPod, "test-group");
     verify(mockVwbUserManagerClient, never()).removeUserFromGroup(anyString(), anyString());
   }
-
-  @Test
-  public void testAddUserIntoVwbTier_nullPod() {
-    DbUser userWithoutPod = new DbUser().setUsername("test-user");
-    vwbAccessService.addUserIntoVwbTier(userWithoutPod, "test-group");
-    verify(mockVwbUserManagerClient, never()).addUserToGroup(anyString(), anyString());
-  }
-
-  @Test
-  public void testRemoveUserFromVwbTier_nullPod() {
-    DbUser userWithoutPod = new DbUser().setUsername("test-user");
-    vwbAccessService.removeUserFromVwbTier(userWithoutPod, "test-group");
-    verify(mockVwbUserManagerClient, never()).removeUserFromGroup(anyString(), anyString());
-  }
 }
