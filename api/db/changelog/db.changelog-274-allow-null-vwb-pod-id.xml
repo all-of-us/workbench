@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <changeSet author="your-email@google.com" id="changelog-274-allow-null-vwb-pod-id">
+  <changeSet author="tarekahmed" id="changelog-274-allow-null-vwb-pod-id">
     <dropNotNullConstraint
         tableName="vwb_user_pod"
         columnName="vwb_pod_id"
