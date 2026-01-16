@@ -40,22 +40,22 @@ public class CloudTaskVwbController implements CloudTaskVwbApiDelegate {
       return ResponseEntity.badRequest().build();
     }
     Optional<DbUser> dbUser = userService.getByUsername(body.getUserName());
-    // If the user exists and the user does not have a pod, create a pod for the user
+    // If the user exists, create or complete the pod creation
     if (dbUser.isPresent()) {
       DbUser user = dbUser.get();
-      if (user.getVwbUserPod() == null) {
-        vwbUserService.createInitialCreditsPodForUser(user);
-        // If the user has run out of initial credits, unlink the billing account to prevent further
-        // spending
-        if (initialCreditsService.hasUserRunOutOfInitialCredits(user)
-            || initialCreditsService.areUserCreditsExpired(user)) {
-          log.debug(
-              "User has run out of initial credits, unlinking billing account for user: "
-                  + user.getUsername());
-          vwbUserService.unlinkBillingAccountForUserPod(user);
-        }
-        return ResponseEntity.ok().build();
+      // Always call createInitialCreditsPodForUser - it will check internally if pod already exists
+      vwbUserService.createInitialCreditsPodForUser(user);
+
+      // If the user has run out of initial credits, unlink the billing account to prevent further
+      // spending
+      if (initialCreditsService.hasUserRunOutOfInitialCredits(user)
+          || initialCreditsService.areUserCreditsExpired(user)) {
+        log.debug(
+            "User has run out of initial credits, unlinking billing account for user: "
+                + user.getUsername());
+        vwbUserService.unlinkBillingAccountForUserPod(user);
       }
+      return ResponseEntity.ok().build();
     }
     return ResponseEntity.noContent().build();
   }

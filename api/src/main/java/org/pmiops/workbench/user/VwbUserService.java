@@ -86,7 +86,9 @@ public class VwbUserService {
       return null;
     }
     String email = dbUser.getUsername();
-    DbVwbUserPod existingPod = dbUser.getVwbUserPod();
+
+    // Get the latest pod state from database (not from the passed-in user object)
+    DbVwbUserPod existingPod = vwbUserPodDao.findByUserUserId(dbUser.getUserId());
 
     // Check if pod already exists and has a pod_id (not just a lock)
     if (existingPod != null && existingPod.getVwbPodId() != null) {
@@ -94,36 +96,55 @@ public class VwbUserService {
       return existingPod;
     }
 
+    // If there's a lock row but no pod yet, we need to create the pod
     PodDescription initialCreditsPodForUser = vwbUserManagerClient.createPodForUserWithEmail(email);
     try {
       vwbUserManagerClient.sharePodWithUserWithRole(
           initialCreditsPodForUser.getPodId(), email, PodRole.ADMIN);
 
       // If there's an existing lock row (pod with null pod_id), update it
-      if (existingPod != null && existingPod.getVwbPodId() == null) {
+      if (existingPod != null) {
+        // We have a lock row, update it with the actual pod_id
         existingPod.setVwbPodId(initialCreditsPodForUser.getPodId().toString());
         existingPod.setInitialCreditsActive(true);
         vwbUserPodDao.save(existingPod);
+        logger.info(
+            "Updated VWB pod lock with actual pod ID {} for user {}",
+            initialCreditsPodForUser.getPodId(),
+            email);
         return existingPod;
       } else {
-        // No existing pod at all, create new (shouldn't happen with new locking, but keep for
-        // safety)
+        // No existing pod at all, create new (shouldn't happen with new locking)
+        // This path should rarely be taken since AccessSyncServiceImpl creates the lock first
         DbVwbUserPod dbVwbUserPod =
             new DbVwbUserPod()
                 .setVwbPodId(initialCreditsPodForUser.getPodId().toString())
                 .setUser(dbUser)
                 .setInitialCreditsActive(true);
-        dbUser.setVwbUserPod(dbVwbUserPod);
-        userDao.save(dbUser);
+        vwbUserPodDao.save(dbVwbUserPod);
+        logger.info(
+            "Created new VWB pod {} for user {} (no lock found)",
+            initialCreditsPodForUser.getPodId(),
+            email);
         return dbVwbUserPod;
       }
     } catch (DataIntegrityViolationException e) {
-      // Another task already created a pod for this user - that's ok!
-      logger.info("Pod already created for user {} by another task, fetching existing pod", email);
+      // This should rarely happen now with the locking mechanism
+      // If it does, it means another task managed to create a full pod record
+      logger.warn("Unexpected duplicate key error for user {}, checking for existing pod", email);
+
+      // Delete the pod we just created since we couldn't save it
       vwbUserManagerClient.deletePod(initialCreditsPodForUser.getPodId());
+
       // Refresh and return the existing pod
-      DbUser refreshedUser = userDao.findById(dbUser.getUserId()).orElseThrow();
-      return refreshedUser.getVwbUserPod();
+      DbVwbUserPod latestPod = vwbUserPodDao.findByUserUserId(dbUser.getUserId());
+      if (latestPod != null && latestPod.getVwbPodId() != null) {
+        logger.info("Found existing pod {} for user {}", latestPod.getVwbPodId(), email);
+        return latestPod;
+      } else {
+        logger.error("Failed to find existing pod after duplicate key error for user {}", email);
+        return null;
+      }
     } catch (Throwable e) {
       logger.error("Error creating pod for user with email, deleting the pod {}", email, e);
       vwbUserManagerClient.deletePod(initialCreditsPodForUser.getPodId());

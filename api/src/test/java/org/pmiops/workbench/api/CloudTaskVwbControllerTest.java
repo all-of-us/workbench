@@ -84,7 +84,7 @@ class CloudTaskVwbControllerTest {
   }
 
   @Test
-  void processCreateVwbPodTask_whenUserExistsButAlreadyHasPod_returnsNoContent() {
+  void processCreateVwbPodTask_whenUserExistsButAlreadyHasPod_returnsOk() {
     // Arrange
     mockFeatureFlags.enableVWBPodCreation = true;
     CreateVwbPodTaskRequest request = new CreateVwbPodTaskRequest();
@@ -103,14 +103,20 @@ class CloudTaskVwbControllerTest {
     existingUser.setVwbUserPod(dbVwbUserPod1);
 
     when(mockUserService.getByUsername(TEST_USERNAME)).thenReturn(Optional.of(existingUser));
+    when(mockInitialCreditsService.hasUserRunOutOfInitialCredits(existingUser)).thenReturn(false);
+    when(mockInitialCreditsService.areUserCreditsExpired(existingUser)).thenReturn(false);
+    // createInitialCreditsPodForUser will return existing pod when it already exists
+    when(mockVwbUserService.createInitialCreditsPodForUser(existingUser)).thenReturn(dbVwbUserPod1);
 
     // Act
     ResponseEntity<Void> response = controller.processCreateVwbPodTask(request);
 
     // Assert
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     verify(mockUserService).getByUsername(TEST_USERNAME);
-    verifyNoInteractions(mockVwbUserService, mockInitialCreditsService);
+    verify(mockVwbUserService).createInitialCreditsPodForUser(existingUser);
+    verify(mockInitialCreditsService).hasUserRunOutOfInitialCredits(existingUser);
+    verify(mockInitialCreditsService).areUserCreditsExpired(existingUser);
   }
 
   @Test

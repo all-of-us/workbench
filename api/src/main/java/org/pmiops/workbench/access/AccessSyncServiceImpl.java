@@ -83,7 +83,12 @@ public class AccessSyncServiceImpl implements AccessSyncService {
           dbUser, previousAccessTiers, newAccessTiers, agent);
     }
 
-    createVwbUserIfNeeded(dbUser, previousAccessTiers, newAccessTiers);
+    // Check if we need to create VWB user/pod
+    boolean shouldCreateVwb = false;
+    if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
+      // Try to create the lock row - only push task if we successfully created it
+      shouldCreateVwb = createVwbUserLockIfNeeded(dbUser);
+    }
 
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
@@ -102,17 +107,17 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
     tiersToAdd.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
-    return userDao.save(dbUser);
-  }
+    DbUser savedUser = userDao.save(dbUser);
 
-  private void createVwbUserIfNeeded(
-      DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
-    // This means that the user has been granted access to a tier for the first time. Then perform
-    // the VWB creation logic.
-    if (!userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
-      return;
+    // Push the Cloud Task after saving
+    if (shouldCreateVwb) {
+      taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
     }
 
+    return savedUser;
+  }
+
+  private boolean createVwbUserLockIfNeeded(DbUser dbUser) {
     // Use database-based locking to prevent concurrent VWB user/pod creation across all GAE
     // instances.
     // We insert a row with null vwb_pod_id as a lock, then the async task will update it with the
@@ -120,11 +125,11 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     Long userId = dbUser.getUserId();
 
     // Check if a pod record already exists (even with null pod_id)
-    DbVwbUserPod existingPod = vwbUserPodDao.findByUserId(userId);
+    DbVwbUserPod existingPod = vwbUserPodDao.findByUserUserId(userId);
     if (existingPod != null) {
       // Pod record already exists (either fully created or just a lock), skip
-      log.fine("VWB pod record already exists for user ID: " + userId + ", skipping");
-      return;
+      log.info("VWB pod record already exists for user ID: " + userId + ", skipping");
+      return false;
     }
 
     try {
@@ -137,12 +142,11 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
       vwbUserPodDao.save(lockPod);
       log.info("Created VWB pod lock for user ID: " + userId);
-
-      // Create the pod asynchronously to avoid blocking the user
-      taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
+      return true; // Successfully created the lock, should push task
     } catch (DataIntegrityViolationException e) {
       // Another request already created the lock, that's ok
-      log.fine("VWB pod lock already created for user ID: " + userId + " by another request");
+      log.info("VWB pod lock already created for user ID: " + userId + " by another request");
+      return false; // Someone else created the lock, don't push task
     }
   }
 
