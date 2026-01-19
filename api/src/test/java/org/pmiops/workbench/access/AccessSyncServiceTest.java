@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -316,7 +317,7 @@ public class AccessSyncServiceTest {
 
     // Mock database behavior: first call returns null (no pod), subsequent calls throw
     // DataIntegrityViolationException
-    Mockito.doAnswer(
+    doAnswer(
             invocation -> {
               int count = dbSaveCount.incrementAndGet();
               if (count == 1) {
@@ -334,9 +335,9 @@ public class AccessSyncServiceTest {
         .save(any());
 
     // Mock the findByUserId to return null initially, then return the saved pod after first save
-    Mockito.when(vwbUserPodDao.findByUserUserId(any())).thenAnswer(invocation -> savedPod.get());
+    when(vwbUserPodDao.findByUserUserId(any())).thenAnswer(invocation -> savedPod.get());
 
-    Mockito.doAnswer(
+    doAnswer(
             invocation -> {
               vwbPodTaskCount.incrementAndGet();
               return null;
