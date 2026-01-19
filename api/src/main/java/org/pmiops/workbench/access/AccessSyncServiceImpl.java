@@ -72,7 +72,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
    * Ensures that the data access tiers for the user reflect the state of other fields on the user
    */
   @Override
-  @Transactional
   public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
