@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -20,6 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 public class VwbAccessServiceTest {
   @MockBean private VwbUserManagerClient mockVwbUserManagerClient;
   @MockBean private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @MockBean private VwbUserService vwbUserService;
   private WorkbenchConfig workbenchConfig = createEmptyConfig();
 
   private VwbAccessService vwbAccessService;
@@ -34,6 +36,7 @@ public class VwbAccessServiceTest {
   @Test
   public void testAddUserIntoVwbTier_vwbUm() {
     DbUser userWithPod = new DbUser().setUsername("test-user").setVwbUserPod(new DbVwbUserPod());
+    when(vwbUserService.doesUserExist("test-user")).thenReturn(true);
     vwbAccessService.addUserIntoVwbTier(userWithPod, "test-group");
     verify(mockVwbUserManagerClient).addUserToGroup("test-group", "test-user");
   }
@@ -51,20 +54,6 @@ public class VwbAccessServiceTest {
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
     DbUser userWithPod = new DbUser().setUsername("test-user").setVwbUserPod(new DbVwbUserPod());
     vwbAccessService.removeUserFromVwbTier(userWithPod, "test-group");
-    verify(mockVwbUserManagerClient, never()).removeUserFromGroup(anyString(), anyString());
-  }
-
-  @Test
-  public void testAddUserIntoVwbTier_nullPod() {
-    DbUser userWithoutPod = new DbUser().setUsername("test-user");
-    vwbAccessService.addUserIntoVwbTier(userWithoutPod, "test-group");
-    verify(mockVwbUserManagerClient, never()).addUserToGroup(anyString(), anyString());
-  }
-
-  @Test
-  public void testRemoveUserFromVwbTier_nullPod() {
-    DbUser userWithoutPod = new DbUser().setUsername("test-user");
-    vwbAccessService.removeUserFromVwbTier(userWithoutPod, "test-group");
     verify(mockVwbUserManagerClient, never()).removeUserFromGroup(anyString(), anyString());
   }
 }
