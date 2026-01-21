@@ -1,0 +1,38 @@
+version: 2
+updates:
+  # Configuration for Gradle dependencies in the API directory
+  - package-ecosystem: "gradle"
+    directory: "/api"
+    schedule:
+      interval: "monthly"
+      time: "09:00"
+      timezone: "America/New_York"
+    # Limit the number of open PRs to avoid overwhelming the pipeline
+    open-pull-requests-limit: 5
+    # Group minor and patch updates together to reduce PR count
+    groups:
+      minor-patch-dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "automated-pr"
+  # Configuration for npm/yarn dependencies in the UI directory
+  - package-ecosystem: "npm"
+    directory: "/ui"
+    schedule:
+      interval: "monthly"
+      time: "09:00"
+      timezone: "America/New_York"
+    # Limit the number of open PRs to avoid overwhelming the pipeline
+    open-pull-requests-limit: 5
+    # Group minor and patch updates together to reduce PR count
+    groups:
+      minor-patch-dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "automated-pr"
