@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,7 +18,12 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,20 +39,24 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.user.VwbUserService;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 public class AccessSyncServiceTest {
   @Mock private AccessTierService accessTierService;
 
   @Mock private UserDao userDao;
+
+  @Mock private VwbUserPodDao vwbUserPodDao;
 
   @Mock Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -59,8 +69,6 @@ public class AccessSyncServiceTest {
   @Mock InitialCreditsService initialCreditsService;
 
   @Mock UserServiceAuditor userServiceAuditor;
-
-  @Mock VwbUserService vwbUserService;
 
   @Mock TaskQueueService taskQueueService;
 
@@ -78,12 +86,12 @@ public class AccessSyncServiceTest {
     Mockito.reset(
         accessTierService,
         userDao,
+        vwbUserPodDao,
         workbenchConfigProvider,
         accessModuleService,
         institutionService,
         userService,
         userServiceAuditor,
-        vwbUserService,
         taskQueueService);
 
     registeredTier = createRegisteredTier();
@@ -123,6 +131,9 @@ public class AccessSyncServiceTest {
   public void testUpdateUserAccessTiers_whenTierGranted(boolean enableInitialCreditsExpiration) {
     stubWorkbenchConfig_enableInitialCreditsExpiration(enableInitialCreditsExpiration);
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+    when(vwbUserPodDao.findByUserUserId(any())).thenReturn(null);
+    when(vwbUserPodDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
+    doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
 
     // User starts with access to no tiers.
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
@@ -252,8 +263,9 @@ public class AccessSyncServiceTest {
     stubWorkbenchConfig_enableInitialCreditsExpiration(false);
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
     // Mock VWB services for first tier access
-    doNothing().when(vwbUserService).createUser(any());
     doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
+    when(vwbUserPodDao.findByUserUserId(any())).thenReturn(null);
+    when(vwbUserPodDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     // User starts with access to no tiers.
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
@@ -275,8 +287,9 @@ public class AccessSyncServiceTest {
     stubWorkbenchConfig_enableInitialCreditsExpiration(false);
     doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
     // Mock VWB services for first tier access
-    doNothing().when(vwbUserService).createUser(any());
     doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
+    when(vwbUserPodDao.findByUserUserId(any())).thenReturn(null);
+    when(vwbUserPodDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     // User starts with access to no tiers.
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
@@ -289,5 +302,76 @@ public class AccessSyncServiceTest {
     verify(accessTierService).addUserToTier(dbUser, registeredTier);
     verify(accessTierService).addUserToTier(dbUser, controlledTier);
     verify(accessTierService, times(0)).removeUserFromTier(any(), any());
+  }
+
+  @Test
+  public void testUpdateUserAccessTiers_concurrentCallsForSameUser_onlyCreatesVwbPodOnce()
+      throws InterruptedException {
+    stubWorkbenchConfig_enableInitialCreditsExpiration(false);
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+
+    // Track how many times VWB user/pod creation is called
+    AtomicInteger vwbPodTaskCount = new AtomicInteger(0);
+    AtomicInteger dbSaveCount = new AtomicInteger(0);
+    AtomicReference<DbVwbUserPod> savedPod = new AtomicReference<>();
+
+    // Mock database behavior: first call returns null (no pod), subsequent calls throw
+    // DataIntegrityViolationException
+    doAnswer(
+            invocation -> {
+              int count = dbSaveCount.incrementAndGet();
+              if (count == 1) {
+                // First save succeeds
+                DbVwbUserPod pod = (DbVwbUserPod) invocation.getArguments()[0];
+                savedPod.set(pod);
+                return pod;
+              } else {
+                // Subsequent saves fail with unique constraint violation
+                throw new DataIntegrityViolationException(
+                    "Duplicate key value violates unique constraint");
+              }
+            })
+        .when(vwbUserPodDao)
+        .save(any());
+
+    // Mock the findByUserId to return null initially, then return the saved pod after first save
+    when(vwbUserPodDao.findByUserUserId(any())).thenAnswer(invocation -> savedPod.get());
+
+    doAnswer(
+            invocation -> {
+              vwbPodTaskCount.incrementAndGet();
+              return null;
+            })
+        .when(taskQueueService)
+        .pushVwbPodCreationTask(any());
+
+    // User starts with access to no tiers
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
+
+    // Simulate concurrent calls to updateUserAccessTiers for the same user
+    int numThreads = 5;
+    ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+    CountDownLatch latch = new CountDownLatch(numThreads);
+
+    for (int i = 0; i < numThreads; i++) {
+      executor.submit(
+          () -> {
+            try {
+              accessSyncService.updateUserAccessTiers(dbUser, agent);
+            } finally {
+              latch.countDown();
+            }
+          });
+    }
+
+    // Wait for all threads to complete
+    latch.await(10, TimeUnit.SECONDS);
+    executor.shutdown();
+
+    // Verify that VWB pod creation was only called once despite concurrent calls
+    assertEquals(
+        1,
+        vwbPodTaskCount.get(),
+        "VWB pod creation task should only be pushed once despite concurrent calls");
   }
 }

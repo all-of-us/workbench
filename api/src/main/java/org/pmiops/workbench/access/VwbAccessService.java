@@ -24,20 +24,15 @@ public class VwbAccessService {
   }
 
   /**
-   * Adds a user to the Vwb tier group. Exceptions are logged and swallowed to allow the program to
-   * proceed since the Vwb feature is still under development.
+   * Adds a user to the Vwb tier group.
    *
-   * @param userName the username of the user to be added
+   * @param user the db user of the user to be added
    * @param vwbGroupName the access tier to which the user is being added
    */
   public void addUserIntoVwbTier(DbUser user, String vwbGroupName) {
     if (workbenchConfigProvider.get().featureFlags.enableVWBUserAccessManagement) {
-      if (user.getVwbUserPod() == null) {
-        log.info(String.format("User %s does not exist in VWB skipping...'", user.getUsername()));
-        return;
-      }
       log.info(
-          String.format("Added user %s to VWB Tier group '%s'", user.getUsername(), vwbGroupName));
+          String.format("Adding user %s to VWB Tier group '%s'", user.getUsername(), vwbGroupName));
       vwbUserManagerClient.addUserToGroup(vwbGroupName, user.getUsername());
     }
   }

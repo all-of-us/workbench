@@ -51,6 +51,7 @@ import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.PageVisitMapper;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.ras.RasLinkService;
+import org.pmiops.workbench.user.VwbUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,6 +88,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final RasLinkService rasLinkService;
   private final ComplianceTrainingService complianceTrainingService;
   private final InitialCreditsService initialCreditsService;
+  private final VwbUserService vwbUserService;
 
   @Autowired
   ProfileController(
@@ -109,7 +111,8 @@ public class ProfileController implements ProfileApiDelegate {
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService,
       ComplianceTrainingService complianceTrainingService,
-      InitialCreditsService initialCreditsService) {
+      InitialCreditsService initialCreditsService,
+      VwbUserService vwbUserService) {
     this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -130,6 +133,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.rasLinkService = rasLinkService;
     this.complianceTrainingService = complianceTrainingService;
     this.initialCreditsService = initialCreditsService;
+    this.vwbUserService = vwbUserService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -141,7 +145,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private DbUser maybeInitializeUserWithTerra() {
+  private DbUser maybeInitializeUserWithTerraAndVwb() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
     DbUser dbUser = userAuthentication.getUser();
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
@@ -169,6 +173,23 @@ public class ProfileController implements ProfileApiDelegate {
         // to be replaced as part of RW-11416
         userService.acceptTerraTermsOfServiceDeprecated(dbUser);
       }
+
+      // VWB user creation now happens during account creation in createAccount() to avoid
+      // login delays and prevent race conditions with access tier assignment.
+      // Retry VWB user creation if it failed during account creation (best-effort, non-blocking)
+      if (workbenchConfigProvider.get().featureFlags.enableVWBUserCreation) {
+        try {
+          // This is idempotent - createUser() checks if user already exists
+          vwbUserService.createUser(dbUser.getUsername());
+        } catch (Exception e) {
+          // Log but don't fail login - VWB features will be unavailable but user can still work
+          log.log(
+              Level.WARNING,
+              "Failed to create/verify VWB user during login for: " + dbUser.getUsername(),
+              e);
+        }
+      }
+
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       return saveUserWithConflictHandling(dbUser);
     }
@@ -185,7 +206,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> getMe() {
     // Record that the user signed in and run Terra initialization as needed.
-    DbUser dbUser = maybeInitializeUserWithTerra();
+    DbUser dbUser = maybeInitializeUserWithTerraAndVwb();
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);
   }
@@ -287,6 +308,16 @@ public class ProfileController implements ProfileApiDelegate {
     // we can't call submitTerraTermsOfService() yet because the Terra account doesn't exist yet.
     // see maybeInitializeUserWithTerra()
     userService.submitAouTermsOfService(user, request.getTermsOfServiceVersion());
+
+    // Create the user in VWB during account creation to avoid login delays.
+    // This ensures the user exists in VWB before they can get access tiers,
+    // preventing race conditions when assigning VWB group memberships.
+
+    vwbUserService.createUser(gSuiteUsername);
+    log.info(
+        String.format(
+            "Successfully created VWB user for %s during account creation", gSuiteUsername));
+
     String institutionShortName =
         profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName();
     try {

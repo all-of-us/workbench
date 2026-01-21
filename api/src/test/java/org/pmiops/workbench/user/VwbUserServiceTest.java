@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.vwb.user.ApiException;
@@ -31,6 +32,8 @@ class VwbUserServiceTest {
   @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Mock private UserDao userDao;
+
+  @Mock private VwbUserPodDao vwbUserPodDao;
 
   @InjectMocks private VwbUserService vwbUserService;
 
@@ -102,10 +105,18 @@ class VwbUserServiceTest {
 
     DbUser dbUser = mock(DbUser.class);
     when(dbUser.getUsername()).thenReturn("test@example.com");
+    when(dbUser.getUserId()).thenReturn(1L);
+
+    // Mock that no pod exists yet
+    when(vwbUserPodDao.findByUserUserId(1L)).thenReturn(null);
+
     PodDescription podDescription = mock(PodDescription.class);
     when(podDescription.getPodId()).thenReturn(uuid);
     when(vwbUserManagerClient.createPodForUserWithEmail("test@example.com"))
         .thenReturn(podDescription);
+
+    // Mock the save operation
+    when(vwbUserPodDao.save(any(DbVwbUserPod.class))).thenAnswer(i -> i.getArguments()[0]);
 
     DbVwbUserPod result = vwbUserService.createInitialCreditsPodForUser(dbUser);
 

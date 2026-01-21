@@ -107,6 +107,7 @@ public class InitialCreditsBatchUpdateService {
             .map(DbUser::getVwbUserPod)
             .filter(Objects::nonNull)
             .filter(DbVwbUserPod::isInitialCreditsActive)
+            .filter(pod -> pod.getVwbPodId() != null) // Filter out lock rows with null pod_id
             .collect(Collectors.toMap(DbVwbUserPod::getVwbPodId, pod -> pod));
 
     // Extract the set of active VWB pod IDs
