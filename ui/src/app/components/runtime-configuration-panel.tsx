@@ -26,7 +26,8 @@ import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
-  machineRunningCost,
+  derivePdFromAnalysisConfig,
+  machineRunningCostPerHour,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import {
@@ -163,7 +164,13 @@ export const getErrorsAndWarnings = ({
   };
 
   const runningCostErrors = validate(
-    { currentRunningCost: machineRunningCost(analysisConfig) },
+    {
+      currentRunningCost: machineRunningCostPerHour({
+        ...analysisConfig,
+        // temp derive from analysisConfig
+        persistentDisk: derivePdFromAnalysisConfig(analysisConfig),
+      }),
+    },
     {
       currentRunningCost: runningCostValidatorWithMessage(),
     }
