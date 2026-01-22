@@ -10,7 +10,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="source_workspace_id" type="varchar(255)">
-                <constraints nullable="false" foreignKeyName="fk_temporary_initial_credits_relink_workspace_source_workspace_id" references="workspace(workspace_id)" deleteCascade="true"/>
+                <constraints nullable="false" foreignKeyName="fk_temporary_initial_credits_relink_workspace_src_ws_id" references="workspace(workspace_id)" deleteCascade="true"/>
             </column>
             <column name="destination_workspace_namespace" type="varchar(255)">
                 <constraints nullable="false" unique="true"/>
