@@ -9,7 +9,7 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="source_workspace_id" type="varchar(255)">
+            <column name="source_workspace_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="fk_temporary_initial_credits_relink_workspace_src_ws_id" references="workspace(workspace_id)" deleteCascade="true"/>
             </column>
             <column name="destination_workspace_namespace" type="varchar(255)">
