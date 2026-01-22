@@ -207,7 +207,7 @@ swaggerSources {
     ])
     tanagra swagger3JavaClient("tanagra.yaml", "tanagra")
 
-    wsmanager swagger3JavaClient("ws-manager.yaml", "wsmanager")
+    wsmanager swagger3JavaClient("vwb-ws-manager.yaml", "vwb.wsmanager")
     vwbum swagger3JavaClient("vwb-user-manager.yaml", "vwb.user")
     vwbexfil swagger3JavaClient("vwb-exfil-manager.yaml", "vwb.exfil")
     vwbsam swagger3JavaClient("vwb-sam.yaml", "vwb.sam")

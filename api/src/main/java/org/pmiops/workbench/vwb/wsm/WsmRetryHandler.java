@@ -9,7 +9,7 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.terra.TerraServiceRetryHandler;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
-import org.pmiops.workbench.wsmanager.ApiException;
+import org.pmiops.workbench.vwb.wsmanager.ApiException;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
