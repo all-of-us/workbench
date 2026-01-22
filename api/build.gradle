@@ -73,6 +73,7 @@ plugins {
     id 'org.hidetake.swagger.generator' version '2.19.2'
     id 'org.owasp.dependencycheck' version '12.1.0'
     id 'jacoco'
+    id 'com.libyear.libyear-gradle-plugin' version "0.4.0"
 }
 
 // relates to the Spring plugin io.spring.dependency-management
@@ -770,6 +771,13 @@ task listProjectAPIs(type: GenerateAPIListingTask)
 // XML file under src/main/webapp/WEB-INF/appengine-web.xml
 def db_host = System.getenv("DB_HOST")
 def db_port = System.getenv("DB_PORT")
+
+// run with "./gradlew reportLibyears"
+libyear {
+    configurations = ['compileClasspath']
+    failOnError = false // necessary for sam-client
+    validator = singleArtifactMustNotBeOlderThan(years(15))
+}
 
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
