@@ -114,10 +114,15 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       // If the save failed and we created a pod lock, clean it up
       if (podLockCreated) {
         try {
-          log.info("Cleaning up pod lock for user ID " + dbUser.getUserId() + " after save failure");
+          log.info(
+              "Cleaning up pod lock for user ID " + dbUser.getUserId() + " after save failure");
           vwbUserPodDao.deleteByUserUserId(dbUser.getUserId());
         } catch (Exception cleanupException) {
-          log.severe("Failed to clean up pod lock for user ID " + dbUser.getUserId() + ": " + cleanupException.getMessage());
+          log.severe(
+              "Failed to clean up pod lock for user ID "
+                  + dbUser.getUserId()
+                  + ": "
+                  + cleanupException.getMessage());
         }
       }
       // Re-throw the original exception
