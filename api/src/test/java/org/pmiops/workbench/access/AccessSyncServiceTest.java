@@ -379,7 +379,6 @@ public class AccessSyncServiceTest {
   public void testUpdateUserAccessTiers_cleanupPodLockOnUserSaveFailure() {
     DbUser dbUser = createDbUser();
     Agent agent = Agent.asUser(dbUser);
-    DbAccessTier registeredTier = createRegisteredTier();
 
     // Set up workbench config
     stubWorkbenchConfig_enableInitialCreditsExpiration(false);
