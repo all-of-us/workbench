@@ -5,4 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface VwbUserPodDao extends CrudRepository<DbVwbUserPod, Long> {
   DbVwbUserPod findByUserUserId(Long userId);
+
+  void deleteByUserUserId(Long userId);
 }

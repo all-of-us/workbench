@@ -83,9 +83,11 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
     // Check if we need to create VWB user/pod
     boolean shouldCreateVwb = false;
+    boolean podLockCreated = false;
     if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
       // Try to create the lock row - only push task if we successfully created it
-      shouldCreateVwb = createVwbUserLockIfNeeded(dbUser);
+      podLockCreated = createVwbUserLockIfNeeded(dbUser);
+      shouldCreateVwb = podLockCreated;
     }
 
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
@@ -105,7 +107,22 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
     tiersToAdd.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
-    DbUser savedUser = userDao.save(dbUser);
+    DbUser savedUser;
+    try {
+      savedUser = userDao.save(dbUser);
+    } catch (DataIntegrityViolationException e) {
+      // If the save failed and we created a pod lock, clean it up
+      if (podLockCreated) {
+        try {
+          log.info("Cleaning up pod lock for user ID " + dbUser.getUserId() + " after save failure");
+          vwbUserPodDao.deleteByUserUserId(dbUser.getUserId());
+        } catch (Exception cleanupException) {
+          log.severe("Failed to clean up pod lock for user ID " + dbUser.getUserId() + ": " + cleanupException.getMessage());
+        }
+      }
+      // Re-throw the original exception
+      throw e;
+    }
 
     // Push the Cloud Task after saving
     if (shouldCreateVwb) {

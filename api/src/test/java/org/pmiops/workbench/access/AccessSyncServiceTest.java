@@ -374,4 +374,44 @@ public class AccessSyncServiceTest {
         vwbPodTaskCount.get(),
         "VWB pod creation task should only be pushed once despite concurrent calls");
   }
+
+  @Test
+  public void testUpdateUserAccessTiers_cleanupPodLockOnUserSaveFailure() {
+    DbUser dbUser = createDbUser();
+    Agent agent = Agent.asUser(dbUser);
+    DbAccessTier registeredTier = createRegisteredTier();
+
+    // Set up workbench config
+    stubWorkbenchConfig_enableInitialCreditsExpiration(false);
+
+    // User starts with no access tiers
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(List.of());
+
+    // Set up the required modules list for registered tier
+    for (DbAccessModuleName moduleName : getRequiredModulesForRegisteredTierAccess()) {
+      when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(true);
+    }
+
+    // Simulate successful pod lock creation
+    when(vwbUserPodDao.findByUserUserId(dbUser.getUserId())).thenReturn(null);
+    DbVwbUserPod savedPodLock = new DbVwbUserPod().setUser(dbUser).setVwbPodId(null);
+    when(vwbUserPodDao.save(any(DbVwbUserPod.class))).thenReturn(savedPodLock);
+
+    // Simulate DataIntegrityViolationException on user save (e.g., duplicate DUCC agreement)
+    when(userDao.save(dbUser))
+        .thenThrow(new DataIntegrityViolationException("Duplicate user_code_of_conduct_agreement"));
+
+    // Attempt to update user access tiers, which should fail but clean up the pod lock
+    try {
+      accessSyncService.updateUserAccessTiers(dbUser, agent);
+    } catch (DataIntegrityViolationException e) {
+      // Expected exception
+    }
+
+    // Verify that the pod lock was cleaned up
+    verify(vwbUserPodDao, times(1)).deleteByUserUserId(dbUser.getUserId());
+
+    // Verify that the VWB pod creation task was NOT pushed since save failed
+    verify(taskQueueService, times(0)).pushVwbPodCreationTask(any());
+  }
 }
