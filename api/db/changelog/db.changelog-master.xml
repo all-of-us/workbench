@@ -282,6 +282,7 @@
   <include file="changelog/db.changelog-272-add-vwb-workspace-id-column.xml"/>
   <include file="changelog/db.changelog-273-add-unique-constraint-vwb-user-pod.xml"/>
   <include file="changelog/db.changelog-274-allow-null-vwb-pod-id.xml"/>
+  <include file="changelog/db.changelog-275-add-temporary-initial-credits-relink-workspace-table.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

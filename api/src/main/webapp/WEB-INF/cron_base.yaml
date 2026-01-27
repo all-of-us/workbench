@@ -103,3 +103,8 @@ cron:
   schedule: every day 21:30
   timezone: America/Chicago
   target: api
+- description: Check for temporary initial credit relinkages to clean up
+  url: /v1/cron/cleanupTemporarilyRelinkedWorkspaces
+  schedule: every 30 minutes
+  timezone: UTC
+  target: api
