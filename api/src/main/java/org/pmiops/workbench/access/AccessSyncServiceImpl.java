@@ -81,15 +81,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
           dbUser, previousAccessTiers, newAccessTiers, agent);
     }
 
-    // Check if we need to create VWB user/pod
-    boolean shouldCreateVwb = false;
-    boolean podLockCreated = false;
-    if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
-      // Try to create the lock row - only push task if we successfully created it
-      podLockCreated = createVwbUserLockIfNeeded(dbUser);
-      shouldCreateVwb = podLockCreated;
-    }
-
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
     // Tiers to add are those present in the new set of tiers but not in the previous set.
@@ -107,31 +98,16 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
     tiersToAdd.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
-    DbUser savedUser;
-    try {
-      savedUser = userDao.save(dbUser);
-    } catch (DataIntegrityViolationException e) {
-      // If the save failed and we created a pod lock, clean it up
-      if (podLockCreated) {
-        try {
-          log.info(
-              "Cleaning up pod lock for user ID " + dbUser.getUserId() + " after save failure");
-          vwbUserPodDao.deleteByUserUserId(dbUser.getUserId());
-        } catch (Exception cleanupException) {
-          log.severe(
-              "Failed to clean up pod lock for user ID "
-                  + dbUser.getUserId()
-                  + ": "
-                  + cleanupException.getMessage());
-        }
-      }
-      // Re-throw the original exception
-      throw e;
-    }
+    // Save the user first
+    DbUser savedUser = userDao.save(dbUser);
 
-    // Push the Cloud Task after saving
-    if (shouldCreateVwb) {
-      taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
+    // Only after successful save, create the pod lock and push the task
+    if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
+      // Try to create the lock row - only push task if we successfully created it
+      boolean podLockCreated = createVwbUserLockIfNeeded(savedUser);
+      if (podLockCreated) {
+        taskQueueService.pushVwbPodCreationTask(savedUser.getUsername());
+      }
     }
 
     return savedUser;
