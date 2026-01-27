@@ -81,13 +81,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
           dbUser, previousAccessTiers, newAccessTiers, agent);
     }
 
-    // Check if we need to create VWB user/pod
-    boolean shouldCreateVwb = false;
-    if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
-      // Try to create the lock row - only push task if we successfully created it
-      shouldCreateVwb = createVwbUserLockIfNeeded(dbUser);
-    }
-
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
     // Tiers to add are those present in the new set of tiers but not in the previous set.
@@ -105,11 +98,16 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
     tiersToAdd.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
+    // Save the user first
     DbUser savedUser = userDao.save(dbUser);
 
-    // Push the Cloud Task after saving
-    if (shouldCreateVwb) {
-      taskQueueService.pushVwbPodCreationTask(dbUser.getUsername());
+    // Only after successful save, create the pod lock and push the task
+    if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
+      // Try to create the lock row - only push task if we successfully created it
+      boolean podLockCreated = createVwbUserLockIfNeeded(savedUser);
+      if (podLockCreated) {
+        taskQueueService.pushVwbPodCreationTask(savedUser.getUsername());
+      }
     }
 
     return savedUser;
