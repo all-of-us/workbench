@@ -7491,6 +7491,10 @@ components:
           type: boolean
           default: false
           description: If true, will display the VWB banner on RW homepage
+        enableCTPlusCards:
+          type: boolean
+          default: false
+          description: If true, will display the CTPlus card
     AccessModuleConfig:
       required:
       - expirable

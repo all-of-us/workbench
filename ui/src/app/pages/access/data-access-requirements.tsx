@@ -635,9 +635,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         unsafeAllowSelfBypass,
         initialCreditsValidityPeriodDays,
         initialCreditsExtensionPeriodDays,
-        featureFlags: {
-              enableCTPlusCards,
-            },
+        enableCTPlusCards,
         },
     } = useStore(serverConfigStore);
 
