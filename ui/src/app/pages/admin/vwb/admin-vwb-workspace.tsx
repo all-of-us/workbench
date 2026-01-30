@@ -26,7 +26,12 @@ import { WorkspaceInfoField } from 'app/pages/admin/workspace/workspace-info-fie
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import {
+  AuthorityGuardedAction,
+  renderIfAuthorized,
+} from 'app/utils/authorities';
+import { MatchParams, profileStore, serverConfigStore } from 'app/utils/stores';
+import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 
 const styles = reactStyles({
   sectionContentContainer: {
@@ -327,6 +332,17 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                 )}
               </div>
             </div>
+            <h3>Egress event history</h3>
+            {renderIfAuthorized(
+              profileStore.get().profile,
+              AuthorityGuardedAction.EGRESS_EVENTS,
+              () => (
+                <EgressEventsTable
+                  displayPageSize={10}
+                  sourceWorkspaceNamespace={workspace.id}
+                />
+              )
+            )}
             <h3>Workspace Activity</h3>
             <div className='collaborators' style={{ marginTop: '1.5rem' }}>
               {loadingWorkspaceActivity ? (

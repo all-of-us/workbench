@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import jakarta.inject.Provider;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -108,16 +109,23 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     }
 
     DbWorkspace workspaceFilter = null;
+    String vwbWorkspaceIdFilter = null;
     if (!Strings.isNullOrEmpty((request.getSourceWorkspaceNamespace()))) {
-      workspaceFilter =
-          workspaceDao
-              .getByNamespace(request.getSourceWorkspaceNamespace())
-              .orElseThrow(
-                  () ->
-                      new NotFoundException(
-                          String.format(
-                              "workspace namespace '%s' not found",
-                              request.getSourceWorkspaceNamespace())));
+      // Check if it's a UUID (VWB workspace)
+      if (isUUID(request.getSourceWorkspaceNamespace())) {
+        vwbWorkspaceIdFilter = request.getSourceWorkspaceNamespace();
+      } else {
+        // Legacy RWB workspace
+        workspaceFilter =
+            workspaceDao
+                .getByNamespace(request.getSourceWorkspaceNamespace())
+                .orElseThrow(
+                    () ->
+                        new NotFoundException(
+                            String.format(
+                                "workspace namespace '%s' not found",
+                                request.getSourceWorkspaceNamespace())));
+      }
     }
 
     Page<DbEgressEvent> page;
@@ -125,8 +133,16 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
       page =
           egressEventDao.findAllByUserAndWorkspaceOrderByCreationTimeDesc(
               userFilter, workspaceFilter, pageable);
+    } else if (userFilter != null && vwbWorkspaceIdFilter != null) {
+      page =
+          egressEventDao.findAllByUserAndVwbWorkspaceIdOrderByCreationTimeDesc(
+              userFilter, vwbWorkspaceIdFilter, pageable);
     } else if (workspaceFilter != null) {
       page = egressEventDao.findAllByWorkspaceOrderByCreationTimeDesc(workspaceFilter, pageable);
+    } else if (vwbWorkspaceIdFilter != null) {
+      page =
+          egressEventDao.findAllByVwbWorkspaceIdOrderByCreationTimeDesc(
+              vwbWorkspaceIdFilter, pageable);
     } else if (userFilter != null) {
       page = egressEventDao.findAllByUserOrderByCreationTimeDesc(userFilter, pageable);
     } else {
@@ -154,6 +170,15 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     return new Object[] {
       req.getSourceUserEmail(), req.getSourceWorkspaceNamespace(), req.getPageSize()
     };
+  }
+
+  private boolean isUUID(String str) {
+    try {
+      UUID.fromString(str);
+      return true;
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
   }
 
   @AuthorityRequired(Authority.SECURITY_ADMIN)
