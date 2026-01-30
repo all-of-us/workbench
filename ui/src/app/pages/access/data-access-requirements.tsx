@@ -44,6 +44,7 @@ import { ReactComponent as survey } from 'assets/icons/DAR/survey.svg';
 import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 
 import { ControlledTierCard } from './controlled-tier-card';
+import { ControlledTierPlusCard } from './controlled-tier-plus-card';
 import { DuccCard } from './ducc-card';
 import { RegisteredTierCard } from './registered-tier-card';
 
@@ -288,7 +289,19 @@ export const styles = reactStyles({
     flexDirection: 'column',
     alignItems: 'flex-start',
   },
+  ctaButton: {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  }
 });
+
+type CtPlusState =
+  | 'NOT_AVAILABLE'
+  | 'AVAILABLE'
+  | 'COMPLETED'
+  | 'ADMIN_BYPASS';
+
 
 const RenewalRequirementsText = () => (
   <span>
@@ -622,7 +635,10 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         unsafeAllowSelfBypass,
         initialCreditsValidityPeriodDays,
         initialCreditsExtensionPeriodDays,
-      },
+        featureFlags: {
+              enableCTPlusCards,
+            },
+        },
     } = useStore(serverConfigStore);
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -651,6 +667,38 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       !isRenewalCompleteForModule(moduleStatus, profile.duccSignedVersion);
     const showCompletionBanner = profile && !nextRequired && !ctNeedsRenewal;
 
+ // CT+ access rule:
+ // - Card is always visible during initial registration
+ // - CTA is enabled ONLY after Controlled Tier (CT) is completed
+ // - This guarantees RT + CT are done before CT+ is actionable
+const ctModuleStatus = getAccessModuleStatusByName(
+  profile,
+  AccessModule.CT_COMPLIANCE_TRAINING
+);
+
+const isCtCompleted =
+  !!ctModuleStatus?.completionEpochMillis ||
+  !!ctModuleStatus?.bypassEpochMillis;
+
+
+ const hasCtPlusTier = profile.tierEligibilities?.some(
+   (tier) => tier.accessTierShortName === 'CONTROLLED_PLUS'
+ );
+
+ let ctPlusState: CtPlusState = 'NOT_AVAILABLE';
+
+  if (hasCtPlusTier) {
+   ctPlusState = 'COMPLETED';
+ } else if (isCtCompleted) {
+   ctPlusState = 'AVAILABLE';
+ }
+
+const showCtPlusCard =
+  enableCTPlusCards &&
+  pageMode === DARPageMode.INITIAL_REGISTRATION &&
+  profile !== null;
+
+
     const rtCard = (
       <RegisteredTierCard
         {...{
@@ -676,6 +724,20 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         key='ct'
       />
     );
+    const ctPlusCard =
+      showCtPlusCard ? (
+        <ControlledTierPlusCard
+          key='ct-plus'
+          institutionDisplayName={
+            profile.verifiedInstitutionalAffiliation.institutionDisplayName
+          }
+          state={ctPlusState}
+          onGetStarted={() => {
+            console.log('CT+ get started');
+          }}
+        />
+      ) : null;
+
     const dCard = (
       <DuccCard
         {...{
@@ -690,7 +752,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       />
     );
 
-    const cards = [rtCard, ctCard, dCard];
+    const cards = [rtCard, ctCard,ctPlusCard, dCard];
 
     // Effects
     useEffect(() => {
