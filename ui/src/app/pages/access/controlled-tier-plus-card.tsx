@@ -7,10 +7,7 @@ import colors from 'app/styles/colors';
 
 import { DataDetail, styles } from './data-access-requirements';
 
-type CtPlusState =
-  | 'NOT_AVAILABLE'
-  | 'AVAILABLE'
-  | 'COMPLETED';
+type CtPlusState = 'NOT_AVAILABLE' | 'AVAILABLE' | 'COMPLETED';
 
 export const ControlledTierPlusCard = (props: {
   institutionDisplayName: string;
@@ -18,8 +15,8 @@ export const ControlledTierPlusCard = (props: {
   onGetStarted: () => void;
 }) => {
   const { institutionDisplayName, state, onGetStarted } = props;
- const isDisabled = state === 'NOT_AVAILABLE';
- const isCompleted = state === 'COMPLETED';
+  const isDisabled = state === 'NOT_AVAILABLE';
+  const isCompleted = state === 'COMPLETED';
 
   return (
     <FlexRow style={styles.card} data-test-id='controlled-tier-plus-card'>
@@ -34,8 +31,8 @@ export const ControlledTierPlusCard = (props: {
         </div>
 
         <div style={styles.dataDetails}>
-          In addition to Registered Tier and Controlled Tier data, the Controlled
-          Tier + dataset contains:
+          In addition to Registered Tier and Controlled Tier data, the
+          Controlled Tier + dataset contains:
         </div>
 
         <DataDetail icon='genomic' text='Expanded base phenotypic dataset' />
@@ -64,13 +61,13 @@ export const ControlledTierPlusCard = (props: {
             gap: '1em',
           }}
         >
-         <Button
-           style={styles.ctaButton}
-           disabled={isDisabled}
-           onClick={!isDisabled ? onGetStarted : undefined}
-         >
-           {isCompleted ? 'ENROLLED': 'GET STARTED'}
-         </Button>
+          <Button
+            style={styles.ctaButton}
+            disabled={isDisabled}
+            onClick={!isDisabled ? onGetStarted : undefined}
+          >
+            {isCompleted ? 'ENROLLED' : 'GET STARTED'}
+          </Button>
 
           <div
             style={{
