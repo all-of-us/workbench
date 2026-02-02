@@ -327,17 +327,15 @@ public class EgressEventsAdminControllerTest {
   public void testListEgressEvents_vwbWorkspaceFiltering() {
     // Create a VWB egress event with UUID workspace ID
     String vwbWorkspaceId = "12345678-1234-1234-1234-123456789012";
-    DbEgressEvent vwbEvent =
-        egressEventDao.save(
-            newEvent()
-                .setUser(user1)
-                .setStatus(DbEgressEventStatus.PENDING)
-                .setVwbWorkspaceId(vwbWorkspaceId)
-                .setVwbEgressEventId("vwb-event-123"));
+    egressEventDao.save(
+        newEvent()
+            .setUser(user1)
+            .setStatus(DbEgressEventStatus.PENDING)
+            .setVwbWorkspaceId(vwbWorkspaceId)
+            .setVwbEgressEventId("vwb-event-123"));
 
     // Create a legacy egress event
-    DbEgressEvent legacyEvent =
-        egressEventDao.save(newEvent().setUser(user2).setWorkspace(workspace1));
+    egressEventDao.save(newEvent().setUser(user2).setWorkspace(workspace1));
 
     // Test filtering by VWB workspace UUID returns only VWB event
     ListEgressEventsResponse vwbResponse =
