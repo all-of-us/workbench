@@ -24,6 +24,12 @@ public interface EgressEventDao
   Page<DbEgressEvent> findAllByUserAndWorkspaceOrderByCreationTimeDesc(
       DbUser user, DbWorkspace workspace, Pageable p);
 
+  Page<DbEgressEvent> findAllByVwbWorkspaceIdOrderByCreationTimeDesc(
+      String vwbWorkspaceId, Pageable p);
+
+  Page<DbEgressEvent> findAllByUserAndVwbWorkspaceIdOrderByCreationTimeDesc(
+      DbUser user, String vwbWorkspaceId, Pageable p);
+
   List<DbEgressEvent> findAllByUserAndStatusNotIn(
       DbUser user, Collection<DbEgressEventStatus> status);
 

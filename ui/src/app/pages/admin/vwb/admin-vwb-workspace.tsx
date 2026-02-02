@@ -21,12 +21,17 @@ import { NewWindowIcon } from 'app/components/icons';
 import { Error as ErrorDiv } from 'app/components/inputs';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import { RESEARCH_PURPOSE_MAPPING } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import { WorkspaceInfoField } from 'app/pages/admin/workspace/workspace-info-field';
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import {
+  AuthorityGuardedAction,
+  renderIfAuthorized,
+} from 'app/utils/authorities';
+import { MatchParams, profileStore, serverConfigStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   sectionContentContainer: {
@@ -327,6 +332,17 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                 )}
               </div>
             </div>
+            <h3>Egress event history</h3>
+            {renderIfAuthorized(
+              profileStore.get().profile,
+              AuthorityGuardedAction.EGRESS_EVENTS,
+              () => (
+                <EgressEventsTable
+                  displayPageSize={10}
+                  sourceWorkspaceNamespace={workspace.id}
+                />
+              )
+            )}
             <h3>Workspace Activity</h3>
             <div className='collaborators' style={{ marginTop: '1.5rem' }}>
               {loadingWorkspaceActivity ? (

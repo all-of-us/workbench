@@ -2,6 +2,7 @@ package org.pmiops.workbench.exfiltration.jirahandler;
 
 import jakarta.inject.Provider;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -17,7 +18,9 @@ import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.model.EgressEvent;
+import org.pmiops.workbench.model.VwbWorkspace;
 import org.pmiops.workbench.utils.mappers.VwbEgressEventMapper;
+import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +31,16 @@ public class EgressVwbJiraHandler extends EgressJiraHandler {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final VwbEgressEventMapper vwbEgressEventMapper;
+  private final VwbAdminQueryService vwbAdminQueryService;
 
   @Autowired
   public EgressVwbJiraHandler(
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      VwbEgressEventMapper vwbEgressEventMapper) {
+      VwbEgressEventMapper vwbEgressEventMapper,
+      VwbAdminQueryService vwbAdminQueryService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.vwbEgressEventMapper = vwbEgressEventMapper;
+    this.vwbAdminQueryService = vwbAdminQueryService;
   }
 
   /**
@@ -115,13 +121,32 @@ public class EgressVwbJiraHandler extends EgressJiraHandler {
                 "Total egress detected: %.2f MB in %d secs\n",
                 event.getEgressMegabytes(), event.getEgressWindowSeconds())),
         JiraContent.text("Workspace admin console (as RW admin):"),
-        workspace
-            .map(
-                w ->
-                    JiraContent.link(
-                        workbenchConfigProvider.get().server.uiBaseUrl
-                            + "/admin/workspaces/"
-                            + w.getWorkspaceNamespace()))
-            .orElse(JiraContent.text("unknown")));
+        getVwbWorkspaceAdminLink(event));
+  }
+
+  private AtlassianContent getVwbWorkspaceAdminLink(DbEgressEvent event) {
+    if (event.getVwbWorkspaceId() == null) {
+      return JiraContent.text("unknown");
+    }
+
+    try {
+      List<VwbWorkspace> workspaces =
+          vwbAdminQueryService.queryVwbWorkspacesByWorkspaceId(event.getVwbWorkspaceId());
+
+      if (workspaces.isEmpty()) {
+        return JiraContent.text("unknown - workspace not found");
+      }
+
+      VwbWorkspace workspace = workspaces.get(0);
+      String adminUrl =
+          workbenchConfigProvider.get().server.uiBaseUrl
+              + "/admin/vwb/workspaces/"
+              + workspace.getUserFacingId();
+
+      return JiraContent.link(adminUrl);
+    } catch (Exception e) {
+      log.warning("Failed to query VWB workspace for Jira link: " + e.getMessage());
+      return JiraContent.text("unknown - query failed");
+    }
   }
 }
