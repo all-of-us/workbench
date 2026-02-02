@@ -99,6 +99,7 @@ public class EgressRemediationServiceTest {
   @MockBean private JiraApi mockJiraApi;
 
   @MockBean private UserAdminService mockUserAdminService;
+  @MockBean private org.pmiops.workbench.vwb.admin.VwbAdminQueryService mockVwbAdminQueryService;
 
   @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;

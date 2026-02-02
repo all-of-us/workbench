@@ -21,6 +21,7 @@ import { NewWindowIcon } from 'app/components/icons';
 import { Error as ErrorDiv } from 'app/components/inputs';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import { RESEARCH_PURPOSE_MAPPING } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import { WorkspaceInfoField } from 'app/pages/admin/workspace/workspace-info-field';
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
@@ -31,7 +32,6 @@ import {
   renderIfAuthorized,
 } from 'app/utils/authorities';
 import { MatchParams, profileStore, serverConfigStore } from 'app/utils/stores';
-import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 
 const styles = reactStyles({
   sectionContentContainer: {

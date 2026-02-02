@@ -324,6 +324,44 @@ public class EgressEventsAdminControllerTest {
   }
 
   @Test
+  public void testListEgressEvents_vwbWorkspaceFiltering() {
+    // Create a VWB egress event with UUID workspace ID
+    String vwbWorkspaceId = "12345678-1234-1234-1234-123456789012";
+    DbEgressEvent vwbEvent =
+        egressEventDao.save(
+            newEvent()
+                .setUser(user1)
+                .setStatus(DbEgressEventStatus.PENDING)
+                .setVwbWorkspaceId(vwbWorkspaceId)
+                .setVwbEgressEventId("vwb-event-123"));
+
+    // Create a legacy egress event
+    DbEgressEvent legacyEvent =
+        egressEventDao.save(newEvent().setUser(user2).setWorkspace(workspace1));
+
+    // Test filtering by VWB workspace UUID returns only VWB event
+    ListEgressEventsResponse vwbResponse =
+        controller
+            .listEgressEvents(
+                new ListEgressEventsRequest().sourceWorkspaceNamespace(vwbWorkspaceId))
+            .getBody();
+
+    assertThat(vwbResponse.getEvents()).hasSize(1);
+    assertThat(vwbResponse.getEvents().get(0).getSourceWorkspaceNamespace())
+        .isEqualTo(vwbWorkspaceId);
+
+    // Test filtering by legacy workspace namespace still works
+    ListEgressEventsResponse legacyResponse =
+        controller
+            .listEgressEvents(new ListEgressEventsRequest().sourceWorkspaceNamespace(WORKSPACE1_NS))
+            .getBody();
+
+    assertThat(legacyResponse.getEvents()).hasSize(1);
+    assertThat(legacyResponse.getEvents().get(0).getSourceWorkspaceNamespace())
+        .isEqualTo(WORKSPACE1_NS);
+  }
+
+  @Test
   public void testListEgressEvents_badPageToken() {
     assertThrows(
         BadRequestException.class,
