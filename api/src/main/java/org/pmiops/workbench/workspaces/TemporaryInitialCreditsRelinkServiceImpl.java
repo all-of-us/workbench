@@ -19,6 +19,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.stereotype.Service;
 
@@ -33,18 +34,21 @@ public class TemporaryInitialCreditsRelinkServiceImpl
   private final WorkspaceDao workspaceDao;
   private final TemporaryInitialCreditsRelinkWorkspaceDao relinkWorkspaceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final InitialCreditsService initialCreditsService;
 
   public TemporaryInitialCreditsRelinkServiceImpl(
       FireCloudService fireCloudService,
       CloudBillingClient cloudBillingClient,
       WorkspaceDao workspaceDao,
       TemporaryInitialCreditsRelinkWorkspaceDao relinkWorkspaceDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      InitialCreditsService initialCreditsService) {
     this.fireCloudService = fireCloudService;
     this.cloudBillingClient = cloudBillingClient;
     this.workspaceDao = workspaceDao;
     this.relinkWorkspaceDao = relinkWorkspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.initialCreditsService = initialCreditsService;
   }
 
   /**
@@ -116,9 +120,15 @@ public class TemporaryInitialCreditsRelinkServiceImpl
         if (!inProgressWorkspaceSourceIds.contains(sourceId)) {
           Optional<DbWorkspace> sourceWorkspace = workspaceDao.findActiveByWorkspaceId(sourceId);
           sourceWorkspace.ifPresent(
-              ws ->
+              ws -> {
+                // Only unlink billing if the source workspace is still out of initial credits in
+                // case it regained eligibility mid-clone
+                if (ws.isInitialCreditsExhausted()
+                    && initialCreditsService.areUserCreditsExpired(ws.getCreator())) {
                   fireCloudService.removeBillingAccountFromBillingProjectAsService(
-                      ws.getWorkspaceNamespace()));
+                      ws.getWorkspaceNamespace());
+                }
+              });
         }
 
         completedWorkspace.workspace.setCloneCompleted(

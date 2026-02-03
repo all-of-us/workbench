@@ -22,10 +22,12 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.TemporaryInitialCreditsRelinkWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbTemporaryInitialCreditsRelinkWorkspace;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
@@ -38,6 +40,7 @@ public class TemporaryInitialCreditsRelinkServiceTest {
   @Mock private WorkspaceDao workspaceDao;
   @Mock private TemporaryInitialCreditsRelinkWorkspaceDao temporaryInitialCreditsRelinkWorkspaceDao;
   @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Mock private InitialCreditsService initialCreditsService;
 
   private TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
   String initialCreditsBillingAccountId = "test-account-id";
@@ -50,7 +53,8 @@ public class TemporaryInitialCreditsRelinkServiceTest {
             cloudBillingClient,
             workspaceDao,
             temporaryInitialCreditsRelinkWorkspaceDao,
-            workbenchConfigProvider);
+            workbenchConfigProvider,
+            initialCreditsService);
   }
 
   @Test
@@ -148,8 +152,15 @@ public class TemporaryInitialCreditsRelinkServiceTest {
     mockGetWorkspaceCalls(destNs1, cloneCompleted);
     mockGetWorkspaceCalls(destNs2, cloneCompleted);
     mockGetWorkspaceCalls(destNs3, null);
-    when(workspaceDao.findActiveByWorkspaceId(sourceId2))
-        .thenReturn(Optional.of(new DbWorkspace().setWorkspaceNamespace(sourceNs2)));
+
+    DbUser creator = new DbUser();
+    DbWorkspace sourceWorkspace2 =
+        new DbWorkspace()
+            .setWorkspaceNamespace(sourceNs2)
+            .setInitialCreditsExhausted(true)
+            .setCreator(creator);
+    when(workspaceDao.findActiveByWorkspaceId(sourceId2)).thenReturn(Optional.of(sourceWorkspace2));
+    when(initialCreditsService.areUserCreditsExpired(creator)).thenReturn(true);
     when(temporaryInitialCreditsRelinkWorkspaceDao.findByCloneCompletedIsNull())
         .thenReturn(workspacesToCheck);
 
@@ -261,11 +272,26 @@ public class TemporaryInitialCreditsRelinkServiceTest {
 
     mockGetWorkspaceCalls(destNs1, cloneCompleted);
     mockGetWorkspaceCalls(destNs2, cloneCompleted);
+
+    DbUser creator1 = new DbUser();
+    DbUser creator2 = new DbUser();
+    DbWorkspace failedSourceWorkspace =
+        new DbWorkspace()
+            .setWorkspaceNamespace(failedRemovalSourceNs)
+            .setInitialCreditsExhausted(true)
+            .setCreator(creator1);
+    DbWorkspace successfulSourceWorkspace =
+        new DbWorkspace()
+            .setWorkspaceNamespace(successfulRemovalSourceNs)
+            .setInitialCreditsExhausted(true)
+            .setCreator(creator2);
+
     when(workspaceDao.findActiveByWorkspaceId(successfulRemovalSourceId))
-        .thenReturn(
-            Optional.of(new DbWorkspace().setWorkspaceNamespace(successfulRemovalSourceNs)));
+        .thenReturn(Optional.of(successfulSourceWorkspace));
     when(workspaceDao.findActiveByWorkspaceId(failedRemovalSourceId))
-        .thenReturn(Optional.of(new DbWorkspace().setWorkspaceNamespace(failedRemovalSourceNs)));
+        .thenReturn(Optional.of(failedSourceWorkspace));
+    when(initialCreditsService.areUserCreditsExpired(creator1)).thenReturn(true);
+    when(initialCreditsService.areUserCreditsExpired(creator2)).thenReturn(true);
     when(temporaryInitialCreditsRelinkWorkspaceDao.findByCloneCompletedIsNull())
         .thenReturn(workspacesToCheck);
     doThrow(new RuntimeException("Failure!"))
@@ -287,6 +313,80 @@ public class TemporaryInitialCreditsRelinkServiceTest {
         .save(
             successfulRemovalWorkspace.setCloneCompleted(
                 Timestamp.from(cloneCompleted.toInstant())));
+  }
+
+  @Test
+  public void testCleanupTemporarilyRelinkedWorkspaces_creditsNotExhausted()
+      throws IOException, InterruptedException {
+    long sourceId = 1L;
+    String sourceNs = "sourceNs";
+    String destNs = "destNs";
+
+    DbTemporaryInitialCreditsRelinkWorkspace workspace =
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceId(sourceId)
+            .setDestinationWorkspaceNamespace(destNs);
+    var workspacesToCheck = List.of(workspace);
+
+    var cloneCompleted = OffsetDateTime.now();
+
+    mockGetWorkspaceCalls(destNs, cloneCompleted);
+
+    DbUser creator = new DbUser();
+    DbWorkspace sourceWorkspace =
+        new DbWorkspace()
+            .setWorkspaceNamespace(sourceNs)
+            .setInitialCreditsExhausted(false) // Credits NOT exhausted
+            .setCreator(creator);
+    when(workspaceDao.findActiveByWorkspaceId(sourceId)).thenReturn(Optional.of(sourceWorkspace));
+    when(temporaryInitialCreditsRelinkWorkspaceDao.findByCloneCompletedIsNull())
+        .thenReturn(workspacesToCheck);
+
+    temporaryInitialCreditsRelinkService.cleanupTemporarilyRelinkedWorkspaces();
+
+    // Billing should NOT be removed because credits are not exhausted
+    verify(fireCloudService, never()).removeBillingAccountFromBillingProjectAsService(sourceNs);
+    // Workspace should still be marked as completed
+    verify(temporaryInitialCreditsRelinkWorkspaceDao)
+        .save(workspace.setCloneCompleted(Timestamp.from(cloneCompleted.toInstant())));
+  }
+
+  @Test
+  public void testCleanupTemporarilyRelinkedWorkspaces_creditsNotExpired()
+      throws IOException, InterruptedException {
+    long sourceId = 1L;
+    String sourceNs = "sourceNs";
+    String destNs = "destNs";
+
+    DbTemporaryInitialCreditsRelinkWorkspace workspace =
+        new DbTemporaryInitialCreditsRelinkWorkspace()
+            .setSourceWorkspaceId(sourceId)
+            .setDestinationWorkspaceNamespace(destNs);
+    var workspacesToCheck = List.of(workspace);
+
+    var cloneCompleted = OffsetDateTime.now();
+
+    mockGetWorkspaceCalls(destNs, cloneCompleted);
+
+    DbUser creator = new DbUser();
+    DbWorkspace sourceWorkspace =
+        new DbWorkspace()
+            .setWorkspaceNamespace(sourceNs)
+            .setInitialCreditsExhausted(true)
+            .setCreator(creator);
+    when(workspaceDao.findActiveByWorkspaceId(sourceId)).thenReturn(Optional.of(sourceWorkspace));
+    when(initialCreditsService.areUserCreditsExpired(creator))
+        .thenReturn(false); // Credits NOT expired
+    when(temporaryInitialCreditsRelinkWorkspaceDao.findByCloneCompletedIsNull())
+        .thenReturn(workspacesToCheck);
+
+    temporaryInitialCreditsRelinkService.cleanupTemporarilyRelinkedWorkspaces();
+
+    // Billing should NOT be removed because credits are not expired
+    verify(fireCloudService, never()).removeBillingAccountFromBillingProjectAsService(sourceNs);
+    // Workspace should still be marked as completed
+    verify(temporaryInitialCreditsRelinkWorkspaceDao)
+        .save(workspace.setCloneCompleted(Timestamp.from(cloneCompleted.toInstant())));
   }
 
   private void mockGetWorkspaceCalls(String namespace, OffsetDateTime cloneCompleted) {
