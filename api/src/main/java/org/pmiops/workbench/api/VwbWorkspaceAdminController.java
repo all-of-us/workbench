@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -13,23 +15,30 @@ import org.pmiops.workbench.model.VwbWorkspaceListResponse;
 import org.pmiops.workbench.model.VwbWorkspaceSearchParamType;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate {
+  private static final Logger log = Logger.getLogger(VwbWorkspaceAdminController.class.getName());
+
   private final VwbAdminQueryService vwbAdminQueryService;
   private final VwbUserManagerClient vwbUserManagerClient;
+  private final WsmClient wsmClient;
 
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
   @Autowired
   public VwbWorkspaceAdminController(
-      VwbAdminQueryService vwbAdminQueryService, VwbUserManagerClient vwbUserManagerClient) {
+      VwbAdminQueryService vwbAdminQueryService,
+      VwbUserManagerClient vwbUserManagerClient,
+      WsmClient wsmClient) {
     this.vwbAdminQueryService = vwbAdminQueryService;
     this.vwbUserManagerClient = vwbUserManagerClient;
+    this.wsmClient = wsmClient;
   }
 
   @Override
@@ -95,6 +104,34 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   public ResponseEntity<Void> enableAccessOnDemandByUserFacingId(
       String userFacingId, VwbAodRequest request) {
     vwbUserManagerClient.workspaceAccessOnDemandByUserFacingId(userFacingId, request.getReason());
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<org.pmiops.workbench.model.InlineResponse200> getVwbWorkspaceResources(
+      String workspaceId) {
+    Object result = wsmClient.enumerateWorkspaceResources(workspaceId);
+
+    // Extract resources from the result
+    List<Object> resources = new ArrayList<>();
+    if (result instanceof org.pmiops.workbench.wsmanager.model.ResourceList) {
+      org.pmiops.workbench.wsmanager.model.ResourceList resourceList =
+          (org.pmiops.workbench.wsmanager.model.ResourceList) result;
+      if (resourceList.getResources() != null) {
+        resources = new ArrayList<>(resourceList.getResources());
+      }
+    }
+
+    return ResponseEntity.ok(
+        new org.pmiops.workbench.model.InlineResponse200().resources(resources));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<Void> deleteVwbWorkspaceResource(
+      String workspaceId, String resourceId, String resourceType) {
+    wsmClient.deleteWorkspaceResource(workspaceId, resourceId, resourceType);
     return ResponseEntity.ok().build();
   }
 

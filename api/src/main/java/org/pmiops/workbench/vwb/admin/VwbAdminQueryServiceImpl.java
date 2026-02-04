@@ -98,6 +98,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + " %s \n"
           + "WHERE \n"
           + " change_subject_id=@WORKSPACE_ID "
+          + " AND change_type != 'SYSTEM_CLEANUP' "
           + "ORDER BY change_date ASC ";
 
   @Autowired

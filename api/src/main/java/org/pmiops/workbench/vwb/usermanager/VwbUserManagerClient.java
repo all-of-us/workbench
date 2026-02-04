@@ -195,11 +195,20 @@ public class VwbUserManagerClient {
   }
 
   public void workspaceAccessOnDemandByUserFacingId(String userFacingId, String reason) {
+    logger.info(
+        String.format("Granting workspace access on demand for userFacingId=%s", userFacingId));
+
     AccessOnDemandRequest accessOnDemandRequest =
         new AccessOnDemandRequest().reason(reason).role(WorkbenchRole.SUPPORT);
+
+    // Verily's API requires UFID to be prefixed with "~" when using workspaceAccessOnDemand
+    String workspaceIdentifier = "~" + userFacingId;
+
     vwbUserManagerRetryHandler.run(
         context -> {
-          workspaceApiProvider.get().workspaceAccessOnDemand(accessOnDemandRequest, userFacingId);
+          workspaceApiProvider
+              .get()
+              .workspaceAccessOnDemand(accessOnDemandRequest, workspaceIdentifier);
           return null;
         });
   }

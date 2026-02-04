@@ -6923,6 +6923,81 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/admin/vwb/workspaces/{workspaceId}/resources:
+    get:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Returns workspace resources using service account credentials. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: getVwbWorkspaceResources
+      parameters:
+        - name: workspaceId
+          in: path
+          description: The workspace UUID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workspace resources list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resources:
+                    type: array
+                    items:
+                      type: object
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/admin/vwb/workspaces/{workspaceId}/resources/{resourceId}:
+    delete:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Deletes a workspace resource using service account credentials. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: deleteVwbWorkspaceResource
+      parameters:
+        - name: workspaceId
+          in: path
+          description: The workspace UUID
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: The resource UUID
+          required: true
+          schema:
+            type: string
+        - name: resourceType
+          in: query
+          description: The resource type (GCE_INSTANCE, DATAPROC_CLUSTER, GCS_BUCKET, BIG_QUERY_DATASET)
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Resource deleted successfully
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     ArchivalStatus:
