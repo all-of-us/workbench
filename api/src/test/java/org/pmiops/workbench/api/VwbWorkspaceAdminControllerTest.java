@@ -25,7 +25,9 @@ import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+@SpringJUnitConfig
 public class VwbWorkspaceAdminControllerTest {
 
   @Mock private VwbAdminQueryService mockVwbAdminQueryService;

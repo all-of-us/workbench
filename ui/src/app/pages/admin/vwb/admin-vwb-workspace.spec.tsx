@@ -28,7 +28,7 @@ const ADMIN_PROFILE: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
   authorities: [
     Authority.RESEARCHER_DATA_VIEW,
-    Authority.WORKSPACE_ADMIN,
+    Authority.SECURITY_ADMIN,
     Authority.EGRESS_EVENTS,
   ],
 };
