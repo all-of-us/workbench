@@ -293,18 +293,13 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
         resourceToDelete.type
       );
 
-      // Optimistically remove the resource from the local state
-      // Note: Delete operations are async in workspace manager, so the resource
-      // might still exist for a while, but we remove it from UI immediately
-      setWorkspaceResources((prevResources) =>
-        prevResources.filter(
-          (r) => r.metadata.resourceId !== resourceToDelete.id
-        )
-      );
-
       // Clear state after successful deletion
       setDeletingResourceId(null);
       setResourceToDelete(null);
+
+      // Reload workspace resources to get the updated status
+      // The resource will show as DELETING until the async deletion completes
+      await loadWorkspaceResources();
     } catch (err) {
       setDeleteError(
         `Failed to delete resource: ${err.message || err.toString()}`
