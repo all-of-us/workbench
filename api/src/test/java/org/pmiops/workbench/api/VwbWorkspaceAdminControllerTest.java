@@ -74,7 +74,7 @@ public class VwbWorkspaceAdminControllerTest {
         .thenReturn(testWorkspaces);
 
     ResponseEntity<VwbWorkspaceListResponse> response =
-        controller.getVwbWorkspacesBySearchParam("CREATOR", "creator@example.com");
+        controller.getVwbWorkspacesBySearchParam("WORKSPACE_CREATOR", "creator@example.com");
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().getItems()).hasSize(1);
@@ -89,7 +89,7 @@ public class VwbWorkspaceAdminControllerTest {
         .thenReturn(testWorkspaces);
 
     ResponseEntity<VwbWorkspaceListResponse> response =
-        controller.getVwbWorkspacesBySearchParam("USER_FACING_ID", "test-ufid");
+        controller.getVwbWorkspacesBySearchParam("WORKSPACE_USER_FACING_ID", "test-ufid");
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().getItems()).hasSize(1);
@@ -102,7 +102,7 @@ public class VwbWorkspaceAdminControllerTest {
         .thenReturn(testWorkspaces);
 
     ResponseEntity<VwbWorkspaceListResponse> response =
-        controller.getVwbWorkspacesBySearchParam("ID", "workspace-uuid-123");
+        controller.getVwbWorkspacesBySearchParam("WORKSPACE_ID", "workspace-uuid-123");
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().getItems()).hasSize(1);
@@ -115,7 +115,7 @@ public class VwbWorkspaceAdminControllerTest {
         .thenReturn(testWorkspaces);
 
     ResponseEntity<VwbWorkspaceListResponse> response =
-        controller.getVwbWorkspacesBySearchParam("NAME", "Test Workspace");
+        controller.getVwbWorkspacesBySearchParam("WORKSPACE_NAME", "Test Workspace");
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().getItems()).hasSize(1);
@@ -128,7 +128,7 @@ public class VwbWorkspaceAdminControllerTest {
         .thenReturn(testWorkspaces);
 
     ResponseEntity<VwbWorkspaceListResponse> response =
-        controller.getVwbWorkspacesBySearchParam("SHARED", "user@example.com");
+        controller.getVwbWorkspacesBySearchParam("WORKSPACE_SHARED", "user@example.com");
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().getItems()).hasSize(1);
@@ -141,7 +141,7 @@ public class VwbWorkspaceAdminControllerTest {
         .thenReturn(testWorkspaces);
 
     ResponseEntity<VwbWorkspaceListResponse> response =
-        controller.getVwbWorkspacesBySearchParam("GCP_PROJECT_ID", "test-gcp-project");
+        controller.getVwbWorkspacesBySearchParam("WORKSPACE_GCP_PROJECT_ID", "test-gcp-project");
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().getItems()).hasSize(1);
@@ -217,9 +217,14 @@ public class VwbWorkspaceAdminControllerTest {
 
   @Test
   public void testGetVwbWorkspaceResources() {
+    org.pmiops.workbench.wsmanager.model.ResourceDescription resource1 =
+        new org.pmiops.workbench.wsmanager.model.ResourceDescription();
+    org.pmiops.workbench.wsmanager.model.ResourceDescription resource2 =
+        new org.pmiops.workbench.wsmanager.model.ResourceDescription();
+
     org.pmiops.workbench.wsmanager.model.ResourceList mockResourceList =
         new org.pmiops.workbench.wsmanager.model.ResourceList();
-    mockResourceList.setResources(Arrays.asList(new Object(), new Object())); // Mock resources
+    mockResourceList.setResources(Arrays.asList(resource1, resource2));
 
     when(mockWsmClient.enumerateWorkspaceResources("workspace-uuid-123"))
         .thenReturn(mockResourceList);
