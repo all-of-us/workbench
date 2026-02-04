@@ -36,7 +36,6 @@ public class VwbWorkspaceAdminControllerTest {
 
   private VwbWorkspaceAdminController controller;
 
-  private VwbWorkspace testWorkspace;
   private List<VwbWorkspace> testWorkspaces;
   private List<UserRole> testCollaborators;
   private List<VwbWorkspaceAuditLog> testAuditLogs;
@@ -50,7 +49,7 @@ public class VwbWorkspaceAdminControllerTest {
             mockVwbAdminQueryService, mockVwbUserManagerClient, mockWsmClient);
 
     // Set up test data
-    testWorkspace = new VwbWorkspace();
+    VwbWorkspace testWorkspace = new VwbWorkspace();
     testWorkspace.setId("workspace-uuid-123");
     testWorkspace.setUserFacingId("test-ufid");
     testWorkspace.setDisplayName("Test Workspace");

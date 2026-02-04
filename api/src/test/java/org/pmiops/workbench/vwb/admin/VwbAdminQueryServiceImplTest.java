@@ -28,14 +28,13 @@ public class VwbAdminQueryServiceImplTest {
   @Mock private TableResult mockTableResult;
 
   private VwbAdminQueryServiceImpl service;
-  private WorkbenchConfig config;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
 
     // Set up config
-    config = new WorkbenchConfig();
+    WorkbenchConfig config = new WorkbenchConfig();
     config.googleDirectoryService = new WorkbenchConfig.GoogleDirectoryServiceConfig();
     config.googleDirectoryService.gSuiteDomain = TEST_GSUITE_DOMAIN;
     config.vwb = new WorkbenchConfig.VwbConfig();
@@ -57,7 +56,7 @@ public class VwbAdminQueryServiceImplTest {
   @Test
   public void testNormalizeEmail_usernameOnly_appendsDomain() {
     // When querying by creator with just username
-    List<VwbWorkspace> result = service.queryVwbWorkspacesByCreator("testuser");
+    service.queryVwbWorkspacesByCreator("testuser");
 
     // Verify that the email was normalized with domain
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
@@ -72,7 +71,7 @@ public class VwbAdminQueryServiceImplTest {
   @Test
   public void testNormalizeEmail_fullEmailWithConfiguredDomain_unchanged() {
     // When querying with full email that matches GSuite domain
-    List<VwbWorkspace> result = service.queryVwbWorkspacesByCreator("user@example.com");
+    service.queryVwbWorkspacesByCreator("user@example.com");
 
     // Verify that the email was not modified
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
@@ -88,7 +87,7 @@ public class VwbAdminQueryServiceImplTest {
   public void testNormalizeEmail_fullEmailWithDifferentDomain_allowedAndUnchanged() {
     // When querying with full email from different domain (e.g., user@otherdomain.com when
     // config is fake.researchallofus.org) - this is allowed and passed through unchanged
-    List<VwbWorkspace> result = service.queryVwbWorkspacesByCreator("user@otherdomain.com");
+    service.queryVwbWorkspacesByCreator("user@otherdomain.com");
 
     // Verify that the email was not modified - different domains are allowed
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
@@ -118,7 +117,7 @@ public class VwbAdminQueryServiceImplTest {
   @Test
   public void testNormalizeEmail_emptyString_unchanged() {
     // When querying with empty string
-    List<VwbWorkspace> result = service.queryVwbWorkspacesByCreator("");
+    service.queryVwbWorkspacesByCreator("");
 
     // Verify that empty string was passed as is
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
@@ -133,7 +132,7 @@ public class VwbAdminQueryServiceImplTest {
   @Test
   public void testNormalizeEmail_shareActivity_usernameOnly_appendsDomain() {
     // When querying share activity by username
-    List<VwbWorkspace> result = service.queryVwbWorkspacesByShareActivity("testuser");
+    service.queryVwbWorkspacesByShareActivity("testuser");
 
     // Verify that the email was normalized with domain
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
@@ -148,7 +147,7 @@ public class VwbAdminQueryServiceImplTest {
   @Test
   public void testNormalizeEmail_shareActivity_fullEmail_unchanged() {
     // When querying share activity with full email
-    List<VwbWorkspace> result = service.queryVwbWorkspacesByShareActivity("testuser@example.com");
+    service.queryVwbWorkspacesByShareActivity("testuser@example.com");
 
     // Verify that the email was not modified
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
@@ -163,7 +162,7 @@ public class VwbAdminQueryServiceImplTest {
   @Test
   public void testNormalizeEmail_usernameWithDot_appendsDomain() {
     // When querying with username containing dot
-    List<VwbWorkspace> result = service.queryVwbWorkspacesByCreator("first.last");
+    service.queryVwbWorkspacesByCreator("first.last");
 
     // Verify that domain was appended
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
