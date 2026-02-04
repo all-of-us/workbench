@@ -93,12 +93,11 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + " change_type, \n"
           + " change_date, \n"
           + " actor_email, \n"
-          + " workspace_id, \n"
+          + " workspace_id \n"
           + "FROM \n"
           + " %s \n"
           + "WHERE \n"
           + " change_subject_id=@WORKSPACE_ID "
-          + " AND change_type != 'SYSTEM_CLEANUP' "
           + "ORDER BY change_date ASC ";
 
   @Autowired
@@ -110,6 +109,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   @Override
   public List<VwbWorkspace> queryVwbWorkspacesByCreator(String email) {
+    final String normalizedEmail = normalizeEmail(email);
 
     final String queryString =
         String.format(
@@ -120,7 +120,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
-            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(email))
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(normalizedEmail))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
@@ -186,6 +186,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   @Override
   public List<VwbWorkspace> queryVwbWorkspacesByShareActivity(String email) {
+    final String normalizedEmail = normalizeEmail(email);
 
     final String queryString =
         String.format(
@@ -196,7 +197,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
-            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(email))
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(normalizedEmail))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
@@ -246,15 +247,28 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final String queryString =
         String.format(AUDIT_QUERY, getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE_PREFIX));
 
+    System.out.println("DEBUG: Workspace Activity Query: " + queryString);
+
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .addNamedParameter("WORKSPACE_ID", QueryParameterValue.string(workspaceId))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
-    return StreamSupport.stream(result.iterateAll().spliterator(), false)
-        .map(this::fieldValueListToVwbWorkspaceAuditLog)
-        .collect(Collectors.toList());
+    List<VwbWorkspaceAuditLog> logs =
+        StreamSupport.stream(result.iterateAll().spliterator(), false)
+            .map(this::fieldValueListToVwbWorkspaceAuditLog)
+            .collect(Collectors.toList());
+
+    // Log all unique change types to debug
+    System.out.println(
+        "DEBUG: Change types found: "
+            + logs.stream()
+                .map(VwbWorkspaceAuditLog::getChangeType)
+                .distinct()
+                .collect(Collectors.joining(", ")));
+
+    return logs;
   }
 
   private String getTableName(String tablePrefix) {
@@ -309,5 +323,28 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .ifPresent(auditLog::setChangeTime);
     FieldValues.getString(row, "actor_email").ifPresent(auditLog::setActorEmail);
     return auditLog;
+  }
+
+  /**
+   * Normalizes email input by appending the configured GSuite domain if no domain is present.
+   *
+   * @param email The email or username to normalize
+   * @return The normalized email address
+   */
+  private String normalizeEmail(String email) {
+    if (email == null || email.trim().isEmpty()) {
+      return email;
+    }
+
+    String trimmedEmail = email.trim();
+
+    // If email already contains '@', return as is (already has a domain)
+    if (trimmedEmail.contains("@")) {
+      return trimmedEmail;
+    }
+
+    // Otherwise, append the configured GSuite domain
+    String gSuiteDomain = workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
+    return trimmedEmail + "@" + gSuiteDomain;
   }
 }

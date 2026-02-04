@@ -155,12 +155,22 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
   };
 
   const getWorkspaceActivity = async (workspaceId: string) => {
+    console.log(
+      'DEBUG: Fetching workspace activity for workspaceId:',
+      workspaceId
+    );
     setLoadingWorkspaceActivity(true);
 
     vwbWorkspaceAdminApi()
       .getVwbWorkspaceAuditLogs(workspaceId)
-      .then(setWorkspaceActivity)
-      .catch((error) => handleDataLoadError(error))
+      .then((result) => {
+        console.log('DEBUG: Workspace activity result:', result);
+        setWorkspaceActivity(result);
+      })
+      .catch((error) => {
+        console.error('DEBUG: Workspace activity error:', error);
+        handleDataLoadError(error);
+      })
       .finally(() => setLoadingWorkspaceActivity(false));
   };
 
@@ -171,10 +181,18 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     vwbWorkspaceAdminApi()
       .getVwbWorkspaceAdminView(ufid)
       .then((resp) => {
+        console.log(
+          'DEBUG: Got workspace details, workspace.id:',
+          resp.workspace?.id
+        );
         setWorkspaceDetails(resp);
         setResearchPurpose(
           (JSON.parse(resp.workspace.researchPurpose)?.[0]
             ?.form_data as ResearchPurposeItem) ?? {}
+        );
+        console.log(
+          'DEBUG: About to call getWorkspaceActivity with id:',
+          resp.workspace.id
         );
         getWorkspaceActivity(resp.workspace.id);
       })
@@ -368,7 +386,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
       {workspace && (
         <div>
           <h3>Basic Information</h3>
-          <div className='basic-info' style={{ marginTop: '1.5rem' }}>
+          <div className='basic-info' style={{ marginTop: '0.5rem' }}>
             <WorkspaceInfoField labelText='Billing Account Type'>
               {workspace.billingAccountId ===
               serverConfigStore.get().config.initialCreditsBillingAccountId
@@ -464,7 +482,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
               </AccordionTab>
             </Accordion>
             <h3>Collaborators</h3>
-            <div className='collaborators' style={{ marginTop: '1.5rem' }}>
+            <div className='collaborators' style={{ marginTop: '0.5rem' }}>
               <div style={{ marginBottom: '0.5rem' }}>
                 Creator and Owner: {workspace.createdBy}
               </div>
@@ -498,7 +516,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             <h3>Manual Access to Workspace (Optional)</h3>
             <div
               className='aod'
-              style={{ marginTop: '1.5rem', width: '800px' }}
+              style={{ marginTop: '0.5rem', width: '800px' }}
             >
               <div style={{ marginBottom: '1rem' }}>
                 <strong>
@@ -556,7 +574,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             {resourcesFetched && (
               <>
                 <h3>Workspace Resources</h3>
-                <div style={{ marginTop: '1.5rem' }}>
+                <div style={{ marginTop: '0.5rem' }}>
                   <TabView>
                     <TabPanel header='Cloud Environments'>
                       <DataTable
@@ -790,7 +808,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
               </>
             )}
             <h3>Egress event history</h3>
-            <div style={{ marginTop: '1.5rem' }}>
+            <div style={{ marginTop: '0.5rem' }}>
               {renderIfAuthorized(
                 profileStore.get().profile,
                 AuthorityGuardedAction.EGRESS_EVENTS,
@@ -803,7 +821,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
               )}
             </div>
             <h3>Workspace Activity</h3>
-            <div className='collaborators' style={{ marginTop: '1.5rem' }}>
+            <div className='collaborators' style={{ marginTop: '0.5rem' }}>
               {loadingWorkspaceActivity ? (
                 <Spinner style={{ marginLeft: '40%' }} />
               ) : (
