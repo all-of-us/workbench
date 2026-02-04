@@ -163,6 +163,112 @@ public class WsmClient {
                 .getWorkspaceByUserFacingId(workspaceNamespace, IamRole.READER));
   }
 
+  /**
+   * Deletes a workspace resource using service account credentials.
+   *
+   * @param workspaceId UUID of the workspace
+   * @param resourceId UUID of the resource to delete
+   * @param resourceType Type of the resource (GCE_INSTANCE, DATAPROC_CLUSTER, etc.)
+   */
+  public void deleteWorkspaceResource(String workspaceId, String resourceId, String resourceType) {
+    logger.info(
+        String.format(
+            "Deleting workspace resource: workspaceId=%s, resourceId=%s, resourceType=%s",
+            workspaceId, resourceId, resourceType));
+    try {
+      wsmRetryHandler.run(
+          context -> {
+            org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi controlledGcpResourceApi =
+                new org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi(
+                    workspaceServiceApi.get().getApiClient());
+
+            UUID resourceUuid = UUID.fromString(resourceId);
+            JobControl jobControl = new JobControl().id(UUID.randomUUID().toString());
+
+            try {
+              switch (resourceType) {
+                case "GCE_INSTANCE":
+                  org.pmiops.workbench.wsmanager.model.DeleteControlledGcpGceInstanceRequest
+                      gceRequest =
+                          new org.pmiops.workbench.wsmanager.model
+                                  .DeleteControlledGcpGceInstanceRequest()
+                              .jobControl(jobControl);
+                  controlledGcpResourceApi.deleteGceInstance(gceRequest, workspaceId, resourceUuid);
+                  break;
+                case "DATAPROC_CLUSTER":
+                  org.pmiops.workbench.wsmanager.model.DeleteControlledGcpDataprocClusterRequest
+                      dataprocRequest =
+                          new org.pmiops.workbench.wsmanager.model
+                                  .DeleteControlledGcpDataprocClusterRequest()
+                              .jobControl(jobControl);
+                  controlledGcpResourceApi.deleteDataprocCluster(
+                      dataprocRequest, workspaceId, resourceUuid);
+                  break;
+                case "GCS_BUCKET":
+                  org.pmiops.workbench.wsmanager.model.DeleteControlledGcpGcsBucketRequest
+                      bucketRequest =
+                          new org.pmiops.workbench.wsmanager.model
+                                  .DeleteControlledGcpGcsBucketRequest()
+                              .jobControl(jobControl);
+                  controlledGcpResourceApi.deleteBucket(bucketRequest, workspaceId, resourceUuid);
+                  break;
+                case "BIG_QUERY_DATASET":
+                  controlledGcpResourceApi.deleteBigQueryDataset(workspaceId, resourceUuid);
+                  break;
+                default:
+                  throw new WorkbenchException(
+                      String.format("Unsupported resource type: %s", resourceType));
+              }
+
+              return null;
+            } catch (ApiException e) {
+              // Rethrow ApiException so retry handler can handle it
+              throw e;
+            }
+          });
+    } catch (WorkbenchException e) {
+      // Re-throw WorkbenchException from retry handler
+      throw e;
+    }
+  }
+
+  /**
+   * Enumerates workspace resources using service account credentials. This method calls the
+   * workspace manager API directly since the operation isn't available in the generated client.
+   *
+   * @param workspaceId UUID of the workspace
+   * @return Object containing the workspace resources (as returned by workspace manager API)
+   */
+  public Object enumerateWorkspaceResources(String workspaceId) {
+    logger.info(String.format("Enumerating workspace resources for workspaceId=%s", workspaceId));
+    try {
+      return wsmRetryHandler.run(
+          context -> {
+            try {
+              // Call workspace manager API directly to enumerate resources
+              // The workspace service API provider has service account credentials
+              org.pmiops.workbench.wsmanager.api.ResourceApi resourceApi =
+                  new org.pmiops.workbench.wsmanager.api.ResourceApi(
+                      workspaceServiceApi.get().getApiClient());
+              return resourceApi.enumerateResources(
+                  workspaceId,
+                  0, // offset
+                  1000, // limit
+                  null, // resource type (null = all types)
+                  org.pmiops.workbench.wsmanager.model.StewardshipType.CONTROLLED,
+                  false // includeAccessInfo
+                  );
+            } catch (ApiException e) {
+              // Rethrow ApiException so retry handler can handle it
+              throw e;
+            }
+          });
+    } catch (WorkbenchException e) {
+      // Re-throw WorkbenchException from retry handler
+      throw e;
+    }
+  }
+
   private static Properties stringMapToProperties(Map<String, String> map) {
     Properties properties = new Properties();
     if (map == null) {

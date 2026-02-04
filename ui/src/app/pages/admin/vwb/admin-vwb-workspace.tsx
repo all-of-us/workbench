@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { TabPanel, TabView } from 'primereact/tabview';
 import { faCopy } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -15,10 +16,16 @@ import {
 } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
-import { Button, StyledExternalLink } from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { NewWindowIcon } from 'app/components/icons';
 import { Error as ErrorDiv } from 'app/components/inputs';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalTitle,
+} from 'app/components/modals';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
@@ -61,6 +68,42 @@ interface ResearchPurposeItem {
   [key: string]: boolean | string;
 }
 
+interface WsmCloudResource {
+  metadata: {
+    resourceId: string;
+    name: string;
+    description?: string;
+    resourceType: string;
+    stewardshipType: string;
+    cloningInstructions: string;
+    controlledResourceMetadata?: {
+      region?: string;
+      privateResourceUser?: {
+        userName: string;
+      };
+    };
+    createdBy?: string;
+    state?: string;
+  };
+  resourceAttributes?: {
+    gcpGcsBucket?: {
+      bucketName: string;
+    };
+    gcpDataprocCluster?: {
+      clusterId: string;
+      region: string;
+    };
+    gcpBigQueryDataset?: {
+      datasetId: string;
+    };
+    gcpGceInstance?: {
+      instanceId: string;
+      zone: string;
+      status?: string;
+    };
+  };
+}
+
 const collabList = (users: UserRole[]) => {
   return users?.length > 0
     ? users.map((c) => (
@@ -88,10 +131,25 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [researchPurpose, setResearchPurpose] = useState<ResearchPurposeItem>();
+  const [fetchingResources, setFetchingResources] = useState<boolean>(false);
+  const [workspaceResources, setWorkspaceResources] = useState<
+    WsmCloudResource[]
+  >([]);
+  const [resourcesFetched, setResourcesFetched] = useState<boolean>(false);
+  const [deletingResourceId, setDeletingResourceId] = useState<string | null>(
+    null
+  );
+  const [confirmDeleteResource, setConfirmDeleteResource] =
+    useState<boolean>(false);
+  const [resourceToDelete, setResourceToDelete] = useState<{
+    id: string;
+    type: string;
+    name: string;
+  } | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleDataLoadError = async (error) => {
     if (error instanceof Response) {
-      console.log('error', error, await error.json());
       setDataLoadError(error);
     }
   };
@@ -101,7 +159,9 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
 
     vwbWorkspaceAdminApi()
       .getVwbWorkspaceAuditLogs(workspaceId)
-      .then(setWorkspaceActivity)
+      .then((result) => {
+        setWorkspaceActivity(result);
+      })
       .catch((error) => handleDataLoadError(error))
       .finally(() => setLoadingWorkspaceActivity(false));
   };
@@ -114,10 +174,14 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
       .getVwbWorkspaceAdminView(ufid)
       .then((resp) => {
         setWorkspaceDetails(resp);
-        setResearchPurpose(
-          (JSON.parse(resp.workspace.researchPurpose)?.[0]
-            ?.form_data as ResearchPurposeItem) ?? {}
-        );
+        try {
+          const parsed = JSON.parse(resp.workspace.researchPurpose || '{}');
+          setResearchPurpose(
+            (parsed?.[0]?.form_data as ResearchPurposeItem) ?? {}
+          );
+        } catch (e) {
+          setResearchPurpose({});
+        }
         getWorkspaceActivity(resp.workspace.id);
       })
       .catch((error) => handleDataLoadError(error))
@@ -135,6 +199,117 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     }
   };
 
+  const loadWorkspaceResources = async () => {
+    const ws = workspaceDetails?.workspace;
+    if (!ws) {
+      return;
+    }
+
+    try {
+      // Call backend endpoint which uses service account credentials
+      const response = await vwbWorkspaceAdminApi().getVwbWorkspaceResources(
+        ws.id
+      );
+
+      // Cast from Array<object> to WsmCloudResource[]
+      const resources = (response.resources || []) as WsmCloudResource[];
+
+      setWorkspaceResources(resources);
+      setResourcesFetched(true);
+    } catch (err) {
+      // Don't set dataLoadError here - we want to fail silently if AoD isn't active
+      setWorkspaceResources([]);
+      setResourcesFetched(false);
+    }
+  };
+
+  const fetchWorkspaceData = async () => {
+    const ws = workspaceDetails?.workspace;
+    if (!ws) {
+      return;
+    }
+
+    setFetchingResources(true);
+
+    try {
+      // First, enable AoD as service
+      await vwbWorkspaceAdminApi().enableAccessOnDemandByUserFacingId(
+        ws.userFacingId,
+        {
+          reason: 'AoU Prod Support',
+        }
+      );
+
+      // Wait a moment for AoD to propagate
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Then reload workspace resources
+      await loadWorkspaceResources();
+    } catch (err) {
+      alert(`Failed to fetch workspace data: ${err}`);
+      setDataLoadError(err as Response);
+    } finally {
+      setFetchingResources(false);
+    }
+  };
+
+  const deleteResource = (
+    resourceId: string,
+    resourceType: string,
+    resourceName: string
+  ) => {
+    setResourceToDelete({
+      id: resourceId,
+      type: resourceType,
+      name: resourceName,
+    });
+    setConfirmDeleteResource(true);
+  };
+
+  const cancelDeleteResource = () => {
+    setConfirmDeleteResource(false);
+    setResourceToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!resourceToDelete) {
+      return;
+    }
+
+    setConfirmDeleteResource(false);
+    setDeletingResourceId(resourceToDelete.id);
+    setDeleteError(null);
+
+    const ws = workspaceDetails?.workspace;
+    if (!ws) {
+      return;
+    }
+
+    try {
+      // Call backend API which uses service account credentials
+      await vwbWorkspaceAdminApi().deleteVwbWorkspaceResource(
+        ws.id,
+        resourceToDelete.id,
+        resourceToDelete.type
+      );
+
+      // Clear state after successful deletion
+      setDeletingResourceId(null);
+      setResourceToDelete(null);
+
+      // Reload workspace resources to get the updated status
+      // The resource will show as DELETING until the async deletion completes
+      await loadWorkspaceResources();
+    } catch (err) {
+      setDeleteError(
+        `Failed to delete resource: ${err.message || err.toString()}`
+      );
+      // Clear state after error
+      setDeletingResourceId(null);
+      setResourceToDelete(null);
+    }
+  };
+
   useEffect(() => {
     props.hideSpinner();
   }, []);
@@ -143,10 +318,47 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     populateWorkspaceDetails();
   }, [props.match.params.ufid]);
 
+  useEffect(() => {
+    // Try to load workspace resources when workspace details are available
+    // This will succeed if AoD is already active
+    if (workspaceDetails?.workspace) {
+      loadWorkspaceResources();
+    }
+  }, [workspaceDetails]);
+
   const { collaborators, workspace } = workspaceDetails || {};
 
   return (
     <div style={{ margin: '1.5rem' }}>
+      {confirmDeleteResource && resourceToDelete && (
+        <Modal onRequestClose={cancelDeleteResource}>
+          <ModalTitle>Delete Resource</ModalTitle>
+          <ModalBody>
+            Are you sure you want to delete <b>{resourceToDelete.name}</b> (
+            {resourceToDelete.type})?
+            <br />
+            <br />
+            This action cannot be undone.
+          </ModalBody>
+          <ModalFooter>
+            <Button type='secondary' onClick={cancelDeleteResource}>
+              Cancel
+            </Button>
+            <Button style={{ marginLeft: '0.75rem' }} onClick={confirmDelete}>
+              Delete
+            </Button>
+          </ModalFooter>
+        </Modal>
+      )}
+      {deleteError && (
+        <Modal onRequestClose={() => setDeleteError(null)}>
+          <ModalTitle>Delete Failed</ModalTitle>
+          <ModalBody>{deleteError}</ModalBody>
+          <ModalFooter>
+            <Button onClick={() => setDeleteError(null)}>Close</Button>
+          </ModalFooter>
+        </Modal>
+      )}
       {dataLoadError && (
         <ErrorDiv>
           Error loading data. Please refresh the page or contact the development
@@ -157,7 +369,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
       {workspace && (
         <div>
           <h3>Basic Information</h3>
-          <div className='basic-info' style={{ marginTop: '1.5rem' }}>
+          <div className='basic-info' style={{ marginTop: '0.5rem' }}>
             <WorkspaceInfoField labelText='Billing Account Type'>
               {workspace.billingAccountId ===
               serverConfigStore.get().config.initialCreditsBillingAccountId
@@ -181,6 +393,19 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Description'>
               {workspace.description}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Workspace Data'>
+              <Button
+                type='primary'
+                style={{ height: '2.25rem' }}
+                disabled={fetchingResources}
+                onClick={fetchWorkspaceData}
+              >
+                Fetch Workspace Data
+                {fetchingResources && (
+                  <Spinner size={18} style={{ marginLeft: '0.75rem' }} />
+                )}
+              </Button>
             </WorkspaceInfoField>
             <Accordion style={{ marginTop: '0.5rem' }}>
               <AccordionTab header='Research Purpose'>
@@ -239,20 +464,49 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                 ))}
               </AccordionTab>
             </Accordion>
-            <h3>Access On Demand</h3>
+            <h3>Collaborators</h3>
+            <div className='collaborators' style={{ marginTop: '0.5rem' }}>
+              <div style={{ marginBottom: '0.5rem' }}>
+                Creator and Owner: {workspace.createdBy}
+              </div>
+              <div style={{ marginBottom: '0.5rem' }}>
+                Other Owners:{' '}
+                {collabList(
+                  collaborators.filter(
+                    (c) =>
+                      c.role === WorkspaceAccessLevel.OWNER &&
+                      c.email !== workspace.createdBy
+                  )
+                )}
+              </div>
+              <div style={{ marginBottom: '0.5rem' }}>
+                Writers:{' '}
+                {collabList(
+                  collaborators.filter(
+                    (c) => c.role === WorkspaceAccessLevel.WRITER
+                  )
+                )}
+              </div>
+              <div style={{ marginBottom: '0.5rem' }}>
+                Readers:{' '}
+                {collabList(
+                  collaborators.filter(
+                    (c) => c.role === WorkspaceAccessLevel.READER
+                  )
+                )}
+              </div>
+            </div>
+            <h3>Manual Access to Workspace (Optional)</h3>
             <div
               className='aod'
-              style={{ marginTop: '1.5rem', width: '800px' }}
+              style={{ marginTop: '0.5rem', width: '800px' }}
             >
               <div style={{ marginBottom: '1rem' }}>
-                To enable Access On Demand for this workspace, run the following
-                command using Verily's{' '}
-                <StyledExternalLink
-                  href='https://support.workbench.verily.com/docs/guides/cli/cli_install_and_run/'
-                  target='_blank'
-                >
-                  Workbench CLI
-                </StyledExternalLink>
+                <strong>
+                  Use this CLI command only if you need to access the workspace
+                  in Verily Workbench UI to delete workspace, edit settings, or
+                  manage collaborators.
+                </strong>
                 <FlexRow
                   style={{
                     alignItems: 'center',
@@ -300,51 +554,257 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                 <NewWindowIcon style={{ marginLeft: '5px' }} />
               </Button>
             </div>
-            <h3>Collaborators</h3>
-            <div className='collaborators' style={{ marginTop: '1.5rem' }}>
-              <div style={{ marginBottom: '1rem' }}>
-                Creator and Owner: {workspace.createdBy}
-              </div>
-              <div style={{ marginBottom: '1rem' }}>
-                Other Owners:{' '}
-                {collabList(
-                  collaborators.filter(
-                    (c) =>
-                      c.role === WorkspaceAccessLevel.OWNER &&
-                      c.email !== workspace.createdBy
-                  )
-                )}
-              </div>
-              <div style={{ marginBottom: '1rem' }}>
-                Writers:{' '}
-                {collabList(
-                  collaborators.filter(
-                    (c) => c.role === WorkspaceAccessLevel.WRITER
-                  )
-                )}
-              </div>
-              <div style={{ marginBottom: '1rem' }}>
-                Readers:{' '}
-                {collabList(
-                  collaborators.filter(
-                    (c) => c.role === WorkspaceAccessLevel.READER
-                  )
-                )}
-              </div>
-            </div>
-            <h3>Egress event history</h3>
-            {renderIfAuthorized(
-              profileStore.get().profile,
-              AuthorityGuardedAction.EGRESS_EVENTS,
-              () => (
-                <EgressEventsTable
-                  displayPageSize={10}
-                  sourceWorkspaceNamespace={workspace.id}
-                />
-              )
+            {resourcesFetched && (
+              <>
+                <h3>Workspace Resources</h3>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <TabView>
+                    <TabPanel header='Cloud Environments'>
+                      <DataTable
+                        value={workspaceResources.filter(
+                          (r) =>
+                            r.metadata.resourceType === 'GCE_INSTANCE' ||
+                            r.metadata.resourceType === 'DATAPROC_CLUSTER'
+                        )}
+                        emptyMessage='No Cloud Environments found'
+                        paginator
+                        rows={10}
+                      >
+                        <Column
+                          field='metadata.resourceType'
+                          header='Type'
+                          headerStyle={{ width: '150px' }}
+                          body={(rowData) =>
+                            rowData.metadata.resourceType === 'GCE_INSTANCE'
+                              ? 'GCE Instance'
+                              : 'Dataproc Cluster'
+                          }
+                        />
+                        <Column
+                          field='metadata.name'
+                          header='Name'
+                          headerStyle={{ width: '200px' }}
+                        />
+                        <Column
+                          header='ID / Cluster ID'
+                          headerStyle={{ width: '200px' }}
+                          body={(rowData) =>
+                            rowData.resourceAttributes?.gcpGceInstance
+                              ?.instanceId ||
+                            rowData.resourceAttributes?.gcpDataprocCluster
+                              ?.clusterId ||
+                            '-'
+                          }
+                        />
+                        <Column
+                          header='Zone / Region'
+                          headerStyle={{ width: '150px' }}
+                          body={(rowData) =>
+                            rowData.resourceAttributes?.gcpGceInstance?.zone ||
+                            rowData.resourceAttributes?.gcpDataprocCluster
+                              ?.region ||
+                            '-'
+                          }
+                        />
+                        <Column
+                          header='Status'
+                          headerStyle={{ width: '120px' }}
+                          body={(rowData) =>
+                            rowData.resourceAttributes?.gcpGceInstance
+                              ?.status ||
+                            rowData.metadata?.state ||
+                            '-'
+                          }
+                        />
+                        <Column
+                          header='Creator'
+                          headerStyle={{ width: '200px' }}
+                          body={(rowData) =>
+                            rowData.metadata?.createdBy ||
+                            rowData.metadata?.controlledResourceMetadata
+                              ?.privateResourceUser?.userName ||
+                            '-'
+                          }
+                        />
+                        <Column
+                          header='Actions'
+                          headerStyle={{ width: '100px' }}
+                          body={(rowData) => (
+                            <Button
+                              type='primary'
+                              style={{ height: '1.875rem' }}
+                              disabled={
+                                deletingResourceId ===
+                                rowData.metadata.resourceId
+                              }
+                              onClick={() =>
+                                deleteResource(
+                                  rowData.metadata.resourceId,
+                                  rowData.metadata.resourceType,
+                                  rowData.metadata.name
+                                )
+                              }
+                            >
+                              {deletingResourceId ===
+                              rowData.metadata.resourceId ? (
+                                <Spinner size={14} />
+                              ) : (
+                                'Delete'
+                              )}
+                            </Button>
+                          )}
+                        />
+                      </DataTable>
+                    </TabPanel>
+                    <TabPanel header='Cloud Storage'>
+                      <DataTable
+                        value={workspaceResources.filter(
+                          (r) => r.metadata.resourceType === 'GCS_BUCKET'
+                        )}
+                        emptyMessage='No Cloud Storage buckets found'
+                        paginator
+                        rows={10}
+                      >
+                        <Column
+                          field='metadata.name'
+                          header='Name'
+                          headerStyle={{ width: '200px' }}
+                        />
+                        <Column
+                          field='resourceAttributes.gcpGcsBucket.bucketName'
+                          header='Bucket Name'
+                          headerStyle={{ width: '300px' }}
+                          body={(rowData) =>
+                            rowData.resourceAttributes?.gcpGcsBucket
+                              ?.bucketName || '-'
+                          }
+                        />
+                        <Column
+                          header='Creator'
+                          headerStyle={{ width: '200px' }}
+                          body={(rowData) =>
+                            rowData.metadata?.createdBy ||
+                            rowData.metadata?.controlledResourceMetadata
+                              ?.privateResourceUser?.userName ||
+                            '-'
+                          }
+                        />
+                        <Column
+                          header='Actions'
+                          headerStyle={{ width: '100px' }}
+                          body={(rowData) => (
+                            <Button
+                              type='primary'
+                              style={{ height: '1.875rem' }}
+                              disabled={
+                                deletingResourceId ===
+                                rowData.metadata.resourceId
+                              }
+                              onClick={() =>
+                                deleteResource(
+                                  rowData.metadata.resourceId,
+                                  rowData.metadata.resourceType,
+                                  rowData.metadata.name
+                                )
+                              }
+                            >
+                              {deletingResourceId ===
+                              rowData.metadata.resourceId ? (
+                                <Spinner size={14} />
+                              ) : (
+                                'Delete'
+                              )}
+                            </Button>
+                          )}
+                        />
+                      </DataTable>
+                    </TabPanel>
+                    <TabPanel header='BigQuery Dataset'>
+                      <DataTable
+                        value={workspaceResources.filter(
+                          (r) => r.metadata.resourceType === 'BIG_QUERY_DATASET'
+                        )}
+                        emptyMessage='No BigQuery datasets found'
+                        paginator
+                        rows={10}
+                      >
+                        <Column
+                          field='metadata.name'
+                          header='Name'
+                          headerStyle={{ width: '250px' }}
+                        />
+                        <Column
+                          field='metadata.resourceId'
+                          header='Resource ID'
+                          headerStyle={{ width: '300px' }}
+                        />
+                        <Column
+                          field='resourceAttributes.gcpBigQueryDataset.datasetId'
+                          header='Dataset ID'
+                          body={(rowData) =>
+                            rowData.resourceAttributes?.gcpBigQueryDataset
+                              ?.datasetId || '-'
+                          }
+                        />
+                        <Column
+                          header='Creator'
+                          headerStyle={{ width: '200px' }}
+                          body={(rowData) =>
+                            rowData.metadata?.createdBy ||
+                            rowData.metadata?.controlledResourceMetadata
+                              ?.privateResourceUser?.userName ||
+                            '-'
+                          }
+                        />
+                        <Column
+                          header='Actions'
+                          headerStyle={{ width: '120px' }}
+                          body={(rowData) => (
+                            <Button
+                              type='primary'
+                              style={{ height: '1.875rem' }}
+                              disabled={
+                                deletingResourceId ===
+                                rowData.metadata.resourceId
+                              }
+                              onClick={() =>
+                                deleteResource(
+                                  rowData.metadata.resourceId,
+                                  rowData.metadata.resourceType,
+                                  rowData.metadata.name
+                                )
+                              }
+                            >
+                              {deletingResourceId ===
+                              rowData.metadata.resourceId ? (
+                                <Spinner size={14} />
+                              ) : (
+                                'Delete'
+                              )}
+                            </Button>
+                          )}
+                        />
+                      </DataTable>
+                    </TabPanel>
+                  </TabView>
+                </div>
+              </>
             )}
+            <h3>Egress event history</h3>
+            <div style={{ marginTop: '0.5rem' }}>
+              {renderIfAuthorized(
+                profileStore.get().profile,
+                AuthorityGuardedAction.EGRESS_EVENTS,
+                () => (
+                  <EgressEventsTable
+                    displayPageSize={10}
+                    sourceWorkspaceNamespace={workspace.id}
+                  />
+                )
+              )}
+            </div>
             <h3>Workspace Activity</h3>
-            <div className='collaborators' style={{ marginTop: '1.5rem' }}>
+            <div className='collaborators' style={{ marginTop: '0.5rem' }}>
               {loadingWorkspaceActivity ? (
                 <Spinner style={{ marginLeft: '40%' }} />
               ) : (

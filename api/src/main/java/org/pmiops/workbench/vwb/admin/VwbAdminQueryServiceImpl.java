@@ -93,7 +93,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + " change_type, \n"
           + " change_date, \n"
           + " actor_email, \n"
-          + " workspace_id, \n"
+          + " workspace_id \n"
           + "FROM \n"
           + " %s \n"
           + "WHERE \n"
@@ -109,6 +109,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   @Override
   public List<VwbWorkspace> queryVwbWorkspacesByCreator(String email) {
+    final String normalizedEmail = normalizeEmail(email);
 
     final String queryString =
         String.format(
@@ -119,7 +120,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
-            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(email))
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(normalizedEmail))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
@@ -185,6 +186,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   @Override
   public List<VwbWorkspace> queryVwbWorkspacesByShareActivity(String email) {
+    final String normalizedEmail = normalizeEmail(email);
 
     final String queryString =
         String.format(
@@ -195,7 +197,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
-            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(email))
+            .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(normalizedEmail))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
@@ -308,5 +310,28 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .ifPresent(auditLog::setChangeTime);
     FieldValues.getString(row, "actor_email").ifPresent(auditLog::setActorEmail);
     return auditLog;
+  }
+
+  /**
+   * Normalizes email input by appending the configured GSuite domain if no domain is present.
+   *
+   * @param email The email or username to normalize
+   * @return The normalized email address
+   */
+  private String normalizeEmail(String email) {
+    if (email == null || email.trim().isEmpty()) {
+      return email;
+    }
+
+    String trimmedEmail = email.trim();
+
+    // If email already contains '@', return as is (already has a domain)
+    if (trimmedEmail.contains("@")) {
+      return trimmedEmail;
+    }
+
+    // Otherwise, append the configured GSuite domain
+    String gSuiteDomain = workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
+    return trimmedEmail + "@" + gSuiteDomain;
   }
 }
