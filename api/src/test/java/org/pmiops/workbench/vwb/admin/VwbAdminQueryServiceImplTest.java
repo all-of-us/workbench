@@ -102,7 +102,7 @@ public class VwbAdminQueryServiceImplTest {
   @Test
   public void testNormalizeEmail_usernameWithWhitespace_trimsAndAppendsDomain() {
     // When querying with username that has whitespace
-    List<VwbWorkspace> result = service.queryVwbWorkspacesByCreator("  testuser  ");
+    service.queryVwbWorkspacesByCreator("  testuser  ");
 
     // Verify that whitespace was trimmed and domain was appended
     ArgumentCaptor<QueryJobConfiguration> configCaptor =
