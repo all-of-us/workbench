@@ -247,28 +247,15 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final String queryString =
         String.format(AUDIT_QUERY, getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE_PREFIX));
 
-    System.out.println("DEBUG: Workspace Activity Query: " + queryString);
-
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .addNamedParameter("WORKSPACE_ID", QueryParameterValue.string(workspaceId))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
-    List<VwbWorkspaceAuditLog> logs =
-        StreamSupport.stream(result.iterateAll().spliterator(), false)
-            .map(this::fieldValueListToVwbWorkspaceAuditLog)
-            .collect(Collectors.toList());
-
-    // Log all unique change types to debug
-    System.out.println(
-        "DEBUG: Change types found: "
-            + logs.stream()
-                .map(VwbWorkspaceAuditLog::getChangeType)
-                .distinct()
-                .collect(Collectors.joining(", ")));
-
-    return logs;
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToVwbWorkspaceAuditLog)
+        .collect(Collectors.toList());
   }
 
   private String getTableName(String tablePrefix) {

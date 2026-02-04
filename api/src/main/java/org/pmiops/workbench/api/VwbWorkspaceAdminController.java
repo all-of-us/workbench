@@ -128,7 +128,7 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   }
 
   @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  @AuthorityRequired({Authority.WORKSPACE_ADMIN})
   public ResponseEntity<Void> deleteVwbWorkspaceResource(
       String workspaceId, String resourceId, String resourceType) {
     wsmClient.deleteWorkspaceResource(workspaceId, resourceId, resourceType);

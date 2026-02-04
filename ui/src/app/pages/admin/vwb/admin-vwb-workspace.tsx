@@ -68,7 +68,7 @@ interface ResearchPurposeItem {
   [key: string]: boolean | string;
 }
 
-interface WorkspaceResource {
+interface WsmCloudResource {
   metadata: {
     resourceId: string;
     name: string;
@@ -133,7 +133,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
   const [researchPurpose, setResearchPurpose] = useState<ResearchPurposeItem>();
   const [fetchingResources, setFetchingResources] = useState<boolean>(false);
   const [workspaceResources, setWorkspaceResources] = useState<
-    WorkspaceResource[]
+    WsmCloudResource[]
   >([]);
   const [resourcesFetched, setResourcesFetched] = useState<boolean>(false);
   const [deletingResourceId, setDeletingResourceId] = useState<string | null>(
@@ -155,22 +155,14 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
   };
 
   const getWorkspaceActivity = async (workspaceId: string) => {
-    console.log(
-      'DEBUG: Fetching workspace activity for workspaceId:',
-      workspaceId
-    );
     setLoadingWorkspaceActivity(true);
 
     vwbWorkspaceAdminApi()
       .getVwbWorkspaceAuditLogs(workspaceId)
       .then((result) => {
-        console.log('DEBUG: Workspace activity result:', result);
         setWorkspaceActivity(result);
       })
-      .catch((error) => {
-        console.error('DEBUG: Workspace activity error:', error);
-        handleDataLoadError(error);
-      })
+      .catch((error) => handleDataLoadError(error))
       .finally(() => setLoadingWorkspaceActivity(false));
   };
 
@@ -181,19 +173,15 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
     vwbWorkspaceAdminApi()
       .getVwbWorkspaceAdminView(ufid)
       .then((resp) => {
-        console.log(
-          'DEBUG: Got workspace details, workspace.id:',
-          resp.workspace?.id
-        );
         setWorkspaceDetails(resp);
-        setResearchPurpose(
-          (JSON.parse(resp.workspace.researchPurpose)?.[0]
-            ?.form_data as ResearchPurposeItem) ?? {}
-        );
-        console.log(
-          'DEBUG: About to call getWorkspaceActivity with id:',
-          resp.workspace.id
-        );
+        try {
+          const parsed = JSON.parse(resp.workspace.researchPurpose || '{}');
+          setResearchPurpose(
+            (parsed?.[0]?.form_data as ResearchPurposeItem) ?? {}
+          );
+        } catch (e) {
+          setResearchPurpose({});
+        }
         getWorkspaceActivity(resp.workspace.id);
       })
       .catch((error) => handleDataLoadError(error))
@@ -223,8 +211,8 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
         ws.id
       );
 
-      // Cast from Array<object> to WorkspaceResource[]
-      const resources = (response.resources || []) as WorkspaceResource[];
+      // Cast from Array<object> to WsmCloudResource[]
+      const resources = (response.resources || []) as WsmCloudResource[];
 
       setWorkspaceResources(resources);
       setResourcesFetched(true);
