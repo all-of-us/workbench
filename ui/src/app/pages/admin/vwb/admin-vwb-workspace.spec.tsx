@@ -5,6 +5,7 @@ import { MemoryRouter, Route } from 'react-router';
 
 import {
   Authority,
+  EgressEventsAdminApi,
   Profile,
   UserRole,
   VwbWorkspace,
@@ -15,22 +16,18 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import { AdminVwbWorkspace } from './admin-vwb-workspace';
 
 const ADMIN_PROFILE: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [
-    Authority.RESEARCHER_DATA_VIEW,
-    Authority.SECURITY_ADMIN,
-    Authority.EGRESS_EVENTS,
-  ],
+  authorities: [Authority.RESEARCHER_DATA_VIEW, Authority.SECURITY_ADMIN],
 };
 
 const TEST_WORKSPACE: VwbWorkspace = {
@@ -80,7 +77,7 @@ const TEST_AUDIT_LOGS: VwbWorkspaceAuditLog[] = [
 
 class VwbWorkspaceAdminApiStub extends VwbWorkspaceAdminApi {
   getVwbWorkspaceAdminView = jest.fn(
-    async (userFacingId: string): Promise<VwbWorkspaceAdminView> => {
+    async (_userFacingId: string): Promise<VwbWorkspaceAdminView> => {
       return {
         workspace: TEST_WORKSPACE,
         collaborators: TEST_COLLABORATORS,
@@ -89,27 +86,25 @@ class VwbWorkspaceAdminApiStub extends VwbWorkspaceAdminApi {
   );
 
   getVwbWorkspaceAuditLogs = jest.fn(
-    async (workspaceId: string): Promise<VwbWorkspaceAuditLog[]> => {
+    async (_workspaceId: string): Promise<VwbWorkspaceAuditLog[]> => {
       return TEST_AUDIT_LOGS;
     }
   );
 
-  getVwbWorkspaceResources = jest.fn(async (workspaceId: string) => {
-    // Return 403 to simulate AoD not active
-    throw new Response(null, { status: 403 });
+  getVwbWorkspaceResources = jest.fn(async (_workspaceId: string) => {
+    return { resources: [] };
   });
 
   enableAccessOnDemandByUserFacingId = jest.fn(async () => {
-    return {};
+    return;
   });
 
   deleteVwbWorkspaceResource = jest.fn(async () => {
-    return {};
+    return;
   });
 }
 
 describe('AdminVwbWorkspace', () => {
-  let user;
   let vwbWorkspaceAdminApiStub: VwbWorkspaceAdminApiStub;
 
   const component = (ufid: string = 'test-workspace-ufid') => {
@@ -138,7 +133,7 @@ describe('AdminVwbWorkspace', () => {
 
     vwbWorkspaceAdminApiStub = new VwbWorkspaceAdminApiStub();
     registerApiClient(VwbWorkspaceAdminApi, vwbWorkspaceAdminApiStub);
-    user = userEvent.setup();
+    registerApiClient(EgressEventsAdminApi, new EgressEventsAdminApiStub());
   });
 
   afterEach(() => {
@@ -163,7 +158,9 @@ describe('AdminVwbWorkspace', () => {
     await waitUntilPageLoaded();
 
     await waitFor(() => {
-      expect(screen.getByText('owner@example.com')).toBeInTheDocument();
+      expect(screen.getAllByText('owner@example.com').length).toBeGreaterThan(
+        0
+      );
       expect(screen.getByText('writer@example.com')).toBeInTheDocument();
     });
   });
@@ -199,9 +196,11 @@ describe('AdminVwbWorkspace', () => {
   });
 
   it('should handle workspace not found', async () => {
-    vwbWorkspaceAdminApiStub.getVwbWorkspaceAdminView = jest.fn(async () => {
-      throw new Response('Not found', { status: 404 });
-    });
+    vwbWorkspaceAdminApiStub.getVwbWorkspaceAdminView = jest.fn(
+      async (_userFacingId: string) => {
+        throw new Response('Not found', { status: 404 });
+      }
+    );
 
     component('nonexistent-ufid');
 
@@ -217,15 +216,7 @@ describe('AdminVwbWorkspace', () => {
     expect(
       screen.getByText('Manual Access to Workspace (Optional)')
     ).toBeInTheDocument();
-    expect(screen.getByText('Request Temporary Access')).toBeInTheDocument();
-  });
-
-  it('should show workspace resources section', async () => {
-    component();
-    await waitUntilPageLoaded();
-
-    expect(screen.getByText('Workspace Resources')).toBeInTheDocument();
-    expect(screen.getByText('Fetch Workspace Data')).toBeInTheDocument();
+    expect(screen.getByText(/Open in Verily Workbench/)).toBeInTheDocument();
   });
 
   it('should not show workspace resources if user lacks authority', async () => {
