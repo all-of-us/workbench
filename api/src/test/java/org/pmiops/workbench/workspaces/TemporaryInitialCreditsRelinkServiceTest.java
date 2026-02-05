@@ -78,12 +78,15 @@ public class TemporaryInitialCreditsRelinkServiceTest {
     temporaryInitialCreditsRelinkService.initiateTemporaryRelinking(
         sourceWorkspace, destinationWorkspace);
 
-    inOrder
-        .verify(temporaryInitialCreditsRelinkWorkspaceDao)
-        .save(
-            new DbTemporaryInitialCreditsRelinkWorkspace()
-                .setSourceWorkspaceId(sourceWorkspace.getWorkspaceId())
-                .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace()));
+    ArgumentCaptor<DbTemporaryInitialCreditsRelinkWorkspace> captor =
+        ArgumentCaptor.forClass(DbTemporaryInitialCreditsRelinkWorkspace.class);
+    inOrder.verify(temporaryInitialCreditsRelinkWorkspaceDao).save(captor.capture());
+
+    DbTemporaryInitialCreditsRelinkWorkspace saved = captor.getValue();
+    assert saved.getSourceWorkspaceId() == sourceWorkspace.getWorkspaceId();
+    assert saved.getDestinationWorkspaceNamespace().equals(destinationWorkspace.getNamespace());
+    assert saved.getCreated() != null;
+
     inOrder
         .verify(fireCloudService)
         .updateBillingAccountAsService(
