@@ -212,8 +212,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2,
-            initialCreditsDollarThresholdSubstitutionMapV2(
-                user, currentUsage, remainingBalance));
+            initialCreditsDollarThresholdSubstitutionMapV2(user, currentUsage, remainingBalance));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -256,8 +255,7 @@ public class MailServiceImpl implements MailService {
 
     final String htmlMessage =
         buildHtml(
-            INITIAL_CREDITS_EXPIRING_RESOURCE_V2,
-            initialCreditsExpiringSubstitutionMap(user));
+            INITIAL_CREDITS_EXPIRING_RESOURCE_V2, initialCreditsExpiringSubstitutionMap(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
