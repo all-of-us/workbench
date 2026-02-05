@@ -69,7 +69,8 @@ public class TemporaryInitialCreditsRelinkServiceImpl
         relinkWorkspaceDao.save(
             new DbTemporaryInitialCreditsRelinkWorkspace()
                 .setSourceWorkspaceId(sourceWorkspace.getWorkspaceId())
-                .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace()));
+                .setDestinationWorkspaceNamespace(destinationWorkspace.getNamespace())
+                .setCreated(Timestamp.from(Instant.now())));
     try {
       fireCloudService.updateBillingAccountAsService(
           sourceWorkspace.getWorkspaceNamespace(), initialCreditsBillingAccountName);
