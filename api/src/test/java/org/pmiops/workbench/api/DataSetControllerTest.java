@@ -290,7 +290,8 @@ public class DataSetControllerTest {
     WsmClient.class,
     VwbAccessService.class,
     VwbUserService.class,
-    TaskQueueService.class
+    TaskQueueService.class,
+    TemporaryInitialCreditsRelinkService.class
   })
   static class Configuration {
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)

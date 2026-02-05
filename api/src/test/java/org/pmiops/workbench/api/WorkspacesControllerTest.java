@@ -389,7 +389,8 @@ public class WorkspacesControllerTest {
     UserService.class,
     WorkspaceAuditor.class,
     WorkspaceServiceFactory.class,
-    WsmClient.class
+    WsmClient.class,
+    TemporaryInitialCreditsRelinkService.class
   })
   static class Configuration {
     @Bean
