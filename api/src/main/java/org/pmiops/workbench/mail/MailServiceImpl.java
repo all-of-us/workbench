@@ -210,15 +210,10 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        checkEnableUnlinkBillingForInitialCreditsFlag()
-            ? buildHtml(
-                INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2,
-                initialCreditsDollarThresholdSubstitutionMapV2(
-                    user, currentUsage, remainingBalance))
-            : buildHtml(
-                INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V1,
-                initialCreditsDollarThresholdSubstitutionMapV1(
-                    user, currentUsage, remainingBalance));
+        buildHtml(
+            INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE_V2,
+            initialCreditsDollarThresholdSubstitutionMapV2(
+                user, currentUsage, remainingBalance));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -239,13 +234,9 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        checkEnableUnlinkBillingForInitialCreditsFlag()
-            ? buildHtml(
-                INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2,
-                initialCreditsExhaustionSubstitutionMapV2(user))
-            : buildHtml(
-                INITIAL_CREDITS_EXHAUSTION_RESOURCE_V1,
-                initialCreditsExhaustionSubstitutionMapV1(user));
+        buildHtml(
+            INITIAL_CREDITS_EXHAUSTION_RESOURCE_V2,
+            initialCreditsExhaustionSubstitutionMapV2(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -265,9 +256,7 @@ public class MailServiceImpl implements MailService {
 
     final String htmlMessage =
         buildHtml(
-            checkEnableUnlinkBillingForInitialCreditsFlag()
-                ? INITIAL_CREDITS_EXPIRING_RESOURCE_V2
-                : INITIAL_CREDITS_EXPIRING_RESOURCE_V1,
+            INITIAL_CREDITS_EXPIRING_RESOURCE_V2,
             initialCreditsExpiringSubstitutionMap(user));
 
     sendWithRetries(
@@ -280,11 +269,6 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void alertUserInitialCreditsExpired(DbUser user) throws MessagingException {
-    if (!checkEnableUnlinkBillingForInitialCreditsFlag()) {
-      // Feature flag is off; do not send the expired email.
-      log.info("Initial credits expiration feature flag is disabled. Not sending expired email.");
-      return;
-    }
     final String logMsg =
         String.format(
             "Sending email because initial credits are expired for User %s", userForLogging(user));
