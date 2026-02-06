@@ -11,6 +11,8 @@ public interface AccessTierService {
 
   String CONTROLLED_TIER_SHORT_NAME = "controlled";
 
+  String CONTROLLED_TIER_PLUS_SHORT_NAME = "ct_plus";
+
   /**
    * Return all access tiers in the database, in alphabetical order by shortName.
    *

@@ -15,9 +15,11 @@ public interface AccessModuleNameMapper {
   DbAccessModuleName clientAccessModuleToStorage(AccessModule source);
 
   @ValueMapping(source = "RT_COMPLIANCE_TRAINING", target = "COMPLIANCE_TRAINING")
+  @ValueMapping(source = "CT_PLUS_COMPLIANCE_TRAINING", target = "CT_PLUS_COMPLIANCE_TRAINING")
   @ValueMapping(source = "RAS_LOGIN_GOV", target = "RAS_LINK_LOGIN_GOV")
   @ValueMapping(source = "RAS_ID_ME", target = "RAS_LINK_ID_ME")
   AccessModule storageAccessModuleToClient(DbAccessModuleName source);
 
+  @ValueMapping(source = "CT_PLUS_COMPLIANCE_TRAINING", target = "CT_PLUS_COMPLIANCE_TRAINING")
   BypassTimeTargetProperty bypassAuditPropertyFromStorage(DbAccessModuleName source);
 }

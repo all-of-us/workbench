@@ -6,6 +6,7 @@ public enum BypassTimeTargetProperty implements SimpleTargetProperty {
   DATA_USER_CODE_OF_CONDUCT("data_use_agreement_bypass_time"),
   RT_COMPLIANCE_TRAINING("compliance_training_time"),
   CT_COMPLIANCE_TRAINING("ct_compliance_training_time"),
+  CT_PLUS_COMPLIANCE_TRAINING("ct_plus_compliance_training_time"),
   ERA_COMMONS("era_commons_bypass_time"),
   TWO_FACTOR_AUTH("two_factor_auth_bypass_time"),
   PROFILE_CONFIRMATION("profile_confirmation_bypass_time"),

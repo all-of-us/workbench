@@ -2426,6 +2426,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListUserDisabledEventsResponse'
+  /v1/admin/users/{userId}/ctPlusComplete:
+    post:
+      tags:
+        - userAdmin
+      description: Mock CT+ training completion and trigger access sync.
+      operationId: mockCtPlusTrainingCompletion
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
   /v1/cron/cacheWorkspaceAcls:
     get:
       tags:
@@ -8219,6 +8239,7 @@ components:
       - IDENTITY
       - PROFILE_CONFIRMATION
       - PUBLICATION_CONFIRMATION
+      - CT_PLUS_COMPLIANCE_TRAINING
     AccessBypassRequest:
       required:
       - bypassed
