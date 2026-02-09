@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
@@ -30,7 +31,6 @@ import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.user.UserAdminService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -158,21 +158,22 @@ public class UserAdminController implements UserAdminApiDelegate {
         new ListUserDisabledEventsResponse()
             .disabledEvents(userAdminService.listAllUserDisabledEvents(userId)));
   }
+
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> mockCtPlusTrainingCompletion(Long userId) {
 
     // 1 Fetch user
     DbUser user =
-            userService
-                    .getByDatabaseId(userId)
-                    .orElseThrow(() -> new NotFoundException("User not found"));
+        userService
+            .getByDatabaseId(userId)
+            .orElseThrow(() -> new NotFoundException("User not found"));
 
     // 2 Mark CT+ training as completed
     accessModuleService.updateCompletionTime(
-            user,
-            DbAccessModule.DbAccessModuleName.CT_PLUS_COMPLIANCE_TRAINING,
-            new java.sql.Timestamp(System.currentTimeMillis()));
+        user,
+        DbAccessModule.DbAccessModuleName.CT_PLUS_COMPLIANCE_TRAINING,
+        new java.sql.Timestamp(System.currentTimeMillis()));
 
     // 3 Sync tiers → this will grant CT+ automatically
     accessSyncService.updateUserAccessTiers(user, Agent.asUser(user));

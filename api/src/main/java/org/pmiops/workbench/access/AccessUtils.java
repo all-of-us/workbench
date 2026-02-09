@@ -59,7 +59,7 @@ public class AccessUtils {
   }
 
   static final Collection<DbAccessModuleName> EXCLUSIVE_MODULES_FOR_CT_PLUS_TIER =
-          Collections.singleton(DbAccessModuleName.CT_PLUS_COMPLIANCE_TRAINING);
+      Collections.singleton(DbAccessModuleName.CT_PLUS_COMPLIANCE_TRAINING);
 
   public static Collection<DbAccessModuleName> getRequiredModulesForCtPlusTierAccess() {
     Collection<DbAccessModuleName> required = new ArrayList<>();
