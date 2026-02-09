@@ -15,7 +15,12 @@
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.16",
     "workspaceLogsProject": "fc-aou-logs-preprod",
     "workspaceBucketLocation": "us-central1",
-    "gceVmZones": ["us-central1-a","us-central1-b","us-central1-c", "us-central1-f"],
+    "gceVmZones": [
+      "us-central1-a",
+      "us-central1-b",
+      "us-central1-c",
+      "us-central1-f"
+    ],
     "defaultGceVmZone": "us-central1-a"
   },
   "billing": {
@@ -23,10 +28,7 @@
     "projectNamePrefix": "aou-rw-preprod-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "defaultInitialCreditsDollarLimit": 300.0,
-    "initialCreditsCostAlertThresholds": [
-      0.25,
-      0.5
-    ],
+    "initialCreditsCostAlertThresholds": [0.25, 0.5],
     "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
@@ -125,7 +127,7 @@
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
-    "enableUnlinkBillingForInitialCredits": false,
+    "enableUnlinkBillingForInitialCredits": true,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": false,
