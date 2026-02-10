@@ -103,6 +103,7 @@ public class DbWorkspace {
   private boolean usesTanagra;
 
   private Boolean isVwbWorkspace;
+  private String migratedVwbWorkspaceId;
 
   private AIANResearchType aianResearchType;
   private String aianResearchDetails;
@@ -722,6 +723,16 @@ public class DbWorkspace {
 
   public DbWorkspace setVwbWorkspace(Boolean vwbWorkspace) {
     isVwbWorkspace = vwbWorkspace;
+    return this;
+  }
+
+  @Column(name = "migrated_vwb_workspace_id")
+  public String getMigratedVwbWorkspaceId() {
+    return migratedVwbWorkspaceId;
+  }
+
+  public DbWorkspace setMigratedVwbWorkspaceId(String migratedVwbWorkspaceId) {
+    this.migratedVwbWorkspaceId = migratedVwbWorkspaceId;
     return this;
   }
 

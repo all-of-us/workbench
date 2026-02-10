@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet author="yonghao" id="changelog-277-create-workspace-bucket-archive-table">
+        <createTable tableName="workspace_bucket_archive">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="legacy_workspace_id" type="bigint">
+                <constraints nullable="true" foreignKeyName="fk_workspace_bucket_archive_legacy_workspace_id" references="workspace(workspace_id)" deleteCascade="true"/>
+            </column>
+            <column name="gcs_path" type="varchar(1024)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
