@@ -326,7 +326,7 @@ def publish_cdr(cmd_name, args)
 
   # This is a grep -v filter. It skips cohort builder build-only tables, which
   # follow the convention of having the prefix prep_. See RW-4863.
-  table_skip_filter = "^prep_"
+  table_skip_filter = "^prep_\|^T_"
 
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]

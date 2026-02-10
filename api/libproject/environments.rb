@@ -214,6 +214,22 @@ ENVIRONMENTS = {
       }
     }
   }),
+  "vwb-earlyaccess" => env_with_defaults("vwb-prod", {
+    :source_cdr_project => "aou-res-curation-output-prod",
+    :source_cdr_wgs_project => "aou-genomics-curation-prod",
+    :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
+    :publishing_project => "all-of-us-rw-prod",
+    :skip_acl => true,
+    :accessTiers => {
+      "registered" => {
+        :dest_cdr_project => "wb-crisp-citrus-2555",
+      },
+      "controlled" => {
+        :dest_cdr_project => "wb-bright-olive-4015",
+        :dest_cdr_bucket => "gs://vwb-aou-earlyaccess-datasets-controlled",
+      }
+    }
+  }),
   "vwb-prod" => env_with_defaults("vwb-prod", {
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
@@ -226,7 +242,7 @@ ENVIRONMENTS = {
       },
       "controlled" => {
         :dest_cdr_project => "wb-silky-artichoke-2408",
-        :dest_cdr_bucket => "<PLACEHOLDER FOR VWB PROD CONTROLLED BUCKET>",
+        :dest_cdr_bucket => "gs://vwb-aou-datasets-controlled",
       }
     }
   })
