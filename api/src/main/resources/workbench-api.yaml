@@ -7854,6 +7854,9 @@ components:
           type: boolean
           description: whether this workspace is a VWB workspace
           default: false
+        migratedVwbWorkspaceId:
+          type: string
+          description: UUID of the VWB workspace this workspace was migrated to
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
