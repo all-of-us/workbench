@@ -1,8 +1,10 @@
 package org.pmiops.workbench.access;
 
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_PLUS_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForControlledTierAccess;
+import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForCtPlusTierAccess;
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 
 import jakarta.inject.Provider;
@@ -188,6 +190,19 @@ public class AccessSyncServiceImpl implements AccessSyncService {
                   dbUser,
                   getRequiredModulesForControlledTierAccess(),
                   CONTROLLED_TIER_SHORT_NAME)) {
+                userAccessTiers.add(tier);
+              }
+            });
+
+    // Add CT+ Access Tier if user completed CT+ training
+    accessTierService
+        .getAccessTierByName(CONTROLLED_TIER_PLUS_SHORT_NAME)
+        .ifPresent(
+            tier -> {
+              if (shouldGrantUserTierAccess(
+                  dbUser,
+                  getRequiredModulesForCtPlusTierAccess(),
+                  CONTROLLED_TIER_PLUS_SHORT_NAME)) {
                 userAccessTiers.add(tier);
               }
             });

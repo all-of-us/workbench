@@ -57,4 +57,14 @@ public class AccessUtils {
   public static Collection<DbAccessModuleName> getRequiredModulesForControlledTierRenewal() {
     return EXCLUSIVE_MODULES_FOR_CONTROLLED_TIER;
   }
+
+  static final Collection<DbAccessModuleName> EXCLUSIVE_MODULES_FOR_CT_PLUS_TIER =
+      Collections.singleton(DbAccessModuleName.CT_PLUS_COMPLIANCE_TRAINING);
+
+  public static Collection<DbAccessModuleName> getRequiredModulesForCtPlusTierAccess() {
+    Collection<DbAccessModuleName> required = new ArrayList<>();
+    required.addAll(getRequiredModulesForControlledTierAccess());
+    required.addAll(EXCLUSIVE_MODULES_FOR_CT_PLUS_TIER);
+    return required;
+  }
 }

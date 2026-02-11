@@ -12,8 +12,10 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
@@ -155,5 +157,27 @@ public class UserAdminController implements UserAdminApiDelegate {
     return ResponseEntity.ok(
         new ListUserDisabledEventsResponse()
             .disabledEvents(userAdminService.listAllUserDisabledEvents(userId)));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<EmptyResponse> mockCtPlusTrainingCompletion(Long userId) {
+
+    // 1 Fetch user
+    DbUser user =
+        userService
+            .getByDatabaseId(userId)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+
+    // 2 Mark CT+ training as completed
+    accessModuleService.updateCompletionTime(
+        user,
+        DbAccessModule.DbAccessModuleName.CT_PLUS_COMPLIANCE_TRAINING,
+        new java.sql.Timestamp(System.currentTimeMillis()));
+
+    // 3 Sync tiers → this will grant CT+ automatically
+    accessSyncService.updateUserAccessTiers(user, Agent.asUser(user));
+
+    return ResponseEntity.ok(new EmptyResponse());
   }
 }
