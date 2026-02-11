@@ -67,6 +67,11 @@ const moduleToToggleProps: Record<
     name: 'CT Compliance Training',
     'data-test-id': 'ct-compliance-training-toggle',
   },
+
+  [AccessModule.CT_PLUS_COMPLIANCE_TRAINING]: {
+    name: 'CT+ Compliance Training',
+    'data-test-id': 'ct-plus-compliance-training-toggle',
+  },
   [AccessModule.DATA_USER_CODE_OF_CONDUCT]: {
     name: 'Data User Code of Conduct',
     'data-test-id': 'ducc-toggle',

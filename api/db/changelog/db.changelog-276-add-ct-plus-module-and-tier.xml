@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.liquibase.org/xml/ns/dbchangelog
+          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Add CT+ Compliance Training module -->
+    <changeSet id="add-ct-plus-access-module" author="alaidaa">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM access_module
+                WHERE name = 'CT_PLUS_COMPLIANCE_TRAINING';
+            </sqlCheck>
+        </preConditions>
+
+        <sql>
+            INSERT INTO access_module (name, expirable)
+            VALUES ('CT_PLUS_COMPLIANCE_TRAINING', 1);
+        </sql>
+    </changeSet>
+
+    <changeSet id="add-ct-plus-access-tier-fix" author="alaidaa">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="true">
+                SELECT COUNT(*) > 0
+                FROM access_tier
+                WHERE short_name = 'controlled';
+            </sqlCheck>
+        </preConditions>
+
+
+        <sql>
+            INSERT INTO access_tier (
+                access_tier_id,
+                short_name,
+                display_name,
+                service_perimeter,
+                auth_domain_name,
+                auth_domain_group_email,
+                datasets_bucket,
+                enable_user_workflows,
+                vwb_tier_group_name
+            )
+            SELECT
+                    (SELECT MAX(access_tier_id) + 1 FROM access_tier),
+                    'ct_plus',
+                    'CT+ Tier',
+                    service_perimeter,
+                    auth_domain_name,
+                    auth_domain_group_email,
+                    datasets_bucket,
+                    enable_user_workflows,
+                    vwb_tier_group_name
+            FROM access_tier
+            WHERE short_name = 'controlled';
+        </sql>
+
+    </changeSet>
+
+
+</databaseChangeLog>
