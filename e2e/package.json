@@ -68,7 +68,7 @@
     "jest-junit": "^13.0.0",
     "jest-puppeteer": "^7.0.1",
     "jest-stare": "^2.3.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.23",
     "otplib": "^12.0.1",
     "prettier": "^2.2.1",
     "puppeteer": "^6",
