@@ -24,10 +24,15 @@
     <changeSet id="add-ct-plus-access-tier-fix" author="alaidaa">
 
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="true">
+            <sqlCheck expectedResult="1">
                 SELECT COUNT(*) > 0
                 FROM access_tier
                 WHERE short_name = 'controlled';
+            </sqlCheck>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM access_tier
+                WHERE short_name = 'ct_plus';
             </sqlCheck>
         </preConditions>
 
