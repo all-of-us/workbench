@@ -129,7 +129,8 @@
     "enableVWBPodCreation": true,
     "enableVWBInitialCreditsExhaustion": true,
     "enableTierAccessCheckInDb": true,
-    "enableVWBHomepageBanner": true
+    "enableVWBHomepageBanner": true,
+    "enableCTPlusCards": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

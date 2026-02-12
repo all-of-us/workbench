@@ -349,6 +349,8 @@ public class WorkbenchConfig {
     public boolean enableTierAccessCheckInDb;
     // If true, will display the VWB banner on RW homepage
     public boolean enableVWBHomepageBanner;
+    // If true, enables the Controlled Tier Plus (CT+) access card in the UI.
+    public boolean enableCTPlusCards;
   }
 
   public static class ActionAuditConfig {
