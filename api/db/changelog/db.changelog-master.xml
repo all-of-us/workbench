@@ -283,6 +283,8 @@
   <include file="changelog/db.changelog-273-add-unique-constraint-vwb-user-pod.xml"/>
   <include file="changelog/db.changelog-274-allow-null-vwb-pod-id.xml"/>
   <include file="changelog/db.changelog-275-add-temporary-initial-credits-relink-workspace-table.xml"/>
+  <include file="changelog/db.changelog-276-add-migration-tracking-columns.xml"/>
+  <include file="changelog/db.changelog-277-create-workspace-bucket-archive-table.xml"/>
   <include file="changelog/db.changelog-278-drop-temporary-initial-credits-relink-workspace-table.xml"/>
   <!--
    Note: to update the DB locally, do the following:
