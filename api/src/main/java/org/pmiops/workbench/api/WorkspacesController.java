@@ -17,8 +17,16 @@ import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.*;
-import org.pmiops.workbench.db.model.*;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceOperation;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -54,10 +62,12 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
-import org.pmiops.workbench.workspaces.*;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -86,7 +96,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceOperationMapper workspaceOperationMapper;
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
-  private final TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
 
   private final WorkspaceServiceFactory workspaceServiceFactory;
 
@@ -112,8 +121,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceResourcesService workspaceResourcesService,
       WorkspaceService workspaceService,
       WorkspaceServiceFactory workspaceServiceFactory,
-      WsmClient wsmClient,
-      TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService) {
+      WsmClient wsmClient) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -133,7 +141,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceServiceFactory = workspaceServiceFactory;
     this.wsmClient = wsmClient;
-    this.temporaryInitialCreditsRelinkService = temporaryInitialCreditsRelinkService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -572,11 +579,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               "DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceTerraName));
     }
 
-    // Temporarily relink source workspace to initial credits if necessary
-    if (sourceWorkspaceRequiresTemporaryInitialCreditsRelink(fromWorkspace)) {
-      temporaryInitialCreditsRelinkService.initiateTemporaryRelinking(fromWorkspace, toWorkspace);
-    }
-
     DbAccessTier accessTier = fromWorkspace.getCdrVersion().getAccessTier();
 
     // When specifying a CDR Version in the request, it must be live and
@@ -661,16 +663,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
 
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
-  }
-
-  // Return true if the source workspace is on initial credits and has exhausted or expired initial
-  // credits
-  private boolean sourceWorkspaceRequiresTemporaryInitialCreditsRelink(DbWorkspace fromWorkspace) {
-    return workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits
-        && BillingUtils.isInitialCredits(
-            fromWorkspace.getBillingAccountName(), workbenchConfigProvider.get())
-        && (fromWorkspace.isInitialCreditsExhausted()
-            || initialCreditsService.areUserCreditsExpired(fromWorkspace.getCreator()));
   }
 
   @Override

@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.workspaces.TemporaryInitialCreditsRelinkService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,6 @@ public class OfflineWorkspaceControllerTest {
   @Mock private WorkspaceService workspaceService;
   @Mock private WorkspaceUserCacheService mockWorkspaceUserCacheService;
   @Mock private TaskQueueService mockTaskQueueService;
-  @Mock private TemporaryInitialCreditsRelinkService mockTemporaryInitialCreditsRelinkService;
 
   private OfflineWorkspaceController offlineWorkspaceController;
 
@@ -35,10 +33,7 @@ public class OfflineWorkspaceControllerTest {
   public void setUp() {
     offlineWorkspaceController =
         new OfflineWorkspaceController(
-            mockTaskQueueService,
-            workspaceService,
-            mockWorkspaceUserCacheService,
-            mockTemporaryInitialCreditsRelinkService);
+            mockTaskQueueService, workspaceService, mockWorkspaceUserCacheService);
   }
 
   @Test

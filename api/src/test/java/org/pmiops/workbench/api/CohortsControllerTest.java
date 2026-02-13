@@ -229,8 +229,7 @@ public class CohortsControllerTest {
     WsmClient.class,
     VwbAccessService.class,
     VwbUserService.class,
-    TaskQueueService.class,
-    TemporaryInitialCreditsRelinkService.class
+    TaskQueueService.class
   })
   static class Configuration {
     @Bean

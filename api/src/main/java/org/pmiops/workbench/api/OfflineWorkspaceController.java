@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.workspaces.TemporaryInitialCreditsRelinkService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +17,15 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   private final TaskQueueService taskQueueService;
   private final WorkspaceService workspaceService;
   private final WorkspaceUserCacheService workspaceUserCacheService;
-  private final TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
 
   @Autowired
   public OfflineWorkspaceController(
       TaskQueueService taskQueueService,
       WorkspaceService workspaceService,
-      WorkspaceUserCacheService workspaceUserCacheService,
-      TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService) {
+      WorkspaceUserCacheService workspaceUserCacheService) {
     this.taskQueueService = taskQueueService;
     this.workspaceService = workspaceService;
     this.workspaceUserCacheService = workspaceUserCacheService;
-    this.temporaryInitialCreditsRelinkService = temporaryInitialCreditsRelinkService;
   }
 
   @Override
@@ -52,14 +48,6 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     log.info("Pushing workspaces onto task queue");
     taskQueueService.pushWorkspaceUserCacheTask(workspaces);
     log.info("Finished cacheWorkspaceAcls cron job");
-
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> cleanupTemporarilyRelinkedWorkspaces() {
-    log.info("Starting cleanup temporarilyRelinkedWorkspaces");
-    temporaryInitialCreditsRelinkService.cleanupTemporarilyRelinkedWorkspaces();
 
     return ResponseEntity.ok().build();
   }

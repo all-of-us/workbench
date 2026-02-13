@@ -140,7 +140,11 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
-import org.pmiops.workbench.workspaces.*;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
+import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -311,8 +315,7 @@ public class CohortReviewControllerTest {
     WorkspaceServiceFactory.class,
     WsmClient.class,
     VwbUserService.class,
-    TaskQueueService.class,
-    TemporaryInitialCreditsRelinkService.class
+    TaskQueueService.class
   })
   static class Configuration {
     @Bean
