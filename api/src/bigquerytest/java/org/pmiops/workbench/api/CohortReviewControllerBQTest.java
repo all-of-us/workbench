@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
@@ -139,7 +140,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
     WorkspaceAuthService.class,
-    CohortBuilderMapperImpl.class
+    CohortBuilderMapperImpl.class,
+    CohortBuilderServiceImpl.class
   })
   static class Configuration {
     @Bean
