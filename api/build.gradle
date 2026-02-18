@@ -472,9 +472,7 @@ dependencies {
     implementation "org.apache.commons:commons-collections4:4.5.0-M3"
     implementation 'org.apache.commons:commons-lang3:3.18.0'
     implementation 'org.apache.commons:commons-text:1.13.1'
-    // 5.4+ results in a runtime error:
-    // java.lang.NoSuchMethodError: 'void org.apache.hc.core5.http.impl.io.DefaultHttpRequestWriterFactory.<init>(org.apache.hc.core5.http.config.Http1Config)'
-    implementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
+    implementation "org.apache.httpcomponents.client5:httpclient5:5.4.4"
     implementation 'commons-codec:commons-codec:1.17.0'
     implementation 'com.auth0:java-jwt:4.5.0'
     implementation 'org.json:json:20250107'
