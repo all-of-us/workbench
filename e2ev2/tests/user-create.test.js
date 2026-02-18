@@ -95,7 +95,7 @@ browserTest('create user', async browser => {
     return sel
   }).then(sel => page.click(sel))
 
-  await page.waitForSelector('#account-creation-success')
+  await page.waitForSelector('#account-creation-success', {timeout: 10e3})
   await expect(page.waitForSelector('h2').then(eh => eh.evaluate(e => e.innerText)))
     .resolves.toBe('Congratulations!')
 }, 20e3)
