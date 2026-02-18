@@ -29,10 +29,7 @@ buildscript {
         HIBERNATE_VERSION = '6.5.3.Final'
         JACKSON_VERSION = '2.18.3'
         LIQUIBASE_VERSION = '4.31.1'
-        // 1.5.7+ results in a runtime error:
-        // Logging system failed to initialize using configuration from 'null'
-        //  java.lang.NoSuchMethodError: 'java.lang.Object ch.qos.logback.classic.LoggerContext.getConfigurationLock()'
-        LOGBACK_VERSION = '1.5.6'
+        LOGBACK_VERSION = '1.5.16'
         MAPSTRUCT_VERSION = '1.6.2'
         OKHTTP_VERSION = '4.12.0'
         OPENTELEMETRY_SDK_VERSION = '1.48.0'
@@ -56,7 +53,7 @@ plugins {
 
     id 'io.spring.dependency-management' version '1.1.7'
     // keep in sync with the dependencyManagement block below
-    id 'org.springframework.boot' version '3.2.12'
+    id 'org.springframework.boot' version '3.5.0'
 
     id 'com.diffplug.spotless' version '6.23.3'
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.8.0'
@@ -81,7 +78,7 @@ dependencyManagement {
     dependencies {
         dependency group: 'org.springframework', name: 'spring-core', version: '6.2.7'
         // keep in sync with the plugin block above
-        dependency group: 'org.springframework.boot', name: 'spring-boot', version: '3.2.12'
+        dependency group: 'org.springframework.boot', name: 'spring-boot', version: '3.5.0'
         dependency group: 'org.springframework.security', name: 'spring-security', version: '6.4.5'
     }
 }
@@ -685,7 +682,8 @@ tasks.withType(Test) {
         }
     }
     // As of Q1 2021, API unit tests need a larger heap due to memory retention across individual test cases.
-    maxHeapSize = "2g"
+    // Increased from 2g for Spring Boot 3.5 upgrade (JPA entity scanning requires more memory).
+    maxHeapSize = "3g"
 }
 
 appengine {  // App Engine tasks configuration
