@@ -17,9 +17,9 @@ import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({
   FakeClockConfiguration.class,
@@ -30,12 +30,10 @@ import org.springframework.test.annotation.DirtiesContext;
   InstitutionUserInstructionsMapperImpl.class,
   InstitutionTierConfigMapperImpl.class,
 })
-@MockBean({
-  AccessTierService.class,
-})
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class VerifiedInstitutionalAffiliationMapperTest {
+  @MockitoBean private AccessTierService accessTierService;
   @Autowired VerifiedInstitutionalAffiliationMapper mapper;
 
   @Autowired InstitutionService institutionService;

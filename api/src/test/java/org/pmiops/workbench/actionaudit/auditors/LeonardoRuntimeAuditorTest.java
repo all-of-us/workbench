@@ -18,12 +18,13 @@ import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class LeonardoRuntimeAuditorTest {
+  @MockitoBean private ActionAuditService actionAuditService;
   private DbUser user1;
   private static final long Y2K_EPOCH_MILLIS =
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
@@ -40,7 +41,6 @@ public class LeonardoRuntimeAuditorTest {
 
   @TestConfiguration
   @Import(FakeClockConfiguration.class)
-  @MockBean(value = {ActionAuditService.class})
   static class Configuration {}
 
   @BeforeEach

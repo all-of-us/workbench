@@ -157,11 +157,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -173,6 +173,32 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DataSetControllerTest {
 
+  @MockitoBean private AccessModuleService accessModuleService;
+  @MockitoBean private BillingProjectAuditor billingProjectAuditor;
+  @MockitoBean private BucketAuditQueryService bucketAuditQueryService;
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private CohortBuilderMapper cohortBuilderMapper;
+  @MockitoBean private CohortBuilderService cohortBuilderService;
+  @MockitoBean private CohortCloningService cohortCloningService;
+  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
+  @MockitoBean private DirectoryService directoryService;
+  @MockitoBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockitoBean private IamService iamService;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
+  @MockitoBean private ParticipantCohortStatusMapper participantCohortStatusMapper;
+  @MockitoBean private ReviewQueryBuilder reviewQueryBuilder;
+  @MockitoBean private TanagraApi tanagraApi;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private UserServiceAuditor userServiceAuditor;
+  @MockitoBean private WorkspaceAuditor workspaceAuditor;
+  @MockitoBean private WorkspaceOperationMapper workspaceOperationMapper;
+  @MockitoBean private WsmClient wsmClient;
+  @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
@@ -213,19 +239,19 @@ public class DataSetControllerTest {
   @Autowired private FirecloudMapper firecloudMapper;
 
   @Autowired private WorkspaceService workspaceService;
-  @Autowired private WorkspaceServiceFactory workspaceServiceFactory;
+  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
 
-  @MockBean private BigQueryService mockBigQueryService;
-  @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
-  @MockBean private CdrVersionService mockCdrVersionService;
-  @MockBean private CloudBillingClient cloudBillingClient;
-  @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
-  @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
-  @MockBean private FireCloudService fireCloudService;
-  @MockBean private GenomicExtractionService mockGenomicExtractionService;
-  @MockBean private NotebooksService mockNotebooksService;
+  @MockitoBean private BigQueryService mockBigQueryService;
+  @MockitoBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
+  @MockitoBean private CdrVersionService mockCdrVersionService;
+  @MockitoBean private CloudBillingClient cloudBillingClient;
+  @MockitoBean private CohortQueryBuilder mockCohortQueryBuilder;
+  @MockitoBean private DSDataDictionaryDao mockDSDataDictionaryDao;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private GenomicExtractionService mockGenomicExtractionService;
+  @MockitoBean private NotebooksService mockNotebooksService;
 
-  @MockBean
+  @MockitoBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
   EgressRemediationService egressRemediationService;
 
@@ -260,38 +286,6 @@ public class DataSetControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
-  })
-  @MockBean({
-    AccessModuleService.class,
-    BigQueryService.class,
-    BillingProjectAuditor.class,
-    BucketAuditQueryService.class,
-    CloudBillingClient.class,
-    CloudStorageClient.class,
-    CohortBuilderMapper.class,
-    CohortBuilderService.class,
-    CohortCloningService.class,
-    ConceptBigQueryService.class,
-    DirectoryService.class,
-    FeaturedWorkspaceMapper.class,
-    IamService.class,
-    InitialCreditsService.class,
-    MailService.class,
-    ParticipantCohortAnnotationMapper.class,
-    ParticipantCohortStatusMapper.class,
-    ReviewQueryBuilder.class,
-    TanagraApi.class,
-    TaskQueueService.class,
-    UserRecentResourceService.class,
-    UserServiceAuditor.class,
-    WorkspaceAuditor.class,
-    WorkspaceOperationMapper.class,
-    WorkspaceServiceFactory.class,
-    WsmClient.class,
-    VwbAccessService.class,
-    VwbUserService.class,
-    TaskQueueService.class,
-    TemporaryInitialCreditsRelinkService.class
   })
   static class Configuration {
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)

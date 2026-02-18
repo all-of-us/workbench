@@ -33,13 +33,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class WorkspaceOperationMapperTest {
+  @MockitoBean private FirecloudApiClientFactory firecloudApiClientFactory;
+  @MockitoBean private FirecloudRetryHandler firecloudRetryHandler;
   private static WorkbenchConfig workbenchConfig;
 
   @Autowired private WorkspaceOperationMapper workspaceOperationMapper;
@@ -47,8 +49,8 @@ public class WorkspaceOperationMapperTest {
   @Autowired private WorkspaceMapper workspaceMapper;
   @Autowired private WorkspaceDao workspaceDao;
 
-  @MockBean private FireCloudService mockFirecloudService;
-  @MockBean private InitialCreditsService mockInitialCreditsService;
+  @MockitoBean private FireCloudService mockFirecloudService;
+  @MockitoBean private InitialCreditsService mockInitialCreditsService;
 
   @TestConfiguration
   @Import({
@@ -59,7 +61,6 @@ public class WorkspaceOperationMapperTest {
     WorkspaceMapperImpl.class,
     WorkspaceOperationMapperImpl.class,
   })
-  @MockBean({FirecloudApiClientFactory.class, FirecloudRetryHandler.class})
   static class Configuration {
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)

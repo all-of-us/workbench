@@ -70,13 +70,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class EgressEventsAdminControllerTest {
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean private EgressEventAuditor egressEventAuditor;
   private static WorkbenchConfig workbenchConfig;
 
   private static final Instant TIME0 = Instant.parse("2020-06-11T01:30:00.02Z");
@@ -97,7 +99,7 @@ public class EgressEventsAdminControllerTest {
 
   @Autowired private FakeClock fakeClock;
   @Autowired private BigQueryService mockBigQueryService;
-  @MockBean private ExfilManagerClient exfilManagerClient;
+  @MockitoBean private ExfilManagerClient exfilManagerClient;
 
   private DbUser user1;
   private DbUser user2;
@@ -116,10 +118,6 @@ public class EgressEventsAdminControllerTest {
     EgressLogService.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class
-  })
-  @MockBean({
-    BigQueryService.class,
-    EgressEventAuditor.class,
   })
   static class Configuration {
     @Bean

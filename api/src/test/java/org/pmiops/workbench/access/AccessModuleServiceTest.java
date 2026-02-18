@@ -32,10 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class AccessModuleServiceTest {
@@ -44,7 +44,7 @@ public class AccessModuleServiceTest {
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private UserDao userDao;
 
-  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockitoBean private UserServiceAuditor mockUserServiceAuditAdapter;
   private static DbUser user;
   private static WorkbenchConfig config;
   private static List<DbAccessModule> accessModules;

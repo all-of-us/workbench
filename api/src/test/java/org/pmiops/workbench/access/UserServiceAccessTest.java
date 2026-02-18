@@ -64,11 +64,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Tests to cover access change determinations by executing {@link
@@ -83,6 +83,13 @@ import org.springframework.test.annotation.DirtiesContext;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceAccessTest {
+  @MockitoBean private DirectoryService directoryService;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private UserServiceAuditor userServiceAuditor;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private TaskQueueService taskQueueService;
   private static final String USERNAME = "abc@fake-research-aou.org";
   private static final Instant START_INSTANT = Instant.parse("2030-01-01T00:00:00.00Z");
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
@@ -110,7 +117,7 @@ public class UserServiceAccessTest {
   @Autowired private UserService userService;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
-  @MockBean private MailService mailService;
+  @MockitoBean private MailService mailService;
 
   @Import({
     UserServiceTestConfiguration.class,
@@ -120,16 +127,6 @@ public class UserServiceAccessTest {
     AccessSyncServiceImpl.class,
     InstitutionServiceImpl.class,
     UserAccessModuleMapperImpl.class,
-  })
-  @MockBean({
-    DirectoryService.class,
-    FireCloudService.class,
-    MailService.class,
-    UserServiceAuditor.class,
-    InitialCreditsService.class,
-    VwbAccessService.class,
-    VwbUserService.class,
-    TaskQueueService.class
   })
   @TestConfiguration
   static class Configuration {

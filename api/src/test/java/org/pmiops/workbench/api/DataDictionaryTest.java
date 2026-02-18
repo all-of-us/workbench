@@ -41,14 +41,32 @@ import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataDictionaryTest {
 
+  @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private AnalysisLanguageMapper analysisLanguageMapper;
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  @MockitoBean private CdrVersionMapper cdrVersionMapper;
+  @MockitoBean private CohortBuilderMapperImpl cohortBuilderMapperImpl;
+  @MockitoBean private CohortBuilderServiceImpl cohortBuilderServiceImpl;
+  @MockitoBean private CohortQueryBuilder cohortQueryBuilder;
+  @MockitoBean private CohortService cohortService;
+  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
+  @MockitoBean private ConceptSetMapper conceptSetMapper;
+  @MockitoBean private ConceptSetService conceptSetService;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private GenomicExtractionService genomicExtractionService;
+  @MockitoBean private NotebooksService notebooksService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private WorkspaceAuthService workspaceAuthService;
+  @MockitoBean private WorkspaceService workspaceService;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
@@ -64,26 +82,6 @@ public class DataDictionaryTest {
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     FakeClockConfiguration.class,
-  })
-  @MockBean({
-    AccessTierService.class,
-    AnalysisLanguageMapper.class,
-    BigQueryService.class,
-    CdrBigQuerySchemaConfigService.class,
-    CdrVersionMapper.class,
-    CohortBuilderMapperImpl.class,
-    CohortBuilderServiceImpl.class,
-    CohortQueryBuilder.class,
-    CohortService.class,
-    ConceptBigQueryService.class,
-    ConceptSetMapper.class,
-    ConceptSetService.class,
-    FireCloudService.class,
-    GenomicExtractionService.class,
-    NotebooksService.class,
-    UserRecentResourceService.class,
-    WorkspaceAuthService.class,
-    WorkspaceService.class,
   })
   static class Configuration {}
 

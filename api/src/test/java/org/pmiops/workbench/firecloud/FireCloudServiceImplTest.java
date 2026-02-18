@@ -44,11 +44,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.SimpleThreadScope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -65,21 +65,24 @@ public class FireCloudServiceImplTest {
 
   private static WorkbenchConfig workbenchConfig;
 
-  @MockBean
+  @MockitoBean
   @Qualifier(RawlsConfig.SERVICE_ACCOUNT_BILLING_V2_API)
   private BillingV2Api billingV2Api;
 
-  @MockBean
+  @MockitoBean
   @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_GROUPS_API)
   private GroupsApi groupsApi;
 
-  @MockBean private NihApi nihApi;
-  @MockBean private ProfileApi profileApi;
-  @MockBean private StatusApi statusApi;
+  @MockitoBean private NihApi nihApi;
+  @MockitoBean private ProfileApi profileApi;
+  @MockitoBean private StatusApi statusApi;
+
   // old Terms of Service endpoints, before RW-11416
-  @MockBean private org.pmiops.workbench.firecloud.api.TermsOfServiceApi firecloudTermsOfServiceApi;
+  @MockitoBean
+  private org.pmiops.workbench.firecloud.api.TermsOfServiceApi firecloudTermsOfServiceApi;
+
   // new Terms of Service endpoints, after RW-11416
-  @MockBean private TermsOfServiceApi termsOfServiceApi;
+  @MockitoBean private TermsOfServiceApi termsOfServiceApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 

@@ -15,20 +15,20 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 public class NotebooksIntegrationTest extends BaseIntegrationTest {
   @Autowired private LeonardoApiClient leonardoApiClient;
 
   // Provide mock beans for dependencies of NotebooksServiceImpl (which is loaded as a bean within
   // this test due to the @ComponentScan on the o.p.w.notebooks package.
-  @MockBean FireCloudService mockFireCloudService;
-  @MockBean UserRecentResourceService mockUserRecentResourceService;
-  @MockBean LeonardoMapper leonardoMapper;
-  @MockBean WorkspaceDao workspaceDao;
-  @MockBean WorkspaceAuthService workspaceAuthService;
+  @MockitoBean FireCloudService mockFireCloudService;
+  @MockitoBean UserRecentResourceService mockUserRecentResourceService;
+  @MockitoBean LeonardoMapper leonardoMapper;
+  @MockitoBean WorkspaceDao workspaceDao;
+  @MockitoBean WorkspaceAuthService workspaceAuthService;
 
   @TestConfiguration
   // N.B. in the other integration test classes we add a @ComponentScan which scans the package

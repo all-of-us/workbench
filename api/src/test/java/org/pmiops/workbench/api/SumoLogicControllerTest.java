@@ -27,10 +27,10 @@ import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
@@ -38,9 +38,9 @@ public class SumoLogicControllerTest {
 
   private static final String API_KEY = "12345";
 
-  @MockBean private EgressEventAuditor mockEgressEventAuditor;
-  @MockBean private CloudStorageClient mockCloudStorageClient;
-  @MockBean private EgressEventService mockEgressEventService;
+  @MockitoBean private EgressEventAuditor mockEgressEventAuditor;
+  @MockitoBean private CloudStorageClient mockCloudStorageClient;
+  @MockitoBean private EgressEventService mockEgressEventService;
   private static WorkbenchConfig config;
 
   @Autowired private SumoLogicController sumoLogicController;

@@ -123,7 +123,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -132,19 +131,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ProfileControllerTest extends BaseControllerTest {
-  @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
-  @MockBean private CloudStorageClient mockCloudStorageClient;
-  @MockBean private DirectoryService mockDirectoryService;
-  @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private MailService mockMailService;
-  @MockBean private ProfileAuditor mockProfileAuditor;
-  @MockBean private UserServiceAuditor mockUserServiceAuditor;
-  @MockBean private RasLinkService mockRasLinkService;
-  @MockBean private Provider<DbUser> mockUserProvider;
+  @MockitoBean private AbsorbService absorbService;
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean private NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private LeonardoApiClient leonardoApiClient;
+  @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private WorkspaceMapper workspaceMapper;
+  @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private CaptchaVerificationService mockCaptchaVerificationService;
+  @MockitoBean private CloudStorageClient mockCloudStorageClient;
+  @MockitoBean private DirectoryService mockDirectoryService;
+  @MockitoBean private FireCloudService mockFireCloudService;
+  @MockitoBean private MailService mockMailService;
+  @MockitoBean private ProfileAuditor mockProfileAuditor;
+  @MockitoBean private UserServiceAuditor mockUserServiceAuditor;
+  @MockitoBean private RasLinkService mockRasLinkService;
+  @MockitoBean private Provider<DbUser> mockUserProvider;
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
@@ -211,16 +219,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
     WorkspaceInitialCreditUsageService.class,
-  })
-  @MockBean({
-    AbsorbService.class,
-    BigQueryService.class,
-    NewUserSatisfactionSurveyService.class,
-    TaskQueueService.class,
-    LeonardoApiClient.class,
-    VwbAccessService.class,
-    WorkspaceMapper.class,
-    VwbUserService.class
   })
   static class Configuration {
     @Bean

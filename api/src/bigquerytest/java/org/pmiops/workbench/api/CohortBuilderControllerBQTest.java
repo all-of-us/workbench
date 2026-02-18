@@ -91,12 +91,12 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({
   TestJpaConfig.class,
@@ -104,6 +104,10 @@ import org.springframework.http.ResponseEntity;
   StorageConfig.class
 })
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
+
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private CdrVersionService cdrVersionService;
 
   @TestConfiguration
   @Import({
@@ -118,12 +122,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CohortBuilderMapperImpl.class,
     CohortReviewMapperImpl.class,
     VariantQueryBuilder.class
-  })
-  @MockBean({
-    FireCloudService.class,
-    AccessTierService.class,
-    CdrVersionService.class,
-    WorkspaceAuthService.class
   })
   static class Configuration {
     @Bean
@@ -148,7 +146,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private ChartService chartService;
 
-  @Autowired private WorkspaceAuthService workspaceAuthService;
+  @MockitoBean private WorkspaceAuthService workspaceAuthService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
 

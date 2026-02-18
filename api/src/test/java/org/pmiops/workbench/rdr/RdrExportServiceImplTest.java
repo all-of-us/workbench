@@ -58,13 +58,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class RdrExportServiceImplTest {
+  @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private ApiClient apiClient;
+  @MockitoBean private RdrApi rdrApi;
+  @MockitoBean private InstitutionService institutionService;
+  @MockitoBean private WorkspaceService workspaceService;
   @Autowired private RdrExportService rdrExportService;
   @Autowired private RdrMapper rdrMapper;
 
@@ -76,7 +81,7 @@ public class RdrExportServiceImplTest {
   @Autowired private RdrExportDao rdrExportDao;
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @MockitoBean private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private DbWorkspace workspace;
   private DbWorkspace deletedWorkspace;
@@ -96,14 +101,6 @@ public class RdrExportServiceImplTest {
     DemographicSurveyMapperImpl.class,
     RdrExportServiceImpl.class,
     RdrMapperImpl.class
-  })
-  @MockBean({
-    AccessTierService.class,
-    ApiClient.class,
-    RdrApi.class,
-    InstitutionService.class,
-    WorkspaceService.class,
-    VerifiedInstitutionalAffiliationDao.class
   })
   static class Configuration {
     @Bean

@@ -22,13 +22,14 @@ import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class CloudStorageClientTest {
 
+  @MockitoBean private Storage mockStorage;
   private final String NOTEBOOK_NAME = "testNotebook.ipynb";
   private final String USER_EMAIL = "fakeUser@domain.com";
 
@@ -39,7 +40,6 @@ public class CloudStorageClientTest {
 
   @TestConfiguration
   @Import({CloudStorageClientImpl.class})
-  @MockBean({Storage.class})
   static class Configuration {
 
     @Bean

@@ -44,13 +44,16 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 public class WorkspaceAuditorTest {
 
+  @MockitoBean private UserDao userDao;
+  @MockitoBean private ConceptSetService conceptSetService;
+  @MockitoBean private CohortService cohortService;
   private static final long WORKSPACE_1_DB_ID = 101L;
   private static final long WORKSPACE_2_DB_ID = 201L;
   private static final long REMOVED_USER_ID = 301L;
@@ -60,8 +63,8 @@ public class WorkspaceAuditorTest {
   private DbWorkspace dbWorkspace1;
 
   @Autowired private WorkspaceAuditor workspaceAuditor;
-  @MockBean private Provider<DbUser> mockUserProvider;
-  @MockBean private ActionAuditService mockActionAuditService;
+  @MockitoBean private Provider<DbUser> mockUserProvider;
+  @MockitoBean private ActionAuditService mockActionAuditService;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventCollectionCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
@@ -78,7 +81,6 @@ public class WorkspaceAuditorTest {
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class
   })
-  @MockBean({UserDao.class, ConceptSetService.class, CohortService.class})
   static class Config {}
 
   @BeforeEach

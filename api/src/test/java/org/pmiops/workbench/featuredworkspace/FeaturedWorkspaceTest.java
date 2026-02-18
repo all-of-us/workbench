@@ -33,15 +33,19 @@ import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class FeaturedWorkspaceTest {
 
-  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FireCloudService mockFireCloudService;
+  @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private WorkspaceAdminService workspaceAdminService;
+  @MockitoBean private WorkspaceDao workspaceDao;
+  @MockitoBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
+  @MockitoBean private FireCloudService mockFireCloudService;
 
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
@@ -56,12 +60,6 @@ public class FeaturedWorkspaceTest {
     FeaturedWorkspaceServiceImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceMapperImpl.class,
-  })
-  @MockBean({
-    AccessTierService.class,
-    InitialCreditsService.class,
-    WorkspaceAdminService.class,
-    WorkspaceDao.class,
   })
   static class Configuration {
     @Bean

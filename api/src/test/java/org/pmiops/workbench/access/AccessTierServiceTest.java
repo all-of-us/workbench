@@ -25,13 +25,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class AccessTierServiceTest {
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private VwbAccessService vwbAccessService;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessTierService accessTierService;
   @Autowired private UserAccessTierDao userAccessTierDao;
@@ -44,10 +46,6 @@ public class AccessTierServiceTest {
 
   @Import({
     AccessTierServiceImpl.class,
-  })
-  @MockBean({
-    FireCloudService.class,
-    VwbAccessService.class,
   })
   @TestConfiguration
   static class Configuration {

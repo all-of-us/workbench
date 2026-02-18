@@ -55,18 +55,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserControllerTest {
 
+  @MockitoBean private DirectoryService directoryService;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private UserServiceAuditor userServiceAuditor;
+  @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private TaskQueueService taskQueueService;
   @Autowired private FakeClock fakeClock;
   private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
   private static long incrementedUserId = 1;
@@ -81,17 +88,6 @@ public class UserControllerTest {
     AccessModuleServiceImpl.class,
     UserAccessModuleMapperImpl.class,
     CommonMappers.class,
-  })
-  @MockBean({
-    DirectoryService.class,
-    FireCloudService.class,
-    InitialCreditsService.class,
-    MailService.class,
-    UserServiceAuditor.class,
-    InitialCreditsService.class,
-    VwbAccessService.class,
-    VwbUserService.class,
-    TaskQueueService.class
   })
   static class Configuration {
 
@@ -121,7 +117,7 @@ public class UserControllerTest {
   @Autowired UserController userController;
 
   @Autowired AccessTierDao accessTierDao;
-  @Autowired FireCloudService fireCloudService;
+  @MockitoBean private FireCloudService fireCloudService;
   @Autowired InitialCreditsService mockInitialCreditsService;
   @Autowired UserAccessTierDao userAccessTierDao;
   @Autowired UserDao userDao;

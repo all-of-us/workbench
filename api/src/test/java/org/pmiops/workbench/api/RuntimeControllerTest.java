@@ -122,13 +122,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -136,6 +136,18 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RuntimeControllerTest {
+  @MockitoBean private AccessModuleService accessModuleService;
+  @MockitoBean private CohortService cohortService;
+  @MockitoBean private ConceptSetService conceptSetService;
+  @MockitoBean private DirectoryService directoryService;
+  @MockitoBean private InteractiveAnalysisService interactiveAnalysisService;
+  @MockitoBean private LeonardoApiClientFactory leonardoApiClientFactory;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private UserServiceAuditor userServiceAuditor;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private TaskQueueService taskQueueService;
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
   private static final String WORKSPACE_DISPLAY_NAME = "My First Workspace";
@@ -181,20 +193,6 @@ public class RuntimeControllerTest {
     UserServiceTestConfiguration.class,
     WorkspaceMapperImpl.class,
   })
-  @MockBean({
-    AccessModuleService.class,
-    CohortService.class,
-    ConceptSetService.class,
-    DirectoryService.class,
-    InteractiveAnalysisService.class,
-    LeonardoApiClientFactory.class,
-    MailService.class,
-    UserServiceAuditor.class,
-    InitialCreditsService.class,
-    VwbAccessService.class,
-    VwbUserService.class,
-    TaskQueueService.class
-  })
   static class Configuration {
 
     @Bean
@@ -219,17 +217,17 @@ public class RuntimeControllerTest {
   @Captor private ArgumentCaptor<LeonardoUpdateRuntimeRequest> updateRuntimeRequestCaptor;
 
   @Qualifier(LeonardoConfig.USER_RUNTIMES_API)
-  @MockBean
+  @MockitoBean
   RuntimesApi mockUserRuntimesApi;
 
-  @MockBean
+  @MockitoBean
   @Qualifier(LeonardoConfig.USER_DISKS_API)
   DisksApi mockUserDisksApi;
 
-  @MockBean FireCloudService mockFireCloudService;
-  @MockBean WorkspaceAuthService mockWorkspaceAuthService;
-  @MockBean WorkspaceDao mockWorkspaceDao;
-  @MockBean WorkspaceService mockWorkspaceService;
+  @MockitoBean FireCloudService mockFireCloudService;
+  @MockitoBean WorkspaceAuthService mockWorkspaceAuthService;
+  @MockitoBean WorkspaceDao mockWorkspaceDao;
+  @MockitoBean WorkspaceService mockWorkspaceService;
 
   @Autowired AccessTierDao accessTierDao;
   @Autowired FirecloudMapper firecloudMapper;

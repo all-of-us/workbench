@@ -31,16 +31,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class OfflineUserControllerTest {
 
+  @MockitoBean private CloudTasksClient cloudTasksClient;
+  @MockitoBean private UserService userService;
   @Autowired private UserService mockUserService;
   @Autowired private OfflineUserController offlineUserController;
   @Autowired private CloudTasksClient mockCloudTasksClient;
@@ -57,7 +59,6 @@ public class OfflineUserControllerTest {
     TaskQueueService.class,
     WorkbenchLocationConfigService.class,
   })
-  @MockBean({CloudTasksClient.class, UserService.class})
   static class Configuration {
 
     @Bean

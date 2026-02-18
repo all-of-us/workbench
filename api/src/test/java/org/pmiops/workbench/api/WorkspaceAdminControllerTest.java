@@ -47,12 +47,18 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class WorkspaceAdminControllerTest {
 
+  @MockitoBean private ActionAuditQueryService actionAuditQueryService;
+  @MockitoBean private CloudMonitoringService cloudMonitoringService;
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private CohortService cohortService;
+  @MockitoBean private ConceptSetService conceptSetService;
+  @MockitoBean private NotebooksService notebooksService;
   private static final long DB_WORKSPACE_ID = 2222L;
   private static final String FIRECLOUD_WORKSPACE_CREATOR_USERNAME = "jay@allofus.biz";
   private static final String WORKSPACE_DISPLAY_NAME = "Work It !";
@@ -64,10 +70,10 @@ public class WorkspaceAdminControllerTest {
   private static final String BAD_EXCEPTION_REQUEST_REASON_CHAR =
       "Locking Reason text length should be at least 10 characters long and at most 4000 characters";
 
-  @MockBean private FireCloudService mockFirecloudService;
-  @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
-  @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
-  @MockBean private WorkspaceService mockWorkspaceService;
+  @MockitoBean private FireCloudService mockFirecloudService;
+  @MockitoBean private LeonardoApiClient mockLeonardoNotebooksClient;
+  @MockitoBean private WorkspaceAdminService mockWorkspaceAdminService;
+  @MockitoBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private WorkspaceAdminController workspaceAdminController;
 
@@ -82,14 +88,6 @@ public class WorkspaceAdminControllerTest {
     FirecloudMapperImpl.class,
     WorkspaceAdminController.class,
     WorkspaceMapperImpl.class,
-  })
-  @MockBean({
-    ActionAuditQueryService.class,
-    CloudMonitoringService.class,
-    CloudStorageClient.class,
-    CohortService.class,
-    ConceptSetService.class,
-    NotebooksService.class,
   })
   static class Configuration {}
 

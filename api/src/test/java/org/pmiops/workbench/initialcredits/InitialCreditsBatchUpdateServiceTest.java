@@ -25,10 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,10 +36,10 @@ public class InitialCreditsBatchUpdateServiceTest {
 
   @Autowired private InitialCreditsBatchUpdateService initialCreditsBatchUpdateService;
 
-  @MockBean private WorkspaceDao mockWorkspaceDao;
-  @MockBean private InitialCreditsService mockInitialCreditsService;
-  @MockBean private UserDao mockUserDao;
-  @MockBean private InitialCreditsBigQueryService mockBigQueryService;
+  @MockitoBean private WorkspaceDao mockWorkspaceDao;
+  @MockitoBean private InitialCreditsService mockInitialCreditsService;
+  @MockitoBean private UserDao mockUserDao;
+  @MockitoBean private InitialCreditsBigQueryService mockBigQueryService;
 
   private static WorkbenchConfig config;
 

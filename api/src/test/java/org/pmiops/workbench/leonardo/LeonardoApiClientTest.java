@@ -60,15 +60,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.backoff.NoBackOffPolicy;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @DataJpaTest
 public class LeonardoApiClientTest {
+  @MockitoBean private LeonardoApiClientFactory leonardoApiClientFactory;
+
   @TestConfiguration
   @Import({
     CommonMappers.class,
@@ -82,7 +84,6 @@ public class LeonardoApiClientTest {
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
   })
-  @MockBean(LeonardoApiClientFactory.class)
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -98,21 +99,21 @@ public class LeonardoApiClientTest {
   }
 
   @Qualifier(LeonardoConfig.USER_APPS_API)
-  @MockBean
+  @MockitoBean
   AppsApi mockUserAppsApi;
 
   @Qualifier(LeonardoConfig.USER_DISKS_API)
-  @MockBean
+  @MockitoBean
   DisksApi mockUserDisksApi;
 
   @Qualifier("userRuntimesApi")
-  @MockBean
+  @MockitoBean
   RuntimesApi userRuntimesApi;
 
-  @MockBean FireCloudService mockFireCloudService;
-  @MockBean WorkspaceDao mockWorkspaceDao;
+  @MockitoBean FireCloudService mockFireCloudService;
+  @MockitoBean WorkspaceDao mockWorkspaceDao;
 
-  @SpyBean LeonardoMapper leonardoMapper;
+  @MockitoSpyBean LeonardoMapper leonardoMapper;
 
   @Autowired AccessTierDao accessTierDao;
   @Autowired FirecloudMapper firecloudMapper;

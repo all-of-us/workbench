@@ -31,22 +31,20 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class OfflineEnvironmentsControllerTest {
+  @MockitoBean private DiskAdminService diskAdminService;
+  @MockitoBean private WorkspaceService workspaceService;
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Duration RUNTIME_MAX_AGE = Duration.ofDays(14);
   private static final Duration RUNTIME_IDLE_MAX_AGE = Duration.ofDays(7);
 
   @TestConfiguration
-  @MockBean({
-    DiskAdminService.class,
-    WorkspaceService.class,
-  })
   @Import({
     FakeClockConfiguration.class,
     LeonardoMapperImpl.class,
@@ -61,7 +59,7 @@ public class OfflineEnvironmentsControllerTest {
     }
   }
 
-  @MockBean private LeonardoApiClient mockLeonardoApiClient;
+  @MockitoBean private LeonardoApiClient mockLeonardoApiClient;
 
   @Autowired private OfflineEnvironmentsController controller;
 

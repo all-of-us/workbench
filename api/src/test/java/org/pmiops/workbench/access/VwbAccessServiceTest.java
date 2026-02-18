@@ -14,14 +14,14 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class VwbAccessServiceTest {
-  @MockBean private VwbUserManagerClient mockVwbUserManagerClient;
-  @MockBean private Provider<WorkbenchConfig> workbenchConfigProvider;
-  @MockBean private VwbUserService vwbUserService;
+  @MockitoBean private VwbUserManagerClient mockVwbUserManagerClient;
+  @MockitoBean private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @MockitoBean private VwbUserService vwbUserService;
   private WorkbenchConfig workbenchConfig = createEmptyConfig();
 
   private VwbAccessService vwbAccessService;

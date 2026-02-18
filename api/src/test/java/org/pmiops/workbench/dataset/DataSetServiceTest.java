@@ -87,15 +87,21 @@ import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataSetServiceTest {
 
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean private DbUser dbUser;
+  @MockitoBean private CommonMappers commonMappers;
+  @MockitoBean private CohortBuilderService cohortBuilderService;
+  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
+  @MockitoBean private CohortQueryBuilder cohortQueryBuilder;
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder(
               "SELECT person_id FROM `${projectId}.${dataSetId}.person` person")
@@ -123,7 +129,7 @@ public class DataSetServiceTest {
   @Autowired private DataSetServiceImpl dataSetServiceImpl;
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private UserDao userDao;
-  @Autowired private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
 
   private DbWorkspace workspace;
   private DbCohort cohort;
@@ -137,15 +143,6 @@ public class DataSetServiceTest {
     CohortService.class,
     CohortMapperImpl.class,
     ConceptSetService.class
-  })
-  @MockBean({
-    BigQueryService.class,
-    DbUser.class,
-    CommonMappers.class,
-    CohortBuilderService.class,
-    ConceptBigQueryService.class,
-    CohortQueryBuilder.class,
-    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean

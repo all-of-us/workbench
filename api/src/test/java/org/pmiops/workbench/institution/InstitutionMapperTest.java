@@ -16,9 +16,9 @@ import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({InstitutionMapperImpl.class, FakeClockConfiguration.class})
 @DataJpaTest
@@ -26,7 +26,7 @@ import org.springframework.test.annotation.DirtiesContext;
 public class InstitutionMapperTest {
   private static final String TIER_NAME = "REGISTERED";
   @Autowired InstitutionMapper mapper;
-  @MockBean InstitutionService service;
+  @MockitoBean InstitutionService service;
 
   private List<String> sortedModelDomains;
   private List<String> sortedModelAddresses;

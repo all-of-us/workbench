@@ -206,8 +206,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -215,6 +213,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -223,6 +223,29 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
 
+  @MockitoBean private ActionAuditQueryService actionAuditQueryService;
+  @MockitoBean private AdminAuditor adminAuditor;
+  @MockitoBean private AnalysisLanguageMapperImpl analysisLanguageMapperImpl;
+  @MockitoBean private BillingProjectAuditor billingProjectAuditor;
+  @MockitoBean private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  @MockitoBean private CdrVersionService cdrVersionService;
+  @MockitoBean private ChartQueryBuilder chartQueryBuilder;
+  @MockitoBean private ChartService chartService;
+  @MockitoBean private CloudMonitoringService cloudMonitoringService;
+  @MockitoBean private CohortBuilderMapper cohortBuilderMapper;
+
+  @MockitoBean private CohortQueryBuilder cohortQueryBuilder;
+  @MockitoBean private GenomicExtractionService genomicExtractionService;
+  @MockitoBean private LeonardoApiClient leonardoApiClient;
+  @MockitoBean private LeonardoRuntimeAuditor leonardoRuntimeAuditor;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private NotebooksService notebooksService;
+  @MockitoBean private TanagraApi tanagraApi;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private UserService userService;
+  @MockitoBean private WorkspaceAuditor workspaceAuditor;
+  @MockitoBean private WsmClient wsmClient;
+  @MockitoBean private TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";
 
@@ -266,15 +289,15 @@ public class WorkspacesControllerTest {
           .conceptSynonyms(new ArrayList<>());
 
   @Autowired AccessTierDao accessTierDao;
-  @Autowired BigQueryService bigQueryService;
+  @MockitoBean private BigQueryService bigQueryService;
   @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CloudStorageClient cloudStorageClient;
+  @MockitoBean private CloudStorageClient cloudStorageClient;
   @Autowired CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired CohortReviewDao cohortReviewDao;
   @Autowired CohortsController cohortsController;
-  @Autowired ConceptBigQueryService conceptBigQueryService;
+  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
@@ -282,11 +305,10 @@ public class WorkspacesControllerTest {
   @Autowired DataSetDao dataSetDao;
   @Autowired DataSetService dataSetService;
   @Autowired FakeClock fakeClock;
-  @Autowired FireCloudService fireCloudService;
   @Autowired FirecloudMapper firecloudMapper;
   @Autowired ObjectNameLengthService objectNameLengthService;
   @Autowired UserDao userDao;
-  @Autowired UserRecentResourceService userRecentResourceService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
   @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired WorkspaceAdminService workspaceAdminService;
   @Autowired WorkspaceAuditor mockWorkspaceAuditor;
@@ -294,21 +316,21 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspacesController workspacesController;
   @Autowired FeaturedWorkspaceDao featuredWorkspaceDao;
-  @Autowired WorkspaceServiceFactory workspaceServiceFactory;
+  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
 
-  @MockBean AccessTierService accessTierService;
-  @MockBean BucketAuditQueryService bucketAuditQueryService;
-  @MockBean CloudBillingClient mockCloudBillingClient;
-  @MockBean CohortBuilderService cohortBuilderService;
-  @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  @MockBean FireCloudService mockFireCloudService;
-  @MockBean InitialCreditsService mockInitialCreditsService;
-  @MockBean IamService mockIamService;
+  @MockitoBean AccessTierService accessTierService;
+  @MockitoBean BucketAuditQueryService bucketAuditQueryService;
+  @MockitoBean CloudBillingClient mockCloudBillingClient;
+  @MockitoBean CohortBuilderService cohortBuilderService;
+  @MockitoBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockitoBean FireCloudService fireCloudService;
+  @MockitoBean InitialCreditsService mockInitialCreditsService;
+  @MockitoBean IamService mockIamService;
 
-  @SpyBean @Autowired WorkspaceDao workspaceDao;
-  @SpyBean @Autowired WorkspaceService workspaceService;
+  @MockitoSpyBean @Autowired WorkspaceDao workspaceDao;
+  @MockitoSpyBean @Autowired WorkspaceService workspaceService;
 
-  @MockBean
+  @MockitoBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
   EgressRemediationService egressRemediationService;
 
@@ -358,39 +380,6 @@ public class WorkspacesControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
-  })
-  @MockBean({
-    AccessTierService.class,
-    ActionAuditQueryService.class,
-    AdminAuditor.class,
-    AnalysisLanguageMapperImpl.class,
-    BigQueryService.class,
-    BillingProjectAuditor.class,
-    CdrBigQuerySchemaConfigService.class,
-    CdrVersionService.class,
-    ChartQueryBuilder.class,
-    ChartService.class,
-    CloudMonitoringService.class,
-    CloudStorageClient.class,
-    CohortBuilderMapper.class,
-    CohortBuilderService.class,
-    CohortQueryBuilder.class,
-    ConceptBigQueryService.class,
-    FireCloudService.class,
-    GenomicExtractionService.class,
-    InitialCreditsService.class,
-    LeonardoApiClient.class,
-    LeonardoRuntimeAuditor.class,
-    MailService.class,
-    NotebooksService.class,
-    TanagraApi.class,
-    TaskQueueService.class,
-    UserRecentResourceService.class,
-    UserService.class,
-    WorkspaceAuditor.class,
-    WorkspaceServiceFactory.class,
-    WsmClient.class,
-    TemporaryInitialCreditsRelinkService.class
   })
   static class Configuration {
     @Bean
@@ -1074,7 +1063,7 @@ public class WorkspacesControllerTest {
         new RawlsWorkspaceResponse()
             .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(fcName))
             .accessLevel(accessLevel);
-    when(mockFireCloudService.getWorkspace(namespace, fcName)).thenReturn(toReturn);
+    when(fireCloudService.getWorkspace(namespace, fcName)).thenReturn(toReturn);
   }
 
   private static Stream<Arguments> workspaceAccessLevels() {
