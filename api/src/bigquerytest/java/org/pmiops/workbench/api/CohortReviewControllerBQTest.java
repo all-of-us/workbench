@@ -110,7 +110,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @MockitoBean private ConceptSetService conceptSetService;
   @MockitoBean private DataSetService dataSetService;
   @MockitoBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  @MockitoBean private FireCloudService fireCloudService;
+
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private MailService mailService;
   @MockitoBean private UserRecentResourceService userRecentResourceService;
