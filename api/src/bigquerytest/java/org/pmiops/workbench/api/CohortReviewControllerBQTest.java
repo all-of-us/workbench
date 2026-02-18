@@ -180,7 +180,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @MockitoSpyBean private CohortBuilderService cohortBuilderService;
 
-  @MockitoSpyBean private FireCloudService mockFireCloudService;
+  @MockitoBean private FireCloudService mockFireCloudService;
 
   @MockitoSpyBean private UserDao userDao;
 
