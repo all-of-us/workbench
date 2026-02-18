@@ -75,6 +75,7 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "gceVmZones", source = "config.firecloud.gceVmZones")
   @Mapping(target = "defaultGceVmZone", source = "config.firecloud.defaultGceVmZone")
   @Mapping(target = "enableCTPlusCards", source = "config.featureFlags.enableCTPlusCards")
+  @Mapping(target = "enableVwbMigration", source = "config.featureFlags.enableVwbMigration")
   @Mapping(
       target = "enableVWBWorkspaceCreation",
       source = "config.featureFlags.enableVWBWorkspaceCreation")

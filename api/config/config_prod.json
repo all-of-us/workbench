@@ -136,7 +136,8 @@
     "enableVWBInitialCreditsExhaustion": true,
     "enableTierAccessCheckInDb": true,
     "enableVWBHomepageBanner": true,
-    "enableCTPlusCards": false
+    "enableCTPlusCards": false,
+    "enableVwbMigration": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
