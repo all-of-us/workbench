@@ -62,11 +62,11 @@ public class AppsControllerTest {
     }
   }
 
-  @Autowired private AppsController controller;
-
   @MockitoBean LeonardoApiClient mockLeonardoApiClient;
   @MockitoBean WorkspaceAuthService mockWorkspaceAuthService;
   @MockitoBean WorkspaceService mockWorkspaceService;
+
+  @Autowired private AppsController controller;
 
   private static final String APP_NAME = "all-of-us-123-cromwell";
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";

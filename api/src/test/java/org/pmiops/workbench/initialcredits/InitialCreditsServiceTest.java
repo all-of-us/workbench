@@ -86,20 +86,19 @@ public class InitialCreditsServiceTest {
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
   @MockitoSpyBean private UserDao spyUserDao;
-
   @MockitoSpyBean private WorkspaceDao spyWorkspaceDao;
 
   @MockitoBean private UserServiceAuditor mockUserServiceAuditor;
   @MockitoBean private MailService mailService;
   @MockitoBean private LeonardoApiClient leonardoApiClient;
   @MockitoBean private InstitutionService institutionService;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private VwbUserService vwbUserService;
 
   @Autowired InitialCreditsService initialCreditsService;
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-
-  @MockitoBean private TaskQueueService taskQueueService;
   @Autowired private ApplicationContext applicationContext;
   @Autowired private VwbUserPodDao vwbUserPodDao;
 
@@ -127,7 +126,6 @@ public class InitialCreditsServiceTest {
               .plusSeconds((warningPeriodDays + 1L) * 24 * 60 * 60));
 
   private DbWorkspace workspace;
-  @MockitoBean private VwbUserService vwbUserService;
 
   @TestConfiguration
   @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})

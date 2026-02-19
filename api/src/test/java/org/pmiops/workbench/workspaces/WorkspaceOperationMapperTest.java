@@ -42,15 +42,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 public class WorkspaceOperationMapperTest {
   @MockitoBean private FirecloudApiClientFactory firecloudApiClientFactory;
   @MockitoBean private FirecloudRetryHandler firecloudRetryHandler;
+  @MockitoBean private FireCloudService mockFirecloudService;
+  @MockitoBean private InitialCreditsService mockInitialCreditsService;
+
   private static WorkbenchConfig workbenchConfig;
 
   @Autowired private WorkspaceOperationMapper workspaceOperationMapper;
-
   @Autowired private WorkspaceMapper workspaceMapper;
   @Autowired private WorkspaceDao workspaceDao;
-
-  @MockitoBean private FireCloudService mockFirecloudService;
-  @MockitoBean private InitialCreditsService mockInitialCreditsService;
 
   @TestConfiguration
   @Import({

@@ -62,9 +62,10 @@ public class WorkspaceAuditorTest {
   private Workspace workspace1;
   private DbWorkspace dbWorkspace1;
 
-  @Autowired private WorkspaceAuditor workspaceAuditor;
   @MockitoBean private Provider<DbUser> mockUserProvider;
   @MockitoBean private ActionAuditService mockActionAuditService;
+
+  @Autowired private WorkspaceAuditor workspaceAuditor;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventCollectionCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;

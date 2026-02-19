@@ -101,6 +101,8 @@ public class UserServiceTest {
   @MockitoBean private FireCloudService mockFireCloudService;
   @MockitoBean private InstitutionService mockInstitutionService;
   @MockitoBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  // use a SpyBean when we need the full service for some tests and mocks for others
+  @MockitoSpyBean private AccessModuleService accessModuleService;
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -112,9 +114,6 @@ public class UserServiceTest {
   @Autowired private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
-
-  // use a SpyBean when we need the full service for some tests and mocks for others
-  @MockitoSpyBean private AccessModuleService accessModuleService;
 
   @Import({
     FakeClockConfiguration.class,

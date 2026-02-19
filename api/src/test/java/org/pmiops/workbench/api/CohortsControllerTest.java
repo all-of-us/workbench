@@ -160,9 +160,27 @@ public class CohortsControllerTest {
 
   private static DbUser currentUser;
 
+  @MockitoBean private CdrVersionService cdrVersionService;
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private CloudBillingClient cloudBillingClient;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private DataSetService dataSetService;
+  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
+
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired UserService userService;
+  @Autowired WorkspaceService workspaceService;
+  @Autowired WorkspaceAuthService workspaceAuthService;
+  @Autowired AccessTierDao accessTierDao;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired CohortDao cohortDao;
+  @Autowired CohortReviewDao cohortReviewDao;
+  @Autowired ConceptSetDao conceptSetDao;
+  @Autowired UserDao userDao;
+  @Autowired FirecloudMapper firecloudMapper;
 
   Workspace workspace;
   Workspace workspace2;
@@ -170,27 +188,6 @@ public class CohortsControllerTest {
   CohortDefinition cohortDefinition;
   String cohortCriteria;
   String badCohortCriteria;
-
-  @MockitoBean private CdrVersionService cdrVersionService;
-  @MockitoBean private CloudStorageClient cloudStorageClient;
-  @MockitoBean private CloudBillingClient cloudBillingClient;
-  @MockitoBean private FireCloudService fireCloudService;
-  @MockitoBean private UserRecentResourceService userRecentResourceService;
-  @Autowired UserService userService;
-  @Autowired WorkspaceService workspaceService;
-  @Autowired WorkspaceAuthService workspaceAuthService;
-
-  @Autowired AccessTierDao accessTierDao;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortDao cohortDao;
-  @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired ConceptSetDao conceptSetDao;
-  @MockitoBean private DataSetService dataSetService;
-  @Autowired UserDao userDao;
-
-  @Autowired FirecloudMapper firecloudMapper;
-
-  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
 
   @TestConfiguration
   @Import({

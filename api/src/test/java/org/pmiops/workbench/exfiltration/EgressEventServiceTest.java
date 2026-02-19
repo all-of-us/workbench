@@ -48,21 +48,19 @@ public class EgressEventServiceTest {
   @MockitoBean private EgressEventAuditor egressEventAuditor;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserService userService;
+  @MockitoBean private LeonardoApiClient leonardoApiClient;
+
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
   private static final String WORKSPACE_NAMEPACE = "aou-namespace";
 
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private UserDao userDao;
-
   @Autowired private EgressEventAuditor mockEgressEventAuditor;
   @Autowired private TaskQueueService mockTaskQueueService;
   @Autowired private UserService mockUserService;
-
   @Autowired private EgressEventService egressEventService;
   @Autowired private FakeClock fakeClock;
-
-  @MockitoBean private LeonardoApiClient leonardoApiClient;
 
   private static final User USER_1 =
       new User()

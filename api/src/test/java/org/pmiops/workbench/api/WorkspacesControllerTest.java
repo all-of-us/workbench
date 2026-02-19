@@ -287,16 +287,34 @@ public class WorkspacesControllerTest {
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
 
-  @Autowired AccessTierDao accessTierDao;
   @MockitoBean private BigQueryService bigQueryService;
-  @Autowired CdrVersionDao cdrVersionDao;
   @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
+  @MockitoBean AccessTierService accessTierService;
+  @MockitoBean BucketAuditQueryService bucketAuditQueryService;
+  @MockitoBean CloudBillingClient mockCloudBillingClient;
+  @MockitoBean CohortBuilderService cohortBuilderService;
+  @MockitoBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockitoBean FireCloudService fireCloudService;
+  @MockitoBean InitialCreditsService mockInitialCreditsService;
+  @MockitoBean IamService mockIamService;
+
+  @MockitoBean
+  @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
+  EgressRemediationService egressRemediationService;
+
+  @MockitoSpyBean @Autowired WorkspaceDao workspaceDao;
+  @MockitoSpyBean @Autowired WorkspaceService workspaceService;
+
+  @Autowired AccessTierDao accessTierDao;
+  @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired CohortReviewDao cohortReviewDao;
   @Autowired CohortsController cohortsController;
-  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
@@ -307,7 +325,6 @@ public class WorkspacesControllerTest {
   @Autowired FirecloudMapper firecloudMapper;
   @Autowired ObjectNameLengthService objectNameLengthService;
   @Autowired UserDao userDao;
-  @MockitoBean private UserRecentResourceService userRecentResourceService;
   @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired WorkspaceAdminService workspaceAdminService;
   @Autowired WorkspaceAuditor mockWorkspaceAuditor;
@@ -315,23 +332,6 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspacesController workspacesController;
   @Autowired FeaturedWorkspaceDao featuredWorkspaceDao;
-  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
-
-  @MockitoBean AccessTierService accessTierService;
-  @MockitoBean BucketAuditQueryService bucketAuditQueryService;
-  @MockitoBean CloudBillingClient mockCloudBillingClient;
-  @MockitoBean CohortBuilderService cohortBuilderService;
-  @MockitoBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  @MockitoBean FireCloudService fireCloudService;
-  @MockitoBean InitialCreditsService mockInitialCreditsService;
-  @MockitoBean IamService mockIamService;
-
-  @MockitoSpyBean @Autowired WorkspaceDao workspaceDao;
-  @MockitoSpyBean @Autowired WorkspaceService workspaceService;
-
-  @MockitoBean
-  @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
-  EgressRemediationService egressRemediationService;
 
   private static DbUser currentUser;
   private static WorkbenchConfig workbenchConfig;

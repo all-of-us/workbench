@@ -36,18 +36,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CloudTaskUserControllerTest {
   @MockitoBean private CloudResourceManagerService cloudResourceManagerService;
-  @Autowired private CloudResourceManagerService mockCloudResourceManagerService;
-
-  private long incrementedUserId = 1L;
-  private DbUser userA;
-  private DbUser userB;
-
-  @Autowired private CloudTaskUserController controller;
-
   @MockitoBean private AccessModuleService mockAccessModuleService;
   @MockitoBean private InitialCreditsBatchUpdateService mockInitialCreditsBatchUpdateService;
   @MockitoBean private InitialCreditsService mockInitialCreditsService;
   @MockitoBean private UserService mockUserService;
+
+  @Autowired private CloudResourceManagerService mockCloudResourceManagerService;
+  @Autowired private CloudTaskUserController controller;
+
+  private long incrementedUserId = 1L;
+  private DbUser userA;
+  private DbUser userB;
 
   @TestConfiguration
   @Import({

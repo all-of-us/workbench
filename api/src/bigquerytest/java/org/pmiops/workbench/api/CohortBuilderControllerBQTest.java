@@ -108,6 +108,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private AccessTierService accessTierService;
   @MockitoBean private CdrVersionService cdrVersionService;
+  @MockitoBean private WorkspaceAuthService workspaceAuthService;
 
   @TestConfiguration
   @Import({
@@ -145,8 +146,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Autowired private CohortBuilderService cohortBuilderService;
 
   @Autowired private ChartService chartService;
-
-  @MockitoBean private WorkspaceAuthService workspaceAuthService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
 

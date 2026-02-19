@@ -73,15 +73,15 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
 
+  @MockitoSpyBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private MailService mailService;
+
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceInitialCreditsUsageDao;
   @Autowired VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
-
-  @MockitoSpyBean private InitialCreditsService initialCreditsService;
-  @MockitoBean private MailService mailService;
-
   @Autowired CloudTaskInitialCreditsExhaustionController controller;
+  @Autowired private InstitutionDao institutionDao;
 
   private DbInstitution dbInstitution;
 
@@ -89,7 +89,6 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
-  @Autowired private InstitutionDao institutionDao;
 
   @TestConfiguration
   @Import({

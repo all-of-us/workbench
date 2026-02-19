@@ -44,13 +44,14 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 class NewUserSatisfactionSurveyServiceTest {
   @MockitoBean private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
-  @Autowired private NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
   @MockitoBean private NewUserSatisfactionSurveyMapper newUserSatisfactionSurveyMapper;
   @MockitoBean private MailService mailService;
   @MockitoBean private UserDao userDao;
 
   @MockitoBean
   private NewUserSatisfactionSurveyOneTimeCodeDao newUserSatisfactionSurveyOneTimeCodeDao;
+
+  @Autowired private NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
 
   @Captor private ArgumentCaptor<DbNewUserSatisfactionSurveyOneTimeCode> oneTimeCodeCaptor;
 

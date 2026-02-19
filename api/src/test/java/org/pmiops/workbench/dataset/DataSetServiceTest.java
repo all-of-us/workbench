@@ -118,6 +118,8 @@ public class DataSetServiceTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private DataSetDao dataSetDao;
@@ -129,7 +131,6 @@ public class DataSetServiceTest {
   @Autowired private DataSetServiceImpl dataSetServiceImpl;
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private UserDao userDao;
-  @MockitoBean private UserRecentResourceService userRecentResourceService;
 
   private DbWorkspace workspace;
   private DbCohort cohort;

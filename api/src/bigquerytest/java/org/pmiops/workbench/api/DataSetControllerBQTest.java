@@ -127,6 +127,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @MockitoBean private Provider provider;
   @MockitoBean private UserMapper userMapper;
   @MockitoBean private WorkspaceMapperImpl workspaceMapperImpl;
+  @MockitoBean private CdrVersionService cdrVersionService;
+  @MockitoBean private GenomicExtractionService genomicExtractionService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String TANAGRA_WORKSPACE_NAMESPACE = "tanagraNamespace";
@@ -141,7 +144,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CdrVersionDao cdrVersionDao;
-  @MockitoBean private CdrVersionService cdrVersionService;
   @Autowired private CohortBuilderService cohortBuilderService;
   @Autowired private CohortDao cohortDao;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
@@ -154,12 +156,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private DataSetMapper dataSetMapper;
   private DataSetService dataSetService;
   @Autowired private FireCloudService fireCloudService;
-  @MockitoBean private GenomicExtractionService genomicExtractionService;
   @Autowired private NotebooksService notebooksService;
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
-  @MockitoBean private UserRecentResourceService userRecentResourceService;
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private WorkspaceDao workspaceDao;

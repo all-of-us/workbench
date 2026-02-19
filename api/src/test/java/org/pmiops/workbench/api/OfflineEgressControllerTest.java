@@ -31,8 +31,9 @@ public class OfflineEgressControllerTest {
   private static final Instant TWO_HOURS_AGO =
       FakeClockConfiguration.NOW.toInstant().minus(Duration.ofHours(2L));
 
-  @Autowired private FakeClock fakeClock;
   @MockitoBean private TaskQueueService mockTaskQueueService;
+
+  @Autowired private FakeClock fakeClock;
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private OfflineEgressController offlineEgressController;
 

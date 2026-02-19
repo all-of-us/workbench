@@ -210,6 +210,15 @@ public class CohortReviewControllerTest {
   DbParticipantCohortAnnotation participantAnnotation;
   DbParticipantCohortAnnotation participantAnnotationDate;
 
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private CloudBillingClient cloudBillingClient;
+  @MockitoBean private DataSetService dataSetService;
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private WorkspaceService workspaceService;
+  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
+
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired AccessTierDao accessTierDao;
   @Autowired CBCriteriaDao cbCriteriaDao;
@@ -223,20 +232,10 @@ public class CohortReviewControllerTest {
   @Autowired ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
   @Autowired ParticipantCohortStatusMapper participantCohortStatusMapper;
   @Autowired CohortReviewMapper cohortReviewMapper;
-  @MockitoBean private FireCloudService fireCloudService;
-  @MockitoBean private CloudStorageClient cloudStorageClient;
-  @MockitoBean private CloudBillingClient cloudBillingClient;
-  @MockitoBean private DataSetService dataSetService;
-  @MockitoBean private BigQueryService bigQueryService;
   @Autowired UserService userService;
-  @MockitoBean private UserRecentResourceService userRecentResourceService;
-  @MockitoBean private WorkspaceService workspaceService;
   @Autowired WorkspaceAuthService workspaceAuthService;
-
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortReviewController cohortReviewController;
-
-  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
 
   private enum TestConcepts {
     RACE_ASIAN("Asian", 8515, CriteriaType.RACE),

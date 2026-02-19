@@ -152,11 +152,6 @@ public class WorkspaceServiceTest {
     }
   }
 
-  @Autowired private AccessTierDao accessTierDao;
-  @Autowired private CdrVersionDao cdrVersionDao;
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspaceService workspaceService;
-
   @MockitoBean private AccessTierService mockAccessTierService;
   @MockitoBean private BillingProjectAuditor mockBillingProjectAuditor;
   @MockitoBean private Clock mockClock;
@@ -166,6 +161,11 @@ public class WorkspaceServiceTest {
   @MockitoBean private MailService mockMailService;
   @MockitoBean private WorkspaceAuthService mockWorkspaceAuthService;
   @MockitoBean private Provider<Stopwatch> mockStopwatchProvider;
+
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceService workspaceService;
 
   private static DbUser currentUser;
 

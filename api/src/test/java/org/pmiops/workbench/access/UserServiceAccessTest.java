@@ -107,6 +107,8 @@ public class UserServiceAccessTest {
   private InstitutionTierConfig ctTierConfig;
   private Institution institution;
 
+  @MockitoBean private MailService mailService;
+
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessTierDao accessTierDao;
@@ -116,8 +118,6 @@ public class UserServiceAccessTest {
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
-
-  @MockitoBean private MailService mailService;
 
   @Import({
     UserServiceTestConfiguration.class,

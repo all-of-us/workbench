@@ -68,13 +68,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 public class UserControllerTest {
 
   @MockitoBean private DirectoryService directoryService;
+  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private MailService mailService;
   @MockitoBean private UserServiceAuditor userServiceAuditor;
   @MockitoBean private VwbAccessService vwbAccessService;
   @MockitoBean private VwbUserService vwbUserService;
   @MockitoBean private TaskQueueService taskQueueService;
-  @Autowired private FakeClock fakeClock;
+
   private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
   private static long incrementedUserId = 1;
   private static final Cloudbilling testCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -114,10 +115,9 @@ public class UserControllerTest {
     }
   }
 
+  @Autowired private FakeClock fakeClock;
   @Autowired UserController userController;
-
   @Autowired AccessTierDao accessTierDao;
-  @MockitoBean private FireCloudService fireCloudService;
   @Autowired InitialCreditsService mockInitialCreditsService;
   @Autowired UserAccessTierDao userAccessTierDao;
   @Autowired UserDao userDao;

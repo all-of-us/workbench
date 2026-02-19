@@ -70,9 +70,10 @@ public class RdrExportServiceImplTest {
   @MockitoBean private RdrApi rdrApi;
   @MockitoBean private InstitutionService institutionService;
   @MockitoBean private WorkspaceService workspaceService;
+  @MockitoBean private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
   @Autowired private RdrExportService rdrExportService;
   @Autowired private RdrMapper rdrMapper;
-
   @Autowired private FakeClock clock;
   @Autowired private AccessTierService mockAccessTierService;
   @Autowired private ApiClient mockApiClient;
@@ -81,7 +82,6 @@ public class RdrExportServiceImplTest {
   @Autowired private RdrExportDao rdrExportDao;
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
-  @MockitoBean private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private DbWorkspace workspace;
   private DbWorkspace deletedWorkspace;

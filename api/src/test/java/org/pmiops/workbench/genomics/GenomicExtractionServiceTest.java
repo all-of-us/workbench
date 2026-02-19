@@ -92,23 +92,22 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 public class GenomicExtractionServiceTest {
 
   @MockitoBean private InitialCreditsService initialCreditsService;
-  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-  private static final String FC_SUBMISSION_ID = "123";
-
-  @Autowired GenomicExtractionService genomicExtractionService;
-
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired DataSetDao dataSetDao;
-  @Autowired UserDao userDao;
-  @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
-  @Autowired WorkspaceDao workspaceDao;
-
   @MockitoBean FireCloudService mockFireCloudService;
   @MockitoBean VwbAccessService mockVwbAccessService;
   @MockitoBean GenomicDatasetService mockGenomicDatasetService;
   @MockitoBean JiraService mockJiraService;
   @MockitoBean MethodConfigurationsApi mockMethodConfigurationsApi;
   @MockitoBean SubmissionsApi mockSubmissionsApi;
+
+  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+  private static final String FC_SUBMISSION_ID = "123";
+
+  @Autowired GenomicExtractionService genomicExtractionService;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired DataSetDao dataSetDao;
+  @Autowired UserDao userDao;
+  @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
+  @Autowired WorkspaceDao workspaceDao;
 
   private DbWorkspace targetWorkspace;
 

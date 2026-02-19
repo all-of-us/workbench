@@ -91,15 +91,14 @@ public class EgressEventsAdminControllerTest {
   private static final String WORKSPACE2_NS = "ns2";
   private static final String WORKSPACE3_NS = "ns3";
 
-  @Autowired private EgressEventsAdminController controller;
+  @MockitoBean private ExfilManagerClient exfilManagerClient;
 
+  @Autowired private EgressEventsAdminController controller;
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
-
   @Autowired private FakeClock fakeClock;
   @Autowired private BigQueryService mockBigQueryService;
-  @MockitoBean private ExfilManagerClient exfilManagerClient;
 
   private DbUser user1;
   private DbUser user2;

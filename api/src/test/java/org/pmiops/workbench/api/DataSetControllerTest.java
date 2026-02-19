@@ -226,20 +226,7 @@ public class DataSetControllerTest {
   private DataSet noAccessDataSet;
   private DbCdrVersion cdrVersion;
 
-  @Autowired private AccessTierDao accessTierDao;
-  @Autowired private CdrVersionDao cdrVersionDao;
-  @Autowired private CohortsController cohortsController;
-  @Autowired private ConceptSetsController conceptSetsController;
-  @Autowired private DataSetController dataSetController;
-  @Autowired private UserDao userDao;
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspacesController workspacesController;
-
-  @Autowired private FirecloudMapper firecloudMapper;
-
-  @Autowired private WorkspaceService workspaceService;
   @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
-
   @MockitoBean private BigQueryService mockBigQueryService;
   @MockitoBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockitoBean private CdrVersionService mockCdrVersionService;
@@ -253,6 +240,17 @@ public class DataSetControllerTest {
   @MockitoBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
   EgressRemediationService egressRemediationService;
+
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private CohortsController cohortsController;
+  @Autowired private ConceptSetsController conceptSetsController;
+  @Autowired private DataSetController dataSetController;
+  @Autowired private UserDao userDao;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspacesController workspacesController;
+  @Autowired private FirecloudMapper firecloudMapper;
+  @Autowired private WorkspaceService workspaceService;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 

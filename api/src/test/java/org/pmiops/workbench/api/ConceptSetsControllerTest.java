@@ -218,28 +218,18 @@ public class ConceptSetsControllerTest {
   private Workspace workspace2;
   private ConceptSet defaultConceptSet;
 
-  @Autowired AccessTierDao accessTierDao;
-
-  @Autowired CdrVersionDao cdrVersionDao;
-
-  @Autowired CBCriteriaDao cbCriteriaDao;
-
-  @Autowired UserDao userDao;
-
   @MockitoBean private CloudBillingClient cloudBillingClient;
-
   @MockitoBean private FireCloudService fireCloudService;
-
-  @Autowired ConceptSetsController conceptSetsController;
-
   @MockitoBean private ConceptBigQueryService conceptBigQueryService;
-
-  @Autowired WorkspacesController workspacesController;
-
   @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
 
+  @Autowired AccessTierDao accessTierDao;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired CBCriteriaDao cbCriteriaDao;
+  @Autowired UserDao userDao;
+  @Autowired ConceptSetsController conceptSetsController;
+  @Autowired WorkspacesController workspacesController;
   @Autowired WorkspaceService workspaceService;
-
   @Autowired private FakeClock fakeClock;
 
   @TestConfiguration

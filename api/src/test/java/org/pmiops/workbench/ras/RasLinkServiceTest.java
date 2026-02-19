@@ -149,17 +149,18 @@ public class RasLinkServiceTest {
   private RasLinkService rasLinkService;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+  @MockitoBean private InstitutionService mockInstitutionService;
+
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
-  @Mock private static OpenIdConnectClient mockOidcClient;
 
+  @Mock private static OpenIdConnectClient mockOidcClient;
   @Mock private static IdentityVerificationService mockIdentityVerificationService;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
   @Mock private static Provider<DbUser> mockUserProvider;
-  @MockitoBean private InstitutionService mockInstitutionService;
 
   @TestConfiguration
   @Import({

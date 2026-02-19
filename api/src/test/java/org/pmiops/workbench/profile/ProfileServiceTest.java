@@ -122,10 +122,11 @@ public class ProfileServiceTest {
   @MockitoBean
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
 
-  @Autowired ProfileService profileService;
   // Use a SpyBean here, since we need to have a real UserDao available, but also mock out specific
   // method calls (see e.g. testGetAdminTableUsers* tests).
   @MockitoSpyBean UserDao userDao;
+
+  @Autowired ProfileService profileService;
 
   // enables access to the logged in user
   private static DbUser loggedInUser;
