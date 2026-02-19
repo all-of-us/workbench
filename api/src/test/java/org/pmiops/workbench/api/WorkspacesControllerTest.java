@@ -245,7 +245,6 @@ public class WorkspacesControllerTest {
   @MockitoBean private UserService userService;
   @MockitoBean private WorkspaceAuditor workspaceAuditor;
   @MockitoBean private WsmClient wsmClient;
-  @MockitoBean private TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";
 

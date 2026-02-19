@@ -141,7 +141,6 @@ public class ConceptSetsControllerTest {
   @MockitoBean private WsmClient wsmClient;
   @MockitoBean private VwbAccessService vwbAccessService;
   @MockitoBean private VwbUserService vwbUserService;
-  @MockitoBean private TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
   public static final String UPDATED_DESC = "Updated Desc";
   private static final Criteria CRITERIA_CONDITION_1 =
       new Criteria()

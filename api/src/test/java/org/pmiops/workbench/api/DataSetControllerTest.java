@@ -198,7 +198,6 @@ public class DataSetControllerTest {
   @MockitoBean private WsmClient wsmClient;
   @MockitoBean private VwbAccessService vwbAccessService;
   @MockitoBean private VwbUserService vwbUserService;
-  @MockitoBean private TemporaryInitialCreditsRelinkService temporaryInitialCreditsRelinkService;
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
