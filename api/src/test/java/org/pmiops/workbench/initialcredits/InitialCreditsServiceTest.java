@@ -1047,6 +1047,28 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
+  public void test_checkCreditsExpirationForUserIDs_alreadyCleaned_doesNotResendEmail()
+      throws MessagingException {
+    // User whose credits expired but whose cleanup was already completed (expirationCleanupTime
+    // set)
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(PAST_EXPIRATION)
+                        .setBypassed(false)
+                        .setExpirationCleanupTime(NOW)));
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // Should not re-send the expiration email or modify the cleanup time
+    verify(mailService, never()).alertUserInitialCreditsExpired(any());
+    assertEquals(NOW, user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
+
+  @Test
   public void test_extendInitialCreditsExpiration_extensionDisabled() {
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = false;
 
