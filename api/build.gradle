@@ -53,7 +53,7 @@ plugins {
 
     id 'io.spring.dependency-management' version '1.1.7'
     // keep in sync with the dependencyManagement block below
-    id 'org.springframework.boot' version '3.5.0'
+    id 'org.springframework.boot' version '3.5.11'
 
     id 'com.diffplug.spotless' version '6.23.3'
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.8.0'
@@ -78,7 +78,7 @@ dependencyManagement {
     dependencies {
         dependency group: 'org.springframework', name: 'spring-core', version: '6.2.7'
         // keep in sync with the plugin block above
-        dependency group: 'org.springframework.boot', name: 'spring-boot', version: '3.5.0'
+        dependency group: 'org.springframework.boot', name: 'spring-boot', version: '3.5.11'
         dependency group: 'org.springframework.security', name: 'spring-security', version: '6.4.5'
     }
 }
