@@ -36,7 +36,8 @@ public abstract class RetryHandler<E extends Exception> {
       throw new ServerErrorException(retryException.getCause());
     } catch (WorkbenchException exception) {
       // Already converted upstream; re-throw directly rather than passing to convertException,
-      // which expects the raw typed exception E (e.g. ApiException).
+      // which expects the raw typed exception E (e.g. ApiException). Passing a WorkbenchException
+      // would cause a ClassCastException in the bridge method before convertException is reached.
       throw exception;
     } catch (Exception exception) {
       throw convertException((E) exception);
