@@ -35,6 +35,9 @@ public abstract class RetryHandler<E extends Exception> {
     } catch (RetryException retryException) {
       throw new ServerErrorException(retryException.getCause());
     } catch (Exception exception) {
+      if (exception instanceof WorkbenchException) {
+        throw (WorkbenchException) exception;
+      }
       throw convertException((E) exception);
     }
   }
