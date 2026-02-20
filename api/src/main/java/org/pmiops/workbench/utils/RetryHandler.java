@@ -34,10 +34,11 @@ public abstract class RetryHandler<E extends Exception> {
       return retryTemplate.execute(retryCallback);
     } catch (RetryException retryException) {
       throw new ServerErrorException(retryException.getCause());
+    } catch (WorkbenchException exception) {
+      // Already converted upstream; re-throw directly rather than passing to convertException,
+      // which expects the raw typed exception E (e.g. ApiException).
+      throw exception;
     } catch (Exception exception) {
-      if (exception instanceof WorkbenchException) {
-        throw (WorkbenchException) exception;
-      }
       throw convertException((E) exception);
     }
   }
