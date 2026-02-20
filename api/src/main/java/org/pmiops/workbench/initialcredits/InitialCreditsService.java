@@ -492,12 +492,7 @@ public class InitialCreditsService {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
 
-    if (userInitialCreditsExpiration == null) {
-      return;
-    }
-
-    if (areUserCreditsExpired(user)
-        && userInitialCreditsExpiration.getExpirationCleanupTime() == null) {
+    if (areUserCreditsExpired(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
         && shouldCheckApproachingExpirationNotification(userInitialCreditsExpiration)) {
