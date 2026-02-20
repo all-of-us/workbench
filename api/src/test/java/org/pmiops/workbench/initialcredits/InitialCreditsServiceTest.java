@@ -1049,7 +1049,8 @@ public class InitialCreditsServiceTest {
   @Test
   public void test_checkCreditsExpirationForUserIDs_alreadyCleaned_doesNotResendEmail()
       throws MessagingException {
-    // User whose credits expired but whose cleanup was already completed (expirationCleanupTime set)
+    // User whose credits expired but whose cleanup was already completed (expirationCleanupTime
+    // set)
     DbUser user =
         spyUserDao.save(
             new DbUser()

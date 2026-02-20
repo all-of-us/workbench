@@ -34,6 +34,12 @@ public class RetryHandlerTest {
     ForbiddenException toThrow = new ForbiddenException("forbidden");
     // Before Fix 1: the bridge method cast ForbiddenException → IllegalArgumentException,
     // resulting in ClassCastException. After Fix 1: ForbiddenException propagates directly.
-    assertThrows(ForbiddenException.class, () -> handler.run(context -> { throw toThrow; }));
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            handler.run(
+                context -> {
+                  throw toThrow;
+                }));
   }
 }
