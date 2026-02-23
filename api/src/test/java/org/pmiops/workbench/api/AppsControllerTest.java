@@ -26,12 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,14 +39,13 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AppsControllerTest {
+  @MockitoBean private InteractiveAnalysisService interactiveAnalysisService;
+
   @TestConfiguration
   @Import({
     AppsController.class,
     FakeClockConfiguration.class,
     LeonardoApiHelper.class,
-  })
-  @MockBean({
-    InteractiveAnalysisService.class,
   })
   static class Configuration {
 
@@ -63,11 +62,11 @@ public class AppsControllerTest {
     }
   }
 
-  @Autowired private AppsController controller;
+  @MockitoBean LeonardoApiClient mockLeonardoApiClient;
+  @MockitoBean WorkspaceAuthService mockWorkspaceAuthService;
+  @MockitoBean WorkspaceService mockWorkspaceService;
 
-  @MockBean LeonardoApiClient mockLeonardoApiClient;
-  @MockBean WorkspaceAuthService mockWorkspaceAuthService;
-  @MockBean WorkspaceService mockWorkspaceService;
+  @Autowired private AppsController controller;
 
   private static final String APP_NAME = "all-of-us-123-cromwell";
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";

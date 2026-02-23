@@ -32,20 +32,19 @@ import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class InteractiveAnalysisServiceTest {
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+
   @TestConfiguration
   @Import({
     InteractiveAnalysisService.class,
-  })
-  @MockBean({
-    UserRecentResourceService.class,
   })
   static class Configuration {
     @Bean
@@ -73,10 +72,10 @@ public class InteractiveAnalysisServiceTest {
   private static final String BUCKET_NAME = "bucket-name";
   private static final String NOTEBOOK_DIR = "gs://" + BUCKET_NAME + "/notebooks";
   private static final String APP_NAME = "app-name";
-  @MockBean WorkspaceService mockWorkspaceService;
-  @MockBean LeonardoApiClient mockLeonardoApiClient;
-  @MockBean FireCloudService mockFireCloudService;
-  @MockBean NotebooksService mockNotebooksService;
+  @MockitoBean WorkspaceService mockWorkspaceService;
+  @MockitoBean LeonardoApiClient mockLeonardoApiClient;
+  @MockitoBean FireCloudService mockFireCloudService;
+  @MockitoBean NotebooksService mockNotebooksService;
 
   @Autowired InteractiveAnalysisService interactiveAnalysisService;
 

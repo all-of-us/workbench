@@ -20,13 +20,14 @@ import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class ConceptSetMapperTest {
 
+  @MockitoBean private ConceptBigQueryService mockConceptBigQueryService;
   @Autowired private ConceptSetMapper conceptSetMapper;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
 
@@ -34,7 +35,6 @@ public class ConceptSetMapperTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, ConceptSetMapperImpl.class, CommonMappers.class})
-  @MockBean({ConceptBigQueryService.class})
   static class Configuration {}
 
   @BeforeEach

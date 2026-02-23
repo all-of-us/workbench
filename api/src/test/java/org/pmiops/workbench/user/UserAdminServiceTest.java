@@ -28,8 +28,8 @@ import org.pmiops.workbench.vwb.exfil.ExfilManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class UserAdminServiceTest {
@@ -53,9 +53,9 @@ public class UserAdminServiceTest {
 
   @Autowired UserAdminService userAdminService;
 
-  @MockBean UserService userService;
+  @MockitoBean UserService userService;
 
-  @MockBean ExfilManagerClient exfilManagerClient;
+  @MockitoBean ExfilManagerClient exfilManagerClient;
 
   @Test
   public void testCreateEgressByPassWindow() {

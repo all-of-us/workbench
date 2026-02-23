@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
@@ -94,14 +95,28 @@ import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @Import({TestJpaConfig.class, CohortReviewControllerBQTest.Configuration.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
+  @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private BillingProjectAuditor billingProjectAuditor;
+  @MockitoBean private CloudBillingClientImpl cloudBillingClientImpl;
+  @MockitoBean private CohortFactory cohortFactory;
+  @MockitoBean private CohortService cohortService;
+  @MockitoBean private ConceptSetService conceptSetService;
+  @MockitoBean private DataSetService dataSetService;
+  @MockitoBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
+
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private UserService userService;
+
   @TestConfiguration
   @Import({
     BigQueryTestService.class,
@@ -125,23 +140,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
     WorkspaceAuthService.class,
-    CohortBuilderMapperImpl.class
-  })
-  @MockBean({
-    AccessTierService.class,
-    BillingProjectAuditor.class,
-    CloudBillingClientImpl.class,
-    CohortBuilderService.class,
-    CohortFactory.class,
-    CohortService.class,
-    ConceptSetService.class,
-    DataSetService.class,
-    FeaturedWorkspaceMapper.class,
-    FireCloudService.class,
-    InitialCreditsService.class,
-    MailService.class,
-    UserRecentResourceService.class,
-    UserService.class,
+    CohortBuilderMapperImpl.class,
+    CohortBuilderServiceImpl.class
   })
   static class Configuration {
     @Bean
@@ -164,27 +164,27 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private DbCdrVersion cdrVersion;
   private DbWorkspace workspace;
 
-  @SpyBean private CohortReviewController controller;
+  @MockitoSpyBean private CohortReviewController controller;
 
-  @SpyBean private TestWorkbenchConfig testWorkbenchConfig;
+  @MockitoSpyBean private TestWorkbenchConfig testWorkbenchConfig;
 
-  @SpyBean private CohortDao cohortDao;
+  @MockitoSpyBean private CohortDao cohortDao;
 
-  @SpyBean private CohortReviewDao cohortReviewDao;
+  @MockitoSpyBean private CohortReviewDao cohortReviewDao;
 
-  @SpyBean private WorkspaceDao workspaceDao;
+  @MockitoSpyBean private WorkspaceDao workspaceDao;
 
-  @SpyBean private CdrVersionDao cdrVersionDao;
+  @MockitoSpyBean private CdrVersionDao cdrVersionDao;
 
-  @SpyBean private ParticipantCohortStatusDao participantCohortStatusDao;
+  @MockitoSpyBean private ParticipantCohortStatusDao participantCohortStatusDao;
 
-  @SpyBean private CohortBuilderService cohortBuilderService;
+  @MockitoSpyBean private CohortBuilderService cohortBuilderService;
 
-  @SpyBean private FireCloudService mockFireCloudService;
+  @MockitoBean private FireCloudService mockFireCloudService;
 
-  @SpyBean private UserDao userDao;
+  @MockitoSpyBean private UserDao userDao;
 
-  @SpyBean private AccessTierDao accessTierDao;
+  @MockitoSpyBean private AccessTierDao accessTierDao;
 
   private DbCohortReview reviewWithoutEHRData;
   private DbCohortReview reviewWithEHRData;

@@ -38,12 +38,17 @@ import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @Import({FakeClockConfiguration.class, FakeJpaDateTimeConfiguration.class})
 public class EgressEventServiceTest {
+
+  @MockitoBean private EgressEventAuditor egressEventAuditor;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private UserService userService;
+  @MockitoBean private LeonardoApiClient leonardoApiClient;
 
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
   private static final String WORKSPACE_NAMEPACE = "aou-namespace";
@@ -51,15 +56,11 @@ public class EgressEventServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private UserDao userDao;
-
   @Autowired private EgressEventAuditor mockEgressEventAuditor;
   @Autowired private TaskQueueService mockTaskQueueService;
   @Autowired private UserService mockUserService;
-
   @Autowired private EgressEventService egressEventService;
   @Autowired private FakeClock fakeClock;
-
-  @Autowired private LeonardoApiClient leonardoApiClient;
 
   private static final User USER_1 =
       new User()
@@ -97,12 +98,6 @@ public class EgressEventServiceTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, EgressEventServiceImpl.class})
-  @MockBean({
-    EgressEventAuditor.class,
-    TaskQueueService.class,
-    UserService.class,
-    LeonardoApiClient.class
-  })
   static class Configuration {}
 
   @BeforeEach

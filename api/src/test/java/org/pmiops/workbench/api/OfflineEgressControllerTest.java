@@ -20,8 +20,8 @@ import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @Import(FakeJpaDateTimeConfiguration.class)
@@ -31,8 +31,9 @@ public class OfflineEgressControllerTest {
   private static final Instant TWO_HOURS_AGO =
       FakeClockConfiguration.NOW.toInstant().minus(Duration.ofHours(2L));
 
+  @MockitoBean private TaskQueueService mockTaskQueueService;
+
   @Autowired private FakeClock fakeClock;
-  @MockBean private TaskQueueService mockTaskQueueService;
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private OfflineEgressController offlineEgressController;
 

@@ -55,13 +55,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class NotebooksControllerTest {
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private VwbAccessService vwbAccessService;
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
@@ -77,12 +81,6 @@ public class NotebooksControllerTest {
     FakeClockConfiguration.class,
     NotebooksController.class,
   })
-  @MockBean({
-    CloudStorageClient.class,
-    FireCloudService.class,
-    UserRecentResourceService.class,
-    VwbAccessService.class
-  })
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -95,8 +93,8 @@ public class NotebooksControllerTest {
 
   private RawlsWorkspaceACL fcWorkspaceAcl;
 
-  @MockBean private NotebooksService mockNotebookService;
-  @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
+  @MockitoBean private NotebooksService mockNotebookService;
+  @MockitoBean private WorkspaceAuthService mockWorkspaceAuthService;
 
   @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private FireCloudService mockFireCloudService;

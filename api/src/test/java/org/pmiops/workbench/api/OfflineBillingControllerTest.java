@@ -11,16 +11,16 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class OfflineBillingControllerTest {
 
   @Autowired private OfflineBillingController offlineBillingController;
 
-  @MockBean private TaskQueueService mockTaskQueueService;
-  @MockBean private UserService mockUserService;
+  @MockitoBean private TaskQueueService mockTaskQueueService;
+  @MockitoBean private UserService mockUserService;
 
   @TestConfiguration
   @Import({

@@ -9,8 +9,8 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.vwb.exfil.api.EgressEventApi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import({ExfilManagerClient.class, ExfilManagerRetryHandler.class})
@@ -18,7 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 public class VwbSamClientTest {
   @Autowired private ExfilManagerClient exfilManagerClient;
 
-  @MockBean ExfilManagerRetryHandler exfilManagerRetryHandler;
+  @MockitoBean ExfilManagerRetryHandler exfilManagerRetryHandler;
 
   private final DbEgressEvent dbEgressEvent = new DbEgressEvent();
 

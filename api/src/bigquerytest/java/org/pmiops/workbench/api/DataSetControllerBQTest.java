@@ -108,15 +108,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 @Import({TestJpaConfig.class, DataSetControllerBQTest.Configuration.class})
 public class DataSetControllerBQTest extends BigQueryBaseTest {
 
+  @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private BillingProjectAuditor billingProjectAuditor;
+  @MockitoBean private CohortCloningService cohortCloningService;
+  @MockitoBean private CommonMappers commonMappers;
+  @MockitoBean private FireCloudServiceImpl fireCloudServiceImpl;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private NotebooksServiceImpl notebooksServiceImpl;
+  @MockitoBean private Provider provider;
+  @MockitoBean private UserMapper userMapper;
+  @MockitoBean private WorkspaceMapperImpl workspaceMapperImpl;
+  @MockitoBean private CdrVersionService cdrVersionService;
+  @MockitoBean private GenomicExtractionService genomicExtractionService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String TANAGRA_WORKSPACE_NAMESPACE = "tanagraNamespace";
@@ -131,7 +144,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CdrVersionDao cdrVersionDao;
-  @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortBuilderService cohortBuilderService;
   @Autowired private CohortDao cohortDao;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
@@ -144,12 +156,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private DataSetMapper dataSetMapper;
   private DataSetService dataSetService;
   @Autowired private FireCloudService fireCloudService;
-  @Autowired private GenomicExtractionService genomicExtractionService;
   @Autowired private NotebooksService notebooksService;
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
-  @Autowired private UserRecentResourceService userRecentResourceService;
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private WorkspaceDao workspaceDao;
@@ -214,21 +224,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
     WorkspaceAuthService.class,
-  })
-  @MockBean({
-    AccessTierService.class,
-    BillingProjectAuditor.class,
-    CdrVersionService.class,
-    CohortCloningService.class,
-    CommonMappers.class,
-    FireCloudServiceImpl.class,
-    InitialCreditsService.class,
-    GenomicExtractionService.class,
-    NotebooksServiceImpl.class,
-    Provider.class,
-    UserMapper.class,
-    UserRecentResourceService.class,
-    WorkspaceMapperImpl.class,
   })
   static class Configuration {
     @Bean

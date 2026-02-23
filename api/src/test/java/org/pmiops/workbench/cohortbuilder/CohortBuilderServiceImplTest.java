@@ -33,14 +33,15 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class CohortBuilderServiceImplTest {
 
+  @MockitoBean private WorkspaceAuthService workspaceAuthService;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
@@ -58,7 +59,6 @@ class CohortBuilderServiceImplTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
-  @MockBean({WorkspaceAuthService.class})
   static class Configuration {}
 
   private CohortBuilderServiceImpl cohortBuilderService;

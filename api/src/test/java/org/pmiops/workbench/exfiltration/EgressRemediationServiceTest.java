@@ -81,25 +81,26 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class EgressRemediationServiceTest {
 
+  @MockitoBean private CommonMappers commonMappers;
   private static final String USER_EMAIL = "asdf@fake-research-aou.org";
   private static WorkbenchConfig workbenchConfig;
 
-  @MockBean private UserService mockUserService;
-  @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
-  @MockBean private EgressEventAuditor mockEgressEventAuditor;
-  @MockBean private MailService mockMailService;
-  @MockBean private JiraApi mockJiraApi;
+  @MockitoBean private UserService mockUserService;
+  @MockitoBean private LeonardoApiClient mockLeonardoNotebooksClient;
+  @MockitoBean private EgressEventAuditor mockEgressEventAuditor;
+  @MockitoBean private MailService mockMailService;
+  @MockitoBean private JiraApi mockJiraApi;
 
-  @MockBean private UserAdminService mockUserAdminService;
-  @MockBean private org.pmiops.workbench.vwb.admin.VwbAdminQueryService mockVwbAdminQueryService;
+  @MockitoBean private UserAdminService mockUserAdminService;
+  @MockitoBean private org.pmiops.workbench.vwb.admin.VwbAdminQueryService mockVwbAdminQueryService;
 
   @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;
@@ -139,9 +140,6 @@ public class EgressRemediationServiceTest {
     JiraService.class,
     EgressSumologicJiraHandler.class,
     EgressVwbJiraHandler.class
-  })
-  @MockBean({
-    CommonMappers.class,
   })
   static class Configuration {
 

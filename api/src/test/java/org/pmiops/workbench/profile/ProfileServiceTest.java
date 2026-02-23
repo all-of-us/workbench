@@ -66,16 +66,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @DataJpaTest
 public class ProfileServiceTest {
+  @MockitoBean private AccessModuleService accessModuleService;
+  @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
+  @MockitoBean private ProfileAuditor profileAuditor;
+  @MockitoBean private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private static final FakeClock CLOCK = new FakeClock(Instant.parse("2000-01-01T00:00:00.00Z"));
 
   private static final DbInstitution BROAD_INSTITUTION =
@@ -108,19 +113,20 @@ public class ProfileServiceTest {
 
   private static final Profile VALID_PROFILE = createValidProfile();
 
-  @MockBean private InstitutionDao mockInstitutionDao;
-  @MockBean private InstitutionService mockInstitutionService;
-  @MockBean private UserService mockUserService;
-  @MockBean private InitialCreditsService mockInitialCreditsService;
-  @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
+  @MockitoBean private InstitutionDao mockInstitutionDao;
+  @MockitoBean private InstitutionService mockInstitutionService;
+  @MockitoBean private UserService mockUserService;
+  @MockitoBean private InitialCreditsService mockInitialCreditsService;
+  @MockitoBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
-  @MockBean
+  @MockitoBean
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
 
-  @Autowired ProfileService profileService;
   // Use a SpyBean here, since we need to have a real UserDao available, but also mock out specific
   // method calls (see e.g. testGetAdminTableUsers* tests).
-  @SpyBean UserDao userDao;
+  @MockitoSpyBean UserDao userDao;
+
+  @Autowired ProfileService profileService;
 
   // enables access to the logged in user
   private static DbUser loggedInUser;
@@ -138,14 +144,6 @@ public class ProfileServiceTest {
     ProfileMapperImpl.class,
     ProfileService.class,
     VerifiedInstitutionalAffiliationMapperImpl.class
-  })
-  @MockBean({
-    AccessModuleService.class,
-    AccessTierService.class,
-    InitialCreditsService.class,
-    NewUserSatisfactionSurveyService.class,
-    ProfileAuditor.class,
-    VerifiedInstitutionalAffiliationDao.class,
   })
   static class Configuration {
     @Bean

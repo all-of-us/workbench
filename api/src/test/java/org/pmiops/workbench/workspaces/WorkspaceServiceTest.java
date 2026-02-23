@@ -89,15 +89,29 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceServiceTest {
+
+  @MockitoBean private BucketAuditQueryService bucketAuditQueryService;
+  @MockitoBean private CohortCloningService cohortCloningService;
+  @MockitoBean private CohortService cohortService;
+  @MockitoBean private ConceptSetService conceptSetService;
+  @MockitoBean private DataSetService dataSetService;
+  @MockitoBean private EgressRemediationService egressRemediationService;
+  @MockitoBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockitoBean private IamService iamService;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private ProfileMapper profileMapper;
+  @MockitoBean private UserDao userDao;
+  @MockitoBean private UserMapper userMapper;
+  @MockitoBean private UserService userService;
 
   @TestConfiguration
   @Import({
@@ -111,23 +125,6 @@ public class WorkspaceServiceTest {
     ObjectNameLengthServiceImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class
-  })
-  @MockBean({
-    AccessTierService.class,
-    BillingProjectAuditor.class,
-    BucketAuditQueryService.class,
-    CohortCloningService.class,
-    CohortService.class,
-    ConceptSetService.class,
-    DataSetService.class,
-    EgressRemediationService.class,
-    FeaturedWorkspaceMapper.class,
-    IamService.class,
-    InitialCreditsService.class,
-    ProfileMapper.class,
-    UserDao.class,
-    UserMapper.class,
-    UserService.class
   })
   static class Configuration {
     @Bean
@@ -155,20 +152,20 @@ public class WorkspaceServiceTest {
     }
   }
 
+  @MockitoBean private AccessTierService mockAccessTierService;
+  @MockitoBean private BillingProjectAuditor mockBillingProjectAuditor;
+  @MockitoBean private Clock mockClock;
+  @MockitoBean private CloudBillingClient mockCloudBillingClient;
+  @MockitoBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
+  @MockitoBean private FireCloudService mockFireCloudService;
+  @MockitoBean private MailService mockMailService;
+  @MockitoBean private WorkspaceAuthService mockWorkspaceAuthService;
+  @MockitoBean private Provider<Stopwatch> mockStopwatchProvider;
+
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceService workspaceService;
-
-  @MockBean private AccessTierService mockAccessTierService;
-  @MockBean private BillingProjectAuditor mockBillingProjectAuditor;
-  @MockBean private Clock mockClock;
-  @MockBean private CloudBillingClient mockCloudBillingClient;
-  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private MailService mockMailService;
-  @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
-  @MockBean private Provider<Stopwatch> mockStopwatchProvider;
 
   private static DbUser currentUser;
 

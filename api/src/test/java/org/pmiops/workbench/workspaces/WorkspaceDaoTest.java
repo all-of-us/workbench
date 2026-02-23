@@ -38,11 +38,11 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceDaoTest {
+  @MockitoBean private Clock clock;
   private final long MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
   private static final String WORKSPACE_1_NAME = "Foo";
   private static final String WORKSPACE_NAMESPACE = "aou-1";
@@ -70,7 +71,6 @@ public class WorkspaceDaoTest {
 
   @TestConfiguration
   @Import({CommonMappers.class, ReportingTestConfig.class})
-  @MockBean({Clock.class})
   public static class config {}
 
   @BeforeEach

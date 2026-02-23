@@ -30,15 +30,17 @@ import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import(FakeClockConfiguration.class)
 @SpringJUnitConfig
 public class MailServiceTest {
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private SendGridMailSender mockSendGridMailSender;
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String PASSWORD = "secretpassword";
   private static final String INSTITUTION_NAME = "BROAD Institute";
@@ -49,7 +51,6 @@ public class MailServiceTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, MailServiceImpl.class})
-  @MockBean({CloudStorageClient.class, SendGridMailSender.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

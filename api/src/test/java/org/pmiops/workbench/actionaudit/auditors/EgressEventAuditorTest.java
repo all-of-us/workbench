@@ -44,8 +44,8 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
@@ -69,10 +69,10 @@ public class EgressEventAuditorTest {
 
   @Autowired private EgressEventAuditor egressEventAuditor;
 
-  @MockBean private ActionAuditService mockActionAuditService;
-  @MockBean private WorkspaceService mockWorkspaceService;
-  @MockBean private WorkspaceDao workspaceDao;
-  @MockBean private UserDao mockUserDao;
+  @MockitoBean private ActionAuditService mockActionAuditService;
+  @MockitoBean private WorkspaceService mockWorkspaceService;
+  @MockitoBean private WorkspaceDao workspaceDao;
+  @MockitoBean private UserDao mockUserDao;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventsCaptor;
 

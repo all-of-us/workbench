@@ -22,22 +22,22 @@ import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.client.RestTemplate;
 
 @SpringJUnitConfig
 class OAuth2ApiControllerTest {
-  @SpyBean private OAuth2ApiController oAuth2ApiController;
+  @MockitoSpyBean private OAuth2ApiController oAuth2ApiController;
 
-  @MockBean CloudStorageClient cloudStorageClient;
-  @MockBean private HttpServletRequest mockHttpServletRequest;
-  @MockBean private RestTemplate mockRestTemplate;
+  @MockitoBean CloudStorageClient cloudStorageClient;
+  @MockitoBean private HttpServletRequest mockHttpServletRequest;
+  @MockitoBean private RestTemplate mockRestTemplate;
 
   @TestConfiguration
   @Import({OAuth2ApiController.class})

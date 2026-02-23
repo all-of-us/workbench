@@ -17,13 +17,14 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class CohortMapperTest {
 
+  @MockitoBean private UserDao userDao;
   private Cohort sourceClientCohort;
   private DbCohort sourceDbCohort;
 
@@ -32,7 +33,6 @@ public class CohortMapperTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CohortMapperImpl.class, CommonMappers.class})
-  @MockBean({UserDao.class})
   static class Configuration {}
 
   @BeforeEach

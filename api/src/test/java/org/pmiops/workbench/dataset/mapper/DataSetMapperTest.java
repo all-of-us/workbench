@@ -48,13 +48,24 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class DataSetMapperTest {
 
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private ConceptSetDao conceptSetDao;
+  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
+  @MockitoBean private CohortBuilderService cohortBuilderService;
+  @MockitoBean private CohortBuilderMapper cohortBuilderMapper;
+  @MockitoBean private CohortQueryBuilder cohortQueryBuilder;
+  @MockitoBean private CohortDao cohortDao;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
+  @MockitoBean private UserDao userDao;
   private DbDataset dbDataset;
   private DbDSDataDictionary dbDataDictionaryEntry;
 
@@ -72,19 +83,6 @@ public class DataSetMapperTest {
     ConceptSetMapperImpl.class,
     CohortService.class,
     CohortMapperImpl.class
-  })
-  @MockBean({
-    BigQueryService.class,
-    CloudStorageClient.class,
-    ConceptSetDao.class,
-    ConceptBigQueryService.class,
-    CohortBuilderService.class,
-    CohortBuilderMapper.class,
-    CohortQueryBuilder.class,
-    CohortDao.class,
-    FireCloudService.class,
-    WgsExtractCromwellSubmissionDao.class,
-    UserDao.class
   })
   static class Configuration {}
 

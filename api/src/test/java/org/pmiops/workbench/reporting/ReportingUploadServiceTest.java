@@ -47,8 +47,8 @@ import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
@@ -59,13 +59,15 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 public class ReportingUploadServiceTest {
 
+  @MockitoBean private ReportingQueryService reportingQueryService;
+  @MockitoBean private ReportingVerificationService reportingVerificationService;
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
   private static final OffsetDateTime THEN = OffsetDateTime.ofInstant(THEN_INSTANT, ZoneOffset.UTC);
 
   private List<ReportingWorkspace> reportingWorkspaces;
 
-  @MockBean private BigQueryService mockBigQueryService;
+  @MockitoBean private BigQueryService mockBigQueryService;
 
   @Autowired private ReportingUploadService reportingUploadService;
 
@@ -82,7 +84,6 @@ public class ReportingUploadServiceTest {
     ReportingTestConfig.class,
     ReportingUploadServiceImpl.class,
   })
-  @MockBean({ReportingQueryService.class, ReportingVerificationService.class})
   public static class Config {}
 
   @BeforeEach

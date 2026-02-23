@@ -106,7 +106,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -114,6 +113,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -122,6 +122,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CohortsControllerTest {
 
+  @MockitoBean private AccessModuleService accessModuleService;
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean private BillingProjectAuditor billingProjectAuditor;
+  @MockitoBean private CohortBuilderMapper cohortBuilderMapper;
+  @MockitoBean private CohortBuilderService cohortBuilderService;
+  @MockitoBean private CohortService cohortService;
+  @MockitoBean private CohortQueryBuilder cohortQueryBuilder;
+  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
+  @MockitoBean private DirectoryService directoryService;
+  @MockitoBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockitoBean private LeonardoApiClient leonardoApiClient;
+  @MockitoBean private IamService iamService;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
+  @MockitoBean private ParticipantCohortStatusMapper participantCohortStatusMapper;
+  @MockitoBean private ReviewQueryBuilder reviewQueryBuilder;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private UserServiceAuditor userServiceAuditor;
+  @MockitoBean private WorkspaceAuditor workspaceAuditor;
+  @MockitoBean private WorkspaceOperationMapper workspaceOperationMapper;
+  @MockitoBean private EgressObjectLengthsRemediationService egressObjectLengthsRemediationService;
+  @MockitoBean private WsmClient wsmClient;
+  @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserService vwbUserService;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String CDR_VERSION_NAME = "cdrVersion";
@@ -135,9 +160,27 @@ public class CohortsControllerTest {
 
   private static DbUser currentUser;
 
+  @MockitoBean private CdrVersionService cdrVersionService;
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private CloudBillingClient cloudBillingClient;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private UserRecentResourceService userRecentResourceService;
+  @MockitoBean private DataSetService dataSetService;
+  @MockitoBean private WorkspaceServiceFactory workspaceServiceFactory;
+
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired UserService userService;
+  @Autowired WorkspaceService workspaceService;
+  @Autowired WorkspaceAuthService workspaceAuthService;
+  @Autowired AccessTierDao accessTierDao;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired CohortDao cohortDao;
+  @Autowired CohortReviewDao cohortReviewDao;
+  @Autowired ConceptSetDao conceptSetDao;
+  @Autowired UserDao userDao;
+  @Autowired FirecloudMapper firecloudMapper;
 
   Workspace workspace;
   Workspace workspace2;
@@ -145,27 +188,6 @@ public class CohortsControllerTest {
   CohortDefinition cohortDefinition;
   String cohortCriteria;
   String badCohortCriteria;
-
-  @Autowired CdrVersionService cdrVersionService;
-  @Autowired CloudStorageClient cloudStorageClient;
-  @Autowired CloudBillingClient cloudBillingClient;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired UserService userService;
-  @Autowired WorkspaceService workspaceService;
-  @Autowired WorkspaceAuthService workspaceAuthService;
-
-  @Autowired AccessTierDao accessTierDao;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortDao cohortDao;
-  @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired DataSetService dataSetService;
-  @Autowired UserDao userDao;
-
-  @Autowired FirecloudMapper firecloudMapper;
-
-  @Autowired WorkspaceServiceFactory workspaceServiceFactory;
 
   @TestConfiguration
   @Import({
@@ -195,41 +217,6 @@ public class CohortsControllerTest {
     ObjectNameLengthServiceImpl.class,
     BucketAuditQueryServiceImpl.class,
     EgressObjectLengthsRemediationService.class,
-  })
-  @MockBean({
-    AccessModuleService.class,
-    BigQueryService.class,
-    BillingProjectAuditor.class,
-    CdrVersionService.class,
-    CloudBillingClient.class,
-    CloudStorageClient.class,
-    CohortBuilderMapper.class,
-    CohortBuilderService.class,
-    CohortService.class,
-    CohortQueryBuilder.class,
-    ConceptBigQueryService.class,
-    DataSetService.class,
-    DirectoryService.class,
-    FeaturedWorkspaceMapper.class,
-    FireCloudService.class,
-    LeonardoApiClient.class,
-    IamService.class,
-    InitialCreditsService.class,
-    MailService.class,
-    ParticipantCohortAnnotationMapper.class,
-    ParticipantCohortStatusMapper.class,
-    ReviewQueryBuilder.class,
-    TaskQueueService.class,
-    UserRecentResourceService.class,
-    UserServiceAuditor.class,
-    WorkspaceAuditor.class,
-    WorkspaceOperationMapper.class,
-    EgressObjectLengthsRemediationService.class,
-    WorkspaceServiceFactory.class,
-    WsmClient.class,
-    VwbAccessService.class,
-    VwbUserService.class,
-    TaskQueueService.class
   })
   static class Configuration {
     @Bean

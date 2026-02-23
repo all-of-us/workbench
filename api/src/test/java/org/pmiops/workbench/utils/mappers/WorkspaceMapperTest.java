@@ -57,14 +57,28 @@ import org.pmiops.workbench.user.VwbUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class WorkspaceMapperTest {
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private CohortService cohortService;
+  @MockitoBean private ConceptSetService conceptSetService;
+  @MockitoBean private InstitutionService institutionService;
+  @MockitoBean private LeonardoApiClient leonardoApiClient;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private UserDao userDao;
+  @MockitoBean private UserServiceAuditor userServiceAuditor;
+  @MockitoBean private WorkspaceDao workspaceDao;
+  @MockitoBean private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+  @MockitoBean private WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
+  @MockitoBean private VwbUserPodDao vwbUserPodDao;
+  @MockitoBean private VwbUserService vwbUserService;
   private static final String FIRECLOUD_NAMESPACE = "aou-xxxxxxx";
   private static final String CREATOR_EMAIL = "ojc@verily.biz";
   private static final String CREATOR_GIVEN_NAME = "Oscar";
@@ -113,22 +127,6 @@ public class WorkspaceMapperTest {
     FirecloudMapperImpl.class,
     InitialCreditsService.class,
     WorkspaceMapperImpl.class,
-  })
-  @MockBean({
-    FireCloudService.class,
-    CohortService.class,
-    ConceptSetService.class,
-    InstitutionService.class,
-    LeonardoApiClient.class,
-    MailService.class,
-    TaskQueueService.class,
-    UserDao.class,
-    UserServiceAuditor.class,
-    WorkspaceDao.class,
-    WorkspaceFreeTierUsageDao.class,
-    WorkspaceInitialCreditUsageService.class,
-    VwbUserPodDao.class,
-    VwbUserService.class,
   })
   static class Configuration {
 

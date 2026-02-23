@@ -53,27 +53,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @DataJpaTest
 class CloudTaskInitialCreditsExhaustionControllerTest {
 
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private InstitutionService institutionService;
+  @MockitoBean private LeonardoApiClient leonardoApiClient;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private UserServiceAuditor userServiceAuditor;
+  @MockitoBean private WorkspaceInitialCreditUsageService workspaceInitialCreditUsageService;
+  @MockitoBean private WorkspaceMapper workspaceMapper;
+  @MockitoBean private VwbUserService vwbUserService;
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
+
+  @MockitoSpyBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private MailService mailService;
 
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceInitialCreditsUsageDao;
   @Autowired VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
-
-  @Autowired InitialCreditsService initialCreditsService;
-  @Autowired MailService mailService;
-
   @Autowired CloudTaskInitialCreditsExhaustionController controller;
+  @Autowired private InstitutionDao institutionDao;
 
   private DbInstitution dbInstitution;
 
@@ -81,24 +89,10 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
-  @Autowired private InstitutionDao institutionDao;
 
   @TestConfiguration
   @Import({
     CloudTaskInitialCreditsExhaustionController.class,
-  })
-  @MockBean({
-    FireCloudService.class,
-    InstitutionService.class,
-    LeonardoApiClient.class,
-    MailService.class,
-    TaskQueueService.class,
-    UserServiceAuditor.class,
-    WorkspaceInitialCreditUsageService.class,
-    WorkspaceMapper.class,
-    VwbUserService.class,
-  })
-  @SpyBean({
     InitialCreditsService.class,
   })
   static class Configuration {

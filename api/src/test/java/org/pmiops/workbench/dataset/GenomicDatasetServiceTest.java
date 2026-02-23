@@ -38,9 +38,9 @@ import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -70,8 +70,8 @@ public class GenomicDatasetServiceTest {
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
 
-  @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
-  @MockBean private BigQueryService mockBigQueryService;
+  @MockitoBean private CohortQueryBuilder mockCohortQueryBuilder;
+  @MockitoBean private BigQueryService mockBigQueryService;
 
   private DbCohort cohort;
   private DbWorkspace workspace;

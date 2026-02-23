@@ -95,12 +95,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -138,8 +138,8 @@ public class ReportingQueryServiceTest {
   @Qualifier("REPORTING_USER_TEST_FIXTURE")
   ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
-  @MockBean private BigQueryService bigQueryService;
-  @MockBean Provider<WorkbenchConfig> workbenchConfigProvider;
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Import({
     FakeClockConfiguration.class,

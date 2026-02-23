@@ -66,37 +66,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.transaction.TestTransaction;
 
 @DataJpaTest
 public class InitialCreditsServiceTest {
 
+  @MockitoBean private BigQueryService bigQueryService;
+  @MockitoBean private WorkspaceMapper workspaceMapper;
+  @MockitoBean private FireCloudService fireCloudService;
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
 
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
-  @SpyBean private UserDao spyUserDao;
+  @MockitoSpyBean private UserDao spyUserDao;
+  @MockitoSpyBean private WorkspaceDao spyWorkspaceDao;
 
-  @SpyBean private WorkspaceDao spyWorkspaceDao;
-
-  @MockBean private UserServiceAuditor mockUserServiceAuditor;
-  @MockBean private MailService mailService;
-  @MockBean private LeonardoApiClient leonardoApiClient;
-  @MockBean private InstitutionService institutionService;
+  @MockitoBean private UserServiceAuditor mockUserServiceAuditor;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private LeonardoApiClient leonardoApiClient;
+  @MockitoBean private InstitutionService institutionService;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private VwbUserService vwbUserService;
 
   @Autowired InitialCreditsService initialCreditsService;
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-
-  @Autowired private TaskQueueService taskQueueService;
   @Autowired private ApplicationContext applicationContext;
   @Autowired private VwbUserPodDao vwbUserPodDao;
 
@@ -124,17 +126,9 @@ public class InitialCreditsServiceTest {
               .plusSeconds((warningPeriodDays + 1L) * 24 * 60 * 60));
 
   private DbWorkspace workspace;
-  @Autowired private VwbUserService vwbUserService;
 
   @TestConfiguration
   @Import({InitialCreditsService.class, WorkspaceInitialCreditUsageService.class})
-  @MockBean({
-    BigQueryService.class,
-    TaskQueueService.class,
-    WorkspaceMapper.class,
-    FireCloudService.class,
-    VwbUserService.class,
-  })
   static class Configuration {
     @Bean
     public Clock clock() {

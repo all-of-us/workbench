@@ -69,17 +69,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceTest {
 
+  @MockitoBean private MailService mailService;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private TaskQueueService taskQueueService;
   private static final String USERNAME = "abc@fake-research-aou.org";
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
@@ -92,10 +97,12 @@ public class UserServiceTest {
   private static DbAccessTier registeredTier;
   private static DbAccessTier controlledTier;
 
-  @MockBean private DirectoryService mockDirectoryService;
-  @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private InstitutionService mockInstitutionService;
-  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockitoBean private DirectoryService mockDirectoryService;
+  @MockitoBean private FireCloudService mockFireCloudService;
+  @MockitoBean private InstitutionService mockInstitutionService;
+  @MockitoBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  // use a SpyBean when we need the full service for some tests and mocks for others
+  @MockitoSpyBean private AccessModuleService accessModuleService;
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -108,9 +115,6 @@ public class UserServiceTest {
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
-  // use a SpyBean when we need the full service for some tests and mocks for others
-  @SpyBean private AccessModuleService accessModuleService;
-
   @Import({
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
@@ -119,13 +123,6 @@ public class UserServiceTest {
     AccessModuleServiceImpl.class,
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
-  })
-  @MockBean({
-    MailService.class,
-    InitialCreditsService.class,
-    VwbAccessService.class,
-    VwbUserService.class,
-    TaskQueueService.class
   })
   @TestConfiguration
   static class Configuration {

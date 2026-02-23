@@ -28,38 +28,31 @@ import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CloudTaskUserControllerTest {
+  @MockitoBean private CloudResourceManagerService cloudResourceManagerService;
+  @MockitoBean private AccessModuleService mockAccessModuleService;
+  @MockitoBean private InitialCreditsBatchUpdateService mockInitialCreditsBatchUpdateService;
+  @MockitoBean private InitialCreditsService mockInitialCreditsService;
+  @MockitoBean private UserService mockUserService;
+
   @Autowired private CloudResourceManagerService mockCloudResourceManagerService;
+  @Autowired private CloudTaskUserController controller;
 
   private long incrementedUserId = 1L;
   private DbUser userA;
   private DbUser userB;
-
-  @Autowired private CloudTaskUserController controller;
-
-  @MockBean private AccessModuleService mockAccessModuleService;
-  @MockBean private InitialCreditsBatchUpdateService mockInitialCreditsBatchUpdateService;
-  @MockBean private InitialCreditsService mockInitialCreditsService;
-  @MockBean private UserService mockUserService;
 
   @TestConfiguration
   @Import({
     FakeClockConfiguration.class,
     CloudTaskUserController.class,
     Stopwatch.class,
-  })
-  @MockBean({
-    AccessModuleService.class,
-    CloudResourceManagerService.class,
-    InitialCreditsBatchUpdateService.class,
-    InitialCreditsService.class,
-    UserService.class,
   })
   static class Configuration {}
 

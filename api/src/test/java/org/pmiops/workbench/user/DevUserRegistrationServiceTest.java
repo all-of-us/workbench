@@ -22,16 +22,16 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperIm
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 public class DevUserRegistrationServiceTest {
 
-  @MockBean private DirectoryService directoryService;
-  @MockBean private InstitutionService institutionService;
-  @MockBean private UserService userService;
+  @MockitoBean private DirectoryService directoryService;
+  @MockitoBean private InstitutionService institutionService;
+  @MockitoBean private UserService userService;
 
   private Userinfo userInfo;
   private ArgumentCaptor<DbVerifiedInstitutionalAffiliation> dbAffiliationCaptor =

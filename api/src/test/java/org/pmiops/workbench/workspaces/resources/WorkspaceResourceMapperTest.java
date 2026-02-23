@@ -24,11 +24,14 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class WorkspaceResourceMapperTest {
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private CohortService cohortService;
+  @MockitoBean private ConceptSetService conceptSetService;
   private DbDataset dbDataset;
 
   @Autowired private WorkspaceResourceMapper workspaceResourceMapper;
@@ -43,7 +46,6 @@ public class WorkspaceResourceMapperTest {
     ConceptSetMapperImpl.class,
     FirecloudMapperImpl.class,
   })
-  @MockBean({FireCloudService.class, CohortService.class, ConceptSetService.class})
   static class Configuration {}
 
   @BeforeEach

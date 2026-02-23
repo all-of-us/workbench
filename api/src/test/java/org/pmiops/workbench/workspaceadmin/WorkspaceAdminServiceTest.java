@@ -95,14 +95,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class WorkspaceAdminServiceTest {
 
+  @MockitoBean private ActionAuditQueryService actionAuditQueryService;
+  @MockitoBean private CohortDao cohortDao;
+  @MockitoBean private CohortReviewMapper cohortReviewMapper;
+  @MockitoBean private CommonMappers commonMappers;
+  @MockitoBean private ConceptSetDao conceptSetDao;
+  @MockitoBean private ConceptSetMapper conceptSetMapper;
+  @MockitoBean private DataSetDao dataSetDao;
+  @MockitoBean private DataSetMapper dataSetMapper;
+  @MockitoBean private FirecloudMapper firecloudMapper;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private UserMapper userMapper;
+  @MockitoBean private UserService userService;
+  @MockitoBean private WorkspaceAuthService workspaceAuthService;
   private static final String GOOGLE_PROJECT_ID = DEFAULT_GOOGLE_PROJECT;
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
   private static final String WORKSPACE_DISPLAY_NAME = "Work It !";
@@ -115,18 +128,18 @@ public class WorkspaceAdminServiceTest {
   private LeonardoGetRuntimeResponse testLeoRuntime;
   private LeonardoListRuntimeResponse testLeoListRuntimeResponse;
 
-  @MockBean private AdminAuditor mockAdminAuditor;
-  @MockBean private CloudMonitoringService mockCloudMonitoringService;
-  @MockBean private CloudStorageClient mockCloudStorageClient;
-  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
-  @MockBean private FireCloudService mockFirecloudService;
-  @MockBean private VwbAccessService mockVwbAccessService;
-  @MockBean private LeonardoApiClient mockLeonardoApiClient;
-  @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean private MailService mailService;
-  @MockBean private NotebooksService mockNotebooksService;
-  @MockBean private WorkspaceService mockWorkspaceService;
+  @MockitoBean private AdminAuditor mockAdminAuditor;
+  @MockitoBean private CloudMonitoringService mockCloudMonitoringService;
+  @MockitoBean private CloudStorageClient mockCloudStorageClient;
+  @MockitoBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
+  @MockitoBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockitoBean private FireCloudService mockFirecloudService;
+  @MockitoBean private VwbAccessService mockVwbAccessService;
+  @MockitoBean private LeonardoApiClient mockLeonardoApiClient;
+  @MockitoBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private NotebooksService mockNotebooksService;
+  @MockitoBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -144,23 +157,6 @@ public class WorkspaceAdminServiceTest {
     LeonardoMapperImpl.class,
     WorkspaceAdminServiceImpl.class,
     WorkspaceMapperImpl.class,
-  })
-  @MockBean({
-    ActionAuditQueryService.class,
-    AdminAuditor.class,
-    CohortDao.class,
-    CohortReviewMapper.class,
-    CommonMappers.class,
-    ConceptSetDao.class,
-    ConceptSetMapper.class,
-    DataSetDao.class,
-    DataSetMapper.class,
-    FirecloudMapper.class,
-    InitialCreditsService.class,
-    LeonardoApiClient.class,
-    UserMapper.class,
-    UserService.class,
-    WorkspaceAuthService.class,
   })
   static class Configuration {
     @Bean

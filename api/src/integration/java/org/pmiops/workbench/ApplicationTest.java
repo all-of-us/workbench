@@ -11,10 +11,10 @@ import org.pmiops.workbench.cdr.DbParams;
 import org.pmiops.workbench.db.Params;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * This test that all application injection is done properly. It loads all JPA repositories,
@@ -25,12 +25,12 @@ public class ApplicationTest {
 
   @Autowired private ApplicationContext context;
 
-  @MockBean(name = "params")
+  @MockitoBean(name = "params")
   private Params params;
 
-  @MockBean private DataSource dataSource;
-  @MockBean private DbParams cdrParams;
-  @MockBean private CdrDataSource cdrDataSource;
+  @MockitoBean private DataSource dataSource;
+  @MockitoBean private DbParams cdrParams;
+  @MockitoBean private CdrDataSource cdrDataSource;
 
   /**
    * Spring Boot provides a mechanism that will create a schema and load data into it. It loads SQL

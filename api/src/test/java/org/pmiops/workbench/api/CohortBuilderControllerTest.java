@@ -73,17 +73,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CohortBuilderControllerTest {
 
+  @MockitoBean private WorkspaceAuthService mockWorkspaceAuthService;
   private CohortBuilderController controller;
 
   @Mock private BigQueryService bigQueryService;
@@ -116,7 +117,6 @@ public class CohortBuilderControllerTest {
     CohortBuilderMapperImpl.class,
     CohortReviewMapperImpl.class
   })
-  @MockBean({WorkspaceAuthService.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

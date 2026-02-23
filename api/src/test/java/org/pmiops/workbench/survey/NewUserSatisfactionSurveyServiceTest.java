@@ -35,19 +35,23 @@ import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
 class NewUserSatisfactionSurveyServiceTest {
+  @MockitoBean private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
+  @MockitoBean private NewUserSatisfactionSurveyMapper newUserSatisfactionSurveyMapper;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private UserDao userDao;
+
+  @MockitoBean
+  private NewUserSatisfactionSurveyOneTimeCodeDao newUserSatisfactionSurveyOneTimeCodeDao;
+
   @Autowired private NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
-  @MockBean private NewUserSatisfactionSurveyMapper newUserSatisfactionSurveyMapper;
-  @MockBean private MailService mailService;
-  @MockBean private UserDao userDao;
-  @MockBean private NewUserSatisfactionSurveyOneTimeCodeDao newUserSatisfactionSurveyOneTimeCodeDao;
 
   @Captor private ArgumentCaptor<DbNewUserSatisfactionSurveyOneTimeCode> oneTimeCodeCaptor;
 
@@ -71,9 +75,6 @@ class NewUserSatisfactionSurveyServiceTest {
   }
 
   @TestConfiguration
-  @MockBean({
-    NewUserSatisfactionSurveyDao.class,
-  })
   @Import({
     NewUserSatisfactionSurveyServiceImpl.class,
   })

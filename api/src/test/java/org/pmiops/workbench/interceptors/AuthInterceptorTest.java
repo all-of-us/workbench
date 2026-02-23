@@ -48,10 +48,10 @@ import org.pmiops.workbench.user.DevUserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
 
@@ -72,12 +72,13 @@ class FakeController {
 @SpringJUnitConfig
 public class AuthInterceptorTest {
 
+  @MockitoBean private UserService userService;
   private static final long USER_ID = 123L;
 
-  @MockBean private UserInfoService userInfoService;
-  @MockBean private FireCloudService fireCloudService;
-  @MockBean private UserDao userDao;
-  @MockBean private DevUserRegistrationService devUserRegistrationService;
+  @MockitoBean private UserInfoService userInfoService;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private UserDao userDao;
+  @MockitoBean private DevUserRegistrationService devUserRegistrationService;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -92,7 +93,6 @@ public class AuthInterceptorTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, AuthInterceptor.class})
-  @MockBean({UserService.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

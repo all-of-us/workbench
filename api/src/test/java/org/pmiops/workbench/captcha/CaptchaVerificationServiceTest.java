@@ -14,10 +14,10 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
@@ -27,8 +27,8 @@ public class CaptchaVerificationServiceTest {
   final String testUrl = "testkey.google.com";
   final String responseToken = "responseToken";
 
-  @MockBean private CloudStorageClient cloudStorageClient;
-  @MockBean private CaptchaApi captchaApiProvider;
+  @MockitoBean private CloudStorageClient cloudStorageClient;
+  @MockitoBean private CaptchaApi captchaApiProvider;
 
   @Autowired private CaptchaVerificationServiceImpl captchaVerificationService;
 

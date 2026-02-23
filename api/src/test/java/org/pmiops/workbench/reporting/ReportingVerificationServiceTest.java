@@ -56,11 +56,11 @@ import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -94,7 +94,7 @@ public class ReportingVerificationServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
-  @MockBean private BigQueryService mockBigQueryService;
+  @MockitoBean private BigQueryService mockBigQueryService;
 
   @TestConfiguration
   @Import({

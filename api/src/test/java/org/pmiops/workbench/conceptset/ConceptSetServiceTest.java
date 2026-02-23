@@ -23,27 +23,25 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ConceptSetServiceTest {
 
+  @MockitoBean private CommonMappers commonMappers;
+  @MockitoBean private CohortBuilderMapper cohortBuilderMapper;
+  @MockitoBean private ConceptBigQueryService conceptBigQueryService;
+  @MockitoBean private CohortBuilderService cohortBuilderService;
+  @MockitoBean private DbUser dbUser;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetMapper conceptSetMapper;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, ConceptSetService.class, ConceptSetMapperImpl.class})
-  @MockBean({
-    CommonMappers.class,
-    CohortBuilderMapper.class,
-    ConceptBigQueryService.class,
-    CohortBuilderService.class,
-    DbUser.class
-  })
   static class Configuration {}
 
   @Test

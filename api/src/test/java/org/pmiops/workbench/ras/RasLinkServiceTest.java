@@ -68,13 +68,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class RasLinkServiceTest {
+  @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private DirectoryService directoryService;
+  @MockitoBean private FireCloudService fireCloudService;
+  @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private HttpTransport httpTransport;
+  @MockitoBean private MailService mailService;
+  @MockitoBean private UserServiceAuditor userServiceAuditor;
+  @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private TaskQueueService taskQueueService;
   private static final Timestamp NOW = Timestamp.from(Instant.now());
   private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
@@ -140,17 +149,18 @@ public class RasLinkServiceTest {
   private RasLinkService rasLinkService;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+  @MockitoBean private InstitutionService mockInstitutionService;
+
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
-  @Mock private static OpenIdConnectClient mockOidcClient;
 
+  @Mock private static OpenIdConnectClient mockOidcClient;
   @Mock private static IdentityVerificationService mockIdentityVerificationService;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
   @Mock private static Provider<DbUser> mockUserProvider;
-  @MockBean private InstitutionService mockInstitutionService;
 
   @TestConfiguration
   @Import({
@@ -161,18 +171,6 @@ public class RasLinkServiceTest {
     RasLinkService.class,
     UserServiceTestConfiguration.class,
     IdentityVerificationService.class
-  })
-  @MockBean({
-    AccessTierService.class,
-    DirectoryService.class,
-    FireCloudService.class,
-    InitialCreditsService.class,
-    HttpTransport.class,
-    MailService.class,
-    UserServiceAuditor.class,
-    InitialCreditsService.class,
-    VwbUserService.class,
-    TaskQueueService.class
   })
   static class Configuration {
     @Bean

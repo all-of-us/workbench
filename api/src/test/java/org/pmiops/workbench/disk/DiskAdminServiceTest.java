@@ -55,18 +55,19 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class DiskAdminServiceTest {
+  @MockitoBean private WorkspaceService workspaceService;
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
 
-  @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private LeonardoApiClient mockLeonardoApiClient;
-  @MockBean private InitialCreditsService mockInitialCreditsService;
-  @MockBean private MailService mockMailService;
+  @MockitoBean private FireCloudService mockFireCloudService;
+  @MockitoBean private LeonardoApiClient mockLeonardoApiClient;
+  @MockitoBean private InitialCreditsService mockInitialCreditsService;
+  @MockitoBean private MailService mockMailService;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -81,7 +82,6 @@ public class DiskAdminServiceTest {
   private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
 
   @TestConfiguration
-  @MockBean(WorkspaceService.class)
   @Import({
     FakeClockConfiguration.class,
     DiskAdminService.class,
