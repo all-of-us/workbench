@@ -75,6 +75,8 @@ executors:
   workbench-executor: &workbench-executor
     environment:
       <<: *env-default
+      GCLOUD_SERVICE_KEY_EMAIL: << pipeline.parameters.circle-service-account >>
+      GCLOUD_SERVICE_ACCOUNT: << pipeline.parameters.circle-service-account >>
     docker:
       - image: << pipeline.parameters.workbench-image >>
     working_directory: ~/workbench
@@ -102,6 +104,8 @@ executors:
     environment:
       <<: *env-default
       <<: *env-db
+      GCLOUD_SERVICE_KEY_EMAIL: << pipeline.parameters.circle-service-account >>
+      GCLOUD_SERVICE_ACCOUNT: << pipeline.parameters.circle-service-account >>
     working_directory: ~/workbench
 
   # Environment with browsers that is used to run Puppeteer end-to-end tests
@@ -111,6 +115,8 @@ executors:
       - image: << pipeline.parameters.workbench-image >>
         environment:
           TZ: "America/New_York"
+          GCLOUD_SERVICE_KEY_EMAIL: << pipeline.parameters.circle-service-account >>
+          GCLOUD_SERVICE_ACCOUNT: << pipeline.parameters.circle-service-account >>
     working_directory: ~/workbench
     environment:
       CI: true
@@ -118,6 +124,8 @@ executors:
       WORKBENCH_ENV: test
       TEST_MODE: integration
       TZ: "America/New_York"
+      GCLOUD_SERVICE_KEY_EMAIL: << pipeline.parameters.circle-service-account >>
+      GCLOUD_SERVICE_ACCOUNT: << pipeline.parameters.circle-service-account >>
 
 # -------------------------
 #   COMMANDS
