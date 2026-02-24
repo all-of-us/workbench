@@ -8,7 +8,6 @@ orbs:
   browser-tools: circleci/browser-tools@1.4.6
   queue: eddiewebb/queue@2.2.1
   coverage-reporter: codacy/coverage-reporter@13.13.7
-  gcp-cli: circleci/gcp-cli@3.0.0
   slack: circleci/slack@4.13.3
 
 # -------------------------
@@ -151,7 +150,18 @@ commands:
         type: string
         default: "<< pipeline.parameters.circle-service-account >>"
     steps:
-      - gcp-cli/install
+      - run:
+          name: Install gcloud CLI
+          command: |
+            if ! command -v gcloud &> /dev/null; then
+              echo "Installing Google Cloud SDK..."
+              export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+              echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+              curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+              sudo apt-get update && sudo apt-get install -y google-cloud-sdk
+            else
+              echo "gcloud is already installed"
+            fi
       - run:
           command: |
             # Store the CircleCI-generated OIDC token in temp file
