@@ -153,6 +153,8 @@ commands:
     steps:
       - gcp-cli/install
       - run:
+          environment:
+            GCP_SERVICE_ACCOUNT_EMAIL: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
           command: |
             # Store the CircleCI-generated OIDC token in temp file
             echo $CIRCLE_OIDC_TOKEN > << parameters.oidc_token_file_path >>
@@ -160,7 +162,7 @@ commands:
             gcloud iam workload-identity-pools create-cred-config \
                 "projects/<< parameters.project_id >>/locations/global/workloadIdentityPools/<< parameters.wip_id >>/providers/<< parameters.wip_provider_id >>"\
                 --output-file="<< pipeline.parameters.circle-service-account-key >>" \
-                --service-account="<< parameters.service_account >>" \
+                --service-account="${GCP_SERVICE_ACCOUNT_EMAIL}" \
                 --credential-source-file=<< parameters.oidc_token_file_path >>
           name: Store OIDC credential configuration in temp file
       - run:
@@ -173,7 +175,7 @@ commands:
           name: Configure gcloud to use the OIDC credential configuration
       - run:
           name: Verify that gcloud is authenticated
-          command: gcloud iam service-accounts get-iam-policy << parameters.service_account >>
+          command: gcloud iam service-accounts get-iam-policy "${GCP_SERVICE_ACCOUNT_EMAIL}"
       - run:
           name: Verify that ADC works
           command: |
