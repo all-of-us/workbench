@@ -187,6 +187,7 @@ commands:
           project_id: "602460048110" # all-of-us-workbench-test
           wip_id: "circleci-wip-test"
           wip_provider_id: "circleci-oidc-prv-test"
+          service_account: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
 
   gcloud-auth-login-oidc-stable:
     description: "Activate CircleCI service account credential for the Stable environment"
