@@ -8,7 +8,7 @@ orbs:
   browser-tools: circleci/browser-tools@1.4.6
   queue: eddiewebb/queue@2.2.1
   coverage-reporter: codacy/coverage-reporter@13.13.7
-  gcp-cli: circleci/gcp-cli@3.2.1
+  gcp-cli: circleci/gcp-cli@3.0.0
   slack: circleci/slack@4.13.3
 
 # -------------------------
