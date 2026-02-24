@@ -11,16 +11,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.api.WorkspaceApi;
-import org.pmiops.workbench.wsmanager.model.CloneWorkspaceV2Request;
-import org.pmiops.workbench.wsmanager.model.CloneWorkspaceV2Result;
-import org.pmiops.workbench.wsmanager.model.GrantRoleRequestBody;
-import org.pmiops.workbench.wsmanager.model.IamRole;
-import org.pmiops.workbench.wsmanager.model.JobControl;
-import org.pmiops.workbench.wsmanager.model.JobReport;
-import org.pmiops.workbench.wsmanager.model.Properties;
-import org.pmiops.workbench.wsmanager.model.Property;
-import org.pmiops.workbench.wsmanager.model.State;
-import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
+import org.pmiops.workbench.wsmanager.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -102,6 +93,57 @@ public class WsmClient {
               .getWorkspace(
                   cloneWorkspaceV2Result.getCloneResult().getDestinationWorkspaceId().toString(),
                   null);
+        });
+  }
+
+  /**
+   * Creates a new VWB workspace as a service account.
+   *
+   * @param targetWorkspace the RW workspace used to populate metadata
+   * @param podId the cloud resource group (pod) id
+   * @return WorkspaceDescription of the created workspace
+   */
+  public WorkspaceDescription createWorkspaceAsService(Workspace targetWorkspace, String podId) {
+
+    return wsmRetryHandler.run(
+        context -> {
+          CreateWorkspaceV2Request createWorkspaceRequest =
+              new CreateWorkspaceV2Request()
+                  .userFacingId(targetWorkspace.getNamespace())
+                  .displayName(targetWorkspace.getName())
+                  .properties(
+                      stringMapToProperties(
+                          Map.of(
+                              "terra-workspace-short-description",
+                              targetWorkspace.getResearchPurpose().getOtherPurposeDetails())))
+                  .description(formatWorkspaceDescription(targetWorkspace))
+                  .cloudResourceGroupId(podId)
+                  .organizationId(workbenchConfigProvider.get().vwb.organizationId)
+                  .jobControl(new JobControl().id(UUID.randomUUID().toString()));
+
+          CreateWorkspaceV2Result result =
+              workspaceServiceApi.get().createWorkspaceV2(createWorkspaceRequest);
+
+          JobReport jobReport = result.getJobReport();
+          if (jobReport != null) {
+            logger.error("Status code from WSM {}", jobReport.getStatusCode());
+          }
+
+          Optional.ofNullable(result.getErrorReport())
+              .ifPresent(
+                  errorReport -> {
+                    logger.error(
+                        "Failed to create workspace {}: {}",
+                        targetWorkspace.getNamespace(),
+                        errorReport.getMessage());
+                    throw new WorkbenchException(
+                        String.format(
+                            "Failed to create workspace %s: %s",
+                            targetWorkspace.getNamespace(), errorReport.getMessage()));
+                  });
+
+          // Fetch full workspace description
+          return workspaceServiceApi.get().getWorkspace(result.getWorkspaceId().toString(), null);
         });
   }
 
