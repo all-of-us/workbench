@@ -64,6 +64,15 @@ const styles = reactStyles({
     color: colors.disabled,
     cursor: 'not-allowed',
   },
+  migrationButton: {
+    marginRight: 16,
+    padding: '6px 14px',
+    backgroundColor: colors.primary,
+    color: colors.white,
+    borderRadius: 4,
+    fontSize: 12,
+    fontWeight: 600,
+  },
 });
 
 const stylesFunction = {
@@ -79,6 +88,13 @@ const stylesFunction = {
     };
   },
 };
+
+const handleMigrationClick = () => {
+  // TODO: wire to migration endpoint in future ticket
+  console.log('VWB migration triggered (feature flag enabled)');
+};
+
+const enableVwbMigration = serverConfigStore.get().config?.enableVwbMigration;
 
 const USER_DISMISSED_ALERT_VALUE = 'DISMISSED';
 
@@ -243,6 +259,17 @@ export const WorkspaceNavBar = fp.flow(
       {activeTabIndex > 0 && navSeparator}
       {fp.map((tab) => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
       <div style={{ flexGrow: 1 }} />
+
+      {enableVwbMigration && workspace && (
+        <Clickable
+          data-test-id='vwb-migration-button'
+          onClick={handleMigrationClick}
+          style={styles.migrationButton}
+        >
+          Migrate to Verily Workbench
+        </Clickable>
+      )}
+
       {workspace && (
         <CdrVersion
           workspace={workspace}

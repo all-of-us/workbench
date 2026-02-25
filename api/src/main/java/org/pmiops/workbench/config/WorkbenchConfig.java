@@ -351,6 +351,8 @@ public class WorkbenchConfig {
     public boolean enableVWBHomepageBanner;
     // If true, enables the Controlled Tier Plus (CT+) access card in the UI.
     public boolean enableCTPlusCards;
+    // If true, enables the workspace migration button to Verily Workbench.
+    public boolean enableVwbMigration;
   }
 
   public static class ActionAuditConfig {

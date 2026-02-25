@@ -7570,6 +7570,10 @@ components:
           type: boolean
           default: false
           description: If true, will display the CTPlus card
+        enableVwbMigration:
+          type: boolean
+          default: false
+          description: If true, will display the "Migrate to Verily Workbench" button on workspace pages.
     AccessModuleConfig:
       required:
       - expirable
