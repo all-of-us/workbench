@@ -80,6 +80,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
   @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
   @Mapping(target = "migratedVwbWorkspaceId", source = "dbWorkspace.migratedVwbWorkspaceId")
+  @Mapping(target = "migrationState", source = "dbWorkspace.migrationState")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
@@ -169,6 +170,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "vwbWorkspace", source = "dbWorkspace.vwbWorkspace")
   @Mapping(target = "migratedVwbWorkspaceId", source = "dbWorkspace.migratedVwbWorkspaceId")
+  @Mapping(target = "migrationState", source = "dbWorkspace.migrationState")
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(
       DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService);
@@ -232,6 +234,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "usesTanagra", ignore = true)
   @Mapping(target = "vwbWorkspace", ignore = true)
   @Mapping(target = "migratedVwbWorkspaceId", ignore = true)
+  @Mapping(target = "migrationState", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

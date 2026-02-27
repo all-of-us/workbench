@@ -7843,6 +7843,13 @@ components:
         migratedVwbWorkspaceId:
           type: string
           description: UUID of the VWB workspace this workspace was migrated to
+        migrationState:
+          type: string
+          description: Tracks the lifecycle (NOT_STARTED, STARTING, FINISHED)
+          enum:
+            - NOT_STARTED
+            - STARTING
+            - FINISHED
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
