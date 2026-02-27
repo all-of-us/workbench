@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { Button } from 'app/components/buttons';
+import { Button, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Modal } from 'app/components/modals';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
@@ -36,6 +36,12 @@ const styles = reactStyles({
   cellAction: {
     flex: '0 0 auto',
     justifyContent: 'flex-end',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
 });
 
@@ -99,6 +105,14 @@ export const MigrationModal = ({ onClose }: Props) => {
       width={720}
     >
       <FlexColumn>
+        <FlexRow style={styles.header}>
+          <div style={{ fontWeight: 600, fontSize: 18 }}>
+            Migrate Workspaces to Verily Workbench
+          </div>
+
+          <CloseButton onClose={onClose} />
+        </FlexRow>
+
         <FlexRow style={styles.tableHeader}>
           <div style={styles.cellName}>Workspace</div>
           <div style={styles.cellCdr}>CDR</div>
