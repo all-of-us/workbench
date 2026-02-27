@@ -14,6 +14,7 @@ import {
   CommunityIcon,
   ControlledTierBadge,
 } from 'app/components/icons';
+import { MigrationBadge } from 'app/components/migration/migration-badge';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
@@ -161,12 +162,13 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         useFeaturedWorkspacePageUi,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
+      const isMigrating = workspace.migrationState === 'STARTING';
       return (
         <React.Fragment>
           <WorkspaceCardBase>
             <FlexRow style={{ height: '100%' }}>
               <FlexColumn style={styles.workspaceMenuWrapper}>
-                {!tierAccessDisabled && (
+                {!tierAccessDisabled && !isMigrating && (
                   <PopupTrigger
                     side='bottom'
                     closeOnClick
@@ -337,6 +339,12 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                             />
                           </TooltipTrigger>
                         </FlexColumn>
+                      )}
+                      {isMigrating && (
+                        <MigrationBadge
+                          state={workspace.migrationState}
+                          owner={workspace.creatorUser?.userName}
+                        />
                       )}
                     </FlexRow>
                   </FlexColumn>

@@ -15,6 +15,8 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SemiBoldHeader, SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
 import { CustomBulletList, CustomBulletListItem } from 'app/components/lists';
+import { MigrationBanner } from 'app/components/migration/migration-banner';
+import { MigrationModal } from 'app/components/migration/migration-modal';
 import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { RecentResources } from 'app/pages/homepage/recent-resources';
@@ -221,6 +223,7 @@ interface State {
   firstVisit: boolean;
   firstVisitTraining: boolean;
   userWorkspacesResponse: WorkspaceResponseListResponse;
+  showMigrationModal: boolean;
 }
 
 export const Homepage = fp.flow(
@@ -238,6 +241,7 @@ export const Homepage = fp.flow(
         firstVisit: undefined,
         firstVisitTraining: true,
         userWorkspacesResponse: undefined,
+        showMigrationModal: false,
       };
     }
 
@@ -300,9 +304,17 @@ export const Homepage = fp.flow(
       return userWorkspacesResponse?.items?.length > 0;
     }
 
+    openMigrationModal = () => {
+      this.setState({ showMigrationModal: true });
+    };
+
+    closeMigrationModal = () => {
+      this.setState({ showMigrationModal: false });
+    };
+
     render() {
       const { firstVisit, userWorkspacesResponse } = this.state;
-
+      const { enableVwbMigration } = serverConfigStore.get().config;
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
@@ -310,6 +322,9 @@ export const Homepage = fp.flow(
               <VwbBanner />
             ) : (
               <WelcomeHeader />
+            )}
+            {enableVwbMigration && (
+              <MigrationBanner onStartMigration={this.openMigrationModal} />
             )}
             <div style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
@@ -327,6 +342,9 @@ export const Homepage = fp.flow(
             </div>
           </FlexColumn>
           <QuickTourAndVideos showQuickTourInitially={firstVisit} />
+          {this.state.showMigrationModal && (
+            <MigrationModal onClose={this.closeMigrationModal} />
+          )}
         </React.Fragment>
       );
     }
