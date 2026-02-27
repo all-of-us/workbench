@@ -318,13 +318,13 @@ export const Homepage = fp.flow(
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
+            {enableVwbMigration && (
+              <MigrationBanner onStartMigration={this.openMigrationModal} />
+            )}
             {serverConfigStore.get().config.enableVWBHomepageBanner ? (
               <VwbBanner />
             ) : (
               <WelcomeHeader />
-            )}
-            {enableVwbMigration && (
-              <MigrationBanner onStartMigration={this.openMigrationModal} />
             )}
             <div style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
