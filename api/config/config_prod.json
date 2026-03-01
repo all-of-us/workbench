@@ -15,7 +15,12 @@
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.16",
     "workspaceLogsProject": "fc-aou-logs-prod",
     "workspaceBucketLocation": "us-central1",
-    "gceVmZones": ["us-central1-a","us-central1-b","us-central1-c", "us-central1-f"],
+    "gceVmZones": [
+      "us-central1-a",
+      "us-central1-b",
+      "us-central1-c",
+      "us-central1-f"
+    ],
     "defaultGceVmZone": "us-central1-a"
   },
   "billing": {
@@ -23,10 +28,7 @@
     "projectNamePrefix": "aou-rw-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "defaultInitialCreditsDollarLimit": 300.0,
-    "initialCreditsCostAlertThresholds": [
-      0.25,
-      0.5
-    ],
+    "initialCreditsCostAlertThresholds": [0.25, 0.5],
     "initialCreditsValidityPeriodDays": 365,
     "initialCreditsExtensionPeriodDays": 365,
     "initialCreditsExpirationWarningDays": 14,
@@ -37,9 +39,7 @@
     "vwbExportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.vwb_billing_export"
   },
   "auth": {
-    "serviceAccountApiUsers": [
-      "all-of-us-rw-prod@appspot.gserviceaccount.com"
-    ]
+    "serviceAccountApiUsers": ["all-of-us-rw-prod@appspot.gserviceaccount.com"]
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-prod.iam.gserviceaccount.com",
@@ -126,7 +126,7 @@
     "enableGKEAppMachineTypeChoice": false,
     "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": true,
-    "enableUnlinkBillingForInitialCredits": false,
+    "enableUnlinkBillingForInitialCredits": true,
     "blockComplianceTraining": false,
     "enableVWBWorkspaceCreation": false,
     "enableVWBEgressMonitor": true,
@@ -191,15 +191,18 @@
     "enableJiraTicketing": true,
     "notifyFromEmail": "security-alerts@researchallofus.org",
     "notifyCcEmails": ["security-alerts@researchallofus.org"],
-    "escalations": [{
-      "afterIncidentCount": 1,
-      "suspendCompute": {
-        "durationMinutes": 10
+    "escalations": [
+      {
+        "afterIncidentCount": 1,
+        "suspendCompute": {
+          "durationMinutes": 10
+        }
+      },
+      {
+        "afterIncidentCount": 3,
+        "disableUser": {}
       }
-    }, {
-      "afterIncidentCount": 3,
-      "disableUser": {}
-    }]
+    ]
   },
   "termsOfService": {
     "minimumAcceptedAouVersion": 2
