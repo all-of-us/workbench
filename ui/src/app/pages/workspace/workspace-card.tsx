@@ -4,6 +4,7 @@ import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
+import { MigrationState } from 'generated/fetch';
 
 import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
@@ -162,7 +163,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         useFeaturedWorkspacePageUi,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
-      const isMigrating = workspace.migrationState === 'STARTING';
+      const isMigrating = workspace.migrationState === MigrationState.STARTING;
       return (
         <React.Fragment>
           <WorkspaceCardBase>

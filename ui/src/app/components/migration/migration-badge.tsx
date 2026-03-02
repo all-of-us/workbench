@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { MigrationState } from 'generated/fetch';
+
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
@@ -12,7 +14,6 @@ const styles = reactStyles({
     fontWeight: 600,
   },
 });
-type MigrationState = 'NOT_STARTED' | 'STARTING' | 'FINISHED';
 
 interface Props {
   state: MigrationState;

@@ -26,8 +26,8 @@ interface Props {
 export const MigrationBanner = ({ onStartMigration }: Props) => (
   <FlexRow style={styles.banner}>
     <div style={styles.text}>
-      Migration to Verily Workbench is now open. Please migrate your workspaces
-      to avoid data loss.
+      Migration to Verily Workbench is now open (In Development). Please migrate
+      your workspaces to avoid data loss.
     </div>
     <Button onClick={onStartMigration}>Start Migration</Button>
   </FlexRow>

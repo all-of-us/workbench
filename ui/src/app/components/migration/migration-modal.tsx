@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
+import { MigrationState } from 'generated/fetch';
+
 import { Button, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Modal } from 'app/components/modals';
@@ -48,7 +50,6 @@ const styles = reactStyles({
 interface Props {
   onClose: () => void;
 }
-type MigrationState = 'NOT_STARTED' | 'STARTING' | 'FINISHED';
 
 interface MigrationWorkspace {
   id: string;
