@@ -56,6 +56,7 @@ import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
 import org.pmiops.workbench.model.EthnicCategory;
 import org.pmiops.workbench.model.GenderIdentityV2;
+import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SexAtBirthV2;
@@ -141,6 +142,7 @@ public class TestMockFactory {
         .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())
         .lastModifiedTime(1588097211621L)
         .googleProject(DEFAULT_GOOGLE_PROJECT)
+        .migrationState(MigrationState.NOT_STARTED)
         .researchPurpose(
             new ResearchPurpose()
                 .additionalNotes(null)

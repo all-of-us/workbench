@@ -44,6 +44,7 @@ import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -183,6 +184,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     RawlsWorkspaceDetails fcWorkspace = workspaceService.createWorkspace(workspace, cdrVersion);
 
     DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
+
+    if (dbWorkspace.getMigrationState() == null) {
+      dbWorkspace.setMigrationState(String.valueOf(MigrationState.NOT_STARTED));
+    }
+
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);
     } catch (Exception e) {

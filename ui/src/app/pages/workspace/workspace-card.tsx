@@ -4,6 +4,7 @@ import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
+import { MigrationState } from 'generated/fetch';
 
 import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
@@ -14,6 +15,7 @@ import {
   CommunityIcon,
   ControlledTierBadge,
 } from 'app/components/icons';
+import { MigrationBadge } from 'app/components/migration/migration-badge';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
@@ -161,12 +163,13 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         useFeaturedWorkspacePageUi,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
+      const isMigrating = workspace.migrationState === MigrationState.STARTING;
       return (
         <React.Fragment>
           <WorkspaceCardBase>
             <FlexRow style={{ height: '100%' }}>
               <FlexColumn style={styles.workspaceMenuWrapper}>
-                {!tierAccessDisabled && (
+                {!tierAccessDisabled && !isMigrating && (
                   <PopupTrigger
                     side='bottom'
                     closeOnClick
@@ -337,6 +340,12 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                             />
                           </TooltipTrigger>
                         </FlexColumn>
+                      )}
+                      {isMigrating && (
+                        <MigrationBadge
+                          state={workspace.migrationState}
+                          owner={workspace.creatorUser?.userName}
+                        />
                       )}
                     </FlexRow>
                   </FlexColumn>
