@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { MigrationState } from 'generated/fetch';
+import { MigrationState, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { Button, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -57,7 +57,7 @@ interface MigrationWorkspace {
   cdrVersion: string | number;
   migrationState: MigrationState;
   migrationOwner?: string;
-  accessLevel?: string;
+  accessLevel?: WorkspaceAccessLevel;
 }
 
 export const MigrationModal = ({ onClose }: Props) => {
@@ -70,7 +70,8 @@ export const MigrationModal = ({ onClose }: Props) => {
         const response = await workspacesApi().getWorkspaces();
         const mapped: MigrationWorkspace[] = (response.items || []).map(
           (w: any) => {
-            const migrationState = w.workspace?.migrationState ?? 'NOT_STARTED';
+            const migrationState =
+              w.workspace?.migrationState ?? MigrationState.NOT_STARTED;
 
             return {
               id: w.workspace.namespace,
@@ -137,9 +138,9 @@ export const MigrationModal = ({ onClose }: Props) => {
               <FlexRow style={styles.cellAction}>
                 <Button
                   disabled={
-                    ws.migrationState === 'STARTING' ||
-                    ws.migrationState === 'FINISHED' ||
-                    ws.accessLevel !== 'OWNER'
+                    ws.migrationState === MigrationState.STARTING ||
+                    ws.migrationState === MigrationState.FINISHED ||
+                    ws.accessLevel !== WorkspaceAccessLevel.OWNER
                   }
                   onClick={() => handleStartMigration(ws)}
                 >

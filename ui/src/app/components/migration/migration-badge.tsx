@@ -23,15 +23,15 @@ interface Props {
 export const MigrationBadge = ({ state, owner }: Props) => {
   const getLabel = () => {
     switch (state) {
-      case 'NOT_STARTED':
+      case MigrationState.NOT_STARTED:
         return 'Ready to migrate';
 
-      case 'STARTING':
+      case MigrationState.STARTING:
         return owner
           ? `Migration in progress (Initiated by ${owner})`
           : 'Migration in progress';
 
-      case 'FINISHED':
+      case MigrationState.FINISHED:
         return 'Migrated';
 
       default:
@@ -41,19 +41,19 @@ export const MigrationBadge = ({ state, owner }: Props) => {
 
   const getStyle = () => {
     switch (state) {
-      case 'NOT_STARTED':
+      case MigrationState.NOT_STARTED:
         return {
           background: colorWithWhiteness(colors.success, 0.85),
           color: colors.success,
         };
 
-      case 'STARTING':
+      case MigrationState.STARTING:
         return {
           background: colorWithWhiteness(colors.primary, 0.85),
           color: colors.primary,
         };
 
-      case 'FINISHED':
+      case MigrationState.FINISHED:
         return {
           background: colorWithWhiteness(colors.secondary, 0.85),
           color: colors.secondary,
