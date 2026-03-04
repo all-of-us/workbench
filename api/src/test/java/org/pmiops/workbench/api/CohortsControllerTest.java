@@ -99,6 +99,7 @@ import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.*;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
@@ -145,6 +146,7 @@ public class CohortsControllerTest {
   @MockitoBean private WorkspaceOperationMapper workspaceOperationMapper;
   @MockitoBean private EgressObjectLengthsRemediationService egressObjectLengthsRemediationService;
   @MockitoBean private WsmClient wsmClient;
+  @MockitoBean private WorkspaceMigrationService workspaceMigrationService;
   @MockitoBean private VwbAccessService vwbAccessService;
   @MockitoBean private VwbUserService vwbUserService;
   private static final Instant NOW = Instant.now();
