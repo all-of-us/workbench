@@ -198,6 +198,7 @@ import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.pmiops.workbench.workspaces.*;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
@@ -244,6 +245,7 @@ public class WorkspacesControllerTest {
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserService userService;
   @MockitoBean private WorkspaceAuditor workspaceAuditor;
+  @MockitoBean private WorkspaceMigrationService workspaceMigrationService;
   @MockitoBean private WsmClient wsmClient;
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";

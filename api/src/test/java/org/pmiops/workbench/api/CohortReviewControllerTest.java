@@ -145,6 +145,7 @@ import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,6 +182,7 @@ public class CohortReviewControllerTest {
   @MockitoBean private WorkspaceOperationMapper workspaceOperationMapper;
   @MockitoBean private WorkspaceResourcesService workspaceResourcesService;
   @MockitoBean private WsmClient wsmClient;
+  @MockitoBean private WorkspaceMigrationService workspaceMigrationService;
   @MockitoBean private VwbUserService vwbUserService;
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";

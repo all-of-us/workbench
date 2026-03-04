@@ -46,7 +46,6 @@ public class WorkspaceMigrationServiceImplTest {
 
   private DbWorkspace dbWorkspace;
   private Workspace workspace;
-  private RawlsWorkspaceDetails rawlsWorkspace;
 
   @BeforeEach
   void setup() {
@@ -60,7 +59,7 @@ public class WorkspaceMigrationServiceImplTest {
     workspace.setName(TERRA_NAME);
     workspace.setCreator("user@test.com");
 
-    rawlsWorkspace = new RawlsWorkspaceDetails();
+    RawlsWorkspaceDetails rawlsWorkspace = new RawlsWorkspaceDetails();
 
     when(fireCloudService.getWorkspace(NAMESPACE, TERRA_NAME))
         .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
