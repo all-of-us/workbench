@@ -69,5 +69,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
             .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
 
     wsmClient.createWorkspaceAsService(workspace, podId);
+
+    // TODO: Un-comment this once the Storage
+    // Transfer Service (STS) migration flow is finalized.
+    //
+    //    WorkspaceDescription vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, podId);
+    //    String workspaceId = vwbWorkspace.getId().toString();
+    //    wsmClient.createControlledBucket(workspaceId, namespace);
   }
 }
