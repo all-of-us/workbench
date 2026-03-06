@@ -9,6 +9,7 @@ import { Modal } from 'app/components/modals';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 
+import { FolderSelection } from './FolderSelection';
 import { MigrationBadge } from './migration-badge';
 
 const styles = reactStyles({
@@ -64,10 +65,15 @@ export const MigrationModal = ({ onClose }: Props) => {
   const [workspaces, setWorkspaces] = useState<MigrationWorkspace[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // NEW: track which workspace user selected for migration
+  const [selectedWorkspace, setSelectedWorkspace] =
+    useState<MigrationWorkspace | null>(null);
+
   useEffect(() => {
     const load = async () => {
       try {
         const response = await workspacesApi().getWorkspaces();
+
         const mapped: MigrationWorkspace[] = (response.items || []).map(
           (w: any) => {
             const migrationState =
@@ -96,8 +102,10 @@ export const MigrationModal = ({ onClose }: Props) => {
   }, []);
 
   const handleStartMigration = (ws: MigrationWorkspace) => {
-    // stub for now
     console.log('Start migration clicked for:', ws.name);
+
+    // switch modal to folder selection step
+    setSelectedWorkspace(ws);
   };
 
   return (
@@ -106,51 +114,65 @@ export const MigrationModal = ({ onClose }: Props) => {
       onClose={onClose}
       width={720}
     >
-      <FlexColumn>
-        <FlexRow style={styles.header}>
-          <div style={{ fontWeight: 600, fontSize: 18 }}>
-            Migrate Workspaces to Verily Workbench
-          </div>
+      {selectedWorkspace ? (
+        <FolderSelection
+          workspaceName={selectedWorkspace.name}
+          onBack={() => setSelectedWorkspace(null)}
+          onClose={onClose}
+          onContinue={(folders) => {
+            console.log('Selected folders:', folders);
+            // TODO: connect with backend migration API later
+          }}
+        />
+      ) : (
+        <FlexColumn>
+          <FlexRow style={styles.header}>
+            <div style={{ fontWeight: 600, fontSize: 18 }}>
+              Migrate Workspaces to Verily Workbench
+            </div>
 
-          <CloseButton onClose={onClose} />
-        </FlexRow>
+            <CloseButton onClose={onClose} />
+          </FlexRow>
 
-        <FlexRow style={styles.tableHeader}>
-          <div style={styles.cellName}>Workspace</div>
-          <div style={styles.cellCdr}>CDR</div>
-          <div style={styles.cellStatus}>Status</div>
-          <div style={styles.cellAction} />
-        </FlexRow>
+          <FlexRow style={styles.tableHeader}>
+            <div style={styles.cellName}>Workspace</div>
+            <div style={styles.cellCdr}>CDR</div>
+            <div style={styles.cellStatus}>Status</div>
+            <div style={styles.cellAction} />
+          </FlexRow>
 
-        {loading ? (
-          <div style={{ padding: '16px' }}>Loading workspaces…</div>
-        ) : (
-          workspaces.map((ws) => (
-            <FlexRow key={ws.id} style={styles.row}>
-              <div style={styles.cellName}>{ws.name}</div>
-              <div style={styles.cellCdr}>v{ws.cdrVersion}</div>
-              <div style={styles.cellStatus}>
-                <MigrationBadge
-                  state={ws.migrationState}
-                  owner={ws.migrationOwner}
-                />
-              </div>
-              <FlexRow style={styles.cellAction}>
-                <Button
-                  disabled={
-                    ws.migrationState === MigrationState.STARTING ||
-                    ws.migrationState === MigrationState.FINISHED ||
-                    ws.accessLevel !== WorkspaceAccessLevel.OWNER
-                  }
-                  onClick={() => handleStartMigration(ws)}
-                >
-                  Start Migration
-                </Button>
+          {loading ? (
+            <div style={{ padding: '16px' }}>Loading workspaces…</div>
+          ) : (
+            workspaces.map((ws) => (
+              <FlexRow key={ws.id} style={styles.row}>
+                <div style={styles.cellName}>{ws.name}</div>
+                <div style={styles.cellCdr}>v{ws.cdrVersion}</div>
+
+                <div style={styles.cellStatus}>
+                  <MigrationBadge
+                    state={ws.migrationState}
+                    owner={ws.migrationOwner}
+                  />
+                </div>
+
+                <FlexRow style={styles.cellAction}>
+                  <Button
+                    disabled={
+                      ws.migrationState === MigrationState.STARTING ||
+                      ws.migrationState === MigrationState.FINISHED ||
+                      ws.accessLevel !== WorkspaceAccessLevel.OWNER
+                    }
+                    onClick={() => handleStartMigration(ws)}
+                  >
+                    Start Migration
+                  </Button>
+                </FlexRow>
               </FlexRow>
-            </FlexRow>
-          ))
-        )}
-      </FlexColumn>
+            ))
+          )}
+        </FlexColumn>
+      )}
     </Modal>
   );
 };
