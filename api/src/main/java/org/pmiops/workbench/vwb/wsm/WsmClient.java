@@ -11,18 +11,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.api.WorkspaceApi;
-import org.pmiops.workbench.wsmanager.model.CloneWorkspaceV2Request;
-import org.pmiops.workbench.wsmanager.model.CloneWorkspaceV2Result;
-import org.pmiops.workbench.wsmanager.model.CreateWorkspaceV2Request;
-import org.pmiops.workbench.wsmanager.model.CreateWorkspaceV2Result;
-import org.pmiops.workbench.wsmanager.model.GrantRoleRequestBody;
-import org.pmiops.workbench.wsmanager.model.IamRole;
-import org.pmiops.workbench.wsmanager.model.JobControl;
-import org.pmiops.workbench.wsmanager.model.JobReport;
-import org.pmiops.workbench.wsmanager.model.Properties;
-import org.pmiops.workbench.wsmanager.model.Property;
-import org.pmiops.workbench.wsmanager.model.State;
-import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
+import org.pmiops.workbench.wsmanager.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -155,6 +144,35 @@ public class WsmClient {
 
           // Fetch full workspace description
           return workspaceServiceApi.get().getWorkspace(result.getWorkspaceId().toString(), null);
+        });
+  }
+
+  public void createControlledBucket(String workspaceId, String namespace) {
+
+    wsmRetryHandler.run(
+        context -> {
+          org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi controlledApi =
+              new org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi(
+                  workspaceServiceApi.get().getApiClient());
+
+          // Common resource metadata
+          ControlledResourceCommonFields common =
+              new ControlledResourceCommonFields()
+                  .name("rw-migration-bucket")
+                  .description("RW migration bucket")
+                  .cloningInstructions(CloningInstructionsEnum.NOTHING);
+
+          // Bucket parameters
+          GcpGcsBucketCreationParameters bucketParams =
+              new GcpGcsBucketCreationParameters().name("rw-migration-" + namespace);
+
+          // Request body
+          CreateControlledGcpGcsBucketRequestBody request =
+              new CreateControlledGcpGcsBucketRequestBody().common(common).gcsBucket(bucketParams);
+
+          controlledApi.createBucket(request, workspaceId);
+
+          return null;
         });
   }
 

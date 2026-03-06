@@ -29,6 +29,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -111,6 +112,7 @@ public class DbWorkspace {
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    this.migrationState = String.valueOf(MigrationState.NOT_STARTED);
   }
 
   @Id
@@ -737,7 +739,7 @@ public class DbWorkspace {
     return this;
   }
 
-  @Column(name = "migration_state")
+  @Column(name = "migration_state", nullable = false)
   public String getMigrationState() {
     return migrationState;
   }

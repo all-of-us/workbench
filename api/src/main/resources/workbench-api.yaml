@@ -3303,6 +3303,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResourceResponse'
+  /v1/migration/workspaces/{workspaceNamespace}/{terraName}/start:
+    post:
+      summary: Start workspace migration to VWB
+      operationId: startWorkspaceMigration
+      tags:
+        - Workspaces
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed
+            due to confusion with DB IDs, which it is not)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Migration started
   /v1/workspaces/{workspaceNamespace}/{terraName}/user-recent-resources/update:
     post:
       tags:

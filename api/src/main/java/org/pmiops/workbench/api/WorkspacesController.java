@@ -69,6 +69,7 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFactory;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -97,7 +98,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceOperationMapper workspaceOperationMapper;
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
-
+  private final WorkspaceMigrationService workspaceMigrationService;
   private final WorkspaceServiceFactory workspaceServiceFactory;
 
   private final WsmClient wsmClient;
@@ -121,6 +122,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceOperationMapper workspaceOperationMapper,
       WorkspaceResourcesService workspaceResourcesService,
       WorkspaceService workspaceService,
+      WorkspaceMigrationService workspaceMigrationService,
       WorkspaceServiceFactory workspaceServiceFactory,
       WsmClient wsmClient) {
     this.cdrVersionDao = cdrVersionDao;
@@ -140,6 +142,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceOperationMapper = workspaceOperationMapper;
     this.workspaceResourcesService = workspaceResourcesService;
     this.workspaceService = workspaceService;
+    this.workspaceMigrationService = workspaceMigrationService;
     this.workspaceServiceFactory = workspaceServiceFactory;
     this.wsmClient = wsmClient;
   }
@@ -811,6 +814,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .collect(Collectors.toList());
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  @Override
+  public ResponseEntity<Void> startWorkspaceMigration(String workspaceNamespace, String terraName) {
+
+    workspaceMigrationService.startWorkspaceMigration(workspaceNamespace, terraName);
+    return ResponseEntity.ok().build();
   }
 
   @Override
