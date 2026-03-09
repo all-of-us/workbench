@@ -55,6 +55,7 @@ interface Props {
 interface MigrationWorkspace {
   id: string;
   name: string;
+  terraName: string;
   cdrVersion: string | number;
   migrationState: MigrationState;
   migrationOwner?: string;
@@ -64,6 +65,7 @@ interface MigrationWorkspace {
 export const MigrationModal = ({ onClose }: Props) => {
   const [workspaces, setWorkspaces] = useState<MigrationWorkspace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [folders, setFolders] = useState<string[]>([]);
 
   // NEW: track which workspace user selected for migration
   const [selectedWorkspace, setSelectedWorkspace] =
@@ -82,6 +84,7 @@ export const MigrationModal = ({ onClose }: Props) => {
             return {
               id: w.workspace.namespace,
               name: w.workspace.name,
+              terraName: w.workspace.terraName,
               cdrVersion: w.workspace.cdrVersionId,
               migrationState,
               migrationOwner: w.workspace?.migrationOwner,
@@ -101,11 +104,18 @@ export const MigrationModal = ({ onClose }: Props) => {
     load();
   }, []);
 
-  const handleStartMigration = (ws: MigrationWorkspace) => {
-    console.log('Start migration clicked for:', ws.name);
+  const handleStartMigration = async (ws: MigrationWorkspace) => {
+    try {
+      const response = await workspacesApi().getMigrationBucketContents(
+        ws.id,
+        ws.terraName
+      );
 
-    // switch modal to folder selection step
-    setSelectedWorkspace(ws);
+      setFolders(response.folders || []);
+      setSelectedWorkspace(ws);
+    } catch (e) {
+      console.error('Failed to load bucket folders', e);
+    }
   };
 
   return (
@@ -117,11 +127,11 @@ export const MigrationModal = ({ onClose }: Props) => {
       {selectedWorkspace ? (
         <FolderSelection
           workspaceName={selectedWorkspace.name}
+          folders={folders}
           onBack={() => setSelectedWorkspace(null)}
           onClose={onClose}
-          onContinue={(folders) => {
-            console.log('Selected folders:', folders);
-            // TODO: connect with backend migration API later
+          onContinue={() => {
+            // This will be used later when STS migration step is implemented
           }}
         />
       ) : (

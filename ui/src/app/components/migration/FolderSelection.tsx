@@ -29,6 +29,7 @@ const styles = reactStyles({
 });
 
 interface Props {
+  folders: string[];
   onContinue: (folders: string[]) => void;
   workspaceName?: string;
   onBack?: () => void;
@@ -36,14 +37,12 @@ interface Props {
 }
 
 export const FolderSelection = ({
+  folders,
   onContinue,
   workspaceName,
   onBack,
   onClose,
 }: Props) => {
-  // TODO: Replace dummy folder list with GET /migration/bucket-contents API
-  const dummyFolders = ['notebooks/', 'data/', 'results/', 'analysis/'];
-
   const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
 
   const toggleFolder = (folder: string) => {
@@ -67,7 +66,7 @@ export const FolderSelection = ({
       </FlexRow>
 
       {/* Folder List */}
-      {dummyFolders.map((folder) => (
+      {folders.map((folder) => (
         <FlexRow key={folder} style={styles.folderRow}>
           <input
             type='checkbox'
