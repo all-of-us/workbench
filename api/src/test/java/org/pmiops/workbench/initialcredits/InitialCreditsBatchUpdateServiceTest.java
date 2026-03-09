@@ -115,29 +115,26 @@ public class InitialCreditsBatchUpdateServiceTest {
     // Create users with inactive VWB pods
     Set<DbUser> usersWithInactivePods = new HashSet<>();
     DbUser userWithInactivePod = new DbUser().setUserId(4L);
-    DbVwbUserPod inactivePod = new DbVwbUserPod()
-        .setVwbUserPodId(4L)
-        .setUser(userWithInactivePod)
-        .setVwbPodId("pod4")
-        .setInitialCreditsActive(false);  // Inactive pod
+    DbVwbUserPod inactivePod =
+        new DbVwbUserPod()
+            .setVwbUserPodId(4L)
+            .setUser(userWithInactivePod)
+            .setVwbPodId("pod4")
+            .setInitialCreditsActive(false); // Inactive pod
     userWithInactivePod.setVwbUserPod(inactivePod);
     usersWithInactivePods.add(userWithInactivePod);
 
-    when(mockUserDao.findUsersByUserIdIn(List.of(4L)))
-        .thenReturn(List.of(userWithInactivePod));
+    when(mockUserDao.findUsersByUserIdIn(List.of(4L))).thenReturn(List.of(userWithInactivePod));
     when(mockWorkspaceDao.getWorkspaceGoogleProjectsForCreators(List.of(4L)))
         .thenReturn(Collections.emptySet());
-    when(mockBigQueryService.getAllVWBProjectCostsFromBQ())
-        .thenReturn(Map.of("pod4", 5.5d));
+    when(mockBigQueryService.getAllVWBProjectCostsFromBQ()).thenReturn(Map.of("pod4", 5.5d));
 
     initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(4L));
 
     // Verify that the cost for the inactive pod is still included
     verify(mockInitialCreditsService)
         .checkInitialCreditsUsageForUsers(
-            usersWithInactivePods,
-            Collections.emptyMap(),
-            Map.of(4L, 5.5d));
+            usersWithInactivePods, Collections.emptyMap(), Map.of(4L, 5.5d));
   }
 
   @Test
@@ -149,21 +146,23 @@ public class InitialCreditsBatchUpdateServiceTest {
 
     // User with active pod
     DbUser userActive = new DbUser().setUserId(5L);
-    DbVwbUserPod activePod = new DbVwbUserPod()
-        .setVwbUserPodId(5L)
-        .setUser(userActive)
-        .setVwbPodId("pod5")
-        .setInitialCreditsActive(true);
+    DbVwbUserPod activePod =
+        new DbVwbUserPod()
+            .setVwbUserPodId(5L)
+            .setUser(userActive)
+            .setVwbPodId("pod5")
+            .setInitialCreditsActive(true);
     userActive.setVwbUserPod(activePod);
     mixedUsers.add(userActive);
 
     // User with inactive pod
     DbUser userInactive = new DbUser().setUserId(6L);
-    DbVwbUserPod inactivePod = new DbVwbUserPod()
-        .setVwbUserPodId(6L)
-        .setUser(userInactive)
-        .setVwbPodId("pod6")
-        .setInitialCreditsActive(false);
+    DbVwbUserPod inactivePod =
+        new DbVwbUserPod()
+            .setVwbUserPodId(6L)
+            .setUser(userInactive)
+            .setVwbPodId("pod6")
+            .setInitialCreditsActive(false);
     userInactive.setVwbUserPod(inactivePod);
     mixedUsers.add(userInactive);
 
@@ -191,21 +190,23 @@ public class InitialCreditsBatchUpdateServiceTest {
 
     // User with null pod_id (lock row)
     DbUser userWithNullPodId = new DbUser().setUserId(7L);
-    DbVwbUserPod nullPodIdPod = new DbVwbUserPod()
-        .setVwbUserPodId(7L)
-        .setUser(userWithNullPodId)
-        .setVwbPodId(null)  // Null pod_id indicates a lock row
-        .setInitialCreditsActive(true);
+    DbVwbUserPod nullPodIdPod =
+        new DbVwbUserPod()
+            .setVwbUserPodId(7L)
+            .setUser(userWithNullPodId)
+            .setVwbPodId(null) // Null pod_id indicates a lock row
+            .setInitialCreditsActive(true);
     userWithNullPodId.setVwbUserPod(nullPodIdPod);
     usersWithNullPodId.add(userWithNullPodId);
 
     // User with valid pod_id
     DbUser userWithValidPodId = new DbUser().setUserId(8L);
-    DbVwbUserPod validPod = new DbVwbUserPod()
-        .setVwbUserPodId(8L)
-        .setUser(userWithValidPodId)
-        .setVwbPodId("pod8")
-        .setInitialCreditsActive(true);
+    DbVwbUserPod validPod =
+        new DbVwbUserPod()
+            .setVwbUserPodId(8L)
+            .setUser(userWithValidPodId)
+            .setVwbPodId("pod8")
+            .setInitialCreditsActive(true);
     userWithValidPodId.setVwbUserPod(validPod);
     usersWithNullPodId.add(userWithValidPodId);
 
@@ -213,15 +214,15 @@ public class InitialCreditsBatchUpdateServiceTest {
         .thenReturn(List.of(userWithNullPodId, userWithValidPodId));
     when(mockWorkspaceDao.getWorkspaceGoogleProjectsForCreators(List.of(7L, 8L)))
         .thenReturn(Collections.emptySet());
-    when(mockBigQueryService.getAllVWBProjectCostsFromBQ())
-        .thenReturn(Map.of("pod8", 15.0d));
+    when(mockBigQueryService.getAllVWBProjectCostsFromBQ()).thenReturn(Map.of("pod8", 15.0d));
 
     initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(7L, 8L));
 
     // Verify that only the user with valid pod_id has costs included
     Map<Long, Double> expectedCosts = Map.of(8L, 15.0d);
     verify(mockInitialCreditsService)
-        .checkInitialCreditsUsageForUsers(usersWithNullPodId, Collections.emptyMap(), expectedCosts);
+        .checkInitialCreditsUsageForUsers(
+            usersWithNullPodId, Collections.emptyMap(), expectedCosts);
   }
 
   @Test
@@ -234,31 +235,28 @@ public class InitialCreditsBatchUpdateServiceTest {
 
     // User who previously exhausted credits
     DbUser exhaustedUser = new DbUser().setUserId(9L);
-    DbVwbUserPod exhaustedPod = new DbVwbUserPod()
-        .setVwbUserPodId(9L)
-        .setUser(exhaustedUser)
-        .setVwbPodId("pod9")
-        .setInitialCreditsActive(false)  // Previously marked as exhausted
-        .setCost(100.0);  // Previous cost in DB
+    DbVwbUserPod exhaustedPod =
+        new DbVwbUserPod()
+            .setVwbUserPodId(9L)
+            .setUser(exhaustedUser)
+            .setVwbPodId("pod9")
+            .setInitialCreditsActive(false) // Previously marked as exhausted
+            .setCost(100.0); // Previous cost in DB
     exhaustedUser.setVwbUserPod(exhaustedPod);
     exhaustedUsers.add(exhaustedUser);
 
-    when(mockUserDao.findUsersByUserIdIn(List.of(9L)))
-        .thenReturn(List.of(exhaustedUser));
+    when(mockUserDao.findUsersByUserIdIn(List.of(9L))).thenReturn(List.of(exhaustedUser));
     when(mockWorkspaceDao.getWorkspaceGoogleProjectsForCreators(List.of(9L)))
         .thenReturn(Collections.emptySet());
     // New costs appear in BQ due to delayed billing report
-    when(mockBigQueryService.getAllVWBProjectCostsFromBQ())
-        .thenReturn(Map.of("pod9", 150.0d));
+    when(mockBigQueryService.getAllVWBProjectCostsFromBQ()).thenReturn(Map.of("pod9", 150.0d));
 
     initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(9L));
 
     // Verify that the updated cost from BQ is included despite inactive status
     verify(mockInitialCreditsService)
         .checkInitialCreditsUsageForUsers(
-            exhaustedUsers,
-            Collections.emptyMap(),
-            Map.of(9L, 150.0d));
+            exhaustedUsers, Collections.emptyMap(), Map.of(9L, 150.0d));
   }
 
   @Test
@@ -272,56 +270,61 @@ public class InitialCreditsBatchUpdateServiceTest {
 
     // Create multiple users with different pod states
     DbUser userWithActiveAndCost = new DbUser().setUserId(10L);
-    DbVwbUserPod activePodWithCost = new DbVwbUserPod()
-        .setVwbUserPodId(10L)
-        .setUser(userWithActiveAndCost)
-        .setVwbPodId("pod10")
-        .setInitialCreditsActive(true)
-        .setCost(50.0);
+    DbVwbUserPod activePodWithCost =
+        new DbVwbUserPod()
+            .setVwbUserPodId(10L)
+            .setUser(userWithActiveAndCost)
+            .setVwbPodId("pod10")
+            .setInitialCreditsActive(true)
+            .setCost(50.0);
     userWithActiveAndCost.setVwbUserPod(activePodWithCost);
     testUsers.add(userWithActiveAndCost);
 
     DbUser userWithInactiveAndCost = new DbUser().setUserId(11L);
-    DbVwbUserPod inactivePodWithCost = new DbVwbUserPod()
-        .setVwbUserPodId(11L)
-        .setUser(userWithInactiveAndCost)
-        .setVwbPodId("pod11")
-        .setInitialCreditsActive(false)  // Inactive but should still be included
-        .setCost(75.0);
+    DbVwbUserPod inactivePodWithCost =
+        new DbVwbUserPod()
+            .setVwbUserPodId(11L)
+            .setUser(userWithInactiveAndCost)
+            .setVwbPodId("pod11")
+            .setInitialCreditsActive(false) // Inactive but should still be included
+            .setCost(75.0);
     userWithInactiveAndCost.setVwbUserPod(inactivePodWithCost);
     testUsers.add(userWithInactiveAndCost);
 
     DbUser userWithInactiveNoCost = new DbUser().setUserId(12L);
-    DbVwbUserPod inactivePodNoCost = new DbVwbUserPod()
-        .setVwbUserPodId(12L)
-        .setUser(userWithInactiveNoCost)
-        .setVwbPodId("pod12")
-        .setInitialCreditsActive(false)
-        .setCost(0.0);
+    DbVwbUserPod inactivePodNoCost =
+        new DbVwbUserPod()
+            .setVwbUserPodId(12L)
+            .setUser(userWithInactiveNoCost)
+            .setVwbPodId("pod12")
+            .setInitialCreditsActive(false)
+            .setCost(0.0);
     userWithInactiveNoCost.setVwbUserPod(inactivePodNoCost);
     testUsers.add(userWithInactiveNoCost);
 
     when(mockUserDao.findUsersByUserIdIn(List.of(10L, 11L, 12L)))
-        .thenReturn(List.of(userWithActiveAndCost, userWithInactiveAndCost, userWithInactiveNoCost));
+        .thenReturn(
+            List.of(userWithActiveAndCost, userWithInactiveAndCost, userWithInactiveNoCost));
     when(mockWorkspaceDao.getWorkspaceGoogleProjectsForCreators(List.of(10L, 11L, 12L)))
         .thenReturn(Collections.emptySet());
 
     // BigQuery returns costs for all pods regardless of active status
     when(mockBigQueryService.getAllVWBProjectCostsFromBQ())
-        .thenReturn(Map.of(
-            "pod10", 55.0d,   // Active pod with updated cost
-            "pod11", 85.0d,   // Inactive pod with updated cost (delayed billing)
-            "pod12", 10.0d    // Inactive pod with new cost (delayed billing)
-        ));
+        .thenReturn(
+            Map.of(
+                "pod10", 55.0d, // Active pod with updated cost
+                "pod11", 85.0d, // Inactive pod with updated cost (delayed billing)
+                "pod12", 10.0d // Inactive pod with new cost (delayed billing)
+                ));
 
     initialCreditsBatchUpdateService.checkInitialCreditsUsage(List.of(10L, 11L, 12L));
 
     // All pods should have their costs included, not just active ones
-    Map<Long, Double> expectedCosts = Map.of(
-        10L, 55.0d,
-        11L, 85.0d,
-        12L, 10.0d
-    );
+    Map<Long, Double> expectedCosts =
+        Map.of(
+            10L, 55.0d,
+            11L, 85.0d,
+            12L, 10.0d);
 
     verify(mockInitialCreditsService)
         .checkInitialCreditsUsageForUsers(testUsers, Collections.emptyMap(), expectedCosts);
