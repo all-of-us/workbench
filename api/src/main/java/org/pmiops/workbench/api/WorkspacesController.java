@@ -44,6 +44,7 @@ import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.MigrationBucketContentsResponse;
 import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
@@ -821,6 +822,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceMigrationService.startWorkspaceMigration(workspaceNamespace, terraName);
     return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<MigrationBucketContentsResponse> getMigrationBucketContents(
+      String namespace, String terraName) {
+
+    MigrationBucketContentsResponse response =
+        workspaceMigrationService.getBucketContents(namespace, terraName);
+
+    return ResponseEntity.ok(response);
   }
 
   @Override

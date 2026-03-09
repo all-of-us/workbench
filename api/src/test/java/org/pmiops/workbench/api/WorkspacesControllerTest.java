@@ -131,49 +131,7 @@ import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AnnotationType;
-import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.CloneWorkspaceRequest;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
-import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.Concept;
-import org.pmiops.workbench.model.ConceptSet;
-import org.pmiops.workbench.model.ConceptSetConceptId;
-import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetRequest;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainValuePair;
-import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.PageFilterRequest;
-import org.pmiops.workbench.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.model.RecentWorkspace;
-import org.pmiops.workbench.model.RecentWorkspaceResponse;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResourceType;
-import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
-import org.pmiops.workbench.model.UpdateConceptSetRequest;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
-import org.pmiops.workbench.model.WorkspaceOperation;
-import org.pmiops.workbench.model.WorkspaceOperationStatus;
-import org.pmiops.workbench.model.WorkspaceResource;
-import org.pmiops.workbench.model.WorkspaceResourceResponse;
-import org.pmiops.workbench.model.WorkspaceResponseListResponse;
-import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
@@ -3052,5 +3010,30 @@ public class WorkspacesControllerTest {
     workspacesController.publishCommunityWorkspace(wsNamespace);
     verify(workspaceService).publishCommunityWorkspace(any(DbWorkspace.class));
     verify(mockWorkspaceAuditor).firePublishAction(anyLong());
+  }
+
+  @Test
+  public void testGetMigrationBucketContents() {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    String namespace = workspace.getNamespace();
+    String terraName = workspace.getTerraName();
+
+    MigrationBucketContentsResponse mockResponse =
+        new MigrationBucketContentsResponse()
+            .bucketName("test-bucket")
+            .folders(List.of("notebooks/", "data/", "results/"));
+
+    when(workspaceMigrationService.getBucketContents(namespace, terraName))
+        .thenReturn(mockResponse);
+
+    MigrationBucketContentsResponse response =
+        workspacesController.getMigrationBucketContents(namespace, terraName).getBody();
+
+    assertThat(response.getBucketName()).isEqualTo("test-bucket");
+    assertThat(response.getFolders()).containsExactly("notebooks/", "data/", "results/");
+
+    verify(workspaceMigrationService).getBucketContents(namespace, terraName);
   }
 }

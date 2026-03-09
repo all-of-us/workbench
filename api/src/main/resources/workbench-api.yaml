@@ -5747,6 +5747,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
+  /v1/workspaces/{namespace}/{terraName}/migration/bucket-contents:
+    get:
+      tags:
+        - workspaces
+      description: Returns the top-level folders from the RW workspace bucket for migration selection.
+      operationId: getMigrationBucketContents
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          description: The workspace Terra name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bucket contents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MigrationBucketContentsResponse'
   /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/menu/{parentId}:
     get:
       tags:
@@ -8070,6 +8096,15 @@ components:
       - PROCESSING
       - ERROR
       - SUCCESS
+    MigrationBucketContentsResponse:
+      type: object
+      properties:
+        bucketName:
+          type: string
+        folders:
+          type: array
+          items:
+            type: string
     ResearchPurpose:
       required:
       - ancestry
