@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 
@@ -21,6 +22,9 @@ public interface UserServiceAuditor {
       BypassTimeTargetProperty bypassTimeTargetProperty,
       Optional<Instant> previousBypassTime,
       Optional<Instant> newBypassTime);
+
+  void fireAdministrativeModuleCompletionReset(
+      long userId, DbAccessModuleName moduleName, Optional<Instant> previousCompletionTime);
 
   void fireAcknowledgeTermsOfService(DbUser targetUser, Integer termsOfServiceVersion);
 

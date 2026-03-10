@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessCompletionResetRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +120,29 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       updateCompletionTime(dbUser, DbAccessModuleName.IDENTITY, timestamp);
     }
     return userAccessModuleToUpdate;
+  }
+
+  @Override
+  public void resetCompletionTime(long userId, AccessCompletionResetRequest request) {
+    DbAccessModuleName moduleName =
+        accessModuleNameMapper.clientAccessModuleToStorage(request.getModuleName());
+    DbAccessModule accessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), moduleName);
+
+    final DbUser user = userDao.findUserByUserId(userId);
+    DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(user, accessModule);
+    final Timestamp previousCompletionTime = userAccessModule.getCompletionTime();
+
+    logger.info(
+        String.format(
+            "Resetting %s(uid: %d) completion time for module %s",
+            user.getUsername(), userId, accessModule.getName()));
+
+    updateCompletionTime(user, moduleName, null);
+    userServiceAuditor.fireAdministrativeModuleCompletionReset(
+        user.getUserId(),
+        moduleName,
+        Optional.ofNullable(previousCompletionTime).map(Timestamp::toInstant));
   }
 
   @Override
