@@ -530,9 +530,7 @@ public class AccessModuleServiceTest {
 
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeModuleCompletionReset(
-            user.getUserId(),
-            DbAccessModuleName.RT_COMPLIANCE_TRAINING,
-            Optional.empty());
+            user.getUserId(), DbAccessModuleName.RT_COMPLIANCE_TRAINING, Optional.empty());
   }
 
   private static Optional<Instant> nullableTimestampToOptionalInstant(
