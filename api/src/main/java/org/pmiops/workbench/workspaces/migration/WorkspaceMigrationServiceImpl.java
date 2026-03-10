@@ -1,7 +1,13 @@
 package org.pmiops.workbench.workspaces.migration;
 
+import com.google.cloud.storage.Blob;
 import jakarta.inject.Provider;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -9,7 +15,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.model.MigrationBucketContentsResponse;
 import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -28,6 +36,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
+  private final CloudStorageClient cloudStorageClient;
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -37,7 +46,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       UserDao userDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       FireCloudService fireCloudService,
-      InitialCreditsService initialCreditsService) {
+      InitialCreditsService initialCreditsService,
+      CloudStorageClient cloudStorageClient) {
+
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
@@ -45,6 +56,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
+    this.cloudStorageClient = cloudStorageClient;
   }
 
   @Override
@@ -61,7 +73,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     Workspace workspace =
         workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
 
-    // podId (MATCH EXISTING PATTERN)
+    // Determine pod ID using existing project pattern
     String podId =
         Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
             .map(DbUser::getVwbUserPod)
@@ -70,11 +82,37 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     wsmClient.createWorkspaceAsService(workspace, podId);
 
-    // TODO: Un-comment this once the Storage
-    // Transfer Service (STS) migration flow is finalized.
+    // TODO: enable once Storage Transfer Service migration step is implemented
     //
-    //    WorkspaceDescription vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, podId);
-    //    String workspaceId = vwbWorkspace.getId().toString();
-    //    wsmClient.createControlledBucket(workspaceId, namespace);
+    // WorkspaceDescription vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, podId);
+    // String workspaceId = vwbWorkspace.getId().toString();
+    // wsmClient.createControlledBucket(workspaceId, namespace);
+  }
+
+  @Override
+  public MigrationBucketContentsResponse getBucketContents(String namespace, String terraName) {
+
+    RawlsWorkspaceDetails fcWorkspace =
+        fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
+
+    String bucketName = fcWorkspace.getBucketName();
+
+    List<Blob> blobs = cloudStorageClient.getBlobPage(bucketName);
+
+    Set<String> folderSet = new HashSet<>();
+
+    for (Blob blob : blobs) {
+      String name = blob.getName();
+
+      if (name != null && name.contains("/")) {
+        String folder = name.substring(0, name.indexOf("/") + 1);
+        folderSet.add(folder);
+      }
+    }
+
+    List<String> folders = new ArrayList<>(folderSet);
+    Collections.sort(folders);
+
+    return new MigrationBucketContentsResponse().bucketName(bucketName).folders(folders);
   }
 }

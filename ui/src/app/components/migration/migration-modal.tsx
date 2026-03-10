@@ -9,6 +9,7 @@ import { Modal } from 'app/components/modals';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 
+import { FolderSelection } from './FolderSelection';
 import { MigrationBadge } from './migration-badge';
 
 const styles = reactStyles({
@@ -54,6 +55,7 @@ interface Props {
 interface MigrationWorkspace {
   id: string;
   name: string;
+  terraName: string;
   cdrVersion: string | number;
   migrationState: MigrationState;
   migrationOwner?: string;
@@ -63,11 +65,17 @@ interface MigrationWorkspace {
 export const MigrationModal = ({ onClose }: Props) => {
   const [workspaces, setWorkspaces] = useState<MigrationWorkspace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [folders, setFolders] = useState<string[]>([]);
+
+  // NEW: track which workspace user selected for migration
+  const [selectedWorkspace, setSelectedWorkspace] =
+    useState<MigrationWorkspace | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
         const response = await workspacesApi().getWorkspaces();
+
         const mapped: MigrationWorkspace[] = (response.items || []).map(
           (w: any) => {
             const migrationState =
@@ -76,6 +84,7 @@ export const MigrationModal = ({ onClose }: Props) => {
             return {
               id: w.workspace.namespace,
               name: w.workspace.name,
+              terraName: w.workspace.terraName,
               cdrVersion: w.workspace.cdrVersionId,
               migrationState,
               migrationOwner: w.workspace?.migrationOwner,
@@ -95,9 +104,18 @@ export const MigrationModal = ({ onClose }: Props) => {
     load();
   }, []);
 
-  const handleStartMigration = (ws: MigrationWorkspace) => {
-    // stub for now
-    console.log('Start migration clicked for:', ws.name);
+  const handleStartMigration = async (ws: MigrationWorkspace) => {
+    try {
+      const response = await workspacesApi().getMigrationBucketContents(
+        ws.id,
+        ws.terraName
+      );
+
+      setFolders(response.folders || []);
+      setSelectedWorkspace(ws);
+    } catch (e) {
+      console.error('Failed to load bucket folders', e);
+    }
   };
 
   return (
@@ -106,51 +124,65 @@ export const MigrationModal = ({ onClose }: Props) => {
       onClose={onClose}
       width={720}
     >
-      <FlexColumn>
-        <FlexRow style={styles.header}>
-          <div style={{ fontWeight: 600, fontSize: 18 }}>
-            Migrate Workspaces to Verily Workbench
-          </div>
+      {selectedWorkspace ? (
+        <FolderSelection
+          workspaceName={selectedWorkspace.name}
+          folders={folders}
+          onBack={() => setSelectedWorkspace(null)}
+          onClose={onClose}
+          onContinue={() => {
+            // This will be used later when STS migration step is implemented
+          }}
+        />
+      ) : (
+        <FlexColumn>
+          <FlexRow style={styles.header}>
+            <div style={{ fontWeight: 600, fontSize: 18 }}>
+              Migrate Workspaces to Verily Workbench
+            </div>
 
-          <CloseButton onClose={onClose} />
-        </FlexRow>
+            <CloseButton onClose={onClose} />
+          </FlexRow>
 
-        <FlexRow style={styles.tableHeader}>
-          <div style={styles.cellName}>Workspace</div>
-          <div style={styles.cellCdr}>CDR</div>
-          <div style={styles.cellStatus}>Status</div>
-          <div style={styles.cellAction} />
-        </FlexRow>
+          <FlexRow style={styles.tableHeader}>
+            <div style={styles.cellName}>Workspace</div>
+            <div style={styles.cellCdr}>CDR</div>
+            <div style={styles.cellStatus}>Status</div>
+            <div style={styles.cellAction} />
+          </FlexRow>
 
-        {loading ? (
-          <div style={{ padding: '16px' }}>Loading workspaces…</div>
-        ) : (
-          workspaces.map((ws) => (
-            <FlexRow key={ws.id} style={styles.row}>
-              <div style={styles.cellName}>{ws.name}</div>
-              <div style={styles.cellCdr}>v{ws.cdrVersion}</div>
-              <div style={styles.cellStatus}>
-                <MigrationBadge
-                  state={ws.migrationState}
-                  owner={ws.migrationOwner}
-                />
-              </div>
-              <FlexRow style={styles.cellAction}>
-                <Button
-                  disabled={
-                    ws.migrationState === MigrationState.STARTING ||
-                    ws.migrationState === MigrationState.FINISHED ||
-                    ws.accessLevel !== WorkspaceAccessLevel.OWNER
-                  }
-                  onClick={() => handleStartMigration(ws)}
-                >
-                  Start Migration
-                </Button>
+          {loading ? (
+            <div style={{ padding: '16px' }}>Loading workspaces…</div>
+          ) : (
+            workspaces.map((ws) => (
+              <FlexRow key={ws.id} style={styles.row}>
+                <div style={styles.cellName}>{ws.name}</div>
+                <div style={styles.cellCdr}>v{ws.cdrVersion}</div>
+
+                <div style={styles.cellStatus}>
+                  <MigrationBadge
+                    state={ws.migrationState}
+                    owner={ws.migrationOwner}
+                  />
+                </div>
+
+                <FlexRow style={styles.cellAction}>
+                  <Button
+                    disabled={
+                      ws.migrationState === MigrationState.STARTING ||
+                      ws.migrationState === MigrationState.FINISHED ||
+                      ws.accessLevel !== WorkspaceAccessLevel.OWNER
+                    }
+                    onClick={() => handleStartMigration(ws)}
+                  >
+                    Start Migration
+                  </Button>
+                </FlexRow>
               </FlexRow>
-            </FlexRow>
-          ))
-        )}
-      </FlexColumn>
+            ))
+          )}
+        </FlexColumn>
+      )}
     </Modal>
   );
 };
