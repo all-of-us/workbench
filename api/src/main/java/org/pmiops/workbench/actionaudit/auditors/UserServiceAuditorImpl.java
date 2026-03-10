@@ -19,6 +19,7 @@ import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,28 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
     previousBypassTime.ifPresent(
         i -> eventBuilder.previousValueMaybe(String.valueOf(i.toEpochMilli())));
     newBypassTime.ifPresent(i -> eventBuilder.newValueMaybe(String.valueOf(i.toEpochMilli())));
+
+    actionAuditService.send(eventBuilder.build());
+  }
+
+  @Override
+  public void fireAdministrativeCompletionReset(
+      long userId, DbAccessModuleName moduleName, Optional<Instant> previousCompletionTime) {
+    DbUser adminUser = dbUserProvider.get();
+    Builder eventBuilder =
+        ActionAuditEvent.builder()
+            .timestamp(clock.millis())
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentIdMaybe(adminUser.getUserId())
+            .agentEmailMaybe(adminUser.getUsername())
+            .actionId(actionIdProvider.get())
+            .actionType(ActionType.EDIT)
+            .targetType(TargetType.ACCOUNT)
+            .targetPropertyMaybe(moduleName.toString() + "_completion_reset")
+            .targetIdMaybe(userId);
+
+    previousCompletionTime.ifPresent(
+        i -> eventBuilder.previousValueMaybe(String.valueOf(i.toEpochMilli())));
 
     actionAuditService.send(eventBuilder.build());
   }

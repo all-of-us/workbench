@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
+import org.pmiops.workbench.model.AccessCompletionResetRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -495,6 +496,43 @@ public class AccessModuleServiceTest {
             accessModuleService.isModuleCompliant(
                 user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT))
         .isFalse();
+  }
+
+  @Test
+  public void testResetCompletionTime_resetsExistingCompletion() {
+    accessModuleService.updateCompletionTime(
+        user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, FakeClockConfiguration.NOW);
+    List<DbUserAccessModule> before = userAccessModuleDao.getAllByUser(user);
+    assertThat(before.get(0).getCompletionTime()).isEqualTo(FakeClockConfiguration.NOW);
+
+    accessModuleService.resetCompletionTime(
+        user.getUserId(),
+        new AccessCompletionResetRequest().moduleName(AccessModule.COMPLIANCE_TRAINING));
+
+    List<DbUserAccessModule> after = userAccessModuleDao.getAllByUser(user);
+    assertThat(after.get(0).getCompletionTime()).isNull();
+
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeCompletionReset(
+            user.getUserId(),
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING,
+            nullableTimestampToOptionalInstant(FakeClockConfiguration.NOW));
+  }
+
+  @Test
+  public void testResetCompletionTime_noExistingCompletion() {
+    accessModuleService.resetCompletionTime(
+        user.getUserId(),
+        new AccessCompletionResetRequest().moduleName(AccessModule.COMPLIANCE_TRAINING));
+
+    List<DbUserAccessModule> after = userAccessModuleDao.getAllByUser(user);
+    assertThat(after.get(0).getCompletionTime()).isNull();
+
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeCompletionReset(
+            user.getUserId(),
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING,
+            Optional.empty());
   }
 
   private static Optional<Instant> nullableTimestampToOptionalInstant(

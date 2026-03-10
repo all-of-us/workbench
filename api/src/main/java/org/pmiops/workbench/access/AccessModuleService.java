@@ -7,6 +7,7 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessCompletionResetRequest;
 import org.pmiops.workbench.model.AccessModuleStatus;
 
 public interface AccessModuleService {
@@ -44,6 +45,9 @@ public interface AccessModuleService {
    * <p>The module can be bypassed OR (completed but not expired).
    */
   boolean isModuleCompliant(DbUser dbUser, DbAccessModuleName accessModuleName);
+
+  /** Resets the completion time for an access module, forcing the user to redo it. */
+  void resetCompletionTime(long userId, AccessCompletionResetRequest request);
 
   boolean isSignedDuccVersionCurrent(Integer signedVersion);
 

@@ -8251,6 +8251,13 @@ components:
         bypassed:
           type: boolean
           default: false
+    AccessCompletionResetRequest:
+      required:
+      - moduleName
+      type: object
+      properties:
+        moduleName:
+          $ref: '#/components/schemas/AccessModule'
     CohortReviewListResponse:
       required:
       - items
@@ -12727,6 +12734,11 @@ components:
           description: Updates the user's bypass status for the given access modules.
           items:
             $ref: '#/components/schemas/AccessBypassRequest'
+        accessCompletionResets:
+          type: array
+          description: Resets the user's completion status for the given access modules, forcing them to redo the module.
+          items:
+            $ref: '#/components/schemas/AccessCompletionResetRequest'
         accountDisabledStatus:
           $ref: '#/components/schemas/AccountDisabledStatus'
         accountDisabledReason:

@@ -547,6 +547,12 @@ public class ProfileService {
         .getAccessBypassRequests()
         .forEach(bypass -> accessModuleService.updateBypassTime(dbUser.getUserId(), bypass));
 
+    Optional.ofNullable(request.getAccessCompletionResets())
+        .ifPresent(
+            resets ->
+                resets.forEach(
+                    reset -> accessModuleService.resetCompletionTime(dbUser.getUserId(), reset)));
+
     // refetch from the DB
     Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));
     Optional.ofNullable(request.getContactEmail()).ifPresent(updatedProfile::setContactEmail);
