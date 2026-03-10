@@ -1743,4 +1743,92 @@ public class InitialCreditsServiceTest {
               initialCreditsWorkspace.getWorkspaceNamespace());
     }
   }
+
+  @Test
+  public void test_checkCreditsExpirationForUserIDs_exhaustedUser_doesNotSendExpirationEmail()
+      throws MessagingException {
+    // User whose credits expired but who has already exhausted their credits
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(PAST_EXPIRATION)
+                        .setBypassed(false)
+                        .setExpirationCleanupTime(null)));
+
+    // Create a workspace for this user that is marked as exhausted
+    DbWorkspace exhaustedWorkspace = createWorkspace(user, "exhausted-project");
+    exhaustedWorkspace.setInitialCreditsExhausted(true);
+    spyWorkspaceDao.save(exhaustedWorkspace);
+
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // Should NOT send expiration email because user has exhausted workspaces
+    verify(mailService, never()).alertUserInitialCreditsExpired(any());
+    // expirationCleanupTime should still be null
+    assertNull(user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
+
+  @Test
+  public void test_checkCreditsExpirationForUserIDs_exhaustedUser_doesNotSendExpiringSoonEmail()
+      throws MessagingException {
+    // User whose credits are expiring soon but who has already exhausted their credits
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setBypassed(false)
+                        .setApproachingExpirationNotificationTime(null)
+                        .setExpirationCleanupTime(null)));
+
+    // Create a workspace for this user that is marked as exhausted
+    DbWorkspace exhaustedWorkspace = createWorkspace(user, "exhausted-project");
+    exhaustedWorkspace.setInitialCreditsExhausted(true);
+    spyWorkspaceDao.save(exhaustedWorkspace);
+
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // Should NOT send expiring soon email because user has exhausted workspaces
+    verify(mailService, never()).alertUserInitialCreditsExpiring(any());
+    // approachingExpirationNotificationTime should still be null
+    assertNull(user.getUserInitialCreditsExpiration().getApproachingExpirationNotificationTime());
+  }
+
+  @Test
+  public void test_checkCreditsExpirationForUserIDs_nonExhaustedUser_sendsExpirationEmail()
+      throws MessagingException {
+    // User whose credits expired and who has NOT exhausted their credits
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(PAST_EXPIRATION)
+                        .setBypassed(false)
+                        .setExpirationCleanupTime(null)));
+
+    // Create a workspace for this user that is NOT exhausted
+    DbWorkspace nonExhaustedWorkspace = createWorkspace(user, "non-exhausted-project");
+    nonExhaustedWorkspace.setInitialCreditsExhausted(false);
+    spyWorkspaceDao.save(nonExhaustedWorkspace);
+
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // SHOULD send expiration email because user has no exhausted workspaces
+    verify(mailService, times(1)).alertUserInitialCreditsExpired(user);
+    // expirationCleanupTime should be set
+    assertNotNull(user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
 }

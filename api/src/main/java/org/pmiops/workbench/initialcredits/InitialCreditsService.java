@@ -488,15 +488,28 @@ public class InitialCreditsService {
         || exp.getApproachingExpirationNotificationTime() == null;
   }
 
+  /**
+   * Check if the user has any workspaces with exhausted initial credits.
+   *
+   * @param user The user to check
+   * @return True if the user has at least one workspace marked as exhausted
+   */
+  private boolean hasExhaustedWorkspaces(DbUser user) {
+    return workspaceDao.findAllByCreator(user).stream()
+        .anyMatch(DbWorkspace::isInitialCreditsExhausted);
+  }
+
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
 
     if (areUserCreditsExpired(user)
-        && userInitialCreditsExpiration.getExpirationCleanupTime() == null) {
+        && userInitialCreditsExpiration.getExpirationCleanupTime() == null
+        && !hasExhaustedWorkspaces(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
-        && shouldCheckApproachingExpirationNotification(userInitialCreditsExpiration)) {
+        && shouldCheckApproachingExpirationNotification(userInitialCreditsExpiration)
+        && !hasExhaustedWorkspaces(user)) {
       handleExpiringSoonCredits(user, userInitialCreditsExpiration);
     }
   }
