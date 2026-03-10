@@ -24,15 +24,15 @@ export const MigrationBadge = ({ state, owner }: Props) => {
   const getLabel = () => {
     switch (state) {
       case MigrationState.NOT_STARTED:
-        return 'Ready to migrate';
+        return 'Not Started';
 
       case MigrationState.STARTING:
         return owner
-          ? `Migration in progress (Initiated by ${owner})`
-          : 'Migration in progress';
+          ? `Migration in Progress (Initiated by ${owner})`
+          : 'Migration in Progress';
 
       case MigrationState.FINISHED:
-        return 'Migrated';
+        return 'Migration Complete';
 
       default:
         return '';
