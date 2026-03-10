@@ -139,7 +139,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
             user.getUsername(), userId, accessModule.getName()));
 
     updateCompletionTime(user, moduleName, null);
-    userServiceAuditor.fireAdministrativeCompletionReset(
+    userServiceAuditor.fireAdministrativeModuleCompletionReset(
         user.getUserId(),
         moduleName,
         Optional.ofNullable(previousCompletionTime).map(Timestamp::toInstant));

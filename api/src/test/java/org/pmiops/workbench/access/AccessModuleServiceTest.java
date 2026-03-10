@@ -513,7 +513,7 @@ public class AccessModuleServiceTest {
     assertThat(after.get(0).getCompletionTime()).isNull();
 
     verify(mockUserServiceAuditAdapter)
-        .fireAdministrativeCompletionReset(
+        .fireAdministrativeModuleCompletionReset(
             user.getUserId(),
             DbAccessModuleName.RT_COMPLIANCE_TRAINING,
             nullableTimestampToOptionalInstant(FakeClockConfiguration.NOW));
@@ -529,7 +529,7 @@ public class AccessModuleServiceTest {
     assertThat(after.get(0).getCompletionTime()).isNull();
 
     verify(mockUserServiceAuditAdapter)
-        .fireAdministrativeCompletionReset(
+        .fireAdministrativeModuleCompletionReset(
             user.getUserId(),
             DbAccessModuleName.RT_COMPLIANCE_TRAINING,
             Optional.empty());

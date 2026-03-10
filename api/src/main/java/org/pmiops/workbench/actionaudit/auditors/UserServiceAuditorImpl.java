@@ -101,7 +101,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   }
 
   @Override
-  public void fireAdministrativeCompletionReset(
+  public void fireAdministrativeModuleCompletionReset(
       long userId, DbAccessModuleName moduleName, Optional<Instant> previousCompletionTime) {
     DbUser adminUser = dbUserProvider.get();
     Builder eventBuilder =

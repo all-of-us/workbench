@@ -23,7 +23,7 @@ public interface UserServiceAuditor {
       Optional<Instant> previousBypassTime,
       Optional<Instant> newBypassTime);
 
-  void fireAdministrativeCompletionReset(
+  void fireAdministrativeModuleCompletionReset(
       long userId, DbAccessModuleName moduleName, Optional<Instant> previousCompletionTime);
 
   void fireAcknowledgeTermsOfService(DbUser targetUser, Integer termsOfServiceVersion);
