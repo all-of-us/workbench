@@ -6,4 +6,6 @@ public interface WorkspaceMigrationService {
   void startWorkspaceMigration(String namespace, String terraName);
 
   MigrationBucketContentsResponse getBucketContents(String namespace, String terraName);
+
+  void checkMigrationStatus(String namespace, String terraName);
 }

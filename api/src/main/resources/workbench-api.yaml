@@ -4419,6 +4419,27 @@ paths:
           description: Workspace created
           content: {}
       x-codegen-request-body-name: request
+  /v1/cloudTask/checkWorkspaceMigrationStatus:
+    post:
+      tags:
+        - cloudTaskWorkspaces
+      description: |
+        Checks the status of a workspace migration STS job and updates
+        the migration state when complete. Requeues itself if still running.
+      operationId: checkWorkspaceMigrationStatus
+      security: [ ]
+      requestBody:
+        description: Workspace migration status task to process.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckWorkspaceMigrationStatusRequest'
+        required: true
+      responses:
+        200:
+          description: Migration status checked successfully
+          content: { }
+      x-codegen-request-body-name: request
   /v1/cloudTask/deleteTestUserWorkspaces:
     post:
       tags:
@@ -7797,6 +7818,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Workspace'
+    CheckWorkspaceMigrationStatusRequest:
+      type: object
+      properties:
+        workspaceNamespace:
+          type: string
+        workspaceName:
+          type: string
     WorkspaceResponseListResponse:
       required:
       - items

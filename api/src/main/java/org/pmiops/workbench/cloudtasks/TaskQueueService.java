@@ -61,6 +61,11 @@ public class TaskQueueService {
   public static final TaskQueuePair RDR_WORKSPACE =
       new TaskQueuePair(RDR_EXPORT_QUEUE_NAME, "exportWorkspaceData");
 
+  // Workspace migration status queue
+
+  public static final TaskQueuePair WORKSPACE_MIGRATION_STATUS =
+      new TaskQueuePair("workspaceMigrationStatusQueue", "checkWorkspaceMigrationStatus");
+
   // initial credits queues and cloud tasks:
   //
   // INITIAL_CREDITS_EXPIRATION - run as part of the cron checkInitialCreditsExpiration to check
@@ -284,6 +289,15 @@ public class TaskQueueService {
             .toList();
     LOGGER.info("Pushing " + request.size() + " tasks onto workspace user cache queue");
     createAndPushAll(request, config.workspacesPerWorkspaceUserCacheTask, CACHE_WORKSPACE_USERS);
+  }
+
+  public void pushWorkspaceMigrationStatusTask(String namespace, String terraName) {
+
+    createAndPushTask(
+        WORKSPACE_MIGRATION_STATUS,
+        Map.of(
+            "workspaceNamespace", namespace,
+            "workspaceName", terraName));
   }
 
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {

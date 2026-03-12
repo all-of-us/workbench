@@ -147,7 +147,9 @@ public class WsmClient {
         });
   }
 
-  public void createControlledBucket(String workspaceId, String namespace) {
+  public String createControlledBucket(String workspaceId, String namespace) {
+
+    String bucketName = "rw-migration-" + namespace.toLowerCase();
 
     wsmRetryHandler.run(
         context -> {
@@ -174,6 +176,7 @@ public class WsmClient {
 
           return null;
         });
+    return bucketName;
   }
 
   public void shareWorkspaceAsService(String workspaceId, String userEmail, IamRole role) {
