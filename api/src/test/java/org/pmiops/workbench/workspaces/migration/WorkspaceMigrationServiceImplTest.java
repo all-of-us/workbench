@@ -39,6 +39,7 @@ public class WorkspaceMigrationServiceImplTest {
   private static final String TERRA_NAME = "test-ws";
   private static final String POD_ID = "pod-123";
   private static final String GOOGLE_PROJECT = "gcp-project-123";
+  private static final String SERVER_PROJECT = "test-lobby-project"; // Workbench/Lobby project
   private static final String SOURCE_BUCKET = "source-bucket";
   private static final String DEST_BUCKET = "dest-bucket";
   private static final List<String> SELECTED_FOLDERS = List.of("notebooks/", "data/");
@@ -58,10 +59,10 @@ public class WorkspaceMigrationServiceImplTest {
   private DbWorkspace dbWorkspace;
   private Workspace workspace;
   private RawlsWorkspaceDetails rawlsWorkspace;
+  private WorkbenchConfig config;
 
   @BeforeEach
   void setup() {
-    // Only things used by ALL tests go here
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(NAMESPACE);
     dbWorkspace.setFirecloudName(TERRA_NAME);
@@ -75,6 +76,14 @@ public class WorkspaceMigrationServiceImplTest {
     rawlsWorkspace = new RawlsWorkspaceDetails();
     rawlsWorkspace.setBucketName(SOURCE_BUCKET);
     rawlsWorkspace.setGoogleProject(GOOGLE_PROJECT);
+
+    // Config available to ALL tests (startMigration + checkMigrationStatus)
+    config = new WorkbenchConfig();
+    config.vwb = new WorkbenchConfig.VwbConfig();
+    config.vwb.defaultPodId = "default-pod";
+    config.server = new WorkbenchConfig.ServerConfig();
+    config.server.projectId = SERVER_PROJECT;
+    lenient().when(workbenchConfigProvider.get()).thenReturn(config);
 
     lenient().when(workspaceDao.getRequired(NAMESPACE, TERRA_NAME)).thenReturn(dbWorkspace);
   }
@@ -93,22 +102,12 @@ public class WorkspaceMigrationServiceImplTest {
     dbUser.setVwbUserPod(pod);
     when(userDao.findUserByUsername(any())).thenReturn(dbUser);
 
-    WorkbenchConfig config = new WorkbenchConfig();
-
-    config.vwb = new WorkbenchConfig.VwbConfig();
-    config.vwb.defaultPodId = "default-pod";
-
-    config.server = new WorkbenchConfig.ServerConfig();
-    config.server.projectId = "test-lobby-project";
-
-    when(workbenchConfigProvider.get()).thenReturn(config);
-
     WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
     vwbWorkspace.setId(UUID.randomUUID());
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
     when(wsmClient.createControlledBucket(any(), any())).thenReturn(DEST_BUCKET);
     when(storageTransferClient.startBucketTransfer(any(), any(), any(), any()))
-        .thenReturn("transferJobs/migration-" + GOOGLE_PROJECT);
+        .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 
   @Test
@@ -134,7 +133,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
     verify(storageTransferClient)
-        .startBucketTransfer(SOURCE_BUCKET, DEST_BUCKET, GOOGLE_PROJECT, SELECTED_FOLDERS);
+        .startBucketTransfer(SOURCE_BUCKET, DEST_BUCKET, SERVER_PROJECT, SELECTED_FOLDERS);
   }
 
   @Test
@@ -143,7 +142,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of());
 
     verify(storageTransferClient)
-        .startBucketTransfer(SOURCE_BUCKET, DEST_BUCKET, GOOGLE_PROJECT, List.of());
+        .startBucketTransfer(SOURCE_BUCKET, DEST_BUCKET, SERVER_PROJECT, List.of());
   }
 
   @Test
@@ -160,7 +159,7 @@ public class WorkspaceMigrationServiceImplTest {
         TransferTypes.TransferJob.newBuilder()
             .setStatus(TransferTypes.TransferJob.Status.ENABLED)
             .build();
-    when(storageTransferClient.getTransferJob(GOOGLE_PROJECT)).thenReturn(runningJob);
+    when(storageTransferClient.getTransferJob(SERVER_PROJECT)).thenReturn(runningJob);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 
@@ -174,7 +173,7 @@ public class WorkspaceMigrationServiceImplTest {
         TransferTypes.TransferJob.newBuilder()
             .setStatus(TransferTypes.TransferJob.Status.DISABLED)
             .build();
-    when(storageTransferClient.getTransferJob(GOOGLE_PROJECT)).thenReturn(completedJob);
+    when(storageTransferClient.getTransferJob(SERVER_PROJECT)).thenReturn(completedJob);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 
