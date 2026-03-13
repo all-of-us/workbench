@@ -94,9 +94,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     String workspaceId = vwbWorkspace.getId().toString();
     String destinationBucket = wsmClient.createControlledBucket(workspaceId, namespace);
     String sourceBucket = fcWorkspace.getBucketName();
-    String projectId = fcWorkspace.getGoogleProject();
 
-    storageTransferClient.startBucketTransfer(sourceBucket, destinationBucket, projectId, folders);
+    storageTransferClient.startBucketTransfer(
+        sourceBucket, destinationBucket, workbenchConfigProvider.get().server.projectId, folders);
 
     taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
   }
@@ -132,7 +132,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   public void checkMigrationStatus(String namespace, String terraName) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
-    String projectId = dbWorkspace.getGoogleProject();
+    String projectId = workbenchConfigProvider.get().server.projectId;
 
     TransferTypes.TransferJob job = storageTransferClient.getTransferJob(projectId);
 

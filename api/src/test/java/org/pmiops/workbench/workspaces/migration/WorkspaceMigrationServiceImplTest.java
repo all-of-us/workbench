@@ -2,8 +2,7 @@ package org.pmiops.workbench.workspaces.migration;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
@@ -77,7 +76,7 @@ public class WorkspaceMigrationServiceImplTest {
     rawlsWorkspace.setBucketName(SOURCE_BUCKET);
     rawlsWorkspace.setGoogleProject(GOOGLE_PROJECT);
 
-    when(workspaceDao.getRequired(NAMESPACE, TERRA_NAME)).thenReturn(dbWorkspace);
+    lenient().when(workspaceDao.getRequired(NAMESPACE, TERRA_NAME)).thenReturn(dbWorkspace);
   }
 
   // ── helper: stubs needed by all startWorkspaceMigration tests ──────────────
@@ -95,8 +94,13 @@ public class WorkspaceMigrationServiceImplTest {
     when(userDao.findUserByUsername(any())).thenReturn(dbUser);
 
     WorkbenchConfig config = new WorkbenchConfig();
+
     config.vwb = new WorkbenchConfig.VwbConfig();
     config.vwb.defaultPodId = "default-pod";
+
+    config.server = new WorkbenchConfig.ServerConfig();
+    config.server.projectId = "test-lobby-project";
+
     when(workbenchConfigProvider.get()).thenReturn(config);
 
     WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
