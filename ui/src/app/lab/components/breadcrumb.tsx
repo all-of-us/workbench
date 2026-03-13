@@ -305,7 +305,7 @@ const shouldShowInvalidBillingBanner = (
   workspace: WorkspaceData,
   profile: Profile
 ) => {
-  if (!workspace || !profile) {
+  if (!workspace || !profile || !isUsingInitialCredits(workspace)) {
     return false;
   }
 
