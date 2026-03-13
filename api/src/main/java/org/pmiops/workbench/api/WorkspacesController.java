@@ -38,31 +38,7 @@ import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
-import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.CloneWorkspaceRequest;
-import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.MigrationBucketContentsResponse;
-import org.pmiops.workbench.model.MigrationState;
-import org.pmiops.workbench.model.RecentWorkspace;
-import org.pmiops.workbench.model.RecentWorkspaceResponse;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResourceType;
-import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
-import org.pmiops.workbench.model.WorkspaceCreatorFreeCreditsRemainingResponse;
-import org.pmiops.workbench.model.WorkspaceOperation;
-import org.pmiops.workbench.model.WorkspaceResourceResponse;
-import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.model.WorkspaceResponseListResponse;
-import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
@@ -818,9 +794,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> startWorkspaceMigration(String workspaceNamespace, String terraName) {
+  public ResponseEntity<Void> startWorkspaceMigration(
+      String workspaceNamespace, String terraName, StartWorkspaceMigrationRequest request) {
 
-    workspaceMigrationService.startWorkspaceMigration(workspaceNamespace, terraName);
+    List<String> folders =
+        request != null && request.getFolders() != null ? request.getFolders() : List.of();
+
+    workspaceMigrationService.startWorkspaceMigration(workspaceNamespace, terraName, folders);
+
     return ResponseEntity.ok().build();
   }
 

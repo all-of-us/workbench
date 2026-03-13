@@ -493,6 +493,8 @@ dependencies {
     implementation 'com.google.cloud:google-cloud-trace'
     implementation 'com.google.cloud:google-cloud-storage'
     implementation 'com.google.cloud:google-cloud-tasks'
+    implementation 'com.google.cloud:google-cloud-storage-transfer'
+    implementation 'com.google.api.grpc:proto-google-cloud-storage-transfer-v1'
 
     implementation("com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION") {
         exclude group: 'com.google.api-client', module: 'google-api-client-servlet'
