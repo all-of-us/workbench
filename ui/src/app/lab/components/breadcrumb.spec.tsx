@@ -335,7 +335,8 @@ describe('InvalidBillingBanner Component', () => {
   it('should not display InvalidBillingBanner when workspace uses user-provided billing', () => {
     // Arrange
     const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
-    modifiedWorkspace.billingAccountName = 'billingAccounts/user-provided-account';
+    modifiedWorkspace.billingAccountName =
+      'billingAccounts/user-provided-account';
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',

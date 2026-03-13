@@ -1900,9 +1900,8 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void
-      test_checkCreditsExpirationForUserIDs_mixedBilling_stillSendsExpirationEmail()
-          throws MessagingException {
+  public void test_checkCreditsExpirationForUserIDs_mixedBilling_stillSendsExpirationEmail()
+      throws MessagingException {
     // User whose credits expired and has BOTH initial credits and user-provided workspaces
     DbUser user =
         spyUserDao.save(
@@ -1936,9 +1935,8 @@ public class InitialCreditsServiceTest {
   }
 
   @Test
-  public void
-      test_checkCreditsExpirationForUserIDs_noActiveWorkspaces_stillSendsExpirationEmail()
-          throws MessagingException {
+  public void test_checkCreditsExpirationForUserIDs_noActiveWorkspaces_stillSendsExpirationEmail()
+      throws MessagingException {
     // User whose credits expired and has no active workspaces at all
     DbUser user =
         spyUserDao.save(
