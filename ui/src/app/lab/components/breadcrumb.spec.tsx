@@ -202,6 +202,14 @@ describe('InvalidBillingBanner Component', () => {
   const reload = jest.fn();
   const updateCache = jest.fn();
 
+  function makeWorkspaceWithInitialCreditsBilling(base = workspaceDataStub) {
+    const ws = fp.cloneDeep(base);
+    ws.billingAccountName = `billingAccounts/${
+      serverConfigStore.get().config.initialCreditsBillingAccountId
+    }`;
+    return ws;
+  }
+
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     routeDataStore.set({ breadcrumb: BreadcrumbType.Workspace });
@@ -209,13 +217,14 @@ describe('InvalidBillingBanner Component', () => {
       config: {
         enableUnlinkBillingForInitialCredits: false,
         gsuiteDomain: '',
+        initialCreditsBillingAccountId: 'test-billing-id',
       },
     });
   });
 
   it('should display InvalidBillingBanner when credits are exhausted', () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBilling();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -252,7 +261,7 @@ describe('InvalidBillingBanner Component', () => {
 
   it('should display InvalidBillingBanner when credits are expired and not bypassed', () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBilling();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -289,7 +298,7 @@ describe('InvalidBillingBanner Component', () => {
 
   it('should not display InvalidBillingBanner when credits are expired but bypassed', () => {
     // Arrange
-    const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBilling();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',
@@ -323,9 +332,47 @@ describe('InvalidBillingBanner Component', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should not display InvalidBillingBanner when credits are not expired and not exhausted', () => {
+  it('should not display InvalidBillingBanner when workspace uses user-provided billing', () => {
     // Arrange
     const modifiedWorkspace = fp.cloneDeep(workspaceDataStub);
+    modifiedWorkspace.billingAccountName =
+      'billingAccounts/user-provided-account';
+    modifiedWorkspace.creatorUser = {
+      givenName: 'Test',
+      familyName: 'User',
+      userName: 'test@example.com',
+    };
+    modifiedWorkspace.initialCredits = {
+      exhausted: true, // exhausted but using user-provided billing
+      expirationEpochMillis: minusDays(Date.now(), 1), // expired
+      expirationBypassed: false,
+    };
+
+    currentWorkspaceStore.next(modifiedWorkspace);
+
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
+
+    // Act
+    render(
+      <MemoryRouter>
+        <Breadcrumb />
+      </MemoryRouter>
+    );
+
+    // Assert - banner should NOT show because workspace is not using initial credits
+    expect(
+      screen.queryByTestId('invalid-billing-banner')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not display InvalidBillingBanner when credits are not expired and not exhausted', () => {
+    // Arrange
+    const modifiedWorkspace = makeWorkspaceWithInitialCreditsBilling();
     modifiedWorkspace.creatorUser = {
       givenName: 'Test',
       familyName: 'User',

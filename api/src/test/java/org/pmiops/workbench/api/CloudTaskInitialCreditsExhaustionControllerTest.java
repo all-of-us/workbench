@@ -1,7 +1,10 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -236,7 +239,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         buildExhaustedInitialCreditsEventRequest(List.of(user), allBQCosts, allDbCosts);
 
     controller.handleInitialCreditsExhaustionBatch(request);
-    verifyNoInteractions(initialCreditsService);
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
     verifyNoInteractions(mailService);
 
     // check that we alert for the 30% threshold
@@ -287,7 +290,8 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExhaustion);
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoMoreInteractions(mailService);
-    verifyNoMoreInteractions(initialCreditsService);
+    // updateInitialCreditsExhaustion should only have been called once (above)
+    verify(initialCreditsService, times(1)).updateInitialCreditsExhaustion(any(), anyBoolean());
   }
 
   @Test
@@ -357,7 +361,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
-    verifyNoInteractions(initialCreditsService);
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
   }
 
@@ -378,7 +382,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
 
     controller.handleInitialCreditsExhaustionBatch(request);
     verifyNoInteractions(mailService);
-    verifyNoInteractions(initialCreditsService);
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
   }
 
@@ -652,7 +656,7 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
         buildExhaustedInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verifyNoInteractions(mailService);
-    verifyNoInteractions(initialCreditsService);
+    verify(initialCreditsService, never()).updateInitialCreditsExhaustion(any(), anyBoolean());
 
     DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT + "4");
     assertThat(workspace.isInitialCreditsExhausted()).isEqualTo(false);
@@ -707,6 +711,88 @@ class CloudTaskInitialCreditsExhaustionControllerTest {
     verify(mailService).alertUserInitialCreditsExhausted(eq(user1));
     verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user1), eq(true));
     verifyNoMoreInteractions(mailService);
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_noExhaustionEmail_whenAllActiveWorkspacesUseUserBilling()
+          throws MessagingException {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    // Create only a user-provided billing workspace (no initial credits workspaces)
+    workspaceDao.save(
+        new DbWorkspace()
+            .setCreator(user)
+            .setWorkspaceNamespace("user-billing-ns")
+            .setGoogleProject("user-billing-project")
+            .setBillingAccountName("billingAccounts/user-provided-account"));
+
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 100.01);
+
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
+
+    // Should NOT send exhaustion email because all active workspaces use user-provided billing
+    verifyNoInteractions(mailService);
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_noThresholdEmail_whenAllActiveWorkspacesUseUserBilling()
+          throws MessagingException {
+    final double limit = 100.0;
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = limit;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    // Create only a user-provided billing workspace
+    workspaceDao.save(
+        new DbWorkspace()
+            .setCreator(user)
+            .setWorkspaceNamespace("user-billing-ns")
+            .setGoogleProject("user-billing-project")
+            .setBillingAccountName("billingAccounts/user-provided-account"));
+
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 50.5);
+
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
+
+    // Should NOT send threshold email because all active workspaces use user-provided billing
+    verifyNoInteractions(mailService);
+  }
+
+  @Test
+  public void
+      handleInitialCreditsExhaustionBatch_stillSendsExhaustionEmail_whenMixedBillingWorkspaces()
+          throws MessagingException {
+    workbenchConfig.billing.defaultInitialCreditsDollarLimit = 100.0;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    // Create an initial credits workspace
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    // Create a user-provided billing workspace
+    workspaceDao.save(
+        new DbWorkspace()
+            .setCreator(user)
+            .setWorkspaceNamespace("user-billing-ns")
+            .setGoogleProject("user-billing-project")
+            .setBillingAccountName("billingAccounts/user-provided-account"));
+
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 100.01);
+
+    controller.handleInitialCreditsExhaustionBatch(
+        buildExhaustedInitialCreditsEventRequest(
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
+
+    // SHOULD send exhaustion email because user still has an initial credits workspace
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
+    verify(initialCreditsService).updateInitialCreditsExhaustion(eq(user), eq(true));
   }
 
   private DbUser createUser(String email) {

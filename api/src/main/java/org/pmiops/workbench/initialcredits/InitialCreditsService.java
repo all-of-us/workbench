@@ -42,6 +42,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
@@ -499,17 +500,42 @@ public class InitialCreditsService {
         .anyMatch(DbWorkspace::isInitialCreditsExhausted);
   }
 
+  /**
+   * Check if all of the user's active workspaces use user-provided billing accounts. Returns true
+   * if the user has at least one active workspace and none of them use initial credits billing.
+   * Returns false if the user has no active workspaces.
+   *
+   * @param user The user to check
+   * @return True if all active workspaces use user-provided billing
+   */
+  public boolean hasOnlyUserProvidedBillingWorkspaces(DbUser user) {
+    List<DbWorkspace> activeWorkspaces =
+        workspaceDao.findAllByCreator(user).stream()
+            .filter(ws -> ws.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE)
+            .toList();
+
+    if (activeWorkspaces.isEmpty()) {
+      return false;
+    }
+
+    return activeWorkspaces.stream()
+        .noneMatch(
+            ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()));
+  }
+
   private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
 
     if (areUserCreditsExpired(user)
         && userInitialCreditsExpiration.getExpirationCleanupTime() == null
-        && !hasExhaustedWorkspaces(user)) {
+        && !hasExhaustedWorkspaces(user)
+        && !hasOnlyUserProvidedBillingWorkspaces(user)) {
       handleExpiredCredits(user, userInitialCreditsExpiration);
     } else if (areCreditsExpiringSoon(user)
         && shouldCheckApproachingExpirationNotification(userInitialCreditsExpiration)
-        && !hasExhaustedWorkspaces(user)) {
+        && !hasExhaustedWorkspaces(user)
+        && !hasOnlyUserProvidedBillingWorkspaces(user)) {
       handleExpiringSoonCredits(user, userInitialCreditsExpiration);
     }
   }
