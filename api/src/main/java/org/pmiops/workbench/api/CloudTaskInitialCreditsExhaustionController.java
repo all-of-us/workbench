@@ -79,6 +79,26 @@ public class CloudTaskInitialCreditsExhaustionController
     Map<String, Double> stringKeyLiveCostMap = (Map<String, Double>) request.getLiveCostByCreator();
     Map<Long, Double> liveCostByCreator = convertMapKeysToLong(stringKeyLiveCostMap);
 
+    // Filter out users whose ALL active workspaces use user-provided billing.
+    // These users don't need initial credits notifications.
+    Set<Long> userIdsWithOnlyUserBilling =
+        users.stream()
+            .filter(initialCreditsService::hasOnlyUserProvidedBillingWorkspaces)
+            .map(DbUser::getUserId)
+            .collect(Collectors.toSet());
+
+    if (!userIdsWithOnlyUserBilling.isEmpty()) {
+      logger.info(
+          "Skipping initial credits alerts for users with only user-provided billing: {}",
+          userIdsWithOnlyUserBilling);
+      users =
+          users.stream()
+              .filter(u -> !userIdsWithOnlyUserBilling.contains(u.getUserId()))
+              .collect(Collectors.toSet());
+      dbCostByCreator.keySet().removeAll(userIdsWithOnlyUserBilling);
+      liveCostByCreator.keySet().removeAll(userIdsWithOnlyUserBilling);
+    }
+
     var newlyExhaustedUsers = getNewlyExhaustedUsers(users, dbCostByCreator, liveCostByCreator);
 
     handleExhaustedUsers(newlyExhaustedUsers);

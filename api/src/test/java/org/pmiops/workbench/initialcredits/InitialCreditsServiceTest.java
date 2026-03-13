@@ -1831,4 +1831,132 @@ public class InitialCreditsServiceTest {
     // expirationCleanupTime should be set
     assertNotNull(user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
   }
+
+  @Test
+  public void
+      test_checkCreditsExpirationForUserIDs_onlyUserProvidedBilling_doesNotSendExpirationEmail()
+          throws MessagingException {
+    // User whose credits expired but ALL active workspaces use user-provided billing
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(PAST_EXPIRATION)
+                        .setBypassed(false)
+                        .setExpirationCleanupTime(null)));
+
+    // Create only a user-provided billing workspace (no initial credits workspaces)
+    spyWorkspaceDao.save(
+        new DbWorkspace()
+            .setCreator(user)
+            .setWorkspaceNamespace("user-billing-ns")
+            .setGoogleProject("user-billing-project")
+            .setBillingAccountName("billingAccounts/user-provided-account")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // Should NOT send expiration email because all active workspaces use user-provided billing
+    verify(mailService, never()).alertUserInitialCreditsExpired(any());
+    assertNull(user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
+
+  @Test
+  public void
+      test_checkCreditsExpirationForUserIDs_onlyUserProvidedBilling_doesNotSendExpiringSoonEmail()
+          throws MessagingException {
+    // User whose credits are expiring soon but ALL active workspaces use user-provided billing
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(DURING_WARNING_PERIOD)
+                        .setBypassed(false)
+                        .setApproachingExpirationNotificationTime(null)
+                        .setExpirationCleanupTime(null)));
+
+    // Create only a user-provided billing workspace
+    spyWorkspaceDao.save(
+        new DbWorkspace()
+            .setCreator(user)
+            .setWorkspaceNamespace("user-billing-ns")
+            .setGoogleProject("user-billing-project")
+            .setBillingAccountName("billingAccounts/user-provided-account")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // Should NOT send expiring soon email
+    verify(mailService, never()).alertUserInitialCreditsExpiring(any());
+    assertNull(user.getUserInitialCreditsExpiration().getApproachingExpirationNotificationTime());
+  }
+
+  @Test
+  public void
+      test_checkCreditsExpirationForUserIDs_mixedBilling_stillSendsExpirationEmail()
+          throws MessagingException {
+    // User whose credits expired and has BOTH initial credits and user-provided workspaces
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(PAST_EXPIRATION)
+                        .setBypassed(false)
+                        .setExpirationCleanupTime(null)));
+
+    // Create an initial credits workspace
+    createWorkspace(user, "ic-project");
+
+    // Create a user-provided billing workspace
+    spyWorkspaceDao.save(
+        new DbWorkspace()
+            .setCreator(user)
+            .setWorkspaceNamespace("user-billing-ns")
+            .setGoogleProject("user-billing-project")
+            .setBillingAccountName("billingAccounts/user-provided-account")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // SHOULD send expiration email because user still has an initial credits workspace
+    verify(mailService, times(1)).alertUserInitialCreditsExpired(user);
+    assertNotNull(user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
+
+  @Test
+  public void
+      test_checkCreditsExpirationForUserIDs_noActiveWorkspaces_stillSendsExpirationEmail()
+          throws MessagingException {
+    // User whose credits expired and has no active workspaces at all
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setExpirationTime(PAST_EXPIRATION)
+                        .setBypassed(false)
+                        .setExpirationCleanupTime(null)));
+
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(false);
+
+    initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
+
+    // SHOULD send expiration email because hasOnlyUserProvidedBillingWorkspaces returns false
+    // for users with no active workspaces
+    verify(mailService, times(1)).alertUserInitialCreditsExpired(user);
+    assertNotNull(user.getUserInitialCreditsExpiration().getExpirationCleanupTime());
+  }
 }
