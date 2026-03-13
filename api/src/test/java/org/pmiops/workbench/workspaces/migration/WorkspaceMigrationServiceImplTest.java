@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,7 @@ public class WorkspaceMigrationServiceImplTest {
   private static final String GOOGLE_PROJECT = "gcp-project-123";
   private static final String SOURCE_BUCKET = "source-bucket";
   private static final String DEST_BUCKET = "dest-bucket";
+  private static final List<String> SELECTED_FOLDERS = List.of("notebooks/", "data/");
 
   @Mock private WsmClient wsmClient;
   @Mock private WorkspaceDao workspaceDao;
@@ -101,14 +103,14 @@ public class WorkspaceMigrationServiceImplTest {
     vwbWorkspace.setId(UUID.randomUUID());
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
     when(wsmClient.createControlledBucket(any(), any())).thenReturn(DEST_BUCKET);
-    when(storageTransferClient.startBucketTransfer(any(), any(), any()))
+    when(storageTransferClient.startBucketTransfer(any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + GOOGLE_PROJECT);
   }
 
   @Test
   void startWorkspaceMigration_setsStateToStarting() {
     setupStartMigrationStubs();
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME);
+    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
     verify(workspaceDao)
         .save(argThat(ws -> MigrationState.STARTING.name().equals(ws.getMigrationState())));
@@ -117,23 +119,33 @@ public class WorkspaceMigrationServiceImplTest {
   @Test
   void startWorkspaceMigration_createsVwbWorkspaceWithCorrectPod() {
     setupStartMigrationStubs();
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME);
+    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
     verify(wsmClient).createWorkspaceAsService(workspace, POD_ID);
   }
 
   @Test
-  void startWorkspaceMigration_startsStsTransfer() {
+  void startWorkspaceMigration_startsStsTransferWithSelectedFolders() {
     setupStartMigrationStubs();
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME);
+    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
-    verify(storageTransferClient).startBucketTransfer(SOURCE_BUCKET, DEST_BUCKET, GOOGLE_PROJECT);
+    verify(storageTransferClient)
+        .startBucketTransfer(SOURCE_BUCKET, DEST_BUCKET, GOOGLE_PROJECT, SELECTED_FOLDERS);
+  }
+
+  @Test
+  void startWorkspaceMigration_startsStsTransferWithEmptyFolders_migratesEntireBucket() {
+    setupStartMigrationStubs();
+    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of());
+
+    verify(storageTransferClient)
+        .startBucketTransfer(SOURCE_BUCKET, DEST_BUCKET, GOOGLE_PROJECT, List.of());
   }
 
   @Test
   void startWorkspaceMigration_pushesStatusTask() {
     setupStartMigrationStubs();
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME);
+    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
     verify(taskQueueService).pushWorkspaceMigrationStatusTask(NAMESPACE, TERRA_NAME);
   }

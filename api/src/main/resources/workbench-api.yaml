@@ -3318,14 +3318,21 @@ paths:
             type: string
         - name: terraName
           in: path
-          description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed
-            due to confusion with DB IDs, which it is not)
+          description: The Workspace's name in Terra
           required: true
           schema:
             type: string
+      requestBody:
+        description: Folders to migrate from the workspace bucket.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartWorkspaceMigrationRequest'
+        required: false
       responses:
         '200':
           description: Migration started
+      x-codegen-request-body-name: request
   /v1/workspaces/{workspaceNamespace}/{terraName}/user-recent-resources/update:
     post:
       tags:
@@ -7825,6 +7832,14 @@ components:
           type: string
         workspaceName:
           type: string
+    StartWorkspaceMigrationRequest:
+      type: object
+      properties:
+        folders:
+          type: array
+          items:
+            type: string
+          description: List of folder prefixes to migrate. If empty, migrates entire bucket.
     WorkspaceResponseListResponse:
       required:
       - items

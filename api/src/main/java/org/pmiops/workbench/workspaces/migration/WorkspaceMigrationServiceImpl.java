@@ -70,7 +70,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void startWorkspaceMigration(String namespace, String terraName) {
+  public void startWorkspaceMigration(String namespace, String terraName, List<String> folders) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
@@ -91,14 +91,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
             .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
 
     WorkspaceDescription vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, podId);
-
     String workspaceId = vwbWorkspace.getId().toString();
-
     String destinationBucket = wsmClient.createControlledBucket(workspaceId, namespace);
     String sourceBucket = fcWorkspace.getBucketName();
     String projectId = fcWorkspace.getGoogleProject();
 
-    storageTransferClient.startBucketTransfer(sourceBucket, destinationBucket, projectId);
+    storageTransferClient.startBucketTransfer(sourceBucket, destinationBucket, projectId, folders);
 
     taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
   }
