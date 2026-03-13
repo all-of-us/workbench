@@ -59,9 +59,8 @@ public class WorkspaceMigrationServiceImplTest {
   private DbWorkspace dbWorkspace;
   private Workspace workspace;
   private RawlsWorkspaceDetails rawlsWorkspace;
-  private WorkbenchConfig config;
 
-  @BeforeEach
+    @BeforeEach
   void setup() {
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(NAMESPACE);
@@ -78,7 +77,7 @@ public class WorkspaceMigrationServiceImplTest {
     rawlsWorkspace.setGoogleProject(GOOGLE_PROJECT);
 
     // Config available to ALL tests (startMigration + checkMigrationStatus)
-    config = new WorkbenchConfig();
+        WorkbenchConfig config = new WorkbenchConfig();
     config.vwb = new WorkbenchConfig.VwbConfig();
     config.vwb.defaultPodId = "default-pod";
     config.server = new WorkbenchConfig.ServerConfig();
