@@ -155,7 +155,9 @@ public class WsmClient {
               new ControlledResourceCommonFields()
                   .name("rw-migration-bucket")
                   .description("RW migration bucket")
-                  .cloningInstructions(CloningInstructionsEnum.NOTHING);
+                  .cloningInstructions(CloningInstructionsEnum.NOTHING)
+                  .accessScope(AccessScope.SHARED_ACCESS)
+                  .managedBy(ManagedBy.APPLICATION);
 
           // Bucket parameters
           GcpGcsBucketCreationParameters bucketParams =
