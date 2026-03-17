@@ -157,7 +157,7 @@ public class WsmClient {
                   .description("RW migration bucket")
                   .cloningInstructions(CloningInstructionsEnum.NOTHING)
                   .accessScope(AccessScope.SHARED_ACCESS)
-                  .managedBy(ManagedBy.APPLICATION);
+                  .managedBy(ManagedBy.USER);
 
           // Bucket parameters
           GcpGcsBucketCreationParameters bucketParams =
