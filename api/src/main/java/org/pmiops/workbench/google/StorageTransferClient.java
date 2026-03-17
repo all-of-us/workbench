@@ -5,7 +5,11 @@ import java.util.List;
 
 public interface StorageTransferClient {
   String startBucketTransfer(
-      String sourceBucket, String destinationBucket, String projectId, List<String> folders);
+      String sourceBucket,
+      String destinationBucket,
+      String projectId,
+      List<String> folders,
+      String serviceAccountEmail);
 
   TransferTypes.TransferJob getTransferJob(String projectId);
 }

@@ -94,10 +94,14 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     String workspaceId = vwbWorkspace.getId().toString();
     String destinationBucket = wsmClient.createControlledBucket(workspaceId, namespace);
     String sourceBucket = fcWorkspace.getBucketName();
+    String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
 
     storageTransferClient.startBucketTransfer(
-        sourceBucket, destinationBucket, workbenchConfigProvider.get().server.projectId, folders);
-
+        sourceBucket,
+        destinationBucket,
+        workbenchConfigProvider.get().server.projectId,
+        folders,
+        serviceAccountEmail);
     taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
   }
 

@@ -1,12 +1,9 @@
 package org.pmiops.workbench.google;
 
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.storagetransfer.v1.proto.StorageTransferServiceClient;
 import com.google.storagetransfer.v1.proto.TransferProto;
-import com.google.storagetransfer.v1.proto.TransferProto.CreateTransferJobRequest;
 import com.google.storagetransfer.v1.proto.TransferTypes;
-import com.google.storagetransfer.v1.proto.TransferTypes.GcsData;
-import com.google.storagetransfer.v1.proto.TransferTypes.TransferJob;
-import com.google.storagetransfer.v1.proto.TransferTypes.TransferSpec;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -16,37 +13,67 @@ public class StorageTransferClientImpl implements StorageTransferClient {
 
   @Override
   public String startBucketTransfer(
-      String sourceBucket, String destinationBucket, String projectId, List<String> folders) {
-    try (StorageTransferServiceClient client = StorageTransferServiceClient.create()) {
+      String sourceBucket,
+      String destinationBucket,
+      String projectId,
+      List<String> folders,
+      String serviceAccountEmail) {
+    try {
 
       String jobName = "transferJobs/migration-" + projectId;
 
-      TransferSpec.Builder transferSpecBuilder =
-          TransferSpec.newBuilder()
-              .setGcsDataSource(GcsData.newBuilder().setBucketName(sourceBucket).build())
-              .setGcsDataSink(GcsData.newBuilder().setBucketName(destinationBucket).build());
+      com.google.gson.JsonObject transferSpec = new com.google.gson.JsonObject();
+      com.google.gson.JsonObject gcsSource = new com.google.gson.JsonObject();
+      gcsSource.addProperty("bucketName", sourceBucket);
+      com.google.gson.JsonObject gcsSink = new com.google.gson.JsonObject();
+      gcsSink.addProperty("bucketName", destinationBucket);
+      transferSpec.add("gcsDataSource", gcsSource);
+      transferSpec.add("gcsDataSink", gcsSink);
 
-      // Only filter if folders were selected
       if (folders != null && !folders.isEmpty()) {
-        transferSpecBuilder.setObjectConditions(
-            TransferTypes.ObjectConditions.newBuilder().addAllIncludePrefixes(folders).build());
+        com.google.gson.JsonObject objectConditions = new com.google.gson.JsonObject();
+        com.google.gson.JsonArray prefixes = new com.google.gson.JsonArray();
+        folders.forEach(prefixes::add);
+        objectConditions.add("includePrefixes", prefixes);
+        transferSpec.add("objectConditions", objectConditions);
       }
 
-      TransferJob transferJob =
-          TransferJob.newBuilder()
-              .setName(jobName)
-              .setProjectId(projectId)
-              .setTransferSpec(transferSpecBuilder.build())
-              .setStatus(TransferJob.Status.ENABLED)
+      com.google.gson.JsonObject requestBody = new com.google.gson.JsonObject();
+      requestBody.addProperty("name", jobName);
+      requestBody.addProperty("projectId", projectId);
+      requestBody.addProperty("serviceAccount", serviceAccountEmail); // ← key field
+      requestBody.addProperty("status", "ENABLED");
+      requestBody.add("transferSpec", transferSpec);
+
+
+      GoogleCredentials credentials =
+          GoogleCredentials.getApplicationDefault()
+              .createScoped("https://www.googleapis.com/auth/cloud-platform");
+      credentials.refreshIfExpired();
+      String accessToken = credentials.getAccessToken().getTokenValue();
+
+      java.net.http.HttpClient httpClient = java.net.http.HttpClient.newHttpClient();
+      java.net.http.HttpRequest request =
+          java.net.http.HttpRequest.newBuilder()
+              .uri(java.net.URI.create("https://storagetransfer.googleapis.com/v1/transferJobs"))
+              .header("Authorization", "Bearer " + accessToken)
+              .header("Content-Type", "application/json")
+              .POST(java.net.http.HttpRequest.BodyPublishers.ofString(requestBody.toString()))
               .build();
 
-      CreateTransferJobRequest request =
-          CreateTransferJobRequest.newBuilder().setTransferJob(transferJob).build();
+      java.net.http.HttpResponse<String> response =
+          httpClient.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
 
-      TransferJob createdJob = client.createTransferJob(request);
-      return createdJob.getName();
+      if (response.statusCode() != 200) {
+        throw new RuntimeException(
+            "STS REST API failed: " + response.statusCode() + " " + response.body());
+      }
 
-    } catch (IOException e) {
+      com.google.gson.JsonObject responseJson =
+          com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
+      return responseJson.get("name").getAsString();
+
+    } catch (Exception e) {
       throw new RuntimeException("Failed to start STS bucket transfer", e);
     }
   }
