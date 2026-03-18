@@ -13348,6 +13348,14 @@ components:
           type: string
           description: |-
             Indicates the status of the workspace. It can be either "Active" or "Deleted".
+        migratedVwbWorkspaceId:
+          type: string
+          description: |-
+            Id of the RW 2.0 workspace created during migration
+        migrationState:
+          type: string
+          description: |-
+            Indicates the status of the workspace migration. It can be "NOT_STARTED", "STARTING" or "FINISHED".
         focusOnUnderrepresentedPopulations:
           type: boolean
           description: |-
