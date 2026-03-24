@@ -39,7 +39,7 @@ ds_condition_occurrence
 ds_data_dictionary
 ds_device
 ds_drug_exposure
-ds_heart_rate_minute_level
+ds_heart_rate_intraday
 ds_heart_rate_summary
 ds_linking
 ds_measurement

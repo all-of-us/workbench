@@ -81,7 +81,7 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "has_fitbit_heart_rate_level",
+    "name": "has_fitbit_heart_rate_intraday",
     "type": "INTEGER"
   },
   {
@@ -96,7 +96,22 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "has_fitbit_sleep_daily_summary_30dayavg",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_sleep_daily_summary_counts",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "has_fitbit_sleep_level",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_sleep_level_short",
     "type": "INTEGER"
   },
   {

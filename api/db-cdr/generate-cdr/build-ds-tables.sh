@@ -266,13 +266,13 @@ function do_fitbit() {
   FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`)
   where rank = 1"
 
-  echo "ds_heart_rate_minute_level - inserting data"
+  echo "ds_heart_rate_intraday - inserting data"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_intraday\`
       (datetime, person_id, heart_rate_value)
   SELECT datetime, person_id, heart_rate_value
   FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
-  FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`)
+  FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_intraday\`)
   where rank = 1"
 
   echo "ds_heart_rate_summary - inserting data"
@@ -302,6 +302,24 @@ function do_fitbit() {
   FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`)
   where rank = 1"
 
+  echo "ds_sleep_daily_summary_30dayavg - inserting data"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_sleep_daily_summary_30dayavg\`
+      (person_id, sleep_log_id, sleep_date, thirty_day_avg_minutes_restless, thirty_day_avg_minutes_deep, thirty_day_avg_minutes_light, thirty_day_avg_minutes_rem, thirty_day_avg_minutes_wake)
+  SELECT person_id, sleep_log_id, sleep_date, thirty_day_avg_minutes_restless, thirty_day_avg_minutes_deep, thirty_day_avg_minutes_light, thirty_day_avg_minutes_rem, thirty_day_avg_minutes_wake
+  FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
+  FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_30dayavg\`)
+  where rank = 1"
+
+  echo "ds_sleep_daily_summary_counts - inserting data"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_sleep_daily_summary_counts\`
+      (person_id, sleep_log_id, sleep_date, count_restless, count_deep, count_light, count_rem, count_wake)
+  SELECT person_id, sleep_log_id, sleep_date, count_restless, count_deep, count_light, count_rem, count_wake
+  FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
+  FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_counts\`)
+  where rank = 1"
+
   echo "ds_sleep_level - inserting data"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_sleep_level\`
@@ -309,6 +327,15 @@ function do_fitbit() {
   SELECT person_id, sleep_date, is_main_sleep, level, start_datetime, duration_in_min
   FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
   FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`)
+  where rank = 1"
+
+  echo "ds_sleep_level_short - inserting data"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_sleep_level_short\`
+      (person_id, sleep_log_id, sleep_date, is_main_sleep, level, start_datetime, duration_in_min)
+  SELECT person_id, sleep_log_id, sleep_date, is_main_sleep, level, start_datetime, duration_in_min
+  FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
+  FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`)
   where rank = 1"
   
   echo "ds_fitbit_device - inserting data"
