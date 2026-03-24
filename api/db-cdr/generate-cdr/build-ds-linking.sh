@@ -251,10 +251,10 @@ echo "ds_linking - inserting fitbit heart_rate_level data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ($((ID++)), 'PERSON_ID', 'heart_rate_minute_level.person_id', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ($((ID++)), 'DATETIME', 'CAST(heart_rate_minute_level.datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ($((ID++)), 'HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level')"
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_level'),
+  ($((ID++)), 'PERSON_ID', 'heart_rate_intraday.person_id', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_level'),
+  ($((ID++)), 'DATETIME', 'CAST(heart_rate_intraday.datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_level'),
+  ($((ID++)), 'HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_level')"
 
 echo "ds_linking - inserting fitbit activity_summary data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \

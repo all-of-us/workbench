@@ -266,13 +266,13 @@ function do_fitbit() {
   FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`)
   where rank = 1"
 
-  echo "ds_heart_rate_minute_level - inserting data"
+  echo "ds_heart_rate_intraday - inserting data"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_intraday\`
       (datetime, person_id, heart_rate_value)
   SELECT datetime, person_id, heart_rate_value
   FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
-  FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`)
+  FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_intraday\`)
   where rank = 1"
 
   echo "ds_heart_rate_summary - inserting data"

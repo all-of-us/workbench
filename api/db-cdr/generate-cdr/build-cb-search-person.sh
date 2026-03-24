@@ -105,7 +105,7 @@ then
         (
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
             union distinct
-            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_intraday\`
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
             union distinct
@@ -180,7 +180,7 @@ then
         (
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
             union distinct
-            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_intraday\`
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
             union distinct
@@ -284,7 +284,7 @@ else
         (
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
             union distinct
-            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_intraday\`
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
             union distinct
@@ -383,7 +383,7 @@ else
         (
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
             union distinct
-            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_intraday\`
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
             union distinct
@@ -612,7 +612,7 @@ FROM
             ) asum on (p.person_id = asum.person_id)
         LEFT JOIN
             (
-                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_intraday\`
             ) hrml on (p.person_id = hrml.person_id)
         LEFT JOIN
             (
@@ -704,7 +704,7 @@ then
               (
                   SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
                   union distinct
-                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_intraday\`
                   union distinct
                   SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
                   union distinct
