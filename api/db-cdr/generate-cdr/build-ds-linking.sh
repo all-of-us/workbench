@@ -247,14 +247,14 @@ VALUES
   ($((ID++)), 'MINUTE_IN_ZONE', 'heart_rate_summary.minute_in_zone', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
   ($((ID++)), 'CALORIE_COUNT', 'heart_rate_summary.calorie_count', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary')"
 
-echo "ds_linking - inserting fitbit heart_rate_level data"
+echo "ds_linking - inserting fitbit heart_rate_intraday data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_level'),
-  ($((ID++)), 'PERSON_ID', 'heart_rate_intraday.person_id', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_level'),
-  ($((ID++)), 'DATETIME', 'CAST(heart_rate_intraday.datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_level'),
-  ($((ID++)), 'HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_level')"
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_intraday'),
+  ($((ID++)), 'PERSON_ID', 'heart_rate_intraday.person_id', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_intraday'),
+  ($((ID++)), 'DATETIME', 'CAST(heart_rate_intraday.datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_intraday'),
+  ($((ID++)), 'HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_intraday\` heart_rate_intraday', 'Fitbit_heart_rate_intraday')"
 
 echo "ds_linking - inserting fitbit activity_summary data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -342,6 +342,34 @@ VALUES
   ($((ID++)), 'MINUTE_REM', 'sleep_daily_summary.minute_rem', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
   ($((ID++)), 'MINUTE_WAKE', 'sleep_daily_summary.minute_wake', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary')"
 
+echo "ds_linking - inserting fitbit sleep_daily_summary_30dayavg data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg'),
+  ($((ID++)), 'PERSON_ID', 'sleep_daily_summary_30dayavg.person_id', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg'),
+  ($((ID++)), 'SLEEP_LOG_ID', 'sleep_daily_summary_30dayavg.sleep_log_id', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg'),
+  ($((ID++)), 'SLEEP_DATE', 'sleep_daily_summary_30dayavg.sleep_date', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg'),
+  ($((ID++)), 'THIRTY_DAY_AVG_MINUTES_RESTLESS', 'sleep_daily_summary_30dayavg.thirty_day_avg_minutes_restless', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg'),
+  ($((ID++)), 'THIRTY_DAY_AVG_MINUTES_DEEP', 'sleep_daily_summary_30dayavg.thirty_day_avg_minutes_deep', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg'),
+  ($((ID++)), 'THIRTY_DAY_AVG_MINUTES_LIGHT', 'sleep_daily_summary_30dayavg.thirty_day_avg_minutes_light', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg'),
+  ($((ID++)), 'THIRTY_DAY_AVG_MINUTES_REM', 'sleep_daily_summary_30dayavg.thirty_day_avg_minutes_rem', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg'),
+  ($((ID++)), 'THIRTY_DAY_AVG_MINUTES_WAKE', 'sleep_daily_summary_30dayavg.thirty_day_avg_minutes_wake', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_30dayavg\` sleep_daily_summary_30dayavg', 'Fitbit_sleep_daily_summary_30dayavg')"
+
+echo "ds_linking - inserting fitbit sleep_daily_summary_counts data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts'),
+  ($((ID++)), 'PERSON_ID', 'sleep_daily_summary_counts.person_id', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts'),
+  ($((ID++)), 'SLEEP_LOG_ID', 'sleep_daily_summary_counts.sleep_log_id', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts'),
+  ($((ID++)), 'SLEEP_DATE', 'sleep_daily_summary_counts.sleep_date', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts'),
+  ($((ID++)), 'COUNT_RESTLESS', 'sleep_daily_summary_counts.count_restless', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts'),
+  ($((ID++)), 'COUNT_DEEP', 'sleep_daily_summary_counts.count_deep', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts'),
+  ($((ID++)), 'COUNT_LIGHT', 'sleep_daily_summary_counts.count_light', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts'),
+  ($((ID++)), 'COUNT_REM', 'sleep_daily_summary_counts.count_rem', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts'),
+  ($((ID++)), 'COUNT_WAKE', 'sleep_daily_summary_counts.count_wake', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary_counts\` sleep_daily_summary_counts', 'Fitbit_sleep_daily_summary_counts')"
+
 echo "ds_linking - inserting fitbit sleep_level data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
@@ -353,6 +381,19 @@ VALUES
   ($((ID++)), 'LEVEL', 'sleep_level.level', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
   ($((ID++)), 'START_DATETIME', 'CAST(sleep_level.start_datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
   ($((ID++)), 'DURATION_IN_MIN', 'sleep_level.duration_in_min', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level')"
+
+echo "ds_linking - inserting fitbit sleep_level_short data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($((ID++)), 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.sleep_level_short\` sleep_level_short', 'Fitbit_sleep_level_short'),
+  ($((ID++)), 'PERSON_ID', 'sleep_level_short.person_id', 'FROM \`\${projectId}.\${dataSetId}.sleep_level_short\` sleep_level_short', 'Fitbit_sleep_level_short'),
+  ($((ID++)), 'SLEEP_LOG_ID', 'sleep_level_short.sleep_log_id', 'FROM \`\${projectId}.\${dataSetId}.sleep_level_short\` sleep_level_short', 'Fitbit_sleep_level_short'),
+  ($((ID++)), 'SLEEP_DATE', 'sleep_level_short.sleep_date', 'FROM \`\${projectId}.\${dataSetId}.sleep_level_short\` sleep_level_short', 'Fitbit_sleep_level_short'),
+  ($((ID++)), 'IS_MAIN_SLEEP', 'sleep_level_short.is_main_sleep', 'FROM \`\${projectId}.\${dataSetId}.sleep_level_short\` sleep_level_short', 'Fitbit_sleep_level_short'),
+  ($((ID++)), 'LEVEL', 'sleep_level_short.level', 'FROM \`\${projectId}.\${dataSetId}.sleep_level_short\` sleep_level_short', 'Fitbit_sleep_level_short'),
+  ($((ID++)), 'START_DATETIME', 'CAST(sleep_level_short.start_datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.sleep_level_short\` sleep_level_short', 'Fitbit_sleep_level_short'),
+  ($((ID++)), 'DURATION_IN_MIN', 'sleep_level_short.duration_in_min', 'FROM \`\${projectId}.\${dataSetId}.sleep_level_short\` sleep_level_short', 'Fitbit_sleep_level_short')"
   
 echo "ds_linking - inserting fitbit device data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \

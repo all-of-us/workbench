@@ -113,7 +113,13 @@ then
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
             union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_30dayavg\`
+            union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_counts\`
+            union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
+            union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`
         ) f on (p.person_id = f.person_id)"
         
   else
@@ -188,7 +194,13 @@ then
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
             union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_30dayavg\`
+            union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_counts\`
+            union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
+            union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`
         ) f on (p.person_id = f.person_id)"
     
   fi
@@ -292,7 +304,13 @@ else
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
             union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_30dayavg\`
+            union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_counts\`
+            union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
+            union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`
         ) f on (p.person_id = f.person_id)
     LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_wgs_metadata\` w on (CAST(p.person_id as STRING) = w.sample_name)
     LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_longreads_metadata\` lrw on (CAST(p.person_id as STRING) = lrw.sample_name)
@@ -391,7 +409,13 @@ else
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
             union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_30dayavg\`
+            union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_counts\`
+            union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
+            union distinct
+            SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`
         ) f on (p.person_id = f.person_id)
     LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_wgs_metadata\` w on (CAST(p.person_id as STRING) = w.sample_name)
     LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_longreads_metadata\` lrw on (CAST(p.person_id as STRING) = lrw.sample_name)
@@ -572,11 +596,14 @@ echo "set fitbit table flags in cb_search_person"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
 SET x.has_fitbit_activity_summary = y.has_fitbit_activity_summary,
-    x.has_fitbit_heart_rate_level = y.has_fitbit_heart_rate_level,
+    x.has_fitbit_heart_rate_intraday = y.has_fitbit_heart_rate_intraday,
     x.has_fitbit_heart_rate_summary = y.has_fitbit_heart_rate_summary,
     x.has_fitbit_steps_intraday = y.has_fitbit_steps_intraday,
     x.has_fitbit_sleep_daily_summary = y.has_fitbit_sleep_daily_summary,
-    x.has_fitbit_sleep_level = y.has_fitbit_sleep_level
+    x.has_fitbit_sleep_daily_summary_30dayavg = y.has_fitbit_sleep_daily_summary_30dayavg,
+    x.has_fitbit_sleep_daily_summary_counts = y.has_fitbit_sleep_daily_summary_counts,
+    x.has_fitbit_sleep_level = y.has_fitbit_sleep_level,
+    x.has_fitbit_sleep_level_short = y.has_fitbit_sleep_level_short
 FROM
     (
         SELECT
@@ -588,7 +615,7 @@ FROM
             , CASE
                 WHEN hrml.person_id is null THEN 0
                 ELSE 1
-              END has_fitbit_heart_rate_level
+              END has_fitbit_heart_rate_intraday
             , CASE
                 WHEN hrs.person_id is null THEN 0
                 ELSE 1
@@ -602,9 +629,21 @@ FROM
                 ELSE 1
               END has_fitbit_sleep_daily_summary
             , CASE
+                WHEN sdsa.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_sleep_daily_summary_30dayavg
+            , CASE
+                WHEN sdsc.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_sleep_daily_summary_counts
+            , CASE
                 WHEN sl.person_id is null THEN 0
                 ELSE 1
               END has_fitbit_sleep_level
+            , CASE
+                WHEN sls.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_sleep_level_short
         FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
         LEFT JOIN
             (
@@ -628,8 +667,20 @@ FROM
             ) sds on (p.person_id = sds.person_id)
         LEFT JOIN
             (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_30dayavg\`
+            ) sdsa on (p.person_id = sdsa.person_id)
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_counts\`
+            ) sdsc on (p.person_id = sdsc.person_id)
+        LEFT JOIN
+            (
                 SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
             ) sl on (p.person_id = sl.person_id)
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`
+            ) sls on (p.person_id = sls.person_id)
     ) y
 WHERE x.person_id = y.person_id"
 
@@ -712,7 +763,13 @@ then
                   union distinct
                   SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
                   union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_30dayavg\`
+                  union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary_counts\`
+                  union distinct
                   SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
+                  union distinct
+                  SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`
                   union distinct
                   SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.device\`
               ) ws on (p.person_id = ws.person_id)
