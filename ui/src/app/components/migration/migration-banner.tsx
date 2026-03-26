@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { MigrationState } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
@@ -20,15 +20,41 @@ const styles = reactStyles({
 });
 
 interface Props {
-  onStartMigration: () => void;
+  onStartMigration?: () => void;
+  state?: MigrationState;
 }
 
-export const MigrationBanner = ({ onStartMigration }: Props) => (
-  <FlexRow style={styles.banner}>
-    <div style={styles.text}>
-      Migration to Verily Workbench is now open (In Development). Please migrate
-      your workspaces to avoid data loss.
-    </div>
-    <Button onClick={onStartMigration}>Start Migration</Button>
-  </FlexRow>
-);
+export const MigrationBanner = ({ onStartMigration, state }: Props) => {
+  //  Homepage banner (CTA only)
+  if (!state) {
+    return (
+      <FlexRow style={styles.banner}>
+        <div style={styles.text}>
+          Migration to Verily Workbench is now available. Please migrate your
+          workspaces to avoid potential data loss.
+        </div>
+        {onStartMigration && (
+          <Button onClick={onStartMigration}>Migrate Workspace</Button>
+        )}
+      </FlexRow>
+    );
+  }
+
+  // Workspace 1.0 banner (ONLY when FINISHED)
+  if (state === MigrationState.FINISHED) {
+    return (
+      <FlexRow style={styles.banner}>
+        <div style={styles.text}>
+          <strong>
+            This workspace has already been migrated to Verily Workbench.
+          </strong>{' '}
+          Any new changes made here will <strong>NOT</strong> automatically
+          reflect in the migrated workspace. Re-migration is required to sync
+          updates. To avoid ongoing Google Cloud charges, please delete this
+          Workspace 1.0 instance.
+        </div>
+      </FlexRow>
+    );
+  }
+  return null;
+};

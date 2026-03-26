@@ -9,6 +9,7 @@ import { Workspace } from 'generated/fetch';
 import { StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { HelpSidebar } from 'app/components/help-sidebar';
+import { MigrationBanner } from 'app/components/migration/migration-banner';
 import { Spinner } from 'app/components/spinners';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { WorkspaceRoutes } from 'app/routing/workspace-app-routing';
@@ -353,6 +354,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
     setShowNewCtNotification(isControlled && isNew);
     setShowUnlinkedBillingNotification(isWorkspaceBillingUnlinked());
   }, [workspace]);
+  const migrationState = workspace?.migrationState;
 
   const showMultiRegionWorkspaceNotification =
     workspace &&
@@ -365,6 +367,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
           {!routeData.minimizeChrome && (
             <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab} />
           )}
+          <MigrationBanner state={migrationState} />
           {showNewCtNotification && (
             <NewCtNotification
               onCancel={() => setShowNewCtNotification(false)}

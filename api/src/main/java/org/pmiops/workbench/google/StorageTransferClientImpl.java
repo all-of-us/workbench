@@ -6,10 +6,13 @@ import com.google.storagetransfer.v1.proto.TransferProto;
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import java.io.IOException;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StorageTransferClientImpl implements StorageTransferClient {
+  private static final Logger logger = LoggerFactory.getLogger(StorageTransferClientImpl.class);
 
   @Override
   public String startBucketTransfer(
@@ -21,7 +24,6 @@ public class StorageTransferClientImpl implements StorageTransferClient {
     try {
 
       String jobName = "transferJobs/migration-" + projectId;
-
       com.google.gson.JsonObject transferSpec = new com.google.gson.JsonObject();
       com.google.gson.JsonObject gcsSource = new com.google.gson.JsonObject();
       gcsSource.addProperty("bucketName", sourceBucket);
@@ -41,10 +43,9 @@ public class StorageTransferClientImpl implements StorageTransferClient {
       com.google.gson.JsonObject requestBody = new com.google.gson.JsonObject();
       requestBody.addProperty("name", jobName);
       requestBody.addProperty("projectId", projectId);
-      requestBody.addProperty("serviceAccount", serviceAccountEmail); // ← key field
+      requestBody.addProperty("serviceAccount", serviceAccountEmail);
       requestBody.addProperty("status", "ENABLED");
       requestBody.add("transferSpec", transferSpec);
-
 
       GoogleCredentials credentials =
           GoogleCredentials.getApplicationDefault()
@@ -71,9 +72,12 @@ public class StorageTransferClientImpl implements StorageTransferClient {
 
       com.google.gson.JsonObject responseJson =
           com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
-      return responseJson.get("name").getAsString();
+      String createdJobName = responseJson.get("name").getAsString();
+      logger.info("STS transfer job created successfully: {}", createdJobName);
+      return createdJobName;
 
     } catch (Exception e) {
+      logger.error("STS bucket transfer failed: {}", e.getMessage(), e);
       throw new RuntimeException("Failed to start STS bucket transfer", e);
     }
   }
