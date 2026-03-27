@@ -491,6 +491,8 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     useState<PublicInstitutionDetails>(null);
   const [showAdminCommentModal, setShowAdminCommentModal] =
     useState<boolean>(false);
+  const [migrationGroupMember, setMigrationGroupMember] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const onMount = async () => {
@@ -643,6 +645,10 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     setUpdatedProfile(response);
     spinnerProps.hideSpinner();
   };
+
+  const toggleMigrationGroupStatus = () => {
+    setMigrationGroupMember((prevState) => !prevState);
+  }
 
   const errors = validate(
     {
@@ -812,6 +818,16 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               </FlexColumn>
             </FlexRow>
           </FlexColumn>
+          <FlexRow>
+            <h2>Workspace migration testing</h2>
+          </FlexRow>
+          <FlexRow>
+            <CommonToggle
+              name='Member of testing group'
+              checked={migrationGroupMember}
+              onToggle={() => toggleMigrationGroupStatus()}
+            />
+          </FlexRow>
           <FlexRow>
             <h2>Egress event history</h2>
           </FlexRow>
