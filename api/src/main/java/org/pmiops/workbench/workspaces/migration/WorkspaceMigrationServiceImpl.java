@@ -76,33 +76,53 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     dbWorkspace.setMigrationState(MigrationState.STARTING.name());
     workspaceDao.save(dbWorkspace);
+    boolean vwbCreated = false;
+    try {
+      RawlsWorkspaceDetails fcWorkspace =
+          fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
 
-    RawlsWorkspaceDetails fcWorkspace =
-        fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
+      Workspace workspace =
+          workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
 
-    Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
+      String podId =
+          Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
+              .map(DbUser::getVwbUserPod)
+              .map(DbVwbUserPod::getVwbPodId)
+              .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
 
-    // Determine pod ID using existing project pattern
-    String podId =
-        Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
-            .map(DbUser::getVwbUserPod)
-            .map(DbVwbUserPod::getVwbPodId)
-            .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
+      WorkspaceDescription vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, podId);
 
-    WorkspaceDescription vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, podId);
-    String workspaceId = vwbWorkspace.getId().toString();
-    String destinationBucket = wsmClient.createControlledBucket(workspaceId, namespace);
-    String sourceBucket = fcWorkspace.getBucketName();
-    String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+      vwbCreated = true;
 
-    storageTransferClient.startBucketTransfer(
-        sourceBucket,
-        destinationBucket,
-        workbenchConfigProvider.get().server.projectId,
-        folders,
-        serviceAccountEmail);
-    taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
+      String workspaceId = vwbWorkspace.getId().toString();
+
+      String destinationBucket = wsmClient.createControlledBucket(workspaceId, namespace);
+
+      String sourceBucket = fcWorkspace.getBucketName();
+
+      String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+
+      storageTransferClient.startBucketTransfer(
+          sourceBucket,
+          destinationBucket,
+          workbenchConfigProvider.get().server.projectId,
+          folders,
+          serviceAccountEmail);
+
+      taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
+
+    } catch (Exception e) {
+
+      if (!vwbCreated) {
+        dbWorkspace.setMigrationState(MigrationState.NOT_STARTED.name());
+      } else {
+        dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+      }
+
+      workspaceDao.save(dbWorkspace);
+
+      throw new RuntimeException("Workspace migration failed to start", e);
+    }
   }
 
   @Override
@@ -134,10 +154,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
   @Override
   public void checkMigrationStatus(String namespace, String terraName) {
-
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
     String projectId = workbenchConfigProvider.get().server.projectId;
-
     TransferTypes.TransferJob job = storageTransferClient.getTransferJob(projectId);
 
     if (job.getStatus() == TransferTypes.TransferJob.Status.ENABLED) {

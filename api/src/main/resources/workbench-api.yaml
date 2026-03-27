@@ -7991,11 +7991,12 @@ components:
           socialBehavioral: false
     MigrationState:
       type: string
-      description: Tracks the lifecycle (NOT_STARTED, STARTING, FINISHED)
+      description: Tracks the lifecycle (NOT_STARTED, STARTING, FINISHED, FAILED)
       enum:
         - NOT_STARTED
         - STARTING
         - FINISHED
+        - FAILED
     WorkspaceBillingUsageResponse:
       required:
       - cost
