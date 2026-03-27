@@ -105,6 +105,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       storageTransferClient.startBucketTransfer(
           sourceBucket,
           destinationBucket,
+          workspace.getNamespace(),
           workbenchConfigProvider.get().server.projectId,
           folders,
           serviceAccountEmail);
@@ -156,7 +157,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   public void checkMigrationStatus(String namespace, String terraName) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
     String projectId = workbenchConfigProvider.get().server.projectId;
-    TransferTypes.TransferJob job = storageTransferClient.getTransferJob(projectId);
+    String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
+    TransferTypes.TransferJob job =
+        storageTransferClient.getTransferJob(projectId, workspaceNamespace);
 
     if (job.getStatus() == TransferTypes.TransferJob.Status.ENABLED) {
       // STS still running — requeue

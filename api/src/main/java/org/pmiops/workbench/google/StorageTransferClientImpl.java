@@ -18,12 +18,13 @@ public class StorageTransferClientImpl implements StorageTransferClient {
   public String startBucketTransfer(
       String sourceBucket,
       String destinationBucket,
+      String workspaceNamespace,
       String projectId,
       List<String> folders,
       String serviceAccountEmail) {
     try {
 
-      String jobName = "transferJobs/migration-" + projectId;
+      String jobName = "transferJobs/migration-" + workspaceNamespace;
       com.google.gson.JsonObject transferSpec = new com.google.gson.JsonObject();
       com.google.gson.JsonObject gcsSource = new com.google.gson.JsonObject();
       gcsSource.addProperty("bucketName", sourceBucket);
@@ -83,10 +84,10 @@ public class StorageTransferClientImpl implements StorageTransferClient {
   }
 
   @Override
-  public TransferTypes.TransferJob getTransferJob(String projectId) {
+  public TransferTypes.TransferJob getTransferJob(String projectId, String workspaceNamespace) {
     try (StorageTransferServiceClient client = StorageTransferServiceClient.create()) {
 
-      String jobName = "transferJobs/migration-" + projectId;
+      String jobName = "transferJobs/migration-" + workspaceNamespace;
 
       TransferProto.GetTransferJobRequest request =
           TransferProto.GetTransferJobRequest.newBuilder()

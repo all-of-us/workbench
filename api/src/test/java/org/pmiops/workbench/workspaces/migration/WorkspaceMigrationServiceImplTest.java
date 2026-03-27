@@ -78,7 +78,6 @@ public class WorkspaceMigrationServiceImplTest {
     rawlsWorkspace.setBucketName(SOURCE_BUCKET);
     rawlsWorkspace.setGoogleProject(GOOGLE_PROJECT);
 
-    // Config available to ALL tests
     WorkbenchConfig config = new WorkbenchConfig();
     config.vwb = new WorkbenchConfig.VwbConfig();
     config.vwb.defaultPodId = "default-pod";
@@ -86,15 +85,15 @@ public class WorkspaceMigrationServiceImplTest {
     config.server.projectId = SERVER_PROJECT;
     config.auth = new WorkbenchConfig.AuthConfig();
     config.auth.serviceAccountApiUsers = List.of(SERVICE_ACCOUNT_EMAIL);
-    lenient().when(workbenchConfigProvider.get()).thenReturn(config);
 
+    lenient().when(workbenchConfigProvider.get()).thenReturn(config);
     lenient().when(workspaceDao.getRequired(NAMESPACE, TERRA_NAME)).thenReturn(dbWorkspace);
   }
 
-  // ── helper: stubs needed by all startWorkspaceMigration tests ──────────────
   private void setupStartMigrationStubs() {
     when(fireCloudService.getWorkspace(NAMESPACE, TERRA_NAME))
         .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
+
     when(workspaceMapper.toApiWorkspace(
             eq(dbWorkspace), any(RawlsWorkspaceDetails.class), eq(initialCreditsService)))
         .thenReturn(workspace);
@@ -103,19 +102,23 @@ public class WorkspaceMigrationServiceImplTest {
     DbVwbUserPod pod = new DbVwbUserPod();
     pod.setVwbPodId(POD_ID);
     dbUser.setVwbUserPod(pod);
+
     when(userDao.findUserByUsername(any())).thenReturn(dbUser);
 
     WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
     vwbWorkspace.setId(UUID.randomUUID());
+
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
     when(wsmClient.createControlledBucket(any(), any())).thenReturn(DEST_BUCKET);
-    when(storageTransferClient.startBucketTransfer(any(), any(), any(), any(), any()))
+
+    when(storageTransferClient.startBucketTransfer(any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 
   @Test
   void startWorkspaceMigration_setsStateToStarting() {
     setupStartMigrationStubs();
+
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
     verify(workspaceDao)
@@ -125,6 +128,7 @@ public class WorkspaceMigrationServiceImplTest {
   @Test
   void startWorkspaceMigration_createsVwbWorkspaceWithCorrectPod() {
     setupStartMigrationStubs();
+
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
     verify(wsmClient).createWorkspaceAsService(workspace, POD_ID);
@@ -133,26 +137,39 @@ public class WorkspaceMigrationServiceImplTest {
   @Test
   void startWorkspaceMigration_startsStsTransferWithSelectedFolders() {
     setupStartMigrationStubs();
+
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
     verify(storageTransferClient)
         .startBucketTransfer(
-            SOURCE_BUCKET, DEST_BUCKET, SERVER_PROJECT, SELECTED_FOLDERS, SERVICE_ACCOUNT_EMAIL);
+            SOURCE_BUCKET,
+            DEST_BUCKET,
+            NAMESPACE,
+            SERVER_PROJECT,
+            SELECTED_FOLDERS,
+            SERVICE_ACCOUNT_EMAIL);
   }
 
   @Test
   void startWorkspaceMigration_startsStsTransferWithEmptyFolders_migratesEntireBucket() {
     setupStartMigrationStubs();
+
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of());
 
     verify(storageTransferClient)
         .startBucketTransfer(
-            SOURCE_BUCKET, DEST_BUCKET, SERVER_PROJECT, List.of(), SERVICE_ACCOUNT_EMAIL);
+            SOURCE_BUCKET,
+            DEST_BUCKET,
+            NAMESPACE,
+            SERVER_PROJECT,
+            List.of(),
+            SERVICE_ACCOUNT_EMAIL);
   }
 
   @Test
   void startWorkspaceMigration_pushesStatusTask() {
     setupStartMigrationStubs();
+
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS);
 
     verify(taskQueueService).pushWorkspaceMigrationStatusTask(NAMESPACE, TERRA_NAME);
@@ -164,7 +181,8 @@ public class WorkspaceMigrationServiceImplTest {
         TransferTypes.TransferJob.newBuilder()
             .setStatus(TransferTypes.TransferJob.Status.ENABLED)
             .build();
-    when(storageTransferClient.getTransferJob(SERVER_PROJECT)).thenReturn(runningJob);
+
+    when(storageTransferClient.getTransferJob(SERVER_PROJECT, NAMESPACE)).thenReturn(runningJob);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 
@@ -178,7 +196,8 @@ public class WorkspaceMigrationServiceImplTest {
         TransferTypes.TransferJob.newBuilder()
             .setStatus(TransferTypes.TransferJob.Status.DISABLED)
             .build();
-    when(storageTransferClient.getTransferJob(SERVER_PROJECT)).thenReturn(completedJob);
+
+    when(storageTransferClient.getTransferJob(SERVER_PROJECT, NAMESPACE)).thenReturn(completedJob);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 
