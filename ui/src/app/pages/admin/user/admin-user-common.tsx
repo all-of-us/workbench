@@ -294,7 +294,8 @@ export const updateAccountProperties = async (
   accessBypassRequests?: AccessBypassRequest[],
   accountDisabledReason?: string
 ): Promise<Profile> => {
-  const { username, initialCreditsExpirationBypassed } = updatedProfile;
+  const { username, initialCreditsExpirationBypassed, migrationTestingGroup } =
+    updatedProfile;
 
   const updateDisabledMaybe: boolean = getUpdatedProfileValue(
     oldProfile,
@@ -325,6 +326,7 @@ export const updateAccountProperties = async (
       'verifiedInstitutionalAffiliation',
     ]),
     initialCreditsExpirationBypassed,
+    migrationTestingGroup,
   };
 
   return userAdminApi().updateAccountProperties(request);

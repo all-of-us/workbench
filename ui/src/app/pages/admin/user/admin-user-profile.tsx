@@ -433,6 +433,30 @@ const DisabledToggle = (props: {
   );
 };
 
+const MigrationToggle = (props: {
+  currentlyMember: boolean;
+  previouslyMember: boolean;
+  toggleMember: () => void;
+}) => {
+  const { currentlyMember, previouslyMember, toggleMember } = props;
+  const highlightStyle =
+    currentlyMember !== previouslyMember
+      ? { background: colors.highlight }
+      : {};
+
+  return (
+    <div style={{ paddingLeft: '2em' }}>
+      <div style={highlightStyle}>
+        <CommonToggle
+          name='Migration testing group'
+          checked={currentlyMember}
+          onToggle={() => toggleMember()}
+        />
+      </div>
+    </div>
+  );
+};
+
 const AdminCommentModal = (props: {
   onCancel: Function;
   onSubmit: Function;
@@ -490,8 +514,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const [institution, setInstitution] =
     useState<PublicInstitutionDetails>(null);
   const [showAdminCommentModal, setShowAdminCommentModal] =
-    useState<boolean>(false);
-  const [migrationGroupMember, setMigrationGroupMember] =
     useState<boolean>(false);
 
   useEffect(() => {
@@ -574,6 +596,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   };
 
   const updateProfile = (newUpdates: Partial<Profile>) => {
+    console.log(newUpdates);
     setUpdatedProfile({ ...updatedProfile, ...newUpdates });
   };
 
@@ -645,10 +668,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     setUpdatedProfile(response);
     spinnerProps.hideSpinner();
   };
-
-  const toggleMigrationGroupStatus = () => {
-    setMigrationGroupMember((prevState) => !prevState);
-  }
 
   const errors = validate(
     {
@@ -806,6 +825,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                       />
                     </div>
                   </TooltipTrigger>
+                  <div>
+                    <MigrationToggle
+                      currentlyMember={updatedProfile.migrationTestingGroup}
+                      previouslyMember={oldProfile.migrationTestingGroup}
+                      toggleMember={() =>
+                        updateProfile({
+                          migrationTestingGroup:
+                            !updatedProfile.migrationTestingGroup,
+                        })
+                      }
+                    />
+                  </div>
                 </FlexRow>
                 <AccessModuleTable
                   oldProfile={oldProfile}
@@ -818,16 +849,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               </FlexColumn>
             </FlexRow>
           </FlexColumn>
-          <FlexRow>
-            <h2>Workspace migration testing</h2>
-          </FlexRow>
-          <FlexRow>
-            <CommonToggle
-              name='Member of testing group'
-              checked={migrationGroupMember}
-              onToggle={() => toggleMigrationGroupStatus()}
-            />
-          </FlexRow>
           <FlexRow>
             <h2>Egress event history</h2>
           </FlexRow>

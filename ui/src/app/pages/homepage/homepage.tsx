@@ -313,12 +313,17 @@ export const Homepage = fp.flow(
     };
 
     render() {
+      const {
+        profileState: {
+          profile: { migrationTestingGroup },
+        },
+      } = this.props;
       const { firstVisit, userWorkspacesResponse } = this.state;
       const { enableVwbMigration } = serverConfigStore.get().config;
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
-            {enableVwbMigration && (
+            {enableVwbMigration && migrationTestingGroup && (
               <MigrationBanner onStartMigration={this.openMigrationModal} />
             )}
             {serverConfigStore.get().config.enableVWBHomepageBanner ? (

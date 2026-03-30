@@ -64,6 +64,7 @@ public interface ProfileMapper {
       target = "eligibleForInitialCreditsExtension",
       source = "dbUser",
       qualifiedByName = "checkInitialCreditsExtensionEligibility")
+  @Mapping(target = "migrationTestingGroup", source = "migrationTestingGroup")
   Profile toModel(
       DbUser dbUser,
       @Context InitialCreditsService initialCreditsService,
@@ -75,7 +76,8 @@ public interface ProfileMapper {
       List<UserTierEligibility> tierEligibilities,
       ProfileAccessModules accessModules,
       boolean newUserSatisfactionSurveyEligibility,
-      Instant newUserSatisfactionSurveyEligibilityEndTime);
+      Instant newUserSatisfactionSurveyEligibilityEndTime,
+      boolean migrationTestingGroup);
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 
