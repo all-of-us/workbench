@@ -12831,6 +12831,7 @@ components:
             initial credits within the expiration period.
         migrationTestingGroup:
           type: boolean
+          default: false
           description: When set to true, the user can test the workspace migration feature.
       description: |
         A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page. Updates to the contact email or the institutional affiliation will be rejected if they do not validate.
