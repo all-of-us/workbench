@@ -104,6 +104,32 @@ export const MigrationModal = ({ onClose }: Props) => {
     load();
   }, []);
 
+  const handleContinueMigration = async (selectedFolders: string[]) => {
+    if (!selectedWorkspace) {
+      return;
+    }
+
+    try {
+      await workspacesApi().startWorkspaceMigration(
+        selectedWorkspace.id,
+        selectedWorkspace.terraName,
+        { folders: selectedFolders }
+      );
+
+      setWorkspaces((prev) =>
+        prev.map((ws) =>
+          ws.id === selectedWorkspace.id
+            ? { ...ws, migrationState: MigrationState.STARTING }
+            : ws
+        )
+      );
+
+      setSelectedWorkspace(null);
+    } catch (e) {
+      console.error('Failed to start migration', e);
+    }
+  };
+
   const handleStartMigration = async (ws: MigrationWorkspace) => {
     try {
       const response = await workspacesApi().getMigrationBucketContents(
@@ -130,9 +156,7 @@ export const MigrationModal = ({ onClose }: Props) => {
           folders={folders}
           onBack={() => setSelectedWorkspace(null)}
           onClose={onClose}
-          onContinue={() => {
-            // This will be used later when STS migration step is implemented
-          }}
+          onContinue={handleContinueMigration}
         />
       ) : (
         <FlexColumn>

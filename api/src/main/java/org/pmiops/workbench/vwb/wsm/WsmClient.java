@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.api.WorkspaceApi;
@@ -104,50 +105,44 @@ public class WsmClient {
    * @return WorkspaceDescription of the created workspace
    */
   public WorkspaceDescription createWorkspaceAsService(Workspace targetWorkspace, String podId) {
-
     return wsmRetryHandler.run(
         context -> {
+          String shortDescription =
+              Optional.ofNullable(targetWorkspace.getResearchPurpose())
+                  .map(ResearchPurpose::getOtherPurposeDetails)
+                  .orElse("");
+
+          UUID workspaceId = UUID.randomUUID();
+
           CreateWorkspaceV2Request createWorkspaceRequest =
               new CreateWorkspaceV2Request()
+                  .id(workspaceId)
+                  .stage(WorkspaceStageModel.CRG_WORKSPACE)
                   .userFacingId(targetWorkspace.getNamespace())
-                  .displayName(targetWorkspace.getName())
+                  .displayName(targetWorkspace.getDisplayName())
                   .properties(
                       stringMapToProperties(
-                          Map.of(
-                              "terra-workspace-short-description",
-                              targetWorkspace.getResearchPurpose().getOtherPurposeDetails())))
+                          Map.of("terra-workspace-short-description", shortDescription)))
                   .description(formatWorkspaceDescription(targetWorkspace))
                   .cloudResourceGroupId(podId)
                   .organizationId(workbenchConfigProvider.get().vwb.organizationId)
                   .jobControl(new JobControl().id(UUID.randomUUID().toString()));
 
-          CreateWorkspaceV2Result result =
-              workspaceServiceApi.get().createWorkspaceV2(createWorkspaceRequest);
+          workspaceServiceApi.get().createWorkspaceV2(createWorkspaceRequest);
 
-          JobReport jobReport = result.getJobReport();
-          if (jobReport != null) {
-            logger.error("Status code from WSM {}", jobReport.getStatusCode());
+          try {
+            waitForWorkspaceCreation(workspaceId.toString()); // ← reuse existing poller!
+          } catch (InterruptedException | ApiException e) {
+            throw new WorkbenchException(e);
           }
 
-          Optional.ofNullable(result.getErrorReport())
-              .ifPresent(
-                  errorReport -> {
-                    logger.error(
-                        "Failed to create workspace {}: {}",
-                        targetWorkspace.getNamespace(),
-                        errorReport.getMessage());
-                    throw new WorkbenchException(
-                        String.format(
-                            "Failed to create workspace %s: %s",
-                            targetWorkspace.getNamespace(), errorReport.getMessage()));
-                  });
-
-          // Fetch full workspace description
-          return workspaceServiceApi.get().getWorkspace(result.getWorkspaceId().toString(), null);
+          return workspaceServiceApi.get().getWorkspace(workspaceId.toString(), null);
         });
   }
 
-  public void createControlledBucket(String workspaceId, String namespace) {
+  public String createControlledBucket(String workspaceId, String namespace) {
+
+    String bucketName = "rw-migration-" + namespace.toLowerCase();
 
     wsmRetryHandler.run(
         context -> {
@@ -160,7 +155,9 @@ public class WsmClient {
               new ControlledResourceCommonFields()
                   .name("rw-migration-bucket")
                   .description("RW migration bucket")
-                  .cloningInstructions(CloningInstructionsEnum.NOTHING);
+                  .cloningInstructions(CloningInstructionsEnum.NOTHING)
+                  .accessScope(AccessScope.SHARED_ACCESS)
+                  .managedBy(ManagedBy.USER);
 
           // Bucket parameters
           GcpGcsBucketCreationParameters bucketParams =
@@ -174,6 +171,7 @@ public class WsmClient {
 
           return null;
         });
+    return bucketName;
   }
 
   public void shareWorkspaceAsService(String workspaceId, String userEmail, IamRole role) {

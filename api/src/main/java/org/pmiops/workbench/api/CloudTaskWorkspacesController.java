@@ -6,12 +6,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
+import org.pmiops.workbench.model.CheckWorkspaceMigrationStatusRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.WorkspaceUserCacheQueueWorkspace;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,15 +28,18 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceUserCacheService workspaceUserCacheService;
+  private final WorkspaceMigrationService workspaceMigrationService;
 
   @Autowired
   public CloudTaskWorkspacesController(
       ImpersonatedWorkspaceService impersonatedWorkspaceService,
       WorkspaceAuthService workspaceAuthService,
-      WorkspaceUserCacheService workspaceUserCacheService) {
+      WorkspaceUserCacheService workspaceUserCacheService,
+      WorkspaceMigrationService workspaceMigrationService) {
     this.impersonatedWorkspaceService = impersonatedWorkspaceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceUserCacheService = workspaceUserCacheService;
+    this.workspaceMigrationService = workspaceMigrationService;
   }
 
   @Override
@@ -138,6 +143,20 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
     workspaceUserCacheService.updateWorkspaceUserCache(wsAcls);
 
     LOGGER.info("Finished processing workspace user cache queue task.");
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> checkWorkspaceMigrationStatus(
+      CheckWorkspaceMigrationStatusRequest request) {
+    LOGGER.info(
+        String.format(
+            "Checking migration status for workspace %s/%s",
+            request.getWorkspaceNamespace(), request.getWorkspaceName()));
+
+    workspaceMigrationService.checkMigrationStatus(
+        request.getWorkspaceNamespace(), request.getWorkspaceName());
 
     return ResponseEntity.ok().build();
   }
