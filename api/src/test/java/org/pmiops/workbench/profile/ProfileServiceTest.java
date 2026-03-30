@@ -108,7 +108,8 @@ public class ProfileServiceTest {
         .professionalUrl("https://scholar.google.com/citations?user=asdf")
         .areaOfResearch("asdfasdfasdf")
         .verifiedInstitutionalAffiliation(BROAD_AFFILIATION)
-        .initialCreditsExpirationBypassed(false);
+        .initialCreditsExpirationBypassed(false)
+        .migrationTestingGroup(false);
   }
 
   private static final Profile VALID_PROFILE = createValidProfile();
