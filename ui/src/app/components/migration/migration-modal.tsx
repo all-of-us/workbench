@@ -36,9 +36,18 @@ const styles = reactStyles({
     flex: 2,
     minWidth: 0,
   },
+  cellPod: {
+    flex: 2,
+    minWidth: 180,
+  },
   cellAction: {
     flex: '0 0 auto',
     justifyContent: 'flex-end',
+  },
+  dropdown: {
+    width: '100%',
+    padding: 6,
+    borderRadius: 4,
   },
   header: {
     display: 'flex',
@@ -67,9 +76,12 @@ export const MigrationModal = ({ onClose }: Props) => {
   const [loading, setLoading] = useState(true);
   const [folders, setFolders] = useState<string[]>([]);
 
-  // NEW: track which workspace user selected for migration
   const [selectedWorkspace, setSelectedWorkspace] =
     useState<MigrationWorkspace | null>(null);
+
+  // 🔥 NEW: pod per workspace
+  const [pods, setPods] = useState<any[]>([]);
+  const [selectedPods, setSelectedPods] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -101,7 +113,17 @@ export const MigrationModal = ({ onClose }: Props) => {
       }
     };
 
+    const loadPods = async () => {
+      try {
+        const response = await workspacesApi().getUserPods();
+        setPods(response || []);
+      } catch (e) {
+        console.error('Failed to load pods', e);
+      }
+    };
+
     load();
+    loadPods();
   }, []);
 
   const handleContinueMigration = async (selectedFolders: string[]) => {
@@ -113,7 +135,10 @@ export const MigrationModal = ({ onClose }: Props) => {
       await workspacesApi().startWorkspaceMigration(
         selectedWorkspace.id,
         selectedWorkspace.terraName,
-        { folders: selectedFolders }
+        {
+          folders: selectedFolders,
+          podId: selectedPods[selectedWorkspace.id],
+        }
       );
 
       setWorkspaces((prev) =>
@@ -148,7 +173,7 @@ export const MigrationModal = ({ onClose }: Props) => {
     <Modal
       title='Migrate Workspaces to Verily Workbench'
       onClose={onClose}
-      width={720}
+      width={900}
     >
       {selectedWorkspace ? (
         <FolderSelection
@@ -164,7 +189,6 @@ export const MigrationModal = ({ onClose }: Props) => {
             <div style={{ fontWeight: 600, fontSize: 18 }}>
               Migrate Workspaces to Verily Workbench
             </div>
-
             <CloseButton onClose={onClose} />
           </FlexRow>
 
@@ -172,6 +196,7 @@ export const MigrationModal = ({ onClose }: Props) => {
             <div style={styles.cellName}>Workspace</div>
             <div style={styles.cellCdr}>CDR</div>
             <div style={styles.cellStatus}>Status</div>
+            <div style={styles.cellPod}>Select Pod</div>
             <div style={styles.cellAction} />
           </FlexRow>
 
@@ -188,6 +213,26 @@ export const MigrationModal = ({ onClose }: Props) => {
                     state={ws.migrationState}
                     owner={ws.migrationOwner}
                   />
+                </div>
+
+                <div style={styles.cellPod}>
+                  <select
+                    value={selectedPods[ws.id] || ''}
+                    onChange={(e) =>
+                      setSelectedPods((prev) => ({
+                        ...prev,
+                        [ws.id]: e.target.value,
+                      }))
+                    }
+                    style={styles.dropdown}
+                  >
+                    <option value=''>Select a pod</option>
+                    {pods.map((pod) => (
+                      <option key={pod.podId} value={pod.podId}>
+                        {pod.userFacingId || pod.description || pod.podId}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <FlexRow style={styles.cellAction}>

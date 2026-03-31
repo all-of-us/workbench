@@ -7849,6 +7849,8 @@ components:
     StartWorkspaceMigrationRequest:
       type: object
       properties:
+        podId:
+          type: string
         folders:
           type: array
           items:
