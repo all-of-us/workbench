@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -40,6 +41,7 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -76,6 +78,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
   private final WorkspaceMigrationService workspaceMigrationService;
+  private final VwbUserService vwbUserService;
   private final WorkspaceServiceFactory workspaceServiceFactory;
 
   private final WsmClient wsmClient;
@@ -101,6 +104,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       WorkspaceMigrationService workspaceMigrationService,
       WorkspaceServiceFactory workspaceServiceFactory,
+      VwbUserService vwbUserService,
       WsmClient wsmClient) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
@@ -121,6 +125,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceMigrationService = workspaceMigrationService;
     this.workspaceServiceFactory = workspaceServiceFactory;
+    this.vwbUserService = vwbUserService;
     this.wsmClient = wsmClient;
   }
 
@@ -869,5 +874,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(
         new WorkspaceCreatorFreeCreditsRemainingResponse()
             .freeCreditsRemaining(freeCreditsRemaining));
+  }
+
+  @Override
+  public ResponseEntity<List<VwbPodDescription>> getUserPods() {
+    return ResponseEntity.ok(
+        vwbUserService.getUserPods().stream()
+            .map(
+                p -> {
+                  VwbPodDescription pod = new VwbPodDescription();
+                  pod.setPodId(UUID.fromString(p.getPodId().toString()));
+                  pod.setUserFacingId(p.getUserFacingId());
+                  pod.setDescription(p.getDescription());
+                  return pod;
+                })
+            .toList());
   }
 }

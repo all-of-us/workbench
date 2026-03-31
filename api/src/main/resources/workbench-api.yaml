@@ -4261,6 +4261,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainValuesResponse'
+  /v1/workspaces/pods:
+    get:
+      tags:
+        - workspaces
+      operationId: getUserPods
+      responses:
+        '200':
+          description: List of user-accessible pods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VwbPodDescription'
   /v1/cloudTask/exportResearcherData:
     post:
       tags:
@@ -8149,6 +8163,16 @@ components:
           type: array
           items:
             type: string
+    VwbPodDescription:
+      type: object
+      properties:
+        podId:
+          type: string
+          format: uuid
+        userFacingId:
+          type: string
+        description:
+          type: string
     ResearchPurpose:
       required:
       - ancestry

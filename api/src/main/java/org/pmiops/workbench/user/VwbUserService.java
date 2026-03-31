@@ -1,6 +1,7 @@
 package org.pmiops.workbench.user;
 
 import jakarta.inject.Provider;
+import java.util.List;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbUserPodDao;
@@ -8,6 +9,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.PodDescription;
+import org.pmiops.workbench.vwb.user.model.PodDescriptionList;
 import org.pmiops.workbench.vwb.user.model.PodRole;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.slf4j.Logger;
@@ -209,6 +211,14 @@ public class VwbUserService {
                         .getEnvironmentDataGcp()
                         .getBillingAccountId())
             .orElse("");
+  }
+
+  public List<PodDescription> getUserPods() {
+    PodDescriptionList podList = vwbUserManagerClient.listUserPods();
+    if (podList == null || podList.getResults() == null) {
+      return List.of();
+    }
+    return podList.getResults();
   }
 
   public void linkInitialCreditsBillingAccountToPod(DbVwbUserPod pod) {
