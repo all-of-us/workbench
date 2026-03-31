@@ -79,7 +79,6 @@ export const MigrationModal = ({ onClose }: Props) => {
   const [selectedWorkspace, setSelectedWorkspace] =
     useState<MigrationWorkspace | null>(null);
 
-  // 🔥 NEW: pod per workspace
   const [pods, setPods] = useState<any[]>([]);
   const [selectedPods, setSelectedPods] = useState<Record<string, string>>({});
 
