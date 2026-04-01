@@ -70,7 +70,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void startWorkspaceMigration(String namespace, String terraName, List<String> folders) {
+  public void startWorkspaceMigration(
+      String namespace, String terraName, List<String> folders, String podId) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
@@ -84,13 +85,16 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       Workspace workspace =
           workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
 
-      String podId =
-          Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
-              .map(DbUser::getVwbUserPod)
-              .map(DbVwbUserPod::getVwbPodId)
-              .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
+      String resolvedPodId =
+          podId != null
+              ? podId
+              : Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
+                  .map(DbUser::getVwbUserPod)
+                  .map(DbVwbUserPod::getVwbPodId)
+                  .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
 
-      WorkspaceDescription vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, podId);
+      WorkspaceDescription vwbWorkspace =
+          wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
 
       vwbCreated = true;
 

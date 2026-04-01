@@ -142,6 +142,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
@@ -205,6 +206,7 @@ public class WorkspacesControllerTest {
   @MockitoBean private WorkspaceAuditor workspaceAuditor;
   @MockitoBean private WorkspaceMigrationService workspaceMigrationService;
   @MockitoBean private WsmClient wsmClient;
+  @MockitoBean private VwbUserService vwbUserService;
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";
 

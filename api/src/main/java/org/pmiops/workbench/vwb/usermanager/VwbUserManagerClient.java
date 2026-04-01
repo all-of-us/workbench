@@ -213,6 +213,10 @@ public class VwbUserManagerClient {
         });
   }
 
+  public PodDescriptionList listUserPods() {
+    return vwbUserManagerRetryHandler.run(context -> podApiProvider.get().listUserPods());
+  }
+
   private static JobControl generateJobControlWithUUID() {
     return new JobControl().id(UUID.randomUUID().toString());
   }
