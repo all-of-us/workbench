@@ -35,7 +35,7 @@ const styles = reactStyles({
 
 interface Props {
   folders: string[];
-  onContinue: (folders: string[]) => Promise<void>; // 👈 important change
+  onContinue: (folders: string[]) => Promise<void>;
   workspaceName?: string;
   onBack?: () => void;
   onClose?: () => void;
