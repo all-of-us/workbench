@@ -49,6 +49,7 @@ export const FolderSelection = ({
   onClose,
 }: Props) => {
   const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const toggleFolder = (folder: string) => {
@@ -71,8 +72,8 @@ export const FolderSelection = ({
     setIsLoading(true);
     try {
       await onContinue(selectedFolders);
-    } catch (e) {
-      console.error('Migration failed', e);
+    } catch (e: any) {
+      setError(e.message || 'Failed to start migration');
     } finally {
       setIsLoading(false);
     }
@@ -118,6 +119,8 @@ export const FolderSelection = ({
           {isLoading ? 'Migrating...' : 'Continue Migration'}
         </Button>
       </FlexRow>
+
+      {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
 
       {/* Helper Text */}
       {isLoading && (
