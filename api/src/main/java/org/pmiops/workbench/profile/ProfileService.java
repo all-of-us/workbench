@@ -20,6 +20,7 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
+import org.pmiops.workbench.db.dao.MigrationTestingGroupDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDisabledEventDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -28,6 +29,7 @@ import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbMigrationTestingGroup;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserDisabledEvent;
@@ -65,6 +67,7 @@ public class ProfileService {
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
   private final Javers javers;
+  private final MigrationTestingGroupDao migrationTestingGroupDao;
   private final NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
@@ -88,6 +91,7 @@ public class ProfileService {
       InstitutionDao institutionDao,
       InstitutionService institutionService,
       Javers javers,
+      MigrationTestingGroupDao migrationTestingGroupDao,
       ProfileAuditor profileAuditor,
       ProfileMapper profileMapper,
       Provider<DbUser> userProvider,
@@ -108,6 +112,7 @@ public class ProfileService {
     this.institutionDao = institutionDao;
     this.institutionService = institutionService;
     this.javers = javers;
+    this.migrationTestingGroupDao = migrationTestingGroupDao;
     this.profileAuditor = profileAuditor;
     this.profileMapper = profileMapper;
     this.userProvider = userProvider;
@@ -151,6 +156,7 @@ public class ProfileService {
         newUserSatisfactionSurveyService.eligibleToTakeSurvey(user);
     final Instant newUserSatisfactionSurveyEligibilityEndTime =
         newUserSatisfactionSurveyService.eligibilityWindowEnd(user);
+    final boolean migrationTestingGroup = migrationTestingGroupDao.existsByUserId(user.getUserId());
 
     return profileMapper.toModel(
         user,
@@ -163,7 +169,8 @@ public class ProfileService {
         userTierEligibilities,
         accessModules,
         newUserSatisfactionSurveyEligibility,
-        newUserSatisfactionSurveyEligibilityEndTime);
+        newUserSatisfactionSurveyEligibilityEndTime,
+        migrationTestingGroup);
   }
 
   public void validateAffiliation(Profile profile) {
@@ -567,6 +574,14 @@ public class ProfileService {
     if (enableInitialCreditsExpiration) {
       updatedProfile.setInitialCreditsExpirationBypassed(
           request.isInitialCreditsExpirationBypassed());
+    }
+    if (originalProfile.isMigrationTestingGroup() != request.isMigrationTestingGroup()) {
+      updatedProfile.setMigrationTestingGroup(request.isMigrationTestingGroup());
+      if (updatedProfile.isMigrationTestingGroup()) {
+        migrationTestingGroupDao.save(new DbMigrationTestingGroup().setUserId(dbUser.getUserId()));
+      } else {
+        migrationTestingGroupDao.deleteByUserId(dbUser.getUserId());
+      }
     }
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
     if (originalProfile.isDisabled() != updatedProfile.isDisabled()) {

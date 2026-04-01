@@ -108,7 +108,8 @@ public class ProfileServiceTest {
         .professionalUrl("https://scholar.google.com/citations?user=asdf")
         .areaOfResearch("asdfasdfasdf")
         .verifiedInstitutionalAffiliation(BROAD_AFFILIATION)
-        .initialCreditsExpirationBypassed(false);
+        .initialCreditsExpirationBypassed(false)
+        .migrationTestingGroup(false);
   }
 
   private static final Profile VALID_PROFILE = createValidProfile();
@@ -603,6 +604,9 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
 
+    // wait a second
+    CLOCK.increment(1000);
+
     TestMockFactory.assertEqualDemographicSurveys(
         profileService.getProfile(targetUser).getDemographicSurveyV2(),
         updatedProfile.getDemographicSurveyV2());
@@ -635,6 +639,9 @@ public class ProfileServiceTest {
 
     profileService.updateProfile(
         targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
+
+    // wait a second
+    CLOCK.increment(1000);
 
     TestMockFactory.assertEqualDemographicSurveys(
         profileService.getProfile(targetUser).getDemographicSurveyV2(),
@@ -683,6 +690,9 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
 
+    // wait a second
+    CLOCK.increment(1000);
+
     TestMockFactory.assertEqualDemographicSurveys(
         profileService.getProfile(targetUser).getDemographicSurveyV2(),
         updatedProfile.getDemographicSurveyV2());
@@ -702,6 +712,9 @@ public class ProfileServiceTest {
 
     profileService.updateProfile(
         targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
+
+    // wait a second
+    CLOCK.increment(1000);
 
     TestMockFactory.assertEqualDemographicSurveys(
         profileService.getProfile(targetUser).getDemographicSurveyV2(),

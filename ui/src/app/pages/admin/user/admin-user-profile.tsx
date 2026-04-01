@@ -433,6 +433,30 @@ const DisabledToggle = (props: {
   );
 };
 
+const MigrationToggle = (props: {
+  currentlyMember: boolean;
+  previouslyMember: boolean;
+  toggleMember: () => void;
+}) => {
+  const { currentlyMember, previouslyMember, toggleMember } = props;
+  const highlightStyle =
+    currentlyMember !== previouslyMember
+      ? { background: colors.highlight }
+      : {};
+
+  return (
+    <div style={{ paddingLeft: '2em' }}>
+      <div style={highlightStyle}>
+        <CommonToggle
+          name='Migration testing group'
+          checked={currentlyMember}
+          onToggle={() => toggleMember()}
+        />
+      </div>
+    </div>
+  );
+};
+
 const AdminCommentModal = (props: {
   onCancel: Function;
   onSubmit: Function;
@@ -572,6 +596,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   };
 
   const updateProfile = (newUpdates: Partial<Profile>) => {
+    console.log(newUpdates);
     setUpdatedProfile({ ...updatedProfile, ...newUpdates });
   };
 
@@ -800,6 +825,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                       />
                     </div>
                   </TooltipTrigger>
+                  <div>
+                    <MigrationToggle
+                      currentlyMember={updatedProfile.migrationTestingGroup}
+                      previouslyMember={oldProfile.migrationTestingGroup}
+                      toggleMember={() =>
+                        updateProfile({
+                          migrationTestingGroup:
+                            !updatedProfile.migrationTestingGroup,
+                        })
+                      }
+                    />
+                  </div>
                 </FlexRow>
                 <AccessModuleTable
                   oldProfile={oldProfile}
