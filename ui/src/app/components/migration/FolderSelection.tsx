@@ -26,11 +26,16 @@ const styles = reactStyles({
     marginTop: 20,
     gap: 12,
   },
+  helperText: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 8,
+  },
 });
 
 interface Props {
   folders: string[];
-  onContinue: (folders: string[]) => void;
+  onContinue: (folders: string[]) => Promise<void>; // 👈 important change
   workspaceName?: string;
   onBack?: () => void;
   onClose?: () => void;
@@ -44,12 +49,32 @@ export const FolderSelection = ({
   onClose,
 }: Props) => {
   const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleFolder = (folder: string) => {
+    if (isLoading) {
+      return;
+    } // prevent interaction while loading
+
     if (selectedFolders.includes(folder)) {
       setSelectedFolders(selectedFolders.filter((f) => f !== folder));
     } else {
       setSelectedFolders([...selectedFolders, folder]);
+    }
+  };
+
+  const handleContinue = async () => {
+    if (isLoading) {
+      return;
+    } // prevent double click
+
+    setIsLoading(true);
+    try {
+      await onContinue(selectedFolders);
+    } catch (e) {
+      console.error('Migration failed', e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,7 +87,7 @@ export const FolderSelection = ({
           {workspaceName ? ` – ${workspaceName}` : ''}
         </div>
 
-        {onClose && <CloseButton onClose={onClose} />}
+        {onClose && !isLoading && <CloseButton onClose={onClose} />}
       </FlexRow>
 
       {/* Folder List */}
@@ -72,6 +97,7 @@ export const FolderSelection = ({
             type='checkbox'
             checked={selectedFolders.includes(folder)}
             onChange={() => toggleFolder(folder)}
+            disabled={isLoading}
           />
           <span>{folder}</span>
         </FlexRow>
@@ -80,18 +106,23 @@ export const FolderSelection = ({
       {/* Footer Buttons */}
       <FlexRow style={styles.footer}>
         {onBack && (
-          <Button type='secondary' onClick={onBack}>
+          <Button type='secondary' onClick={onBack} disabled={isLoading}>
             Back
           </Button>
         )}
 
         <Button
-          disabled={selectedFolders.length === 0}
-          onClick={() => onContinue(selectedFolders)}
+          disabled={selectedFolders.length === 0 || isLoading}
+          onClick={handleContinue}
         >
-          Continue Migration
+          {isLoading ? 'Migrating...' : 'Continue Migration'}
         </Button>
       </FlexRow>
+
+      {/* Helper Text */}
+      {isLoading && (
+        <div style={styles.helperText}>Starting migration... please wait</div>
+      )}
     </FlexColumn>
   );
 };
