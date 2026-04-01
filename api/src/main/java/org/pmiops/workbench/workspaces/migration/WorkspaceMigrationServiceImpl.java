@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces.migration;
 import com.google.cloud.storage.Blob;
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,12 +27,17 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService {
+
+  private static final Logger logger = LoggerFactory.getLogger(WorkspaceMigrationServiceImpl.class);
 
   private final WsmClient wsmClient;
   private final WorkspaceDao workspaceDao;
@@ -73,6 +79,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   public void startWorkspaceMigration(
       String namespace, String terraName, List<String> folders, String podId) {
 
+    Duration bucketDelay = Duration.ofSeconds(10);
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
     dbWorkspace.setMigrationState(MigrationState.STARTING.name());
@@ -100,7 +107,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       String workspaceId = vwbWorkspace.getId().toString();
 
-      String destinationBucket = wsmClient.createControlledBucket(workspaceId, namespace);
+      CreatedControlledGcpGcsBucket controlledBucket =
+          wsmClient.createControlledBucket(workspaceId, namespace);
+
+      // Make sure new bucket is ready for transfer
+      Thread.sleep(bucketDelay.toMillis());
+
+      String destinationBucket = controlledBucket.getGcpBucket().getAttributes().getBucketName();
 
       String sourceBucket = fcWorkspace.getBucketName();
 

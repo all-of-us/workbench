@@ -30,6 +30,9 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
+import org.pmiops.workbench.wsmanager.model.GcpGcsBucketAttributes;
+import org.pmiops.workbench.wsmanager.model.GcpGcsBucketResource;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +47,11 @@ public class WorkspaceMigrationServiceImplTest {
       "all-of-us-workbench-test@appspot.gserviceaccount.com";
   private static final String SOURCE_BUCKET = "source-bucket";
   private static final String DEST_BUCKET = "dest-bucket";
+  private static final CreatedControlledGcpGcsBucket CREATED_BUCKET =
+      new CreatedControlledGcpGcsBucket()
+          .gcpBucket(
+              new GcpGcsBucketResource()
+                  .attributes(new GcpGcsBucketAttributes().bucketName(DEST_BUCKET)));
   private static final List<String> SELECTED_FOLDERS = List.of("notebooks/", "data/");
 
   @Mock private WsmClient wsmClient;
@@ -109,7 +117,7 @@ public class WorkspaceMigrationServiceImplTest {
     vwbWorkspace.setId(UUID.randomUUID());
 
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
-    when(wsmClient.createControlledBucket(any(), any())).thenReturn(DEST_BUCKET);
+    when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
 
     when(storageTransferClient.startBucketTransfer(any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
