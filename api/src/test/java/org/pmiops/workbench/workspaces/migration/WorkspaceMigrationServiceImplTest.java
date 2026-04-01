@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
+import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
 import java.util.List;
 import java.util.UUID;
@@ -196,8 +196,12 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void checkMigrationStatus_requeueTaskIfStillRunning() {
+    TransferTypes.TransferOperation transferOperation =
+        TransferTypes.TransferOperation.newBuilder()
+            .setStatus(TransferTypes.TransferOperation.Status.IN_PROGRESS)
+            .build();
     when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, NAMESPACE))
-        .thenReturn(TransferOperation.Status.IN_PROGRESS);
+        .thenReturn(transferOperation);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 
@@ -207,8 +211,12 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void checkMigrationStatus_setsFinishedWhenComplete() {
+    TransferTypes.TransferOperation transferOperation =
+        TransferTypes.TransferOperation.newBuilder()
+            .setStatus(TransferTypes.TransferOperation.Status.SUCCESS)
+            .build();
     when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, NAMESPACE))
-        .thenReturn(TransferOperation.Status.SUCCESS);
+        .thenReturn(transferOperation);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 

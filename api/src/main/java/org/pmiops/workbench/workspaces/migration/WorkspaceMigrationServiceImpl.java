@@ -176,9 +176,10 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
     String projectId = workbenchConfigProvider.get().server.projectId;
     String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
-    TransferOperation.Status jobStatus =
+    TransferOperation transferOperation =
         storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
-
+    TransferOperation.Status jobStatus = transferOperation.getStatus();
+    String jobName = transferOperation.getName();
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
@@ -188,10 +189,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       case FAILED:
         dbWorkspace.setMigrationState(MigrationState.FAILED.name());
         workspaceDao.save(dbWorkspace);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
         return;
       case SUCCESS:
         dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
         workspaceDao.save(dbWorkspace);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
     }
   }
 }

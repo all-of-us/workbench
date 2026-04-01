@@ -1,6 +1,6 @@
 package org.pmiops.workbench.google;
 
-import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
+import com.google.storagetransfer.v1.proto.TransferTypes;
 import java.util.List;
 
 public interface StorageTransferClient {
@@ -14,5 +14,7 @@ public interface StorageTransferClient {
 
   void runTransferJob(String projectId, String jobName);
 
-  TransferOperation.Status getTransferJobStatus(String projectId, String workspaceNamespace);
+  void deleteTransferJob(String projectId, String jobName);
+
+  TransferTypes.TransferOperation getTransferJobStatus(String projectId, String workspaceNamespace);
 }

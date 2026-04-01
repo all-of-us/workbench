@@ -102,10 +102,28 @@ public class StorageTransferClientImpl implements StorageTransferClient {
   }
 
   @Override
-  public TransferOperation.Status getTransferJobStatus(
+  public void deleteTransferJob(String projectId, String jobName) {
+    try (StorageTransferServiceClient client = StorageTransferServiceClient.create()) {
+
+      TransferProto.DeleteTransferJobRequest request =
+          TransferProto.DeleteTransferJobRequest.newBuilder()
+              .setJobName(jobName)
+              .setProjectId(projectId)
+              .build();
+      client.deleteTransferJob(request);
+
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to delete STS transfer job for project: " + projectId, e);
+    }
+  }
+
+  @Override
+  public TransferOperation getTransferJobStatus(
       String projectId, String workspaceNamespace) {
     try (StorageTransferServiceClient client = StorageTransferServiceClient.create()) {
-      TransferOperation.Status jobStatus = TransferOperation.Status.QUEUED;
+      TransferOperation transferOperation =  TransferTypes.TransferOperation.newBuilder()
+          .setStatus(TransferTypes.TransferOperation.Status.QUEUED)
+          .build();
 
       String jobName = "transferJobs/migration-" + workspaceNamespace;
 
@@ -118,11 +136,10 @@ public class StorageTransferClientImpl implements StorageTransferClient {
       String latestOperationName = transferJob.getLatestOperationName();
       if (!latestOperationName.isEmpty()) {
         Operation operation = client.getOperationsClient().getOperation(latestOperationName);
-        TransferTypes.TransferOperation latestOperation =
+        transferOperation =
             TransferTypes.TransferOperation.parseFrom(operation.getMetadata().getValue());
-        jobStatus = latestOperation.getStatus();
       }
-      return jobStatus;
+      return transferOperation;
     } catch (IOException e) {
       throw new RuntimeException("Failed to get STS transfer job for project: " + projectId, e);
     }
