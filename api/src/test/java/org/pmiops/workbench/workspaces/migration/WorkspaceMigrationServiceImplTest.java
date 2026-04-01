@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import com.google.storagetransfer.v1.proto.TransferTypes;
+import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
 import java.util.List;
 import java.util.UUID;
@@ -119,7 +119,7 @@ public class WorkspaceMigrationServiceImplTest {
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
     when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
 
-    when(storageTransferClient.startBucketTransfer(any(), any(), any(), any(), any(), any()))
+    when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 
@@ -160,7 +160,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID);
 
     verify(storageTransferClient)
-        .startBucketTransfer(
+        .createTransferJob(
             SOURCE_BUCKET,
             DEST_BUCKET,
             NAMESPACE,
@@ -176,7 +176,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of(), POD_ID);
 
     verify(storageTransferClient)
-        .startBucketTransfer(
+        .createTransferJob(
             SOURCE_BUCKET,
             DEST_BUCKET,
             NAMESPACE,
@@ -196,12 +196,8 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void checkMigrationStatus_requeueTaskIfStillRunning() {
-    TransferTypes.TransferJob runningJob =
-        TransferTypes.TransferJob.newBuilder()
-            .setStatus(TransferTypes.TransferJob.Status.ENABLED)
-            .build();
-
-    when(storageTransferClient.getTransferJob(SERVER_PROJECT, NAMESPACE)).thenReturn(runningJob);
+    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, NAMESPACE))
+        .thenReturn(TransferOperation.Status.IN_PROGRESS);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 
@@ -211,12 +207,8 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void checkMigrationStatus_setsFinishedWhenComplete() {
-    TransferTypes.TransferJob completedJob =
-        TransferTypes.TransferJob.newBuilder()
-            .setStatus(TransferTypes.TransferJob.Status.DISABLED)
-            .build();
-
-    when(storageTransferClient.getTransferJob(SERVER_PROJECT, NAMESPACE)).thenReturn(completedJob);
+    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, NAMESPACE))
+        .thenReturn(TransferOperation.Status.SUCCESS);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 

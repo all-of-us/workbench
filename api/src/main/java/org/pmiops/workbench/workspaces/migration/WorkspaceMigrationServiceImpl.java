@@ -1,7 +1,7 @@
 package org.pmiops.workbench.workspaces.migration;
 
 import com.google.cloud.storage.Blob;
-import com.google.storagetransfer.v1.proto.TransferTypes;
+import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -119,13 +119,18 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
 
-      storageTransferClient.startBucketTransfer(
-          sourceBucket,
-          destinationBucket,
-          workspace.getNamespace(),
-          workbenchConfigProvider.get().server.projectId,
-          folders,
-          serviceAccountEmail);
+      String projectId = workbenchConfigProvider.get().server.projectId;
+
+      String jobName =
+          storageTransferClient.createTransferJob(
+              sourceBucket,
+              destinationBucket,
+              workspace.getNamespace(),
+              projectId,
+              folders,
+              serviceAccountEmail);
+
+      storageTransferClient.runTransferJob(projectId, jobName);
 
       taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
 
@@ -175,16 +180,22 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
     String projectId = workbenchConfigProvider.get().server.projectId;
     String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
-    TransferTypes.TransferJob job =
-        storageTransferClient.getTransferJob(projectId, workspaceNamespace);
+    TransferOperation.Status jobStatus =
+        storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
 
-    if (job.getStatus() == TransferTypes.TransferJob.Status.ENABLED) {
-      // STS still running — requeue
-      taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
-      return;
+    switch (jobStatus) {
+      case IN_PROGRESS:
+      case QUEUED:
+        // STS still running — requeue
+        taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
+        return;
+      case FAILED:
+        dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+        workspaceDao.save(dbWorkspace);
+        return;
+      case SUCCESS:
+        dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
+        workspaceDao.save(dbWorkspace);
     }
-
-    dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
-    workspaceDao.save(dbWorkspace);
   }
 }
