@@ -29,15 +29,11 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService {
-
-  private static final Logger logger = LoggerFactory.getLogger(WorkspaceMigrationServiceImpl.class);
 
   private final WsmClient wsmClient;
   private final WorkspaceDao workspaceDao;
