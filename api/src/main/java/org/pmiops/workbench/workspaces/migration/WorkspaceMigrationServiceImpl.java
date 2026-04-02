@@ -179,7 +179,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     TransferOperation transferOperation =
         storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
-    String jobName = transferOperation.getName();
+    String jobName = "transferJobs/migration-" + workspaceNamespace;
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
