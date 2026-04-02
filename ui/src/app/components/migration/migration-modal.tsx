@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { MigrationState, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { Button, CloseButton } from 'app/components/buttons';
-import { FlexColumn, FlexRow } from 'app/components/flex';
+import { FlexColumn } from 'app/components/flex';
 import { Modal } from 'app/components/modals';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
@@ -13,47 +13,35 @@ import { FolderSelection } from './FolderSelection';
 import { MigrationBadge } from './migration-badge';
 
 const styles = reactStyles({
-  tableHeader: {
-    fontWeight: 600,
-    padding: '8px 0',
-    borderBottom: '1px solid #ddd',
-  },
-  row: {
-    padding: '10px 0',
-    borderBottom: '1px solid #eee',
-    alignItems: 'center',
-    gap: 12,
-  },
-  cellName: {
-    flex: 2,
-    minWidth: 0,
-  },
-  cellCdr: {
-    flex: 1,
-    minWidth: 0,
-  },
-  cellStatus: {
-    flex: 2,
-    minWidth: 0,
-  },
-  cellPod: {
-    flex: 2,
-    minWidth: 180,
-  },
-  cellAction: {
-    flex: '0 0 auto',
-    justifyContent: 'flex-end',
-  },
-  dropdown: {
-    width: '100%',
-    padding: 6,
-    borderRadius: 4,
-  },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+  },
+
+  tableHeader: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr 2fr 2fr 1fr',
+    columnGap: 12,
+    fontWeight: 600,
+    padding: '8px 0',
+    borderBottom: '1px solid #ddd',
+  },
+
+  tableRow: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr 2fr 2fr 1fr',
+    columnGap: 12,
+    alignItems: 'center',
+    padding: '10px 0',
+    borderBottom: '1px solid #eee',
+  },
+
+  dropdown: {
+    width: '100%',
+    padding: 6,
+    borderRadius: 4,
   },
 });
 
@@ -151,6 +139,7 @@ export const MigrationModal = ({ onClose }: Props) => {
       setSelectedWorkspace(null);
     } catch (e) {
       console.error('Failed to start migration', e);
+      throw e;
     }
   };
 
@@ -184,37 +173,40 @@ export const MigrationModal = ({ onClose }: Props) => {
         />
       ) : (
         <FlexColumn>
-          <FlexRow style={styles.header}>
+          {/* Header */}
+          <div style={styles.header}>
             <div style={{ fontWeight: 600, fontSize: 18 }}>
               Migrate Workspaces to Verily Workbench
             </div>
             <CloseButton onClose={onClose} />
-          </FlexRow>
+          </div>
 
-          <FlexRow style={styles.tableHeader}>
-            <div style={styles.cellName}>Workspace</div>
-            <div style={styles.cellCdr}>CDR</div>
-            <div style={styles.cellStatus}>Status</div>
-            <div style={styles.cellPod}>Select Pod</div>
-            <div style={styles.cellAction} />
-          </FlexRow>
+          {/* Table Header */}
+          <div style={styles.tableHeader}>
+            <div>Workspace</div>
+            <div>CDR</div>
+            <div>Status</div>
+            <div>Select Pod</div>
+            <div></div>
+          </div>
 
+          {/* Rows */}
           {loading ? (
             <div style={{ padding: '16px' }}>Loading workspaces…</div>
           ) : (
             workspaces.map((ws) => (
-              <FlexRow key={ws.id} style={styles.row}>
-                <div style={styles.cellName}>{ws.name}</div>
-                <div style={styles.cellCdr}>v{ws.cdrVersion}</div>
+              <div key={ws.id} style={styles.tableRow}>
+                <div>{ws.name}</div>
+                <div>v{ws.cdrVersion}</div>
 
-                <div style={styles.cellStatus}>
+                <div>
                   <MigrationBadge
                     state={ws.migrationState}
                     owner={ws.migrationOwner}
                   />
                 </div>
 
-                <div style={styles.cellPod}>
+                <div>
                   <select
                     value={selectedPods[ws.id] || ''}
                     onChange={(e) =>
@@ -234,7 +226,7 @@ export const MigrationModal = ({ onClose }: Props) => {
                   </select>
                 </div>
 
-                <FlexRow style={styles.cellAction}>
+                <div style={{ textAlign: 'right' }}>
                   <Button
                     disabled={
                       ws.migrationState === MigrationState.STARTING ||
@@ -245,8 +237,8 @@ export const MigrationModal = ({ onClose }: Props) => {
                   >
                     Start Migration
                   </Button>
-                </FlexRow>
-              </FlexRow>
+                </div>
+              </div>
             ))
           )}
         </FlexColumn>
