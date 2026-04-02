@@ -615,87 +615,99 @@ public class ProfileServiceTest {
   @Test
   public void updateProfile_with_existing_demo_survey_v2() {
     DemographicSurveyV2 v2Survey =
-        new DemographicSurveyV2()
-            .ethnicCategories(
-                ImmutableList.of(
-                    EthnicCategory.ASIAN, EthnicCategory.ASIAN_CHINESE, EthnicCategory.WHITE))
-            .genderIdentities(ImmutableList.of(GenderIdentityV2.MAN, GenderIdentityV2.TRANS_MAN))
-            .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
-            .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
-            .yearOfBirthPreferNot(true)
-            .disabilityHearing(YesNoPreferNot.NO)
-            .disabilitySeeing(YesNoPreferNot.YES)
-            .education(EducationV2.DOCTORATE)
-            .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
+            new DemographicSurveyV2()
+                    .ethnicCategories(
+                            ImmutableList.of(
+                                    EthnicCategory.ASIAN, EthnicCategory.ASIAN_CHINESE, EthnicCategory.WHITE))
+                    .genderIdentities(ImmutableList.of(GenderIdentityV2.MAN, GenderIdentityV2.TRANS_MAN))
+                    .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
+                    .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
+                    .yearOfBirthPreferNot(true)
+                    .disabilityHearing(YesNoPreferNot.NO)
+                    .disabilitySeeing(YesNoPreferNot.YES)
+                    .education(EducationV2.DOCTORATE)
+                    .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
 
     Profile previousProfile = createValidProfile().demographicSurveyV2(v2Survey);
     Profile updatedProfile =
-        createValidProfile().demographicSurveyV2(v2Survey).areaOfResearch("Some research");
+            createValidProfile().demographicSurveyV2(v2Survey).areaOfResearch("Some research");
 
     DbUser targetUser =
-        userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
+            userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
 
     when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
 
     profileService.updateProfile(
-        targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
+            targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
 
-    // wait a second
     CLOCK.increment(1000);
 
+    DemographicSurveyV2 actual =
+            profileService.getProfile(targetUser).getDemographicSurveyV2();
+
+    updatedProfile.getDemographicSurveyV2().setCompletionTime(actual.getCompletionTime());
+
     TestMockFactory.assertEqualDemographicSurveys(
-        profileService.getProfile(targetUser).getDemographicSurveyV2(),
-        updatedProfile.getDemographicSurveyV2());
+            actual,
+            updatedProfile.getDemographicSurveyV2());
+
+    assertThat(actual.getCompletionTime()).isNotNull();
 
     assertThat(profileService.getProfile(targetUser).getAreaOfResearch())
-        .isEqualTo("Some research");
+            .isEqualTo("Some research");
   }
 
   @Test
   public void updateProfile_demo_survey_update_v2() {
     DemographicSurveyV2 v2Survey =
-        new DemographicSurveyV2()
-            .ethnicCategories(
-                ImmutableList.of(
-                    EthnicCategory.ASIAN, EthnicCategory.ASIAN_CHINESE, EthnicCategory.WHITE))
-            .genderIdentities(ImmutableList.of(GenderIdentityV2.MAN, GenderIdentityV2.TRANS_MAN))
-            .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
-            .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
-            .yearOfBirthPreferNot(true)
-            .disabilityHearing(YesNoPreferNot.NO)
-            .disabilitySeeing(YesNoPreferNot.YES)
-            .education(EducationV2.DOCTORATE)
-            .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
+            new DemographicSurveyV2()
+                    .ethnicCategories(
+                            ImmutableList.of(
+                                    EthnicCategory.ASIAN, EthnicCategory.ASIAN_CHINESE, EthnicCategory.WHITE))
+                    .genderIdentities(ImmutableList.of(GenderIdentityV2.MAN, GenderIdentityV2.TRANS_MAN))
+                    .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
+                    .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
+                    .yearOfBirthPreferNot(true)
+                    .disabilityHearing(YesNoPreferNot.NO)
+                    .disabilitySeeing(YesNoPreferNot.YES)
+                    .education(EducationV2.DOCTORATE)
+                    .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
 
     DemographicSurveyV2 updatedV2Survey =
-        new DemographicSurveyV2()
-            .ethnicCategories(ImmutableList.of(EthnicCategory.BLACK))
-            .genderIdentities(ImmutableList.of(GenderIdentityV2.PREFER_NOT_TO_ANSWER))
-            .sexualOrientations(ImmutableList.of(SexualOrientationV2.PREFER_NOT_TO_ANSWER))
-            .sexAtBirth(SexAtBirthV2.FEMALE)
-            .yearOfBirth(1995)
-            .disabilityHearing(YesNoPreferNot.NO)
-            .disabilitySeeing(YesNoPreferNot.NO)
-            .education(EducationV2.PREFER_NOT_TO_ANSWER)
-            .disadvantaged(YesNoPreferNot.NO);
+            new DemographicSurveyV2()
+                    .ethnicCategories(ImmutableList.of(EthnicCategory.BLACK))
+                    .genderIdentities(ImmutableList.of(GenderIdentityV2.PREFER_NOT_TO_ANSWER))
+                    .sexualOrientations(ImmutableList.of(SexualOrientationV2.PREFER_NOT_TO_ANSWER))
+                    .sexAtBirth(SexAtBirthV2.FEMALE)
+                    .yearOfBirth(1995)
+                    .disabilityHearing(YesNoPreferNot.NO)
+                    .disabilitySeeing(YesNoPreferNot.NO)
+                    .education(EducationV2.PREFER_NOT_TO_ANSWER)
+                    .disadvantaged(YesNoPreferNot.NO);
 
     Profile previousProfile = createValidProfile().demographicSurveyV2(v2Survey);
     Profile updatedProfile = createValidProfile().demographicSurveyV2(updatedV2Survey);
 
     DbUser targetUser =
-        userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
+            userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
 
     when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
 
     profileService.updateProfile(
-        targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
+            targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
 
-    // wait a second
     CLOCK.increment(1000);
 
+    DemographicSurveyV2 actual =
+            profileService.getProfile(targetUser).getDemographicSurveyV2();
+
+    updatedProfile.getDemographicSurveyV2().setCompletionTime(actual.getCompletionTime());
+
     TestMockFactory.assertEqualDemographicSurveys(
-        profileService.getProfile(targetUser).getDemographicSurveyV2(),
-        updatedProfile.getDemographicSurveyV2());
+            actual,
+            updatedProfile.getDemographicSurveyV2());
+
+    assertThat(actual.getCompletionTime()).isNotNull();
   }
 
   @Test
