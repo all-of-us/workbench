@@ -56,7 +56,7 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   ACTIVE_STATUS("active_status", ReportingWorkspace::getActiveStatus),
   MIGRATED_VWB_WORKSPACE_ID(
       "migrated_vwb_workspace_id", ReportingWorkspace::getMigratedVwbWorkspaceId),
-  MIGRATION_STATE("migration_state", ReportingWorkspace::getMigrationState),
+  MIGRATION_STATE("migration_state", w -> enumToString(w.getMigrationState())),
   FOCUS_ON_UNDER_REPRESENTED_POPULATIONS(
       "focus_on_under_represented_populations",
       ReportingWorkspace::isFocusOnUnderrepresentedPopulations),

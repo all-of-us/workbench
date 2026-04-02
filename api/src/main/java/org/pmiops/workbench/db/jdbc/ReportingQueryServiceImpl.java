@@ -680,7 +680,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
               .workspaceDemographic(
                   toModelWorkspaceDemographic(getSpecificPopulationsSet(specificPopulationsStr)))
               .migratedVwbWorkspaceId(rs.getString("migrated_vwb_workspace_id"))
-              .migrationState(rs.getString("migration_state"));
+              .migrationState(migrationStateFromStorage(rs.getShort("migration_state")));
         },
         limit,
         offset);
