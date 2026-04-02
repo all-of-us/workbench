@@ -140,11 +140,9 @@ public class WsmClient {
         });
   }
 
-  public String createControlledBucket(String workspaceId, String namespace) {
-
-    String bucketName = "rw-migration-" + namespace.toLowerCase();
-
-    wsmRetryHandler.run(
+  public CreatedControlledGcpGcsBucket createControlledBucket(
+      String workspaceId, String namespace) {
+    return wsmRetryHandler.run(
         context -> {
           org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi controlledApi =
               new org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi(
@@ -167,11 +165,8 @@ public class WsmClient {
           CreateControlledGcpGcsBucketRequestBody request =
               new CreateControlledGcpGcsBucketRequestBody().common(common).gcsBucket(bucketParams);
 
-          controlledApi.createBucket(request, workspaceId);
-
-          return null;
+          return controlledApi.createBucket(request, workspaceId);
         });
-    return bucketName;
   }
 
   public void shareWorkspaceAsService(String workspaceId, String userEmail, IamRole role) {

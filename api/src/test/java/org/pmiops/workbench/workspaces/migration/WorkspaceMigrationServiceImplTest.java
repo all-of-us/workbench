@@ -30,6 +30,9 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
+import org.pmiops.workbench.wsmanager.model.GcpGcsBucketAttributes;
+import org.pmiops.workbench.wsmanager.model.GcpGcsBucketResource;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +47,11 @@ public class WorkspaceMigrationServiceImplTest {
       "all-of-us-workbench-test@appspot.gserviceaccount.com";
   private static final String SOURCE_BUCKET = "source-bucket";
   private static final String DEST_BUCKET = "dest-bucket";
+  private static final CreatedControlledGcpGcsBucket CREATED_BUCKET =
+      new CreatedControlledGcpGcsBucket()
+          .gcpBucket(
+              new GcpGcsBucketResource()
+                  .attributes(new GcpGcsBucketAttributes().bucketName(DEST_BUCKET)));
   private static final List<String> SELECTED_FOLDERS = List.of("notebooks/", "data/");
 
   @Mock private WsmClient wsmClient;
@@ -109,9 +117,9 @@ public class WorkspaceMigrationServiceImplTest {
     vwbWorkspace.setId(UUID.randomUUID());
 
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
-    when(wsmClient.createControlledBucket(any(), any())).thenReturn(DEST_BUCKET);
+    when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
 
-    when(storageTransferClient.startBucketTransfer(any(), any(), any(), any(), any(), any()))
+    when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 
@@ -152,7 +160,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID);
 
     verify(storageTransferClient)
-        .startBucketTransfer(
+        .createTransferJob(
             SOURCE_BUCKET,
             DEST_BUCKET,
             NAMESPACE,
@@ -168,7 +176,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of(), POD_ID);
 
     verify(storageTransferClient)
-        .startBucketTransfer(
+        .createTransferJob(
             SOURCE_BUCKET,
             DEST_BUCKET,
             NAMESPACE,
@@ -188,12 +196,12 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void checkMigrationStatus_requeueTaskIfStillRunning() {
-    TransferTypes.TransferJob runningJob =
-        TransferTypes.TransferJob.newBuilder()
-            .setStatus(TransferTypes.TransferJob.Status.ENABLED)
+    TransferTypes.TransferOperation transferOperation =
+        TransferTypes.TransferOperation.newBuilder()
+            .setStatus(TransferTypes.TransferOperation.Status.IN_PROGRESS)
             .build();
-
-    when(storageTransferClient.getTransferJob(SERVER_PROJECT, NAMESPACE)).thenReturn(runningJob);
+    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, NAMESPACE))
+        .thenReturn(transferOperation);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 
@@ -203,12 +211,12 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void checkMigrationStatus_setsFinishedWhenComplete() {
-    TransferTypes.TransferJob completedJob =
-        TransferTypes.TransferJob.newBuilder()
-            .setStatus(TransferTypes.TransferJob.Status.DISABLED)
+    TransferTypes.TransferOperation transferOperation =
+        TransferTypes.TransferOperation.newBuilder()
+            .setStatus(TransferTypes.TransferOperation.Status.SUCCESS)
             .build();
-
-    when(storageTransferClient.getTransferJob(SERVER_PROJECT, NAMESPACE)).thenReturn(completedJob);
+    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, NAMESPACE))
+        .thenReturn(transferOperation);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
 

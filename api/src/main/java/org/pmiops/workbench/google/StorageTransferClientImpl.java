@@ -1,9 +1,11 @@
 package org.pmiops.workbench.google;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.longrunning.Operation;
 import com.google.storagetransfer.v1.proto.StorageTransferServiceClient;
 import com.google.storagetransfer.v1.proto.TransferProto;
 import com.google.storagetransfer.v1.proto.TransferTypes;
+import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -15,7 +17,7 @@ public class StorageTransferClientImpl implements StorageTransferClient {
   private static final Logger logger = LoggerFactory.getLogger(StorageTransferClientImpl.class);
 
   @Override
-  public String startBucketTransfer(
+  public String createTransferJob(
       String sourceBucket,
       String destinationBucket,
       String workspaceNamespace,
@@ -84,8 +86,44 @@ public class StorageTransferClientImpl implements StorageTransferClient {
   }
 
   @Override
-  public TransferTypes.TransferJob getTransferJob(String projectId, String workspaceNamespace) {
+  public void runTransferJob(String projectId, String jobName) {
     try (StorageTransferServiceClient client = StorageTransferServiceClient.create()) {
+
+      TransferProto.RunTransferJobRequest request =
+          TransferProto.RunTransferJobRequest.newBuilder()
+              .setJobName(jobName)
+              .setProjectId(projectId)
+              .build();
+      client.runTransferJobAsync(request);
+
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to run STS transfer job for project: " + projectId, e);
+    }
+  }
+
+  @Override
+  public void deleteTransferJob(String projectId, String jobName) {
+    try (StorageTransferServiceClient client = StorageTransferServiceClient.create()) {
+
+      TransferProto.DeleteTransferJobRequest request =
+          TransferProto.DeleteTransferJobRequest.newBuilder()
+              .setJobName(jobName)
+              .setProjectId(projectId)
+              .build();
+      client.deleteTransferJob(request);
+
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to delete STS transfer job for project: " + projectId, e);
+    }
+  }
+
+  @Override
+  public TransferOperation getTransferJobStatus(String projectId, String workspaceNamespace) {
+    try (StorageTransferServiceClient client = StorageTransferServiceClient.create()) {
+      TransferOperation transferOperation =
+          TransferTypes.TransferOperation.newBuilder()
+              .setStatus(TransferTypes.TransferOperation.Status.QUEUED)
+              .build();
 
       String jobName = "transferJobs/migration-" + workspaceNamespace;
 
@@ -94,8 +132,14 @@ public class StorageTransferClientImpl implements StorageTransferClient {
               .setJobName(jobName)
               .setProjectId(projectId)
               .build();
-      return client.getTransferJob(request);
-
+      TransferTypes.TransferJob transferJob = client.getTransferJob(request);
+      String latestOperationName = transferJob.getLatestOperationName();
+      if (!latestOperationName.isEmpty()) {
+        Operation operation = client.getOperationsClient().getOperation(latestOperationName);
+        transferOperation =
+            TransferTypes.TransferOperation.parseFrom(operation.getMetadata().getValue());
+      }
+      return transferOperation;
     } catch (IOException e) {
       throw new RuntimeException("Failed to get STS transfer job for project: " + projectId, e);
     }

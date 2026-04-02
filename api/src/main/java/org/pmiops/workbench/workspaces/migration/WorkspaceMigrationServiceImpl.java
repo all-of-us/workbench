@@ -1,8 +1,9 @@
 package org.pmiops.workbench.workspaces.migration;
 
 import com.google.cloud.storage.Blob;
-import com.google.storagetransfer.v1.proto.TransferTypes;
+import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,6 +75,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   public void startWorkspaceMigration(
       String namespace, String terraName, List<String> folders, String podId) {
 
+    Duration bucketDelay = Duration.ofSeconds(10);
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
     dbWorkspace.setMigrationState(MigrationState.STARTING.name());
@@ -100,19 +103,30 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       String workspaceId = vwbWorkspace.getId().toString();
 
-      String destinationBucket = wsmClient.createControlledBucket(workspaceId, namespace);
+      CreatedControlledGcpGcsBucket controlledBucket =
+          wsmClient.createControlledBucket(workspaceId, namespace);
+
+      // Make sure new bucket is ready for transfer
+      Thread.sleep(bucketDelay.toMillis());
+
+      String destinationBucket = controlledBucket.getGcpBucket().getAttributes().getBucketName();
 
       String sourceBucket = fcWorkspace.getBucketName();
 
       String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
 
-      storageTransferClient.startBucketTransfer(
-          sourceBucket,
-          destinationBucket,
-          workspace.getNamespace(),
-          workbenchConfigProvider.get().server.projectId,
-          folders,
-          serviceAccountEmail);
+      String projectId = workbenchConfigProvider.get().server.projectId;
+
+      String jobName =
+          storageTransferClient.createTransferJob(
+              sourceBucket,
+              destinationBucket,
+              workspace.getNamespace(),
+              projectId,
+              folders,
+              serviceAccountEmail);
+
+      storageTransferClient.runTransferJob(projectId, jobName);
 
       taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
 
@@ -162,16 +176,25 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
     String projectId = workbenchConfigProvider.get().server.projectId;
     String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
-    TransferTypes.TransferJob job =
-        storageTransferClient.getTransferJob(projectId, workspaceNamespace);
-
-    if (job.getStatus() == TransferTypes.TransferJob.Status.ENABLED) {
-      // STS still running — requeue
-      taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
-      return;
+    TransferOperation transferOperation =
+        storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
+    TransferOperation.Status jobStatus = transferOperation.getStatus();
+    String jobName = "transferJobs/migration-" + workspaceNamespace;
+    switch (jobStatus) {
+      case IN_PROGRESS:
+      case QUEUED:
+        // STS still running — requeue
+        taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
+        return;
+      case FAILED:
+        dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+        workspaceDao.save(dbWorkspace);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
+        return;
+      case SUCCESS:
+        dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
+        workspaceDao.save(dbWorkspace);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
     }
-
-    dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
-    workspaceDao.save(dbWorkspace);
   }
 }

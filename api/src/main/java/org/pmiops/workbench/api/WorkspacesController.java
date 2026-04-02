@@ -807,7 +807,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceNamespace,
         terraName,
         request != null ? Collections.singletonList(request.getFolders().toString()) : null,
-        request != null ? Collections.singletonList(request.getPodId()).toString() : null);
+        request != null ? request.getPodId() : null);
 
     return ResponseEntity.ok().build();
   }
