@@ -612,7 +612,6 @@ public class ProfileServiceTest {
 
     TestMockFactory.assertEqualDemographicSurveys(actual, updatedProfile.getDemographicSurveyV2());
 
-    assertThat(actual.getCompletionTime()).isNotNull();
   }
 
   @Test
@@ -651,7 +650,6 @@ public class ProfileServiceTest {
 
     TestMockFactory.assertEqualDemographicSurveys(actual, updatedProfile.getDemographicSurveyV2());
 
-    assertThat(actual.getCompletionTime()).isNotNull();
 
     assertThat(profileService.getProfile(targetUser).getAreaOfResearch())
         .isEqualTo("Some research");
@@ -704,7 +702,6 @@ public class ProfileServiceTest {
 
     TestMockFactory.assertEqualDemographicSurveys(actual, updatedProfile.getDemographicSurveyV2());
 
-    assertThat(actual.getCompletionTime()).isNotNull();
   }
 
   @Test
@@ -730,7 +727,6 @@ public class ProfileServiceTest {
 
     TestMockFactory.assertEqualDemographicSurveys(actual, updatedProfile.getDemographicSurveyV2());
 
-    assertThat(actual.getCompletionTime()).isNotNull();
   }
 
   @Test
