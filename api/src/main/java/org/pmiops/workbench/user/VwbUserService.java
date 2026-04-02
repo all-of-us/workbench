@@ -27,17 +27,20 @@ public class VwbUserService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final VwbUserPodDao vwbUserPodDao;
+  private final Provider<DbUser> userProvider;
 
   @Autowired
   public VwbUserService(
       VwbUserManagerClient vwbUserManagerClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
-      VwbUserPodDao vwbUserPodDao) {
+      VwbUserPodDao vwbUserPodDao,
+      Provider<DbUser> userProvider) {
     this.vwbUserManagerClient = vwbUserManagerClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.vwbUserPodDao = vwbUserPodDao;
+    this.userProvider = userProvider;
   }
 
   /**
@@ -218,7 +221,10 @@ public class VwbUserService {
     if (podList == null || podList.getResults() == null) {
       return List.of();
     }
-    return podList.getResults();
+    String userEmail = userProvider.get().getUsername();
+    return podList.getResults().stream()
+        .filter(p -> p.getDescription().contains(userEmail))
+        .toList();
   }
 
   public void linkInitialCreditsBillingAccountToPod(DbVwbUserPod pod) {
