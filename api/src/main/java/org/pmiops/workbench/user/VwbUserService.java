@@ -223,7 +223,7 @@ public class VwbUserService {
     }
     String userEmail = userProvider.get().getUsername();
     return podList.getResults().stream()
-        .filter(p -> p.getDescription().contains(userEmail))
+        .filter(p -> p.getDescription() != null && p.getDescription().contains(userEmail))
         .toList();
   }
 
