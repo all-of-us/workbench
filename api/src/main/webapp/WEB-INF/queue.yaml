@@ -197,7 +197,7 @@ queue:
     task_retry_limit: 1
     task_age_limit: 5m
 
-- name: workspaceMigrationStatusQueue
+- name: workspaceMigrationStatusTaskQueue
   target: api
 
   # rate parameters
