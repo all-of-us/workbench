@@ -64,7 +64,7 @@ public class TaskQueueService {
   // Workspace migration status queue
 
   public static final TaskQueuePair WORKSPACE_MIGRATION_STATUS =
-      new TaskQueuePair("workspaceMigrationStatusQueue", "checkWorkspaceMigrationStatus");
+      new TaskQueuePair("workspaceMigrationStatusTaskQueue", "checkWorkspaceMigrationStatus");
 
   // initial credits queues and cloud tasks:
   //
