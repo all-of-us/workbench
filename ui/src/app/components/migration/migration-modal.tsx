@@ -1,13 +1,19 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { MigrationState, WorkspaceAccessLevel } from 'generated/fetch';
+import {
+  MigrationState,
+  WorkspaceAccessLevel,
+  WorkspaceResponse,
+} from 'generated/fetch';
 
 import { Button, CloseButton } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
 import { Modal } from 'app/components/modals';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
+import { findCdrVersion } from 'app/utils/cdr-versions';
+import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import { FolderSelection } from './FolderSelection';
 import { MigrationBadge } from './migration-badge';
@@ -75,8 +81,17 @@ export const MigrationModal = ({ onClose }: Props) => {
       try {
         const response = await workspacesApi().getWorkspaces();
 
-        const mapped: MigrationWorkspace[] = (response.items || []).map(
-          (w: any) => {
+        const mapped: MigrationWorkspace[] = (response.items || [])
+          .filter(
+            (w: WorkspaceResponse) =>
+              w.accessLevel === WorkspaceAccessLevel.OWNER &&
+              serverConfigStore
+                .get()
+                .config.cdrVersionIdsForMigration.includes(
+                  +w.workspace.cdrVersionId
+                )
+          )
+          .map((w: WorkspaceResponse) => {
             const migrationState =
               w.workspace?.migrationState ?? MigrationState.NOT_STARTED;
 
@@ -84,13 +99,14 @@ export const MigrationModal = ({ onClose }: Props) => {
               id: w.workspace.namespace,
               name: w.workspace.name,
               terraName: w.workspace.terraName,
-              cdrVersion: w.workspace.cdrVersionId,
+              cdrVersion: findCdrVersion(
+                w.workspace.cdrVersionId,
+                cdrVersionStore.get()
+              ).name,
               migrationState,
-              migrationOwner: w.workspace?.migrationOwner,
               accessLevel: w.accessLevel,
             };
-          }
-        );
+          });
 
         setWorkspaces(mapped);
       } catch (e) {
@@ -197,7 +213,7 @@ export const MigrationModal = ({ onClose }: Props) => {
             workspaces.map((ws) => (
               <div key={ws.id} style={styles.tableRow}>
                 <div>{ws.name}</div>
-                <div>v{ws.cdrVersion}</div>
+                <div>{ws.cdrVersion}</div>
 
                 <div>
                   <MigrationBadge

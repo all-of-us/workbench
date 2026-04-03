@@ -82,5 +82,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableVWBHomepageBanner",
       source = "config.featureFlags.enableVWBHomepageBanner")
+  @Mapping(target = "cdrVersionIdsForMigration", source = "config.vwb.cdrVersionIdsForMigration")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

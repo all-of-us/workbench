@@ -239,6 +239,7 @@
     "adminBigQuery": {
       "logProjectId": "workbench-bq-log-sink",
       "bigQueryDataset": "workbench_monitoring_org_logs_dev"
-    }
+    },
+    "cdrVersionIdsForMigration": [7, 9]
   }
 }
