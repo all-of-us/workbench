@@ -7665,6 +7665,11 @@ components:
           type: boolean
           default: false
           description: If true, will display the "Migrate to Verily Workbench" button on workspace pages.
+        cdrVersionIdsForMigration:
+          type: array
+          items:
+            type: integer
+          description: cdrVersionIds that are available for VWB migration.
     AccessModuleConfig:
       required:
       - expirable

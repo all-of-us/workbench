@@ -531,5 +531,6 @@ public class WorkbenchConfig {
     }
 
     public AdminBigQuery adminBigQuery;
+    public List<Integer> cdrVersionIdsForMigration;
   }
 }
