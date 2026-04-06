@@ -25,6 +25,8 @@ public class WsmConfig {
   public static final String WSM_SERVICE_ACCOUNT_API_CLIENT = "WSM_SERVICE_ACCOUNT_API_CLIENT";
   public static final String WSM_SERVICE_ACCOUNT_WORKSPACE_API =
       "WSM_SERVICE_ACCOUNT_WORKSPACE_API";
+  public static final String WSM_SERVICE_ACCOUNT_CONTROLLED_GCP_RESOURCE_API =
+      "WSM_SERVICE_ACCOUNT_CONTROLLED_GCP_RESOURCE_API";
   public static final int TIMEOUT = 60 * 1000;
 
   @Bean
@@ -86,5 +88,12 @@ public class WsmConfig {
   public WorkspaceApi serviceAccountWorkspaceApi(
       @Qualifier(WSM_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     return new WorkspaceApi(apiClient);
+  }
+
+  @Bean(name = WSM_SERVICE_ACCOUNT_CONTROLLED_GCP_RESOURCE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ControlledGcpResourceApi serviceAccountControlledGcpResourceApi(
+      @Qualifier(WSM_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+    return new ControlledGcpResourceApi(apiClient);
   }
 }

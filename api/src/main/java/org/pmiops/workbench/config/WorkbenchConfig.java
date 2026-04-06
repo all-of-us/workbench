@@ -532,5 +532,17 @@ public class WorkbenchConfig {
 
     public AdminBigQuery adminBigQuery;
     public List<Integer> cdrVersionIdsForMigration;
+
+    public static class DcAccessTier {
+      public String workspaceId;
+      public String resourceId;
+    }
+
+    public static class DataCollectionsForMigration {
+      public DcAccessTier controlled;
+      public DcAccessTier registered;
+    }
+
+    public DataCollectionsForMigration dataCollectionsForMigration;
   }
 }

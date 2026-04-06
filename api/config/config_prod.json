@@ -225,6 +225,16 @@
       "logProjectId": "workbench-bq-log-sink",
       "bigQueryDataset": "workbench_monitoring_org_logs_prod"
     },
-    "cdrVersionIdsForMigration": [13, 14]
+    "cdrVersionIdsForMigration": [13, 14],
+    "dataCollectionsForMigration": {
+      "controlled": {
+        "workspaceId": "3d83ef80-77d7-43e8-a479-52946619b769",
+        "resourceId": "e761c0c3-8741-45f0-944c-d15e4cffb5ae"
+      },
+      "registered": {
+        "workspaceId": "698c6700-afbe-454a-b73a-c675e629336c",
+        "resourceId": "0ee225d5-acc5-4a50-830e-6c062beb95fb"
+      }
+    }
   }
 }

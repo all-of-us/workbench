@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -27,7 +30,9 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.model.CloneControlledGcpBigQueryDatasetResult;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
+import org.pmiops.workbench.wsmanager.model.Property;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +40,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService {
 
+  private static final String metadata =
+      "[{\"form_id\":\"AOU-CDR-V8\",\"form_data\":{\"purposeOtherText\":\"\",\"purposeDiseaseText\":\"\",\"purposeDrug\":false,\"purposeElsi\":false,\"purposePopulationResearch\":false,\"purposeSocialResearch\":false,\"purposeGeneticResearch\":false,\"purposeResearchControl\":false,\"purposeMethods\":false,\"purposeDisease\":false,\"purposeOther\":false,\"purposeForProfit\":false,\"purposeEducation\":true,\"purposeResearch\":false,\"anticipatedFindings\":\"What are the specific scientific question(s) you intend to study, and why is the question important (i.e. relevance to science or public health)?\",\"scientificApproaches\":\"What are the specific scientific question(s) you intend to study, and why is the question important (i.e. relevance to science or public health)?\",\"scientificQuestions\":\"What are the specific scientific question(s) you intend to study, and why is the question important (i.e. relevance to science or public health)?\",\"disseminateOtherText\":\"\",\"disseminateOther\":false,\"disseminatePersonalBlog\":true,\"disseminateCommunityJournal\":false,\"disseminatePressRelease\":false,\"disseminateCommunityForum\":false,\"disseminatePresentationConferences\":false,\"disseminateSocialMedia\":false,\"disseminateJournal\":false,\"fitNone\":true,\"fitOutcome\":false,\"fitDiagnosis\":false,\"fitPrevention\":false,\"fitEquity\":false,\"fitWellness\":false,\"populationOtherText\":\"\",\"populationOther\":false,\"populationIncome\":false,\"populationEducation\":false,\"populationCare\":false,\"populationDisability\":false,\"populationGeography\":false,\"populationSexualOrientation\":false,\"populationGenderIdentity\":false,\"populationSexOther\":false,\"populationOlderAdults75\":false,\"populationOlderAdults65\":false,\"populationAdolescents\":false,\"populationChildren\":false,\"populationMultiAncestry\":false,\"populationNhpi\":false,\"populationMena\":false,\"populationAian\":false,\"populationHispanicLatinoSpanish\":false,\"populationBlackAfricanAfricanAmerican\":false,\"populationAsian\":false,\"populationYesNo\":\"no\",\"aiAnPlanExplanation\":\"What are the specific scientific question(s) you intend to study, and why is the question important (i.e. relevance to science or public health)?\",\"aiAnPlanType\":\"no_specific_analysis\",\"requestReviewByRab\":\"no\"}}]";
+
+  private static final Logger logger =
+      Logger.getLogger(WorkspaceMigrationServiceImpl.class.getName());
   private final WsmClient wsmClient;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
@@ -95,19 +105,60 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
                   .map(DbUser::getVwbUserPod)
                   .map(DbVwbUserPod::getVwbPodId)
                   .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
+      logger.log(Level.INFO, "Starting workspace creation");
 
       WorkspaceDescription vwbWorkspace =
           wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
 
       vwbCreated = true;
 
-      String workspaceId = vwbWorkspace.getId().toString();
+      UUID workspaceId = vwbWorkspace.getId();
+      List<Property> properties =
+          List.of(
+              new Property().key("terra-default-location").value("us-central1"),
+              new Property().key("terra-required-data-use-metadata").value(metadata),
+              new Property().key("terra-workspace-short-description").value(""));
+      wsmClient.updateWorkspaceProperties(properties, workspaceId.toString());
+      logger.log(Level.INFO, "Workspace created: " + vwbWorkspace);
 
+      String accessTier = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
+      String dataCollectionWsid;
+      String dataCollectionResourceId;
+
+      if (accessTier.equals("registered")) {
+        dataCollectionWsid =
+            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.workspaceId;
+        dataCollectionResourceId =
+            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.resourceId;
+      } else if (accessTier.equals("controlled")) {
+        dataCollectionWsid =
+            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.controlled.workspaceId;
+        dataCollectionResourceId =
+            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.controlled.resourceId;
+      } else {
+        throw new RuntimeException("Workspace migration failed, invalid access tier");
+      }
+
+      logger.log(Level.INFO, "Starting BQ clone");
+      CloneControlledGcpBigQueryDatasetResult bqResult =
+          wsmClient.cloneBQDataset(
+              workspaceId,
+              dataCollectionWsid,
+              UUID.fromString(dataCollectionResourceId),
+              UUID.randomUUID().toString());
+
+      logger.log(Level.INFO, "BQ clone complete: " + bqResult.toString());
+      logger.log(Level.INFO, "Creating bucket ");
       CreatedControlledGcpGcsBucket controlledBucket =
-          wsmClient.createControlledBucket(workspaceId, namespace);
+          wsmClient.createControlledBucket(workspaceId.toString(), namespace);
+      logger.log(Level.INFO, "Bucket creation complete: " + controlledBucket.toString());
 
       // Make sure new bucket is ready for transfer
       Thread.sleep(bucketDelay.toMillis());
+
+      WorkspaceDescription vwbWorkspaceWithPolicies =
+          wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId());
+      logger.log(Level.INFO, "New workspace with policies: " + vwbWorkspaceWithPolicies);
 
       String destinationBucket = controlledBucket.getGcpBucket().getAttributes().getBucketName();
 
@@ -116,6 +167,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
 
       String projectId = workbenchConfigProvider.get().server.projectId;
+      logger.log(Level.INFO, "Creating transfer job");
 
       String jobName =
           storageTransferClient.createTransferJob(
@@ -125,8 +177,10 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               projectId,
               folders,
               serviceAccountEmail);
+      logger.log(Level.INFO, "Job created, running transfer job");
 
       storageTransferClient.runTransferJob(projectId, jobName);
+      logger.log(Level.INFO, "Running transfer queue");
 
       taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
 
@@ -179,7 +233,10 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     TransferOperation transferOperation =
         storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
-    String jobName = "transferJobs/migration-" + workspaceNamespace;
+    logger.log(Level.INFO, "Job status: " + jobStatus.toString());
+    // Commenting out deleteTransferJob calls since all STS runs aren't transferring any data
+    // TODO uncomment after resolving STS issue
+    // String jobName = "transferJobs/migration-" + workspaceNamespace;
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
@@ -189,12 +246,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       case FAILED:
         dbWorkspace.setMigrationState(MigrationState.FAILED.name());
         workspaceDao.save(dbWorkspace);
-        storageTransferClient.deleteTransferJob(projectId, jobName);
+        // storageTransferClient.deleteTransferJob(projectId, jobName);
         return;
       case SUCCESS:
         dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
         workspaceDao.save(dbWorkspace);
-        storageTransferClient.deleteTransferJob(projectId, jobName);
+        // storageTransferClient.deleteTransferJob(projectId, jobName);
     }
   }
 }

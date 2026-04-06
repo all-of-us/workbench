@@ -3,6 +3,7 @@ package org.pmiops.workbench.vwb.wsm;
 import jakarta.inject.Provider;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.wsmanager.ApiException;
+import org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi;
 import org.pmiops.workbench.wsmanager.api.WorkspaceApi;
 import org.pmiops.workbench.wsmanager.model.*;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ public class WsmClient {
 
   private static final Logger logger = LoggerFactory.getLogger(WsmClient.class);
 
+  private final Provider<ControlledGcpResourceApi> controlledGcpResourceApiProvider;
   private final Provider<WorkspaceApi> workspaceServiceApi;
 
   private final WsmRetryHandler wsmRetryHandler;
@@ -32,8 +35,11 @@ public class WsmClient {
   public WsmClient(
       @Qualifier(WsmConfig.WSM_SERVICE_ACCOUNT_WORKSPACE_API)
           Provider<WorkspaceApi> workspaceServiceApi,
+      @Qualifier(WsmConfig.WSM_SERVICE_ACCOUNT_CONTROLLED_GCP_RESOURCE_API)
+          Provider<ControlledGcpResourceApi> controlledGcpResourceApiProvider,
       WsmRetryHandler wsmRetryHandler,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.controlledGcpResourceApiProvider = controlledGcpResourceApiProvider;
     this.workspaceServiceApi = workspaceServiceApi;
     this.wsmRetryHandler = wsmRetryHandler;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -144,16 +150,12 @@ public class WsmClient {
       String workspaceId, String namespace) {
     return wsmRetryHandler.run(
         context -> {
-          org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi controlledApi =
-              new org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi(
-                  workspaceServiceApi.get().getApiClient());
-
           // Common resource metadata
           ControlledResourceCommonFields common =
               new ControlledResourceCommonFields()
-                  .name("rw-migration-bucket")
-                  .description("RW migration bucket")
-                  .cloningInstructions(CloningInstructionsEnum.NOTHING)
+                  .name("rw-migration-" + namespace)
+                  .description("RW migration bucket for workspace " + namespace)
+                  .cloningInstructions(CloningInstructionsEnum.RESOURCE)
                   .accessScope(AccessScope.SHARED_ACCESS)
                   .managedBy(ManagedBy.USER);
 
@@ -165,7 +167,30 @@ public class WsmClient {
           CreateControlledGcpGcsBucketRequestBody request =
               new CreateControlledGcpGcsBucketRequestBody().common(common).gcsBucket(bucketParams);
 
-          return controlledApi.createBucket(request, workspaceId);
+          return controlledGcpResourceApiProvider.get().createBucket(request, workspaceId);
+        });
+  }
+
+  public CloneControlledGcpBigQueryDatasetResult cloneBQDataset(
+      UUID destinationWsid, String sourceWsid, UUID resourceId, String jobId) {
+    return wsmRetryHandler.run(
+        context -> {
+          CloneControlledGcpBigQueryDatasetRequest cloneControlledGcpBigQueryDatasetRequest =
+              new CloneControlledGcpBigQueryDatasetRequest()
+                  .destinationWorkspaceId(destinationWsid)
+                  .jobControl(new JobControl().id(jobId));
+          return controlledGcpResourceApiProvider
+              .get()
+              .cloneBigQueryDataset(
+                  cloneControlledGcpBigQueryDatasetRequest, sourceWsid, resourceId);
+        });
+  }
+
+  public void updateWorkspaceProperties(List<Property> body, String workspaceId) {
+    wsmRetryHandler.run(
+        context -> {
+          workspaceServiceApi.get().updateWorkspaceProperties(body, workspaceId);
+          return null;
         });
   }
 
