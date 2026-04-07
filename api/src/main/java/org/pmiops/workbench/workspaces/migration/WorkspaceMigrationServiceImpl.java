@@ -39,9 +39,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService {
 
-  private static final String metadata =
-      "[{\"form_id\":\"AOU-CDR-V8\",\"form_data\":{\"purposeOtherText\":\"\",\"purposeDiseaseText\":\"\",\"purposeDrug\":false,\"purposeElsi\":false,\"purposePopulationResearch\":false,\"purposeSocialResearch\":false,\"purposeGeneticResearch\":false,\"purposeResearchControl\":false,\"purposeMethods\":false,\"purposeDisease\":false,\"purposeOther\":false,\"purposeForProfit\":false,\"purposeEducation\":true,\"purposeResearch\":false,\"anticipatedFindings\":\"What are the specific scientific question(s) you intend to study, and why is the question important (i.e. relevance to science or public health)?\",\"scientificApproaches\":\"What are the specific scientific question(s) you intend to study, and why is the question important (i.e. relevance to science or public health)?\",\"scientificQuestions\":\"What are the specific scientific question(s) you intend to study, and why is the question important (i.e. relevance to science or public health)?\",\"disseminateOtherText\":\"\",\"disseminateOther\":false,\"disseminatePersonalBlog\":true,\"disseminateCommunityJournal\":false,\"disseminatePressRelease\":false,\"disseminateCommunityForum\":false,\"disseminatePresentationConferences\":false,\"disseminateSocialMedia\":false,\"disseminateJournal\":false,\"fitNone\":true,\"fitOutcome\":false,\"fitDiagnosis\":false,\"fitPrevention\":false,\"fitEquity\":false,\"fitWellness\":false,\"populationOtherText\":\"\",\"populationOther\":false,\"populationIncome\":false,\"populationEducation\":false,\"populationCare\":false,\"populationDisability\":false,\"populationGeography\":false,\"populationSexualOrientation\":false,\"populationGenderIdentity\":false,\"populationSexOther\":false,\"populationOlderAdults75\":false,\"populationOlderAdults65\":false,\"populationAdolescents\":false,\"populationChildren\":false,\"populationMultiAncestry\":false,\"populationNhpi\":false,\"populationMena\":false,\"populationAian\":false,\"populationHispanicLatinoSpanish\":false,\"populationBlackAfricanAfricanAmerican\":false,\"populationAsian\":false,\"populationYesNo\":\"no\",\"aiAnPlanExplanation\":\"What are the specific scientific question(s) you intend to study, and why is the question important (i.e. relevance to science or public health)?\",\"aiAnPlanType\":\"no_specific_analysis\",\"requestReviewByRab\":\"no\"}}]";
-
   private static final Logger logger =
       Logger.getLogger(WorkspaceMigrationServiceImpl.class.getName());
   private final WsmClient wsmClient;
@@ -82,7 +79,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
   @Override
   public void startWorkspaceMigration(
-      String namespace, String terraName, List<String> folders, String podId) {
+      String namespace,
+      String terraName,
+      List<String> folders,
+      String podId,
+      String researchPurpose) {
 
     Duration bucketDelay = Duration.ofSeconds(10);
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
@@ -115,7 +116,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       List<Property> properties =
           List.of(
               new Property().key("terra-default-location").value("us-central1"),
-              new Property().key("terra-required-data-use-metadata").value(metadata),
+              new Property().key("terra-required-data-use-metadata").value(researchPurpose),
               new Property().key("terra-workspace-short-description").value(""));
       wsmClient.updateWorkspaceProperties(properties, workspaceId.toString());
       logger.log(Level.INFO, "Workspace created: " + vwbWorkspace);

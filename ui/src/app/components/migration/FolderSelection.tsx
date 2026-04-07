@@ -84,7 +84,7 @@ export const FolderSelection = ({
       {/* Header */}
       <FlexRow style={styles.header}>
         <div style={styles.title}>
-          Select folders to migrate
+          Entire bucket will be migrated
           {workspaceName ? ` – ${workspaceName}` : ''}
         </div>
 
@@ -112,10 +112,7 @@ export const FolderSelection = ({
           </Button>
         )}
 
-        <Button
-          disabled={selectedFolders.length === 0 || isLoading}
-          onClick={handleContinue}
-        >
+        <Button disabled={isLoading} onClick={handleContinue}>
           {isLoading ? 'Migrating...' : 'Continue Migration'}
         </Button>
       </FlexRow>

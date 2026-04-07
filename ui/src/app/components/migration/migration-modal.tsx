@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import {
   MigrationState,
+  ResearchPurpose,
   WorkspaceAccessLevel,
   WorkspaceResponse,
 } from 'generated/fetch';
@@ -10,6 +11,7 @@ import {
 import { Button, CloseButton } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
 import { Modal } from 'app/components/modals';
+import { rwToVwbResearchPurpose } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -49,6 +51,11 @@ const styles = reactStyles({
     padding: 6,
     borderRadius: 4,
   },
+  helperText: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 8,
+  },
 });
 
 interface Props {
@@ -63,6 +70,7 @@ interface MigrationWorkspace {
   migrationState: MigrationState;
   migrationOwner?: string;
   accessLevel?: WorkspaceAccessLevel;
+  researchPurpose: ResearchPurpose;
 }
 
 export const MigrationModal = ({ onClose }: Props) => {
@@ -105,6 +113,7 @@ export const MigrationModal = ({ onClose }: Props) => {
               ).name,
               migrationState,
               accessLevel: w.accessLevel,
+              researchPurpose: w.workspace.researchPurpose,
             };
           });
 
@@ -141,6 +150,9 @@ export const MigrationModal = ({ onClose }: Props) => {
         {
           folders: selectedFolders,
           podId: selectedPods[selectedWorkspace.id],
+          researchPurpose: JSON.stringify(
+            rwToVwbResearchPurpose(selectedWorkspace.researchPurpose)
+          ),
         }
       );
 
@@ -160,17 +172,20 @@ export const MigrationModal = ({ onClose }: Props) => {
   };
 
   const handleStartMigration = async (ws: MigrationWorkspace) => {
-    try {
-      const response = await workspacesApi().getMigrationBucketContents(
-        ws.id,
-        ws.terraName
-      );
-
-      setFolders(response.folders || []);
-      setSelectedWorkspace(ws);
-    } catch (e) {
-      console.error('Failed to load bucket folders', e);
-    }
+    // TODO use this call for users to select folders re-migration function
+    // try {
+    //   const response = await workspacesApi().getMigrationBucketContents(
+    //     ws.id,
+    //     ws.terraName
+    //   );
+    //
+    //   setFolders([]);
+    //   setSelectedWorkspace(ws);
+    // } catch (e) {
+    //   console.error('Failed to load bucket folders', e);
+    // }
+    setFolders([]);
+    setSelectedWorkspace(ws);
   };
 
   return (

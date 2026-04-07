@@ -806,8 +806,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceMigrationService.startWorkspaceMigration(
         workspaceNamespace,
         terraName,
-        request != null ? Collections.singletonList(request.getFolders().toString()) : null,
-        request != null ? request.getPodId() : null);
+        null,
+        request != null ? request.getPodId() : null,
+        request != null ? request.getResearchPurpose() : null);
 
     return ResponseEntity.ok().build();
   }
