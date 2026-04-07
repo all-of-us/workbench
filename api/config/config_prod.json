@@ -137,7 +137,7 @@
     "enableTierAccessCheckInDb": true,
     "enableVWBHomepageBanner": true,
     "enableCTPlusCards": false,
-    "enableVwbMigration": false
+    "enableVwbMigration": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
