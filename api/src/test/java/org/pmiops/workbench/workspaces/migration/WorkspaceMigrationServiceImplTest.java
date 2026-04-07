@@ -95,6 +95,9 @@ public class WorkspaceMigrationServiceImplTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.vwb = new WorkbenchConfig.VwbConfig();
     config.vwb.defaultPodId = "default-pod";
+    config.vwb.cdrVersionIdsForMigration = List.of(1);
+    config.vwb.dataCollectionsForMigration.controlled.workspaceId = "ct-data-collection-wsid";
+    config.vwb.dataCollectionsForMigration.controlled.resourceId = "ct-data-collection-rid";
     config.server = new WorkbenchConfig.ServerConfig();
     config.server.projectId = SERVER_PROJECT;
     config.auth = new WorkbenchConfig.AuthConfig();
