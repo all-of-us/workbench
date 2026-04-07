@@ -30,7 +30,6 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
-import org.pmiops.workbench.wsmanager.model.CloneControlledGcpBigQueryDatasetResult;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.Property;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
@@ -140,14 +139,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       }
 
       logger.log(Level.INFO, "Starting BQ clone");
-      CloneControlledGcpBigQueryDatasetResult bqResult =
-          wsmClient.cloneBQDataset(
-              workspaceId,
-              dataCollectionWsid,
-              UUID.fromString(dataCollectionResourceId),
-              UUID.randomUUID().toString());
+      wsmClient.cloneBQDataset(
+          workspaceId,
+          dataCollectionWsid,
+          UUID.fromString(dataCollectionResourceId),
+          UUID.randomUUID().toString());
 
-      logger.log(Level.INFO, "BQ clone complete: " + bqResult.toString());
+      logger.log(Level.INFO, "BQ clone complete");
       logger.log(Level.INFO, "Creating bucket ");
       CreatedControlledGcpGcsBucket controlledBucket =
           wsmClient.createControlledBucket(workspaceId.toString(), namespace);
