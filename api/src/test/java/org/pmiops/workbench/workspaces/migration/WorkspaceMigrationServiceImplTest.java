@@ -46,6 +46,7 @@ public class WorkspaceMigrationServiceImplTest {
   private static final String NAMESPACE = "test-ns";
   private static final String TERRA_NAME = "test-ws";
   private static final String POD_ID = "pod-123";
+  private static final String RESEARCH_PURPOSE = "[{}]";
   private static final String GOOGLE_PROJECT = "gcp-project-123";
   private static final String SERVER_PROJECT = "test-lobby-project";
   private static final String SERVICE_ACCOUNT_EMAIL =
@@ -148,7 +149,8 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_setsStateToStarting() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
 
     verify(workspaceDao)
         .save(argThat(ws -> MigrationState.STARTING.name().equals(ws.getMigrationState())));
@@ -160,7 +162,8 @@ public class WorkspaceMigrationServiceImplTest {
 
     String customPodId = "custom-pod";
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, customPodId);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, customPodId, RESEARCH_PURPOSE);
 
     verify(wsmClient).createWorkspaceAsService(workspace, customPodId);
   }
@@ -169,7 +172,8 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_fallsBackToUserPod_whenPodIdNull() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, null);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, null, RESEARCH_PURPOSE);
 
     verify(wsmClient).createWorkspaceAsService(workspace, POD_ID);
   }
@@ -178,7 +182,8 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_startsStsTransferWithSelectedFolders() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
 
     verify(storageTransferClient)
         .createTransferJob(
@@ -194,7 +199,7 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_startsStsTransferWithEmptyFolders_migratesEntireBucket() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of(), POD_ID);
+    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of(), POD_ID, RESEARCH_PURPOSE);
 
     verify(storageTransferClient)
         .createTransferJob(
@@ -210,7 +215,8 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_pushesStatusTask() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
 
     verify(taskQueueService).pushWorkspaceMigrationStatusTask(NAMESPACE, TERRA_NAME);
   }
