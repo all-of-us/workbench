@@ -56,6 +56,7 @@ public class WorkspaceMigrationServiceImplTest {
               new GcpGcsBucketResource()
                   .attributes(new GcpGcsBucketAttributes().bucketName(DEST_BUCKET)));
   private static final List<String> SELECTED_FOLDERS = List.of("notebooks/", "data/");
+  private static WorkbenchConfig config = new WorkbenchConfig();
 
   @Mock private WsmClient wsmClient;
   @Mock private WorkspaceDao workspaceDao;
@@ -92,15 +93,12 @@ public class WorkspaceMigrationServiceImplTest {
     rawlsWorkspace.setBucketName(SOURCE_BUCKET);
     rawlsWorkspace.setGoogleProject(GOOGLE_PROJECT);
 
-    WorkbenchConfig config = new WorkbenchConfig();
-    config.vwb = new WorkbenchConfig.VwbConfig();
+    config = WorkbenchConfig.createEmptyConfig();
     config.vwb.defaultPodId = "default-pod";
     config.vwb.cdrVersionIdsForMigration = List.of(1);
     config.vwb.dataCollectionsForMigration.controlled.workspaceId = "ct-data-collection-wsid";
     config.vwb.dataCollectionsForMigration.controlled.resourceId = "ct-data-collection-rid";
-    config.server = new WorkbenchConfig.ServerConfig();
     config.server.projectId = SERVER_PROJECT;
-    config.auth = new WorkbenchConfig.AuthConfig();
     config.auth.serviceAccountApiUsers = List.of(SERVICE_ACCOUNT_EMAIL);
 
     lenient().when(workbenchConfigProvider.get()).thenReturn(config);
