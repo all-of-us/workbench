@@ -127,7 +127,7 @@ public class WorkspaceMigrationServiceImplTest {
     vwbWorkspace.setId(UUID.randomUUID());
 
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
-    when(wsmClient.cloneBQDataset(
+    lenient().when(wsmClient.cloneBQDataset(
             vwbWorkspace.getId(),
             config.vwb.dataCollectionsForMigration.controlled.workspaceId,
             UUID.fromString(config.vwb.dataCollectionsForMigration.controlled.resourceId),
