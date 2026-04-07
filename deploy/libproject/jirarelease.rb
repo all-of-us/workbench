@@ -8,6 +8,7 @@
 
 require "open3"
 require "jira-ruby"
+require "active_support/core_ext/object"
 
 require_relative "../../aou-utils/utils/common"
 
