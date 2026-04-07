@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces.migration;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
@@ -18,6 +19,8 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -72,10 +75,13 @@ public class WorkspaceMigrationServiceImplTest {
 
   @BeforeEach
   void setup() {
+    DbCdrVersion cdrVersion =
+        createDefaultCdrVersion(1).setAccessTier(new DbAccessTier().setShortName("controlled"));
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(NAMESPACE);
     dbWorkspace.setFirecloudName(TERRA_NAME);
     dbWorkspace.setGoogleProject(GOOGLE_PROJECT);
+    dbWorkspace.setCdrVersion(cdrVersion);
 
     workspace = new Workspace();
     workspace.setNamespace(NAMESPACE);
