@@ -1,3 +1,143 @@
+import {
+  DisseminateResearchEnum,
+  ResearchOutcomeEnum,
+  ResearchPurpose,
+  SpecificPopulationEnum,
+} from 'generated/fetch';
+
+export const rwToVwbResearchPurpose = (rp: ResearchPurpose) => [
+  {
+    // TODO set form_id based on CDR version, currently only migrating V8
+    form_id: 'AOU-CDR-V8',
+    form_data: {
+      purposeOtherText: rp.otherPurposeDetails,
+      purposeDiseaseText: rp.diseaseOfFocus,
+      purposeDrug: rp.drugDevelopment,
+      purposeElsi: rp.ethics,
+      purposePopulationResearch: rp.populationHealth,
+      purposeSocialResearch: rp.socialBehavioral,
+      purposeGeneticResearch: rp.ancestry,
+      purposeResearchControl: rp.controlSet,
+      purposeMethods: rp.methodsDevelopment,
+      purposeDisease: rp.diseaseFocusedResearch,
+      purposeOther: rp.otherPurpose,
+      purposeForProfit: rp.commercialPurpose,
+      purposeEducation: rp.educational,
+      purposeResearch: true,
+      anticipatedFindings: rp.anticipatedFindings,
+      scientificApproaches: rp.scientificApproach,
+      scientificQuestions: rp.intendedStudy,
+      disseminateOtherText: rp.otherDisseminateResearchFindings,
+      disseminateOther: rp.disseminateResearchFindingList.includes(
+        DisseminateResearchEnum.OTHER
+      ),
+      disseminatePersonalBlog: rp.disseminateResearchFindingList.includes(
+        DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG
+      ),
+      disseminateCommunityJournal: rp.disseminateResearchFindingList.includes(
+        DisseminateResearchEnum.PUBLICATION_COMMUNITY_BASED_BLOG
+      ),
+      disseminatePressRelease: rp.disseminateResearchFindingList.includes(
+        DisseminateResearchEnum.PRESS_RELEASE
+      ),
+      disseminateCommunityForum: rp.disseminateResearchFindingList.includes(
+        DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS
+      ),
+      disseminatePresentationConferences:
+        rp.disseminateResearchFindingList.includes(
+          DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES
+        ),
+      disseminateSocialMedia: rp.disseminateResearchFindingList.includes(
+        DisseminateResearchEnum.SOCIAL_MEDIA
+      ),
+      disseminateJournal: rp.disseminateResearchFindingList.includes(
+        DisseminateResearchEnum.PUBLICATION_PEER_REVIEWED_JOURNALS
+      ),
+      fitNone: rp.researchOutcomeList.includes(ResearchOutcomeEnum.NONE_APPLY),
+      fitOutcome: rp.researchOutcomeList.includes(
+        ResearchOutcomeEnum.PRECISION_INTERVENTION
+      ),
+      fitDiagnosis: rp.researchOutcomeList.includes(
+        ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN
+      ),
+      fitPrevention: rp.researchOutcomeList.includes(
+        ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT
+      ),
+      fitEquity: rp.researchOutcomeList.includes(
+        ResearchOutcomeEnum.IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS
+      ),
+      fitWellness: rp.researchOutcomeList.includes(
+        ResearchOutcomeEnum.PROMOTE_HEALTHY_LIVING
+      ),
+      populationOtherText: rp.otherPopulationDetails,
+      populationOther: rp.populationDetails.includes(
+        SpecificPopulationEnum.OTHER
+      ),
+      populationIncome: rp.populationDetails.includes(
+        SpecificPopulationEnum.INCOME_LEVEL
+      ),
+      populationEducation: rp.populationDetails.includes(
+        SpecificPopulationEnum.EDUCATION_LEVEL
+      ),
+      populationCare: rp.populationDetails.includes(
+        SpecificPopulationEnum.ACCESS_TO_CARE
+      ),
+      populationDisability: rp.populationDetails.includes(
+        SpecificPopulationEnum.DISABILITY_STATUS
+      ),
+      populationGeography: rp.populationDetails.includes(
+        SpecificPopulationEnum.GEOGRAPHY
+      ),
+      populationSexualOrientation: rp.populationDetails.includes(
+        SpecificPopulationEnum.SEXUAL_ORIENTATION
+      ),
+      populationGenderIdentity: rp.populationDetails.includes(
+        SpecificPopulationEnum.GENDER_IDENTITY
+      ),
+      populationSexOther: rp.populationDetails.includes(
+        SpecificPopulationEnum.SEX
+      ),
+      populationOlderAdults75: rp.populationDetails.includes(
+        SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75
+      ),
+      populationOlderAdults65: rp.populationDetails.includes(
+        SpecificPopulationEnum.AGE_OLDER
+      ),
+      populationAdolescents: rp.populationDetails.includes(
+        SpecificPopulationEnum.AGE_ADOLESCENTS
+      ),
+      populationChildren: rp.populationDetails.includes(
+        SpecificPopulationEnum.AGE_CHILDREN
+      ),
+      populationMultiAncestry: rp.populationDetails.includes(
+        SpecificPopulationEnum.RACE_MORE_THAN_ONE
+      ),
+      populationNhpi: rp.populationDetails.includes(
+        SpecificPopulationEnum.RACE_NHPI
+      ),
+      populationMena: rp.populationDetails.includes(
+        SpecificPopulationEnum.RACE_MENA
+      ),
+      populationAian: rp.populationDetails.includes(
+        SpecificPopulationEnum.RACE_AIAN
+      ),
+      populationHispanicLatinoSpanish: rp.populationDetails.includes(
+        SpecificPopulationEnum.RACE_HISPANIC
+      ),
+      populationBlackAfricanAfricanAmerican: rp.populationDetails.includes(
+        SpecificPopulationEnum.RACE_AA
+      ),
+      populationAsian: rp.populationDetails.includes(
+        SpecificPopulationEnum.RACE_ASIAN
+      ),
+      populationYesNo: rp.populationHealth ? 'yes' : 'no',
+      aiAnPlanExplanation: rp.aianResearchDetails,
+      aiAnPlanType: rp.aianResearchType,
+      requestReviewByRab: rp.reviewRequested ? 'yes' : 'no',
+    },
+  },
+];
+
 export const RESEARCH_PURPOSE_MAPPING = [
   {
     sectionHeader: 'Primary purpose of project',

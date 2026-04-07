@@ -5,7 +5,11 @@ import org.pmiops.workbench.model.MigrationBucketContentsResponse;
 
 public interface WorkspaceMigrationService {
   void startWorkspaceMigration(
-      String namespace, String terraName, List<String> folders, String podId);
+      String namespace,
+      String terraName,
+      List<String> folders,
+      String podId,
+      String researchPurpose);
 
   MigrationBucketContentsResponse getBucketContents(String namespace, String terraName);
 

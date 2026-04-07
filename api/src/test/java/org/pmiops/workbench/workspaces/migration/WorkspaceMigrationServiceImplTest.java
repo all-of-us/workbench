@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces.migration;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
@@ -18,6 +19,8 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -30,9 +33,11 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.model.CloneControlledGcpBigQueryDatasetResult;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketAttributes;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketResource;
+import org.pmiops.workbench.wsmanager.model.JobReport;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,18 +46,23 @@ public class WorkspaceMigrationServiceImplTest {
   private static final String NAMESPACE = "test-ns";
   private static final String TERRA_NAME = "test-ws";
   private static final String POD_ID = "pod-123";
+  private static final String RESEARCH_PURPOSE = "[{}]";
   private static final String GOOGLE_PROJECT = "gcp-project-123";
   private static final String SERVER_PROJECT = "test-lobby-project";
   private static final String SERVICE_ACCOUNT_EMAIL =
       "all-of-us-workbench-test@appspot.gserviceaccount.com";
   private static final String SOURCE_BUCKET = "source-bucket";
   private static final String DEST_BUCKET = "dest-bucket";
+  private static final String JOB_ID = UUID.randomUUID().toString();
+  private static final CloneControlledGcpBigQueryDatasetResult CLONED_DATASET_RESULT =
+      new CloneControlledGcpBigQueryDatasetResult().jobReport(new JobReport().id(JOB_ID));
   private static final CreatedControlledGcpGcsBucket CREATED_BUCKET =
       new CreatedControlledGcpGcsBucket()
           .gcpBucket(
               new GcpGcsBucketResource()
                   .attributes(new GcpGcsBucketAttributes().bucketName(DEST_BUCKET)));
   private static final List<String> SELECTED_FOLDERS = List.of("notebooks/", "data/");
+  private static WorkbenchConfig config = new WorkbenchConfig();
 
   @Mock private WsmClient wsmClient;
   @Mock private WorkspaceDao workspaceDao;
@@ -72,10 +82,13 @@ public class WorkspaceMigrationServiceImplTest {
 
   @BeforeEach
   void setup() {
+    DbCdrVersion cdrVersion =
+        createDefaultCdrVersion(1).setAccessTier(new DbAccessTier().setShortName("controlled"));
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(NAMESPACE);
     dbWorkspace.setFirecloudName(TERRA_NAME);
     dbWorkspace.setGoogleProject(GOOGLE_PROJECT);
+    dbWorkspace.setCdrVersion(cdrVersion);
 
     workspace = new Workspace();
     workspace.setNamespace(NAMESPACE);
@@ -86,12 +99,12 @@ public class WorkspaceMigrationServiceImplTest {
     rawlsWorkspace.setBucketName(SOURCE_BUCKET);
     rawlsWorkspace.setGoogleProject(GOOGLE_PROJECT);
 
-    WorkbenchConfig config = new WorkbenchConfig();
-    config.vwb = new WorkbenchConfig.VwbConfig();
+    config = WorkbenchConfig.createEmptyConfig();
     config.vwb.defaultPodId = "default-pod";
-    config.server = new WorkbenchConfig.ServerConfig();
+    config.vwb.cdrVersionIdsForMigration = List.of(1);
+    config.vwb.dataCollectionsForMigration.controlled.workspaceId = "ct-data-collection-wsid";
+    config.vwb.dataCollectionsForMigration.controlled.resourceId = UUID.randomUUID().toString();
     config.server.projectId = SERVER_PROJECT;
-    config.auth = new WorkbenchConfig.AuthConfig();
     config.auth.serviceAccountApiUsers = List.of(SERVICE_ACCOUNT_EMAIL);
 
     lenient().when(workbenchConfigProvider.get()).thenReturn(config);
@@ -117,7 +130,16 @@ public class WorkspaceMigrationServiceImplTest {
     vwbWorkspace.setId(UUID.randomUUID());
 
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
+    lenient()
+        .when(
+            wsmClient.cloneBQDataset(
+                vwbWorkspace.getId(),
+                config.vwb.dataCollectionsForMigration.controlled.workspaceId,
+                UUID.fromString(config.vwb.dataCollectionsForMigration.controlled.resourceId),
+                JOB_ID))
+        .thenReturn(CLONED_DATASET_RESULT);
     when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
+    when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
 
     when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
@@ -127,7 +149,8 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_setsStateToStarting() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
 
     verify(workspaceDao)
         .save(argThat(ws -> MigrationState.STARTING.name().equals(ws.getMigrationState())));
@@ -139,7 +162,8 @@ public class WorkspaceMigrationServiceImplTest {
 
     String customPodId = "custom-pod";
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, customPodId);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, customPodId, RESEARCH_PURPOSE);
 
     verify(wsmClient).createWorkspaceAsService(workspace, customPodId);
   }
@@ -148,7 +172,8 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_fallsBackToUserPod_whenPodIdNull() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, null);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, null, RESEARCH_PURPOSE);
 
     verify(wsmClient).createWorkspaceAsService(workspace, POD_ID);
   }
@@ -157,7 +182,8 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_startsStsTransferWithSelectedFolders() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
 
     verify(storageTransferClient)
         .createTransferJob(
@@ -173,7 +199,7 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_startsStsTransferWithEmptyFolders_migratesEntireBucket() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of(), POD_ID);
+    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, List.of(), POD_ID, RESEARCH_PURPOSE);
 
     verify(storageTransferClient)
         .createTransferJob(
@@ -189,7 +215,8 @@ public class WorkspaceMigrationServiceImplTest {
   void startWorkspaceMigration_pushesStatusTask() {
     setupStartMigrationStubs();
 
-    service.startWorkspaceMigration(NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID);
+    service.startWorkspaceMigration(
+        NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
 
     verify(taskQueueService).pushWorkspaceMigrationStatusTask(NAMESPACE, TERRA_NAME);
   }

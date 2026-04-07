@@ -7861,6 +7861,8 @@ components:
           items:
             type: string
           description: List of folder prefixes to migrate. If empty, migrates entire bucket.
+        researchPurpose:
+          type: string
     WorkspaceResponseListResponse:
       required:
       - items

@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import jakarta.inject.Provider;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -806,8 +805,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceMigrationService.startWorkspaceMigration(
         workspaceNamespace,
         terraName,
-        request != null ? Collections.singletonList(request.getFolders().toString()) : null,
-        request != null ? request.getPodId() : null);
+        null,
+        request != null ? request.getPodId() : null,
+        request != null ? request.getResearchPurpose() : null);
 
     return ResponseEntity.ok().build();
   }
