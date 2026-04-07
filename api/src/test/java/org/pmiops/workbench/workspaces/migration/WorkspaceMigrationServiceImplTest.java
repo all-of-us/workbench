@@ -97,7 +97,7 @@ public class WorkspaceMigrationServiceImplTest {
     config.vwb.defaultPodId = "default-pod";
     config.vwb.cdrVersionIdsForMigration = List.of(1);
     config.vwb.dataCollectionsForMigration.controlled.workspaceId = "ct-data-collection-wsid";
-    config.vwb.dataCollectionsForMigration.controlled.resourceId = "ct-data-collection-rid";
+    config.vwb.dataCollectionsForMigration.controlled.resourceId = UUID.randomUUID().toString();
     config.server.projectId = SERVER_PROJECT;
     config.auth.serviceAccountApiUsers = List.of(SERVICE_ACCOUNT_EMAIL);
 
