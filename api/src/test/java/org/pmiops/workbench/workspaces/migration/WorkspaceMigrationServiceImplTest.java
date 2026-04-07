@@ -127,11 +127,13 @@ public class WorkspaceMigrationServiceImplTest {
     vwbWorkspace.setId(UUID.randomUUID());
 
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
-    lenient().when(wsmClient.cloneBQDataset(
-            vwbWorkspace.getId(),
-            config.vwb.dataCollectionsForMigration.controlled.workspaceId,
-            UUID.fromString(config.vwb.dataCollectionsForMigration.controlled.resourceId),
-            UUID.randomUUID().toString()))
+    lenient()
+        .when(
+            wsmClient.cloneBQDataset(
+                vwbWorkspace.getId(),
+                config.vwb.dataCollectionsForMigration.controlled.workspaceId,
+                UUID.fromString(config.vwb.dataCollectionsForMigration.controlled.resourceId),
+                UUID.randomUUID().toString()))
         .thenReturn(CLONED_BUCKET);
     when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
     when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
