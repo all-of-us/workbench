@@ -33,6 +33,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.model.CloneControlledGcpBigQueryDatasetResult;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketAttributes;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketResource;
@@ -50,6 +51,8 @@ public class WorkspaceMigrationServiceImplTest {
       "all-of-us-workbench-test@appspot.gserviceaccount.com";
   private static final String SOURCE_BUCKET = "source-bucket";
   private static final String DEST_BUCKET = "dest-bucket";
+  private static final CloneControlledGcpBigQueryDatasetResult CLONED_BUCKET =
+      new CloneControlledGcpBigQueryDatasetResult();
   private static final CreatedControlledGcpGcsBucket CREATED_BUCKET =
       new CreatedControlledGcpGcsBucket()
           .gcpBucket(
@@ -124,7 +127,14 @@ public class WorkspaceMigrationServiceImplTest {
     vwbWorkspace.setId(UUID.randomUUID());
 
     when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
+    when(wsmClient.cloneBQDataset(
+            vwbWorkspace.getId(),
+            config.vwb.dataCollectionsForMigration.controlled.workspaceId,
+            UUID.fromString(config.vwb.dataCollectionsForMigration.controlled.resourceId),
+            UUID.randomUUID().toString()))
+        .thenReturn(CLONED_BUCKET);
     when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
+    when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
 
     when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
