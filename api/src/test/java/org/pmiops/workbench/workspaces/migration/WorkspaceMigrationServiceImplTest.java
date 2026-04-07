@@ -37,6 +37,7 @@ import org.pmiops.workbench.wsmanager.model.CloneControlledGcpBigQueryDatasetRes
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketAttributes;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketResource;
+import org.pmiops.workbench.wsmanager.model.JobReport;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,8 +52,9 @@ public class WorkspaceMigrationServiceImplTest {
       "all-of-us-workbench-test@appspot.gserviceaccount.com";
   private static final String SOURCE_BUCKET = "source-bucket";
   private static final String DEST_BUCKET = "dest-bucket";
-  private static final CloneControlledGcpBigQueryDatasetResult CLONED_BUCKET =
-      new CloneControlledGcpBigQueryDatasetResult();
+  private static final String JOB_ID = UUID.randomUUID().toString();
+  private static final CloneControlledGcpBigQueryDatasetResult CLONED_DATASET_RESULT =
+      new CloneControlledGcpBigQueryDatasetResult().jobReport(new JobReport().id(JOB_ID));
   private static final CreatedControlledGcpGcsBucket CREATED_BUCKET =
       new CreatedControlledGcpGcsBucket()
           .gcpBucket(
@@ -133,8 +135,8 @@ public class WorkspaceMigrationServiceImplTest {
                 vwbWorkspace.getId(),
                 config.vwb.dataCollectionsForMigration.controlled.workspaceId,
                 UUID.fromString(config.vwb.dataCollectionsForMigration.controlled.resourceId),
-                UUID.randomUUID().toString()))
-        .thenReturn(CLONED_BUCKET);
+                JOB_ID))
+        .thenReturn(CLONED_DATASET_RESULT);
     when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
     when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
 
