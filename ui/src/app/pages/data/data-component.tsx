@@ -147,6 +147,123 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         <div style={styles.cardButtonArea}>
           <TooltipTrigger
             content={
+              !writePermission &&
+              'Write permission required to perform migration'
+            }
+            side='top'
+          >
+            <CardButton
+              style={{
+                ...styles.resourceTypeButton,
+                backgroundColor: '#E9EDF5', // light bluish background
+                border: '1px solid #D3DAE6',
+                boxShadow: 'none',
+                padding: '20px',
+              }}
+              disabled={!writePermission}
+              onClick={() => {
+                navigate([
+                  'workspaces',
+                  workspace.namespace,
+                  workspace.terraName,
+                  'migration',
+                ]);
+              }}
+            >
+              {/* Title */}
+              <div
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 600,
+                  color: '#1F2A44',
+                  marginBottom: '8px',
+                }}
+              >
+                Migration
+              </div>
+
+              {/* Description */}
+              <div
+                style={{
+                  fontSize: '14px',
+                  lineHeight: '20px',
+                  color: '#3B4A6B',
+                  marginBottom: '8px',
+                }}
+              >
+                Researcher Workbench workspaces are moving to Verily Workbench.
+                Please migrate your researcher before June 15, 2026. Any
+                workspace not migrated will be archived.{' '}
+                <span
+                  style={{
+                    color: '#3B4A6B',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Learn more
+                </span>
+              </div>
+
+              {/* Section Title */}
+              <div
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#1F2A44',
+                  marginTop: '8px',
+                  marginBottom: '6px',
+                }}
+              >
+                Workspace Migration To Do List:
+              </div>
+
+              {/* List */}
+              <div
+                style={{
+                  fontSize: '13px',
+                  lineHeight: '18px',
+                  color: '#1F2A44',
+                }}
+              >
+                <div>1. Review workspace to ensure you wish to migrate</div>
+                <div>
+                  2. Delete stored files no longer applicable to your work
+                </div>
+                <div>
+                  3. Migrate files from your persistent disk (if applicable) to
+                  the workspace bucket
+                </div>
+                <div>4. Know which billing project you would like to use</div>
+              </div>
+
+              {/* CTA */}
+              <div style={{ marginTop: 'auto' }}>
+                <div
+                  style={{
+                    marginTop: '16px',
+                    backgroundColor: '#2F2C7A',
+                    color: '#fff',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '8px 14px',
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                  }}
+                >
+                  Get started
+                  <ClrIcon
+                    shape='arrow right'
+                    size={12}
+                    style={{ marginLeft: '6px' }}
+                  />
+                </div>
+              </div>
+            </CardButton>
+          </TooltipTrigger>
+          <TooltipTrigger
+            content={
               !writePermission && 'Write permission required to create cohorts'
             }
             side='top'

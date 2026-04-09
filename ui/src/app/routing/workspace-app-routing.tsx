@@ -35,6 +35,7 @@ import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 
 import { analysisTabName } from './utils';
+import { MigrationPage } from 'app/pages/workspace/migration';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(
@@ -485,6 +486,20 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: 'data',
             workspaceNavBarTab: 'tanagra',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/migration`}
+        guards={[adminLockedGuard(ns, terraName)]}
+      >
+        <MigrationPage
+          routeData={{
+            title: 'Workspace Migration',
+            breadcrumb: BreadcrumbType.Workspace,
+            workspaceNavBarTab: 'migration',
+            pageKey: 'migration',
           }}
         />
       </AppRoute>
