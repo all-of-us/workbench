@@ -4,13 +4,7 @@ import com.google.cloud.storage.Blob;
 import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -27,10 +21,16 @@ import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.MigrationBucketContentsResponse;
 import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.vwb.user.model.OrganizationMember;
+import org.pmiops.workbench.vwb.user.model.UserActiveState;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
+import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.Property;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +51,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final CloudStorageClient cloudStorageClient;
   private final StorageTransferClient storageTransferClient;
   private final TaskQueueService taskQueueService;
+  private final VwbUserService vwbUserService;
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -63,7 +64,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       InitialCreditsService initialCreditsService,
       CloudStorageClient cloudStorageClient,
       StorageTransferClient storageTransferClient,
-      TaskQueueService taskQueueService) {
+      TaskQueueService taskQueueService,
+      VwbUserService vwbUserService) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
@@ -75,6 +77,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.cloudStorageClient = cloudStorageClient;
     this.storageTransferClient = storageTransferClient;
     this.taskQueueService = taskQueueService;
+    this.vwbUserService = vwbUserService;
   }
 
   @Override
@@ -113,6 +116,69 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       vwbCreated = true;
 
       UUID workspaceId = vwbWorkspace.getId();
+
+      String userEmail = workspace.getCreator();
+      wsmClient.shareWorkspaceAsService(workspaceId.toString(), userEmail, IamRole.OWNER);
+
+      logger.log(Level.INFO, "Fetching existing collaborators from Terra");
+      RawlsWorkspaceACL acl = fireCloudService.getWorkspaceAclAsService(namespace, terraName);
+
+      if (acl != null && acl.getAcl() != null) {
+        com.google.gson.Gson gson = new com.google.gson.Gson();
+        String aclJson = gson.toJson(acl.getAcl());
+        Map<String, RawlsWorkspaceAccessEntry> aclMap =
+            gson.fromJson(
+                aclJson,
+                new com.google.gson.reflect.TypeToken<
+                    Map<String, RawlsWorkspaceAccessEntry>>() {}.getType());
+
+        for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : aclMap.entrySet()) {
+          String collaboratorEmail = entry.getKey();
+
+          // Skip creator, already shared above
+          if (collaboratorEmail.equals(userEmail)) {
+            continue;
+          }
+
+          try {
+            OrganizationMember member = vwbUserService.getOrganizationMember(collaboratorEmail);
+
+            // Skip if not found in VWB
+            if (member == null || member.getUserDescription() == null) {
+              logger.log(
+                  Level.INFO, "Skipping collaborator not found in VWB: " + collaboratorEmail);
+              continue;
+            }
+
+            // Skip if not ENABLED (could be INVITED, DECLINED, DISABLED, ARCHIVED)
+            if (!UserActiveState.ENABLED.equals(member.getUserDescription().getActiveState())) {
+              logger.log(
+                  Level.INFO,
+                  "Skipping inactive collaborator: "
+                      + collaboratorEmail
+                      + " state: "
+                      + member.getUserDescription().getActiveState());
+              continue;
+            }
+
+            // Map Terra role to VWB IamRole
+            IamRole vwbRole = mapTerraRoleToVwbRole(entry.getValue().getAccessLevel());
+            if (vwbRole == null) {
+              logger.log(
+                  Level.INFO, "Skipping collaborator with unmappable role: " + collaboratorEmail);
+              continue;
+            }
+
+            logger.log(Level.INFO, "Sharing workspace with collaborator: " + collaboratorEmail);
+            wsmClient.shareWorkspaceAsService(workspaceId.toString(), collaboratorEmail, vwbRole);
+
+          } catch (Exception e) {
+            // Don't fail entire migration for one collaborator
+            logger.log(Level.WARNING, "Failed to share with collaborator: " + collaboratorEmail, e);
+          }
+        }
+      }
+
       List<Property> properties =
           List.of(
               new Property().key("terra-default-location").value("us-central1"),
@@ -252,5 +318,18 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         workspaceDao.save(dbWorkspace);
         // storageTransferClient.deleteTransferJob(projectId, jobName);
     }
+  }
+
+  private IamRole mapTerraRoleToVwbRole(String terraAccessLevel) {
+    if (terraAccessLevel == null) return null;
+    return switch (terraAccessLevel) {
+      case "OWNER" -> IamRole.OWNER;
+      case "WRITER" -> IamRole.WRITER;
+      case "READER" -> IamRole.READER;
+      default -> {
+        logger.log(Level.WARNING, "Unknown Terra access level: " + terraAccessLevel);
+        yield null;
+      }
+    };
   }
 }

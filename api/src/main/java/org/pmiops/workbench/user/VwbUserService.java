@@ -231,4 +231,8 @@ public class VwbUserService {
     vwbUserManagerClient.updatePodBillingAccount(
         pod.getVwbPodId(), workbenchConfigProvider.get().billing.accountId);
   }
+
+  public OrganizationMember getOrganizationMember(String email) {
+    return vwbUserManagerClient.getOrganizationMember(email);
+  }
 }
