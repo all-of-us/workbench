@@ -31,6 +31,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
+import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.Property;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,10 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       vwbCreated = true;
 
       UUID workspaceId = vwbWorkspace.getId();
+
+      String userEmail = workspace.getCreator();
+      wsmClient.shareWorkspaceAsService(workspaceId.toString(), userEmail, IamRole.OWNER);
+
       List<Property> properties =
           List.of(
               new Property().key("terra-default-location").value("us-central1"),
