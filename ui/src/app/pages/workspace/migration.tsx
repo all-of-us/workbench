@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
+import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -9,15 +10,54 @@ interface Props {
   workspace: WorkspaceData;
 }
 
-const pods = ['Pod A', 'Pod B', 'Pod C'];
-
 export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   const [selectedPod, setSelectedPod] = useState('');
+  const [pods, setPods] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  if (!workspace) return null;
+  if (!workspace) {
+    return null;
+  }
+
+  // 🔥 Load Pods
+  useEffect(() => {
+    const loadPods = async () => {
+      try {
+        const response = await workspacesApi().getUserPods();
+        setPods(response || []);
+      } catch (e) {
+        console.error('Failed to load pods', e);
+      }
+    };
+
+    loadPods();
+  }, []);
+
+  // 🚀 Start Migration
+  const handleMigration = async () => {
+    try {
+      setLoading(true);
+
+      await workspacesApi().startWorkspaceMigration(
+        workspace.namespace,
+        workspace.terraName,
+        {
+          folders: [], // keep empty for now
+          podId: selectedPod,
+          researchPurpose: JSON.stringify(workspace.researchPurpose),
+        }
+      );
+
+      console.log('Migration started');
+    } catch (e) {
+      console.error('Migration failed', e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div style={{ padding: '' }}>
+    <div style={{ padding: '1.5rem 2rem' }}>
       {/* 🔶 TOP BANNER */}
       <div
         style={{
@@ -34,60 +74,12 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
           <ClrIcon shape='exclamation-triangle' size={18} />
           <div style={{ marginLeft: '10px', fontSize: '14px' }}>
             <strong>Important</strong> — For migration to be successful you need
-            to agree to the terms of service in Verily Workbench before starting
-            migration.
+            to agree to the terms of service in Verily Workbench.
           </div>
         </div>
 
-        <div
-          style={{
-            color: '#2F2C7A',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
+        <div style={{ color: '#2F2C7A', fontWeight: 600 }}>
           Open Verily Workbench ✕
-        </div>
-      </div>
-
-      {/* 📦 READY CARD */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: '20px',
-        }}
-      >
-        <div
-          style={{
-            border: '1px solid #D3DAE6',
-            borderRadius: '8px',
-            padding: '16px',
-            width: '60%',
-            background: '#F7F9FC',
-          }}
-        >
-          <h3 style={{ marginBottom: '8px' }}>Ready to migrate?</h3>
-
-          <div style={{ fontSize: '14px', lineHeight: '20px' }}>
-            Once you start migration you will no longer be able to access this
-            workspace on AoU Researcher workbench.
-          </div>
-
-          <div style={{ marginTop: '12px', fontSize: '14px' }}>
-            <strong>What will be migrated:</strong>
-            <div>• Your workspace and files in your cloud bucket</div>
-
-            <div style={{ marginTop: '8px' }}>
-              <strong>What won’t be migrated:</strong>
-              <div>• Any files on your persistent disks</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Support Button */}
-        <div>
-          <Button variant='secondary'>Open user support hub</Button>
         </div>
       </div>
 
@@ -106,14 +98,11 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
         <div>
           <div style={{ fontWeight: 600 }}>{workspace.terraName}</div>
           <div style={{ fontSize: '13px', color: '#6B7280' }}>
-            Controlled Tier Dataset V8
-          </div>
-          <div style={{ fontSize: '12px', marginTop: '4px' }}>
-            Last changed: —
+            Controlled Tier Dataset
           </div>
         </div>
 
-        {/* Middle Pod Select */}
+        {/* Pod Select */}
         <div style={{ width: '300px' }}>
           <select
             value={selectedPod}
@@ -127,15 +116,17 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
           >
             <option value=''>Select a pod</option>
             {pods.map((pod) => (
-              <option key={pod} value={pod}>
-                {pod}
+              <option key={pod.podId} value={pod.podId}>
+                {pod.userFacingId || pod.description || pod.podId}
               </option>
             ))}
           </select>
         </div>
 
         {/* CTA */}
-        <Button disabled={!selectedPod}>Start migration</Button>
+        <Button disabled={!selectedPod || loading} onClick={handleMigration}>
+          {loading ? 'Starting...' : 'Start migration'}
+        </Button>
       </div>
     </div>
   );

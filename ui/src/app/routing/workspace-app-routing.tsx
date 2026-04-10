@@ -26,6 +26,7 @@ import { DataComponentSplitter } from 'app/pages/data/tanagra-dev/data-component
 import { TanagraContainer } from 'app/pages/data/tanagra-dev/tanagra-container';
 import { TanagraDev } from 'app/pages/data/tanagra-dev/tanagra-dev';
 import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
+import { MigrationPage } from 'app/pages/workspace/migration';
 import { WorkspaceAbout } from 'app/pages/workspace/workspace-about';
 import {
   WorkspaceEdit,
@@ -35,7 +36,6 @@ import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 
 import { analysisTabName } from './utils';
-import { MigrationPage } from 'app/pages/workspace/migration';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(

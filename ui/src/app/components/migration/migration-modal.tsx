@@ -231,10 +231,7 @@ export const MigrationModal = ({ onClose }: Props) => {
                 <div>{ws.cdrVersion}</div>
 
                 <div>
-                  <MigrationBadge
-                    state={ws.migrationState}
-                    owner={ws.migrationOwner}
-                  />
+                  <MigrationBadge state={ws.migrationState} />
                 </div>
 
                 <div>

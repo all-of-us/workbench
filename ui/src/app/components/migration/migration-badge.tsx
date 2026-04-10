@@ -2,67 +2,53 @@ import * as React from 'react';
 
 import { MigrationState } from 'generated/fetch';
 
-import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
 const styles = reactStyles({
   badge: {
-    padding: '4px 8px',
-    borderRadius: 12,
-    fontSize: 12,
-    whiteSpace: 'normal',
-    fontWeight: 600,
+    height: '1.5rem',
+    fontSize: 10,
+    borderRadius: '0.3rem',
+    padding: '0 10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '4.5rem',
+  },
+  inProgress: {
+    backgroundColor: '#E5E7EB', // light grey
+    color: '#374151',
+  },
+  completed: {
+    backgroundColor: '#C7E6E3', // teal
+    color: '#1F4D4A',
+  },
+  failed: {
+    backgroundColor: '#FEE2E2',
+    color: '#991B1B',
   },
 });
 
 interface Props {
   state: MigrationState;
-  owner?: string;
 }
 
-export const MigrationBadge = ({ state, owner }: Props) => {
-  const getLabel = () => {
-    switch (state) {
-      case MigrationState.NOT_STARTED:
-        return 'Not Started';
+export const MigrationBadge = ({ state }: Props) => {
+  if (state === MigrationState.STARTING) {
+    return (
+      <span style={{ ...styles.badge, ...styles.inProgress }}>IN PROGRESS</span>
+    );
+  }
 
-      case MigrationState.STARTING:
-        return owner
-          ? `Migration in Progress (Initiated by ${owner})`
-          : 'Migration in Progress';
+  if (state === MigrationState.FINISHED) {
+    return (
+      <span style={{ ...styles.badge, ...styles.completed }}>MIGRATED</span>
+    );
+  }
 
-      case MigrationState.FINISHED:
-        return 'Migration Complete';
+  if (state === MigrationState.FAILED) {
+    return <span style={{ ...styles.badge, ...styles.failed }}>FAILED</span>;
+  }
 
-      default:
-        return '';
-    }
-  };
-
-  const getStyle = () => {
-    switch (state) {
-      case MigrationState.NOT_STARTED:
-        return {
-          background: colorWithWhiteness(colors.success, 0.85),
-          color: colors.success,
-        };
-
-      case MigrationState.STARTING:
-        return {
-          background: colorWithWhiteness(colors.primary, 0.85),
-          color: colors.primary,
-        };
-
-      case MigrationState.FINISHED:
-        return {
-          background: colorWithWhiteness(colors.secondary, 0.85),
-          color: colors.secondary,
-        };
-
-      default:
-        return {};
-    }
-  };
-
-  return <span style={{ ...styles.badge, ...getStyle() }}>{getLabel()}</span>;
+  return null;
 };
