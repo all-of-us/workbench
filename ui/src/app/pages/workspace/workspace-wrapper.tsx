@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -36,6 +35,8 @@ import {
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
+
+import { WorkspaceMigrationNoticeModal } from './workspace-migration-notice-modal';
 
 const styles = reactStyles({
   bannerNotification: {
@@ -261,6 +262,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   const [showNewCtNotification, setShowNewCtNotification] = useState(false);
   const [showUnlinkedBillingNotification, setShowUnlinkedBillingNotification] =
     useState(false);
+  const [showMigrationNotice, setShowMigrationNotice] = useState(false);
 
   useEffect(() => {
     hideSpinner();
@@ -354,6 +356,12 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
     setShowNewCtNotification(isControlled && isNew);
     setShowUnlinkedBillingNotification(isWorkspaceBillingUnlinked());
   }, [workspace]);
+
+  useEffect(() => {
+    if (workspace) {
+      setShowMigrationNotice(true);
+    }
+  }, [workspace]);
   const migrationState = workspace?.migrationState;
 
   const showMultiRegionWorkspaceNotification =
@@ -385,6 +393,11 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
             }}
           >
             <WorkspaceRoutes />
+            {showMigrationNotice && (
+              <WorkspaceMigrationNoticeModal
+                onClose={() => setShowMigrationNotice(false)}
+              />
+            )}
           </div>
         </>
       ) : (

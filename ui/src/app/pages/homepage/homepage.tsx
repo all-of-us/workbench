@@ -15,13 +15,12 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SemiBoldHeader, SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
 import { CustomBulletList, CustomBulletListItem } from 'app/components/lists';
-import { MigrationBanner } from 'app/components/migration/migration-banner';
 import { MigrationModal } from 'app/components/migration/migration-modal';
 import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { RecentResources } from 'app/pages/homepage/recent-resources';
 import { RecentWorkspaces } from 'app/pages/homepage/recent-workspaces';
-import { VwbCreateWorkspaceModal } from 'app/pages/workspace/VwbCreateWorkspaceModal';
+import { VwbCreateWorkspaceModal } from 'app/pages/workspace/vwb-create-workspace-modal';
 import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
@@ -36,7 +35,8 @@ import cohortIcon from 'assets/images/cohort-icon.svg';
 import workspaceIcon from 'assets/images/workspace-icon.svg';
 
 import { QuickTourAndVideos } from './quick-tour-and-videos';
-import { VwbMigrationBanner } from './VwbMigrationBanner';
+import { VwbBanner } from './vwb-banner';
+import { VwbMigrationBanner } from './vwb-migration-banner';
 
 export const styles = reactStyles({
   fadeBox: {
@@ -339,11 +339,12 @@ export const Homepage = fp.flow(
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
-            {enableVwbMigration && migrationTestingGroup && (
-              <MigrationBanner onStartMigration={this.openMigrationModal} />
-            )}
             {serverConfigStore.get().config.enableVWBHomepageBanner ? (
-              <VwbMigrationBanner />
+              enableVwbMigration && migrationTestingGroup ? (
+                <VwbMigrationBanner />
+              ) : (
+                <VwbBanner />
+              )
             ) : (
               <WelcomeHeader />
             )}

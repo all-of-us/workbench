@@ -156,7 +156,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
               style={{
                 ...styles.resourceTypeButton,
                 backgroundColor: '#E9EDF5', // light bluish background
-                border: '1px solid #D3DAE6',
+                border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
                 boxShadow: 'none',
                 padding: '20px',
               }}
@@ -175,7 +175,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 style={{
                   fontSize: '20px',
                   fontWeight: 600,
-                  color: '#1F2A44',
+                  color: colors.primary,
                   marginBottom: '8px',
                 }}
               >
@@ -187,7 +187,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 style={{
                   fontSize: '14px',
                   lineHeight: '20px',
-                  color: '#3B4A6B',
+                  color: colors.dark,
                   marginBottom: '8px',
                 }}
               >
@@ -196,7 +196,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 workspace not migrated will be archived.{' '}
                 <span
                   style={{
-                    color: '#3B4A6B',
+                    color: colors.accent,
                     textDecoration: 'underline',
                     cursor: 'pointer',
                   }}
@@ -210,7 +210,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 style={{
                   fontSize: '14px',
                   fontWeight: 600,
-                  color: '#1F2A44',
+                  color: colors.primary,
                   marginTop: '8px',
                   marginBottom: '6px',
                 }}
@@ -223,7 +223,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 style={{
                   fontSize: '13px',
                   lineHeight: '18px',
-                  color: '#1F2A44',
+                  color: colors.primary,
                 }}
               >
                 <div>1. Review workspace to ensure you wish to migrate</div>
@@ -242,8 +242,8 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 <div
                   style={{
                     marginTop: '16px',
-                    backgroundColor: '#2F2C7A',
-                    color: '#fff',
+                    backgroundColor: colors.primary,
+                    color: colors.white,
                     display: 'inline-flex',
                     alignItems: 'center',
                     padding: '8px 14px',
