@@ -1,4 +1,3 @@
-import { Galleria } from 'primereact/galleria';
 import { faUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -9,18 +8,10 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { useNavigation } from 'app/utils/navigation';
-import vwbCarousel1 from 'assets/images/vwb-carousel-1.png';
-import vwbCarousel2 from 'assets/images/vwb-carousel-2.png';
-import vwbCarousel3 from 'assets/images/vwb-carousel-3.png';
+import vwbMigrationImage from 'assets/images/vwb-migration.png';
 
 const VWB_USER_SUPPORT_HUB_URL =
   'https://support.researchallofus.org/hc/en-us/articles/39985865987732-What-to-expect-during-the-Researcher-Workbench-Migration';
-
-const VWB_CAROUSEL_ITEMS = [vwbCarousel1, vwbCarousel2, vwbCarousel3];
-
-const carouselTemplate = (img) => (
-  <img src={img} alt='migration-carousel' style={{ width: '100%' }} />
-);
 
 export const VwbMigrationBanner = () => {
   const [navigate] = useNavigation();
@@ -28,7 +19,6 @@ export const VwbMigrationBanner = () => {
     <FlexRow
       style={{
         background: colors.banner,
-        borderRadius: '0.5rem',
         margin: '1.5rem 3% 0 3%',
         padding: '1.5rem',
         minWidth: '1450px',
@@ -130,12 +120,13 @@ export const VwbMigrationBanner = () => {
 
       {/* RIGHT CAROUSEL */}
       <FlexColumn style={{ marginLeft: '1.5rem', flex: 1 }}>
-        <Galleria
-          value={VWB_CAROUSEL_ITEMS}
-          showIndicators
-          showIndicatorsOnItem
-          showThumbnails={false}
-          item={carouselTemplate}
+        <img
+          src={vwbMigrationImage}
+          alt='Workspace migration'
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
         />
       </FlexColumn>
     </FlexRow>

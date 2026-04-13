@@ -284,6 +284,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                   <FlexColumn>
                     <FlexRow style={{ gap: '6px', alignItems: 'center' }}>
                       <div
+                        data-test-id='workspace-access-level'
                         style={{
                           ...styles.permissionBox,
                           backgroundColor:
