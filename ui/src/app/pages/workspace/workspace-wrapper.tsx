@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Workspace } from 'generated/fetch';
+import { MigrationState, Workspace } from 'generated/fetch';
 
 import { StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -263,6 +263,9 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   const [showUnlinkedBillingNotification, setShowUnlinkedBillingNotification] =
     useState(false);
   const [showMigrationNotice, setShowMigrationNotice] = useState(false);
+  const migrationState = workspace?.migrationState;
+  const shouldShowMigrationModal =
+    migrationState === MigrationState.NOT_STARTED;
 
   useEffect(() => {
     hideSpinner();
@@ -358,12 +361,10 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   }, [workspace]);
 
   useEffect(() => {
-    if (workspace) {
+    if (workspace && shouldShowMigrationModal) {
       setShowMigrationNotice(true);
     }
   }, [workspace]);
-  const migrationState = workspace?.migrationState;
-
   const showMultiRegionWorkspaceNotification =
     workspace &&
     new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
@@ -393,7 +394,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
             }}
           >
             <WorkspaceRoutes />
-            {showMigrationNotice && (
+            {shouldShowMigrationModal && showMigrationNotice && (
               <WorkspaceMigrationNoticeModal
                 onClose={() => setShowMigrationNotice(false)}
               />
