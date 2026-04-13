@@ -1,10 +1,9 @@
-import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Workspace } from 'generated/fetch';
+import { MigrationState, Workspace } from 'generated/fetch';
 
 import { StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -36,6 +35,8 @@ import {
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
+
+import { WorkspaceMigrationNoticeModal } from './workspace-migration-notice-modal';
 
 const styles = reactStyles({
   bannerNotification: {
@@ -261,6 +262,10 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   const [showNewCtNotification, setShowNewCtNotification] = useState(false);
   const [showUnlinkedBillingNotification, setShowUnlinkedBillingNotification] =
     useState(false);
+  const [showMigrationNotice, setShowMigrationNotice] = useState(false);
+  const migrationState = workspace?.migrationState;
+  const shouldShowMigrationModal =
+    migrationState === MigrationState.NOT_STARTED;
 
   useEffect(() => {
     hideSpinner();
@@ -354,8 +359,12 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
     setShowNewCtNotification(isControlled && isNew);
     setShowUnlinkedBillingNotification(isWorkspaceBillingUnlinked());
   }, [workspace]);
-  const migrationState = workspace?.migrationState;
 
+  useEffect(() => {
+    if (workspace && shouldShowMigrationModal) {
+      setShowMigrationNotice(true);
+    }
+  }, [workspace]);
   const showMultiRegionWorkspaceNotification =
     workspace &&
     new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
@@ -385,6 +394,11 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
             }}
           >
             <WorkspaceRoutes />
+            {shouldShowMigrationModal && showMigrationNotice && (
+              <WorkspaceMigrationNoticeModal
+                onClose={() => setShowMigrationNotice(false)}
+              />
+            )}
           </div>
         </>
       ) : (

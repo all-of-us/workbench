@@ -26,6 +26,7 @@ import { DataComponentSplitter } from 'app/pages/data/tanagra-dev/data-component
 import { TanagraContainer } from 'app/pages/data/tanagra-dev/tanagra-container';
 import { TanagraDev } from 'app/pages/data/tanagra-dev/tanagra-dev';
 import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
+import { MigrationPage } from 'app/pages/workspace/migration';
 import { WorkspaceAbout } from 'app/pages/workspace/workspace-about';
 import {
   WorkspaceEdit,
@@ -485,6 +486,20 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: 'data',
             workspaceNavBarTab: 'tanagra',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/migration`}
+        guards={[adminLockedGuard(ns, terraName)]}
+      >
+        <MigrationPage
+          routeData={{
+            title: 'Workspace Migration',
+            breadcrumb: BreadcrumbType.Workspace,
+            workspaceNavBarTab: 'migration',
+            pageKey: 'migration',
           }}
         />
       </AppRoute>
