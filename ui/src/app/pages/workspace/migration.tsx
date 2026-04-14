@@ -111,7 +111,8 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
       {!hasAcceptedTos && (
         <VwbImportantBanner
           title='Important'
-          message='Before starting migration, log into Researcher Workbench 2.0 to agree to the terms of service. You only need to do this once.'
+          message={`Before starting migration, log into Researcher Workbench 2.0 
+to agree to the terms of service. You only need to do this once.`}
           actionText='Open Verily Workbench'
           onAction={() => window.open(environment.vwbUiUrl, '_blank')}
         />
