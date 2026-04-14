@@ -633,6 +633,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         sql,
         (rs, unused) -> {
           String specificPopulationsStr = rs.getString("specific_populations");
+          String migrationStateStr = rs.getString("migration_state");
           boolean focusOnUnderrepresentedPopulations =
               specificPopulationsStr != null && !specificPopulationsStr.isEmpty();
 
@@ -680,7 +681,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
               .workspaceDemographic(
                   toModelWorkspaceDemographic(getSpecificPopulationsSet(specificPopulationsStr)))
               .migratedVwbWorkspaceId(rs.getString("migrated_vwb_workspace_id"))
-              .migrationState(migrationStateFromStorage(rs.getShort("migration_state")));
+                  .migrationState(
+                          migrationStateStr == null
+                                  ? null
+                                  : MigrationState.valueOf(migrationStateStr)
+                  );
         },
         limit,
         offset);
