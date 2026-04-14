@@ -631,6 +631,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkbenchListBillingAccountsResponse'
+  /v1/user/tosStatus:
+    get:
+      tags:
+        - user
+      summary: Get current user's ToS acceptance status
+      operationId: getUserTosStatus
+      responses:
+        '200':
+          description: Whether user has accepted ToS
+          content:
+            application/json:
+              schema:
+                type: boolean
   /v1/runtimes/{workspaceNamespace}:
     get:
       tags:

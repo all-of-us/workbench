@@ -11,6 +11,7 @@ import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.PodDescription;
 import org.pmiops.workbench.vwb.user.model.PodDescriptionList;
 import org.pmiops.workbench.vwb.user.model.PodRole;
+import org.pmiops.workbench.vwb.user.model.UserTosState;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -234,5 +235,17 @@ public class VwbUserService {
 
   public OrganizationMember getOrganizationMember(String email) {
     return vwbUserManagerClient.getOrganizationMember(email);
+  }
+
+  public Boolean getUserTosState() {
+    String email = userProvider.get().getUsername();
+
+    OrganizationMember member = vwbUserManagerClient.getOrganizationMember(email);
+
+    if (member == null || member.getUserDescription() == null) {
+      return false;
+    }
+
+    return member.getUserDescription().getTosState() == UserTosState.OK;
   }
 }
