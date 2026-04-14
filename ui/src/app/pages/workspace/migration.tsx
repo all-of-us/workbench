@@ -2,10 +2,15 @@ import { useEffect, useState } from 'react';
 
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
-import { userApi, workspacesApi } from 'app/services/swagger-fetch-clients';
+import {
+  disksApi,
+  userApi,
+  workspacesApi,
+} from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
+import { PdWarningModal } from './pd-warning-modal';
 import { VwbImportantBanner } from './vwb-migration-banner';
 import { VwbMigrationInfoBox } from './vwb-migration-infobox';
 
@@ -18,6 +23,10 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   const [pods, setPods] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasAcceptedTos, setHasAcceptedTos] = useState<boolean | null>(null);
+  const [hasPersistentDisk, setHasPersistentDisk] = useState<boolean | null>(
+    null
+  );
+  const [showPdModal, setShowPdModal] = useState(false);
 
   if (!workspace) {
     return null;
@@ -72,7 +81,30 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
 
     fetchTos();
   }, []);
-  console.log(hasAcceptedTos);
+  useEffect(() => {
+    const checkDisks = async () => {
+      try {
+        const disks = await disksApi().listOwnedDisksInWorkspace(
+          workspace.namespace
+        );
+
+        setHasPersistentDisk(disks && disks.length > 0);
+      } catch (e) {
+        console.error('Failed to check disks', e);
+        setHasPersistentDisk(false); // safe fallback
+      }
+    };
+
+    checkDisks();
+  }, [workspace.namespace]);
+
+  const handleStartClick = () => {
+    if (hasPersistentDisk) {
+      setShowPdModal(true);
+    } else {
+      void handleMigration();
+    }
+  };
   return (
     <div style={{ padding: '1.5rem 2rem' }}>
       {/* 🔶 TOP BANNER */}
@@ -126,10 +158,19 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
         </div>
 
         {/* CTA */}
-        <Button disabled={!selectedPod || loading} onClick={handleMigration}>
+        <Button disabled={!selectedPod || loading} onClick={handleStartClick}>
           {loading ? 'Starting...' : 'Start migration'}
         </Button>
       </div>
+      {showPdModal && (
+        <PdWarningModal
+          onCancel={() => setShowPdModal(false)}
+          onConfirm={() => {
+            setShowPdModal(false);
+            handleMigration();
+          }}
+        />
+      )}
     </div>
   );
 });
