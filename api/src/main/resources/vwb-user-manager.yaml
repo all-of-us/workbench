@@ -713,6 +713,14 @@ paths:
       summary: List the pods in an organization
       operationId: listPods
       tags: [ Pod ]
+      parameters:
+        - name: email
+          in: query
+          description: When included, each pod result will include memberRoles for the specified user email
+          required: false
+          schema:
+            type: string
+            format: email
       responses:
         '200':
           description: Response to listPods request
