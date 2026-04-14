@@ -67,7 +67,7 @@ public class ReportingTestUtils {
       FeaturedWorkspaceCategory.COMMUNITY.toString();
   public static final String WORKSPACE__ACTIVE_STATUS = "Active";
   public static final String WORKSPACE__MIGRATED_VWB_WORKSPACE_ID = "12345";
-  public static final String WORKSPACE__MIGRATION_STATE = "NOT_STARTED";
+  public static final MigrationState WORKSPACE__MIGRATION_STATE = MigrationState.NOT_STARTED;
   public static final Boolean WORKSPACE__FOCUS_ON_UNDER_REPRESENTED_POPULATIONS = true;
   public static final WorkspaceDemographic WORKSPACE__WORKSPACE_DEMOGRAPHIC =
       new WorkspaceDemographic()
