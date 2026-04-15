@@ -103,7 +103,8 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { migrationTestingGroup } = profileStore.get().profile;
+  const profile = profileStore.get().profile;
+  const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
   const { enableVwbMigration } = serverConfigStore.get().config;
   const { workspace } = props;
 
