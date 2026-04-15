@@ -1920,6 +1920,9 @@ components:
           $ref: '#/components/schemas/PodEnvironment'
         groupName:
           type: string
+        memberRoles:
+          description: Roles for the specified email (when email query parameter is provided in listPods)
+          $ref: '#/components/schemas/PodRoleList'
         createdBy:
           description: User email of creator
           type: string
