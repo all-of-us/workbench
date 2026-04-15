@@ -8,6 +8,8 @@ import {
   workspacesApi,
 } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace } from 'app/utils';
+import { useNavigation } from 'app/utils/navigation';
+import { profileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { PdWarningModal } from './pd-warning-modal';
@@ -19,6 +21,7 @@ interface Props {
 }
 
 export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
+  const [navigate] = useNavigation();
   const [selectedPod, setSelectedPod] = useState('');
   const [pods, setPods] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,6 +33,10 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
 
   if (!workspace) {
     return null;
+  }
+
+  if (!profileStore.get().profile.migrationTestingGroup) {
+    navigate(['workspaces', workspace.namespace, workspace.terraName, 'data']);
   }
 
   // Load Pods
