@@ -30,6 +30,7 @@ import org.pmiops.workbench.model.BillingAccount;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -61,6 +62,7 @@ public class UserController implements UserApiDelegate {
   private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
   private final UserService userService;
+  private final VwbUserService vwbUserService;
 
   @Autowired
   public UserController(
@@ -70,7 +72,8 @@ public class UserController implements UserApiDelegate {
       AccessTierService accessTierService,
       FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
-      UserService userService) {
+      UserService userService,
+      VwbUserService vwbUserService) {
     this.cloudBillingProvider = cloudBillingProvider;
     this.userProvider = userProvider;
     this.configProvider = configProvider;
@@ -78,6 +81,7 @@ public class UserController implements UserApiDelegate {
     this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
     this.userService = userService;
+    this.vwbUserService = vwbUserService;
   }
 
   /**
@@ -207,6 +211,11 @@ public class UserController implements UserApiDelegate {
   public ResponseEntity<Void> signOut() {
     userService.signOut(userProvider.get());
     return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Boolean> getUserTosStatus() {
+    return ResponseEntity.ok(vwbUserService.getUserTosState());
   }
 
   /**

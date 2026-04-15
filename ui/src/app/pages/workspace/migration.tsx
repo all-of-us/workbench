@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
 
+import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
-import { ClrIcon } from 'app/components/icons';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import {
+  disksApi,
+  userApi,
+  workspacesApi,
+} from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
+
+import { PdWarningModal } from './pd-warning-modal';
+import { VwbImportantBanner } from './vwb-migration-banner';
+import { VwbMigrationInfoBox } from './vwb-migration-infobox';
 
 interface Props {
   workspace: WorkspaceData;
@@ -14,12 +22,17 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   const [selectedPod, setSelectedPod] = useState('');
   const [pods, setPods] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasAcceptedTos, setHasAcceptedTos] = useState<boolean | null>(null);
+  const [hasPersistentDisk, setHasPersistentDisk] = useState<boolean | null>(
+    null
+  );
+  const [showPdModal, setShowPdModal] = useState(false);
 
   if (!workspace) {
     return null;
   }
 
-  // 🔥 Load Pods
+  // Load Pods
   useEffect(() => {
     const loadPods = async () => {
       try {
@@ -33,7 +46,7 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
     loadPods();
   }, []);
 
-  // 🚀 Start Migration
+  // Start Migration
   const handleMigration = async () => {
     try {
       setLoading(true);
@@ -55,34 +68,56 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    const fetchTos = async () => {
+      try {
+        const res = await userApi().getUserTosStatus();
+        setHasAcceptedTos(res);
+      } catch (e) {
+        console.error('Failed to fetch ToS state', e);
+        setHasAcceptedTos(false); // safe fallback
+      }
+    };
 
+    fetchTos();
+  }, []);
+  useEffect(() => {
+    const checkDisks = async () => {
+      try {
+        const disks = await disksApi().listOwnedDisksInWorkspace(
+          workspace.namespace
+        );
+
+        setHasPersistentDisk(disks && disks.length > 0);
+      } catch (e) {
+        console.error('Failed to check disks', e);
+        setHasPersistentDisk(false); // safe fallback
+      }
+    };
+
+    checkDisks();
+  }, [workspace.namespace]);
+
+  const handleStartClick = () => {
+    if (hasPersistentDisk) {
+      setShowPdModal(true);
+    } else {
+      void handleMigration();
+    }
+  };
   return (
     <div style={{ padding: '1.5rem 2rem' }}>
       {/* 🔶 TOP BANNER */}
-      <div
-        style={{
-          background: '#FBE3C2',
-          padding: '12px 16px',
-          borderRadius: '6px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <ClrIcon shape='exclamation-triangle' size={18} />
-          <div style={{ marginLeft: '10px', fontSize: '14px' }}>
-            <strong>Important</strong> — For migration to be successful you need
-            to agree to the terms of service in Verily Workbench.
-          </div>
-        </div>
-
-        <div style={{ color: '#2F2C7A', fontWeight: 600 }}>
-          Open Verily Workbench ✕
-        </div>
-      </div>
-
+      {!hasAcceptedTos && (
+        <VwbImportantBanner
+          title='Important'
+          message={`Before starting migration, log into Researcher Workbench 2.0 
+to agree to the terms of service. You only need to do this once.`}
+          actionText='Open Verily Workbench'
+          onAction={() => window.open(environment.vwbUiUrl, '_blank')}
+        />
+      )}
+      <VwbMigrationInfoBox />
       {/* 🧾 WORKSPACE ROW */}
       <div
         style={{
@@ -124,10 +159,19 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
         </div>
 
         {/* CTA */}
-        <Button disabled={!selectedPod || loading} onClick={handleMigration}>
+        <Button disabled={!selectedPod || loading} onClick={handleStartClick}>
           {loading ? 'Starting...' : 'Start migration'}
         </Button>
       </div>
+      {showPdModal && (
+        <PdWarningModal
+          onCancel={() => setShowPdModal(false)}
+          onConfirm={() => {
+            setShowPdModal(false);
+            handleMigration();
+          }}
+        />
+      )}
     </div>
   );
 });
