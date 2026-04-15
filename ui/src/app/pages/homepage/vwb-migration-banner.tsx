@@ -38,12 +38,18 @@ export const VwbMigrationBanner = () => {
             }}
           >
             Migrate your Workspaces to Researcher Workbench 2.0
-            {/*TODO uncomment whe we have an end date*/}
-            {/*by {'<date>'}*/}
+            {/* TODO uncomment whe we have an end date*/}
+            {/* by {'<date>'}*/}
           </Header>
 
           {/* DESCRIPTION */}
-          <SmallHeader style={{ fontSize: '14px', lineHeight: '1.25rem', marginTop: '1rem' }}>
+          <SmallHeader
+            style={{
+              fontSize: '14px',
+              lineHeight: '1.25rem',
+              marginTop: '1rem',
+            }}
+          >
             You are now able to migrate your workspaces to Researcher Workbench
             2.0, powered on{' '}
             <span style={{ fontWeight: 700 }}>
@@ -51,8 +57,8 @@ export const VwbMigrationBanner = () => {
             </span>
             . Review your current workspaces to decide which ones you want to
             migrate. Any workspaces you don’t migrate will be archived. Any
-            workspace associated with CDR v7 and v8 can be migrated. Review
-            the detailed migration instructions and tips on the{' '}
+            workspace associated with CDR v7 and v8 can be migrated. Review the
+            detailed migration instructions and tips on the{' '}
             <StyledExternalLink
               href={VWB_USER_SUPPORT_HUB_URL}
               style={{ color: colors.primary, textDecoration: 'underline' }}
@@ -64,7 +70,13 @@ export const VwbMigrationBanner = () => {
           </SmallHeader>
 
           {/* PRE-REQUISITES */}
-          <div style={{ fontSize: '14px', lineHeight: '1.25rem', marginTop: '1rem' }}>
+          <div
+            style={{
+              fontSize: '14px',
+              lineHeight: '1.25rem',
+              marginTop: '1rem',
+            }}
+          >
             <SmallHeader style={{ fontWeight: 600 }}>
               Before you begin workspace migration, you must:
             </SmallHeader>
@@ -91,7 +103,7 @@ export const VwbMigrationBanner = () => {
                   Workbench. Otherwise you must set up a billing pod before you
                   begin migration.{' '}
                   <StyledExternalLink
-                    href='https://support.researchallofus.org/hc/en-us/articles/INSERT_BILLING_LINK'
+                    href='https://support.workbench.verily.com/docs/getting_started/billing_setup/'
                     target='_blank'
                     style={{
                       color: colors.primary,
@@ -107,7 +119,7 @@ export const VwbMigrationBanner = () => {
 
           {/* CTA BUTTON */}
           <Button
-            style={{ marginTop: '1rem', height: '45px', width: '300px' }}
+            style={{ marginTop: '0.5rem', height: '45px', width: '300px' }}
             onClick={() => navigate(['workspaces'])}
           >
             Go to My Workspaces
@@ -120,13 +132,14 @@ export const VwbMigrationBanner = () => {
       </FlexColumn>
 
       {/* RIGHT CAROUSEL */}
-      <FlexColumn style={{ marginLeft: '1.5rem', flex: 1.25 }}>
+      <FlexColumn style={{ marginLeft: '1.5rem', flex: 1.35 }}>
         <img
           src={vwbMigrationImage}
           alt='Workspace migration'
           style={{
+            marginTop: '1%',
             width: '100%',
-            height: '100%',
+            height: '95%',
           }}
         />
       </FlexColumn>

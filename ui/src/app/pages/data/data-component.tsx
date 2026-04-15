@@ -3,7 +3,11 @@ import { useEffect, useState } from 'react';
 
 import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 
-import { CardButton, TabButton } from 'app/components/buttons';
+import {
+  CardButton,
+  StyledExternalLink,
+  TabButton,
+} from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -75,6 +79,9 @@ const descriptions = {
   be exported for analysis. `,
   cohorts: 'A cohort is a group of participants based on specific criteria.',
 };
+
+const VWB_USER_SUPPORT_HUB_URL =
+  'https://support.researchallofus.org/hc/en-us/articles/39985865987732-What-to-expect-during-the-Researcher-Workbench-Migration';
 
 const resourceTypesToFetch = [
   ResourceType.COHORT.toString(),
@@ -159,16 +166,9 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
                 boxShadow: 'none',
                 padding: '20px',
+                cursor: 'default',
               }}
               disabled={!writePermission}
-              onClick={() => {
-                navigate([
-                  'workspaces',
-                  workspace.namespace,
-                  workspace.terraName,
-                  'migration',
-                ]);
-              }}
             >
               {/* Title */}
               <div
@@ -185,34 +185,34 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
               {/* Description */}
               <div
                 style={{
-                  fontSize: '14px',
+                  fontSize: '13px',
                   lineHeight: '20px',
                   color: colors.dark,
-                  marginBottom: '8px',
                 }}
               >
                 Researcher Workbench workspaces are moving to Verily Workbench.
                 Please migrate your researcher before June 15, 2026. Any
                 workspace not migrated will be archived.{' '}
-                <span
+                <StyledExternalLink
+                  href={VWB_USER_SUPPORT_HUB_URL}
                   style={{
                     color: colors.accent,
                     textDecoration: 'underline',
                     cursor: 'pointer',
                   }}
+                  target='_blank'
                 >
                   Learn more
-                </span>
+                </StyledExternalLink>
               </div>
 
               {/* Section Title */}
               <div
                 style={{
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: 600,
                   color: colors.primary,
                   marginTop: '8px',
-                  marginBottom: '6px',
                 }}
               >
                 Workspace Migration To Do List:
@@ -221,7 +221,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
               {/* List */}
               <div
                 style={{
-                  fontSize: '13px',
+                  fontSize: '12px',
                   lineHeight: '18px',
                   color: colors.primary,
                 }}
@@ -241,15 +241,24 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
               <div style={{ marginTop: 'auto' }}>
                 <div
                   style={{
-                    marginTop: '16px',
+                    marginTop: '8px',
                     backgroundColor: colors.primary,
                     color: colors.white,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    padding: '8px 14px',
+                    padding: '4px 16px',
                     borderRadius: '4px',
                     fontSize: '13px',
                     fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    navigate([
+                      'workspaces',
+                      workspace.namespace,
+                      workspace.terraName,
+                      'migration',
+                    ]);
                   }}
                 >
                   Get started
