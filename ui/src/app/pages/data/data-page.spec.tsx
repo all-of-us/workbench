@@ -5,6 +5,7 @@ import {
   CohortsApi,
   ConceptSetsApi,
   DataSetApi,
+  Profile,
   WorkspacesApi,
 } from 'generated/fetch';
 
@@ -14,7 +15,11 @@ import { DataComponent } from 'app/pages/data/data-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
+import {
+  ProfileStore,
+  profileStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 import { renderWithRouter, waitForNoSpinner } from 'testing/react-test-helpers';
 import {
@@ -42,6 +47,9 @@ describe('DataPage', () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(DataSetApi, new DataSetApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
+    profileStore.set({
+      profile: { username: 'testUser' } as Profile,
+    } as ProfileStore);
     serverConfigStore.set({
       config: { gsuiteDomain: '' },
     });

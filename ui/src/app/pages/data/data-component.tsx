@@ -19,6 +19,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
@@ -102,6 +103,9 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const profile = profileStore.get().profile;
+  const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
+  const { enableVwbMigration } = serverConfigStore.get().config;
   const { workspace } = props;
 
   if (!workspace) {
@@ -152,125 +156,127 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     <React.Fragment>
       <div style={{ paddingLeft: '2.25rem' }}>
         <div style={styles.cardButtonArea}>
-          <TooltipTrigger
-            content={
-              !writePermission &&
-              'Write permission required to perform migration'
-            }
-            side='top'
-          >
-            <CardButton
-              style={{
-                ...styles.resourceTypeButton,
-                backgroundColor: '#E9EDF5', // light bluish background
-                border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
-                boxShadow: 'none',
-                padding: '20px',
-                cursor: 'default',
-              }}
-              disabled={!writePermission}
+          {enableVwbMigration && migrationTestingGroup && (
+            <TooltipTrigger
+              content={
+                !writePermission &&
+                'Write permission required to perform migration'
+              }
+              side='top'
             >
-              {/* Title */}
-              <div
+              <CardButton
                 style={{
-                  fontSize: '20px',
-                  fontWeight: 600,
-                  color: colors.primary,
-                  marginBottom: '8px',
+                  ...styles.resourceTypeButton,
+                  backgroundColor: '#E9EDF5', // light bluish background
+                  border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+                  boxShadow: 'none',
+                  padding: '20px',
+                  cursor: 'default',
                 }}
+                disabled={!writePermission}
               >
-                Migration
-              </div>
-
-              {/* Description */}
-              <div
-                style={{
-                  fontSize: '13px',
-                  lineHeight: '20px',
-                  color: colors.dark,
-                }}
-              >
-                Researcher Workbench workspaces are moving to Verily Workbench.
-                Please migrate your researcher before June 15, 2026. Any
-                workspace not migrated will be archived.{' '}
-                <StyledExternalLink
-                  href={VWB_USER_SUPPORT_HUB_URL}
-                  style={{
-                    color: colors.accent,
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                  }}
-                  target='_blank'
-                >
-                  Learn more
-                </StyledExternalLink>
-              </div>
-
-              {/* Section Title */}
-              <div
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: colors.primary,
-                  marginTop: '8px',
-                }}
-              >
-                Workspace Migration To Do List:
-              </div>
-
-              {/* List */}
-              <div
-                style={{
-                  fontSize: '12px',
-                  lineHeight: '18px',
-                  color: colors.primary,
-                }}
-              >
-                <div>1. Review workspace to ensure you wish to migrate</div>
-                <div>
-                  2. Delete stored files no longer applicable to your work
-                </div>
-                <div>
-                  3. Migrate files from your persistent disk (if applicable) to
-                  the workspace bucket
-                </div>
-                <div>4. Know which billing project you would like to use</div>
-              </div>
-
-              {/* CTA */}
-              <div style={{ marginTop: 'auto' }}>
+                {/* Title */}
                 <div
                   style={{
-                    marginTop: '8px',
-                    backgroundColor: colors.primary,
-                    color: colors.white,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    padding: '4px 16px',
-                    borderRadius: '4px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    navigate([
-                      'workspaces',
-                      workspace.namespace,
-                      workspace.terraName,
-                      'migration',
-                    ]);
+                    fontSize: '20px',
+                    fontWeight: 600,
+                    color: colors.primary,
+                    marginBottom: '8px',
                   }}
                 >
-                  Get started
-                  <ClrIcon
-                    shape='arrow right'
-                    size={12}
-                    style={{ marginLeft: '6px' }}
-                  />
+                  Migration
                 </div>
-              </div>
-            </CardButton>
-          </TooltipTrigger>
+
+                {/* Description */}
+                <div
+                  style={{
+                    fontSize: '13px',
+                    lineHeight: '20px',
+                    color: colors.dark,
+                  }}
+                >
+                  Researcher Workbench workspaces are moving to Verily
+                  Workbench. Please migrate your researcher before June 15,
+                  2026. Any workspace not migrated will be archived.{' '}
+                  <StyledExternalLink
+                    href={VWB_USER_SUPPORT_HUB_URL}
+                    style={{
+                      color: colors.accent,
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    }}
+                    target='_blank'
+                  >
+                    Learn more
+                  </StyledExternalLink>
+                </div>
+
+                {/* Section Title */}
+                <div
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: colors.primary,
+                    marginTop: '8px',
+                  }}
+                >
+                  Workspace Migration To Do List:
+                </div>
+
+                {/* List */}
+                <div
+                  style={{
+                    fontSize: '12px',
+                    lineHeight: '18px',
+                    color: colors.primary,
+                  }}
+                >
+                  <div>1. Review workspace to ensure you wish to migrate</div>
+                  <div>
+                    2. Delete stored files no longer applicable to your work
+                  </div>
+                  <div>
+                    3. Migrate files from your persistent disk (if applicable)
+                    to the workspace bucket
+                  </div>
+                  <div>4. Know which billing project you would like to use</div>
+                </div>
+
+                {/* CTA */}
+                <div style={{ marginTop: 'auto' }}>
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      backgroundColor: colors.primary,
+                      color: colors.white,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '4px 16px',
+                      borderRadius: '4px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      navigate([
+                        'workspaces',
+                        workspace.namespace,
+                        workspace.terraName,
+                        'migration',
+                      ]);
+                    }}
+                  >
+                    Get started
+                    <ClrIcon
+                      shape='arrow right'
+                      size={12}
+                      style={{ marginLeft: '6px' }}
+                    />
+                  </div>
+                </div>
+              </CardButton>
+            </TooltipTrigger>
+          )}
           <TooltipTrigger
             content={
               !writePermission && 'Write permission required to create cohorts'

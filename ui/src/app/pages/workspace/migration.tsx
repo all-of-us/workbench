@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import { MigrationState } from 'generated/fetch';
+
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import {
@@ -8,6 +10,8 @@ import {
   workspacesApi,
 } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace } from 'app/utils';
+import { useNavigation } from 'app/utils/navigation';
+import { profileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { PdWarningModal } from './pd-warning-modal';
@@ -19,6 +23,7 @@ interface Props {
 }
 
 export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
+  const [navigate] = useNavigation();
   const [selectedPod, setSelectedPod] = useState('');
   const [pods, setPods] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,9 +33,26 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   );
   const [showPdModal, setShowPdModal] = useState(false);
 
+  const [migrationState, setMigrationState] = useState<MigrationState>(
+    workspace?.migrationState ?? MigrationState.NOT_STARTED
+  );
+
   if (!workspace) {
     return null;
   }
+
+  const profile = profileStore.get().profile;
+  const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
+
+  if (!migrationTestingGroup) {
+    navigate(['workspaces', workspace.namespace, workspace.terraName, 'data']);
+  }
+
+  useEffect(() => {
+    if (workspace?.migrationState) {
+      setMigrationState(workspace.migrationState);
+    }
+  }, [workspace]);
 
   // Load Pods
   useEffect(() => {
@@ -55,19 +77,22 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
         workspace.namespace,
         workspace.terraName,
         {
-          folders: [], // keep empty for now
+          folders: [],
           podId: selectedPod,
           researchPurpose: JSON.stringify(workspace.researchPurpose),
         }
       );
 
-      console.log('Migration started');
+      setMigrationState(MigrationState.STARTING);
     } catch (e) {
       console.error('Migration failed', e);
+
+      setMigrationState(MigrationState.FAILED);
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     const fetchTos = async () => {
       try {
@@ -75,12 +100,13 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
         setHasAcceptedTos(res);
       } catch (e) {
         console.error('Failed to fetch ToS state', e);
-        setHasAcceptedTos(false); // safe fallback
+        setHasAcceptedTos(false);
       }
     };
 
     fetchTos();
   }, []);
+
   useEffect(() => {
     const checkDisks = async () => {
       try {
@@ -91,7 +117,7 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
         setHasPersistentDisk(disks && disks.length > 0);
       } catch (e) {
         console.error('Failed to check disks', e);
-        setHasPersistentDisk(false); // safe fallback
+        setHasPersistentDisk(false);
       }
     };
 
@@ -105,9 +131,10 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
       void handleMigration();
     }
   };
+
   return (
     <div style={{ padding: '1.5rem 2rem' }}>
-      {/* 🔶 TOP BANNER */}
+      {/*  TOP BANNER */}
       {!hasAcceptedTos && (
         <VwbImportantBanner
           title='Important'
@@ -117,8 +144,10 @@ to agree to the terms of service. You only need to do this once.`}
           onAction={() => window.open(environment.vwbUiUrl, '_blank')}
         />
       )}
+
       <VwbMigrationInfoBox />
-      {/* 🧾 WORKSPACE ROW */}
+
+      {/*  WORKSPACE ROW */}
       <div
         style={{
           border: '1px solid #D3DAE6',
@@ -159,16 +188,33 @@ to agree to the terms of service. You only need to do this once.`}
         </div>
 
         {/* CTA */}
-        <Button disabled={!selectedPod || loading} onClick={handleStartClick}>
-          {loading ? 'Starting...' : 'Start migration'}
+        <Button
+          disabled={
+            loading ||
+            !selectedPod ||
+            migrationState === MigrationState.STARTING ||
+            migrationState === MigrationState.FINISHED
+          }
+          onClick={handleStartClick}
+        >
+          {loading
+            ? 'Starting...'
+            : migrationState === MigrationState.STARTING
+            ? 'Migration in progress'
+            : migrationState === MigrationState.FINISHED
+            ? 'Migrated'
+            : migrationState === MigrationState.FAILED
+            ? 'Retry migration'
+            : 'Start migration'}
         </Button>
       </div>
+
       {showPdModal && (
         <PdWarningModal
           onCancel={() => setShowPdModal(false)}
           onConfirm={() => {
             setShowPdModal(false);
-            handleMigration();
+            void handleMigration();
           }}
         />
       )}
