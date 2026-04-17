@@ -26,7 +26,8 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   const [navigate] = useNavigation();
   const [selectedPod, setSelectedPod] = useState('');
   const [pods, setPods] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingPods, setLoadingPods] = useState(false);
+  const [startingMigration, setStartingMigration] = useState(false);
   const [hasAcceptedTos, setHasAcceptedTos] = useState<boolean | null>(null);
   const [hasPersistentDisk, setHasPersistentDisk] = useState<boolean | null>(
     null
@@ -52,16 +53,19 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
     if (workspace?.migrationState) {
       setMigrationState(workspace.migrationState);
     }
-  }, [workspace]);
+  }, [workspace.migrationState]);
 
   // Load Pods
   useEffect(() => {
     const loadPods = async () => {
+      setLoadingPods(true);
       try {
         const response = await workspacesApi().getUserPods();
         setPods(response || []);
       } catch (e) {
         console.error('Failed to load pods', e);
+      } finally {
+        setLoadingPods(false);
       }
     };
 
@@ -71,7 +75,7 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   // Start Migration
   const handleMigration = async () => {
     try {
-      setLoading(true);
+      setStartingMigration(true);
 
       await workspacesApi().startWorkspaceMigration(
         workspace.namespace,
@@ -89,7 +93,7 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
 
       setMigrationState(MigrationState.FAILED);
     } finally {
-      setLoading(false);
+      setStartingMigration(false);
     }
   };
 
@@ -177,8 +181,9 @@ to agree to the terms of service. You only need to do this once.`}
               borderRadius: '6px',
               border: '1px solid #D3DAE6',
             }}
+            disabled={loadingPods}
           >
-            <option value=''>Select a pod</option>
+            <option value=''>{loadingPods ? 'Loading pods...' : 'Select a pod'}</option>
             {pods.map((pod) => (
               <option key={pod.podId} value={pod.podId}>
                 {pod.userFacingId || pod.description || pod.podId}
@@ -190,14 +195,14 @@ to agree to the terms of service. You only need to do this once.`}
         {/* CTA */}
         <Button
           disabled={
-            loading ||
+            startingMigration ||
             !selectedPod ||
             migrationState === MigrationState.STARTING ||
             migrationState === MigrationState.FINISHED
           }
           onClick={handleStartClick}
         >
-          {loading
+          {startingMigration
             ? 'Starting...'
             : migrationState === MigrationState.STARTING
             ? 'Migration in progress'
