@@ -15,7 +15,7 @@ import { profileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { PdWarningModal } from './pd-warning-modal';
-import { VwbImportantBanner } from './vwb-migration-banner';
+import { VwbImportantBanner } from './vwb-important-banner';
 import { VwbMigrationInfoBox } from './vwb-migration-infobox';
 
 interface Props {
@@ -146,6 +146,7 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
 to agree to the terms of service. You only need to do this once.`}
           actionText='Open Verily Workbench'
           onAction={() => window.open(environment.vwbUiUrl, '_blank')}
+          onClose={() => setHasAcceptedTos(true)}
         />
       )}
 
@@ -183,7 +184,9 @@ to agree to the terms of service. You only need to do this once.`}
             }}
             disabled={loadingPods}
           >
-            <option value=''>{loadingPods ? 'Loading pods...' : 'Select a pod'}</option>
+            <option value=''>
+              {loadingPods ? 'Loading pods...' : 'Select a pod'}
+            </option>
             {pods.map((pod) => (
               <option key={pod.podId} value={pod.podId}>
                 {pod.userFacingId || pod.description || pod.podId}

@@ -13,6 +13,7 @@ export default {
   light: '#E9ECEF',
   highlight: '#F8C954',
   warning: '#F7981C',
+  warningAlt: '#5D3108',
   danger: '#DB3214',
   dark: '#4A4A4A',
   tableBorder: '#c8c8c8',

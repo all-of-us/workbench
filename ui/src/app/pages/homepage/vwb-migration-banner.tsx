@@ -11,7 +11,10 @@ import { useNavigation } from 'app/utils/navigation';
 import vwbMigrationImage from 'assets/images/vwb-migration.png';
 
 const VWB_USER_SUPPORT_HUB_URL =
-  'https://support.researchallofus.org/hc/en-us/articles/39985865987732-What-to-expect-during-the-Researcher-Workbench-Migration';
+  'https://support.researchallofus.org/hc/en-us/articles/48266066855188';
+const VWB_USER_BILLING_POD_URL =
+  'https://support.researchallofus.org/hc/en-us/articles/41981050556564-' +
+  'Getting-Started-in-new-Researcher-Workbench-2-0#h_01KDR2615S4SGFD62K5MJ4VKPA';
 
 export const VwbMigrationBanner = () => {
   const [navigate] = useNavigation();
@@ -103,7 +106,7 @@ export const VwbMigrationBanner = () => {
                   Workbench. Otherwise you must set up a billing pod before you
                   begin migration.{' '}
                   <StyledExternalLink
-                    href='https://support.workbench.verily.com/docs/getting_started/billing_setup/'
+                    href={VWB_USER_BILLING_POD_URL}
                     target='_blank'
                     style={{
                       color: colors.primary,
