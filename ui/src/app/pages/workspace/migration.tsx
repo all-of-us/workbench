@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as React from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
 import { MigrationState } from 'generated/fetch';
@@ -15,8 +16,14 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
+import { findCdrVersion } from 'app/utils/cdr-versions';
+import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import {
+  cdrVersionStore,
+  profileStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { PdWarningModal } from './pd-warning-modal';
@@ -223,7 +230,19 @@ to agree to the terms of service. You only need to do this once.`}
               marginTop: '4px',
             }}
           >
-            Controlled Tier Dataset V8
+            {findCdrVersion(workspace.cdrVersionId, cdrVersionStore.get()).name}
+          </div>
+          <div
+            style={{
+              fontSize: '12px',
+              color: colors.dark,
+              marginTop: '4px',
+            }}
+          >
+            Last Changed: {displayDate(workspace.lastModifiedTime)}
+          </div>
+          <div style={{ fontSize: 12 }}>
+            Created By: {workspace.creatorUser.userName.split('@')[0]}
           </div>
         </div>
 
