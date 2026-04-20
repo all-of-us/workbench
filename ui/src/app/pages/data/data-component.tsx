@@ -108,7 +108,8 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
 
   const profile = profileStore.get().profile;
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
-  const { enableVwbMigration } = serverConfigStore.get().config;
+  const { cdrVersionIdsForMigration, enableVwbMigration } =
+    serverConfigStore.get().config;
   const { workspace } = props;
 
   if (!workspace) {
@@ -159,92 +160,50 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     <React.Fragment>
       <div style={{ paddingLeft: '2.25rem' }}>
         <div style={styles.cardButtonArea}>
-          {enableVwbMigration && migrationTestingGroup && (
-            <TooltipTrigger
-              content={
-                !writePermission &&
-                'Write permission required to perform migration'
-              }
-              side='top'
-            >
-              <CardButton
-                style={{
-                  ...styles.resourceTypeButton,
-                  backgroundColor: '#E9EDF5', // light bluish background
-                  border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
-                  boxShadow: 'none',
-                  padding: '16px',
-                  cursor: 'default',
-                }}
-                disabled={!writePermission}
+          {enableVwbMigration &&
+            migrationTestingGroup &&
+            cdrVersionIdsForMigration.includes(+workspace.cdrVersionId) && (
+              <TooltipTrigger
+                content={
+                  !writePermission &&
+                  'Write permission required to perform migration'
+                }
+                side='top'
               >
-                {/* Title */}
-                <div
+                <CardButton
                   style={{
-                    fontSize: '20px',
-                    fontWeight: 600,
-                    color: colors.primary,
-                    marginBottom: '4px',
+                    ...styles.resourceTypeButton,
+                    backgroundColor: '#E9EDF5', // light bluish background
+                    border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+                    boxShadow: 'none',
+                    padding: '16px',
+                    cursor: 'default',
                   }}
+                  disabled={!writePermission}
                 >
-                  Migration
-                </div>
-
-                {/* Description */}
-                <div
-                  style={{
-                    fontSize: '12.5px',
-                    lineHeight: '20px',
-                    color: colors.dark,
-                  }}
-                >
-                  The All of Us Researcher Workbench is moving to a new
-                  platform. Please migrate your workspaces. Any workspace not
-                  migrated will be archived.{' '}
-                  <StyledExternalLink
-                    href={VWB_USER_SUPPORT_MIGRATION_URL}
+                  {/* Title */}
+                  <div
                     style={{
-                      color: colors.accent,
-                      textDecoration: 'underline',
+                      fontSize: '20px',
+                      fontWeight: 600,
+                      color: colors.primary,
+                      marginBottom: '4px',
                     }}
-                    target='_blank'
                   >
-                    Learn more
-                  </StyledExternalLink>
-                </div>
-
-                {/* Section Title */}
-                <div
-                  style={{
-                    fontSize: '12.5px',
-                    fontWeight: 600,
-                    color: colors.primary,
-                  }}
-                >
-                  Prepare for Migration:
-                </div>
-
-                {/* List */}
-                <div
-                  style={{
-                    fontSize: '11.5px',
-                    lineHeight: '18px',
-                    color: colors.primary,
-                  }}
-                >
-                  <div>
-                    <CheckBox style={{ marginRight: '4px' }} />
-                    Review your workspaces to decide which ones to migrate
+                    Migration
                   </div>
-                  <div>
-                    <CheckBox style={{ marginRight: '4px' }} />
-                    Delete any inactive workspaces or stored files no longer
-                    applicable to your work
-                  </div>
-                  <div>
-                    <CheckBox style={{ marginRight: '4px' }} />
-                    Migrate files from your persistent disk (if applicable) to
-                    the workspace bucket{' '}
+
+                  {/* Description */}
+                  <div
+                    style={{
+                      fontSize: '12.5px',
+                      lineHeight: '20px',
+                      color: colors.dark,
+                    }}
+                  >
+                    The All of Us Researcher Workbench is moving to a new
+                    platform. Please migrate your workspaces. Any workspace not
+                    migrated will be archived.{' '}
                     <StyledExternalLink
                       href={VWB_USER_SUPPORT_MIGRATION_URL}
                       style={{
@@ -256,59 +215,103 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                       Learn more
                     </StyledExternalLink>
                   </div>
-                  <div>
-                    <CheckBox style={{ marginRight: '4px' }} />
-                    Set up billing in the new Researcher Workbench 2.0 if
-                    initial credits have been used{' '}
-                    <StyledExternalLink
-                      href={VWB_USER_SUPPORT_BILLING_URL}
-                      style={{
-                        color: colors.accent,
-                        textDecoration: 'underline',
-                      }}
-                      target='_blank'
-                    >
-                      Learn more
-                    </StyledExternalLink>
-                  </div>
-                </div>
 
-                {/* CTA */}
-                <div style={{ marginTop: 'auto' }}>
+                  {/* Section Title */}
                   <div
                     style={{
-                      marginTop: '4px',
-                      backgroundColor: colors.primary,
-                      color: colors.white,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      padding: '4px 16px',
-                      borderRadius: '4px',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      height: '30px',
-                    }}
-                    onClick={() => {
-                      navigate([
-                        'workspaces',
-                        workspace.namespace,
-                        workspace.terraName,
-                        'migration',
-                      ]);
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      color: colors.primary,
                     }}
                   >
-                    Get started
-                    <ClrIcon
-                      shape='arrow right'
-                      size={12}
-                      style={{ marginLeft: '6px' }}
-                    />
+                    Prepare for Migration:
                   </div>
-                </div>
-              </CardButton>
-            </TooltipTrigger>
-          )}
+
+                  {/* List */}
+                  <div
+                    style={{
+                      fontSize: '11.5px',
+                      lineHeight: '18px',
+                      color: colors.primary,
+                    }}
+                  >
+                    <div>
+                      <CheckBox style={{ marginRight: '4px' }} />
+                      Review your workspaces to decide which ones to migrate
+                    </div>
+                    <div>
+                      <CheckBox style={{ marginRight: '4px' }} />
+                      Delete any inactive workspaces or stored files no longer
+                      applicable to your work
+                    </div>
+                    <div>
+                      <CheckBox style={{ marginRight: '4px' }} />
+                      Migrate files from your persistent disk (if applicable) to
+                      the workspace bucket{' '}
+                      <StyledExternalLink
+                        href={VWB_USER_SUPPORT_MIGRATION_URL}
+                        style={{
+                          color: colors.accent,
+                          textDecoration: 'underline',
+                        }}
+                        target='_blank'
+                      >
+                        Learn more
+                      </StyledExternalLink>
+                    </div>
+                    <div>
+                      <CheckBox style={{ marginRight: '4px' }} />
+                      Set up billing in the new Researcher Workbench 2.0 if
+                      initial credits have been used{' '}
+                      <StyledExternalLink
+                        href={VWB_USER_SUPPORT_BILLING_URL}
+                        style={{
+                          color: colors.accent,
+                          textDecoration: 'underline',
+                        }}
+                        target='_blank'
+                      >
+                        Learn more
+                      </StyledExternalLink>
+                    </div>
+                  </div>
+
+                  {/* CTA */}
+                  <div style={{ marginTop: 'auto' }}>
+                    <div
+                      style={{
+                        marginTop: '4px',
+                        backgroundColor: colors.primary,
+                        color: colors.white,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        padding: '4px 16px',
+                        borderRadius: '4px',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        height: '30px',
+                      }}
+                      onClick={() => {
+                        navigate([
+                          'workspaces',
+                          workspace.namespace,
+                          workspace.terraName,
+                          'migration',
+                        ]);
+                      }}
+                    >
+                      Get started
+                      <ClrIcon
+                        shape='arrow right'
+                        size={12}
+                        style={{ marginLeft: '6px' }}
+                      />
+                    </div>
+                  </div>
+                </CardButton>
+              </TooltipTrigger>
+            )}
           <TooltipTrigger
             content={
               !writePermission && 'Write permission required to create cohorts'

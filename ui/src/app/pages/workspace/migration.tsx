@@ -12,7 +12,7 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace } from 'app/utils';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
-import { profileStore } from 'app/utils/stores';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { PdWarningModal } from './pd-warning-modal';
@@ -48,9 +48,13 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   }
 
   const profile = profileStore.get().profile;
+  const { cdrVersionIdsForMigration } = serverConfigStore.get().config;
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
 
-  if (!migrationTestingGroup) {
+  if (
+    !migrationTestingGroup ||
+    !cdrVersionIdsForMigration.includes(+workspace.cdrVersionId)
+  ) {
     navigate(['workspaces', workspace.namespace, workspace.terraName, 'data']);
   }
 
