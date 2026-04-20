@@ -4,19 +4,22 @@ import { MigrationState } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
+import { rwToVwbResearchPurpose } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import {
   disksApi,
   userApi,
   workspacesApi,
 } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace } from 'app/utils';
-import { useNavigation } from 'app/utils/navigation';
-import { profileStore } from 'app/utils/stores';
+import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { PdWarningModal } from './pd-warning-modal';
-import { VwbImportantBanner } from './vwb-migration-banner';
+import { VwbImportantBanner } from './vwb-important-banner';
 import { VwbMigrationInfoBox } from './vwb-migration-infobox';
+
+const WORKSPACE_MIGRATION_POLL_INTERVAL_MS = 5 * 1000;
 
 interface Props {
   workspace: WorkspaceData;
@@ -26,7 +29,8 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   const [navigate] = useNavigation();
   const [selectedPod, setSelectedPod] = useState('');
   const [pods, setPods] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingPods, setLoadingPods] = useState(false);
+  const [startingMigration, setStartingMigration] = useState(false);
   const [hasAcceptedTos, setHasAcceptedTos] = useState<boolean | null>(null);
   const [hasPersistentDisk, setHasPersistentDisk] = useState<boolean | null>(
     null
@@ -36,42 +40,60 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   const [migrationState, setMigrationState] = useState<MigrationState>(
     workspace?.migrationState ?? MigrationState.NOT_STARTED
   );
+  const [transferTimeoutId, setTransferTimeoutId] =
+    useState<NodeJS.Timeout>(undefined);
 
   if (!workspace) {
     return null;
   }
 
   const profile = profileStore.get().profile;
+  const { cdrVersionIdsForMigration } = serverConfigStore.get().config;
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
 
-  if (!migrationTestingGroup) {
+  if (
+    !migrationTestingGroup ||
+    !cdrVersionIdsForMigration.includes(+workspace.cdrVersionId)
+  ) {
     navigate(['workspaces', workspace.namespace, workspace.terraName, 'data']);
   }
+
+  const checkWorkspaceMigrationStatus = async () => {
+    const workspaceStatusCheck = await workspacesApi().getWorkspace(
+      workspace.namespace,
+      workspace.terraName
+    );
+    if (
+      workspaceStatusCheck.workspace.migrationState === MigrationState.STARTING
+    ) {
+      if (!transferTimeoutId) {
+        const timeoutId = setTimeout(
+          checkWorkspaceMigrationStatus,
+          WORKSPACE_MIGRATION_POLL_INTERVAL_MS
+        );
+        setTransferTimeoutId(timeoutId);
+      }
+    }
+    setMigrationState(workspaceStatusCheck.workspace.migrationState);
+  };
 
   useEffect(() => {
     if (workspace?.migrationState) {
       setMigrationState(workspace.migrationState);
     }
-  }, [workspace]);
+  }, [workspace.migrationState]);
 
   // Load Pods
-  useEffect(() => {
-    const loadPods = async () => {
-      try {
-        const response = await workspacesApi().getUserPods();
-        setPods(response || []);
-      } catch (e) {
-        console.error('Failed to load pods', e);
-      }
-    };
-
-    loadPods();
-  }, []);
+  useEffect(() => {}, []);
 
   // Start Migration
   const handleMigration = async () => {
     try {
-      setLoading(true);
+      setStartingMigration(true);
+      currentWorkspaceStore.next({
+        ...workspace,
+        migrationState: MigrationState.STARTING,
+      });
 
       await workspacesApi().startWorkspaceMigration(
         workspace.namespace,
@@ -79,21 +101,40 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
         {
           folders: [],
           podId: selectedPod,
-          researchPurpose: JSON.stringify(workspace.researchPurpose),
+          researchPurpose: JSON.stringify(
+            rwToVwbResearchPurpose(workspace.researchPurpose)
+          ),
         }
       );
-
+      void checkWorkspaceMigrationStatus();
       setMigrationState(MigrationState.STARTING);
     } catch (e) {
       console.error('Migration failed', e);
 
       setMigrationState(MigrationState.FAILED);
     } finally {
-      setLoading(false);
+      setStartingMigration(false);
     }
   };
 
   useEffect(() => {
+    if (
+      workspace.migrationState === MigrationState.STARTING &&
+      !startingMigration
+    ) {
+      void checkWorkspaceMigrationStatus();
+    }
+    const loadPods = async () => {
+      setLoadingPods(true);
+      try {
+        const response = await workspacesApi().getUserPods();
+        setPods(response || []);
+      } catch (e) {
+        console.error('Failed to load pods', e);
+      } finally {
+        setLoadingPods(false);
+      }
+    };
     const fetchTos = async () => {
       try {
         const res = await userApi().getUserTosStatus();
@@ -104,6 +145,7 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
       }
     };
 
+    loadPods();
     fetchTos();
   }, []);
 
@@ -142,6 +184,7 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
 to agree to the terms of service. You only need to do this once.`}
           actionText='Open Verily Workbench'
           onAction={() => window.open(environment.vwbUiUrl, '_blank')}
+          onClose={() => setHasAcceptedTos(true)}
         />
       )}
 
@@ -177,8 +220,11 @@ to agree to the terms of service. You only need to do this once.`}
               borderRadius: '6px',
               border: '1px solid #D3DAE6',
             }}
+            disabled={loadingPods}
           >
-            <option value=''>Select a pod</option>
+            <option value=''>
+              {loadingPods ? 'Loading pods...' : 'Select a pod'}
+            </option>
             {pods.map((pod) => (
               <option key={pod.podId} value={pod.podId}>
                 {pod.userFacingId || pod.description || pod.podId}
@@ -190,14 +236,14 @@ to agree to the terms of service. You only need to do this once.`}
         {/* CTA */}
         <Button
           disabled={
-            loading ||
+            startingMigration ||
             !selectedPod ||
             migrationState === MigrationState.STARTING ||
             migrationState === MigrationState.FINISHED
           }
           onClick={handleStartClick}
         >
-          {loading
+          {startingMigration
             ? 'Starting...'
             : migrationState === MigrationState.STARTING
             ? 'Migration in progress'
