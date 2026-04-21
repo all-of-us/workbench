@@ -1,18 +1,29 @@
 import { useEffect, useState } from 'react';
+import * as React from 'react';
+import { Dropdown } from 'primereact/dropdown';
 
 import { MigrationState } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
+import { ClrIcon } from 'app/components/icons';
+import { TooltipTrigger } from 'app/components/popups';
 import { rwToVwbResearchPurpose } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import {
   disksApi,
   userApi,
   workspacesApi,
 } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
+import { findCdrVersion } from 'app/utils/cdr-versions';
+import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import {
+  cdrVersionStore,
+  profileStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { PdWarningModal } from './pd-warning-modal';
@@ -176,7 +187,7 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
 
   return (
     <div style={{ padding: '1.5rem 2rem' }}>
-      {/*  TOP BANNER */}
+      {/* TOP BANNER */}
       {!hasAcceptedTos && (
         <VwbImportantBanner
           title='Important'
@@ -190,50 +201,105 @@ to agree to the terms of service. You only need to do this once.`}
 
       <VwbMigrationInfoBox />
 
-      {/*  WORKSPACE ROW */}
       <div
         style={{
-          border: '1px solid #D3DAE6',
+          border: `1px solid ${colors.light}`,
           borderRadius: '8px',
-          padding: '16px',
+          padding: '16px 20px',
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px',
         }}
       >
-        {/* Left Info */}
-        <div>
-          <div style={{ fontWeight: 600 }}>{workspace.terraName}</div>
-          <div style={{ fontSize: '13px', color: '#6B7280' }}>
-            Controlled Tier Dataset
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div
+            style={{
+              fontWeight: 600,
+              fontSize: '14px',
+              color: colors.primary,
+            }}
+          >
+            {workspace.terraName}
+          </div>
+
+          <div
+            style={{
+              fontSize: '12px',
+              color: colors.dark,
+              marginTop: '4px',
+            }}
+          >
+            {findCdrVersion(workspace.cdrVersionId, cdrVersionStore.get()).name}
+          </div>
+          <div
+            style={{
+              fontSize: '12px',
+              color: colors.dark,
+              marginTop: '4px',
+            }}
+          >
+            Last Changed: {displayDate(workspace.lastModifiedTime)}
+          </div>
+          <div style={{ fontSize: 12 }}>
+            Created By: {workspace.creatorUser.userName.split('@')[0]}
           </div>
         </div>
 
-        {/* Pod Select */}
-        <div style={{ width: '300px' }}>
-          <select
-            value={selectedPod}
-            onChange={(e) => setSelectedPod(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '6px',
-              border: '1px solid #D3DAE6',
-            }}
-            disabled={loadingPods}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flex: 1,
+            justifyContent: 'center',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div
+              style={{
+                fontSize: '12px',
+                color: colors.dark,
+                fontWeight: 500,
+                marginBottom: '4px',
+              }}
+            >
+              Verily Workbench billing pod
+            </div>
+
+            <Dropdown
+              value={selectedPod}
+              options={pods}
+              optionLabel='userFacingId'
+              optionValue='podId'
+              placeholder={loadingPods ? 'Loading pods...' : 'Select a pod'}
+              onChange={(e) => setSelectedPod(e.value)}
+              disabled={loadingPods}
+              style={{
+                width: '300px',
+                borderRadius: '6px',
+              }}
+            />
+          </div>
+
+          <TooltipTrigger
+            content={
+              'You are selecting a pod for workspace storage costs in Verily Workbench. There is no cost to migrate your workspace bucket.'
+            }
+            side='top'
           >
-            <option value=''>
-              {loadingPods ? 'Loading pods...' : 'Select a pod'}
-            </option>
-            {pods.map((pod) => (
-              <option key={pod.podId} value={pod.podId}>
-                {pod.userFacingId || pod.description || pod.podId}
-              </option>
-            ))}
-          </select>
+            <ClrIcon
+              shape='info-circle'
+              size={24}
+              style={{
+                cursor: 'pointer',
+                color: colors.accent,
+                marginTop: '18px',
+              }}
+            />
+          </TooltipTrigger>
         </div>
 
-        {/* CTA */}
         <Button
           disabled={
             startingMigration ||
@@ -241,6 +307,12 @@ to agree to the terms of service. You only need to do this once.`}
             migrationState === MigrationState.STARTING ||
             migrationState === MigrationState.FINISHED
           }
+          style={{
+            height: '36px',
+            padding: '0 16px',
+            fontSize: '13px',
+            fontWeight: 600,
+          }}
           onClick={handleStartClick}
         >
           {startingMigration
@@ -255,6 +327,7 @@ to agree to the terms of service. You only need to do this once.`}
         </Button>
       </div>
 
+      {/* PD MODAL */}
       {showPdModal && (
         <PdWarningModal
           onCancel={() => setShowPdModal(false)}
