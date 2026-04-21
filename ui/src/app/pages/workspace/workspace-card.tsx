@@ -162,6 +162,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         tierAccessDisabled,
         navigate,
         useFeaturedWorkspacePageUi,
+        isMigratedView,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
       return (
@@ -270,25 +271,26 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       </TooltipTrigger>
                     </StyledRouterLink>
 
-                    {workspace.migrationState === 'FINISHED' && (
-                      <a
-                        href={`${environment.vwbUiUrl}/workspaces/${workspace.namespace}`}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        style={{
-                          fontSize: '12px',
-                          color: colors.accent,
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          marginTop: '2px',
-                        }}
-                      >
-                        Open in Verily Workbench
-                        <ClrIcon shape='pop-out' size={10} />
-                      </a>
-                    )}
+                    {workspace.migrationState === 'FINISHED' &&
+                      isMigratedView && (
+                        <a
+                          href={`${environment.vwbUiUrl}/workspaces/${workspace.namespace}`}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          style={{
+                            fontSize: '12px',
+                            color: colors.accent,
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            marginTop: '2px',
+                          }}
+                        >
+                          Open in Verily Workbench
+                          <ClrIcon shape='pop-out' size={10} />
+                        </a>
+                      )}
                   </FlexColumn>
                   {workspace.researchPurpose.reviewRequested === true &&
                     workspace.researchPurpose.approved === false && (

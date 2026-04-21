@@ -252,7 +252,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                               wp.workspace.accessTierShortName
                             )
                           }
-                          isMigratedView={true}
+                          isMigratedView={showMigrated}
                         />
                       ))}
 
