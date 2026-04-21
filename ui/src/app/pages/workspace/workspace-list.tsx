@@ -22,6 +22,7 @@ import { hasTierAccess } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+
 import { NewWorkspaceButton } from './new-workspace-button';
 
 const styles = reactStyles({
