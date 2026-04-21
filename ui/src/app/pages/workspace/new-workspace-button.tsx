@@ -26,7 +26,7 @@ export const NewWorkspaceButton = () => {
       }}
       style={styles.addCard}
     >
-      Create a <br /> New Workspace
+      Create Legacy Workspace
       <ClrIcon shape='plus-circle' style={{ height: '32px', width: '32px' }} />
     </CardButton>
   );
