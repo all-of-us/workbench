@@ -22,6 +22,7 @@ import { hasTierAccess } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import { NewWorkspaceButton } from './new-workspace-button';
 
 const styles = reactStyles({
   fadeBox: {
@@ -273,7 +274,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           </div>
                         </FlexRow>
                       </div>
-
+                      <NewWorkspaceButton />
                       {filteredList.map((wp) => (
                         <WorkspaceCard
                           key={wp.workspace.namespace + '-l'}
@@ -296,7 +297,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           <SmallHeader>Non-migrated Workspaces</SmallHeader>
                         </div>
                       )}
-
+                      <NewWorkspaceButton />
                       {nonMigratedWorkspaces.map((wp) => (
                         <WorkspaceCard
                           key={wp.workspace.namespace}
