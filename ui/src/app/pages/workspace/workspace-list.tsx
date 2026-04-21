@@ -252,6 +252,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                               wp.workspace.accessTierShortName
                             )
                           }
+                          isMigratedView={true}
                         />
                       ))}
 
@@ -288,6 +289,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                               wp.workspace.accessTierShortName
                             )
                           }
+                          isMigratedView={false}
                         />
                       ))}
                     </>
@@ -311,6 +313,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                               wp.workspace.accessTierShortName
                             )
                           }
+                          isMigratedView={false}
                         />
                       ))}
                     </>
