@@ -14,6 +14,7 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceBase from './workspace-base';
 import ConceptSetSearchPage from './conceptset-search-page';
 import { SaveOption } from 'app/modal/conceptset-save-modal';
+import PlanForMigrationModal from 'app/modal/plan-for-migration-modal';
 import ConceptSetActionsPage from './conceptset-actions-page';
 import { Visits } from './cohort-participants-group';
 import CriteriaSearchPage from './criteria-search-page';
@@ -30,6 +31,11 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, PageTitle);
     await waitWhileLoading(this.page);
+    const migrationModal = new PlanForMigrationModal(this.page);
+    if (migrationModal) {
+      const gotIt = migrationModal.getGotItButton();
+      await gotIt.click();
+    }
     return true;
   }
 
