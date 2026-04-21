@@ -610,7 +610,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  w.workspace_id,\n"
             + "  workspace_namespace,\n"
             + "  w.active_status,\n"
-            + "  sp.specific_populations\n"
+            + "  sp.specific_populations,\n"
+            + "  migrated_vwb_workspace_id,\n"
+            + "  migration_state\n"
             + "FROM workspace w\n"
             // some Tanagra workspaces don't have CDR version IDs
             + "  LEFT JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
@@ -631,6 +633,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         sql,
         (rs, unused) -> {
           String specificPopulationsStr = rs.getString("specific_populations");
+          String migrationStateStr = rs.getString("migration_state");
           boolean focusOnUnderrepresentedPopulations =
               specificPopulationsStr != null && !specificPopulationsStr.isEmpty();
 
@@ -676,7 +679,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                   workspaceActiveStatusFromStorage(rs.getShort("active_status")).toString())
               .focusOnUnderrepresentedPopulations(focusOnUnderrepresentedPopulations)
               .workspaceDemographic(
-                  toModelWorkspaceDemographic(getSpecificPopulationsSet(specificPopulationsStr)));
+                  toModelWorkspaceDemographic(getSpecificPopulationsSet(specificPopulationsStr)))
+              .migratedVwbWorkspaceId(rs.getString("migrated_vwb_workspace_id"))
+              .migrationState(
+                  migrationStateStr == null ? null : MigrationState.valueOf(migrationStateStr));
         },
         limit,
         offset);

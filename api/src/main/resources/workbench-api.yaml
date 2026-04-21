@@ -8027,7 +8027,7 @@ components:
           socialBehavioral: false
     MigrationState:
       type: string
-      description: Tracks the lifecycle (NOT_STARTED, STARTING, FINISHED, FAILED)
+      description: Indicates the status of the workspace migration (NOT_STARTED, STARTING, FINISHED, FAILED).
       enum:
         - NOT_STARTED
         - STARTING
@@ -13361,6 +13361,12 @@ components:
           type: string
           description: |-
             Indicates the status of the workspace. It can be either "Active" or "Deleted".
+        migratedVwbWorkspaceId:
+          type: string
+          description: |-
+            Id of the RW 2.0 workspace created during migration
+        migrationState:
+          $ref: '#/components/schemas/MigrationState'
         focusOnUnderrepresentedPopulations:
           type: boolean
           description: |-

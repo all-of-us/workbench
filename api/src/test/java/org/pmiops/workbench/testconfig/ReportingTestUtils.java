@@ -66,6 +66,8 @@ public class ReportingTestUtils {
   public static final String WORKSPACE__FEATURED_WORKSPACE_CATEGORY =
       FeaturedWorkspaceCategory.COMMUNITY.toString();
   public static final String WORKSPACE__ACTIVE_STATUS = "Active";
+  public static final String WORKSPACE__MIGRATED_VWB_WORKSPACE_ID = "12345";
+  public static final MigrationState WORKSPACE__MIGRATION_STATE = MigrationState.NOT_STARTED;
   public static final Boolean WORKSPACE__FOCUS_ON_UNDER_REPRESENTED_POPULATIONS = true;
   public static final WorkspaceDemographic WORKSPACE__WORKSPACE_DEMOGRAPHIC =
       new WorkspaceDemographic()
@@ -153,6 +155,8 @@ public class ReportingTestUtils {
         .workspaceId(WORKSPACE__WORKSPACE_ID)
         .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE)
         .activeStatus(WORKSPACE__ACTIVE_STATUS)
+        .migratedVwbWorkspaceId(WORKSPACE__MIGRATED_VWB_WORKSPACE_ID)
+        .migrationState(WORKSPACE__MIGRATION_STATE)
         .focusOnUnderrepresentedPopulations(WORKSPACE__FOCUS_ON_UNDER_REPRESENTED_POPULATIONS)
         .workspaceDemographic(WORKSPACE__WORKSPACE_DEMOGRAPHIC);
   }

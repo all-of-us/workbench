@@ -14,6 +14,7 @@ import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.Race;
@@ -573,6 +574,14 @@ public final class DbStorageEnums {
           .put(TierAccessStatus.ENABLED, (short) 1)
           .build();
 
+  private static final BiMap<MigrationState, Short> CLIENT_TO_STORAGE_MIGRATION_STATE =
+      ImmutableBiMap.<MigrationState, Short>builder()
+          .put(MigrationState.NOT_STARTED, (short) 0)
+          .put(MigrationState.STARTING, (short) 1)
+          .put(MigrationState.FINISHED, (short) 2)
+          .put(MigrationState.FAILED, (short) 3)
+          .build();
+
   public static Race raceFromStorage(Short race) {
     return CLIENT_TO_STORAGE_RACE.inverse().get(race);
   }
@@ -627,5 +636,13 @@ public final class DbStorageEnums {
 
   public static TierAccessStatus tierAccessStatusFromStorage(Short tierAccessStatus) {
     return CLIENT_TO_STORAGE_TIER_ACCESS_STATUS.inverse().get(tierAccessStatus);
+  }
+
+  public static Short migrationStateToStorage(MigrationState migrationState) {
+    return CLIENT_TO_STORAGE_MIGRATION_STATE.get(migrationState);
+  }
+
+  public static MigrationState migrationStateFromStorage(Short migrationState) {
+    return CLIENT_TO_STORAGE_MIGRATION_STATE.inverse().get(migrationState);
   }
 }
