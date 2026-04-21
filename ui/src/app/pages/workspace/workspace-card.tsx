@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
@@ -97,6 +98,7 @@ interface WorkspaceCardProps extends NavigationProps {
   // non-CT users cannot click or see on CT workspaces.
   tierAccessDisabled?: boolean;
   useFeaturedWorkspacePageUi?: boolean;
+  isMigratedView?: boolean;
 }
 
 export const WorkspaceCard = fp.flow(withNavigation)(
@@ -160,6 +162,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         tierAccessDisabled,
         navigate,
         useFeaturedWorkspacePageUi,
+        isMigratedView,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
       return (
@@ -231,7 +234,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 data-test-id='workspace-card'
               >
                 <FlexColumn style={{ marginBottom: 'auto' }}>
-                  <FlexRow style={{ alignItems: 'flex-start' }}>
+                  <FlexColumn>
                     <StyledRouterLink
                       style={
                         tierAccessDisabled
@@ -267,7 +270,28 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         </div>
                       </TooltipTrigger>
                     </StyledRouterLink>
-                  </FlexRow>
+
+                    {workspace.migrationState === 'FINISHED' &&
+                      isMigratedView && (
+                        <a
+                          href={`${environment.vwbUiUrl}/workspaces/${workspace.namespace}`}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          style={{
+                            fontSize: '12px',
+                            color: colors.accent,
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            marginTop: '2px',
+                          }}
+                        >
+                          Open in Verily Workbench
+                          <ClrIcon shape='pop-out' size={10} />
+                        </a>
+                      )}
+                  </FlexColumn>
                   {workspace.researchPurpose.reviewRequested === true &&
                     workspace.researchPurpose.approved === false && (
                       <div style={{ color: colors.danger }}>
