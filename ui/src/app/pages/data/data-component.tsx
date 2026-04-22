@@ -102,10 +102,16 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
   const [navigate] = useNavigation();
+  const [checks, setChecks] = useState({
+    step1: false,
+    step2: false,
+    step3: false,
+    step4: false,
+  });
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const allChecked = Object.values(checks).every(Boolean);
   const profile = profileStore.get().profile;
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
   const { cdrVersionIdsForMigration, enableVwbMigration } =
@@ -236,16 +242,32 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                     }}
                   >
                     <div>
-                      <CheckBox style={{ marginRight: '4px' }} />
+                      <CheckBox
+                        checked={checks.step1}
+                        onChange={(checked) =>
+                          setChecks({ ...checks, step1: checked })
+                        }
+                        style={{ marginRight: '4px' }}
+                      />
                       Review your workspaces to decide which ones to migrate
                     </div>
                     <div>
-                      <CheckBox style={{ marginRight: '4px' }} />
+                      <CheckBox
+                        checked={checks.step2}
+                        onChange={(checked) =>
+                          setChecks({ ...checks, step2: checked })
+                        }
+                      />
                       Delete any inactive workspaces or stored files no longer
                       applicable to your work
                     </div>
                     <div>
-                      <CheckBox style={{ marginRight: '4px' }} />
+                      <CheckBox
+                        checked={checks.step3}
+                        onChange={(checked) =>
+                          setChecks({ ...checks, step3: checked })
+                        }
+                      />
                       Migrate files from your persistent disk (if applicable) to
                       the workspace bucket{' '}
                       <StyledExternalLink
@@ -260,7 +282,12 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                       </StyledExternalLink>
                     </div>
                     <div>
-                      <CheckBox style={{ marginRight: '4px' }} />
+                      <CheckBox
+                        checked={checks.step4}
+                        onChange={(checked) =>
+                          setChecks({ ...checks, step4: checked })
+                        }
+                      />
                       Set up billing in the new Researcher Workbench 2.0 if
                       initial credits have been used{' '}
                       <StyledExternalLink
@@ -281,7 +308,9 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                     <div
                       style={{
                         marginTop: '4px',
-                        backgroundColor: colors.primary,
+                        backgroundColor: allChecked
+                          ? colors.primary
+                          : '#C4C4C4',
                         color: colors.white,
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -289,10 +318,14 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                         borderRadius: '4px',
                         fontSize: '13px',
                         fontWeight: 500,
-                        cursor: 'pointer',
+                        cursor: allChecked ? 'pointer' : 'not-allowed',
                         height: '30px',
+                        opacity: allChecked ? 1 : 0.6,
                       }}
                       onClick={() => {
+                        if (!allChecked) {
+                          return;
+                        }
                         navigate([
                           'workspaces',
                           workspace.namespace,

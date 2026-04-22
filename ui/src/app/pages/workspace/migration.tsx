@@ -264,7 +264,7 @@ to agree to the terms of service. You only need to do this once.`}
                 marginBottom: '4px',
               }}
             >
-              Verily Workbench billing pod
+              Researcher Workbench 2.0 billing pod
             </div>
 
             <Dropdown

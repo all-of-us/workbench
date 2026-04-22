@@ -69,7 +69,10 @@ export const VwbMigrationInfoBox = () => {
           type='secondaryOutline'
           style={{ height: '36px', marginLeft: '14px' }}
           onClick={() =>
-            window.open('https://support.researchallofus.org/', '_blank')
+            window.open(
+              'https://support.researchallofus.org/hc/en-us/articles/48266066855188',
+              '_blank'
+            )
           }
         >
           <FontAwesomeIcon
