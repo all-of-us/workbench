@@ -217,6 +217,18 @@ public class VwbUserManagerClient {
     return vwbUserManagerRetryHandler.run(context -> podApiProvider.get().listPods(orgId, null));
   }
 
+  public GroupDescriptionList listOrganizationGroups() {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    return vwbUserManagerRetryHandler.run(
+        context -> groupApiProvider.get().listOrganizationGroups(organizationId, null, 1000));
+  }
+
+  public java.util.List<GroupMember> listGroupMembers(String groupName) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    return vwbUserManagerRetryHandler.run(
+        context -> groupApiProvider.get().listGroupMembership(groupName, organizationId));
+  }
+
   private static JobControl generateJobControlWithUUID() {
     return new JobControl().id(UUID.randomUUID().toString());
   }

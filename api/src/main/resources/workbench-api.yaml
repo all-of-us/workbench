@@ -7102,6 +7102,80 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /v2/admin/vwb/groups:
+    get:
+      tags:
+        - vwbGroupAdmin
+      description: Lists all groups in the VWB organization. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: listVwbGroups
+      responses:
+        200:
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbGroupListResponse'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/admin/vwb/groups/{groupName}/members:
+    get:
+      tags:
+        - vwbGroupAdmin
+      description: Lists all members of a VWB group. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: listVwbGroupMembers
+      parameters:
+        - name: groupName
+          in: path
+          description: The name of the group
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of group members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbGroupMemberListResponse'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - vwbGroupAdmin
+      description: Adds a user to a VWB group with the MEMBER role. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: addVwbGroupMember
+      parameters:
+        - name: groupName
+          in: path
+          description: The name of the group
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VwbAddGroupMemberRequest'
+      responses:
+        204:
+          description: Member added successfully
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     ArchivalStatus:
@@ -14220,6 +14294,58 @@ components:
         reason:
           description: required reason for access demand
           type: string
+    VwbGroupDescription:
+      type: object
+      properties:
+        groupName:
+          type: string
+          description: Name of the group
+        managed:
+          type: boolean
+          description: Whether this group is system-managed (data access tier groups)
+        createdBy:
+          type: string
+          description: Email of the group creator
+        createdDate:
+          type: string
+          description: Timestamp the group was created
+    VwbGroupListResponse:
+      type: object
+      required:
+        - groups
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/VwbGroupDescription'
+    VwbGroupMember:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email of the group member
+        roles:
+          type: array
+          items:
+            type: string
+          description: Roles the member has on the group
+    VwbGroupMemberListResponse:
+      type: object
+      required:
+        - members
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/VwbGroupMember'
+    VwbAddGroupMemberRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          description: Email of the user to add to the group
 
   parameters:
     userId:
