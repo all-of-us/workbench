@@ -23,8 +23,8 @@ export const WorkspaceMigrationNoticeModal = ({ onClose }: Props) => {
 
       <ModalBody>
         <div style={{ color: colors.dark, fontSize: '14px' }}>
-          AoU Research will be transferring to a new service soon. Start putting
-          together a plan for migration.
+          The All of Us Researcher Workbench is moving to a new workbench
+          platform soon. Prepare to migrate your workspaces.
         </div>
       </ModalBody>
 
