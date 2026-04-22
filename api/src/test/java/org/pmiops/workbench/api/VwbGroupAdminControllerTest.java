@@ -18,6 +18,7 @@ import org.pmiops.workbench.model.VwbGroupDescription;
 import org.pmiops.workbench.model.VwbGroupListResponse;
 import org.pmiops.workbench.model.VwbGroupMember;
 import org.pmiops.workbench.model.VwbGroupMemberListResponse;
+import org.pmiops.workbench.model.VwbRemoveGroupMemberRequest;
 import org.pmiops.workbench.vwb.user.model.GroupDescription;
 import org.pmiops.workbench.vwb.user.model.GroupDescriptionList;
 import org.pmiops.workbench.vwb.user.model.GroupMember;
@@ -190,12 +191,43 @@ public class VwbGroupAdminControllerTest {
   }
 
   @Test
-  public void testAddVwbGroupMember() {
-    VwbAddGroupMemberRequest request = new VwbAddGroupMemberRequest().email("newuser@verily.com");
+  public void testAddVwbGroupMember_memberRole() {
+    VwbAddGroupMemberRequest request =
+        new VwbAddGroupMemberRequest()
+            .email("newuser@verily.com")
+            .role(VwbAddGroupMemberRequest.RoleEnum.MEMBER)
+            .reason("Needs access for testing");
 
     ResponseEntity<Void> response = controller.addVwbGroupMember("test-group", request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    verify(mockVwbUserManagerClient).addUserToGroup("test-group", "newuser@verily.com");
+    verify(mockVwbUserManagerClient)
+        .addUserToGroup("test-group", "newuser@verily.com", GroupRole.MEMBER);
+  }
+
+  @Test
+  public void testAddVwbGroupMember_adminRole() {
+    VwbAddGroupMemberRequest request =
+        new VwbAddGroupMemberRequest()
+            .email("admin@verily.com")
+            .role(VwbAddGroupMemberRequest.RoleEnum.ADMIN)
+            .reason("Admin access required");
+
+    ResponseEntity<Void> response = controller.addVwbGroupMember("test-group", request);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    verify(mockVwbUserManagerClient)
+        .addUserToGroup("test-group", "admin@verily.com", GroupRole.ADMIN);
+  }
+
+  @Test
+  public void testRemoveVwbGroupMember() {
+    VwbRemoveGroupMemberRequest request =
+        new VwbRemoveGroupMemberRequest().email("user@verily.com");
+
+    ResponseEntity<Void> response = controller.removeVwbGroupMember("test-group", request);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    verify(mockVwbUserManagerClient).removeUserFromGroup("test-group", "user@verily.com");
   }
 }

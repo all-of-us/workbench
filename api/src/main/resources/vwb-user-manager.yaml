@@ -1355,7 +1355,7 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
-  /api/groups/v1/{groupName}:
+  /api/groups/v1/{groupName}/members:
     get:
       parameters:
         - $ref: '#/components/parameters/GroupName'
@@ -1371,7 +1371,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupMemberList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupMember'
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':

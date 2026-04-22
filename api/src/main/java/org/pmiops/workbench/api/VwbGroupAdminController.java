@@ -13,13 +13,19 @@ import org.pmiops.workbench.model.VwbGroupDescription;
 import org.pmiops.workbench.model.VwbGroupListResponse;
 import org.pmiops.workbench.model.VwbGroupMember;
 import org.pmiops.workbench.model.VwbGroupMemberListResponse;
+import org.pmiops.workbench.model.VwbRemoveGroupMemberRequest;
+import org.pmiops.workbench.vwb.user.model.GroupRole;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class VwbGroupAdminController implements VwbGroupAdminApiDelegate {
+
+  private static final Logger logger = LoggerFactory.getLogger(VwbGroupAdminController.class);
 
   private final VwbUserManagerClient vwbUserManagerClient;
   private final AccessTierDao accessTierDao;
@@ -79,10 +85,26 @@ public class VwbGroupAdminController implements VwbGroupAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> addVwbGroupMember(
       String groupName, VwbAddGroupMemberRequest request) {
-    vwbUserManagerClient.addUserToGroup(groupName, request.getEmail());
+    logger.info(
+        "Adding member {} to group {} with role {}. Reason: {}",
+        request.getEmail(),
+        groupName,
+        request.getRole(),
+        request.getReason());
+    GroupRole role = GroupRole.valueOf(request.getRole().name());
+    vwbUserManagerClient.addUserToGroup(groupName, request.getEmail(), role);
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<Void> removeVwbGroupMember(
+      String groupName, VwbRemoveGroupMemberRequest request) {
+    logger.info("Removing member {} from group {}", request.getEmail(), groupName);
+    vwbUserManagerClient.removeUserFromGroup(groupName, request.getEmail());
     return ResponseEntity.noContent().build();
   }
 

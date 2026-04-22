@@ -4,7 +4,11 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { VwbGroupDescription, VwbGroupMember } from 'generated/fetch';
+import {
+  VwbAddGroupMemberRequestRoleEnum,
+  VwbGroupDescription,
+  VwbGroupMember,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
@@ -34,8 +38,15 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [newMemberRole, setNewMemberRole] =
+    useState<VwbAddGroupMemberRequestRoleEnum>(
+      VwbAddGroupMemberRequestRoleEnum.MEMBER
+    );
+  const [newMemberReason, setNewMemberReason] = useState('');
   const [addMemberLoading, setAddMemberLoading] = useState(false);
   const [addMemberError, setAddMemberError] = useState('');
+
+  const [removingMember, setRemovingMember] = useState<string>(null);
 
   const [debouncedSetMemberFilter] = useState(() =>
     fp.debounce(300, (value: string) => setMemberFilter(value))
@@ -88,9 +99,13 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
       setAddMemberLoading(true);
       await vwbGroupAdminApi().addVwbGroupMember(selectedGroup.groupName, {
         email: newMemberEmail,
+        role: newMemberRole,
+        reason: newMemberReason,
       });
       setShowAddMemberModal(false);
       setNewMemberEmail('');
+      setNewMemberRole(VwbAddGroupMemberRequestRoleEnum.MEMBER);
+      setNewMemberReason('');
       loadMembers(selectedGroup.groupName);
     } catch (error) {
       console.error(error);
@@ -99,6 +114,20 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
       );
     } finally {
       setAddMemberLoading(false);
+    }
+  };
+
+  const handleRemoveMember = async (email: string) => {
+    try {
+      setRemovingMember(email);
+      await vwbGroupAdminApi().removeVwbGroupMember(selectedGroup.groupName, {
+        email,
+      });
+      loadMembers(selectedGroup.groupName);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRemovingMember(null);
     }
   };
 
@@ -142,30 +171,20 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                   body={(group: VwbGroupDescription) => {
                     if (group.managed) {
                       return (
-                        <TooltipTrigger
-                          content='This group is managed by data access requirements by system. Humans cannot update membership.'
-                          side='right'
-                        >
+                        <span>
+                          {group.groupName}
                           <span
                             style={{
-                              color: colors.disabled,
-                              cursor: 'not-allowed',
+                              marginLeft: '0.5rem',
+                              fontSize: '0.7rem',
+                              backgroundColor: colors.light,
+                              padding: '0.15rem 0.4rem',
+                              borderRadius: '3px',
                             }}
                           >
-                            {group.groupName}
-                            <span
-                              style={{
-                                marginLeft: '0.5rem',
-                                fontSize: '0.7rem',
-                                backgroundColor: colors.light,
-                                padding: '0.15rem 0.4rem',
-                                borderRadius: '3px',
-                              }}
-                            >
-                              System Managed
-                            </span>
+                            System Managed
                           </span>
-                        </TooltipTrigger>
+                        </span>
                       );
                     }
                     return group.groupName;
@@ -249,12 +268,37 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                           <Column
                             field='roles'
                             header='Roles'
-                            headerStyle={{ width: '200px' }}
+                            headerStyle={{ width: '150px' }}
                             body={(member: VwbGroupMember) =>
                               member.roles ? member.roles.join(', ') : ''
                             }
                             excludeGlobalFilter
                           />
+                          {!selectedGroup.managed && (
+                            <Column
+                              header='Actions'
+                              headerStyle={{ width: '100px' }}
+                              excludeGlobalFilter
+                              body={(member: VwbGroupMember) => (
+                                <Button
+                                  type='secondaryLight'
+                                  style={{
+                                    height: '1.75rem',
+                                    fontSize: '0.8rem',
+                                    padding: '0 0.5rem',
+                                  }}
+                                  disabled={removingMember === member.email}
+                                  onClick={() =>
+                                    handleRemoveMember(member.email)
+                                  }
+                                >
+                                  {removingMember === member.email
+                                    ? 'Removing...'
+                                    : 'Remove'}
+                                </Button>
+                              )}
+                            />
+                          )}
                         </DataTable>
                       </>
                     )
@@ -287,6 +331,39 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
               onChange={setNewMemberEmail}
               style={{ width: '100%' }}
             />
+            <div style={{ marginTop: '0.75rem' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontWeight: 600,
+                  marginBottom: '0.25rem',
+                }}
+              >
+                Role
+              </label>
+              <select
+                value={newMemberRole}
+                onChange={(e) =>
+                  setNewMemberRole(
+                    e.target.value as VwbAddGroupMemberRequestRoleEnum
+                  )
+                }
+                style={{ width: '100%', padding: '0.5rem' }}
+              >
+                <option value={VwbAddGroupMemberRequestRoleEnum.MEMBER}>
+                  Member
+                </option>
+                <option value={VwbAddGroupMemberRequestRoleEnum.ADMIN}>
+                  Admin
+                </option>
+              </select>
+            </div>
+            <TextInputWithLabel
+              labelText='Reason'
+              value={newMemberReason}
+              onChange={setNewMemberReason}
+              style={{ width: '100%', marginTop: '0.75rem' }}
+            />
             {addMemberError && (
               <div style={{ color: colors.danger, marginTop: '0.5rem' }}>
                 {addMemberError}
@@ -299,6 +376,8 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
               onClick={() => {
                 setShowAddMemberModal(false);
                 setNewMemberEmail('');
+                setNewMemberRole(VwbAddGroupMemberRequestRoleEnum.MEMBER);
+                setNewMemberReason('');
                 setAddMemberError('');
               }}
               style={{ marginRight: '0.75rem' }}
@@ -306,7 +385,7 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
               Cancel
             </Button>
             <Button
-              disabled={!newMemberEmail || addMemberLoading}
+              disabled={!newMemberEmail || !newMemberReason || addMemberLoading}
               onClick={handleAddMember}
             >
               {addMemberLoading ? 'Adding...' : 'Add'}
