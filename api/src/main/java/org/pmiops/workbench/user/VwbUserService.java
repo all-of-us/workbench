@@ -220,12 +220,15 @@ public class VwbUserService {
   public List<PodDescription> getUserPods() {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     String userEmail = userProvider.get().getUsername();
-    PodDescriptionList podList = vwbUserManagerClient.listUserPods(organizationId, userEmail);
+    PodDescriptionList podList = vwbUserManagerClient.listUserPods(organizationId);
     if (podList == null || podList.getResults() == null) {
       return List.of();
     }
     return podList.getResults().stream()
-        .filter(p -> p.getMemberRoles() != null && !p.getMemberRoles().isEmpty())
+        .filter(
+            p ->
+                (p.getDescription() != null && p.getDescription().contains(userEmail))
+                    || userEmail.equals(p.getCreatedBy()))
         .toList();
   }
 
