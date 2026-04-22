@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
@@ -8,7 +8,12 @@ import { VwbGroupDescription, VwbGroupMember } from 'generated/fetch';
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Error, TextInputWithLabel } from 'app/components/inputs';
-import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalTitle,
+} from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -24,19 +29,14 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
   const [members, setMembers] = useState<VwbGroupMember[]>(null);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState(false);
+  const [memberSearch, setMemberSearch] = useState('');
 
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [addMemberLoading, setAddMemberLoading] = useState(false);
   const [addMemberError, setAddMemberError] = useState('');
 
-  useEffect(() => spinnerProps.hideSpinner(), []);
-
-  useEffect(() => {
-    loadGroups();
-  }, []);
-
-  const loadGroups = async () => {
+  const loadGroups = useCallback(async () => {
     try {
       setFetchError(false);
       setLoading(true);
@@ -48,13 +48,20 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => spinnerProps.hideSpinner(), []);
+
+  useEffect(() => {
+    loadGroups();
+  }, [loadGroups]);
 
   const loadMembers = async (groupName: string) => {
     try {
       setMembersError(false);
       setMembersLoading(true);
       setMembers(null);
+      setMemberSearch('');
       const response = await vwbGroupAdminApi().listVwbGroupMembers(groupName);
       setMembers(response.members);
     } catch (error) {
@@ -82,18 +89,36 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
       loadMembers(selectedGroup.groupName);
     } catch (error) {
       console.error(error);
-      setAddMemberError('Failed to add member. Please check the email and try again.');
+      setAddMemberError(
+        'Failed to add member. Please check the email and try again.'
+      );
     } finally {
       setAddMemberLoading(false);
     }
   };
+
+  const filteredMembers = useMemo(() => {
+    if (!members) {
+      return null;
+    }
+    if (!memberSearch.trim()) {
+      return members;
+    }
+    const search = memberSearch.trim().toLowerCase();
+    return members.filter(
+      (m) =>
+        m.email?.toLowerCase().includes(search) ||
+        m.roles?.some((r) => r.toLowerCase().includes(search))
+    );
+  }, [members, memberSearch]);
 
   return (
     <div style={{ margin: '1.5rem' }}>
       <h2>VWB Groups</h2>
       {fetchError && (
         <Error>
-          Error loading groups. Please refresh the page or contact the development team.
+          Error loading groups. Please refresh the page or contact the
+          development team.
         </Error>
       )}
       {loading ? (
@@ -129,7 +154,12 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                           content='This group is managed by data access requirements by system. Humans cannot update membership.'
                           side='right'
                         >
-                          <span style={{ color: colors.disabled, cursor: 'not-allowed' }}>
+                          <span
+                            style={{
+                              color: colors.disabled,
+                              cursor: 'not-allowed',
+                            }}
+                          >
                             {group.groupName}
                             <span
                               style={{
@@ -190,29 +220,43 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                       </TooltipTrigger>
                     )}
                   </div>
-                  {membersError && (
-                    <Error>Error loading members.</Error>
-                  )}
+                  {membersError && <Error>Error loading members.</Error>}
                   {membersLoading ? (
                     <SpinnerOverlay />
                   ) : (
                     members !== null && (
-                      <DataTable
-                        paginator
-                        rows={20}
-                        emptyMessage='No members found'
-                        value={members}
-                      >
-                        <Column field='email' header='Email' />
-                        <Column
-                          field='roles'
-                          header='Roles'
-                          headerStyle={{ width: '200px' }}
-                          body={(member: VwbGroupMember) =>
-                            member.roles ? member.roles.join(', ') : ''
-                          }
+                      <>
+                        <input
+                          type='text'
+                          placeholder='Search members by email or role...'
+                          value={memberSearch}
+                          onChange={(e) => setMemberSearch(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            marginBottom: '0.5rem',
+                            border: `1px solid ${colors.light}`,
+                            borderRadius: '3px',
+                            fontSize: '14px',
+                          }}
                         />
-                      </DataTable>
+                        <DataTable
+                          paginator
+                          rows={20}
+                          emptyMessage='No members found'
+                          value={filteredMembers}
+                        >
+                          <Column field='email' header='Email' sortable />
+                          <Column
+                            field='roles'
+                            header='Roles'
+                            headerStyle={{ width: '200px' }}
+                            body={(member: VwbGroupMember) =>
+                              member.roles ? member.roles.join(', ') : ''
+                            }
+                          />
+                        </DataTable>
+                      </>
                     )
                   )}
                 </>
