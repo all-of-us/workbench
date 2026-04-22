@@ -121,8 +121,8 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
               <div style={headerStyles.formLabel}>Organization Groups</div>
               <DataTable
                 paginator
-                rows={20}
-                rowsPerPageOptions={[10, 20, 50, 100]}
+                rows={50}
+                rowsPerPageOptions={[20, 50, 100, 500]}
                 emptyMessage='No groups found'
                 value={groups}
                 selectionMode='single'
@@ -233,8 +233,8 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                         />
                         <DataTable
                           paginator
-                          rows={10}
-                          rowsPerPageOptions={[5, 10, 50, 100]}
+                          rows={50}
+                          rowsPerPageOptions={[20, 50, 100, 500]}
                           emptyMessage='No members found'
                           value={members}
                           globalFilter={memberFilter}

@@ -80,7 +80,9 @@ export const AdminVwbDataCollections = (
           resources: [],
         });
       }
-      grouped.get(key).resources.push(entry);
+      if (entry.resourceId) {
+        grouped.get(key).resources.push(entry);
+      }
     }
     return Array.from(grouped.values());
   }, [entries]);
@@ -116,8 +118,8 @@ export const AdminVwbDataCollections = (
               />
               <DataTable
                 paginator
-                rows={10}
-                rowsPerPageOptions={[5, 10, 50, 100]}
+                rows={50}
+                rowsPerPageOptions={[20, 50, 100, 500]}
                 emptyMessage='No data collections found'
                 value={collections}
                 globalFilter={collectionFilter}
