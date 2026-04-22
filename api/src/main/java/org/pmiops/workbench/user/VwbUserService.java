@@ -227,8 +227,15 @@ public class VwbUserService {
     return podList.getResults().stream()
         .filter(
             p ->
-                (p.getDescription() != null && p.getDescription().contains(userEmail))
-                    || userEmail.equals(p.getCreatedBy()))
+                ((p.getDescription() != null && p.getDescription().contains(userEmail))
+                        || userEmail.equals(p.getCreatedBy()))
+                    && p.getEnvironmentData() != null
+                    && p.getEnvironmentData().getEnvironmentDataGcp() != null
+                    && p.getEnvironmentData().getEnvironmentDataGcp().getBillingAccountId() != null
+                    && !p.getEnvironmentData()
+                        .getEnvironmentDataGcp()
+                        .getBillingAccountId()
+                        .isEmpty())
         .toList();
   }
 
