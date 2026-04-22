@@ -2,11 +2,13 @@ package org.pmiops.workbench.user;
 
 import jakarta.inject.Provider;
 import java.util.List;
+import java.util.Set;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
+import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.PodDescription;
 import org.pmiops.workbench.vwb.user.model.PodDescriptionList;
@@ -25,6 +27,7 @@ public class VwbUserService {
   private static final Logger logger = LoggerFactory.getLogger(VwbUserService.class);
 
   private final VwbUserManagerClient vwbUserManagerClient;
+  private final VwbAdminQueryService vwbAdminQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final VwbUserPodDao vwbUserPodDao;
@@ -33,11 +36,13 @@ public class VwbUserService {
   @Autowired
   public VwbUserService(
       VwbUserManagerClient vwbUserManagerClient,
+      VwbAdminQueryService vwbAdminQueryService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       VwbUserPodDao vwbUserPodDao,
       Provider<DbUser> userProvider) {
     this.vwbUserManagerClient = vwbUserManagerClient;
+    this.vwbAdminQueryService = vwbAdminQueryService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.vwbUserPodDao = vwbUserPodDao;
@@ -220,12 +225,17 @@ public class VwbUserService {
   public List<PodDescription> getUserPods() {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     String userEmail = userProvider.get().getUsername();
-    PodDescriptionList podList = vwbUserManagerClient.listUserPods(organizationId, userEmail);
+    PodDescriptionList podList = vwbUserManagerClient.listUserPods(organizationId);
     if (podList == null || podList.getResults() == null) {
       return List.of();
     }
+    Set<String> podIdsFromBq = vwbAdminQueryService.queryPodIdsByUserEmail(userEmail);
     return podList.getResults().stream()
-        .filter(p -> p.getMemberRoles() != null && !p.getMemberRoles().isEmpty())
+        .filter(
+            p ->
+                (p.getDescription() != null && p.getDescription().contains(userEmail))
+                    || userEmail.equals(p.getCreatedBy())
+                    || podIdsFromBq.contains(p.getPodId().toString()))
         .toList();
   }
 

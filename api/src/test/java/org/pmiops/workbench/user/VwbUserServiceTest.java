@@ -5,11 +5,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import jakarta.inject.Provider;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -17,9 +18,11 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbUserPodDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
+import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.user.ApiException;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.PodDescription;
+import org.pmiops.workbench.vwb.user.model.PodDescriptionList;
 import org.pmiops.workbench.vwb.user.model.PodRole;
 import org.pmiops.workbench.vwb.user.model.UserDescription;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
@@ -29,17 +32,28 @@ class VwbUserServiceTest {
 
   @Mock private VwbUserManagerClient vwbUserManagerClient;
 
+  @Mock private VwbAdminQueryService vwbAdminQueryService;
+
   @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Mock private UserDao userDao;
 
   @Mock private VwbUserPodDao vwbUserPodDao;
 
-  @InjectMocks private VwbUserService vwbUserService;
+  @Mock private Provider<DbUser> userProvider;
+
+  private VwbUserService vwbUserService;
 
   @BeforeEach
   public void setUp() {
-    reset(workbenchConfigProvider);
+    vwbUserService =
+        new VwbUserService(
+            vwbUserManagerClient,
+            vwbAdminQueryService,
+            workbenchConfigProvider,
+            userDao,
+            vwbUserPodDao,
+            userProvider);
   }
 
   void stub(boolean enableVWBUserCreation, boolean enableVWBPodCreation) {
@@ -122,5 +136,84 @@ class VwbUserServiceTest {
 
     assertEquals(uuid.toString(), result.getVwbPodId());
     verify(vwbUserManagerClient).sharePodWithUserWithRole(uuid, "test@example.com", PodRole.ADMIN);
+  }
+
+  private void stubGetUserPods(String userEmail) {
+    WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
+    config.vwb.organizationId = "test-org-id";
+    when(workbenchConfigProvider.get()).thenReturn(config);
+
+    DbUser dbUser = mock(DbUser.class);
+    when(dbUser.getUsername()).thenReturn(userEmail);
+    when(userProvider.get()).thenReturn(dbUser);
+  }
+
+  @Test
+  void getUserPods_matchesByDescription() {
+    String email = "user@example.com";
+    stubGetUserPods(email);
+
+    UUID podId = UUID.randomUUID();
+    PodDescription pod = new PodDescription().podId(podId).description("Pod for " + email);
+    when(vwbUserManagerClient.listUserPods("test-org-id"))
+        .thenReturn(new PodDescriptionList().results(List.of(pod)));
+    when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of());
+
+    List<PodDescription> result = vwbUserService.getUserPods();
+
+    assertEquals(1, result.size());
+    assertEquals(podId, result.get(0).getPodId());
+  }
+
+  @Test
+  void getUserPods_matchesByCreatedBy() {
+    String email = "user@example.com";
+    stubGetUserPods(email);
+
+    UUID podId = UUID.randomUUID();
+    PodDescription pod = new PodDescription().podId(podId).createdBy(email);
+    when(vwbUserManagerClient.listUserPods("test-org-id"))
+        .thenReturn(new PodDescriptionList().results(List.of(pod)));
+    when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of());
+
+    List<PodDescription> result = vwbUserService.getUserPods();
+
+    assertEquals(1, result.size());
+    assertEquals(podId, result.get(0).getPodId());
+  }
+
+  @Test
+  void getUserPods_matchesByBqPodRoles() {
+    String email = "user@example.com";
+    stubGetUserPods(email);
+
+    UUID podId = UUID.randomUUID();
+    PodDescription pod =
+        new PodDescription().podId(podId).description("Pod for someone-else").createdBy("other");
+    when(vwbUserManagerClient.listUserPods("test-org-id"))
+        .thenReturn(new PodDescriptionList().results(List.of(pod)));
+    when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of(podId.toString()));
+
+    List<PodDescription> result = vwbUserService.getUserPods();
+
+    assertEquals(1, result.size());
+    assertEquals(podId, result.get(0).getPodId());
+  }
+
+  @Test
+  void getUserPods_noMatch() {
+    String email = "user@example.com";
+    stubGetUserPods(email);
+
+    UUID podId = UUID.randomUUID();
+    PodDescription pod =
+        new PodDescription().podId(podId).description("Pod for someone-else").createdBy("other");
+    when(vwbUserManagerClient.listUserPods("test-org-id"))
+        .thenReturn(new PodDescriptionList().results(List.of(pod)));
+    when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of());
+
+    List<PodDescription> result = vwbUserService.getUserPods();
+
+    assertTrue(result.isEmpty());
   }
 }

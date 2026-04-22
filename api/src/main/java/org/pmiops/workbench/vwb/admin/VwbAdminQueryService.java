@@ -1,6 +1,7 @@
 package org.pmiops.workbench.vwb.admin;
 
 import java.util.List;
+import java.util.Set;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.VwbWorkspace;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
@@ -27,4 +28,6 @@ public interface VwbAdminQueryService {
   List<UserRole> queryVwbWorkspaceCollaboratorsByUserFacingId(String id);
 
   List<VwbWorkspaceAuditLog> queryVwbWorkspaceActivity(String workspaceId);
+
+  Set<String> queryPodIdsByUserEmail(String email);
 }
