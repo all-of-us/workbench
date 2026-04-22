@@ -139,6 +139,10 @@ const vwbGroupAdminActive = () => {
   return window.location.pathname.startsWith('/admin/vwb/groups');
 };
 
+const vwbDataCollectionAdminActive = () => {
+  return window.location.pathname.startsWith('/admin/vwb/data-collections');
+};
+
 const workspaceAuditActive = () => {
   return window.location.pathname.startsWith('/admin/workspace-audit');
 };
@@ -454,6 +458,19 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href='/admin/vwb/groups'
             active={vwbGroupAdminActive()}
+          />
+        )}
+      {environment.enableVwbAdmin &&
+        hasAuthorityForAction(
+          profile,
+          AuthorityGuardedAction.WORKSPACE_ADMIN
+        ) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='VWB Data Collections'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/vwb/data-collections'
+            active={vwbDataCollectionAdminActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) &&

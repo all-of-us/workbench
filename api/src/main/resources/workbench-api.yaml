@@ -7176,6 +7176,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /v2/admin/vwb/data-collections:
+    get:
+      tags:
+        - vwbDataCollectionAdmin
+      description: Lists all VWB data collections with their resources. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: listVwbDataCollections
+      responses:
+        200:
+          description: List of data collections with resources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbDataCollectionListResponse'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     ArchivalStatus:
@@ -14346,6 +14366,51 @@ components:
         email:
           type: string
           description: Email of the user to add to the group
+    VwbDataCollectionEntry:
+      type: object
+      properties:
+        workspaceDisplayName:
+          type: string
+          description: Display name of the data collection workspace
+        workspaceUserFacingId:
+          type: string
+          description: User-facing ID of the data collection workspace
+        workspaceDescription:
+          type: string
+          description: Description of the data collection workspace
+        createdDate:
+          type: string
+          description: Creation timestamp of the workspace
+        gcpProjectId:
+          type: string
+          description: GCP project ID
+        podId:
+          type: string
+          description: Pod ID of the workspace
+        resourceDisplayName:
+          type: string
+          description: Display name of the resource
+        resourceName:
+          type: string
+          description: Name of the resource
+        resourceId:
+          type: string
+          description: ID of the resource
+        version:
+          type: string
+          description: Version (folder display name) of the resource
+        resourceType:
+          type: string
+          description: Type of the resource
+    VwbDataCollectionListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/VwbDataCollectionEntry'
 
   parameters:
     userId:

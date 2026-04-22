@@ -225,8 +225,10 @@ public class VwbUserManagerClient {
 
   public java.util.List<GroupMember> listGroupMembers(String groupName) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
-    return vwbUserManagerRetryHandler.run(
-        context -> groupApiProvider.get().listGroupMembership(groupName, organizationId));
+    GroupMemberList memberList =
+        vwbUserManagerRetryHandler.run(
+            context -> groupApiProvider.get().listGroupMembership(groupName, organizationId));
+    return memberList.getMembers() != null ? memberList.getMembers() : java.util.List.of();
   }
 
   private static JobControl generateJobControlWithUUID() {

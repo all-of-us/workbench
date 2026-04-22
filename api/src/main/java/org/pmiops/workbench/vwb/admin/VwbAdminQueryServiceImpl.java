@@ -14,6 +14,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.VwbDataCollectionEntry;
 import org.pmiops.workbench.model.VwbWorkspace;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -33,6 +34,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String VWB_WORKSPACE_SAM_USERS_TABLE_PREFIX = "sam_workspace_users";
   private static final String VWB_PODS_TABLE_PREFIX = "um_pods";
   private static final String VWB_USER_POD_ROLES_TABLE_PREFIX = "um_user_pod_roles";
+  private static final String VWB_RESOURCES_TABLE_PREFIX = "wsm_resources";
   private static final String VWB_WORKSPACE_CREATOR_COLUMN = "created_by_email";
   private static final String VWB_WORKSPACE_ID_COLUMN = "workspace_user_facing_id";
   private static final String VWB_WORKSPACE_GCP_PROJECT_ID_COLUMN = "gcp_project_id";
@@ -109,6 +111,26 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "WHERE u.user_email=@USER_EMAIL \n"
           + "AND p.billing_account_id IS NOT NULL \n"
           + "AND p.billing_account_id != '' ";
+
+  private static final String DATA_COLLECTION_QUERY =
+      "SELECT \n"
+          + "  w.workspace_display_name, \n"
+          + "  w.workspace_user_facing_id, \n"
+          + "  w.description, \n"
+          + "  w.created_date, \n"
+          + "  w.gcp_project_id, \n"
+          + "  w.pod_id, \n"
+          + "  r.resource_display_name, \n"
+          + "  r.resource_name, \n"
+          + "  r.resource_id, \n"
+          + "  r.folder_display_name AS version, \n"
+          + "  r.resource_type \n"
+          + "FROM \n"
+          + "  %s w \n"
+          + "LEFT JOIN \n"
+          + "  %s r ON w.workspace_id = r.workspace_id \n"
+          + "WHERE \n"
+          + "  w.is_data_collection = true ";
 
   @Autowired
   public VwbAdminQueryServiceImpl(
@@ -289,6 +311,23 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .collect(Collectors.toSet());
   }
 
+  @Override
+  public List<VwbDataCollectionEntry> queryVwbDataCollections() {
+    final String queryString =
+        String.format(
+            DATA_COLLECTION_QUERY,
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX),
+            getTableName(VWB_RESOURCES_TABLE_PREFIX));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString).build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToVwbDataCollectionEntry)
+        .collect(Collectors.toList());
+  }
+
   private String getTableName(String tablePrefix) {
     final VwbConfig vwbConfig = workbenchConfigProvider.get().vwb;
     final String fullTableName = String.format("%s_%s", tablePrefix, vwbConfig.organizationUfid);
@@ -341,6 +380,25 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .ifPresent(auditLog::setChangeTime);
     FieldValues.getString(row, "actor_email").ifPresent(auditLog::setActorEmail);
     return auditLog;
+  }
+
+  private VwbDataCollectionEntry fieldValueListToVwbDataCollectionEntry(FieldValueList row) {
+    VwbDataCollectionEntry entry = new VwbDataCollectionEntry();
+    FieldValues.getString(row, "workspace_display_name").ifPresent(entry::setWorkspaceDisplayName);
+    FieldValues.getString(row, "workspace_user_facing_id")
+        .ifPresent(entry::setWorkspaceUserFacingId);
+    FieldValues.getString(row, "description").ifPresent(entry::setWorkspaceDescription);
+    FieldValues.getDateTime(row, "created_date")
+        .map(OffsetDateTime::toString)
+        .ifPresent(entry::setCreatedDate);
+    FieldValues.getString(row, "gcp_project_id").ifPresent(entry::setGcpProjectId);
+    FieldValues.getString(row, "pod_id").ifPresent(entry::setPodId);
+    FieldValues.getString(row, "resource_display_name").ifPresent(entry::setResourceDisplayName);
+    FieldValues.getString(row, "resource_name").ifPresent(entry::setResourceName);
+    FieldValues.getString(row, "resource_id").ifPresent(entry::setResourceId);
+    FieldValues.getString(row, "version").ifPresent(entry::setVersion);
+    FieldValues.getString(row, "resource_type").ifPresent(entry::setResourceType);
+    return entry;
   }
 
   /**

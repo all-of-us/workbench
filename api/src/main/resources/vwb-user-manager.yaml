@@ -1654,9 +1654,12 @@ components:
 
     GroupMemberList:
       description: List of group members
-      type: array
-      items:
-        $ref: '#/components/schemas/GroupMember'
+      type: object
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupMember'
 
     GroupRole:
       description: Enum of Group Roles.
