@@ -8,6 +8,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.VwbAodRequest;
 import org.pmiops.workbench.model.VwbWorkspaceAdminView;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
@@ -91,6 +92,12 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
                                     "Workspace User Facing Id %s was not found", userFacingId))))
             .collaborators(
                 vwbAdminQueryService.queryVwbWorkspaceCollaboratorsByUserFacingId(userFacingId)));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<PreprodWorkspace>> getPreprodWorkspace(String namespace) {
+    return ResponseEntity.ok(vwbAdminQueryService.queryPreprodWorkspaceByNamespace(namespace));
   }
 
   @Override

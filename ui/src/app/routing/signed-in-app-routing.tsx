@@ -27,6 +27,7 @@ import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
 import { AdminVwbDataCollections } from 'app/pages/admin/vwb/admin-vwb-data-collections';
 import { AdminVwbGroups } from 'app/pages/admin/vwb/admin-vwb-groups';
+import { AdminVwbPreprodMigration } from 'app/pages/admin/vwb/admin-vwb-preprod-migration';
 import { AdminVwbWorkspace } from 'app/pages/admin/vwb/admin-vwb-workspace';
 import { AdminVwbWorkspaceSearch } from 'app/pages/admin/vwb/admin-vwb-workspace-search';
 import { AdminWorkspace } from 'app/pages/admin/workspace/admin-workspace';
@@ -136,6 +137,10 @@ const VwbGroupAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminVwbGroups);
+const AdminVwbPreprodMigrationPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminVwbPreprodMigration);
 const VwbWorkspaceAdminSearchPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -300,6 +305,15 @@ export const SignedInRoutes = () => {
       >
         <WorkspaceAdminPage
           routeData={{ title: 'Workspace Admin', minimizeChrome: true }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/admin/vwb/preprod-migration'
+        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
+      >
+        <AdminVwbPreprodMigrationPage
+          routeData={{ title: 'Preprod WS Migration', minimizeChrome: true }}
         />
       </AppRoute>
       <AppRoute

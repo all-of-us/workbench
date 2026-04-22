@@ -6938,6 +6938,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v2/admin/vwb/workspaces/preprod/{workspaceNamespace}:
+    get:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Given a preprod workspace namespace, returns workspace details. Requires
+        RESEARCHER_DATA_VIEW authority.
+      operationId: getPreprodWorkspace
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The preprod workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: The details for a preprod workspace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreprodWorkspace'
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v2/admin/vwb/workspaces/{workspaceUserFacingId}:
     get:
       tags:
@@ -14261,6 +14291,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VwbWorkspace'
+    PreprodWorkspace:
+      required:
+        - displayName
+      type: object
+      properties:
+        workspaceId:
+          type: integer
+          format: int64
+          description: ID of the workspace
+        workspaceNamespace:
+          type: string
+          description: Namespace of the preprod workspace
+        displayName:
+          type: string
+          description: The name of the workspace as displayed in the UI.
+        accessTierShortName:
+          type: string
+          description: The shortName corresponding to an access tier
+        cdrVersionId:
+          type: integer
+          format: int64
+          description: ID corresponding to the CDR version
+        researchPurpose:
+          $ref: '#/components/schemas/ResearchPurpose'
     VwbWorkspace:
       required:
         - displayName

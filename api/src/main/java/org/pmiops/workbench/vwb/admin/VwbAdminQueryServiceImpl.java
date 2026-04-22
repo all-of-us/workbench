@@ -13,6 +13,8 @@ import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig;
+import org.pmiops.workbench.model.PreprodWorkspace;
+import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.VwbDataCollectionEntry;
 import org.pmiops.workbench.model.VwbWorkspace;
@@ -40,6 +42,11 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String VWB_WORKSPACE_GCP_PROJECT_ID_COLUMN = "gcp_project_id";
   private static final String VWB_WORKSPACE_UUID_COLUMN = "workspace_id";
   private static final String VWB_WORKSPACE_NAME_COLUMN = "workspace_display_name";
+  private static final String PREPROD_PROJECT_ID = "all-of-us-workbench-test";
+  // private static final String PREPROD_PROJECT_ID = "all-of-us-rw-preprod";
+  private static final String PREPROD_REPORTING_DATASET = "reporting_test";
+  //  private static final String PREPROD_REPORTING_DATASET = "reporting_preprod";
+  private static final String PREPROD_REPORTING_WORKSPACES_TABLE = "live_workspace";
 
   private static final String QUERY =
       "SELECT \n"
@@ -131,6 +138,35 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  %s r ON w.workspace_id = r.workspace_id \n"
           + "WHERE \n"
           + "  w.is_data_collection = true ";
+
+  private static final String PREPROD_QUERY =
+      "SELECT \n"
+          + "  workspace_id, \n"
+          + "  workspace_namespace, \n"
+          + "  name,\n"
+          + "  access_tier_short_name, \n"
+          + "  cdr_version_id, \n"
+          + "  rp_ancestry, \n"
+          + "  rp_commercial_purpose, \n"
+          + "  rp_control_set, \n"
+          + "  rp_disease_focused_research, \n"
+          + "  rp_disease_of_focus, \n"
+          + "  rp_drug_development, \n"
+          + "  rp_educational, \n"
+          + "  rp_ethics, \n"
+          + "  rp_intended_study, \n"
+          + "  rp_methods_development, \n"
+          + "  rp_other_population_details, \n"
+          + "  rp_other_purpose, \n"
+          + "  rp_other_purpose_details, \n"
+          + "  rp_population_health, \n"
+          + "  rp_review_requested, \n"
+          + "  rp_scientific_approach, \n"
+          + "  rp_social_behavioral, \n"
+          + "FROM \n"
+          + "  %s w \n"
+          + "WHERE \n"
+          + " workspace_namespace=@WORKSPACE_NAMESPACE ";
 
   @Autowired
   public VwbAdminQueryServiceImpl(
@@ -328,6 +364,23 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<PreprodWorkspace> queryPreprodWorkspaceByNamespace(String workspaceNamespace) {
+
+    final String queryString = String.format(PREPROD_QUERY, getPreprodReportingTable());
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter(
+                "WORKSPACE_NAMESPACE", QueryParameterValue.string(workspaceNamespace))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToPreprodWorkspace)
+        .toList();
+  }
+
   private String getTableName(String tablePrefix) {
     final VwbConfig vwbConfig = workbenchConfigProvider.get().vwb;
     final String fullTableName = String.format("%s_%s", tablePrefix, vwbConfig.organizationUfid);
@@ -336,6 +389,12 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         vwbConfig.adminBigQuery.logProjectId,
         vwbConfig.adminBigQuery.bigQueryDataset,
         fullTableName);
+  }
+
+  private String getPreprodReportingTable() {
+    return String.format(
+        "`%s.%s.%s`",
+        PREPROD_PROJECT_ID, PREPROD_REPORTING_DATASET, PREPROD_REPORTING_WORKSPACES_TABLE);
   }
 
   private List<VwbWorkspace> tableResultToVwbWorkspace(TableResult tableResult) {
@@ -399,6 +458,50 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     FieldValues.getString(row, "version").ifPresent(entry::setVersion);
     FieldValues.getString(row, "resource_type").ifPresent(entry::setResourceType);
     return entry;
+  }
+
+  private PreprodWorkspace fieldValueListToPreprodWorkspace(FieldValueList row) {
+    PreprodWorkspace preprodWorkspace = new PreprodWorkspace();
+    FieldValues.getLong(row, "workspace_id")
+        .ifPresent(preprodWorkspace::setWorkspaceId);
+    FieldValues.getString(row, "workspace_namespace")
+        .ifPresent(preprodWorkspace::setWorkspaceNamespace);
+    FieldValues.getString(row, "name").ifPresent(preprodWorkspace::setDisplayName);
+    FieldValues.getString(row, "access_tier_short_name")
+        .ifPresent(preprodWorkspace::setAccessTierShortName);
+    FieldValues.getLong(row, "cdr_version_id")
+        .ifPresent(preprodWorkspace::setCdrVersionId);
+
+    ResearchPurpose researchPurpose = new ResearchPurpose();
+    FieldValues.getBoolean(row, "rp_ancestry").ifPresent(researchPurpose::setAncestry);
+    FieldValues.getBoolean(row, "rp_commercial_purpose")
+        .ifPresent(researchPurpose::setCommercialPurpose);
+    FieldValues.getBoolean(row, "rp_control_set").ifPresent(researchPurpose::setControlSet);
+    FieldValues.getBoolean(row, "rp_disease_focused_research")
+        .ifPresent(researchPurpose::setDiseaseFocusedResearch);
+    FieldValues.getString(row, "rp_disease_of_focus").ifPresent(researchPurpose::setDiseaseOfFocus);
+    FieldValues.getBoolean(row, "rp_drug_development")
+        .ifPresent(researchPurpose::setDrugDevelopment);
+    FieldValues.getBoolean(row, "rp_educational").ifPresent(researchPurpose::setEducational);
+    FieldValues.getBoolean(row, "rp_ethics").ifPresent(researchPurpose::setEthics);
+    FieldValues.getString(row, "rp_intended_study").ifPresent(researchPurpose::setIntendedStudy);
+    FieldValues.getBoolean(row, "rp_methods_development")
+        .ifPresent(researchPurpose::setMethodsDevelopment);
+    FieldValues.getString(row, "rp_other_population_details")
+        .ifPresent(researchPurpose::setOtherPopulationDetails);
+    FieldValues.getBoolean(row, "rp_other_purpose").ifPresent(researchPurpose::setOtherPurpose);
+    FieldValues.getString(row, "rp_other_purpose_details")
+        .ifPresent(researchPurpose::setOtherPurposeDetails);
+    FieldValues.getBoolean(row, "rp_population_health")
+        .ifPresent(researchPurpose::setPopulationHealth);
+    FieldValues.getBoolean(row, "rp_review_requested")
+        .ifPresent(researchPurpose::setReviewRequested);
+    FieldValues.getString(row, "rp_scientific_approach")
+        .ifPresent(researchPurpose::setScientificApproach);
+    FieldValues.getBoolean(row, "rp_social_behavioral")
+        .ifPresent(researchPurpose::setSocialBehavioral);
+    preprodWorkspace.setResearchPurpose(researchPurpose);
+    return preprodWorkspace;
   }
 
   /**
