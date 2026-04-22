@@ -92,4 +92,15 @@ public interface MailService {
    */
   void sendAdminUnpublishWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
+
+  /**
+   * Sends emails to workspace owners notifying them that a workspace has been successfully migrated
+   * to VWB.
+   *
+   * @param workspace the workspace that was migrated
+   * @param owners the workspace's owners
+   * @throws MessagingException
+   */
+  void sendWorkspaceMigrationCompleteEmail(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException;
 }
