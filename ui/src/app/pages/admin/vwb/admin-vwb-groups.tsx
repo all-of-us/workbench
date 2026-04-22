@@ -123,7 +123,7 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
       await vwbGroupAdminApi().removeVwbGroupMember(selectedGroup.groupName, {
         email,
       });
-      loadMembers(selectedGroup.groupName);
+      setMembers((prev) => prev.filter((m) => m.email !== email));
     } catch (error) {
       console.error(error);
     } finally {
@@ -133,6 +133,12 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
 
   return (
     <div style={{ margin: '1.5rem' }}>
+      <style>{`
+        .vwb-groups-table .p-datatable-tbody > tr.p-highlight > td {
+          background: #2691D0 !important;
+          color: #ffffff !important;
+        }
+      `}</style>
       <h2>VWB Groups</h2>
       {fetchError && (
         <Error>
@@ -146,7 +152,7 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
         groups !== null && (
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             {/* Groups list */}
-            <div style={{ flex: '0 0 40%' }}>
+            <div style={{ flex: '0 0 40%' }} className='vwb-groups-table'>
               <div style={headerStyles.formLabel}>Organization Groups</div>
               <DataTable
                 paginator
