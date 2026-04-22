@@ -61,17 +61,23 @@ interface State {
   loadingInstitutions: boolean;
   institutions: Array<Institution>;
   institutionLoadError: boolean;
+  filter: string;
 }
 
 export const AdminInstitution = fp.flow(withNavigation)(
   class extends React.Component<Props, State> {
+    debounceUpdateFilter: Function;
     constructor(props) {
       super(props);
       this.state = {
         loadingInstitutions: true,
         institutions: [],
         institutionLoadError: false,
+        filter: '',
       };
+      this.debounceUpdateFilter = fp.debounce(300, (filterString) =>
+        this.setState({ filter: filterString })
+      );
     }
 
     async componentDidMount() {
@@ -134,8 +140,12 @@ export const AdminInstitution = fp.flow(withNavigation)(
     }
 
     render() {
-      const { institutions, institutionLoadError, loadingInstitutions } =
-        this.state;
+      const {
+        institutions,
+        institutionLoadError,
+        loadingInstitutions,
+        filter,
+      } = this.state;
       return (
         <div>
           <FadeBox style={{ marginTop: '1.5rem', marginLeft: '1.5rem' }}>
@@ -161,16 +171,25 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 Error while loading Institution. Please try again later
               </div>
             )}
+            <input
+              data-test-id='search'
+              style={{ marginBottom: '.5em', width: '300px' }}
+              type='text'
+              placeholder='Search'
+              onChange={(e) => this.debounceUpdateFilter(e.target.value)}
+            />
             <DataTable
               data-test-id='institution-datatable'
               value={institutions}
+              globalFilter={filter}
               paginator={true}
               breakpoint='0px'
-              rows={500}
+              rows={10}
+              rowsPerPageOptions={[5, 10, 50, 100]}
               scrollable={true}
               frozenWidth='10.5rem'
               loading={loadingInstitutions}
-              paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
+              paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
               currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'
             >
               <Column
@@ -180,6 +199,9 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 bodyStyle={styles.text}
                 headerStyle={styles.header}
                 frozen={true}
+                sortable
+                filterField='displayName'
+                filterMatchMode='contains'
               />
               <Column
                 field='organizationTypeEnum'
@@ -187,6 +209,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 body={this.renderOrganizationType}
                 bodyStyle={styles.text}
                 headerStyle={styles.header}
+                excludeGlobalFilter
               />
               <Column
                 field='accessTiers'
@@ -194,6 +217,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 body={this.renderAccessTiers}
                 bodyStyle={styles.text}
                 headerStyle={styles.header}
+                excludeGlobalFilter
               />
               <Column
                 field='userInstructions'
@@ -201,6 +225,8 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 body={this.renderInstitutionInstructions}
                 bodyStyle={styles.text}
                 headerStyle={{ ...styles.header, width: '7.5rem' }}
+                filterField='userInstructions'
+                filterMatchMode='contains'
               />
               <Column
                 field='requestAccessUrl'
@@ -208,6 +234,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 body={this.renderRequestAccessUrl}
                 bodyStyle={styles.text}
                 headerStyle={{ ...styles.header, width: '7.5rem' }}
+                excludeGlobalFilter
               />
             </DataTable>
           </FadeBox>

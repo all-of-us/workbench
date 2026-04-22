@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
@@ -29,12 +30,16 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
   const [members, setMembers] = useState<VwbGroupMember[]>(null);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState(false);
-  const [memberSearch, setMemberSearch] = useState('');
+  const [memberFilter, setMemberFilter] = useState('');
 
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [addMemberLoading, setAddMemberLoading] = useState(false);
   const [addMemberError, setAddMemberError] = useState('');
+
+  const [debouncedSetMemberFilter] = useState(() =>
+    fp.debounce(300, (value: string) => setMemberFilter(value))
+  );
 
   const loadGroups = useCallback(async () => {
     try {
@@ -61,7 +66,7 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
       setMembersError(false);
       setMembersLoading(true);
       setMembers(null);
-      setMemberSearch('');
+      setMemberFilter('');
       const response = await vwbGroupAdminApi().listVwbGroupMembers(groupName);
       setMembers(response.members);
     } catch (error) {
@@ -97,21 +102,6 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
     }
   };
 
-  const filteredMembers = useMemo(() => {
-    if (!members) {
-      return null;
-    }
-    if (!memberSearch.trim()) {
-      return members;
-    }
-    const search = memberSearch.trim().toLowerCase();
-    return members.filter(
-      (m) =>
-        m.email?.toLowerCase().includes(search) ||
-        m.roles?.some((r) => r.toLowerCase().includes(search))
-    );
-  }, [members, memberSearch]);
-
   return (
     <div style={{ margin: '1.5rem' }}>
       <h2>VWB Groups</h2>
@@ -132,6 +122,7 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
               <DataTable
                 paginator
                 rows={20}
+                rowsPerPageOptions={[10, 20, 50, 100]}
                 emptyMessage='No groups found'
                 value={groups}
                 selectionMode='single'
@@ -147,6 +138,7 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                 <Column
                   field='groupName'
                   header='Group Name'
+                  sortable
                   body={(group: VwbGroupDescription) => {
                     if (group.managed) {
                       return (
@@ -183,6 +175,7 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                   field='createdBy'
                   header='Created By'
                   headerStyle={{ width: '200px' }}
+                  sortable
                 />
               </DataTable>
             </div>
@@ -227,26 +220,32 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                     members !== null && (
                       <>
                         <input
-                          type='text'
-                          placeholder='Search members by email or role...'
-                          value={memberSearch}
-                          onChange={(e) => setMemberSearch(e.target.value)}
+                          data-test-id='member-search'
                           style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            marginBottom: '0.5rem',
-                            border: `1px solid ${colors.light}`,
-                            borderRadius: '3px',
-                            fontSize: '14px',
+                            marginBottom: '.5em',
+                            width: '300px',
                           }}
+                          type='text'
+                          placeholder='Search'
+                          onChange={(e) =>
+                            debouncedSetMemberFilter(e.target.value)
+                          }
                         />
                         <DataTable
                           paginator
-                          rows={20}
+                          rows={10}
+                          rowsPerPageOptions={[5, 10, 50, 100]}
                           emptyMessage='No members found'
-                          value={filteredMembers}
+                          value={members}
+                          globalFilter={memberFilter}
                         >
-                          <Column field='email' header='Email' sortable />
+                          <Column
+                            field='email'
+                            header='Email'
+                            sortable
+                            filterField='email'
+                            filterMatchMode='contains'
+                          />
                           <Column
                             field='roles'
                             header='Roles'
@@ -254,6 +253,7 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
                             body={(member: VwbGroupMember) =>
                               member.roles ? member.roles.join(', ') : ''
                             }
+                            excludeGlobalFilter
                           />
                         </DataTable>
                       </>
