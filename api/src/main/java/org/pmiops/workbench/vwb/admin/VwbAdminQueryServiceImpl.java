@@ -7,6 +7,7 @@ import com.google.cloud.bigquery.TableResult;
 import jakarta.inject.Provider;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
@@ -31,6 +32,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
       "wsm_workspace_activity_logs";
   private static final String VWB_WORKSPACE_SAM_USERS_TABLE_PREFIX = "sam_workspace_users";
   private static final String VWB_PODS_TABLE_PREFIX = "um_pods";
+  private static final String VWB_USER_POD_ROLES_TABLE_PREFIX = "um_user_pod_roles";
   private static final String VWB_WORKSPACE_CREATOR_COLUMN = "created_by_email";
   private static final String VWB_WORKSPACE_ID_COLUMN = "workspace_user_facing_id";
   private static final String VWB_WORKSPACE_GCP_PROJECT_ID_COLUMN = "gcp_project_id";
@@ -99,6 +101,14 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "WHERE \n"
           + " change_subject_id=@WORKSPACE_ID "
           + "ORDER BY change_date ASC ";
+
+  private static final String USER_POD_IDS_QUERY =
+      "SELECT u.pod_id \n"
+          + "FROM %s u \n"
+          + "JOIN %s p ON u.pod_id = p.pod_id \n"
+          + "WHERE u.user_email=@USER_EMAIL \n"
+          + "AND p.billing_account_id IS NOT NULL \n"
+          + "AND p.billing_account_id != '' ";
 
   @Autowired
   public VwbAdminQueryServiceImpl(
@@ -256,6 +266,27 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     return StreamSupport.stream(result.iterateAll().spliterator(), false)
         .map(this::fieldValueListToVwbWorkspaceAuditLog)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public Set<String> queryPodIdsByUserEmail(String email) {
+    final String queryString =
+        String.format(
+            USER_POD_IDS_QUERY,
+            getTableName(VWB_USER_POD_ROLES_TABLE_PREFIX),
+            getTableName(VWB_PODS_TABLE_PREFIX));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("USER_EMAIL", QueryParameterValue.string(email))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(row -> FieldValues.getString(row, "pod_id"))
+        .filter(java.util.Optional::isPresent)
+        .map(java.util.Optional::get)
+        .collect(Collectors.toSet());
   }
 
   private String getTableName(String tablePrefix) {
