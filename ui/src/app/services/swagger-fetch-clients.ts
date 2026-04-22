@@ -46,6 +46,7 @@ import {
   UserAdminApi,
   UserApi,
   UserMetricsApi,
+  VwbGroupAdminApi,
   VwbWorkspaceAdminApi,
   WorkspaceAdminApi,
   WorkspacesApi,
@@ -124,6 +125,7 @@ export const surveysApi = bindCtor(SurveysApi);
 export const userAdminApi = bindCtor(UserAdminApi);
 export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
+export const vwbGroupAdminApi = bindCtor(VwbGroupAdminApi);
 export const vwbWorkspaceAdminApi = bindCtor(VwbWorkspaceAdminApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
