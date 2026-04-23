@@ -75,8 +75,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       TaskQueueService taskQueueService,
       VwbUserService vwbUserService,
       MailService mailService,
-      WorkspaceService workspaceService) {
-      VwbUserService vwbUserService,
+      WorkspaceService workspaceService,
       Provider<PodApi> podApiProvider) {
 
     this.wsmClient = wsmClient;
