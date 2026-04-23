@@ -42,10 +42,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String VWB_WORKSPACE_GCP_PROJECT_ID_COLUMN = "gcp_project_id";
   private static final String VWB_WORKSPACE_UUID_COLUMN = "workspace_id";
   private static final String VWB_WORKSPACE_NAME_COLUMN = "workspace_display_name";
-  private static final String PREPROD_PROJECT_ID = "all-of-us-workbench-test";
-  // private static final String PREPROD_PROJECT_ID = "all-of-us-rw-preprod";
-  private static final String PREPROD_REPORTING_DATASET = "reporting_test";
-  //  private static final String PREPROD_REPORTING_DATASET = "reporting_preprod";
+  private static final String PREPROD_PROJECT_ID = "all-of-us-rw-preprod";
+  private static final String PREPROD_REPORTING_DATASET = "reporting_preprod";
   private static final String PREPROD_REPORTING_WORKSPACES_TABLE = "live_workspace";
 
   private static final String QUERY =
@@ -164,7 +162,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  rp_scientific_approach, \n"
           + "  rp_social_behavioral, \n"
           + "FROM \n"
-          + "  %s w \n"
+          + "  %s \n"
           + "WHERE \n"
           + " workspace_namespace=@WORKSPACE_NAMESPACE ";
 
@@ -462,15 +460,13 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   private PreprodWorkspace fieldValueListToPreprodWorkspace(FieldValueList row) {
     PreprodWorkspace preprodWorkspace = new PreprodWorkspace();
-    FieldValues.getLong(row, "workspace_id")
-        .ifPresent(preprodWorkspace::setWorkspaceId);
+    FieldValues.getLong(row, "workspace_id").ifPresent(preprodWorkspace::setWorkspaceId);
     FieldValues.getString(row, "workspace_namespace")
         .ifPresent(preprodWorkspace::setWorkspaceNamespace);
     FieldValues.getString(row, "name").ifPresent(preprodWorkspace::setDisplayName);
     FieldValues.getString(row, "access_tier_short_name")
         .ifPresent(preprodWorkspace::setAccessTierShortName);
-    FieldValues.getLong(row, "cdr_version_id")
-        .ifPresent(preprodWorkspace::setCdrVersionId);
+    FieldValues.getLong(row, "cdr_version_id").ifPresent(preprodWorkspace::setCdrVersionId);
 
     ResearchPurpose researchPurpose = new ResearchPurpose();
     FieldValues.getBoolean(row, "rp_ancestry").ifPresent(researchPurpose::setAncestry);

@@ -21,13 +21,16 @@ import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.MigrationBucketContentsResponse;
 import org.pmiops.workbench.model.MigrationState;
+import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
+import org.pmiops.workbench.vwb.user.model.PodAction;
 import org.pmiops.workbench.vwb.user.model.UserActiveState;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -56,6 +59,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final VwbUserService vwbUserService;
   private final MailService mailService;
   private final WorkspaceService workspaceService;
+  private final Provider<PodApi> podApiProvider;
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -72,6 +76,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       VwbUserService vwbUserService,
       MailService mailService,
       WorkspaceService workspaceService) {
+      VwbUserService vwbUserService,
+      Provider<PodApi> podApiProvider) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
@@ -86,6 +92,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.vwbUserService = vwbUserService;
     this.mailService = mailService;
     this.workspaceService = workspaceService;
+    this.podApiProvider = podApiProvider;
   }
 
   @Override
@@ -332,6 +339,101 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           logger.log(Level.WARNING, "Failed to send migration completion email", e);
         }
         // storageTransferClient.deleteTransferJob(projectId, jobName);
+    }
+  }
+
+  @Override
+  public void startPreprodWorkspaceMigration(
+      PreprodWorkspace preprodWorkspace, String email, String researchPurpose, String bucketName) {
+
+    Duration bucketDelay = Duration.ofSeconds(10);
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+
+    try {
+
+      String resolvedPodId =
+          podApiProvider
+              .get()
+              .getPod(organizationId, "~nph-consortium-users", PodAction.READ_METADATA)
+              .getPodId()
+              .toString();
+      logger.log(Level.INFO, "Starting workspace creation");
+
+      WorkspaceDescription vwbWorkspace =
+          wsmClient.createWorkspaceFromPreprodAsService(preprodWorkspace, resolvedPodId);
+
+      UUID workspaceId = vwbWorkspace.getId();
+
+      wsmClient.shareWorkspaceAsService(workspaceId.toString(), email, IamRole.OWNER);
+
+      List<Property> properties =
+          List.of(
+              new Property().key("terra-default-location").value("us-central1"),
+              new Property().key("terra-required-data-use-metadata").value(researchPurpose),
+              new Property().key("terra-workspace-short-description").value(""));
+      wsmClient.updateWorkspaceProperties(properties, workspaceId.toString());
+      logger.log(Level.INFO, "Workspace created: " + vwbWorkspace);
+
+      String accessTier = preprodWorkspace.getAccessTierShortName();
+      String dataCollectionWsid;
+      String dataCollectionResourceId;
+
+      if (accessTier.equals("registered")) {
+        dataCollectionWsid =
+            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.workspaceId;
+        dataCollectionResourceId =
+            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.resourceId;
+      } else if (accessTier.equals("controlled")) {
+        dataCollectionWsid =
+            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.controlled.workspaceId;
+        dataCollectionResourceId =
+            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.controlled.resourceId;
+      } else {
+        throw new RuntimeException("Workspace migration failed, invalid access tier");
+      }
+
+      logger.log(Level.INFO, "Starting BQ clone");
+      wsmClient.cloneBQDataset(
+          workspaceId,
+          dataCollectionWsid,
+          UUID.fromString(dataCollectionResourceId),
+          UUID.randomUUID().toString());
+
+      logger.log(Level.INFO, "BQ clone complete");
+      logger.log(Level.INFO, "Creating bucket ");
+      CreatedControlledGcpGcsBucket controlledBucket =
+          wsmClient.createControlledBucket(
+              workspaceId.toString(), preprodWorkspace.getWorkspaceNamespace());
+      logger.log(Level.INFO, "Bucket creation complete: " + controlledBucket.toString());
+
+      // Make sure new bucket is ready for transfer
+      Thread.sleep(bucketDelay.toMillis());
+
+      WorkspaceDescription vwbWorkspaceWithPolicies =
+          wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId());
+      logger.log(Level.INFO, "New workspace with policies: " + vwbWorkspaceWithPolicies);
+
+      String destinationBucket = controlledBucket.getGcpBucket().getAttributes().getBucketName();
+
+      String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+
+      String projectId = workbenchConfigProvider.get().server.projectId;
+      logger.log(Level.INFO, "Creating transfer job");
+
+      String jobName =
+          storageTransferClient.createTransferJob(
+              bucketName,
+              destinationBucket,
+              preprodWorkspace.getWorkspaceNamespace(),
+              projectId,
+              null,
+              serviceAccountEmail);
+      logger.log(Level.INFO, "Job created, running transfer job");
+
+      storageTransferClient.runTransferJob(projectId, jobName);
+      logger.log(Level.INFO, "Running transfer queue");
+    } catch (Exception e) {
+      throw new RuntimeException("Workspace migration failed to start", e);
     }
   }
 

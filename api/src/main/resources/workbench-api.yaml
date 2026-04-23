@@ -6968,6 +6968,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v2/admin/vwb/workspaces/preprod/migrate:
+    post:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Migrates an RW 1.0 preprod workspace to RW 2.0
+        Requires RESEARCHER_DATA_VIEW authority.
+      operationId: migratePreprodWorkspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreprodMigrationRequest'
+      responses:
+        200:
+          description: The preprod migration transfer was started successfully
+          content: {}
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v2/admin/vwb/workspaces/{workspaceUserFacingId}:
     get:
       tags:
@@ -14315,6 +14339,25 @@ components:
           description: ID corresponding to the CDR version
         researchPurpose:
           $ref: '#/components/schemas/ResearchPurpose'
+    PreprodMigrationRequest:
+      required:
+        - preprodWorkspace
+        - ownerEmail
+        - researchPurpose
+        - sourceBucket
+      type: object
+      properties:
+        preprodWorkspace:
+          $ref: '#/components/schemas/PreprodWorkspace'
+        ownerEmail:
+          type: string
+          description: User to set as owner of the RW 2.0 workspace
+        researchPurpose:
+          type: string
+          description: Research purpose for RW 2.0 workspace in JSON format
+        sourceBucket:
+          type: string
+          description: Source bucket to be migrated to RW 2.0
     VwbWorkspace:
       required:
         - displayName

@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.wsmanager.ApiException;
@@ -130,6 +131,49 @@ public class WsmClient {
                       stringMapToProperties(
                           Map.of("terra-workspace-short-description", shortDescription)))
                   .description(formatWorkspaceDescription(targetWorkspace))
+                  .cloudResourceGroupId(podId)
+                  .organizationId(workbenchConfigProvider.get().vwb.organizationId)
+                  .jobControl(new JobControl().id(UUID.randomUUID().toString()));
+
+          workspaceServiceApi.get().createWorkspaceV2(createWorkspaceRequest);
+
+          try {
+            waitForWorkspaceCreation(workspaceId.toString()); // ← reuse existing poller!
+          } catch (InterruptedException | ApiException e) {
+            throw new WorkbenchException(e);
+          }
+
+          return workspaceServiceApi.get().getWorkspace(workspaceId.toString(), null);
+        });
+  }
+
+  /**
+   * Creates a new VWB workspace from a preprod workspace as a service account.
+   *
+   * @param preprodWorkspace the RW preprod workspace used to populate metadata
+   * @param podId the cloud resource group (pod) id
+   * @return WorkspaceDescription of the created workspace
+   */
+  public WorkspaceDescription createWorkspaceFromPreprodAsService(
+      PreprodWorkspace preprodWorkspace, String podId) {
+    return wsmRetryHandler.run(
+        context -> {
+          String shortDescription =
+              Optional.ofNullable(preprodWorkspace.getResearchPurpose())
+                  .map(ResearchPurpose::getOtherPurposeDetails)
+                  .orElse("");
+
+          UUID workspaceId = UUID.randomUUID();
+
+          CreateWorkspaceV2Request createWorkspaceRequest =
+              new CreateWorkspaceV2Request()
+                  .id(workspaceId)
+                  .stage(WorkspaceStageModel.CRG_WORKSPACE)
+                  .userFacingId(preprodWorkspace.getWorkspaceNamespace())
+                  .displayName(preprodWorkspace.getDisplayName())
+                  .properties(
+                      stringMapToProperties(
+                          Map.of("terra-workspace-short-description", shortDescription)))
                   .cloudResourceGroupId(podId)
                   .organizationId(workbenchConfigProvider.get().vwb.organizationId)
                   .jobControl(new JobControl().id(UUID.randomUUID().toString()));
