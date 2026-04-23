@@ -1355,7 +1355,7 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
-  /api/groups/v1/{groupName}:
+  /api/groups/v1/{groupName}/members:
     get:
       parameters:
         - $ref: '#/components/parameters/GroupName'
@@ -1371,7 +1371,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupMemberList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupMember'
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
@@ -1654,9 +1656,12 @@ components:
 
     GroupMemberList:
       description: List of group members
-      type: array
-      items:
-        $ref: '#/components/schemas/GroupMember'
+      type: object
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupMember'
 
     GroupRole:
       description: Enum of Group Roles.

@@ -25,6 +25,8 @@ import { AdminInstitutionEdit } from 'app/pages/admin/institution/admin-institut
 import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
+import { AdminVwbDataCollections } from 'app/pages/admin/vwb/admin-vwb-data-collections';
+import { AdminVwbGroups } from 'app/pages/admin/vwb/admin-vwb-groups';
 import { AdminVwbWorkspace } from 'app/pages/admin/vwb/admin-vwb-workspace';
 import { AdminVwbWorkspaceSearch } from 'app/pages/admin/vwb/admin-vwb-workspace-search';
 import { AdminWorkspace } from 'app/pages/admin/workspace/admin-workspace';
@@ -126,6 +128,14 @@ const WorkspaceAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminWorkspace);
+const VwbDataCollectionAdminPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminVwbDataCollections);
+const VwbGroupAdminPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminVwbGroups);
 const VwbWorkspaceAdminSearchPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -308,6 +318,27 @@ export const SignedInRoutes = () => {
       >
         <VwbWorkspaceAdminPage
           routeData={{ title: 'VWB Workspace Admin', minimizeChrome: true }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/admin/vwb/groups'
+        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
+      >
+        <VwbGroupAdminPage
+          routeData={{ title: 'VWB Group Admin', minimizeChrome: true }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/admin/vwb/data-collections'
+        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
+      >
+        <VwbDataCollectionAdminPage
+          routeData={{
+            title: 'VWB Data Collections',
+            minimizeChrome: true,
+          }}
         />
       </AppRoute>
       <AppRoute

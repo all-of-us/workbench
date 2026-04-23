@@ -7102,6 +7102,127 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /v2/admin/vwb/groups:
+    get:
+      tags:
+        - vwbGroupAdmin
+      description: Lists all groups in the VWB organization. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: listVwbGroups
+      responses:
+        200:
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbGroupListResponse'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/admin/vwb/groups/{groupName}/members:
+    get:
+      tags:
+        - vwbGroupAdmin
+      description: Lists all members of a VWB group. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: listVwbGroupMembers
+      parameters:
+        - name: groupName
+          in: path
+          description: The name of the group
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of group members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbGroupMemberListResponse'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - vwbGroupAdmin
+      description: Adds a user to a VWB group with a specified role. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: addVwbGroupMember
+      parameters:
+        - name: groupName
+          in: path
+          description: The name of the group
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VwbAddGroupMemberRequest'
+      responses:
+        204:
+          description: Member added successfully
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - vwbGroupAdmin
+      description: Removes a user from a VWB group. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: removeVwbGroupMember
+      parameters:
+        - name: groupName
+          in: path
+          description: The name of the group
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VwbRemoveGroupMemberRequest'
+      responses:
+        204:
+          description: Member removed successfully
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/admin/vwb/data-collections:
+    get:
+      tags:
+        - vwbDataCollectionAdmin
+      description: Lists all VWB data collections with their resources. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: listVwbDataCollections
+      responses:
+        200:
+          description: List of data collections with resources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbDataCollectionListResponse'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     ArchivalStatus:
@@ -14220,6 +14341,122 @@ components:
         reason:
           description: required reason for access demand
           type: string
+    VwbGroupDescription:
+      type: object
+      properties:
+        groupName:
+          type: string
+          description: Name of the group
+        managed:
+          type: boolean
+          description: Whether this group is system-managed (data access tier groups)
+        createdBy:
+          type: string
+          description: Email of the group creator
+        createdDate:
+          type: string
+          description: Timestamp the group was created
+    VwbGroupListResponse:
+      type: object
+      required:
+        - groups
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/VwbGroupDescription'
+    VwbGroupMember:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email of the group member
+        roles:
+          type: array
+          items:
+            type: string
+          description: Roles the member has on the group
+    VwbGroupMemberListResponse:
+      type: object
+      required:
+        - members
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/VwbGroupMember'
+    VwbAddGroupMemberRequest:
+      type: object
+      required:
+        - email
+        - role
+        - reason
+      properties:
+        email:
+          type: string
+          description: Email of the user to add to the group
+        role:
+          type: string
+          description: Role to grant (MEMBER or ADMIN)
+          enum:
+            - MEMBER
+            - ADMIN
+        reason:
+          type: string
+          description: Reason for adding the member
+    VwbRemoveGroupMemberRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          description: Email of the user to remove from the group
+    VwbDataCollectionEntry:
+      type: object
+      properties:
+        workspaceDisplayName:
+          type: string
+          description: Display name of the data collection workspace
+        workspaceUserFacingId:
+          type: string
+          description: User-facing ID of the data collection workspace
+        workspaceDescription:
+          type: string
+          description: Description of the data collection workspace
+        createdDate:
+          type: string
+          description: Creation timestamp of the workspace
+        gcpProjectId:
+          type: string
+          description: GCP project ID
+        podId:
+          type: string
+          description: Pod ID of the workspace
+        resourceDisplayName:
+          type: string
+          description: Display name of the resource
+        resourceName:
+          type: string
+          description: Name of the resource
+        resourceId:
+          type: string
+          description: ID of the resource
+        version:
+          type: string
+          description: Version (folder display name) of the resource
+        resourceType:
+          type: string
+          description: Type of the resource
+    VwbDataCollectionListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/VwbDataCollectionEntry'
 
   parameters:
     userId:

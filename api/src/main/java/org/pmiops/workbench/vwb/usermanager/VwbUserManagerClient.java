@@ -71,21 +71,27 @@ public class VwbUserManagerClient {
 
   /** Adds a user into VWB user group. */
   public void addUserToGroup(String groupName, String email) {
-    logger.info("Adding user in VWB group {}, with email {}", groupName, email);
-    updateGroupMembership(groupName, email, SetAccessOperation.GRANT);
+    addUserToGroup(groupName, email, GroupRole.MEMBER);
   }
 
-  /** Removes a user into VWB user group. */
+  /** Adds a user into VWB user group with a specified role. */
+  public void addUserToGroup(String groupName, String email, GroupRole role) {
+    logger.info("Adding user in VWB group {}, with email {}, role {}", groupName, email, role);
+    updateGroupMembership(groupName, email, SetAccessOperation.GRANT, role);
+  }
+
+  /** Removes a user from VWB user group. */
   public void removeUserFromGroup(String groupName, String email) {
-    logger.info("Removing user in VWB group {}, with email {}", groupName, email);
-    updateGroupMembership(groupName, email, SetAccessOperation.REVOKE);
+    logger.info("Removing user from VWB group {}, with email {}", groupName, email);
+    updateGroupMembership(groupName, email, SetAccessOperation.REVOKE, GroupRole.MEMBER);
   }
 
-  private void updateGroupMembership(String groupName, String email, SetAccessOperation operation) {
+  private void updateGroupMembership(
+      String groupName, String email, SetAccessOperation operation, GroupRole role) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     SetAccessRequest setAccessRequest =
         new SetAccessRequest()
-            .role(GroupRole.MEMBER)
+            .role(role)
             .operation(operation)
             .principal(new Principal().userPrincipal(new PrincipalUser().email(email)));
     vwbUserManagerRetryHandler.run(
@@ -215,6 +221,20 @@ public class VwbUserManagerClient {
 
   public PodDescriptionList listUserPods(String orgId) {
     return vwbUserManagerRetryHandler.run(context -> podApiProvider.get().listPods(orgId, null));
+  }
+
+  public GroupDescriptionList listOrganizationGroups() {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    return vwbUserManagerRetryHandler.run(
+        context -> groupApiProvider.get().listOrganizationGroups(organizationId, null, 1000));
+  }
+
+  public java.util.List<GroupMember> listGroupMembers(String groupName) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    java.util.List<GroupMember> members =
+        vwbUserManagerRetryHandler.run(
+            context -> groupApiProvider.get().listGroupMembership(groupName, organizationId));
+    return members != null ? members : java.util.List.of();
   }
 
   private static JobControl generateJobControlWithUUID() {
