@@ -22,8 +22,6 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { rwToVwbResearchPurpose } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { findCdrVersion } from 'app/utils/cdr-versions';
-import { cdrVersionStore } from 'app/utils/stores';
 
 export const AdminVwbPreprodMigration = (
   spinnerProps: WithSpinnerOverlayProps
@@ -140,15 +138,6 @@ export const AdminVwbPreprodMigration = (
               <Column field='workspaceId' header='ID' />
               <Column field='workspaceNamespace' header='Workspace Namespace' />
               <Column field='displayName' header='Name' />
-              <Column
-                field='cdrVersionId'
-                header='CDR Version'
-                body={({ cdrVersionId }) => (
-                  <div>
-                    {findCdrVersion(cdrVersionId, cdrVersionStore.get()).name}
-                  </div>
-                )}
-              />
               <Column
                 field='accessTierShortName'
                 header='Access Tier'
