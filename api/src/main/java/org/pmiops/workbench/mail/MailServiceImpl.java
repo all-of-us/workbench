@@ -888,7 +888,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.WORKSPACE_CREATOR, workspace.getCreator().getUsername())
-        .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(workspace))
+        .put(EmailSubstitutionField.WORKSPACE_URL, buildVwbWorkspaceUrl(workspace))
         .build();
   }
 
@@ -918,6 +918,12 @@ public class MailServiceImpl implements MailService {
         workbenchConfigProvider.get().server.uiBaseUrl,
         workspace.getWorkspaceNamespace(),
         workspace.getFirecloudName());
+  }
+
+  private String buildVwbWorkspaceUrl(DbWorkspace workspace) {
+    return String.format(
+        "%s/workspaces/%s",
+        workbenchConfigProvider.get().server.vwbUiBaseUrl, workspace.getWorkspaceNamespace());
   }
 
   private String getUiUrlAsHref() {

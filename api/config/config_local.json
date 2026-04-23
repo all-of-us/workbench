@@ -79,6 +79,7 @@
     "apiBaseUrl": "http:\/\/localhost:8081",
     "apiAssetsBaseUrl": "https:\/\/api.test.fake-research-aou.org",
     "uiBaseUrl": "http:\/\/localhost:4200",
+    "vwbUiBaseUrl": "https:\/\/workbench.verily.com",
     "publicApiKeyForErrorReports": "",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Local",

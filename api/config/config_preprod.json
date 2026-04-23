@@ -78,6 +78,7 @@
     "apiBaseUrl": "https:\/\/api.preprod-workbench.researchallofus.org",
     "apiAssetsBaseUrl": "https:\/\/api.preprod-workbench.researchallofus.org",
     "uiBaseUrl": "https:\/\/preprod-workbench.researchallofus.org",
+    "vwbUiBaseUrl": "https:\/\/workbench.verily.com",
     "publicApiKeyForErrorReports": "AIzaSyA5Q0xqZdyaHUIUjZFqpim26wQFO0JqIRw",
     "projectId": "all-of-us-rw-preprod",
     "shortName": "preprod",
