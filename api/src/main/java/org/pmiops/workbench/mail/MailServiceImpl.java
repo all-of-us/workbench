@@ -551,6 +551,27 @@ public class MailServiceImpl implements MailService {
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
   }
 
+  @Override
+  public void sendWorkspaceMigrationCompleteEmail(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+
+    final String subject = "Your workspace has been successfully migrated to VWB";
+    final String supportEmail = workbenchConfigProvider.get().mail.fromEmail;
+
+    for (DbUser owner : owners) {
+      sendWithRetries(
+          Collections.singletonList(owner.getContactEmail()),
+          Collections.singletonList(supportEmail),
+          subject,
+          String.format(
+              "Migration completion email for workspace '%s' (%s) sent to owner %s",
+              workspace.getName(), workspace.getWorkspaceNamespace(), owner.getContactEmail()),
+          buildHtml(
+              "emails/workspace_migration_complete/content.html",
+              workspaceMigrationSubstitutionMap(workspace, owner)));
+    }
+  }
+
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
       final String password, final String username, final String institutionName) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
@@ -855,6 +876,20 @@ public class MailServiceImpl implements MailService {
         .withLocale(Locale.US)
         .withZone(ZoneId.of("America/Chicago"))
         .format(date);
+  }
+
+  private Map<EmailSubstitutionField, String> workspaceMigrationSubstitutionMap(
+      DbWorkspace workspace, DbUser user) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.WORKSPACE_CREATOR, workspace.getCreator().getUsername())
+        .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(workspace))
+        .build();
   }
 
   private String formatCentralTime(Instant date) {

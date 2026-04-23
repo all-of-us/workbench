@@ -18,6 +18,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageTransferClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.MigrationBucketContentsResponse;
 import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.Workspace;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.UserActiveState;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.Property;
@@ -52,6 +54,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final StorageTransferClient storageTransferClient;
   private final TaskQueueService taskQueueService;
   private final VwbUserService vwbUserService;
+  private final MailService mailService;
+  private final WorkspaceService workspaceService;
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -65,7 +69,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       CloudStorageClient cloudStorageClient,
       StorageTransferClient storageTransferClient,
       TaskQueueService taskQueueService,
-      VwbUserService vwbUserService) {
+      VwbUserService vwbUserService,
+      MailService mailService,
+      WorkspaceService workspaceService) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
@@ -78,6 +84,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.storageTransferClient = storageTransferClient;
     this.taskQueueService = taskQueueService;
     this.vwbUserService = vwbUserService;
+    this.mailService = mailService;
+    this.workspaceService = workspaceService;
   }
 
   @Override
@@ -316,6 +324,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       case SUCCESS:
         dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
         workspaceDao.save(dbWorkspace);
+        try {
+          List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
+
+          mailService.sendWorkspaceMigrationCompleteEmail(dbWorkspace, owners);
+        } catch (Exception e) {
+          logger.log(Level.WARNING, "Failed to send migration completion email", e);
+        }
         // storageTransferClient.deleteTransferJob(projectId, jobName);
     }
   }

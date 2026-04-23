@@ -1,0 +1,131 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <style>
+        body {
+            background-color: #FFFFFF;
+            padding-left: 1rem;
+            padding-top: 1rem;
+        }
+        table {
+            width: 600px;
+        }
+        * {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 300;
+        }
+        .title {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #302C71;
+            font-size: 20px;
+            font-weight: 400;
+        }
+        .text {
+            color: #262262;
+            font-size: 16px;
+            margin-bottom: 1rem;
+            line-height: 22px;
+        }
+        .section {
+            border-radius: 8px;
+            background-color: rgba(33, 111, 180, 0.1);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .button {
+            height: 3rem;
+            width: 16rem;
+            border-radius: 5px;
+            background-color: #302C71;
+            font-size: 14px;
+            color: #FFFFFF !important;
+            text-align: center;
+            line-height: 48px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+<table>
+    <tr>
+        <td>
+            <img src="${HEADER_IMG}">
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="title">Workspace Migration Complete</div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                Hi ${FIRST_NAME},
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                Your workspace has been successfully migrated to the ${ALL_OF_US} Researcher Workbench.
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="section">
+                <div class="text"><b>Workspace Name:</b> ${WORKSPACE_NAME}</div>
+                <div class="text"><b>Namespace:</b> ${WORKSPACE_NAMESPACE}</div>
+                <div class="text"><b>Workspace Creator:</b> ${WORKSPACE_CREATOR}</div>
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                You can access your migrated workspace here:
+            </div>
+            <a class="button" href="${WORKSPACE_URL}">
+                Open Workspace
+            </a>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                <b>Note:</b> Your original Workspace 1.0 is still accessible, but changes made there will not automatically sync with the migrated workspace.
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                If you have any questions, please contact
+                <a href="mailto:support@researchallofus.org">support@researchallofus.org</a>.
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                Thanks,<br>
+                The ${ALL_OF_US} Research Support team
+            </div>
+        </td>
+    </tr>
+
+</table>
+</body>
