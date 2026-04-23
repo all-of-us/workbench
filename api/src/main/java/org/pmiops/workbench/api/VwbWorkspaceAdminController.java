@@ -8,6 +8,8 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.PreprodMigrationRequest;
+import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.VwbAodRequest;
 import org.pmiops.workbench.model.VwbWorkspaceAdminView;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
@@ -16,6 +18,7 @@ import org.pmiops.workbench.model.VwbWorkspaceSearchParamType;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +30,7 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   private final VwbAdminQueryService vwbAdminQueryService;
   private final VwbUserManagerClient vwbUserManagerClient;
   private final WsmClient wsmClient;
+  private final WorkspaceMigrationService workspaceMigrationService;
 
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
@@ -35,10 +39,12 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   public VwbWorkspaceAdminController(
       VwbAdminQueryService vwbAdminQueryService,
       VwbUserManagerClient vwbUserManagerClient,
-      WsmClient wsmClient) {
+      WsmClient wsmClient,
+      WorkspaceMigrationService workspaceMigrationService) {
     this.vwbAdminQueryService = vwbAdminQueryService;
     this.vwbUserManagerClient = vwbUserManagerClient;
     this.wsmClient = wsmClient;
+    this.workspaceMigrationService = workspaceMigrationService;
   }
 
   @Override
@@ -91,6 +97,23 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
                                     "Workspace User Facing Id %s was not found", userFacingId))))
             .collaborators(
                 vwbAdminQueryService.queryVwbWorkspaceCollaboratorsByUserFacingId(userFacingId)));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<PreprodWorkspace>> getPreprodWorkspace(String namespace) {
+    return ResponseEntity.ok(vwbAdminQueryService.queryPreprodWorkspaceByNamespace(namespace));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<Void> migratePreprodWorkspace(PreprodMigrationRequest request) {
+    workspaceMigrationService.startPreprodWorkspaceMigration(
+        request.getPreprodWorkspace(),
+        request.getOwnerEmail(),
+        request.getResearchPurpose(),
+        request.getSourceBucket());
+    return ResponseEntity.ok().build();
   }
 
   @Override

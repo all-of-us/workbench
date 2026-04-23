@@ -143,6 +143,10 @@ const vwbDataCollectionAdminActive = () => {
   return window.location.pathname.startsWith('/admin/vwb/data-collections');
 };
 
+const preprodWorkspaceMigrationActive = () => {
+  return window.location.pathname.startsWith('/admin/vwb/preprod-migration');
+};
+
 const workspaceAuditActive = () => {
   return window.location.pathname.startsWith('/admin/workspace-audit');
 };
@@ -471,6 +475,19 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href='/admin/vwb/data-collections'
             active={vwbDataCollectionAdminActive()}
+          />
+        )}
+      {environment.enableVwbAdmin &&
+        hasAuthorityForAction(
+          profile,
+          AuthorityGuardedAction.WORKSPACE_ADMIN
+        ) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='Preprod WS Migration'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/vwb/preprod-migration'
+            active={preprodWorkspaceMigrationActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) &&

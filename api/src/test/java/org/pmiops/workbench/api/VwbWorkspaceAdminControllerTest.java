@@ -23,6 +23,7 @@ import org.pmiops.workbench.model.VwbWorkspaceListResponse;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -33,6 +34,7 @@ public class VwbWorkspaceAdminControllerTest {
   @Mock private VwbAdminQueryService mockVwbAdminQueryService;
   @Mock private VwbUserManagerClient mockVwbUserManagerClient;
   @Mock private WsmClient mockWsmClient;
+  @Mock private WorkspaceMigrationService mockWorkspaceMigrationService;
 
   private VwbWorkspaceAdminController controller;
 
@@ -46,7 +48,10 @@ public class VwbWorkspaceAdminControllerTest {
 
     controller =
         new VwbWorkspaceAdminController(
-            mockVwbAdminQueryService, mockVwbUserManagerClient, mockWsmClient);
+            mockVwbAdminQueryService,
+            mockVwbUserManagerClient,
+            mockWsmClient,
+            mockWorkspaceMigrationService);
 
     // Set up test data
     VwbWorkspace testWorkspace = new VwbWorkspace();
