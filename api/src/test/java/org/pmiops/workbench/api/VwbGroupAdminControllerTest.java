@@ -202,7 +202,8 @@ public class VwbGroupAdminControllerTest {
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     verify(mockVwbUserManagerClient)
-        .addUserToGroup("test-group", "newuser@verily.com", GroupRole.MEMBER);
+        .addUserToGroup(
+            "test-group", "newuser@verily.com", GroupRole.MEMBER, "Needs access for testing");
   }
 
   @Test
@@ -217,7 +218,7 @@ public class VwbGroupAdminControllerTest {
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     verify(mockVwbUserManagerClient)
-        .addUserToGroup("test-group", "admin@verily.com", GroupRole.ADMIN);
+        .addUserToGroup("test-group", "admin@verily.com", GroupRole.ADMIN, "Admin access required");
   }
 
   @Test

@@ -95,7 +95,7 @@ public class VwbGroupAdminController implements VwbGroupAdminApiDelegate {
         request.getRole(),
         request.getReason());
     GroupRole role = GroupRole.valueOf(request.getRole().name());
-    vwbUserManagerClient.addUserToGroup(groupName, request.getEmail(), role);
+    vwbUserManagerClient.addUserToGroup(groupName, request.getEmail(), role, request.getReason());
     return ResponseEntity.noContent().build();
   }
 

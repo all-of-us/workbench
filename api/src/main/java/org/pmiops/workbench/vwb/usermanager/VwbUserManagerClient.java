@@ -71,28 +71,29 @@ public class VwbUserManagerClient {
 
   /** Adds a user into VWB user group. */
   public void addUserToGroup(String groupName, String email) {
-    addUserToGroup(groupName, email, GroupRole.MEMBER);
+    addUserToGroup(groupName, email, GroupRole.MEMBER, null);
   }
 
   /** Adds a user into VWB user group with a specified role. */
-  public void addUserToGroup(String groupName, String email, GroupRole role) {
+  public void addUserToGroup(String groupName, String email, GroupRole role, String reason) {
     logger.info("Adding user in VWB group {}, with email {}, role {}", groupName, email, role);
-    updateGroupMembership(groupName, email, SetAccessOperation.GRANT, role);
+    updateGroupMembership(groupName, email, SetAccessOperation.GRANT, role, reason);
   }
 
   /** Removes a user from VWB user group. */
   public void removeUserFromGroup(String groupName, String email) {
     logger.info("Removing user from VWB group {}, with email {}", groupName, email);
-    updateGroupMembership(groupName, email, SetAccessOperation.REVOKE, GroupRole.MEMBER);
+    updateGroupMembership(groupName, email, SetAccessOperation.REVOKE, GroupRole.MEMBER, null);
   }
 
   private void updateGroupMembership(
-      String groupName, String email, SetAccessOperation operation, GroupRole role) {
+      String groupName, String email, SetAccessOperation operation, GroupRole role, String reason) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     SetAccessRequest setAccessRequest =
         new SetAccessRequest()
             .role(role)
             .operation(operation)
+            .reason(reason)
             .principal(new Principal().userPrincipal(new PrincipalUser().email(email)));
     vwbUserManagerRetryHandler.run(
         context -> {
@@ -212,11 +213,28 @@ public class VwbUserManagerClient {
 
     vwbUserManagerRetryHandler.run(
         context -> {
-          workspaceApiProvider
-              .get()
-              .workspaceAccessOnDemand(accessOnDemandRequest, workspaceIdentifier);
+          try {
+            workspaceApiProvider
+                .get()
+                .workspaceAccessOnDemand(accessOnDemandRequest, workspaceIdentifier);
+          } catch (ApiException e) {
+            if (isAlreadyOwnerException(e)) {
+              logger.info(
+                  String.format(
+                      "Skipping AoD for userFacingId=%s: service account is already an OWNER",
+                      userFacingId));
+            } else {
+              throw e;
+            }
+          }
           return null;
         });
+  }
+
+  private boolean isAlreadyOwnerException(ApiException e) {
+    return e.getCode() == 400
+        && e.getResponseBody() != null
+        && e.getResponseBody().contains("already an OWNER");
   }
 
   public PodDescriptionList listUserPods(String orgId) {

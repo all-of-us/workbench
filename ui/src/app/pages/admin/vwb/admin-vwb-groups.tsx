@@ -109,8 +109,18 @@ export const AdminVwbGroups = (spinnerProps: WithSpinnerOverlayProps) => {
       loadMembers(selectedGroup.groupName);
     } catch (error) {
       console.error(error);
+      let errorMessage = null;
+      if (error instanceof Response) {
+        try {
+          const body = await error.json();
+          errorMessage = body?.message;
+        } catch {
+          // ignore parse errors
+        }
+      }
       setAddMemberError(
-        'Failed to add member. Please check the email and try again.'
+        errorMessage ||
+          'Failed to add member. Please check the email and try again.'
       );
     } finally {
       setAddMemberLoading(false);

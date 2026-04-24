@@ -2100,7 +2100,6 @@ components:
       properties:
         organizationId:
           type: string
-          format: uuid
         groupName:
           type: string
 
@@ -2164,6 +2163,8 @@ components:
           $ref: '#/components/schemas/GroupRole'
         expiration:
           $ref: '#/components/schemas/ExpirationDays'
+        reason:
+          type: string
 
     UserActiveState:
       type: string
