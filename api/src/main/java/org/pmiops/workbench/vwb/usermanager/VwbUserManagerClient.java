@@ -212,11 +212,28 @@ public class VwbUserManagerClient {
 
     vwbUserManagerRetryHandler.run(
         context -> {
-          workspaceApiProvider
-              .get()
-              .workspaceAccessOnDemand(accessOnDemandRequest, workspaceIdentifier);
+          try {
+            workspaceApiProvider
+                .get()
+                .workspaceAccessOnDemand(accessOnDemandRequest, workspaceIdentifier);
+          } catch (ApiException e) {
+            if (isAlreadyOwnerException(e)) {
+              logger.info(
+                  String.format(
+                      "Skipping AoD for userFacingId=%s: service account is already an OWNER",
+                      userFacingId));
+            } else {
+              throw e;
+            }
+          }
           return null;
         });
+  }
+
+  private boolean isAlreadyOwnerException(ApiException e) {
+    return e.getCode() == 400
+        && e.getResponseBody() != null
+        && e.getResponseBody().contains("already an OWNER");
   }
 
   public PodDescriptionList listUserPods(String orgId) {
