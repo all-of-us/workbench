@@ -196,7 +196,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                       marginBottom: '4px',
                     }}
                   >
-                    Migration
+                    Workspace Migration
                   </div>
 
                   {/* Description */}

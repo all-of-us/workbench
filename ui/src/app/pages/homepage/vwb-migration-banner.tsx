@@ -5,7 +5,6 @@ import { environment } from 'environments/environment';
 import { Button, StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
-import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { useNavigation } from 'app/utils/navigation';
 import vwbMigrationImage from 'assets/images/vwb-migration.png';
@@ -41,8 +40,6 @@ export const VwbMigrationBanner = () => {
             }}
           >
             Migrate your Workspaces to Researcher Workbench 2.0
-            {/* TODO uncomment whe we have an end date*/}
-            {/* by {'<date>'}*/}
           </Header>
 
           {/* DESCRIPTION */}
@@ -54,14 +51,10 @@ export const VwbMigrationBanner = () => {
             }}
           >
             You are now able to migrate your workspaces to Researcher Workbench
-            2.0, powered on{' '}
-            <span style={{ fontWeight: 700 }}>
-              <AoU /> Verily Pre
-            </span>
-            . Review your current workspaces to decide which ones you want to
-            migrate. Any workspaces you don’t migrate will be archived. Any
-            workspace associated with CDR v7 and v8 can be migrated. Review the
-            detailed migration instructions and tips on the{' '}
+            2.0, powered on Verily Pre. Review your current workspaces to decide
+            which ones you want to migrate. Any workspaces you don’t migrate
+            will be archived. Any workspace associated with CDR v7 and v8 can be
+            migrated. Review the detailed migration instructions and tips on the{' '}
             <StyledExternalLink
               href={VWB_USER_SUPPORT_HUB_URL}
               style={{ color: colors.primary, textDecoration: 'underline' }}
@@ -69,7 +62,14 @@ export const VwbMigrationBanner = () => {
             >
               User Support Hub
             </StyledExternalLink>
-            .
+            .{' '}
+            <StyledExternalLink
+              href={VWB_USER_SUPPORT_HUB_URL}
+              style={{ color: colors.primary, textDecoration: 'underline' }}
+              target='_blank'
+            >
+              Learn more
+            </StyledExternalLink>
           </SmallHeader>
 
           {/* PRE-REQUISITES */}

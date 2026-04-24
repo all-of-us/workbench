@@ -39,6 +39,10 @@ export const VwbMigrationInfoBox = () => {
             marginBottom: '18px',
           }}
         >
+          <div style={{ marginBottom: '12px' }}>
+            Once you start migration you will no longer be able to access this
+            workspace on AoU Research workbench.
+          </div>
           What will be migrated:
           <ul style={{ margin: 0 }}>
             <li>Your workspace and files in your cloud storage bucket</li>
@@ -56,11 +60,6 @@ export const VwbMigrationInfoBox = () => {
           What won’t be migrated:
           <ul style={{ margin: 0 }}>
             <li>Any files on your persistent disks</li>
-            <li>
-              Any cohorts or datasets built in Cohort Builder and Dataset
-              Builder that have not been exported to an application (Jupyter
-              notebook, RStudio, etc)
-            </li>
           </ul>
         </div>
       </FlexColumn>
