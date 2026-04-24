@@ -14,6 +14,7 @@ import { CheckBox } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { ResourceList } from 'app/components/resources/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -84,9 +85,11 @@ const descriptions = {
 
 const VWB_USER_SUPPORT_MIGRATION_URL =
   'https://support.researchallofus.org/hc/en-us/articles/48266066855188';
-const VWB_USER_SUPPORT_BILLING_URL =
-  'https://support.researchallofus.org/hc/en-us/articles/48266066855188';
 
+const VWB_USER_SUPPORT_BILLING_URL =
+  'https://support.researchallofus.org/hc/en-us/articles/' +
+  '41981050556564-Getting-Started-in-new-Researcher-Workbench-2-0' +
+  '#h_01KDR2615S4SGFD62K5MJ4VKPA';
 const resourceTypesToFetch = [
   ResourceType.COHORT.toString(),
   ResourceType.COHORT_REVIEW.toString(),
@@ -207,7 +210,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                       color: colors.dark,
                     }}
                   >
-                    The All of Us Researcher Workbench is moving to a new
+                    The <AoU /> Researcher Workbench is moving to a new
                     platform. Please migrate your workspaces. Any workspace not
                     migrated will be archived.{' '}
                     <StyledExternalLink

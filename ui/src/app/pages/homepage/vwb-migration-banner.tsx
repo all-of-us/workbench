@@ -55,14 +55,7 @@ export const VwbMigrationBanner = () => {
             which ones you want to migrate. Any workspaces you don’t migrate
             will be archived. Any workspace associated with CDR v7 and v8 can be
             migrated. Review the detailed migration instructions and tips on the{' '}
-            <StyledExternalLink
-              href={VWB_USER_SUPPORT_HUB_URL}
-              style={{ color: colors.primary, textDecoration: 'underline' }}
-              target='_blank'
-            >
-              User Support Hub
-            </StyledExternalLink>
-            .{' '}
+            User Support Hub {'  '}
             <StyledExternalLink
               href={VWB_USER_SUPPORT_HUB_URL}
               style={{ color: colors.primary, textDecoration: 'underline' }}

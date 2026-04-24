@@ -73,7 +73,7 @@
     "apiBaseUrl": "https:\/\/api.staging.fake-research-aou.org",
     "apiAssetsBaseUrl": "https:\/\/api.staging.fake-research-aou.org",
     "uiBaseUrl": "https:\/\/staging.fake-research-aou.org",
-    "vwbUiBaseUrl": "https:\/\/workbench.verily.com",
+    "vwbUiBaseUrl": "https:\/\/workbench-dev.verily.com",
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",

@@ -79,7 +79,7 @@
     "apiBaseUrl": "https:\/\/api.test.fake-research-aou.org",
     "apiAssetsBaseUrl": "https:\/\/api.test.fake-research-aou.org",
     "uiBaseUrl": "https:\/\/test.fake-research-aou.org",
-    "vwbUiBaseUrl": "https:\/\/workbench.verily.com",
+    "vwbUiBaseUrl": "https:\/\/workbench-dev.verily.com",
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Test",
