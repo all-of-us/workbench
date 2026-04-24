@@ -525,14 +525,14 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                   <div
                     style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
                   >
-                    {getCommandText(workspace.id)}
+                    {getCommandText(workspace.userFacingId)}
                   </div>
                   <FontAwesomeIcon
                     icon={faCopy}
                     style={{ marginRight: '0.6rem', cursor: 'pointer' }}
                     onClick={() =>
                       navigator.clipboard.writeText(
-                        getCommandText(workspace.id)
+                        getCommandText(workspace.userFacingId)
                       )
                     }
                     title='Copy CLI Command'
@@ -544,7 +544,7 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
                 style={{ marginLeft: '0.5rem', height: '2.25rem' }}
                 onClick={() => {
                   window.open(
-                    `${environment.vwbUiUrl}/workspaces/${workspace.id}`,
+                    `${environment.vwbUiUrl}/workspaces/${workspace.userFacingId}`,
                     '_blank',
                     'noopener noreferrer'
                   );
