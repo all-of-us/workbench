@@ -40,7 +40,11 @@ public abstract class RetryHandler<E extends Exception> {
       // would cause a ClassCastException in the bridge method before convertException is reached.
       throw exception;
     } catch (Exception exception) {
-      throw convertException((E) exception);
+      try {
+        throw convertException((E) exception);
+      } catch (ClassCastException cce) {
+        throw new ServerErrorException(exception);
+      }
     }
   }
 
