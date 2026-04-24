@@ -2163,6 +2163,8 @@ components:
           $ref: '#/components/schemas/GroupRole'
         expiration:
           $ref: '#/components/schemas/ExpirationDays'
+        reason:
+          type: string
 
     UserActiveState:
       type: string
