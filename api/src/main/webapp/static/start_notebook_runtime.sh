@@ -9,7 +9,7 @@ set -x
 # server and its path is passed in as jupyterStartUserScriptUri during notebook
 # runtime creation. This runs after initialize_notebook_runtime.sh on creation.
 
+IFACE=$(ip route show default | awk '{print $5}' | head -1)
 pushd /usr/local/share/wondershaper
-wondershaper -a "eth0" -u 16384 # kilobits; 16Mib/s (2MiB/s)
-
+wondershaper -a "$IFACE" -u 16384 # kilobits; 16Mib/s (2MiB/s)
 popd
