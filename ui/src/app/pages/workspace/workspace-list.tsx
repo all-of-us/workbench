@@ -236,24 +236,8 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   {showMigrated ? (
                     <>
                       {/* MIGRATED */}
-                      <div style={{ width: '100%' }}>
-                        <div style={{ marginBottom: '12px' }}>
-                          <SmallHeader>Migrated Workspaces</SmallHeader>
-                        </div>
-                        <FlexRow style={styles.banner}>
-                          <ClrIcon
-                            shape='exclamation-triangle'
-                            size={16}
-                            style={styles.icon}
-                          />
-
-                          <div style={styles.text}>
-                            The following workspaces have already been migrated.
-                            You’re still being billed for these workspaces. To
-                            avoid duplicate charges, we recommend deleting them
-                            when you’re finished.
-                          </div>
-                        </FlexRow>
+                      <div style={{ width: '100%', marginBottom: '12px' }}>
+                        <SmallHeader>Migrated Workspaces</SmallHeader>
                       </div>
 
                       {migratedWorkspaces.map((wp) => (
@@ -277,6 +261,20 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                         <div style={{ marginBottom: '12px' }}>
                           <SmallHeader>Legacy Workspaces</SmallHeader>
                         </div>
+                        <FlexRow style={styles.banner}>
+                          <ClrIcon
+                            shape='exclamation-triangle'
+                            size={16}
+                            style={styles.icon}
+                          />
+
+                          <div style={styles.text}>
+                            The following workspaces have already been migrated.
+                            You’re still being billed for these workspaces. To
+                            avoid duplicate charges, we recommend deleting them
+                            when you’re finished.
+                          </div>
+                        </FlexRow>
                       </div>
                       <NewWorkspaceButton />
                       {filteredList.map((wp) => (
