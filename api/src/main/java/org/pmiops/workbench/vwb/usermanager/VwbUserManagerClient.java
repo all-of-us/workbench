@@ -87,11 +87,7 @@ public class VwbUserManagerClient {
   }
 
   private void updateGroupMembership(
-      String groupName,
-      String email,
-      SetAccessOperation operation,
-      GroupRole role,
-      String reason) {
+      String groupName, String email, SetAccessOperation operation, GroupRole role, String reason) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     SetAccessRequest setAccessRequest =
         new SetAccessRequest()
