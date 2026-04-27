@@ -87,13 +87,7 @@ const WelcomeHeader = () => {
   );
 };
 
-const Workspaces = ({
-  onChange,
-  onCreateWorkspaceClick,
-}: {
-  onChange: () => void;
-  onCreateWorkspaceClick: () => void;
-}) => {
+const Workspaces = ({ onChange }: { onChange: () => void }) => {
   const [navigate] = useNavigation();
 
   return (
@@ -118,7 +112,7 @@ const Workspaces = ({
                 }}
                 onClick={() => {
                   AnalyticsTracker.Workspaces.OpenCreatePage();
-                  onCreateWorkspaceClick();
+                  navigate(['workspaces', 'build']);
                 }}
               >
                 <FontAwesomeIcon
@@ -253,9 +247,6 @@ export const Homepage = fp.flow(
         showCreateWorkspaceModal: false,
       };
     }
-    openCreateWorkspaceModal = () => {
-      this.setState({ showCreateWorkspaceModal: true });
-    };
 
     closeCreateWorkspaceModal = () => {
       this.setState({ showCreateWorkspaceModal: false });
@@ -351,10 +342,7 @@ export const Homepage = fp.flow(
             <div style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
-                <Workspaces
-                  onChange={() => this.fetchWorkspaces()}
-                  onCreateWorkspaceClick={this.openCreateWorkspaceModal}
-                />
+                <Workspaces onChange={() => this.fetchWorkspaces()} />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
                     <RecentResources
