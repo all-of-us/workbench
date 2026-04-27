@@ -222,6 +222,7 @@ public class WsmClient {
           CloneControlledGcpBigQueryDatasetRequest cloneControlledGcpBigQueryDatasetRequest =
               new CloneControlledGcpBigQueryDatasetRequest()
                   .destinationWorkspaceId(destinationWsid)
+                  .cloningInstructions(CloningInstructionsEnum.REFERENCE)
                   .jobControl(new JobControl().id(jobId));
           return controlledGcpResourceApiProvider
               .get()
