@@ -7,6 +7,7 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 
 interface Props {
@@ -23,8 +24,8 @@ export const WorkspaceMigrationNoticeModal = ({ onClose }: Props) => {
 
       <ModalBody>
         <div style={{ color: colors.dark, fontSize: '14px' }}>
-          The All of Us Researcher Workbench is moving to a new workbench
-          platform soon. Prepare to migrate your workspaces.
+          The <AoU /> Researcher Workbench is moving to a new workbench platform
+          soon. Prepare to migrate your workspaces.
         </div>
       </ModalBody>
 

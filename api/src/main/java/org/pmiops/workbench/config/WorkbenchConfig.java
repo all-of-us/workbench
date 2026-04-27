@@ -237,6 +237,8 @@ public class WorkbenchConfig {
     public String apiBaseUrl;
     // Base URL for the App Engine UI service (e.g. webapp / client).
     public String uiBaseUrl;
+    // Base URL for the Verily App Engine UI
+    public String vwbUiBaseUrl;
 
     // Server that host API server assets (e.g. jupyter extensions). Assets are hosted in backend
     // servers

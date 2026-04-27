@@ -31,6 +31,35 @@ export const VwbMigrationInfoBox = () => {
           Ready to migrate?
         </div>
 
+        {/* Description */}
+        <div
+          style={{
+            fontSize: '14px',
+            color: colors.dark,
+            marginBottom: '18px',
+            lineHeight: '1.5',
+          }}
+        >
+          Once you start the migration process, you will temporarily be unable
+          to access this workspace in Researcher Workbench 1.0. Once migration
+          is complete, you can return to the workspace if needed, but we highly
+          encourage you to continue work in Researcher Workbench 2.0.
+        </div>
+
+        <div
+          style={{
+            fontSize: '14px',
+            color: colors.dark,
+            marginBottom: '18px',
+            lineHeight: '1.5',
+          }}
+        >
+          Please note, Researcher Workbench 2.0 billing pods you have been added
+          to within the last few hours may not immediately display in the drop
+          down menu below. If you've recently been added to a billing pod and
+          don't see it listed as an option, please check back in 12-24 hours.
+        </div>
+
         {/* What will be migrated */}
         <div
           style={{
@@ -41,11 +70,11 @@ export const VwbMigrationInfoBox = () => {
         >
           What will be migrated:
           <ul style={{ margin: 0 }}>
-            <li>Your workspace and files in your cloud storage bucket</li>
+            <li>Your workspace and files in your workspace bucket</li>
           </ul>
         </div>
 
-        {/* What won’t be migrated */}
+        {/* What will not be migrated */}
         <div
           style={{
             fontSize: '14px',
@@ -53,13 +82,12 @@ export const VwbMigrationInfoBox = () => {
             marginBottom: '8px',
           }}
         >
-          What won’t be migrated:
+          What will not be migrated:
           <ul style={{ margin: 0 }}>
-            <li>Any files on your persistent disks</li>
+            <li>Any files in your persistent disk</li>
             <li>
-              Any cohorts or datasets built in Cohort Builder and Dataset
-              Builder that have not been exported to an application (Jupyter
-              notebook, RStudio, etc)
+              Any cohorts, concept sets, or datasets in the Cohort Builder and
+              Dataset Builder UI
             </li>
           </ul>
         </div>

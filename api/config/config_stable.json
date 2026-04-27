@@ -73,6 +73,7 @@
     "apiBaseUrl": "https:\/\/api.stable.fake-research-aou.org",
     "apiAssetsBaseUrl": "https:\/\/api.stable.fake-research-aou.org",
     "uiBaseUrl": "https:\/\/stable.fake-research-aou.org",
+    "vwbUiBaseUrl": "https:\/\/workbench.verily.com",
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",
