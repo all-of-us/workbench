@@ -219,15 +219,14 @@ public class WsmClient {
       UUID destinationWsid, String sourceWsid, UUID resourceId, String jobId) {
     return wsmRetryHandler.run(
         context -> {
-          CloneControlledGcpBigQueryDatasetRequest cloneControlledGcpBigQueryDatasetRequest =
+          CloneControlledGcpBigQueryDatasetRequest request =
               new CloneControlledGcpBigQueryDatasetRequest()
                   .destinationWorkspaceId(destinationWsid)
                   .cloningInstructions(CloningInstructionsEnum.REFERENCE)
                   .jobControl(new JobControl().id(jobId));
           return controlledGcpResourceApiProvider
               .get()
-              .cloneBigQueryDataset(
-                  cloneControlledGcpBigQueryDatasetRequest, sourceWsid, resourceId);
+              .cloneBigQueryDataset(request, sourceWsid, resourceId);
         });
   }
 
