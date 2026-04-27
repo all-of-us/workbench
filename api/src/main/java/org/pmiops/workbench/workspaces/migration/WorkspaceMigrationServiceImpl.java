@@ -34,6 +34,7 @@ import org.pmiops.workbench.vwb.user.model.PodAction;
 import org.pmiops.workbench.vwb.user.model.UserActiveState;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.Property;
@@ -107,7 +108,6 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     dbWorkspace.setMigrationState(MigrationState.STARTING.name());
     workspaceDao.save(dbWorkspace);
-    boolean vwbCreated = false;
     try {
       RawlsWorkspaceDetails fcWorkspace =
           fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
@@ -123,12 +123,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
                   .map(DbVwbUserPod::getVwbPodId)
                   .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
       WorkspaceDescription vwbWorkspace;
-      if (workspace.getMigratedVwbWorkspaceId().isEmpty()) {
+      if (workspace.getMigratedVwbWorkspaceId() == null) {
         try {
           logger.log(Level.INFO, namespace + ": Starting workspace creation");
 
-          vwbWorkspace =
-              wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
+          vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
         } catch (Exception e) {
           dbWorkspace.setMigrationState(MigrationState.NOT_STARTED.name());
           workspaceDao.save(dbWorkspace);
@@ -136,10 +135,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         }
       } else {
         try {
-          logger.log(Level.INFO, namespace + ": Fetching existing workspace with UUID " + workspace.getMigratedVwbWorkspaceId());
+          logger.log(
+              Level.INFO,
+              namespace
+                  + ": Fetching existing workspace with UUID "
+                  + workspace.getMigratedVwbWorkspaceId());
 
-          vwbWorkspace =
-              wsmClient.getWorkspaceAsService(namespace);
+          vwbWorkspace = wsmClient.getWorkspaceAsService(namespace);
         } catch (Exception e) {
           dbWorkspace.setMigrationState(MigrationState.FAILED.name());
           workspaceDao.save(dbWorkspace);
@@ -233,6 +235,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       String dataCollectionWsid;
       String dataCollectionResourceId;
 
+      // Get data collection id from access tier
       if (accessTier.equals("registered")) {
         dataCollectionWsid =
             workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.workspaceId;
@@ -247,19 +250,45 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         throw new RuntimeException(namespace + ": Workspace migration failed, invalid access tier");
       }
 
-      logger.log(Level.INFO, namespace + ": Starting BQ clone");
-      wsmClient.cloneBQDataset(
-          workspaceId,
-          dataCollectionWsid,
-          UUID.fromString(dataCollectionResourceId),
-          UUID.randomUUID().toString());
+      // Attach data collection
+      try {
+        logger.log(Level.INFO, namespace + ": Starting BQ clone");
+        wsmClient.cloneBQDataset(
+            workspaceId,
+            dataCollectionWsid,
+            UUID.fromString(dataCollectionResourceId),
+            UUID.randomUUID().toString());
 
-      logger.log(Level.INFO, namespace + ": BQ clone complete");
-      logger.log(Level.INFO, namespace + ": Creating bucket ");
-      CreatedControlledGcpGcsBucket controlledBucket =
-          wsmClient.createControlledBucket(workspaceId.toString(), namespace);
-      logger.log(
-          Level.INFO, namespace + ": Bucket creation complete: " + controlledBucket.toString());
+        logger.log(Level.INFO, namespace + ": BQ clone complete");
+      } catch (Exception e) {
+        throw new RuntimeException(namespace + ": BQ clone failed", e);
+      }
+
+      CreatedControlledGcpGcsBucket controlledBucket;
+      try {
+        logger.log(Level.INFO, namespace + ": Creating bucket ");
+        controlledBucket = wsmClient.createControlledBucket(workspaceId.toString(), namespace);
+        logger.log(
+            Level.INFO, namespace + ": Bucket creation complete: " + controlledBucket.toString());
+      } catch (ApiException e) {
+        if (e.getCode() == 409) {
+          // Duplicate bucket name, modify name and try again
+          String modifiedNamespace = namespace + UUID.randomUUID().toString().substring(0, 3);
+          try {
+            logger.log(
+                Level.INFO,
+                namespace + ": Creating bucket with modified namespace: " + modifiedNamespace);
+            controlledBucket = wsmClient.createControlledBucket(workspaceId.toString(), namespace);
+            logger.log(
+                Level.INFO,
+                namespace + ": Modified bucket creation complete: " + controlledBucket.toString());
+          } catch (ApiException ex) {
+            throw new RuntimeException(namespace + ": Modified bucket creation failed", ex);
+          }
+        } else {
+          throw new RuntimeException(namespace + ": Bucket creation failed", e);
+        }
+      }
 
       // Make sure new bucket is ready for transfer
       Thread.sleep(bucketDelay.toMillis());
