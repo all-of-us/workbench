@@ -923,6 +923,26 @@ task deleteWorkspaces(type: JavaExec) {
     }
 }
 
+// See project.rb command: backfill-migrated-vwb-workspace-ids
+task backfillMigratedVwbWorkspaceIds(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    mainClass = "org.pmiops.workbench.tools.BackfillMigratedVwbWorkspaceIds"
+
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
+// See project.rb command: fix-migrated-workspace-bigquery-references
+task fixMigratedWorkspaceBigQueryReferences(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    mainClass = "org.pmiops.workbench.tools.FixMigratedWorkspaceBigQueryReferences"
+
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
 task backfillGSuiteUserData(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
     mainClass = "org.pmiops.workbench.tools.BackfillGSuiteUserData"
