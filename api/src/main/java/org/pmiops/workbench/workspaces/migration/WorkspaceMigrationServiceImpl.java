@@ -273,12 +273,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       } catch (ApiException e) {
         if (e.getCode() == 409) {
           // Duplicate bucket name, modify name and try again
-          String modifiedNamespace = namespace + UUID.randomUUID().toString().substring(0, 3);
+          String modifiedNamespace = namespace + UUID.randomUUID().toString().substring(0, 4);
           try {
             logger.log(
                 Level.INFO,
                 namespace + ": Creating bucket with modified namespace: " + modifiedNamespace);
-            controlledBucket = wsmClient.createControlledBucket(workspaceId.toString(), namespace);
+            controlledBucket =
+                wsmClient.createControlledBucket(workspaceId.toString(), modifiedNamespace);
             logger.log(
                 Level.INFO,
                 namespace + ": Modified bucket creation complete: " + controlledBucket.toString());
@@ -366,9 +367,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
     logger.log(Level.INFO, "Job status: " + jobStatus.toString());
-    // Commenting out deleteTransferJob calls since all STS runs aren't transferring any data
-    // TODO uncomment after resolving STS issue
-    // String jobName = "transferJobs/migration-" + workspaceNamespace;
+    String jobName = "transferJobs/migration-" + workspaceNamespace;
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
@@ -378,7 +377,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       case FAILED:
         dbWorkspace.setMigrationState(MigrationState.FAILED.name());
         workspaceDao.save(dbWorkspace);
-        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
         return;
       case SUCCESS:
         dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
@@ -390,7 +389,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         } catch (Exception e) {
           logger.log(Level.WARNING, "Failed to send migration completion email", e);
         }
-        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
     }
   }
 
