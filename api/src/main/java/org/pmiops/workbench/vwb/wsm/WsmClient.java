@@ -190,29 +190,26 @@ public class WsmClient {
         });
   }
 
-  public CreatedControlledGcpGcsBucket createControlledBucket(
-      String workspaceId, String namespace) {
-    return wsmRetryHandler.run(
-        context -> {
-          // Common resource metadata
-          ControlledResourceCommonFields common =
-              new ControlledResourceCommonFields()
-                  .name("rw-migration-" + namespace)
-                  .description("RW migration bucket for workspace " + namespace)
-                  .cloningInstructions(CloningInstructionsEnum.RESOURCE)
-                  .accessScope(AccessScope.SHARED_ACCESS)
-                  .managedBy(ManagedBy.USER);
+  public CreatedControlledGcpGcsBucket createControlledBucket(String workspaceId, String namespace)
+      throws ApiException {
+    // Common resource metadata
+    ControlledResourceCommonFields common =
+        new ControlledResourceCommonFields()
+            .name("rw-migration-" + namespace)
+            .description("RW migration bucket for workspace " + namespace)
+            .cloningInstructions(CloningInstructionsEnum.RESOURCE)
+            .accessScope(AccessScope.SHARED_ACCESS)
+            .managedBy(ManagedBy.USER);
 
-          // Bucket parameters
-          GcpGcsBucketCreationParameters bucketParams =
-              new GcpGcsBucketCreationParameters().name("rw-migration-" + namespace);
+    // Bucket parameters
+    GcpGcsBucketCreationParameters bucketParams =
+        new GcpGcsBucketCreationParameters().name("rw-migration-" + namespace);
 
-          // Request body
-          CreateControlledGcpGcsBucketRequestBody request =
-              new CreateControlledGcpGcsBucketRequestBody().common(common).gcsBucket(bucketParams);
+    // Request body
+    CreateControlledGcpGcsBucketRequestBody request =
+        new CreateControlledGcpGcsBucketRequestBody().common(common).gcsBucket(bucketParams);
 
-          return controlledGcpResourceApiProvider.get().createBucket(request, workspaceId);
-        });
+    return controlledGcpResourceApiProvider.get().createBucket(request, workspaceId);
   }
 
   public CloneControlledGcpBigQueryDatasetResult cloneBQDataset(

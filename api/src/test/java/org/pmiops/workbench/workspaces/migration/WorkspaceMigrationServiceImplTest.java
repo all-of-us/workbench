@@ -33,6 +33,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.model.CloneControlledGcpBigQueryDatasetResult;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.GcpGcsBucketAttributes;
@@ -138,7 +139,11 @@ public class WorkspaceMigrationServiceImplTest {
                 UUID.fromString(config.vwb.dataCollectionsForMigration.controlled.resourceId),
                 JOB_ID))
         .thenReturn(CLONED_DATASET_RESULT);
-    when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
+    try {
+      when(wsmClient.createControlledBucket(any(), any())).thenReturn(CREATED_BUCKET);
+    } catch (ApiException e) {
+      throw new RuntimeException("Bucket test", e);
+    }
     when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
 
     when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any()))
@@ -152,7 +157,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(
         NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, POD_ID, RESEARCH_PURPOSE);
 
-    verify(workspaceDao)
+    verify(workspaceDao, times(2))
         .save(argThat(ws -> MigrationState.STARTING.name().equals(ws.getMigrationState())));
   }
 
