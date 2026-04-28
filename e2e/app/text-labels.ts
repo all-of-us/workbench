@@ -88,7 +88,7 @@ export enum LinkText {
   CreateAnotherConceptSet = 'Create another Concept Set',
   CreateCohort = 'Create Cohort',
   CreateDataset = 'Create a Dataset',
-  CreateNewWorkspace = 'Create a New Workspace',
+  CreateNewWorkspace = 'Create Legacy Workspace',
   CreateNotebook = 'Create Notebook',
   CreateReviewSets = 'Create Review Sets',
   CreateSet = 'CREATE SET',
