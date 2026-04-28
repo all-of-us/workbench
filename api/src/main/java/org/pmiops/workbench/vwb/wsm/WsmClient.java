@@ -425,4 +425,41 @@ public class WsmClient {
     description.append("# Anticipated Findings\n").append(anticipatedFindings).append("\n\n");
     return description.toString();
   }
+
+  public void deleteResource(UUID destinationWorkspaceId, UUID resourceId) {
+    wsmRetryHandler.run(
+        context -> {
+          controlledGcpResourceApiProvider
+              .get()
+              .deleteBigQueryDataset(destinationWorkspaceId.toString(), resourceId);
+          return null;
+        });
+  }
+
+  public List<ResourceDescription> getWorkspaceResources(UUID destinationWorkspaceId) {
+    return wsmRetryHandler.run(
+        context -> {
+          org.pmiops.workbench.wsmanager.api.ResourceApi resourceApi =
+              new org.pmiops.workbench.wsmanager.api.ResourceApi(
+                  workspaceServiceApi.get().getApiClient());
+
+          return resourceApi
+              .enumerateResources(destinationWorkspaceId.toString(), 0, 1000, null, null, false)
+              .getResources();
+        });
+  }
+
+  public UUID getMigratedWorkspaceId(String namespace) {
+    return wsmRetryHandler.run(
+        context -> {
+          WorkspaceDescription workspace =
+              workspaceServiceApi.get().getWorkspaceByUserFacingId(namespace, IamRole.READER);
+
+          if (workspace == null || workspace.getId() == null) {
+            return null;
+          }
+
+          return workspace.getId();
+        });
+  }
 }
