@@ -18,24 +18,34 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
   /*
    * CSV format:
    *
-   * workspace_id,workspace_user_facing_id,resource_id
+   * workspace_id,workspace_user_facing_id,resource_id,resource_name
    *
    * Example:
    *
-   * 1ba361fa-f2a2-42fd-b926-a91fe1ba7566,aou-rw-1748338f,192a366c-762b-4973-9949-xxxx
+   * 1ba361fa-f2a2-42fd-b926-a91fe1ba7566,
+   * aou-rw-1748338f,
+   * 192a366c-762b-4973-9949-xxxx,
+   * C2024Q3R9
    *
    * Mapping:
    *
    * workspace_id              -> destinationWorkspaceId
-   * workspace_user_facing_id  -> only for logging/reference
+   * workspace_user_facing_id  -> workspace namespace (for logging only)
    * resource_id               -> incorrect controlled BigQuery dataset resource ID
+   * resource_name             -> used to determine CT vs RT source workspace
    *
-   * sourceWorkspaceId:
+   * sourceWorkspaceId rules:
    *
-   * Controlled Tier Data Collection workspace ID
-   * confirmed by Yonghao:
+   * If resource_name starts with:
    *
+   * C -> Controlled Tier Data Collection workspace
+   * R -> Registered Tier Data Collection workspace
+   *
+   * Controlled:
    * 3d83ef80-77d7-43e8-a479-52946619b769
+   *
+   * Registered:
+   * 698c6700-afbe-454a-b73a-c675e629336c
    *
    * Run example:
    *
@@ -43,7 +53,11 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
    *   -PappArgs='["/tmp/migrated_workspaces_bq_cleanup.csv"]'
    */
 
-  private static final String SOURCE_WORKSPACE_ID = "3d83ef80-77d7-43e8-a479-52946619b769";
+  private static final String CONTROLLED_SOURCE_WORKSPACE_ID =
+      "3d83ef80-77d7-43e8-a479-52946619b769";
+
+  private static final String REGISTERED_SOURCE_WORKSPACE_ID =
+      "698c6700-afbe-454a-b73a-c675e629336c";
 
   @Bean
   public CommandLineRunner run(WsmClient wsmClient) {
@@ -56,7 +70,6 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
 
       LOG.info("Starting BigQuery reference resource cleanup...");
       LOG.info("Reading input CSV file: " + inputFile);
-      LOG.info("Using sourceWorkspaceId (Data Collection): " + SOURCE_WORKSPACE_ID);
 
       int successCount = 0;
       int failureCount = 0;
@@ -74,8 +87,8 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
           }
 
           try {
-            if (row.length < 3) {
-              throw new IllegalArgumentException("Invalid CSV row. Expected at least 3 columns.");
+            if (row.length < 4) {
+              throw new IllegalArgumentException("Invalid CSV row. Expected 4 columns.");
             }
 
             UUID destinationWorkspaceId = UUID.fromString(row[0].trim());
@@ -84,10 +97,33 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
 
             UUID resourceId = UUID.fromString(row[2].trim());
 
+            String resourceName = row[3].trim();
+
+            String sourceWorkspaceId;
+
+            /*
+             * Determine sourceWorkspaceId based on resource_name
+             *
+             * C* -> Controlled Tier
+             * R* -> Registered Tier
+             */
+            if (resourceName.startsWith("C")) {
+              sourceWorkspaceId = CONTROLLED_SOURCE_WORKSPACE_ID;
+            } else if (resourceName.startsWith("R")) {
+              sourceWorkspaceId = REGISTERED_SOURCE_WORKSPACE_ID;
+            } else {
+              throw new IllegalArgumentException(
+                  "Unable to determine sourceWorkspaceId from resource_name: " + resourceName);
+            }
+
             LOG.info(
                 String.format(
-                    "Processing workspace namespace=%s destinationWorkspaceId=%s resourceId=%s",
-                    workspaceNamespace, destinationWorkspaceId, resourceId));
+                    "Processing workspace namespace=%s destinationWorkspaceId=%s resourceId=%s resourceName=%s sourceWorkspaceId=%s",
+                    workspaceNamespace,
+                    destinationWorkspaceId,
+                    resourceId,
+                    resourceName,
+                    sourceWorkspaceId));
 
             /*
              * Step 1:
@@ -105,7 +141,7 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
 
             wsmClient.cloneBQDataset(
                 destinationWorkspaceId,
-                SOURCE_WORKSPACE_ID,
+                sourceWorkspaceId,
                 resourceId,
                 UUID.randomUUID().toString());
 
