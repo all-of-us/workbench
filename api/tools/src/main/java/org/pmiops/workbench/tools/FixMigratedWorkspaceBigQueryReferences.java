@@ -18,23 +18,32 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
   /*
    * CSV format:
    *
-   * destinationWorkspaceId,sourceWorkspaceId,resourceId
+   * workspace_id,workspace_user_facing_id,resource_id
    *
    * Example:
    *
-   * destinationWorkspaceId,sourceWorkspaceId,resourceId
-   * 1ba361fa-f2a2-42fd-b926-a91fe1ba7566,3d83ef80-77d7-43e8-a479-52946619b769,e761c0c3-8741-45f0-944c-d15e4cffb5ae
+   * 1ba361fa-f2a2-42fd-b926-a91fe1ba7566,aou-rw-1748338f,192a366c-762b-4973-9949-xxxx
    *
-   * destinationWorkspaceId = migrated VWB workspace
-   * sourceWorkspaceId      = data collection workspace ID
-   * resourceId             = incorrect controlled BigQuery dataset resource ID
+   * Mapping:
+   *
+   * workspace_id              -> destinationWorkspaceId
+   * workspace_user_facing_id  -> only for logging/reference
+   * resource_id               -> incorrect controlled BigQuery dataset resource ID
+   *
+   * sourceWorkspaceId:
+   *
+   * Controlled Tier Data Collection workspace ID
+   * confirmed by Yonghao:
+   *
+   * 3d83ef80-77d7-43e8-a479-52946619b769
    *
    * Run example:
    *
    * ./gradlew fixMigratedWorkspaceBigQueryReferences \
    *   -PappArgs='["/tmp/migrated_workspaces_bq_cleanup.csv"]'
-   *
    */
+
+  private static final String SOURCE_WORKSPACE_ID = "3d83ef80-77d7-43e8-a479-52946619b769";
 
   @Bean
   public CommandLineRunner run(WsmClient wsmClient) {
@@ -45,15 +54,17 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
 
       String inputFile = args[0];
 
-      LOG.info("Starting BigQuery reference resource cleanup script...");
+      LOG.info("Starting BigQuery reference resource cleanup...");
       LOG.info("Reading input CSV file: " + inputFile);
+      LOG.info("Using sourceWorkspaceId (Data Collection): " + SOURCE_WORKSPACE_ID);
+
+      int successCount = 0;
+      int failureCount = 0;
 
       try (CSVReader reader = new CSVReader(new FileReader(inputFile))) {
 
         String[] row;
         boolean skipHeader = true;
-        int successCount = 0;
-        int failureCount = 0;
 
         while ((row = reader.readNext()) != null) {
 
@@ -64,35 +75,37 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
 
           try {
             if (row.length < 3) {
-              throw new IllegalArgumentException("Invalid CSV row. Expected 3 columns.");
+              throw new IllegalArgumentException("Invalid CSV row. Expected at least 3 columns.");
             }
 
             UUID destinationWorkspaceId = UUID.fromString(row[0].trim());
 
-            String sourceWorkspaceId = row[1].trim();
+            String workspaceNamespace = row[1].trim();
 
             UUID resourceId = UUID.fromString(row[2].trim());
 
             LOG.info(
                 String.format(
-                    "Processing destinationWorkspaceId=%s sourceWorkspaceId=%s resourceId=%s",
-                    destinationWorkspaceId, sourceWorkspaceId, resourceId));
+                    "Processing workspace namespace=%s destinationWorkspaceId=%s resourceId=%s",
+                    workspaceNamespace, destinationWorkspaceId, resourceId));
 
             /*
-             * Delete incorrect CONTROLLED BigQuery dataset
+             * Step 1:
+             * Delete incorrect CONTROLLED BigQuery dataset resource
              */
             LOG.info("Deleting incorrect controlled BigQuery dataset resource...");
 
             wsmClient.deleteResource(destinationWorkspaceId, resourceId);
 
             /*
+             * Step 2:
              * Recreate using COPY_REFERENCE
              */
             LOG.info("Recreating BigQuery dataset as REFERENCE resource...");
 
             wsmClient.cloneBQDataset(
                 destinationWorkspaceId,
-                sourceWorkspaceId,
+                SOURCE_WORKSPACE_ID,
                 resourceId,
                 UUID.randomUUID().toString());
 
@@ -116,7 +129,7 @@ public class FixMigratedWorkspaceBigQueryReferences extends Tool {
         throw e;
       }
 
-      LOG.info("BigQuery reference resource cleanup script finished.");
+      LOG.info("BigQuery reference resource cleanup finished.");
     };
   }
 
