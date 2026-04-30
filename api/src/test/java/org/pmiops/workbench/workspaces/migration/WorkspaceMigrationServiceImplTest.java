@@ -85,7 +85,7 @@ public class WorkspaceMigrationServiceImplTest {
   @BeforeEach
   void setup() {
     DbCdrVersion cdrVersion =
-        createDefaultCdrVersion(1).setAccessTier(new DbAccessTier().setShortName("controlled"));
+        createDefaultCdrVersion(9).setAccessTier(new DbAccessTier().setShortName("controlled"));
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(NAMESPACE);
     dbWorkspace.setFirecloudName(TERRA_NAME);
@@ -104,7 +104,7 @@ public class WorkspaceMigrationServiceImplTest {
     config = WorkbenchConfig.createEmptyConfig();
     config.vwb.defaultPodId = "default-pod";
     CdrVersionForMigration cdrVersionForMigration = new CdrVersionForMigration();
-    cdrVersionForMigration.cdrVersionId = 10;
+    cdrVersionForMigration.cdrVersionId = 9;
     cdrVersionForMigration.workspaceId = "ct-data-collection-wsid";
     cdrVersionForMigration.resourceId = UUID.randomUUID().toString();
     config.vwb.cdrVersionsForMigration = List.of(cdrVersionForMigration);
