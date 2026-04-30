@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button } from 'app/components/buttons';
+import { Button, StyledExternalLink } from 'app/components/buttons';
 import {
   Modal,
   ModalBody,
@@ -13,6 +13,9 @@ interface Props {
   onCancel: () => void;
   onConfirm: () => void;
 }
+
+const USER_SUPPORT_OFFICE_HOURS_URL =
+  'https://support.researchallofus.org/hc/en-us/sections/6000285700372-Office-Hour-Recordings';
 
 export const PdWarningModal = ({ onCancel, onConfirm }: Props) => {
   return (
@@ -40,15 +43,16 @@ export const PdWarningModal = ({ onCancel, onConfirm }: Props) => {
         >
           Persistent disk data will not be migrated. Make sure you move this
           data to your cloud bucket for it to stay intact.{' '}
-          <span
+          <StyledExternalLink
+            href={USER_SUPPORT_OFFICE_HOURS_URL}
             style={{
-              textDecoration: 'underline',
-              cursor: 'pointer',
               color: colors.accent,
+              textDecoration: 'underline',
             }}
+            target='_blank'
           >
             Learn more
-          </span>
+          </StyledExternalLink>
         </div>
       </ModalBody>
 

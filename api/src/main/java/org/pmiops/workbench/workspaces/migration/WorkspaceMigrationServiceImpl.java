@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -231,23 +232,14 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       wsmClient.updateWorkspaceProperties(properties, workspaceId.toString());
       logger.log(Level.INFO, namespace + ": Workspace created: " + vwbWorkspace);
 
-      String accessTier = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
-      String dataCollectionWsid;
-      String dataCollectionResourceId;
-
-      // Get data collection id from access tier
-      if (accessTier.equals("registered")) {
-        dataCollectionWsid =
-            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.workspaceId;
-        dataCollectionResourceId =
-            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.resourceId;
-      } else if (accessTier.equals("controlled")) {
-        dataCollectionWsid =
-            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.controlled.workspaceId;
-        dataCollectionResourceId =
-            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.controlled.resourceId;
-      } else {
-        throw new RuntimeException(namespace + ": Workspace migration failed, invalid access tier");
+      long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
+      CdrVersionForMigration cdrVersionForMigration =
+          workbenchConfigProvider.get().vwb.cdrVersionsForMigration.stream()
+              .filter(c -> c.cdrVersionId == cdrVersionId)
+              .findFirst()
+              .orElse(null);
+      if (cdrVersionForMigration == null) {
+        throw new RuntimeException(namespace + ": CDR version not available for migration");
       }
 
       // Attach data collection
@@ -255,8 +247,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         logger.log(Level.INFO, namespace + ": Starting BQ clone");
         wsmClient.cloneBQDataset(
             workspaceId,
-            dataCollectionWsid,
-            UUID.fromString(dataCollectionResourceId),
+            cdrVersionForMigration.workspaceId,
+            UUID.fromString(cdrVersionForMigration.resourceId),
             UUID.randomUUID().toString());
 
         logger.log(Level.INFO, namespace + ": BQ clone complete");
@@ -428,23 +420,36 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           Level.INFO,
           preprodWorkspace.getWorkspaceNamespace() + ": Workspace created: " + vwbWorkspace);
 
-      String accessTier = preprodWorkspace.getAccessTierShortName();
+      // Manually map preprod cdrs to data collection ids from config since preprod cdrVersionIds
+      // will not match prod
+      long cdrVersionId = preprodWorkspace.getCdrVersionId();
       String dataCollectionWsid;
-      String dataCollectionResourceId;
-
-      if (accessTier.equals("registered")) {
-        dataCollectionWsid =
-            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.workspaceId;
-        dataCollectionResourceId =
-            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.registered.resourceId;
-      } else if (accessTier.equals("controlled")) {
-        dataCollectionWsid =
-            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.controlled.workspaceId;
-        dataCollectionResourceId =
-            workbenchConfigProvider.get().vwb.dataCollectionsForMigration.controlled.resourceId;
-      } else {
-        throw new RuntimeException("Workspace migration failed, invalid access tier");
-      }
+      String dataCollectionResourceId =
+          switch (Long.toString(cdrVersionId)) {
+            case "10", "12" -> {
+              dataCollectionWsid =
+                  workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(0).workspaceId;
+              yield workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(0).resourceId;
+            }
+            case "11", "13" -> {
+              dataCollectionWsid =
+                  workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(1).workspaceId;
+              yield workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(1).resourceId;
+            }
+            case "14" -> {
+              dataCollectionWsid =
+                  workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(2).workspaceId;
+              yield workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(2).resourceId;
+            }
+            case "15" -> {
+              dataCollectionWsid =
+                  workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(3).workspaceId;
+              yield workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(3).resourceId;
+            }
+            default -> throw new RuntimeException(
+                preprodWorkspace.getWorkspaceNamespace()
+                    + ": Preprod CDR version not available for migration");
+          };
 
       logger.log(Level.INFO, preprodWorkspace.getWorkspaceNamespace() + ": Starting BQ clone");
       wsmClient.cloneBQDataset(

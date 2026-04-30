@@ -59,12 +59,14 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
   }
 
   const profile = profileStore.get().profile;
-  const { cdrVersionIdsForMigration } = serverConfigStore.get().config;
+  const { cdrVersionsForMigration } = serverConfigStore.get().config;
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
 
   if (
     !migrationTestingGroup ||
-    !cdrVersionIdsForMigration.includes(+workspace.cdrVersionId)
+    !cdrVersionsForMigration.some(
+      (c) => +workspace.cdrVersionId === c.cdrVersionId
+    )
   ) {
     navigate(['workspaces', workspace.namespace, workspace.terraName, 'data']);
   }

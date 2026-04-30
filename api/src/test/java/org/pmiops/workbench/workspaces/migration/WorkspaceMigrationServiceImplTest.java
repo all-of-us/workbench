@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -84,7 +85,7 @@ public class WorkspaceMigrationServiceImplTest {
   @BeforeEach
   void setup() {
     DbCdrVersion cdrVersion =
-        createDefaultCdrVersion(1).setAccessTier(new DbAccessTier().setShortName("controlled"));
+        createDefaultCdrVersion(9).setAccessTier(new DbAccessTier().setShortName("controlled"));
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(NAMESPACE);
     dbWorkspace.setFirecloudName(TERRA_NAME);
@@ -102,9 +103,11 @@ public class WorkspaceMigrationServiceImplTest {
 
     config = WorkbenchConfig.createEmptyConfig();
     config.vwb.defaultPodId = "default-pod";
-    config.vwb.cdrVersionIdsForMigration = List.of(1);
-    config.vwb.dataCollectionsForMigration.controlled.workspaceId = "ct-data-collection-wsid";
-    config.vwb.dataCollectionsForMigration.controlled.resourceId = UUID.randomUUID().toString();
+    CdrVersionForMigration cdrVersionForMigration = new CdrVersionForMigration();
+    cdrVersionForMigration.cdrVersionId = 9;
+    cdrVersionForMigration.workspaceId = "ct-data-collection-wsid";
+    cdrVersionForMigration.resourceId = UUID.randomUUID().toString();
+    config.vwb.cdrVersionsForMigration = List.of(cdrVersionForMigration);
     config.server.projectId = SERVER_PROJECT;
     config.auth.serviceAccountApiUsers = List.of(SERVICE_ACCOUNT_EMAIL);
 
@@ -135,8 +138,8 @@ public class WorkspaceMigrationServiceImplTest {
         .when(
             wsmClient.cloneBQDataset(
                 vwbWorkspace.getId(),
-                config.vwb.dataCollectionsForMigration.controlled.workspaceId,
-                UUID.fromString(config.vwb.dataCollectionsForMigration.controlled.resourceId),
+                config.vwb.cdrVersionsForMigration.get(0).workspaceId,
+                UUID.fromString(config.vwb.cdrVersionsForMigration.get(0).resourceId),
                 JOB_ID))
         .thenReturn(CLONED_DATASET_RESULT);
     try {

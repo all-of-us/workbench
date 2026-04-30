@@ -233,9 +233,10 @@ public class VwbUserService {
     return podList.getResults().stream()
         .filter(
             p ->
-                (p.getDescription() != null && p.getDescription().contains(userEmail))
-                    || userEmail.equals(p.getCreatedBy())
-                    || podIdsFromBq.contains(p.getPodId().toString()))
+                ((p.getDescription() != null && p.getDescription().contains(userEmail))
+                        || userEmail.equals(p.getCreatedBy())
+                        || podIdsFromBq.contains(p.getPodId().toString()))
+                    && p.getEnvironmentData().getEnvironmentDataGcp().getBillingAccountId() != null)
         .toList();
   }
 

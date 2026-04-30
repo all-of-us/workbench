@@ -23,6 +23,8 @@ import org.pmiops.workbench.vwb.user.ApiException;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
 import org.pmiops.workbench.vwb.user.model.PodDescription;
 import org.pmiops.workbench.vwb.user.model.PodDescriptionList;
+import org.pmiops.workbench.vwb.user.model.PodEnvironment;
+import org.pmiops.workbench.vwb.user.model.PodEnvironmentDataGcp;
 import org.pmiops.workbench.vwb.user.model.PodRole;
 import org.pmiops.workbench.vwb.user.model.UserDescription;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
@@ -154,7 +156,14 @@ class VwbUserServiceTest {
     stubGetUserPods(email);
 
     UUID podId = UUID.randomUUID();
-    PodDescription pod = new PodDescription().podId(podId).description("Pod for " + email);
+    PodDescription pod =
+        new PodDescription()
+            .podId(podId)
+            .description("Pod for " + email)
+            .environmentData(
+                new PodEnvironment()
+                    .environmentDataGcp(
+                        new PodEnvironmentDataGcp().billingAccountId("test-billing")));
     when(vwbUserManagerClient.listUserPods("test-org-id"))
         .thenReturn(new PodDescriptionList().results(List.of(pod)));
     when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of());
@@ -171,7 +180,14 @@ class VwbUserServiceTest {
     stubGetUserPods(email);
 
     UUID podId = UUID.randomUUID();
-    PodDescription pod = new PodDescription().podId(podId).createdBy(email);
+    PodDescription pod =
+        new PodDescription()
+            .podId(podId)
+            .createdBy(email)
+            .environmentData(
+                new PodEnvironment()
+                    .environmentDataGcp(
+                        new PodEnvironmentDataGcp().billingAccountId("test-billing")));
     when(vwbUserManagerClient.listUserPods("test-org-id"))
         .thenReturn(new PodDescriptionList().results(List.of(pod)));
     when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of());
@@ -189,7 +205,14 @@ class VwbUserServiceTest {
 
     UUID podId = UUID.randomUUID();
     PodDescription pod =
-        new PodDescription().podId(podId).description("Pod for someone-else").createdBy("other");
+        new PodDescription()
+            .podId(podId)
+            .description("Pod for someone-else")
+            .createdBy("other")
+            .environmentData(
+                new PodEnvironment()
+                    .environmentDataGcp(
+                        new PodEnvironmentDataGcp().billingAccountId("test-billing")));
     when(vwbUserManagerClient.listUserPods("test-org-id"))
         .thenReturn(new PodDescriptionList().results(List.of(pod)));
     when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of(podId.toString()));

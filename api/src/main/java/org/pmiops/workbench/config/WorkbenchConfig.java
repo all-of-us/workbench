@@ -5,8 +5,6 @@ import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.DataCollectionsForMigration;
-import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.DcAccessTier;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.CDRv8PlusConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.LegacyWorkflowConfig;
 
@@ -81,10 +79,7 @@ public class WorkbenchConfig {
     config.termsOfService = new TermsOfServiceConfig();
     config.artifactRegistry = new ArtifactRegistryConfig();
     config.vwb = new VwbConfig();
-    config.vwb.cdrVersionIdsForMigration = List.of();
-    config.vwb.dataCollectionsForMigration = new DataCollectionsForMigration();
-    config.vwb.dataCollectionsForMigration.controlled = new DcAccessTier();
-    config.vwb.dataCollectionsForMigration.registered = new DcAccessTier();
+    config.vwb.cdrVersionsForMigration = List.of();
     return config;
   }
 
@@ -539,18 +534,13 @@ public class WorkbenchConfig {
     }
 
     public AdminBigQuery adminBigQuery;
-    public List<Integer> cdrVersionIdsForMigration;
 
-    public static class DcAccessTier {
+    public static class CdrVersionForMigration {
+      public Integer cdrVersionId;
       public String workspaceId;
       public String resourceId;
     }
 
-    public static class DataCollectionsForMigration {
-      public DcAccessTier controlled;
-      public DcAccessTier registered;
-    }
-
-    public DataCollectionsForMigration dataCollectionsForMigration;
+    public List<CdrVersionForMigration> cdrVersionsForMigration;
   }
 }
