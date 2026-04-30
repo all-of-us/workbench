@@ -95,8 +95,8 @@ export const MigrationModal = ({ onClose }: Props) => {
               w.accessLevel === WorkspaceAccessLevel.OWNER &&
               serverConfigStore
                 .get()
-                .config.cdrVersionIdsForMigration.includes(
-                  +w.workspace.cdrVersionId
+                .config.cdrVersionsForMigration.some(
+                (c) => +w.workspace.cdrVersionId === c.cdrVersionId
                 )
           )
           .map((w: WorkspaceResponse) => {

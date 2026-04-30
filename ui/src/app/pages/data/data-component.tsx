@@ -117,7 +117,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   const allChecked = Object.values(checks).every(Boolean);
   const profile = profileStore.get().profile;
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
-  const { cdrVersionIdsForMigration, enableVwbMigration } =
+  const { cdrVersionsForMigration, enableVwbMigration } =
     serverConfigStore.get().config;
   const { workspace } = props;
 
@@ -171,7 +171,9 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         <div style={styles.cardButtonArea}>
           {enableVwbMigration &&
             migrationTestingGroup &&
-            cdrVersionIdsForMigration.includes(+workspace.cdrVersionId) && (
+            cdrVersionsForMigration.some(
+              (c) => +workspace.cdrVersionId === c.cdrVersionId
+            ) && (
               <TooltipTrigger
                 content={
                   !writePermission &&

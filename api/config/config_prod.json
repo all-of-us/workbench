@@ -226,16 +226,27 @@
       "logProjectId": "workbench-bq-log-sink",
       "bigQueryDataset": "workbench_monitoring_org_logs_prod"
     },
-    "cdrVersionIdsForMigration": [13, 14],
-    "dataCollectionsForMigration": {
-      "controlled": {
-        "workspaceId": "3d83ef80-77d7-43e8-a479-52946619b769",
-        "resourceId": "e761c0c3-8741-45f0-944c-d15e4cffb5ae"
+    "cdrVersionsForMigration": [
+      {
+        "cdrVersionId": 11,
+        "workspaceId": "698c6700-afbe-454a-b73a-c675e629336c",
+        "resourceId": "4b26807c-ac70-47cb-aa03-920570e8e1cc"
       },
-      "registered": {
+      {
+        "cdrVersionId": 12,
+        "workspaceId": "3d83ef80-77d7-43e8-a479-52946619b769",
+        "resourceId": "f3681964-4d49-4ba8-9cea-5e4f40198c8f"
+      },
+      {
+        "cdrVersionId": 13,
         "workspaceId": "698c6700-afbe-454a-b73a-c675e629336c",
         "resourceId": "0ee225d5-acc5-4a50-830e-6c062beb95fb"
+      },
+      {
+        "cdrVersionId": 14,
+        "workspaceId": "3d83ef80-77d7-43e8-a479-52946619b769",
+        "resourceId": "e761c0c3-8741-45f0-944c-d15e4cffb5ae"
       }
-    }
+    ]
   }
 }
