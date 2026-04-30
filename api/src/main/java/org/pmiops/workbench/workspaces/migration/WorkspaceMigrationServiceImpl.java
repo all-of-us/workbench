@@ -420,22 +420,42 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           Level.INFO,
           preprodWorkspace.getWorkspaceNamespace() + ": Workspace created: " + vwbWorkspace);
 
+      // Manually map preprod cdrs to data collection ids from config since preprod cdrVersionIds
+      // will not match prod
       long cdrVersionId = preprodWorkspace.getCdrVersionId();
-      CdrVersionForMigration cdrVersionForMigration =
-          workbenchConfigProvider.get().vwb.cdrVersionsForMigration.stream()
-              .filter(c -> c.cdrVersionId == cdrVersionId)
-              .findFirst()
-              .orElse(null);
-      if (cdrVersionForMigration == null) {
-        throw new RuntimeException(
-            preprodWorkspace.getWorkspaceNamespace() + ": CDR version not available for migration");
-      }
+      String dataCollectionWsid;
+      String dataCollectionResourceId =
+          switch (Long.toString(cdrVersionId)) {
+            case "10", "12" -> {
+              dataCollectionWsid =
+                  workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(0).workspaceId;
+              yield workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(0).resourceId;
+            }
+            case "11", "13" -> {
+              dataCollectionWsid =
+                  workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(1).workspaceId;
+              yield workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(1).resourceId;
+            }
+            case "14" -> {
+              dataCollectionWsid =
+                  workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(2).workspaceId;
+              yield workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(2).resourceId;
+            }
+            case "15" -> {
+              dataCollectionWsid =
+                  workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(3).workspaceId;
+              yield workbenchConfigProvider.get().vwb.cdrVersionsForMigration.get(3).resourceId;
+            }
+            default -> throw new RuntimeException(
+                preprodWorkspace.getWorkspaceNamespace()
+                    + ": Preprod CDR version not available for migration");
+          };
 
       logger.log(Level.INFO, preprodWorkspace.getWorkspaceNamespace() + ": Starting BQ clone");
       wsmClient.cloneBQDataset(
           workspaceId,
-          cdrVersionForMigration.workspaceId,
-          UUID.fromString(cdrVersionForMigration.resourceId),
+          dataCollectionWsid,
+          UUID.fromString(dataCollectionResourceId),
           UUID.randomUUID().toString());
 
       logger.log(Level.INFO, preprodWorkspace.getWorkspaceNamespace() + ": BQ clone complete");
