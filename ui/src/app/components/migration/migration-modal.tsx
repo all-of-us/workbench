@@ -96,7 +96,7 @@ export const MigrationModal = ({ onClose }: Props) => {
               serverConfigStore
                 .get()
                 .config.cdrVersionsForMigration.some(
-                (c) => +w.workspace.cdrVersionId === c.cdrVersionId
+                  (c) => +w.workspace.cdrVersionId === c.cdrVersionId
                 )
           )
           .map((w: WorkspaceResponse) => {
