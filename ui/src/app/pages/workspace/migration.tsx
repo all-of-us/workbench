@@ -64,7 +64,9 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
 
   if (
     !migrationTestingGroup ||
-    !cdrVersionsForMigration.some((c) => +workspace.cdrVersionId === c.cdrVersionId)
+    !cdrVersionsForMigration.some(
+      (c) => +workspace.cdrVersionId === c.cdrVersionId
+    )
   ) {
     navigate(['workspaces', workspace.namespace, workspace.terraName, 'data']);
   }
