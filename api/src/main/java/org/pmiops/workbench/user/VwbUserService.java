@@ -3,6 +3,7 @@ package org.pmiops.workbench.user;
 import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VwbUserPodDao;
@@ -236,7 +237,8 @@ public class VwbUserService {
                 ((p.getDescription() != null && p.getDescription().contains(userEmail))
                         || userEmail.equals(p.getCreatedBy())
                         || podIdsFromBq.contains(p.getPodId().toString()))
-                    && p.getEnvironmentData().getEnvironmentDataGcp().getBillingAccountId() != null)
+                    && StringUtils.isNotBlank(
+                        p.getEnvironmentData().getEnvironmentDataGcp().getBillingAccountId()))
         .toList();
   }
 
