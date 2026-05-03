@@ -26,7 +26,8 @@ import { DataComponentSplitter } from 'app/pages/data/tanagra-dev/data-component
 import { TanagraContainer } from 'app/pages/data/tanagra-dev/tanagra-container';
 import { TanagraDev } from 'app/pages/data/tanagra-dev/tanagra-dev';
 import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
-import { MigrationPage } from 'app/pages/workspace/migration';
+import { Migration } from 'app/pages/workspace/migration';
+import { MigrationFolderSync } from 'app/pages/workspace/migration-folder-sync';
 import { WorkspaceAbout } from 'app/pages/workspace/workspace-about';
 import {
   WorkspaceEdit,
@@ -63,6 +64,8 @@ const DataExplorerPage = fp.flow(
   withRoutingSpinner
 )(DataExplorer);
 const DataComponentPage = fp.flow(withRouteData)(DataComponentSplitter);
+const MigrationPage = fp.flow(withRouteData)(Migration);
+const MigrationFolderSyncPage = fp.flow(withRouteData)(MigrationFolderSync);
 const DataSetComponentPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -259,6 +262,34 @@ export const WorkspaceRoutes = () => {
         <DataComponentPage
           routeData={{
             title: 'Data Page',
+            breadcrumb: BreadcrumbType.Workspace,
+            workspaceNavBarTab: 'data',
+            pageKey: 'data',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/migration`}
+        guards={[adminLockedGuard(ns, terraName)]}
+      >
+        <MigrationPage
+          routeData={{
+            title: 'Workspace Migration',
+            breadcrumb: BreadcrumbType.Workspace,
+            workspaceNavBarTab: 'data',
+            pageKey: 'data',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/folder-sync`}
+        guards={[adminLockedGuard(ns, terraName)]}
+      >
+        <MigrationFolderSyncPage
+          routeData={{
+            title: 'Workspace Folder Sync',
             breadcrumb: BreadcrumbType.Workspace,
             workspaceNavBarTab: 'data',
             pageKey: 'data',
@@ -486,20 +517,6 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: 'data',
             workspaceNavBarTab: 'tanagra',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/migration`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <MigrationPage
-          routeData={{
-            title: 'Workspace Migration',
-            breadcrumb: BreadcrumbType.Workspace,
-            workspaceNavBarTab: 'migration',
-            pageKey: 'migration',
           }}
         />
       </AppRoute>
