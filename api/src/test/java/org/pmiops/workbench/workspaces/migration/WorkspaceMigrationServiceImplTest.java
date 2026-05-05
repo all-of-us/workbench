@@ -149,7 +149,7 @@ public class WorkspaceMigrationServiceImplTest {
     }
     when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
 
-    when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any(), false))
+    when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 

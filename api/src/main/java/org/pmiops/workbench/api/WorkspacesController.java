@@ -817,11 +817,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Boolean> folderSyncInProgress(
-      String namespace) {
+  public ResponseEntity<Boolean> folderSyncInProgress(String namespace) {
 
-    return ResponseEntity.ok(folderSyncTransferDao.findFirstBySourceWorkspaceNamespaceOrderByStartedDesc(namespace).getTransferState().equals(
-        TransferState.IN_PROGRESS.toString()));
+    return ResponseEntity.ok(
+        folderSyncTransferDao
+            .findFirstBySourceWorkspaceNamespaceOrderByStartedDesc(namespace)
+            .getTransferState()
+            .equals(TransferState.IN_PROGRESS.toString()));
   }
 
   @Override
