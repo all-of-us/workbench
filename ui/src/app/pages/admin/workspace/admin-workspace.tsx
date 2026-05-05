@@ -32,6 +32,7 @@ import { CloudStorageObjects } from './cloud-storage-objects';
 import { CloudStorageTrafficChart } from './cloud-storage-traffic-chart';
 import { CohortBuilder } from './cohort-builder';
 import { Collaborators } from './collaborators';
+import { WorkspaceMigrationInfo } from './workspace-migration-info';
 
 interface Props
   extends WithSpinnerOverlayProps,
@@ -133,6 +134,7 @@ const AdminWorkspaceImpl = (props: Props) => {
             {...{ workspace, activeStatus }}
             reload={populateWorkspaceDetails}
           />
+          <WorkspaceMigrationInfo workspace={workspace} />
           <Accordion>
             <AccordionTab header='Research Purpose'>
               <ResearchPurposeSection
