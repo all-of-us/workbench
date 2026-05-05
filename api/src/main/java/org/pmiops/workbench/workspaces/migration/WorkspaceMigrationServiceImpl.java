@@ -125,6 +125,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
     dbWorkspace.setMigrationState(MigrationState.STARTING.name());
+    dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     workspaceDao.save(dbWorkspace);
     try {
       RawlsWorkspaceDetails fcWorkspace =
@@ -148,6 +149,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
         } catch (Exception e) {
           dbWorkspace.setMigrationState(MigrationState.NOT_STARTED.name());
+          dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
           workspaceDao.save(dbWorkspace);
           throw new RuntimeException(namespace + ": Workspace creation failed", e);
         }
@@ -162,6 +164,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           vwbWorkspace = wsmClient.getWorkspaceAsService(namespace);
         } catch (Exception e) {
           dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+          dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
           workspaceDao.save(dbWorkspace);
           throw new RuntimeException(namespace + ": Workspace fetch failed", e);
         }
@@ -169,6 +172,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       UUID workspaceId = vwbWorkspace.getId();
       dbWorkspace.setMigratedVwbWorkspaceId(workspaceId.toString());
+      dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
       workspaceDao.save(dbWorkspace);
 
       String userEmail = workspace.getCreator();
@@ -335,6 +339,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     } catch (Exception e) {
       dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+      dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
       workspaceDao.save(dbWorkspace);
 
       throw new RuntimeException(namespace + ": Workspace migration failed to start", e);
@@ -456,11 +461,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         return;
       case FAILED:
         dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+        dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
         workspaceDao.save(dbWorkspace);
         storageTransferClient.deleteTransferJob(projectId, jobName);
         return;
       case SUCCESS:
         dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
+        dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
         workspaceDao.save(dbWorkspace);
         try {
           List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
