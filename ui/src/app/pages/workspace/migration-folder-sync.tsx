@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as React from 'react';
 
-import { MigrationState } from 'generated/fetch';
-
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { CheckBox } from 'app/components/inputs';
@@ -30,6 +28,13 @@ import { VwbMigrationSyncInfoBox } from './vwb-migration-sync-infobox';
 
 const WORKSPACE_MIGRATION_POLL_INTERVAL_MS = 5 * 1000;
 
+enum SyncState {
+  NOT_STARTED = 'NOT_STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  FAILED = 'FAILED',
+  FINISHED = 'FINISHED',
+}
+
 interface Props {
   workspace: WorkspaceData;
 }
@@ -37,7 +42,6 @@ interface Props {
 export const MigrationFolderSync = withCurrentWorkspace()(
   ({ workspace }: Props) => {
     const [navigate] = useNavigation();
-    const [startingFolderSync, setStartingFolderSync] = useState(false);
     const [loadingTos, setLoadingTos] = useState(true);
     const [hasAcceptedTos, setHasAcceptedTos] = useState<boolean | null>(null);
     const [hasPersistentDisk, setHasPersistentDisk] = useState<boolean | null>(
@@ -49,8 +53,8 @@ export const MigrationFolderSync = withCurrentWorkspace()(
     const [selectAll, setSelectAll] = useState(false);
     const [loadingFolders, setLoadingFolders] = useState(true);
 
-    const [migrationState, setMigrationState] = useState<MigrationState>(
-      workspace?.migrationState ?? MigrationState.NOT_STARTED
+    const [syncState, setSyncState] = useState<SyncState>(
+      SyncState.NOT_STARTED
     );
     const [transferTimeoutId, setTransferTimeoutId] =
       useState<NodeJS.Timeout>(undefined);
@@ -78,14 +82,11 @@ export const MigrationFolderSync = withCurrentWorkspace()(
     }
 
     const checkFolderSyncStatus = async () => {
-      const workspaceStatusCheck = await workspacesApi().getWorkspace(
-        workspace.namespace,
-        workspace.terraName
+      const syncInProgress = await workspacesApi().folderSyncInProgress(
+        workspace.namespace
       );
-      if (
-        workspaceStatusCheck.workspace.migrationState ===
-        MigrationState.STARTING
-      ) {
+      if (syncInProgress) {
+        setSyncState(SyncState.IN_PROGRESS);
         if (!transferTimeoutId) {
           const timeoutId = setTimeout(
             checkFolderSyncStatus,
@@ -93,20 +94,21 @@ export const MigrationFolderSync = withCurrentWorkspace()(
           );
           setTransferTimeoutId(timeoutId);
         }
+      } else {
+        clearTimeout(transferTimeoutId);
+        setTransferTimeoutId(undefined);
+        setSyncState((prevState) =>
+          prevState === SyncState.IN_PROGRESS
+            ? SyncState.FINISHED
+            : SyncState.NOT_STARTED
+        );
       }
-      setMigrationState(workspaceStatusCheck.workspace.migrationState);
     };
-
-    useEffect(() => {
-      if (workspace?.migrationState) {
-        setMigrationState(workspace.migrationState);
-      }
-    }, [workspace.migrationState]);
 
     // Start Folder Sync
     const handleFolderSync = async () => {
       try {
-        setStartingFolderSync(true);
+        setSyncState(SyncState.IN_PROGRESS);
 
         await workspacesApi().syncWorkspaceFolders(
           workspace.namespace,
@@ -119,23 +121,14 @@ export const MigrationFolderSync = withCurrentWorkspace()(
           }
         );
         void checkFolderSyncStatus();
-        setMigrationState(MigrationState.STARTING);
       } catch (e) {
         console.error('Migration failed', e);
-
-        setMigrationState(MigrationState.FAILED);
-      } finally {
-        setStartingFolderSync(false);
+        setSyncState(SyncState.FAILED);
       }
     };
 
     useEffect(() => {
-      if (
-        workspace.migrationState === MigrationState.STARTING &&
-        !startingFolderSync
-      ) {
-        void checkFolderSyncStatus();
-      }
+      void checkFolderSyncStatus();
       const fetchBucketContents = async () => {
         try {
           const res = await workspacesApi().getMigrationBucketContents(
@@ -259,23 +252,31 @@ to agree to the terms of service. You only need to do this once.`}
               </div>
             </div>
 
-            <Button
-              disabled={
-                migrationState === MigrationState.STARTING ||
-                selectedFolders.length === 0
-              }
-              style={{
-                height: '36px',
-                padding: '0 16px',
-                fontSize: '13px',
-                fontWeight: 600,
-              }}
-              onClick={handleStartClick}
-            >
-              {startingFolderSync
-                ? 'Sync in progress'
-                : 'Sync to Researcher Workbench 2.0'}
-            </Button>
+            <div>
+              <Button
+                disabled={
+                  syncState === SyncState.IN_PROGRESS ||
+                  selectedFolders.length === 0
+                }
+                style={{
+                  height: '36px',
+                  padding: '0 16px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                }}
+                onClick={handleStartClick}
+              >
+                {syncState === SyncState.IN_PROGRESS
+                  ? 'Sync in progress'
+                  : syncState === SyncState.FAILED
+                  ? 'Sync failed'
+                  : 'Sync to Researcher Workbench 2.0'}
+              </Button>
+              {syncState === SyncState.FINISHED && (
+                <div>Folder sync complete</div>
+              )}
+              {syncState === SyncState.FAILED && <div>Folder sync failed</div>}
+            </div>
           </div>
           {loadingFolders ? (
             <div style={{ textAlign: 'center' }}>

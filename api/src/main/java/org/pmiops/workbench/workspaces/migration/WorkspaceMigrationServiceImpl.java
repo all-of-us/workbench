@@ -3,6 +3,8 @@ package org.pmiops.workbench.workspaces.migration;
 import com.google.cloud.storage.Blob;
 import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
@@ -10,8 +12,11 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
+import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbFolderSyncTransfer;
+import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -55,6 +60,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final UserDao userDao;
+  private final FolderSyncTransferDao folderSyncTransferDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
@@ -65,6 +71,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final MailService mailService;
   private final WorkspaceService workspaceService;
   private final Provider<PodApi> podApiProvider;
+  private final Provider<DbUser> userProvider;
+  private final Clock clock;
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -72,6 +80,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       UserDao userDao,
+      FolderSyncTransferDao folderSyncTransferDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
@@ -81,12 +90,15 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       VwbUserService vwbUserService,
       MailService mailService,
       WorkspaceService workspaceService,
-      Provider<PodApi> podApiProvider) {
+      Provider<PodApi> podApiProvider,
+      Provider<DbUser> userProvider,
+      Clock clock) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.userDao = userDao;
+    this.folderSyncTransferDao = folderSyncTransferDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
@@ -97,6 +109,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.mailService = mailService;
     this.workspaceService = workspaceService;
     this.podApiProvider = podApiProvider;
+    this.userProvider = userProvider;
+    this.clock = clock;
   }
 
   @Override
@@ -382,6 +396,14 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               true);
       logger.log(Level.INFO, namespace + ": Job created, running transfer job");
       storageTransferClient.runTransferJob(projectId, jobName);
+      DbUser user = userProvider.get();
+      folderSyncTransferDao.save(
+          new DbFolderSyncTransfer()
+              .setCreatedByUserId(user.getUserId())
+              .setStarted(new Timestamp(clock.instant().toEpochMilli()))
+              .setTransferJobName(jobName)
+              .setTransferState(TransferState.IN_PROGRESS.toString())
+              .setSourceWorkspaceNamespace(namespace));
       logger.log(Level.INFO, namespace + ": Running transfer queue");
       taskQueueService.pushFolderSyncStatusTask(namespace, terraName, jobName);
     } catch (Exception e) {
@@ -454,6 +476,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   @Override
   public void checkFolderSyncStatus(String namespace, String terraName, String jobName) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    DbFolderSyncTransfer dbFolderSyncTransfer =
+        folderSyncTransferDao.findDbFolderSyncTransferByTransferJobName(jobName);
     String projectId = workbenchConfigProvider.get().server.projectId;
     String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
     TransferOperation transferOperation =
@@ -468,9 +492,17 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         return;
       case FAILED:
         // storageTransferClient.deleteTransferJob(projectId, jobName);
+        dbFolderSyncTransfer
+            .setTransferState(TransferState.FAILED.toString())
+            .setFinished(new Timestamp(clock.instant().toEpochMilli()));
+        folderSyncTransferDao.save(dbFolderSyncTransfer);
         return;
       case SUCCESS:
         // storageTransferClient.deleteTransferJob(projectId, jobName);
+        dbFolderSyncTransfer
+            .setTransferState(TransferState.FINISHED.toString())
+            .setFinished(new Timestamp(clock.instant().toEpochMilli()));
+        folderSyncTransferDao.save(dbFolderSyncTransfer);
     }
   }
 

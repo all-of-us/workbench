@@ -3372,6 +3372,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MigrationBucketContentsResponse'
+  /v1/workspaces/{namespace}/migration/folder-sync:
+    get:
+      tags:
+        - workspaces
+      description: Check if a folder sync is in progress for this workspace
+      operationId: folderSyncInProgress
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: True if folder sync in progress
+          content:
+            application/json:
+              schema:
+                type: boolean
   /v1/workspaces/{namespace}/{terraName}/migration/folder-sync:
     post:
       tags:

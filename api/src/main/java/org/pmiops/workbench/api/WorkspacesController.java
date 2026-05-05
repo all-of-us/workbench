@@ -19,11 +19,13 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -80,8 +82,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceMigrationService workspaceMigrationService;
   private final VwbUserService vwbUserService;
   private final WorkspaceServiceFactory workspaceServiceFactory;
-
   private final WsmClient wsmClient;
+  private final FolderSyncTransferDao folderSyncTransferDao;
 
   @Autowired
   public WorkspacesController(
@@ -105,7 +107,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceMigrationService workspaceMigrationService,
       WorkspaceServiceFactory workspaceServiceFactory,
       VwbUserService vwbUserService,
-      WsmClient wsmClient) {
+      WsmClient wsmClient,
+      FolderSyncTransferDao folderSyncTransferDao) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -127,6 +130,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceServiceFactory = workspaceServiceFactory;
     this.vwbUserService = vwbUserService;
     this.wsmClient = wsmClient;
+    this.folderSyncTransferDao = folderSyncTransferDao;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -810,6 +814,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         request != null ? request.getResearchPurpose() : null);
 
     return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Boolean> folderSyncInProgress(
+      String namespace) {
+
+    return ResponseEntity.ok(folderSyncTransferDao.findFirstBySourceWorkspaceNamespaceOrderByStartedDesc(namespace).getTransferState().equals(
+        TransferState.IN_PROGRESS.toString()));
   }
 
   @Override
