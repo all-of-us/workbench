@@ -39,6 +39,9 @@ import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.Property;
+import org.pmiops.workbench.wsmanager.model.ResourceDescription;
+import org.pmiops.workbench.wsmanager.model.ResourceList;
+import org.pmiops.workbench.wsmanager.model.ResourceType;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -307,7 +310,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               workspace.getNamespace(),
               projectId,
               folders,
-              serviceAccountEmail);
+              serviceAccountEmail,
+              false);
       logger.log(Level.INFO, namespace + ": Job created, running transfer job");
 
       storageTransferClient.runTransferJob(projectId, jobName);
@@ -320,6 +324,68 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       workspaceDao.save(dbWorkspace);
 
       throw new RuntimeException(namespace + ": Workspace migration failed to start", e);
+    }
+  }
+
+  @Override
+  public void syncWorkspaceFolders(String namespace, String terraName, List<String> folders) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    RawlsWorkspaceDetails fcWorkspace =
+        fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
+    WorkspaceDescription vwbWorkspace;
+    try {
+      logger.log(
+          Level.INFO,
+          namespace
+              + ": Fetching 2.0 workspace with UUID "
+              + dbWorkspace.getMigratedVwbWorkspaceId());
+
+      vwbWorkspace = wsmClient.getWorkspaceAsService(namespace);
+    } catch (Exception e) {
+      throw new RuntimeException(namespace + ": Workspace fetch failed", e);
+    }
+
+    try {
+      logger.log(
+          Level.INFO,
+          namespace
+              + ": Fetching 2.0 workspace resources"
+              + dbWorkspace.getMigratedVwbWorkspaceId());
+      Object resources = wsmClient.enumerateWorkspaceResources(vwbWorkspace.getId().toString());
+      String destinationBucket = "rw-migration-" + namespace;
+      ResourceDescription bucket =
+          ((ResourceList) resources)
+              .getResources().stream()
+                  .filter(
+                      r ->
+                          r.getMetadata().getResourceType() == ResourceType.GCS_BUCKET
+                              && r.getMetadata().getName().startsWith(destinationBucket))
+                  .findFirst()
+                  .orElse(null);
+      if (bucket == null) {
+        throw new RuntimeException(namespace + ": Bucket not found");
+      }
+      logger.log(Level.INFO, namespace + ": Workspace bucket: " + bucket);
+      logger.log(Level.INFO, namespace + ": Creating transfer job");
+
+      String sourceBucket = fcWorkspace.getBucketName();
+      String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+      String projectId = workbenchConfigProvider.get().server.projectId;
+      String jobName =
+          storageTransferClient.createTransferJob(
+              sourceBucket,
+              bucket.getMetadata().getName(),
+              namespace,
+              projectId,
+              folders,
+              serviceAccountEmail,
+              true);
+      logger.log(Level.INFO, namespace + ": Job created, running transfer job");
+      storageTransferClient.runTransferJob(projectId, jobName);
+      logger.log(Level.INFO, namespace + ": Running transfer queue");
+      taskQueueService.pushFolderSyncStatusTask(namespace, terraName, jobName);
+    } catch (Exception e) {
+      throw new RuntimeException(namespace + ": Failed to fetch workspace resources", e);
     }
   }
 
@@ -358,7 +424,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     TransferOperation transferOperation =
         storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
-    logger.log(Level.INFO, "Job status: " + jobStatus.toString());
+    logger.log(Level.INFO, "Job status: " + jobStatus);
     String jobName = "transferJobs/migration-" + workspaceNamespace;
     switch (jobStatus) {
       case IN_PROGRESS:
@@ -382,6 +448,29 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           logger.log(Level.WARNING, "Failed to send migration completion email", e);
         }
         storageTransferClient.deleteTransferJob(projectId, jobName);
+    }
+  }
+
+  @Override
+  public void checkFolderSyncStatus(String namespace, String terraName, String jobName) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    String projectId = workbenchConfigProvider.get().server.projectId;
+    String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
+    TransferOperation transferOperation =
+        storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
+    TransferOperation.Status jobStatus = transferOperation.getStatus();
+    logger.log(Level.INFO, "Job status: " + jobStatus);
+    switch (jobStatus) {
+      case IN_PROGRESS:
+      case QUEUED:
+        // STS still running — requeue
+        taskQueueService.pushFolderSyncStatusTask(namespace, terraName, jobName);
+        return;
+      case FAILED:
+        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        return;
+      case SUCCESS:
+        // storageTransferClient.deleteTransferJob(projectId, jobName);
     }
   }
 
@@ -494,7 +583,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               preprodWorkspace.getWorkspaceNamespace(),
               projectId,
               null,
-              serviceAccountEmail);
+              serviceAccountEmail,
+              true);
       logger.log(
           Level.INFO,
           preprodWorkspace.getWorkspaceNamespace() + ": Job created, running transfer job");

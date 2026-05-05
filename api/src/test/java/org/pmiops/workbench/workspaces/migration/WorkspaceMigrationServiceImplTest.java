@@ -149,7 +149,7 @@ public class WorkspaceMigrationServiceImplTest {
     }
     when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
 
-    when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any()))
+    when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any(), false))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 
@@ -200,7 +200,8 @@ public class WorkspaceMigrationServiceImplTest {
             NAMESPACE,
             SERVER_PROJECT,
             SELECTED_FOLDERS,
-            SERVICE_ACCOUNT_EMAIL);
+            SERVICE_ACCOUNT_EMAIL,
+            false);
   }
 
   @Test
@@ -216,7 +217,8 @@ public class WorkspaceMigrationServiceImplTest {
             NAMESPACE,
             SERVER_PROJECT,
             List.of(),
-            SERVICE_ACCOUNT_EMAIL);
+            SERVICE_ACCOUNT_EMAIL,
+            false);
   }
 
   @Test

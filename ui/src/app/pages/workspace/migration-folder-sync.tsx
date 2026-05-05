@@ -7,7 +7,6 @@ import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { CheckBox } from 'app/components/inputs';
 import { Spinner } from 'app/components/spinners';
-import { rwToVwbResearchPurpose } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import {
   disksApi,
   userApi,
@@ -109,15 +108,14 @@ export const MigrationFolderSync = withCurrentWorkspace()(
       try {
         setStartingFolderSync(true);
 
-        await workspacesApi().startWorkspaceMigration(
+        await workspacesApi().syncWorkspaceFolders(
           workspace.namespace,
           workspace.terraName,
           {
-            folders: selectAll ? [] : selectedFolders,
-            podId: 'selectedPod',
-            researchPurpose: JSON.stringify(
-              rwToVwbResearchPurpose(workspace.researchPurpose)
-            ),
+            folders:
+              selectAll || folders.length === selectedFolders.length
+                ? []
+                : selectedFolders,
           }
         );
         void checkFolderSyncStatus();

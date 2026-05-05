@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
+import org.pmiops.workbench.model.CheckFolderSyncStatusRequest;
 import org.pmiops.workbench.model.CheckWorkspaceMigrationStatusRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
@@ -157,6 +158,19 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
     workspaceMigrationService.checkMigrationStatus(
         request.getWorkspaceNamespace(), request.getWorkspaceName());
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> checkFolderSyncStatus(CheckFolderSyncStatusRequest request) {
+    LOGGER.info(
+        String.format(
+            "Checking folder sync status for workspace %s/%s - %s",
+            request.getWorkspaceNamespace(), request.getWorkspaceName(), request.getJobName()));
+
+    workspaceMigrationService.checkFolderSyncStatus(
+        request.getWorkspaceNamespace(), request.getWorkspaceName(), request.getJobName());
 
     return ResponseEntity.ok().build();
   }

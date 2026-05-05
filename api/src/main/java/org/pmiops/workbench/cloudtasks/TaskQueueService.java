@@ -66,6 +66,11 @@ public class TaskQueueService {
   public static final TaskQueuePair WORKSPACE_MIGRATION_STATUS =
       new TaskQueuePair("workspaceMigrationStatusTaskQueue", "checkWorkspaceMigrationStatus");
 
+  // Workspace migration status queue
+
+  public static final TaskQueuePair FOLDER_SYNC_STATUS =
+      new TaskQueuePair("folderSyncStatusTaskQueue", "checkFolderSyncStatus");
+
   // initial credits queues and cloud tasks:
   //
   // INITIAL_CREDITS_EXPIRATION - run as part of the cron checkInitialCreditsExpiration to check
@@ -298,6 +303,16 @@ public class TaskQueueService {
         Map.of(
             "workspaceNamespace", namespace,
             "workspaceName", terraName));
+  }
+
+  public void pushFolderSyncStatusTask(String namespace, String terraName, String jobName) {
+
+    createAndPushTask(
+        FOLDER_SYNC_STATUS,
+        Map.of(
+            "workspaceNamespace", namespace,
+            "workspaceName", terraName,
+            "jobName", jobName));
   }
 
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {

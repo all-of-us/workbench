@@ -813,6 +813,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Void> syncWorkspaceFolders(
+      String namespace, String terraName, SyncWorkspaceFoldersRequest request) {
+
+    workspaceMigrationService.syncWorkspaceFolders(namespace, terraName, request.getFolders());
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Boolean> vwbWorkspaceExists(String namespace) {
+    return ResponseEntity.ok(wsmClient.getWorkspaceAsService(namespace) != null);
+  }
+
+  @Override
   public ResponseEntity<MigrationBucketContentsResponse> getMigrationBucketContents(
       String namespace, String terraName) {
 
