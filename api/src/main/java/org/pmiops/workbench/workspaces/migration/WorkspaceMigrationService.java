@@ -12,9 +12,13 @@ public interface WorkspaceMigrationService {
       String podId,
       String researchPurpose);
 
+  void syncWorkspaceFolders(String namespace, String terraName, List<String> folders);
+
   MigrationBucketContentsResponse getBucketContents(String namespace, String terraName);
 
   void checkMigrationStatus(String namespace, String terraName);
+
+  void checkFolderSyncStatus(String namespace, String terraName, String jobName);
 
   void startPreprodWorkspaceMigration(
       PreprodWorkspace preprodWorkspace, String email, String researchPurpose, String bucketName);

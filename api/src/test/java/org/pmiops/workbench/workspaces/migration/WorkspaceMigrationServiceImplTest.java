@@ -7,6 +7,9 @@ import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion
 
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,6 +79,9 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private StorageTransferClient storageTransferClient;
   @Mock private TaskQueueService taskQueueService;
 
+  // Clock MOCK
+  @Mock private Clock clock;
+
   @InjectMocks private WorkspaceMigrationServiceImpl service;
 
   private DbWorkspace dbWorkspace;
@@ -84,6 +90,10 @@ public class WorkspaceMigrationServiceImplTest {
 
   @BeforeEach
   void setup() {
+
+    lenient().when(clock.instant()).thenReturn(Instant.now());
+    lenient().when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
     DbCdrVersion cdrVersion =
         createDefaultCdrVersion(9).setAccessTier(new DbAccessTier().setShortName("controlled"));
     dbWorkspace = new DbWorkspace();
@@ -149,7 +159,7 @@ public class WorkspaceMigrationServiceImplTest {
     }
     when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
 
-    when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any()))
+    when(storageTransferClient.createTransferJob(any(), any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 
@@ -200,7 +210,8 @@ public class WorkspaceMigrationServiceImplTest {
             NAMESPACE,
             SERVER_PROJECT,
             SELECTED_FOLDERS,
-            SERVICE_ACCOUNT_EMAIL);
+            SERVICE_ACCOUNT_EMAIL,
+            false);
   }
 
   @Test
@@ -216,7 +227,8 @@ public class WorkspaceMigrationServiceImplTest {
             NAMESPACE,
             SERVER_PROJECT,
             List.of(),
-            SERVICE_ACCOUNT_EMAIL);
+            SERVICE_ACCOUNT_EMAIL,
+            false);
   }
 
   @Test

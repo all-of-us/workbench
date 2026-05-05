@@ -36,11 +36,12 @@ interface Props {
   workspace: WorkspaceData;
 }
 
-export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
+export const Migration = withCurrentWorkspace()(({ workspace }: Props) => {
   const [navigate] = useNavigation();
   const [selectedPod, setSelectedPod] = useState('');
   const [pods, setPods] = useState<any[]>([]);
   const [loadingPods, setLoadingPods] = useState(false);
+  const [loadingTos, setLoadingTos] = useState(true);
   const [startingMigration, setStartingMigration] = useState(false);
   const [hasAcceptedTos, setHasAcceptedTos] = useState<boolean | null>(null);
   const [hasPersistentDisk, setHasPersistentDisk] = useState<boolean | null>(
@@ -155,6 +156,8 @@ export const MigrationPage = withCurrentWorkspace()(({ workspace }: Props) => {
       } catch (e) {
         console.error('Failed to fetch ToS state', e);
         setHasAcceptedTos(false);
+      } finally {
+        setLoadingTos(false);
       }
     };
 
@@ -198,6 +201,7 @@ to agree to the terms of service. You only need to do this once.`}
           actionText='Open Researcher Workbench 2.0'
           onAction={() => window.open(environment.vwbUiUrl, '_blank')}
           onClose={() => setHasAcceptedTos(true)}
+          loadingText={loadingTos && 'Checking Terms of Service'}
         />
       )}
 
@@ -205,6 +209,7 @@ to agree to the terms of service. You only need to do this once.`}
 
       <div
         style={{
+          background: colors.white,
           border: `1px solid ${colors.light}`,
           borderRadius: '8px',
           padding: '16px 20px',

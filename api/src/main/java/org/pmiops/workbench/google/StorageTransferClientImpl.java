@@ -8,6 +8,7 @@ import com.google.storagetransfer.v1.proto.TransferTypes;
 import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,17 +24,24 @@ public class StorageTransferClientImpl implements StorageTransferClient {
       String workspaceNamespace,
       String projectId,
       List<String> folders,
-      String serviceAccountEmail) {
+      String serviceAccountEmail,
+      Boolean uniqueName) {
     try {
 
       String jobName = "transferJobs/migration-" + workspaceNamespace;
+      if (uniqueName) {
+        jobName += "-" + UUID.randomUUID().toString().substring(0, 4);
+      }
       com.google.gson.JsonObject transferSpec = new com.google.gson.JsonObject();
       com.google.gson.JsonObject gcsSource = new com.google.gson.JsonObject();
       gcsSource.addProperty("bucketName", sourceBucket);
       com.google.gson.JsonObject gcsSink = new com.google.gson.JsonObject();
       gcsSink.addProperty("bucketName", destinationBucket);
+      com.google.gson.JsonObject transferOptions = new com.google.gson.JsonObject();
+      transferOptions.addProperty("overwriteObjectsAlreadyExistingInSink", true);
       transferSpec.add("gcsDataSource", gcsSource);
       transferSpec.add("gcsDataSink", gcsSink);
+      transferSpec.add("transferOptions", transferOptions);
 
       if (folders != null && !folders.isEmpty()) {
         com.google.gson.JsonObject objectConditions = new com.google.gson.JsonObject();

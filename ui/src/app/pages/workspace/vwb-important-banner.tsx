@@ -15,6 +15,7 @@ interface Props {
   actionText?: string;
   onAction?: () => void;
   onClose?: () => void;
+  loadingText?: string;
 }
 
 export const VwbImportantBanner = ({
@@ -23,6 +24,7 @@ export const VwbImportantBanner = ({
   actionText,
   onAction,
   onClose,
+  loadingText,
 }: Props) => {
   return (
     <div
@@ -34,34 +36,56 @@ export const VwbImportantBanner = ({
         marginBottom: '1rem',
       }}
     >
-      {/* LEFT */}
-      <FlexRow
-        style={{ color: colors.warningAlt, alignItems: 'center', gap: '10px' }}
-      >
-        <FontAwesomeIcon icon={faTriangleExclamation} />
-        <div style={{ flex: 2, fontWeight: 600 }}>{title}</div>
-
-        {/* RIGHT */}
-        {actionText && (
-          <Clickable
-            style={{ fontWeight: 500, height: '24px' }}
-            onClick={onAction}
-          >
-            {actionText}
-          </Clickable>
-        )}
-        <Clickable style={{ cursor: 'pointer' }} onClick={onClose}>
-          <FontAwesomeIcon icon={faXmark} />
-        </Clickable>
-      </FlexRow>
-
-      <FlexRow>
-        <div
-          style={{ fontSize: '13px', color: colors.dark, marginLeft: '24px' }}
+      {loadingText ? (
+        <FlexRow
+          style={{
+            color: colors.warningAlt,
+            alignItems: 'center',
+            gap: '10px',
+          }}
         >
-          {message}
-        </div>
-      </FlexRow>
+          {loadingText}...
+        </FlexRow>
+      ) : (
+        <>
+          {/* LEFT */}
+          <FlexRow
+            style={{
+              color: colors.warningAlt,
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <FontAwesomeIcon icon={faTriangleExclamation} />
+            <div style={{ flex: 2, fontWeight: 600 }}>{title}</div>
+
+            {/* RIGHT */}
+            {actionText && (
+              <Clickable
+                style={{ fontWeight: 500, height: '24px' }}
+                onClick={onAction}
+              >
+                {actionText}
+              </Clickable>
+            )}
+            <Clickable style={{ cursor: 'pointer' }} onClick={onClose}>
+              <FontAwesomeIcon icon={faXmark} />
+            </Clickable>
+          </FlexRow>
+
+          <FlexRow>
+            <div
+              style={{
+                fontSize: '13px',
+                color: colors.dark,
+                marginLeft: '24px',
+              }}
+            >
+              {message}
+            </div>
+          </FlexRow>
+        </>
+      )}
     </div>
   );
 };

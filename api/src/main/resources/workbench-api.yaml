@@ -3343,9 +3343,104 @@ paths:
               $ref: '#/components/schemas/StartWorkspaceMigrationRequest'
         required: false
       responses:
-        '200':
+        200:
           description: Migration started
       x-codegen-request-body-name: request
+  /v1/workspaces/{namespace}/{terraName}/migration/bucket-contents:
+    get:
+      tags:
+        - workspaces
+      description: Returns the top-level folders from the RW workspace bucket for migration selection.
+      operationId: getMigrationBucketContents
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          description: The workspace Terra name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Bucket contents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MigrationBucketContentsResponse'
+  /v1/workspaces/{namespace}/migration/folder-sync:
+    get:
+      tags:
+        - workspaces
+      description: Check if a folder sync is in progress for this workspace
+      operationId: folderSyncInProgress
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: True if folder sync in progress
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /v1/workspaces/{namespace}/{terraName}/migration/folder-sync:
+    post:
+      tags:
+        - workspaces
+      description: Copies the selected folders to the migrated 2.0 workspace
+      operationId: syncWorkspaceFolders
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          description: The workspace Terra name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Folders to migrate from the workspace bucket.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncWorkspaceFoldersRequest'
+      responses:
+        200:
+          description: Folders migrated successfully
+          content: {}
+  /v1/workspaces/{namespace}/migration/workspace-exists:
+    get:
+      tags:
+        - workspaces
+      description: Checks if RW 2.0 workspace exists
+      operationId: vwbWorkspaceExists
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workspace existence checked.
+          content:
+            application/json:
+              schema:
+                type: boolean
   /v1/workspaces/{workspaceNamespace}/{terraName}/user-recent-resources/update:
     post:
       tags:
@@ -4472,6 +4567,27 @@ paths:
       responses:
         200:
           description: Migration status checked successfully
+          content: { }
+      x-codegen-request-body-name: request
+  /v1/cloudTask/checkFolderSyncStatus:
+    post:
+      tags:
+        - cloudTaskWorkspaces
+      description: |
+        Checks the status of a folder sync STS job and updates
+        the re-migration state when complete. Requeues itself if still running.
+      operationId: checkFolderSyncStatus
+      security: [ ]
+      requestBody:
+        description: Folder sync status task to process.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckFolderSyncStatusRequest'
+        required: true
+      responses:
+        200:
+          description: Folder sync status checked successfully
           content: { }
       x-codegen-request-body-name: request
   /v1/cloudTask/deleteTestUserWorkspaces:
@@ -5802,32 +5918,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/workspaces/{namespace}/{terraName}/migration/bucket-contents:
-    get:
-      tags:
-        - workspaces
-      description: Returns the top-level folders from the RW workspace bucket for migration selection.
-      operationId: getMigrationBucketContents
-      parameters:
-        - name: namespace
-          in: path
-          description: The workspace namespace
-          required: true
-          schema:
-            type: string
-        - name: terraName
-          in: path
-          description: The workspace Terra name
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Bucket contents
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MigrationBucketContentsResponse'
   /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/menu/{parentId}:
     get:
       tags:
@@ -8051,6 +8141,15 @@ components:
           type: string
         workspaceName:
           type: string
+    CheckFolderSyncStatusRequest:
+      type: object
+      properties:
+        workspaceNamespace:
+          type: string
+        workspaceName:
+          type: string
+        jobName:
+          type: string
     StartWorkspaceMigrationRequest:
       type: object
       properties:
@@ -8063,6 +8162,14 @@ components:
           description: List of folder prefixes to migrate. If empty, migrates entire bucket.
         researchPurpose:
           type: string
+    SyncWorkspaceFoldersRequest:
+      type: object
+      properties:
+        folders:
+          type: array
+          items:
+            type: string
+          description: List of folder prefixes to migrate. If empty, migrates entire bucket.
     WorkspaceResponseListResponse:
       required:
       - items

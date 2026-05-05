@@ -192,161 +192,237 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                   }}
                   disabled={!writePermission}
                 >
-                  {/* Title */}
-                  <div
-                    style={{
-                      fontSize: '20px',
-                      fontWeight: 600,
-                      color: colors.primary,
-                      marginBottom: '4px',
-                    }}
-                  >
-                    Workspace Migration
-                  </div>
-
-                  {/* Description */}
-                  <div
-                    style={{
-                      fontSize: '12.5px',
-                      lineHeight: '20px',
-                      color: colors.dark,
-                    }}
-                  >
-                    The <AoU /> Researcher Workbench is moving to a new
-                    platform. Please migrate your workspaces. Any workspace not
-                    migrated will be archived.{' '}
-                    <StyledExternalLink
-                      href={VWB_USER_SUPPORT_MIGRATION_URL}
-                      style={{
-                        color: colors.accent,
-                        textDecoration: 'underline',
-                      }}
-                      target='_blank'
-                    >
-                      Learn more
-                    </StyledExternalLink>
-                  </div>
-
-                  {/* Section Title */}
-                  <div
-                    style={{
-                      fontSize: '12.5px',
-                      fontWeight: 600,
-                      color: colors.primary,
-                    }}
-                  >
-                    Prepare for Migration:
-                  </div>
-
-                  {/* List */}
-                  <div
-                    style={{
-                      fontSize: '11.5px',
-                      lineHeight: '18px',
-                      color: colors.primary,
-                    }}
-                  >
-                    <div>
-                      <CheckBox
-                        checked={checks.step1}
-                        onChange={(checked) =>
-                          setChecks({ ...checks, step1: checked })
-                        }
-                        style={{ marginRight: '4px' }}
-                      />
-                      Review your workspaces to decide which ones to migrate
-                    </div>
-                    <div>
-                      <CheckBox
-                        checked={checks.step2}
-                        onChange={(checked) =>
-                          setChecks({ ...checks, step2: checked })
-                        }
-                      />
-                      Delete any inactive workspaces or stored files no longer
-                      applicable to your work
-                    </div>
-                    <div>
-                      <CheckBox
-                        checked={checks.step3}
-                        onChange={(checked) =>
-                          setChecks({ ...checks, step3: checked })
-                        }
-                      />
-                      Migrate files from your persistent disk (if applicable) to
-                      the workspace bucket{' '}
-                      <StyledExternalLink
-                        href={VWB_USER_SUPPORT_MIGRATION_URL}
+                  {workspace.migratedVwbWorkspaceId ? (
+                    /* Folder Sync for re-migration */
+                    <>
+                      {/* Title */}
+                      <div
                         style={{
-                          color: colors.accent,
-                          textDecoration: 'underline',
+                          fontSize: '20px',
+                          fontWeight: 600,
+                          color: colors.primary,
+                          marginBottom: '4px',
                         }}
-                        target='_blank'
                       >
-                        Learn more
-                      </StyledExternalLink>
-                    </div>
-                    <div>
-                      <CheckBox
-                        checked={checks.step4}
-                        onChange={(checked) =>
-                          setChecks({ ...checks, step4: checked })
-                        }
-                      />
-                      Set up billing in the new Researcher Workbench 2.0 if
-                      initial credits have been used{' '}
-                      <StyledExternalLink
-                        href={VWB_USER_SUPPORT_BILLING_URL}
-                        style={{
-                          color: colors.accent,
-                          textDecoration: 'underline',
-                        }}
-                        target='_blank'
-                      >
-                        Learn more
-                      </StyledExternalLink>
-                    </div>
-                  </div>
+                        Folder Sync
+                      </div>
 
-                  {/* CTA */}
-                  <div style={{ marginTop: 'auto' }}>
-                    <div
-                      style={{
-                        marginTop: '4px',
-                        backgroundColor: allChecked
-                          ? colors.primary
-                          : '#C4C4C4',
-                        color: colors.white,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '4px 16px',
-                        borderRadius: '4px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        cursor: allChecked ? 'pointer' : 'not-allowed',
-                        height: '30px',
-                        opacity: allChecked ? 1 : 0.6,
-                      }}
-                      onClick={() => {
-                        if (!allChecked) {
-                          return;
-                        }
-                        navigate([
-                          'workspaces',
-                          workspace.namespace,
-                          workspace.terraName,
-                          'migration',
-                        ]);
-                      }}
-                    >
-                      Get started
-                      <ClrIcon
-                        shape='arrow right'
-                        size={12}
-                        style={{ marginLeft: '6px' }}
-                      />
-                    </div>
-                  </div>
+                      {/* Description */}
+                      <div
+                        style={{
+                          fontSize: '12.5px',
+                          lineHeight: '20px',
+                          color: colors.dark,
+                        }}
+                      >
+                        This workspace has already been migrated to Researcher
+                        Workbench 2.0. However, any new folders can be moved to
+                        the corresponding Researcher Workbench 2.0 workspace.{' '}
+                        <StyledExternalLink
+                          href={VWB_USER_SUPPORT_MIGRATION_URL}
+                          style={{
+                            color: colors.accent,
+                            textDecoration: 'underline',
+                          }}
+                          target='_blank'
+                        >
+                          Learn more
+                        </StyledExternalLink>
+                      </div>
+
+                      {/* CTA */}
+                      <div style={{ marginTop: 'auto' }}>
+                        <div
+                          style={{
+                            marginTop: '4px',
+                            backgroundColor: colors.primary,
+                            color: colors.white,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '4px 16px',
+                            borderRadius: '4px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            height: '30px',
+                          }}
+                          onClick={() => {
+                            navigate([
+                              'workspaces',
+                              workspace.namespace,
+                              workspace.terraName,
+                              'folder-sync',
+                            ]);
+                          }}
+                        >
+                          Get started
+                          <ClrIcon
+                            shape='arrow right'
+                            size={12}
+                            style={{ marginLeft: '6px' }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Title */}
+                      <div
+                        style={{
+                          fontSize: '20px',
+                          fontWeight: 600,
+                          color: colors.primary,
+                          marginBottom: '4px',
+                        }}
+                      >
+                        Workspace Migration
+                      </div>
+
+                      {/* Description */}
+                      <div
+                        style={{
+                          fontSize: '12.5px',
+                          lineHeight: '20px',
+                          color: colors.dark,
+                        }}
+                      >
+                        The <AoU /> Researcher Workbench is moving to a new
+                        platform. Please migrate your workspaces. Any workspace
+                        not migrated will be archived.{' '}
+                        <StyledExternalLink
+                          href={VWB_USER_SUPPORT_MIGRATION_URL}
+                          style={{
+                            color: colors.accent,
+                            textDecoration: 'underline',
+                          }}
+                          target='_blank'
+                        >
+                          Learn more
+                        </StyledExternalLink>
+                      </div>
+
+                      {/* Section Title */}
+                      <div
+                        style={{
+                          fontSize: '12.5px',
+                          fontWeight: 600,
+                          color: colors.primary,
+                        }}
+                      >
+                        Prepare for Migration:
+                      </div>
+
+                      {/* List */}
+                      <div
+                        style={{
+                          fontSize: '11.5px',
+                          lineHeight: '18px',
+                          color: colors.primary,
+                        }}
+                      >
+                        <div>
+                          <CheckBox
+                            checked={checks.step1}
+                            onChange={(checked) =>
+                              setChecks({ ...checks, step1: checked })
+                            }
+                            style={{ marginRight: '4px' }}
+                          />
+                          Review your workspaces to decide which ones to migrate
+                        </div>
+                        <div>
+                          <CheckBox
+                            checked={checks.step2}
+                            onChange={(checked) =>
+                              setChecks({ ...checks, step2: checked })
+                            }
+                          />
+                          Delete any inactive workspaces or stored files no
+                          longer applicable to your work
+                        </div>
+                        <div>
+                          <CheckBox
+                            checked={checks.step3}
+                            onChange={(checked) =>
+                              setChecks({ ...checks, step3: checked })
+                            }
+                          />
+                          Migrate files from your persistent disk (if
+                          applicable) to the workspace bucket{' '}
+                          <StyledExternalLink
+                            href={VWB_USER_SUPPORT_MIGRATION_URL}
+                            style={{
+                              color: colors.accent,
+                              textDecoration: 'underline',
+                            }}
+                            target='_blank'
+                          >
+                            Learn more
+                          </StyledExternalLink>
+                        </div>
+                        <div>
+                          <CheckBox
+                            checked={checks.step4}
+                            onChange={(checked) =>
+                              setChecks({ ...checks, step4: checked })
+                            }
+                          />
+                          Set up billing in the new Researcher Workbench 2.0 if
+                          initial credits have been used{' '}
+                          <StyledExternalLink
+                            href={VWB_USER_SUPPORT_BILLING_URL}
+                            style={{
+                              color: colors.accent,
+                              textDecoration: 'underline',
+                            }}
+                            target='_blank'
+                          >
+                            Learn more
+                          </StyledExternalLink>
+                        </div>
+                      </div>
+
+                      {/* CTA */}
+                      <div style={{ marginTop: 'auto' }}>
+                        <div
+                          style={{
+                            marginTop: '4px',
+                            backgroundColor: allChecked
+                              ? colors.primary
+                              : '#C4C4C4',
+                            color: colors.white,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '4px 16px',
+                            borderRadius: '4px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: allChecked ? 'pointer' : 'not-allowed',
+                            height: '30px',
+                            opacity: allChecked ? 1 : 0.6,
+                          }}
+                          onClick={() => {
+                            if (!allChecked) {
+                              return;
+                            }
+                            navigate([
+                              'workspaces',
+                              workspace.namespace,
+                              workspace.terraName,
+                              'migration',
+                            ]);
+                          }}
+                        >
+                          Get started
+                          <ClrIcon
+                            shape='arrow right'
+                            size={12}
+                            style={{ marginLeft: '6px' }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </CardButton>
               </TooltipTrigger>
             )}

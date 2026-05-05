@@ -3,6 +3,8 @@ package org.pmiops.workbench.workspaces.migration;
 import com.google.cloud.storage.Blob;
 import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
@@ -10,8 +12,11 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
+import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbFolderSyncTransfer;
+import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -39,6 +44,9 @@ import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
 import org.pmiops.workbench.wsmanager.model.IamRole;
 import org.pmiops.workbench.wsmanager.model.Property;
+import org.pmiops.workbench.wsmanager.model.ResourceDescription;
+import org.pmiops.workbench.wsmanager.model.ResourceList;
+import org.pmiops.workbench.wsmanager.model.ResourceType;
 import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +60,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final UserDao userDao;
+  private final FolderSyncTransferDao folderSyncTransferDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
@@ -62,6 +71,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final MailService mailService;
   private final WorkspaceService workspaceService;
   private final Provider<PodApi> podApiProvider;
+  private final Provider<DbUser> userProvider;
+  private final Clock clock;
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -69,6 +80,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       UserDao userDao,
+      FolderSyncTransferDao folderSyncTransferDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
@@ -78,12 +90,15 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       VwbUserService vwbUserService,
       MailService mailService,
       WorkspaceService workspaceService,
-      Provider<PodApi> podApiProvider) {
+      Provider<PodApi> podApiProvider,
+      Provider<DbUser> userProvider,
+      Clock clock) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.userDao = userDao;
+    this.folderSyncTransferDao = folderSyncTransferDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
@@ -94,6 +109,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.mailService = mailService;
     this.workspaceService = workspaceService;
     this.podApiProvider = podApiProvider;
+    this.userProvider = userProvider;
+    this.clock = clock;
   }
 
   @Override
@@ -108,6 +125,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
     dbWorkspace.setMigrationState(MigrationState.STARTING.name());
+    dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     workspaceDao.save(dbWorkspace);
     try {
       RawlsWorkspaceDetails fcWorkspace =
@@ -131,6 +149,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
         } catch (Exception e) {
           dbWorkspace.setMigrationState(MigrationState.NOT_STARTED.name());
+          dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
           workspaceDao.save(dbWorkspace);
           throw new RuntimeException(namespace + ": Workspace creation failed", e);
         }
@@ -145,6 +164,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           vwbWorkspace = wsmClient.getWorkspaceAsService(namespace);
         } catch (Exception e) {
           dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+          dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
           workspaceDao.save(dbWorkspace);
           throw new RuntimeException(namespace + ": Workspace fetch failed", e);
         }
@@ -152,6 +172,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       UUID workspaceId = vwbWorkspace.getId();
       dbWorkspace.setMigratedVwbWorkspaceId(workspaceId.toString());
+      dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
       workspaceDao.save(dbWorkspace);
 
       String userEmail = workspace.getCreator();
@@ -307,7 +328,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               workspace.getNamespace(),
               projectId,
               folders,
-              serviceAccountEmail);
+              serviceAccountEmail,
+              false);
       logger.log(Level.INFO, namespace + ": Job created, running transfer job");
 
       storageTransferClient.runTransferJob(projectId, jobName);
@@ -317,9 +339,80 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     } catch (Exception e) {
       dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+      dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
       workspaceDao.save(dbWorkspace);
 
       throw new RuntimeException(namespace + ": Workspace migration failed to start", e);
+    }
+  }
+
+  @Override
+  public void syncWorkspaceFolders(String namespace, String terraName, List<String> folders) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    RawlsWorkspaceDetails fcWorkspace =
+        fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
+    WorkspaceDescription vwbWorkspace;
+    try {
+      logger.log(
+          Level.INFO,
+          namespace
+              + ": Fetching 2.0 workspace with UUID "
+              + dbWorkspace.getMigratedVwbWorkspaceId());
+
+      vwbWorkspace = wsmClient.getWorkspaceAsService(namespace);
+    } catch (Exception e) {
+      throw new RuntimeException(namespace + ": Workspace fetch failed", e);
+    }
+
+    try {
+      logger.log(
+          Level.INFO,
+          namespace
+              + ": Fetching 2.0 workspace resources"
+              + dbWorkspace.getMigratedVwbWorkspaceId());
+      Object resources = wsmClient.enumerateWorkspaceResources(vwbWorkspace.getId().toString());
+      String destinationBucket = "rw-migration-" + namespace;
+      ResourceDescription bucket =
+          ((ResourceList) resources)
+              .getResources().stream()
+                  .filter(
+                      r ->
+                          r.getMetadata().getResourceType() == ResourceType.GCS_BUCKET
+                              && r.getMetadata().getName().startsWith(destinationBucket))
+                  .findFirst()
+                  .orElse(null);
+      if (bucket == null) {
+        throw new RuntimeException(namespace + ": Bucket not found");
+      }
+      logger.log(Level.INFO, namespace + ": Workspace bucket: " + bucket);
+      logger.log(Level.INFO, namespace + ": Creating transfer job");
+
+      String sourceBucket = fcWorkspace.getBucketName();
+      String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+      String projectId = workbenchConfigProvider.get().server.projectId;
+      String jobName =
+          storageTransferClient.createTransferJob(
+              sourceBucket,
+              bucket.getMetadata().getName(),
+              namespace,
+              projectId,
+              folders,
+              serviceAccountEmail,
+              true);
+      logger.log(Level.INFO, namespace + ": Job created, running transfer job");
+      storageTransferClient.runTransferJob(projectId, jobName);
+      DbUser user = userProvider.get();
+      folderSyncTransferDao.save(
+          new DbFolderSyncTransfer()
+              .setCreatedByUserId(user.getUserId())
+              .setStarted(new Timestamp(clock.instant().toEpochMilli()))
+              .setTransferJobName(jobName)
+              .setTransferState(TransferState.IN_PROGRESS.toString())
+              .setSourceWorkspaceNamespace(namespace));
+      logger.log(Level.INFO, namespace + ": Running transfer queue");
+      taskQueueService.pushFolderSyncStatusTask(namespace, terraName, jobName);
+    } catch (Exception e) {
+      throw new RuntimeException(namespace + ": Failed to fetch workspace resources", e);
     }
   }
 
@@ -358,7 +451,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     TransferOperation transferOperation =
         storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
-    logger.log(Level.INFO, "Job status: " + jobStatus.toString());
+    logger.log(Level.INFO, "Job status: " + jobStatus);
     String jobName = "transferJobs/migration-" + workspaceNamespace;
     switch (jobStatus) {
       case IN_PROGRESS:
@@ -368,11 +461,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         return;
       case FAILED:
         dbWorkspace.setMigrationState(MigrationState.FAILED.name());
+        dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
         workspaceDao.save(dbWorkspace);
         storageTransferClient.deleteTransferJob(projectId, jobName);
         return;
       case SUCCESS:
         dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
+        dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
         workspaceDao.save(dbWorkspace);
         try {
           List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
@@ -382,6 +477,39 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           logger.log(Level.WARNING, "Failed to send migration completion email", e);
         }
         storageTransferClient.deleteTransferJob(projectId, jobName);
+    }
+  }
+
+  @Override
+  public void checkFolderSyncStatus(String namespace, String terraName, String jobName) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    DbFolderSyncTransfer dbFolderSyncTransfer =
+        folderSyncTransferDao.findDbFolderSyncTransferByTransferJobName(jobName);
+    String projectId = workbenchConfigProvider.get().server.projectId;
+    String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
+    TransferOperation transferOperation =
+        storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
+    TransferOperation.Status jobStatus = transferOperation.getStatus();
+    logger.log(Level.INFO, "Job status: " + jobStatus);
+    switch (jobStatus) {
+      case IN_PROGRESS:
+      case QUEUED:
+        // STS still running — requeue
+        taskQueueService.pushFolderSyncStatusTask(namespace, terraName, jobName);
+        return;
+      case FAILED:
+        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        dbFolderSyncTransfer
+            .setTransferState(TransferState.FAILED.toString())
+            .setFinished(new Timestamp(clock.instant().toEpochMilli()));
+        folderSyncTransferDao.save(dbFolderSyncTransfer);
+        return;
+      case SUCCESS:
+        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        dbFolderSyncTransfer
+            .setTransferState(TransferState.FINISHED.toString())
+            .setFinished(new Timestamp(clock.instant().toEpochMilli()));
+        folderSyncTransferDao.save(dbFolderSyncTransfer);
     }
   }
 
@@ -494,7 +622,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               preprodWorkspace.getWorkspaceNamespace(),
               projectId,
               null,
-              serviceAccountEmail);
+              serviceAccountEmail,
+              true);
       logger.log(
           Level.INFO,
           preprodWorkspace.getWorkspaceNamespace() + ": Job created, running transfer job");

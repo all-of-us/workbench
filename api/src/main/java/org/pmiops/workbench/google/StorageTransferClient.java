@@ -10,7 +10,8 @@ public interface StorageTransferClient {
       String workspaceNamespace,
       String projectId,
       List<String> folders,
-      String serviceAccountEmail);
+      String serviceAccountEmail,
+      Boolean uniqueName);
 
   void runTransferJob(String projectId, String jobName);
 
