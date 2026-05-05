@@ -7,6 +7,9 @@ import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion
 
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,6 +79,9 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private StorageTransferClient storageTransferClient;
   @Mock private TaskQueueService taskQueueService;
 
+  // Clock MOCK
+  @Mock private Clock clock;
+
   @InjectMocks private WorkspaceMigrationServiceImpl service;
 
   private DbWorkspace dbWorkspace;
@@ -84,6 +90,10 @@ public class WorkspaceMigrationServiceImplTest {
 
   @BeforeEach
   void setup() {
+
+    lenient().when(clock.instant()).thenReturn(Instant.now());
+    lenient().when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
     DbCdrVersion cdrVersion =
         createDefaultCdrVersion(9).setAccessTier(new DbAccessTier().setShortName("controlled"));
     dbWorkspace = new DbWorkspace();
