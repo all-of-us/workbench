@@ -3372,26 +3372,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MigrationBucketContentsResponse'
-  /v1/workspaces/{namespace}/migration/folder-sync:
-    get:
-      tags:
-        - workspaces
-      description: Check if a folder sync is in progress for this workspace
-      operationId: folderSyncInProgress
-      parameters:
-        - name: namespace
-          in: path
-          description: The workspace namespace
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: True if folder sync in progress
-          content:
-            application/json:
-              schema:
-                type: boolean
   /v1/workspaces/{namespace}/{terraName}/migration/folder-sync:
     post:
       tags:
@@ -3421,6 +3401,26 @@ paths:
         200:
           description: Folders migrated successfully
           content: {}
+  /v1/workspaces/{namespace}/migration/folder-sync-status:
+    get:
+      tags:
+        - workspaces
+      description: Check the status of the most recent folder sync transfer for this workspace
+      operationId: folderSyncStatus
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Status of the folder sync transfer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderSyncStatusResponse'
   /v1/workspaces/{namespace}/migration/workspace-exists:
     get:
       tags:
@@ -8170,6 +8170,12 @@ components:
           items:
             type: string
           description: List of folder prefixes to migrate. If empty, migrates entire bucket.
+    FolderSyncStatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the folder sync transfer.
     WorkspaceResponseListResponse:
       required:
       - items

@@ -126,14 +126,12 @@ public class StorageTransferClientImpl implements StorageTransferClient {
   }
 
   @Override
-  public TransferOperation getTransferJobStatus(String projectId, String workspaceNamespace) {
+  public TransferOperation getTransferJobStatus(String projectId, String jobName) {
     try (StorageTransferServiceClient client = StorageTransferServiceClient.create()) {
       TransferOperation transferOperation =
           TransferTypes.TransferOperation.newBuilder()
               .setStatus(TransferTypes.TransferOperation.Status.QUEUED)
               .build();
-
-      String jobName = "transferJobs/migration-" + workspaceNamespace;
 
       TransferProto.GetTransferJobRequest request =
           TransferProto.GetTransferJobRequest.newBuilder()
