@@ -187,7 +187,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   gap: '12px',
                 }}
               >
-                {enableVwbMigration && migrationTestingGroup && (
+                {(enableVwbMigration || migrationTestingGroup) && (
                   <FlexRow style={{ alignItems: 'center', gap: '6px' }}>
                     <CommonToggle
                       name='show-migrated'
@@ -295,7 +295,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     </>
                   ) : (
                     <>
-                      {enableVwbMigration && migrationTestingGroup && (
+                      {(enableVwbMigration || migrationTestingGroup) && (
                         <div style={{ width: '100%', marginBottom: '12px' }}>
                           <SmallHeader>Non-migrated Workspaces</SmallHeader>
                         </div>

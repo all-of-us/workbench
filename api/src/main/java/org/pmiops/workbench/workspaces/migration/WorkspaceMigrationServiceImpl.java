@@ -496,14 +496,14 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         taskQueueService.pushFolderSyncStatusTask(namespace, terraName, jobName);
         return;
       case FAILED:
-        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
         dbFolderSyncTransfer
             .setTransferState(TransferState.FAILED.toString())
             .setFinished(new Timestamp(clock.instant().toEpochMilli()));
         folderSyncTransferDao.save(dbFolderSyncTransfer);
         return;
       case SUCCESS:
-        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
         dbFolderSyncTransfer
             .setTransferState(TransferState.FINISHED.toString())
             .setFinished(new Timestamp(clock.instant().toEpochMilli()));
