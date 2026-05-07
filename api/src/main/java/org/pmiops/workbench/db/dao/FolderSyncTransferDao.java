@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 public interface FolderSyncTransferDao extends CrudRepository<DbFolderSyncTransfer, Long> {
   DbFolderSyncTransfer findDbFolderSyncTransferByTransferJobName(String transferJobName);
 
-  DbFolderSyncTransfer findFirstBySourceWorkspaceNamespaceOrderByStartedDesc(
+  DbFolderSyncTransfer findFirstBySourceWorkspaceNamespaceOrderByIdDesc(
       String sourceWorkspaceNamespace);
 }

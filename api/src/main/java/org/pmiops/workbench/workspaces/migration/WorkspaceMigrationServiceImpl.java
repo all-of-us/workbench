@@ -448,11 +448,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
     String projectId = workbenchConfigProvider.get().server.projectId;
     String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
+    String jobName = "transferJobs/migration-" + workspaceNamespace;
     TransferOperation transferOperation =
-        storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
+        storageTransferClient.getTransferJobStatus(projectId, jobName);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
     logger.log(Level.INFO, "Job status: " + jobStatus);
-    String jobName = "transferJobs/migration-" + workspaceNamespace;
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
@@ -482,13 +482,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
   @Override
   public void checkFolderSyncStatus(String namespace, String terraName, String jobName) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
     DbFolderSyncTransfer dbFolderSyncTransfer =
         folderSyncTransferDao.findDbFolderSyncTransferByTransferJobName(jobName);
     String projectId = workbenchConfigProvider.get().server.projectId;
-    String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
     TransferOperation transferOperation =
-        storageTransferClient.getTransferJobStatus(projectId, workspaceNamespace);
+        storageTransferClient.getTransferJobStatus(projectId, jobName);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
     logger.log(Level.INFO, "Job status: " + jobStatus);
     switch (jobStatus) {
@@ -498,14 +496,14 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         taskQueueService.pushFolderSyncStatusTask(namespace, terraName, jobName);
         return;
       case FAILED:
-        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
         dbFolderSyncTransfer
             .setTransferState(TransferState.FAILED.toString())
             .setFinished(new Timestamp(clock.instant().toEpochMilli()));
         folderSyncTransferDao.save(dbFolderSyncTransfer);
         return;
       case SUCCESS:
-        // storageTransferClient.deleteTransferJob(projectId, jobName);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
         dbFolderSyncTransfer
             .setTransferState(TransferState.FINISHED.toString())
             .setFinished(new Timestamp(clock.instant().toEpochMilli()));

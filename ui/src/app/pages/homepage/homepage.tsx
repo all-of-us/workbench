@@ -331,7 +331,7 @@ export const Homepage = fp.flow(
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
             {serverConfigStore.get().config.enableVWBHomepageBanner ? (
-              enableVwbMigration && migrationTestingGroup ? (
+              enableVwbMigration || migrationTestingGroup ? (
                 <VwbMigrationBanner />
               ) : (
                 <VwbBanner />

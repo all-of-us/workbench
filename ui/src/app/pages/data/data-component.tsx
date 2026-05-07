@@ -169,8 +169,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     <React.Fragment>
       <div style={{ paddingLeft: '2.25rem' }}>
         <div style={styles.cardButtonArea}>
-          {enableVwbMigration &&
-            migrationTestingGroup &&
+          {(enableVwbMigration || migrationTestingGroup) &&
             cdrVersionsForMigration.some(
               (c) => +workspace.cdrVersionId === c.cdrVersionId
             ) && (

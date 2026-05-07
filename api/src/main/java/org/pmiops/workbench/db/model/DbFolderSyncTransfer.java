@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 public class DbFolderSyncTransfer {
 
   public enum TransferState {
+    NOT_STARTED,
     IN_PROGRESS,
     FAILED,
     FINISHED

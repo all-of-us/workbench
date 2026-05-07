@@ -17,5 +17,5 @@ public interface StorageTransferClient {
 
   void deleteTransferJob(String projectId, String jobName);
 
-  TransferTypes.TransferOperation getTransferJobStatus(String projectId, String workspaceNamespace);
+  TransferTypes.TransferOperation getTransferJobStatus(String projectId, String jobName);
 }

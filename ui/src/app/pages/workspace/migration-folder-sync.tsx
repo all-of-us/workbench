@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as React from 'react';
+import { Toast } from 'primereact/toast';
 
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
@@ -58,6 +59,7 @@ export const MigrationFolderSync = withCurrentWorkspace()(
     );
     const [transferTimeoutId, setTransferTimeoutId] =
       useState<NodeJS.Timeout>(undefined);
+    const toast = useRef(null);
 
     if (!workspace) {
       return null;
@@ -82,26 +84,47 @@ export const MigrationFolderSync = withCurrentWorkspace()(
     }
 
     const checkFolderSyncStatus = async () => {
-      const syncInProgress = await workspacesApi().folderSyncInProgress(
-        workspace.namespace
-      );
-      if (syncInProgress) {
-        setSyncState(SyncState.IN_PROGRESS);
-        if (!transferTimeoutId) {
-          const timeoutId = setTimeout(
-            checkFolderSyncStatus,
-            WORKSPACE_MIGRATION_POLL_INTERVAL_MS
-          );
-          setTransferTimeoutId(timeoutId);
-        }
-      } else {
-        clearTimeout(transferTimeoutId);
-        setTransferTimeoutId(undefined);
-        setSyncState((prevState) =>
-          prevState === SyncState.IN_PROGRESS
-            ? SyncState.FINISHED
-            : SyncState.NOT_STARTED
+      try {
+        const { status } = await workspacesApi().folderSyncStatus(
+          workspace.namespace
         );
+        if (status === SyncState.IN_PROGRESS.toString()) {
+          if (!transferTimeoutId) {
+            const timeoutId = setTimeout(
+              checkFolderSyncStatus,
+              WORKSPACE_MIGRATION_POLL_INTERVAL_MS
+            );
+            setTransferTimeoutId(timeoutId);
+          }
+        } else {
+          clearTimeout(transferTimeoutId);
+          setTransferTimeoutId(undefined);
+        }
+        if (
+          status === SyncState.FINISHED.toString() &&
+          syncState !== SyncState.NOT_STARTED
+        ) {
+          console.log('success');
+          toast.current.show({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Folder sync complete',
+          });
+        }
+        if (
+          status === SyncState.FAILED.toString() &&
+          syncState !== SyncState.NOT_STARTED
+        ) {
+          console.log('failed');
+          toast.current.show({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Folder sync failed',
+          });
+        }
+        setSyncState(SyncState[status]);
+      } catch (error) {
+        console.error(error);
       }
     };
 
@@ -198,6 +221,7 @@ to agree to the terms of service. You only need to do this once.`}
         )}
 
         <VwbMigrationSyncInfoBox />
+        <Toast ref={toast} />
 
         <div
           style={{
@@ -252,31 +276,25 @@ to agree to the terms of service. You only need to do this once.`}
               </div>
             </div>
 
-            <div>
-              <Button
-                disabled={
-                  syncState === SyncState.IN_PROGRESS ||
-                  selectedFolders.length === 0
-                }
-                style={{
-                  height: '36px',
-                  padding: '0 16px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                }}
-                onClick={handleStartClick}
-              >
-                {syncState === SyncState.IN_PROGRESS
-                  ? 'Sync in progress'
-                  : syncState === SyncState.FAILED
-                  ? 'Sync failed'
-                  : 'Sync to Researcher Workbench 2.0'}
-              </Button>
-              {syncState === SyncState.FINISHED && (
-                <div>Folder sync complete</div>
-              )}
-              {syncState === SyncState.FAILED && <div>Folder sync failed</div>}
-            </div>
+            <Button
+              disabled={
+                syncState === SyncState.IN_PROGRESS ||
+                selectedFolders.length === 0
+              }
+              style={{
+                height: '36px',
+                padding: '0 16px',
+                fontSize: '13px',
+                fontWeight: 600,
+              }}
+              onClick={handleStartClick}
+            >
+              {syncState === SyncState.IN_PROGRESS
+                ? 'Sync in progress'
+                : syncState === SyncState.FAILED
+                ? 'Sync failed'
+                : 'Sync to Researcher Workbench 2.0'}
+            </Button>
           </div>
           {loadingFolders ? (
             <div style={{ textAlign: 'center' }}>

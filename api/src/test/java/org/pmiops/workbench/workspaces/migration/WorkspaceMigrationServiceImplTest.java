@@ -49,6 +49,7 @@ import org.pmiops.workbench.wsmanager.model.WorkspaceDescription;
 public class WorkspaceMigrationServiceImplTest {
 
   private static final String NAMESPACE = "test-ns";
+  private static final String JOB_NAME = "transferJobs/migration-" + NAMESPACE;
   private static final String TERRA_NAME = "test-ws";
   private static final String POD_ID = "pod-123";
   private static final String RESEARCH_PURPOSE = "[{}]";
@@ -247,7 +248,7 @@ public class WorkspaceMigrationServiceImplTest {
         TransferTypes.TransferOperation.newBuilder()
             .setStatus(TransferTypes.TransferOperation.Status.IN_PROGRESS)
             .build();
-    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, NAMESPACE))
+    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, JOB_NAME))
         .thenReturn(transferOperation);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);
@@ -262,7 +263,7 @@ public class WorkspaceMigrationServiceImplTest {
         TransferTypes.TransferOperation.newBuilder()
             .setStatus(TransferTypes.TransferOperation.Status.SUCCESS)
             .build();
-    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, NAMESPACE))
+    when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, JOB_NAME))
         .thenReturn(transferOperation);
 
     service.checkMigrationStatus(NAMESPACE, TERRA_NAME);

@@ -25,6 +25,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbFolderSyncTransfer;
 import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
@@ -817,13 +818,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Boolean> folderSyncInProgress(String namespace) {
-
+  public ResponseEntity<FolderSyncStatusResponse> folderSyncStatus(String namespace) {
+    DbFolderSyncTransfer dbFolderSyncTransfer =
+        folderSyncTransferDao.findFirstBySourceWorkspaceNamespaceOrderByIdDesc(namespace);
     return ResponseEntity.ok(
-        folderSyncTransferDao
-            .findFirstBySourceWorkspaceNamespaceOrderByStartedDesc(namespace)
-            .getTransferState()
-            .equals(TransferState.IN_PROGRESS.toString()));
+        new FolderSyncStatusResponse()
+            .status(
+                dbFolderSyncTransfer != null
+                    ? dbFolderSyncTransfer.getTransferState()
+                    : TransferState.NOT_STARTED.toString()));
   }
 
   @Override
