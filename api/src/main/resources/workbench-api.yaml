@@ -3401,6 +3401,29 @@ paths:
         200:
           description: Folders migrated successfully
           content: {}
+  /v1/workspaces/{namespace}/{terraName}/archive:
+    post:
+      tags:
+        - workspaces
+      description: Starts the archive flow for the RW1.0 workspace bucket.
+      operationId: startWorkspaceArchive
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          description: The workspace Terra name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workspace archive started successfully
+          content: { }
   /v1/workspaces/{namespace}/migration/folder-sync-status:
     get:
       tags:

@@ -830,6 +830,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Void> startWorkspaceArchive(String workspaceNamespace, String terraName) {
+
+    workspaceMigrationService.startWorkspaceArchive(workspaceNamespace, terraName);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
   public ResponseEntity<Void> syncWorkspaceFolders(
       String namespace, String terraName, SyncWorkspaceFoldersRequest request) {
 

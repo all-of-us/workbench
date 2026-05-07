@@ -14,12 +14,10 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
 import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbFolderSyncTransfer;
+import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbVwbUserPod;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageTransferClient;
@@ -73,6 +71,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Provider<PodApi> podApiProvider;
   private final Provider<DbUser> userProvider;
   private final Clock clock;
+  private final WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
+  private static final String ARCHIVE_BUCKET = "TODO_ARCHIVE_BUCKET";
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -92,7 +92,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       WorkspaceService workspaceService,
       Provider<PodApi> podApiProvider,
       Provider<DbUser> userProvider,
-      Clock clock) {
+      Clock clock,
+      WorkspaceBucketArchiveDao workspaceBucketArchiveDao) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
@@ -111,6 +112,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.podApiProvider = podApiProvider;
     this.userProvider = userProvider;
     this.clock = clock;
+    this.workspaceBucketArchiveDao = workspaceBucketArchiveDao;
   }
 
   @Override
@@ -631,6 +633,77 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     } catch (Exception e) {
       throw new RuntimeException(
           preprodWorkspace.getWorkspaceNamespace() + ": Workspace migration failed to start", e);
+    }
+  }
+
+  @Override
+  public void startWorkspaceArchive(String namespace, String terraName) {
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+
+    try {
+
+      logger.log(Level.INFO, namespace + ": Starting workspace archive");
+
+      RawlsWorkspaceDetails fcWorkspace =
+          fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
+
+      String sourceBucket = fcWorkspace.getBucketName();
+
+      // TODO:
+      // Move to config later once confirmed
+      String archiveBucket = ARCHIVE_BUCKET;
+
+      String archivePath = String.format("%s/%s", namespace, UUID.randomUUID());
+
+      logger.log(
+          Level.INFO,
+          namespace
+              + ": Archiving bucket from "
+              + sourceBucket
+              + " to "
+              + archiveBucket
+              + "/"
+              + archivePath);
+
+      String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+
+      String projectId = workbenchConfigProvider.get().server.projectId;
+
+      String jobName =
+          storageTransferClient.createTransferJob(
+              sourceBucket,
+              archiveBucket,
+              "archive-" + namespace,
+              projectId,
+              null,
+              serviceAccountEmail,
+              false);
+
+      logger.log(Level.INFO, namespace + ": Archive transfer job created");
+
+      storageTransferClient.runTransferJob(projectId, jobName);
+
+      logger.log(Level.INFO, namespace + ": Archive transfer job started");
+
+      DbWorkspaceBucketArchive archiveRecord =
+          new DbWorkspaceBucketArchive()
+              .setLegacyWorkspaceId(dbWorkspace.getWorkspaceId())
+              .setGcsPath(String.format("gs://%s/%s", archiveBucket, archivePath))
+              .setCreated(new Timestamp(clock.instant().toEpochMilli()));
+
+      workspaceBucketArchiveDao.save(archiveRecord);
+
+      logger.log(Level.INFO, namespace + ": Archive metadata saved");
+
+      // Optional future task polling
+      // taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
+
+    } catch (Exception e) {
+
+      logger.log(Level.SEVERE, namespace + ": Workspace archive failed", e);
+
+      throw new RuntimeException(namespace + ": Workspace archive failed to start", e);
     }
   }
 
