@@ -14,6 +14,7 @@ import org.pmiops.workbench.model.ReportingBase;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingFolderSync;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.model.ReportingWorkspaceUser;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.FolderSyncColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.LeonardoAppUsageColumnValueExtractor;
@@ -68,6 +70,7 @@ public class ReportingTableService {
   private static final String WORKSPACE_TABLE_NAME = "workspace";
   private static final String WORKSPACE_USER_CACHE_TABLE_NAME = "workspace_user_cache";
   private static final String WORKSPACE_USER_CACHE_BQ_TABLE_NAME = "workspace_user";
+  private static final String FOLDER_SYNC_TABLE_NAME = "folder_sync_transfer";
 
   private final ReportingQueryService reportingQueryService;
 
@@ -85,6 +88,7 @@ public class ReportingTableService {
         cohort(),
         dataset(),
         datasetDomainIdValue(),
+        folderSync(),
         institution(),
         leoAppUsage(),
         newUserSatisfactionSurvey(),
@@ -227,5 +231,14 @@ public class ReportingTableService {
         WorkspaceUserColumnValueExtractor::values,
         reportingQueryService::getWorkspaceUserBatch,
         () -> reportingQueryService.getTableRowCount(WORKSPACE_USER_CACHE_TABLE_NAME));
+  }
+
+  public final ReportingTableParams<ReportingFolderSync> folderSync() {
+    return new ReportingTableParams<>(
+        FOLDER_SYNC_TABLE_NAME,
+        batchSize(FOLDER_SYNC_TABLE_NAME),
+        FolderSyncColumnValueExtractor::values,
+        reportingQueryService::getFolderSyncBatch,
+        () -> reportingQueryService.getTableRowCount(FOLDER_SYNC_TABLE_NAME));
   }
 }
