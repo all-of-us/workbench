@@ -16,6 +16,7 @@ public class DbWorkspaceBucketArchive {
   private Long legacyWorkspaceId;
   private String gcsPath;
   private Timestamp created;
+  private String status;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,6 +56,16 @@ public class DbWorkspaceBucketArchive {
 
   public DbWorkspaceBucketArchive setCreated(Timestamp created) {
     this.created = created;
+    return this;
+  }
+
+  @Column(name = "status")
+  public String getStatus() {
+    return status;
+  }
+
+  public DbWorkspaceBucketArchive setStatus(String status) {
+    this.status = status;
     return this;
   }
 

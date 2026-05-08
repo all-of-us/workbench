@@ -8356,6 +8356,14 @@ components:
         - STARTING
         - FINISHED
         - FAILED
+    WorkspaceArchiveStatus:
+      type: string
+      description: Indicates the status of the workspace archive flow (PENDING, IN_PROGRESS, ARCHIVED, FAILED).
+      enum:
+        - PENDING
+        - IN_PROGRESS
+        - ARCHIVED
+        - FAILED
     WorkspaceBillingUsageResponse:
       required:
       - cost

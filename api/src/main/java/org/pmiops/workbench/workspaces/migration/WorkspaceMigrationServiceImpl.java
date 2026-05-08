@@ -23,10 +23,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageTransferClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.MigrationBucketContentsResponse;
-import org.pmiops.workbench.model.MigrationState;
-import org.pmiops.workbench.model.PreprodWorkspace;
-import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -641,6 +638,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
+    if (handleExistingArchiveState(dbWorkspace, namespace, terraName)) {
+      return;
+    }
+
+    DbWorkspaceBucketArchive archiveRecord = null;
+
     try {
 
       logger.log(Level.INFO, namespace + ": Starting workspace archive");
@@ -654,7 +657,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       // Move to config later once confirmed
       String archiveBucket = ARCHIVE_BUCKET;
 
-      String archivePath = String.format("%s/%s", namespace, UUID.randomUUID());
+      // Each workspace gets its own archive directory
+      String archivePath = String.format("%s/%s", namespace, dbWorkspace.getWorkspaceId());
 
       logger.log(
           Level.INFO,
@@ -665,6 +669,19 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               + archiveBucket
               + "/"
               + archivePath);
+
+      archiveRecord =
+          new DbWorkspaceBucketArchive()
+              .setLegacyWorkspaceId(dbWorkspace.getWorkspaceId())
+              .setGcsPath(String.format("gs://%s/%s", archiveBucket, archivePath))
+              .setCreated(new Timestamp(clock.instant().toEpochMilli()))
+              .setStatus(WorkspaceArchiveStatus.IN_PROGRESS.toString());
+
+      archiveRecord = workspaceBucketArchiveDao.save(archiveRecord);
+
+      logger.log(
+          Level.INFO,
+          namespace + ": Archive record created with status=" + archiveRecord.getStatus());
 
       String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
 
@@ -686,15 +703,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       logger.log(Level.INFO, namespace + ": Archive transfer job started");
 
-      DbWorkspaceBucketArchive archiveRecord =
-          new DbWorkspaceBucketArchive()
-              .setLegacyWorkspaceId(dbWorkspace.getWorkspaceId())
-              .setGcsPath(String.format("gs://%s/%s", archiveBucket, archivePath))
-              .setCreated(new Timestamp(clock.instant().toEpochMilli()));
+      archiveRecord.setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
 
       workspaceBucketArchiveDao.save(archiveRecord);
 
-      logger.log(Level.INFO, namespace + ": Archive metadata saved");
+      logger.log(Level.INFO, namespace + ": Archive metadata saved successfully");
 
       // Optional future task polling
       // taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
@@ -703,8 +716,57 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       logger.log(Level.SEVERE, namespace + ": Workspace archive failed", e);
 
+      if (archiveRecord != null) {
+
+        archiveRecord.setStatus(WorkspaceArchiveStatus.FAILED.toString());
+
+        workspaceBucketArchiveDao.save(archiveRecord);
+      }
+
       throw new RuntimeException(namespace + ": Workspace archive failed to start", e);
     }
+  }
+
+  private boolean handleExistingArchiveState(
+      DbWorkspace dbWorkspace, String namespace, String terraName) {
+
+    List<DbWorkspaceBucketArchive> existingArchives =
+        workspaceBucketArchiveDao.findByLegacyWorkspaceId(dbWorkspace.getWorkspaceId());
+
+    if (existingArchives.isEmpty()) {
+      return false;
+    }
+
+    DbWorkspaceBucketArchive existingArchive = existingArchives.get(0);
+
+    WorkspaceArchiveStatus status = WorkspaceArchiveStatus.valueOf(existingArchive.getStatus());
+
+      return switch (status) {
+          case ARCHIVED -> {
+              logger.log(Level.INFO, namespace + ": Workspace already archived");
+
+              yield true;
+          }
+          case IN_PROGRESS -> {
+              logger.log(Level.INFO, namespace + ": Archive already in progress");
+
+              // TODO:
+              // Add archive polling/status check flow
+              // checkArchiveStatus(namespace, terraName);
+
+              yield true;
+
+              // TODO:
+              // Add archive polling/status check flow
+              // checkArchiveStatus(namespace, terraName);
+          }
+          case FAILED -> {
+              logger.log(Level.INFO, namespace + ": Retrying failed archive");
+
+              yield false;
+          }
+          default -> false;
+      };
   }
 
   private IamRole mapTerraRoleToVwbRole(String terraAccessLevel) {
