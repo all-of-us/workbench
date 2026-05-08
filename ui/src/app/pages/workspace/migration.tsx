@@ -65,8 +65,7 @@ export const Migration = withCurrentWorkspace()(({ workspace }: Props) => {
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
 
   if (
-    !enableVwbMigration ||
-    !migrationTestingGroup ||
+    (!enableVwbMigration && !migrationTestingGroup) ||
     !cdrVersionsForMigration.some(
       (c) => +workspace.cdrVersionId === c.cdrVersionId
     )

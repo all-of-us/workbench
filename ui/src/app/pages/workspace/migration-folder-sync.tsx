@@ -71,8 +71,7 @@ export const MigrationFolderSync = withCurrentWorkspace()(
     const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
 
     if (
-      !enableVwbMigration ||
-      !migrationTestingGroup ||
+      (!enableVwbMigration && !migrationTestingGroup) ||
       !cdrVersionsForMigration.some(
         (c) => +workspace.cdrVersionId === c.cdrVersionId
       )
