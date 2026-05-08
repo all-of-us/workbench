@@ -60,10 +60,12 @@ export const Migration = withCurrentWorkspace()(({ workspace }: Props) => {
   }
 
   const profile = profileStore.get().profile;
-  const { cdrVersionsForMigration } = serverConfigStore.get().config;
+  const { cdrVersionsForMigration, enableVwbMigration } =
+    serverConfigStore.get().config;
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
 
   if (
+    !enableVwbMigration ||
     !migrationTestingGroup ||
     !cdrVersionsForMigration.some(
       (c) => +workspace.cdrVersionId === c.cdrVersionId
