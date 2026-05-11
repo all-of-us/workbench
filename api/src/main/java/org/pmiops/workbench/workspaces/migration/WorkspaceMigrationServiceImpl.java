@@ -324,6 +324,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           storageTransferClient.createTransferJob(
               sourceBucket,
               destinationBucket,
+              null,
               workspace.getNamespace(),
               projectId,
               folders,
@@ -393,6 +394,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           storageTransferClient.createTransferJob(
               sourceBucket,
               bucket.getMetadata().getName(),
+              null,
               namespace,
               projectId,
               folders,
@@ -616,6 +618,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           storageTransferClient.createTransferJob(
               bucketName,
               destinationBucket,
+              null,
               preprodWorkspace.getWorkspaceNamespace(),
               projectId,
               null,
@@ -691,6 +694,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           storageTransferClient.createTransferJob(
               sourceBucket,
               archiveBucket,
+              archivePath,
               "archive-" + namespace,
               projectId,
               null,
@@ -741,32 +745,32 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     WorkspaceArchiveStatus status = WorkspaceArchiveStatus.valueOf(existingArchive.getStatus());
 
-      return switch (status) {
-          case ARCHIVED -> {
-              logger.log(Level.INFO, namespace + ": Workspace already archived");
+    return switch (status) {
+      case ARCHIVED -> {
+        logger.log(Level.INFO, namespace + ": Workspace already archived");
 
-              yield true;
-          }
-          case IN_PROGRESS -> {
-              logger.log(Level.INFO, namespace + ": Archive already in progress");
+        yield true;
+      }
+      case IN_PROGRESS -> {
+        logger.log(Level.INFO, namespace + ": Archive already in progress");
 
-              // TODO:
-              // Add archive polling/status check flow
-              // checkArchiveStatus(namespace, terraName);
+        // TODO:
+        // Add archive polling/status check flow
+        // checkArchiveStatus(namespace, terraName);
 
-              yield true;
+        yield true;
 
-              // TODO:
-              // Add archive polling/status check flow
-              // checkArchiveStatus(namespace, terraName);
-          }
-          case FAILED -> {
-              logger.log(Level.INFO, namespace + ": Retrying failed archive");
+        // TODO:
+        // Add archive polling/status check flow
+        // checkArchiveStatus(namespace, terraName);
+      }
+      case FAILED -> {
+        logger.log(Level.INFO, namespace + ": Retrying failed archive");
 
-              yield false;
-          }
-          default -> false;
-      };
+        yield false;
+      }
+      default -> false;
+    };
   }
 
   private IamRole mapTerraRoleToVwbRole(String terraAccessLevel) {

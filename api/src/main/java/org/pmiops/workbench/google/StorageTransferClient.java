@@ -7,6 +7,7 @@ public interface StorageTransferClient {
   String createTransferJob(
       String sourceBucket,
       String destinationBucket,
+      String destinationPath,
       String workspaceNamespace,
       String projectId,
       List<String> folders,
