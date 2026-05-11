@@ -230,6 +230,38 @@ ENVIRONMENTS = {
       }
     }
   }),
+  "vwb-exposomics" => env_with_defaults("vwb-prod", {
+    :source_cdr_project => "aou-res-curation-output-prod",
+    :source_cdr_wgs_project => "aou-genomics-curation-prod",
+    :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
+    :publishing_project => "all-of-us-rw-prod",
+    :skip_acl => true,
+    :accessTiers => {
+      "registered" => {
+        :dest_cdr_project => "",
+      },
+      "controlled" => {
+        :dest_cdr_project => "wb-prompt-corn-3454",
+        :dest_cdr_bucket => "gs://vwb-aou-exposomics-data",
+      }
+    }
+  }),
+  "vwb-nph" => env_with_defaults("vwb-prod", {
+    :source_cdr_project => "aou-res-curation-output-prod",
+    :source_cdr_wgs_project => "aou-genomics-curation-prod",
+    :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
+    :publishing_project => "all-of-us-rw-prod",
+    :skip_acl => true,
+    :accessTiers => {
+      "registered" => {
+        :dest_cdr_project => "",
+      },
+      "controlled" => {
+        :dest_cdr_project => "wb-lambent-raisin-8999",
+        :dest_cdr_bucket => "gs://vwb-aou-nph-datasets-controlled",
+      }
+    }
+  }),
   "vwb-prod" => env_with_defaults("vwb-prod", {
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",

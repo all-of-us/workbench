@@ -70,11 +70,17 @@ def service_account_context_for_bq(project, account, provided_key_file = nil)
     if provided_key_file
       # If using provided key file, just activate it directly
       common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file_path}}
+      # Wait for credentials to propagate
+      common.status "Waiting 3 seconds for credentials to propagate..."
+      sleep(5)
       yield
     else
       # Use the ServiceAccountContext for temporary key files
       ServiceAccountContext.new(project, account, key_file_path).run do
         common.run_inline %W{gcloud auth activate-service-account --key-file #{key_file_path}}
+        # Wait for credentials to propagate
+        common.status "Waiting 3 seconds for credentials to propagate..."
+        sleep(5)
         yield
       end
     end
@@ -304,17 +310,79 @@ def publish_cdr(cmd_name, args)
 
   # Validation: If source and destination datasets differ, ensure both don't already exist with data.
   if op.opts.bq_dataset != op.opts.dest_bq_dataset
-    dataset_has_tables = lambda do |project, dataset|
-      # Use bq CLI to list tables; returns true if any tables exist
-      tables = `bq ls --project_id=#{project} #{dataset} 2>/dev/null`
-      # The output has a header line; if more than one line, there are tables
-      tables && tables.lines.count > 1
+    get_dataset_tables = lambda do |project, dataset|
+      # Use bq ls with format flag for consistent output
+      cmd = "bq ls --format=json --project_id=#{project} --max_results=1000 #{dataset} 2>&1"
+      tables_output = `#{cmd}`
+
+      # Debug output if requested
+      if ENV['DEBUG_BQ_LS'] == 'true'
+        puts "DEBUG: Command: #{cmd}"
+        puts "DEBUG: Raw output for dataset #{dataset}:"
+        puts tables_output
+        puts "---"
+      end
+
+      # Check if this is an error message
+      if tables_output.include?("Not found:") ||
+         tables_output.include?("does not exist") ||
+         tables_output.include?("Access Denied") ||
+         tables_output.include?("BigQuery error") ||
+         tables_output.include?("is not found") ||
+         tables_output.include?("Permission denied") ||
+         tables_output.include?("Invalid dataset") ||
+         tables_output.include?("Could not connect")
+        # Return empty array for any error - dataset either doesn't exist or can't be accessed
+        return []
+      end
+
+      # Try to parse JSON output
+      begin
+        require 'json'
+        tables = JSON.parse(tables_output)
+        if tables.is_a?(Array)
+          # Extract table IDs from the JSON array
+          table_names = tables.map { |t| t['tableReference']['tableId'] if t['tableReference'] }.compact
+          return table_names
+        end
+      rescue JSON::ParserError
+        # Fall back to text parsing if JSON fails
+        if tables_output && !tables_output.empty?
+          # Look for lines that appear to be table listings (not error messages)
+          # BQ ls format typically shows: tableId TYPE partitioning_field
+          table_lines = tables_output.lines.select do |line|
+            line.strip!
+            # Skip empty lines, header lines, and likely error messages
+            !line.empty? &&
+            !line.match(/^(tableId|TABLE|error|Error|WARNING|Not found|Access Denied|Dataset|does not exist)/i) &&
+            line.split.first &&
+            !line.start_with?("it ") && # Skip lines that look like error text
+            line.split.first.match(/^[a-zA-Z0-9_]+$/) # Table names should be alphanumeric with underscores
+          end
+
+          table_names = table_lines.map { |line| line.split.first }.compact
+          return table_names
+        end
+      end
+
+      return []
     end
 
-    src_has_tables = dataset_has_tables.call(op.opts.project, op.opts.bq_dataset)
-    dest_has_tables = dataset_has_tables.call(op.opts.project, op.opts.dest_bq_dataset)
-    if src_has_tables && dest_has_tables
-      raise "Both source dataset '#{op.opts.bq_dataset}' and destination dataset '#{op.opts.dest_bq_dataset}' exist and contain tables. This may cause data conflicts or overwrites. Please ensure at most one dataset contains data before proceeding."
+    src_tables = get_dataset_tables.call(op.opts.project, op.opts.bq_dataset)
+    dest_tables = get_dataset_tables.call(op.opts.project, op.opts.dest_bq_dataset)
+
+    if !src_tables.empty? && !dest_tables.empty?
+      error_msg = "Both source and destination datasets contain tables:\n\n"
+      error_msg += "Source dataset '#{op.opts.bq_dataset}' contains #{src_tables.length} table(s):\n"
+      error_msg += src_tables.take(10).map { |t| "  - #{t}" }.join("\n")
+      error_msg += "\n  ... and #{src_tables.length - 10} more" if src_tables.length > 10
+      error_msg += "\n\nDestination dataset '#{op.opts.dest_bq_dataset}' contains #{dest_tables.length} table(s):\n"
+      error_msg += dest_tables.take(10).map { |t| "  - #{t}" }.join("\n")
+      error_msg += "\n  ... and #{dest_tables.length - 10} more" if dest_tables.length > 10
+      error_msg += "\n\nThis may cause data conflicts or overwrites. Please ensure at most one dataset contains data before proceeding."
+      error_msg += "\nTo see raw bq ls output, set DEBUG_BQ_LS=true"
+
+      raise error_msg
     end
   end
   # This is a grep filter. It matches all tables, by default.
@@ -443,7 +511,6 @@ def publish_cdr_wgs(cmd_name, args)
   unless source_project
     raise ArgumentError.new("missing WGS source project value for env #{op.opts.project}")
   end
-  extraction_proxy_group = must_get_wgs_proxy_group(op.opts.project)
 
   table_match_filter = WGS_TABLE_FILTER
   if op.opts.table_prefixes
@@ -452,16 +519,26 @@ def publish_cdr_wgs(cmd_name, args)
   end
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    bq_ingest(tier, op.opts.tier, source_project, op.opts.source_bq_dataset, op.opts.dest_bq_dataset, table_match_filter)
+    # Use direct copy if no ingest project is configured (e.g., for VWB environments)
+    if tier.has_key?(:ingest_cdr_project)
+      bq_ingest(tier, op.opts.tier, source_project, op.opts.source_bq_dataset, op.opts.dest_bq_dataset, table_match_filter)
+    else
+      bq_direct_copy(tier, op.opts.tier, source_project, op.opts.source_bq_dataset, op.opts.dest_bq_dataset, table_match_filter)
+    end
 
-    bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, _existing_users|
-      if existing_groups.include?(extraction_proxy_group)
-        common.status "#{extraction_proxy_group} already in ACL, skipping..."
-      else
-        common.status "Adding #{extraction_proxy_group} as a READER..."
-        acl_json["access"].push({ "groupByEmail" => extraction_proxy_group, "role" => "READER" })
+    # Skip ACL changes if configured in the environment (defaults to false)
+    skip_acl = env.fetch(:skip_acl, false)
+    unless skip_acl
+      extraction_proxy_group = must_get_wgs_proxy_group(op.opts.project)
+      bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, _existing_users|
+        if existing_groups.include?(extraction_proxy_group)
+          common.status "#{extraction_proxy_group} already in ACL, skipping..."
+        else
+          common.status "Adding #{extraction_proxy_group} as a READER..."
+          acl_json["access"].push({ "groupByEmail" => extraction_proxy_group, "role" => "READER" })
+        end
+        acl_json
       end
-      acl_json
     end
   end
 end

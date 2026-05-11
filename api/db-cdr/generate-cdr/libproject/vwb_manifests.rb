@@ -1221,6 +1221,7 @@ def create_and_upload_manifest_on_fly(common, job, manifest_path, impersonate_ar
       else
         manifest_file.puts(object_path)
       end
+    end
     manifest_file.close
 
     # Upload manifest to GCS using SA impersonation
