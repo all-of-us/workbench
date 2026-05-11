@@ -26,6 +26,7 @@ import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingFolderSync;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -784,6 +785,31 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     }
 
     return queryResults;
+  }
+
+  @Override
+  public List<ReportingFolderSync> getFolderSyncBatch(long limit, long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT \n"
+                + "  fst.created_by_user_id,\n"
+                + "  fst.started,\n"
+                + "  fst.finished,\n"
+                + "  fst.transfer_job_name,\n"
+                + "  fst.transfer_state,\n"
+                + "  fst.source_workspace_namespace,\n"
+                + "FROM folder_sync_transfer fst\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingFolderSync()
+                .createdByUserId(rs.getLong("created_by_user_id"))
+                .started(offsetDateTimeUtc(rs.getTimestamp("started")))
+                .finished(offsetDateTimeUtc(rs.getTimestamp("finished")))
+                .transferJobName(rs.getString("transfer_job_name"))
+                .transferState(rs.getString("transfer_state"))
+                .sourceWorkspaceNamespace(rs.getString("source_workspace_namespace")));
   }
 
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */

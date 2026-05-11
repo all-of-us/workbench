@@ -9,6 +9,7 @@ import java.util.stream.StreamSupport;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingFolderSync;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
@@ -47,6 +48,8 @@ public interface ReportingQueryService {
       long limit, long offset);
 
   List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset);
+
+  List<ReportingFolderSync> getFolderSyncBatch(long limit, long offset);
 
   default <T> List<T> getBatchByIndex(
       BiFunction<Long, Long, List<T>> getter, long batchSize, long batchIndex) {

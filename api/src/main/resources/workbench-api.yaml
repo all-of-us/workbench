@@ -14001,6 +14001,32 @@ components:
         environmentVariables:
           type: string
           description: All environment variables AoU passes to Leo when creating App.
+    ReportingFolderSync:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
+      type: object
+      properties:
+        createdByUserId:
+          type: integer
+          description: Id of the user that started the transfer
+          format: int64
+        started:
+          type: string
+          description: Start time of the transfer
+          format: date-time
+        finished:
+          type: string
+          description: Finished time of the transfer
+          format: date-time
+        transferJobName:
+          type: string
+          description: Name of the STS job
+        transferState:
+          type: string
+          description: Status of the STS job
+        sourceWorkspaceNamespace:
+          type: string
+          description: Namespace of the source RW 1.0 workspace
     GenomicExtractionJobListResponse:
       type: object
       properties:
