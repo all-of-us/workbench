@@ -6,6 +6,7 @@ import { Button, StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
 import colors from 'app/styles/colors';
+import { useNavigation } from 'app/utils/navigation';
 import vwbMigrationImage from 'assets/images/vwb-migration.png';
 
 const VWB_USER_SUPPORT_HUB_URL =
@@ -15,6 +16,7 @@ const VWB_USER_BILLING_POD_URL =
   'Getting-Started-in-new-Researcher-Workbench-2-0#h_01KDR2615S4SGFD62K5MJ4VKPA';
 
 export const VwbMigrationBanner = () => {
+  const [navigate] = useNavigation();
   return (
     <FlexRow
       style={{
@@ -39,7 +41,6 @@ export const VwbMigrationBanner = () => {
           >
             Migrate your Workspaces to Researcher Workbench 2.0
           </Header>
-
           {/* DESCRIPTION */}
           <SmallHeader
             style={{
@@ -62,7 +63,6 @@ export const VwbMigrationBanner = () => {
               Learn more
             </StyledExternalLink>
           </SmallHeader>
-
           {/* PRE-REQUISITES */}
           <div
             style={{
@@ -110,18 +110,46 @@ export const VwbMigrationBanner = () => {
               </li>
             </ol>
           </div>
-
           {/* CTA BUTTON */}
-          <Button
-            style={{ marginTop: '0.5rem', height: '45px', width: '300px' }}
-            onClick={() => window.open(environment.vwbUiUrl, '_blank')}
+          <FlexRow
+            style={{
+              marginTop: '0.5rem',
+              gap: '1rem',
+              alignItems: 'center',
+            }}
           >
-            Explore the Verily Platform
-            <FontAwesomeIcon
-              icon={faUpRightFromSquare}
-              style={{ marginLeft: '0.5rem' }}
-            />
-          </Button>
+            <Button
+              style={{
+                height: '45px',
+                minWidth: '380px',
+                padding: '0 1rem',
+                whiteSpace: 'nowrap',
+              }}
+              onClick={() => window.open(environment.vwbUiUrl, '_blank')}
+            >
+              Explore Researcher Workbench 2.0
+              <FontAwesomeIcon
+                icon={faUpRightFromSquare}
+                style={{ marginLeft: '0.5rem' }}
+              />
+            </Button>
+
+            <Button
+              style={{
+                height: '45px',
+                minWidth: '300px',
+                padding: '0 1rem',
+                whiteSpace: 'nowrap',
+              }}
+              onClick={() => navigate(['workspaces'])}
+            >
+              Go to My Workspaces
+              <FontAwesomeIcon
+                icon={faUpRightFromSquare}
+                style={{ marginLeft: '0.5rem' }}
+              />
+            </Button>
+          </FlexRow>
         </div>
       </FlexColumn>
 
