@@ -110,7 +110,6 @@ export const VwbMigrationBanner = () => {
               </li>
             </ol>
           </div>
-          {/* CTA BUTTON */}
           <FlexRow
             style={{
               marginTop: '0.5rem',
@@ -135,6 +134,7 @@ export const VwbMigrationBanner = () => {
             </Button>
 
             <Button
+              type='secondaryOutline'
               style={{
                 height: '45px',
                 minWidth: '300px',
