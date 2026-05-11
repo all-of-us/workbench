@@ -22,6 +22,7 @@ public class Params {
   public String cloudSqlInstanceName;
   public String password;
   public String iamDbUser;
+  public String targetPrincipal;
 
   public Params(EnvVars envVars) {
     this.envVars = envVars;
@@ -35,6 +36,7 @@ public class Params {
     cloudSqlInstanceName = envVars.get("CLOUD_SQL_INSTANCE_NAME").orElse(null);
     password = envVars.get("WORKBENCH_DB_PASSWORD").orElse(null);
     iamDbUser = envVars.get("CLOUD_SQL_IAM_USER").orElse(null);
+    targetPrincipal = envVars.get("CLOUD_SQL_TARGET_PRINCIPAL").orElse(null);
   }
 
   protected void logParams() {
@@ -58,6 +60,9 @@ public class Params {
       config.addDataSourceProperty("enableIamAuth", "true");
       config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
       config.addDataSourceProperty("cloudSqlInstance", cloudSqlInstanceName);
+      if (targetPrincipal != null) {
+        config.addDataSourceProperty("cloudSqlTargetPrincipal", targetPrincipal);
+      }
     } else {
       config.setUsername(username);
       config.setPassword(password);
@@ -88,8 +93,10 @@ public class Params {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
-    } else {
+    } else if (!useIamAuth()) {
       // assert cloudSqlInstanceName != null
+      // IAM auth uses ADC directly (e.g. gcloud auth application-default login),
+      // so GOOGLE_APPLICATION_CREDENTIALS is not required.
       if (envVars.get("GOOGLE_APPLICATION_CREDENTIALS").isEmpty()
           && envVars.get("GAE_INSTANCE").isEmpty()) {
         throw new IllegalStateException(
@@ -108,8 +115,8 @@ public class Params {
   public String toString() {
     if (useIamAuth()) {
       return String.format(
-          "[hostname:%s cloudSqlInstanceName:%s iamDbUser:%s authMode:IAM]",
-          hostname, cloudSqlInstanceName, iamDbUser);
+          "[hostname:%s cloudSqlInstanceName:%s iamDbUser:%s targetPrincipal:%s authMode:IAM]",
+          hostname, cloudSqlInstanceName, iamDbUser, targetPrincipal);
     }
     return String.format(
         "[hostname:%s cloudSqlInstanceName:%s username:%s password:%s]",
