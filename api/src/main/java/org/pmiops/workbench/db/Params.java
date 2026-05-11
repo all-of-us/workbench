@@ -60,6 +60,8 @@ public class Params {
       config.addDataSourceProperty("enableIamAuth", "true");
       config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
       config.addDataSourceProperty("cloudSqlInstance", cloudSqlInstanceName);
+      config.addDataSourceProperty("sslmode", "disable");
+      config.addDataSourceProperty("cloudSqlRefreshStrategy", "lazy");
       if (targetPrincipal != null) {
         config.addDataSourceProperty("cloudSqlTargetPrincipal", targetPrincipal);
       }
