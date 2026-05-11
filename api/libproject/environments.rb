@@ -8,6 +8,12 @@ def make_gae_vars(min_idle_instances = 0, max_instances = 10, instance_class = '
   }
 end
 
+# For Cloud SQL IAM authentication, the MySQL username is the App Engine default
+# service account email truncated before '@'.
+def iam_user_for_project(project)
+  project
+end
+
 def env_with_defaults(env, config)
   {
     :env_name => env,
@@ -44,6 +50,7 @@ ENVIRONMENTS = {
   "all-of-us-workbench-test" => env_with_defaults("test", {
     :api_endpoint_host => "api.test.fake-research-aou.org",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
+    :cloud_sql_iam_user => iam_user_for_project("all-of-us-workbench-test"),
     :gae_vars => make_gae_vars(0, 10, 'F4_1G'),
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :source_cdr_project => "all-of-us-ehr-dev",
@@ -73,6 +80,7 @@ ENVIRONMENTS = {
   "all-of-us-rw-staging" => env_with_defaults("staging", {
     :api_endpoint_host => "api.staging.fake-research-aou.org",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
+    :cloud_sql_iam_user => iam_user_for_project("all-of-us-rw-staging"),
     :gae_vars => make_gae_vars(0, 10, 'F4'),
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
@@ -100,6 +108,7 @@ ENVIRONMENTS = {
   "all-of-us-rw-stable" => env_with_defaults("stable", {
     :api_endpoint_host => "api.stable.fake-research-aou.org",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
+    :cloud_sql_iam_user => iam_user_for_project("all-of-us-rw-stable"),
     :gae_vars => make_gae_vars(0, 10, 'F4'),
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
@@ -128,6 +137,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api.preprod-workbench.researchallofus.org",
     :gae_vars => make_gae_vars(0, 10, 'F4'),
     :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
+    :cloud_sql_iam_user => iam_user_for_project("all-of-us-rw-preprod"),
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com",
@@ -156,6 +166,7 @@ ENVIRONMENTS = {
   "all-of-us-rw-prod" => env_with_defaults("prod", {
     :api_endpoint_host => "api.workbench.researchallofus.org",
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
+    :cloud_sql_iam_user => iam_user_for_project("all-of-us-rw-prod"),
     :gae_vars => make_gae_vars(2, 48, 'F4_1G'),
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",

@@ -18,10 +18,10 @@ public class Params {
   protected final EnvVars envVars;
   public static final int mysqlDefaultPort = 3306;
   public String hostname;
-  public final String username = "workbench"; // consistent across environments
+  public String username = "workbench";
   public String cloudSqlInstanceName;
   public String password;
-  private boolean loaded;
+  public String iamDbUser;
 
   public Params(EnvVars envVars) {
     this.envVars = envVars;
@@ -34,10 +34,15 @@ public class Params {
     hostname = envVars.get("DB_HOST").orElse(null);
     cloudSqlInstanceName = envVars.get("CLOUD_SQL_INSTANCE_NAME").orElse(null);
     password = envVars.get("WORKBENCH_DB_PASSWORD").orElse(null);
+    iamDbUser = envVars.get("CLOUD_SQL_IAM_USER").orElse(null);
   }
 
   protected void logParams() {
     log.info("Workbench SQL instance params: " + this.toString());
+  }
+
+  public boolean useIamAuth() {
+    return iamDbUser != null;
   }
 
   public HikariConfig createConfig(String dbName) {
@@ -45,11 +50,21 @@ public class Params {
     config.setDriverClassName("com.mysql.cj.jdbc.Driver");
     config.setJdbcUrl(
         String.format("jdbc:mysql://%s/%s", useAppEngineSocket() ? "" : hostname, dbName));
-    config.setUsername("workbench"); // consistent across environments
-    config.setPassword(password);
-    if (useAppEngineSocket()) {
+
+    if (useIamAuth()) {
+      config.setUsername(iamDbUser);
+      // A non-empty password is required by the JDBC driver but ignored when using IAM auth.
+      config.setPassword("ignored-but-required");
+      config.addDataSourceProperty("enableIamAuth", "true");
       config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
       config.addDataSourceProperty("cloudSqlInstance", cloudSqlInstanceName);
+    } else {
+      config.setUsername(username);
+      config.setPassword(password);
+      if (useAppEngineSocket()) {
+        config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
+        config.addDataSourceProperty("cloudSqlInstance", cloudSqlInstanceName);
+      }
     }
     return config;
   }
@@ -59,6 +74,10 @@ public class Params {
       throw new IllegalStateException(
           "Database connection requires either a hostname (DB_HOST)"
               + " or a Cloud SQL instance name (CLOUD_SQL_INSTANCE_NAME).");
+    }
+    if (useIamAuth() && cloudSqlInstanceName == null) {
+      throw new IllegalStateException(
+          "CLOUD_SQL_IAM_USER requires CLOUD_SQL_INSTANCE_NAME to be set.");
     }
     if (hostname != null) {
       try {
@@ -87,13 +106,16 @@ public class Params {
 
   @Override
   public String toString() {
+    if (useIamAuth()) {
+      return String.format(
+          "[hostname:%s cloudSqlInstanceName:%s iamDbUser:%s authMode:IAM]",
+          hostname, cloudSqlInstanceName, iamDbUser);
+    }
     return String.format(
         "[hostname:%s cloudSqlInstanceName:%s username:%s password:%s]",
         hostname,
         cloudSqlInstanceName,
         username,
-        // We wouldn't want to give a password hint in a public forum, but our logs are
-        // relatively private.
         password != null ? shadow(2, password) : null);
   }
 
