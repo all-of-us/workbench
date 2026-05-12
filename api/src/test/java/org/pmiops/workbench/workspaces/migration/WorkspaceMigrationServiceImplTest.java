@@ -22,17 +22,15 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.CdrVersionForMigration;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbAccessTier;
-import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbVwbUserPod;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageTransferClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceArchiveStatus;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -79,7 +77,7 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private InitialCreditsService initialCreditsService;
   @Mock private StorageTransferClient storageTransferClient;
   @Mock private TaskQueueService taskQueueService;
-
+  @Mock private WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
   // Clock MOCK
   @Mock private Clock clock;
 
@@ -274,5 +272,174 @@ public class WorkspaceMigrationServiceImplTest {
     assertThat(dbWorkspace.getMigrationState()).isEqualTo(MigrationState.FINISHED.name());
     verify(workspaceDao)
         .save(argThat(ws -> MigrationState.FINISHED.name().equals(ws.getMigrationState())));
+  }
+
+  @Test
+  void startWorkspaceArchive_startsArchiveSuccessfully() {
+
+    when(fireCloudService.getWorkspace(NAMESPACE, TERRA_NAME))
+            .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
+
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+            .thenReturn(List.of());
+
+    when(workspaceBucketArchiveDao.save(any()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+    when(storageTransferClient.createTransferJob(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()))
+            .thenReturn("transferJobs/migration-archive-" + NAMESPACE);
+
+    service.startWorkspaceArchive(NAMESPACE, TERRA_NAME);
+
+    verify(storageTransferClient)
+            .createTransferJob(
+                    eq(SOURCE_BUCKET),
+                    eq("all-of-us-archive-ct-bucket"),
+                    eq(NAMESPACE + "/" + dbWorkspace.getWorkspaceId() + "/"),
+                    eq("archive-" + NAMESPACE),
+                    eq(SERVER_PROJECT),
+                    isNull(),
+                    eq(SERVICE_ACCOUNT_EMAIL),
+                    eq(false));
+
+    verify(storageTransferClient)
+            .runTransferJob(
+                    SERVER_PROJECT,
+                    "transferJobs/migration-archive-" + NAMESPACE);
+
+    verify(taskQueueService)
+            .pushWorkspaceArchiveStatusTask(
+                    NAMESPACE,
+                    TERRA_NAME);
+  }
+
+
+  @Test
+  void startWorkspaceArchive_skipsIfAlreadyArchived() {
+
+    DbWorkspaceBucketArchive archive =
+            new DbWorkspaceBucketArchive()
+                    .setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
+
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+            .thenReturn(List.of(archive));
+
+    service.startWorkspaceArchive(NAMESPACE, TERRA_NAME);
+
+    verify(storageTransferClient, never())
+            .createTransferJob(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any());
+
+    verify(taskQueueService, never())
+            .pushWorkspaceArchiveStatusTask(any(), any());
+  }
+
+  @Test
+  void checkArchiveStatus_requeuesWhenStillRunning() {
+
+    DbWorkspaceBucketArchive archive =
+            new DbWorkspaceBucketArchive()
+                    .setStatus(WorkspaceArchiveStatus.IN_PROGRESS.toString());
+
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+            .thenReturn(List.of(archive));
+
+    TransferTypes.TransferOperation transferOperation =
+            TransferTypes.TransferOperation.newBuilder()
+                    .setStatus(TransferTypes.TransferOperation.Status.IN_PROGRESS)
+                    .build();
+
+    when(storageTransferClient.getTransferJobStatus(
+            SERVER_PROJECT,
+            "transferJobs/migration-archive-" + NAMESPACE))
+            .thenReturn(transferOperation);
+
+    service.checkArchiveStatus(NAMESPACE, TERRA_NAME);
+
+    verify(taskQueueService)
+            .pushWorkspaceArchiveStatusTask(
+                    NAMESPACE,
+                    TERRA_NAME);
+  }
+
+  @Test
+  void checkArchiveStatus_marksArchiveCompleted() {
+
+    DbWorkspaceBucketArchive archive =
+            new DbWorkspaceBucketArchive()
+                    .setStatus(WorkspaceArchiveStatus.IN_PROGRESS.toString());
+
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+            .thenReturn(List.of(archive));
+
+    TransferTypes.TransferOperation transferOperation =
+            TransferTypes.TransferOperation.newBuilder()
+                    .setStatus(TransferTypes.TransferOperation.Status.SUCCESS)
+                    .build();
+
+    when(storageTransferClient.getTransferJobStatus(
+            SERVER_PROJECT,
+            "transferJobs/migration-archive-" + NAMESPACE))
+            .thenReturn(transferOperation);
+
+    service.checkArchiveStatus(NAMESPACE, TERRA_NAME);
+
+    assertThat(archive.getStatus())
+            .isEqualTo(WorkspaceArchiveStatus.ARCHIVED.toString());
+
+    verify(workspaceBucketArchiveDao).save(archive);
+
+    verify(storageTransferClient)
+            .deleteTransferJob(
+                    SERVER_PROJECT,
+                    "transferJobs/migration-archive-" + NAMESPACE);
+  }
+
+  @Test
+  void checkArchiveStatus_marksArchiveFailed() {
+
+    DbWorkspaceBucketArchive archive =
+            new DbWorkspaceBucketArchive()
+                    .setStatus(WorkspaceArchiveStatus.IN_PROGRESS.toString());
+
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+            .thenReturn(List.of(archive));
+
+    TransferTypes.TransferOperation transferOperation =
+            TransferTypes.TransferOperation.newBuilder()
+                    .setStatus(TransferTypes.TransferOperation.Status.FAILED)
+                    .build();
+
+    when(storageTransferClient.getTransferJobStatus(
+            SERVER_PROJECT,
+            "transferJobs/migration-archive-" + NAMESPACE))
+            .thenReturn(transferOperation);
+
+    service.checkArchiveStatus(NAMESPACE, TERRA_NAME);
+
+    assertThat(archive.getStatus())
+            .isEqualTo(WorkspaceArchiveStatus.FAILED.toString());
+
+    verify(workspaceBucketArchiveDao).save(archive);
+
+    verify(storageTransferClient)
+            .deleteTransferJob(
+                    SERVER_PROJECT,
+                    "transferJobs/migration-archive-" + NAMESPACE);
   }
 }
