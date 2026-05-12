@@ -170,7 +170,6 @@ interface State {
   workspaceFound: boolean;
   workspaceUpdateConflictError: boolean;
   loadingUserRoles: boolean;
-  loadingCollaborators: boolean;
   userRoles: UserRole[];
   userRolesToChange: UserRole[];
   searchTerm: string;
@@ -202,7 +201,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         workspaceFound: this.props.workspace !== null,
         workspaceUpdateConflictError: false,
         loadingUserRoles: true,
-        loadingCollaborators: false,
         userRoles: [],
         userRolesToChange: [],
         searchTerm: '',
