@@ -41,7 +41,6 @@ export const VwbMigrationBanner = () => {
           >
             Migrate your Workspaces to Researcher Workbench 2.0
           </Header>
-
           {/* DESCRIPTION */}
           <SmallHeader
             style={{
@@ -64,7 +63,6 @@ export const VwbMigrationBanner = () => {
               Learn more
             </StyledExternalLink>
           </SmallHeader>
-
           {/* PRE-REQUISITES */}
           <div
             style={{
@@ -112,18 +110,46 @@ export const VwbMigrationBanner = () => {
               </li>
             </ol>
           </div>
-
-          {/* CTA BUTTON */}
-          <Button
-            style={{ marginTop: '0.5rem', height: '45px', width: '300px' }}
-            onClick={() => navigate(['workspaces'])}
+          <FlexRow
+            style={{
+              marginTop: '0.5rem',
+              gap: '1rem',
+              alignItems: 'center',
+            }}
           >
-            Go to My Workspaces
-            <FontAwesomeIcon
-              icon={faUpRightFromSquare}
-              style={{ marginLeft: '0.5rem' }}
-            />
-          </Button>
+            <Button
+              style={{
+                height: '45px',
+                minWidth: '380px',
+                padding: '0 1rem',
+                whiteSpace: 'nowrap',
+              }}
+              onClick={() => window.open(environment.vwbUiUrl, '_blank')}
+            >
+              Explore Researcher Workbench 2.0
+              <FontAwesomeIcon
+                icon={faUpRightFromSquare}
+                style={{ marginLeft: '0.5rem' }}
+              />
+            </Button>
+
+            <Button
+              type='secondaryOutline'
+              style={{
+                height: '45px',
+                minWidth: '300px',
+                padding: '0 1rem',
+                whiteSpace: 'nowrap',
+              }}
+              onClick={() => navigate(['workspaces'])}
+            >
+              Go to My Workspaces
+              <FontAwesomeIcon
+                icon={faUpRightFromSquare}
+                style={{ marginLeft: '0.5rem' }}
+              />
+            </Button>
+          </FlexRow>
         </div>
       </FlexColumn>
 
