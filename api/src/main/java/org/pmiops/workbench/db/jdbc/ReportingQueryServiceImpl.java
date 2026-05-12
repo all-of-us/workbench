@@ -797,7 +797,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  fst.finished,\n"
                 + "  fst.transfer_job_name,\n"
                 + "  fst.transfer_state,\n"
-                + "  fst.source_workspace_namespace,\n"
+                + "  fst.source_workspace_namespace\n"
                 + "FROM folder_sync_transfer fst\n"
                 + "  LIMIT %d\n"
                 + "  OFFSET %d",
