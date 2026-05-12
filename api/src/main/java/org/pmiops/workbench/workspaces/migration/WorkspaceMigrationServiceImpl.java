@@ -69,10 +69,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Provider<DbUser> userProvider;
   private final Clock clock;
   private final WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
-  private static final String ARCHIVE_BUCKET = "TODO_ARCHIVE_BUCKET";
-  private static final String CONTROLLED_TIER_ARCHIVE_BUCKET = "all-of-us-archive-ct";
+  private static final String CONTROLLED_TIER_ARCHIVE_BUCKET = "all-of-us-archive-ct-bucket";
 
-  private static final String REGISTERED_TIER_ARCHIVE_BUCKET = "all-of-us-archive-rt";
+  private static final String REGISTERED_TIER_ARCHIVE_BUCKET = "all-of-us-archive-rt-bucket";
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
