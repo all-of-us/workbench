@@ -4613,6 +4613,23 @@ paths:
           description: Folder sync status checked successfully
           content: { }
       x-codegen-request-body-name: request
+  /v1/cloudTask/checkWorkspaceArchiveStatus:
+    post:
+      tags:
+        - cloudTaskWorkspaces
+      description: Checks the status of a workspace archive STS job and updates the archive state when complete. Requeues itself if still running.
+      operationId: checkWorkspaceArchiveStatus
+      requestBody:
+        description: Workspace archive status task to process.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckWorkspaceArchiveStatusRequest'
+      responses:
+        200:
+          description: Archive status checked successfully
+          content: { }
   /v1/cloudTask/deleteTestUserWorkspaces:
     post:
       tags:
@@ -8172,6 +8189,16 @@ components:
         workspaceName:
           type: string
         jobName:
+          type: string
+    CheckWorkspaceArchiveStatusRequest:
+      type: object
+      required:
+        - workspaceNamespace
+        - workspaceName
+      properties:
+        workspaceNamespace:
+          type: string
+        workspaceName:
           type: string
     StartWorkspaceMigrationRequest:
       type: object

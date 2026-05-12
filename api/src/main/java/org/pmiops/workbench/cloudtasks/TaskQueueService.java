@@ -52,6 +52,8 @@ public class TaskQueueService {
       new TaskQueuePair("synchronizeAccessQueue", "synchronizeUserAccess");
   public static final TaskQueuePair CLEANUP_ORPHANED_WORKSPACES =
       new TaskQueuePair("cleanupOrphanedWorkspacesQueue", "cleanupOrphanedWorkspaces");
+  public static final TaskQueuePair WORKSPACE_ARCHIVE_STATUS =
+      new TaskQueuePair("workspaceArchiveStatusTaskQueue", "checkWorkspaceArchiveStatus");
 
   // RDR exporting uniquely uses the same queue for two endpoints
 
@@ -369,5 +371,14 @@ public class TaskQueueService {
                         .putAllHeaders(extraHeaders))
                 .build())
         .getName();
+  }
+
+  public void pushWorkspaceArchiveStatusTask(String namespace, String terraName) {
+
+    createAndPushTask(
+        WORKSPACE_ARCHIVE_STATUS,
+        Map.of(
+            "workspaceNamespace", namespace,
+            "workspaceName", terraName));
   }
 }

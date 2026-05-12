@@ -24,4 +24,6 @@ public interface WorkspaceMigrationService {
       PreprodWorkspace preprodWorkspace, String email, String researchPurpose, String bucketName);
 
   void startWorkspaceArchive(String namespace, String terraName);
+
+  void checkArchiveStatus(String workspaceNamespace, String workspaceName);
 }

@@ -200,6 +200,9 @@ queue:
 - name: workspaceMigrationStatusTaskQueue
   target: api
 
+- name: workspaceArchiveStatusTaskQueue
+  target: api
+
   # rate parameters
   bucket_size: 500
   rate: 1/s

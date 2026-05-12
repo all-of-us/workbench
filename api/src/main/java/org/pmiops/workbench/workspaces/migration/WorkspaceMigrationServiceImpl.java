@@ -70,6 +70,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Clock clock;
   private final WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
   private static final String ARCHIVE_BUCKET = "TODO_ARCHIVE_BUCKET";
+  private static final String CONTROLLED_TIER_ARCHIVE_BUCKET = "all-of-us-archive-ct";
+
+  private static final String REGISTERED_TIER_ARCHIVE_BUCKET = "all-of-us-archive-rt";
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -656,12 +659,14 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       String sourceBucket = fcWorkspace.getBucketName();
 
-      // TODO:
-      // Move to config later once confirmed
-      String archiveBucket = ARCHIVE_BUCKET;
+      String accessTierShortName = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
 
-      // Each workspace gets its own archive directory
-      String archivePath = String.format("%s/%s", namespace, dbWorkspace.getWorkspaceId());
+      String archiveBucket =
+          accessTierShortName.equalsIgnoreCase("controlled")
+              ? CONTROLLED_TIER_ARCHIVE_BUCKET
+              : REGISTERED_TIER_ARCHIVE_BUCKET;
+
+      String archivePath = String.format("%s/%s/", namespace, dbWorkspace.getWorkspaceId());
 
       logger.log(
           Level.INFO,
@@ -707,9 +712,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       logger.log(Level.INFO, namespace + ": Archive transfer job started");
 
-      archiveRecord.setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
-
       workspaceBucketArchiveDao.save(archiveRecord);
+
+      taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
 
       logger.log(Level.INFO, namespace + ": Archive metadata saved successfully");
 
@@ -754,15 +759,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       case IN_PROGRESS -> {
         logger.log(Level.INFO, namespace + ": Archive already in progress");
 
-        // TODO:
-        // Add archive polling/status check flow
-        // checkArchiveStatus(namespace, terraName);
+        checkArchiveStatus(namespace, terraName);
 
         yield true;
-
-        // TODO:
-        // Add archive polling/status check flow
-        // checkArchiveStatus(namespace, terraName);
       }
       case FAILED -> {
         logger.log(Level.INFO, namespace + ": Retrying failed archive");
@@ -771,6 +770,60 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       }
       default -> false;
     };
+  }
+
+  @Override
+  public void checkArchiveStatus(String namespace, String terraName) {
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+
+    List<DbWorkspaceBucketArchive> archives =
+        workspaceBucketArchiveDao.findByLegacyWorkspaceId(dbWorkspace.getWorkspaceId());
+
+    if (archives.isEmpty()) {
+      throw new RuntimeException(namespace + ": Archive record not found");
+    }
+
+    DbWorkspaceBucketArchive archive = archives.get(0);
+
+    String projectId = workbenchConfigProvider.get().server.projectId;
+
+    String jobName = "transferJobs/migration-archive-" + namespace;
+
+    TransferOperation transferOperation =
+        storageTransferClient.getTransferJobStatus(projectId, jobName);
+
+    TransferOperation.Status jobStatus = transferOperation.getStatus();
+
+    logger.log(Level.INFO, namespace + ": Archive job status: " + jobStatus);
+
+    switch (jobStatus) {
+      case IN_PROGRESS:
+      case QUEUED:
+        taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
+
+        return;
+
+      case FAILED:
+        archive.setStatus(WorkspaceArchiveStatus.FAILED.toString());
+
+        workspaceBucketArchiveDao.save(archive);
+
+        storageTransferClient.deleteTransferJob(projectId, jobName);
+
+        return;
+
+      case SUCCESS:
+        archive.setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
+
+        workspaceBucketArchiveDao.save(archive);
+
+        storageTransferClient.deleteTransferJob(projectId, jobName);
+
+        logger.log(Level.INFO, namespace + ": Workspace archive completed");
+
+        return;
+    }
   }
 
   private IamRole mapTerraRoleToVwbRole(String terraAccessLevel) {
