@@ -46,7 +46,7 @@ export const MigrationBanner = ({ onStartMigration, state }: Props) => {
       <FlexRow style={styles.banner}>
         <div style={styles.text}>
           <strong>
-            This workspace has already been migrated to Verily Workbench.
+            This workspace has already been migrated to Researcher Workbench 2.0
           </strong>{' '}
           Any new changes made here will <strong>NOT</strong> automatically
           reflect in the migrated workspace. Re-migration is required to sync
