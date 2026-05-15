@@ -117,8 +117,11 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   const allChecked = Object.values(checks).every(Boolean);
   const profile = profileStore.get().profile;
   const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
-  const { cdrVersionsForMigration, enableVwbMigration } =
-    serverConfigStore.get().config;
+  const {
+    cdrVersionsForMigration,
+    enableVwbMigration,
+    enableWorkspaceArchiveRecovery,
+  } = serverConfigStore.get().config;
   const { workspace } = props;
 
   if (!workspace) {
@@ -425,89 +428,81 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 </CardButton>
               </TooltipTrigger>
             )}
-          <TooltipTrigger
-            content={
-              !writePermission &&
-              'Write permission required to recover archived workspace'
-            }
-            side='top'
-          >
-            <CardButton
-              style={{
-                ...styles.resourceTypeButton,
-                backgroundColor: colors.white,
-                border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
-                boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-                padding: '24px',
-                cursor: 'default',
-                minHeight: '325px',
-                maxHeight: '325px',
-              }}
-              disabled={!writePermission}
+          {enableWorkspaceArchiveRecovery && (
+            <TooltipTrigger
+              content={
+                !writePermission &&
+                'Write permission required to recover archived workspace'
+              }
+              side='top'
             >
-              {/* Title */}
-              <div
+              <CardButton
                 style={{
-                  fontSize: '32px',
-                  fontWeight: 500,
-                  color: colors.primary,
-                  marginBottom: '18px',
+                  ...styles.resourceTypeButton,
+                  backgroundColor: colors.white,
+                  border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+                  padding: '24px',
+                  cursor: 'default',
                 }}
+                disabled={!writePermission}
               >
-                Data Recovery
-              </div>
-
-              {/* Description */}
-              <div
-                style={{
-                  fontSize: '16px',
-                  lineHeight: '26px',
-                  color: colors.dark,
-                  maxWidth: '520px',
-                }}
-              >
-                The data in this workspace has been archived in cold storage. To
-                retrieve this data and initiate its transfer to Verily Workbench
-                click get started.
-              </div>
-
-              {/* CTA */}
-              <div style={{ marginTop: 'auto' }}>
                 <div
                   style={{
-                    marginTop: '24px',
-                    backgroundColor: colors.select,
-                    color: colors.white,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '10px 22px',
-                    borderRadius: '6px',
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    minWidth: '165px',
-                    height: '44px',
-                  }}
-                  onClick={() => {
-                    navigate([
-                      'workspaces',
-                      workspace.namespace,
-                      workspace.terraName,
-                      'recovery',
-                    ]);
+                    fontSize: '32px',
+                    fontWeight: 500,
+                    color: colors.primary,
+                    marginBottom: '18px',
                   }}
                 >
-                  Get started
-                  <ClrIcon
-                    shape='export'
-                    size={14}
-                    style={{ marginLeft: '8px' }}
-                  />
+                  Data Recovery
                 </div>
-              </div>
-            </CardButton>
-          </TooltipTrigger>
+
+                <div
+                  style={{
+                    fontSize: '16px',
+                    lineHeight: '26px',
+                    color: colors.dark,
+                  }}
+                >
+                  The data in this workspace has been archived in cold storage.
+                  To retrieve this data and initiate its transfer to Verily
+                  Workbench click get started.
+                </div>
+
+                <div style={{ marginTop: 'auto' }}>
+                  <div
+                    style={{
+                      marginTop: '24px',
+                      backgroundColor: colors.select,
+                      color: colors.white,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '10px 22px',
+                      borderRadius: '6px',
+                      fontSize: '15px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      navigate([
+                        'workspaces',
+                        workspace.namespace,
+                        workspace.terraName,
+                        'recovery',
+                      ]);
+                    }}
+                  >
+                    Get started
+                    <ClrIcon
+                      shape='export'
+                      size={14}
+                      style={{ marginLeft: '8px' }}
+                    />
+                  </div>
+                </div>
+              </CardButton>
+            </TooltipTrigger>
+          )}
           <TooltipTrigger
             content={
               !writePermission && 'Write permission required to create cohorts'

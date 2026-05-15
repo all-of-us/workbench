@@ -77,6 +77,9 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableCTPlusCards", source = "config.featureFlags.enableCTPlusCards")
   @Mapping(target = "enableVwbMigration", source = "config.featureFlags.enableVwbMigration")
   @Mapping(
+      target = "enableWorkspaceArchiveRecovery",
+      source = "config.featureFlags.enableWorkspaceArchiveRecovery")
+  @Mapping(
       target = "enableVWBWorkspaceCreation",
       source = "config.featureFlags.enableVWBWorkspaceCreation")
   @Mapping(

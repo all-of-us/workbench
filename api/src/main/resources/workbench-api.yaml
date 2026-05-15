@@ -7983,6 +7983,10 @@ components:
           type: boolean
           default: false
           description: If true, will display the "Migrate to Verily Workbench" button on workspace pages.
+        enableWorkspaceArchiveRecovery:
+          type: boolean
+          default: false
+          description: If true, will display the archived workspace recovery flow and recovery UI on workspace pages.
         cdrVersionsForMigration:
           type: array
           items:
