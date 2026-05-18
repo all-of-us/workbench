@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
-import { MigrationState } from 'generated/fetch';
+import { MigrationState, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
@@ -68,7 +68,8 @@ export const Migration = withCurrentWorkspace()(({ workspace }: Props) => {
     (!enableVwbMigration && !migrationTestingGroup) ||
     !cdrVersionsForMigration.some(
       (c) => +workspace.cdrVersionId === c.cdrVersionId
-    )
+    ) ||
+    workspace.accessLevel !== WorkspaceAccessLevel.OWNER
   ) {
     navigate(['workspaces', workspace.namespace, workspace.terraName, 'data']);
   }
