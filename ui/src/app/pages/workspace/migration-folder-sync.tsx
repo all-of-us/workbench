@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import * as React from 'react';
 import { Toast } from 'primereact/toast';
 
+import { WorkspaceAccessLevel } from 'generated/fetch';
+
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { CheckBox } from 'app/components/inputs';
@@ -74,7 +76,8 @@ export const MigrationFolderSync = withCurrentWorkspace()(
       (!enableVwbMigration && !migrationTestingGroup) ||
       !cdrVersionsForMigration.some(
         (c) => +workspace.cdrVersionId === c.cdrVersionId
-      )
+      ) ||
+      workspace.accessLevel !== WorkspaceAccessLevel.OWNER
     ) {
       navigate([
         'workspaces',

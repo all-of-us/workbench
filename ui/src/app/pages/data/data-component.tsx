@@ -146,9 +146,10 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     loadResources();
   }, [workspace.namespace, workspace.terraName]);
 
+  const ownerPermission = workspace.accessLevel === WorkspaceAccessLevel.OWNER;
+
   const writePermission =
-    workspace.accessLevel === WorkspaceAccessLevel.OWNER ||
-    workspace.accessLevel === WorkspaceAccessLevel.WRITER;
+    ownerPermission || workspace.accessLevel === WorkspaceAccessLevel.WRITER;
 
   const filteredList = resourceList.filter((resource) => {
     switch (activeTab) {
@@ -176,7 +177,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
               <TooltipTrigger
                 content={
                   !writePermission &&
-                  'Write permission required to perform migration'
+                  'Owner permission required to perform migration'
                 }
                 side='top'
               >
@@ -189,7 +190,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                     padding: '16px',
                     cursor: 'default',
                   }}
-                  disabled={!writePermission}
+                  disabled={!ownerPermission}
                 >
                   {workspace.migratedVwbWorkspaceId ? (
                     /* Folder Sync for re-migration */
@@ -246,12 +247,14 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                             height: '30px',
                           }}
                           onClick={() => {
-                            navigate([
-                              'workspaces',
-                              workspace.namespace,
-                              workspace.terraName,
-                              'folder-sync',
-                            ]);
+                            if (ownerPermission) {
+                              navigate([
+                                'workspaces',
+                                workspace.namespace,
+                                workspace.terraName,
+                                'folder-sync',
+                              ]);
+                            }
                           }}
                         >
                           Get started
@@ -322,6 +325,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                         <div>
                           <CheckBox
                             checked={checks.step1}
+                            disabled={!ownerPermission}
                             onChange={(checked) =>
                               setChecks({ ...checks, step1: checked })
                             }
@@ -332,6 +336,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                         <div>
                           <CheckBox
                             checked={checks.step2}
+                            disabled={!ownerPermission}
                             onChange={(checked) =>
                               setChecks({ ...checks, step2: checked })
                             }
@@ -342,6 +347,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                         <div>
                           <CheckBox
                             checked={checks.step3}
+                            disabled={!ownerPermission}
                             onChange={(checked) =>
                               setChecks({ ...checks, step3: checked })
                             }
@@ -362,6 +368,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                         <div>
                           <CheckBox
                             checked={checks.step4}
+                            disabled={!ownerPermission}
                             onChange={(checked) =>
                               setChecks({ ...checks, step4: checked })
                             }
@@ -401,7 +408,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                             opacity: allChecked ? 1 : 0.6,
                           }}
                           onClick={() => {
-                            if (!allChecked) {
+                            if (!allChecked || !ownerPermission) {
                               return;
                             }
                             navigate([
