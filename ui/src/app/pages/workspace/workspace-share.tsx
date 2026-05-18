@@ -64,7 +64,7 @@ const styles = reactStyles({
   },
 
   open: {
-    overflow: 'hidden',
+    overflow: 'auto',
     position: 'absolute',
     backgroundColor: colors.white,
     border: '1px solid',
@@ -74,7 +74,7 @@ const styles = reactStyles({
     border: 'none',
     background: 'none',
     width: '90%',
-    marginTop: '8px',
+    marginTop: '10px',
   },
 
   spinner: {
@@ -358,7 +358,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
             this.state.userRoles
           );
           this.setState({
-            autocompleteUsers: response.users.splice(0, 4),
+            autocompleteUsers: response.users,
             autocompleteLoading: false,
             dropDown: true,
           });
@@ -504,14 +504,18 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                   ref={(node) => (this.searchingNode = node)}
                   style={styles.dropdown}
                 >
-                  <ClrIcon
-                    shape='search'
-                    style={{
-                      width: '21px',
-                      height: '21px',
-                      paddingLeft: '3px',
-                    }}
-                  />
+                  {this.state.autocompleteLoading ? (
+                    <Spinner size={18} style={{ margin: '0 0 -4px 6px' }} />
+                  ) : (
+                    <ClrIcon
+                      shape='search'
+                      style={{
+                        width: '21px',
+                        height: '21px',
+                        paddingLeft: '3px',
+                      }}
+                    />
+                  )}
                   <input
                     data-test-id='search'
                     style={styles.noBorder}
@@ -523,9 +527,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                     }
                     onFocus={() => this.openDropdown()}
                   />
-                  {this.state.autocompleteLoading && (
-                    <span style={styles.spinner} />
-                  )}
                   {this.showAutocompleteNoResults && (
                     <div
                       data-test-id='drop-down'
