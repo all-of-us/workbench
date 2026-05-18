@@ -260,22 +260,10 @@ else
             WHEN f.person_id is null THEN 0
             ELSE 1
           END has_fitbit
-        , CASE
-            WHEN w.sample_name is null THEN 0
-            ELSE 1
-          END has_whole_genome_variant
-        , CASE
-            WHEN a.sample_name is null THEN 0
-            ELSE 1
-          END has_array_data
-        , CASE
-            WHEN lrw.sample_name is null THEN 0
-            ELSE 1
-          END has_lr_whole_genome_variant
-        , CASE
-            WHEN svt.sample_name is null THEN 0
-            ELSE 1
-          END has_structural_variant_data
+        , 0 as has_whole_genome_variant
+        , 0 as has_array_data
+        , 0 as has_lr_whole_genome_variant
+        , 0 as has_structural_variant_data
         , CASE
             WHEN p.state_of_residence_source_value like 'PII State%' THEN replace(p.state_of_residence_source_value, 'PII State: ','')
             ELSE null
@@ -311,11 +299,7 @@ else
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`
-        ) f on (p.person_id = f.person_id)
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_wgs_metadata\` w on (CAST(p.person_id as STRING) = w.sample_name)
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_longreads_metadata\` lrw on (CAST(p.person_id as STRING) = lrw.sample_name)
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_microarray_metadata\` a on (CAST(p.person_id as STRING) = a.sample_name)
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_structural_variants_metadata\` svt on (CAST(p.person_id as STRING) = svt.sample_name)"
+        ) f on (p.person_id = f.person_id)"
     
   else
     
@@ -366,22 +350,10 @@ else
             WHEN f.person_id is null THEN 0
             ELSE 1
           END has_fitbit
-        , CASE
-            WHEN w.sample_name is null THEN 0
-            ELSE 1
-          END has_whole_genome_variant
-        , CASE
-            WHEN a.sample_name is null THEN 0
-            ELSE 1
-          END has_array_data
-        , CASE
-            WHEN lrw.sample_name is null THEN 0
-            ELSE 1
-          END has_lr_whole_genome_variant
-        , CASE
-            WHEN svt.sample_name is null THEN 0
-            ELSE 1
-          END has_structural_variant_data
+        , 0 as has_whole_genome_variant
+        , 0 as has_array_data
+        , 0 as has_lr_whole_genome_variant
+        , 0 as has_structural_variant_data
         , CASE
             WHEN p.state_of_residence_source_value like 'PII State%' THEN replace(p.state_of_residence_source_value, 'PII State: ','')
             ELSE null
@@ -416,11 +388,7 @@ else
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
             union distinct
             SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level_short\`
-        ) f on (p.person_id = f.person_id)
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_wgs_metadata\` w on (CAST(p.person_id as STRING) = w.sample_name)
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_longreads_metadata\` lrw on (CAST(p.person_id as STRING) = lrw.sample_name)
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_microarray_metadata\` a on (CAST(p.person_id as STRING) = a.sample_name)
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_structural_variants_metadata\` svt on (CAST(p.person_id as STRING) = svt.sample_name)"
+        ) f on (p.person_id = f.person_id)"
   
   fi
   
