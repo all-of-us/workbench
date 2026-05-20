@@ -1,12 +1,14 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
+
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingFolderSync;
 
 public enum FolderSyncColumnValueExtractor implements ColumnValueExtractor<ReportingFolderSync> {
   CREATED_BY_USER_ID("created_by_user_id", ReportingFolderSync::getCreatedByUserId),
-  STARTED("started", ReportingFolderSync::getStarted),
-  FINISHED("finished", ReportingFolderSync::getFinished),
+  STARTED("started", fs -> toInsertRowString(fs.getStarted())),
+  FINISHED("finished", fs -> toInsertRowString(fs.getFinished())),
   TRANSFER_JOB_NAME("transfer_job_name", ReportingFolderSync::getTransferJobName),
   TRANSFER_STATE("transfer_state", ReportingFolderSync::getTransferState),
   SOURCE_WORKSPACE_NAMESPACE(
