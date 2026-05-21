@@ -106,6 +106,7 @@ public class DbWorkspace {
   private Boolean isVwbWorkspace;
   private String migratedVwbWorkspaceId;
   private String migrationState;
+  private String recoveryState;
 
   private AIANResearchType aianResearchType;
   private String aianResearchDetails;
@@ -746,6 +747,18 @@ public class DbWorkspace {
 
   public DbWorkspace setMigrationState(String migrationState) {
     this.migrationState = migrationState;
+    return this;
+  }
+
+  @Column(name = "recovery_state")
+  public String getRecoveryState() {
+    return recoveryState;
+  }
+
+  public DbWorkspace setRecoveryState(String recoveryState) {
+
+    this.recoveryState = recoveryState;
+
     return this;
   }
 

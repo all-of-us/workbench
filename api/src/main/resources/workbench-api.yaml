@@ -4630,6 +4630,31 @@ paths:
         200:
           description: Archive status checked successfully
           content: { }
+  /v1/workspaces/{namespace}/{terraName}/recovery:
+    post:
+      tags:
+        - workspaces
+      description: Starts archived workspace recovery flow.
+      operationId: startWorkspaceRecovery
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceRecoveryRequest'
+      responses:
+        200:
+          description: Recovery started successfully
   /v1/cloudTask/deleteTestUserWorkspaces:
     post:
       tags:
@@ -7987,6 +8012,14 @@ components:
           type: boolean
           default: false
           description: If true, will display the archived workspace recovery flow and recovery UI on workspace pages.
+        RecoveryState:
+          type: string
+          description: Indicates recovery lifecycle state.
+          enum:
+            - NOT_STARTED
+            - RECOVERING
+            - RECOVERED
+            - FAILED
         cdrVersionsForMigration:
           type: array
           items:
@@ -8204,6 +8237,11 @@ components:
           type: string
         workspaceName:
           type: string
+    WorkspaceRecoveryRequest:
+      type: object
+      properties:
+        podId:
+          type: string
     StartWorkspaceMigrationRequest:
       type: object
       properties:
@@ -8327,6 +8365,8 @@ components:
           description: UUID of the VWB workspace this workspace was migrated to
         migrationState:
           $ref: '#/components/schemas/MigrationState'
+        recoveryState:
+          $ref: '#/components/schemas/WorkspaceRecoveryStatus'
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
@@ -8394,6 +8434,14 @@ components:
         - PENDING
         - IN_PROGRESS
         - ARCHIVED
+        - FAILED
+    WorkspaceRecoveryStatus:
+      type: string
+      description: Indicates the status of the workspace recovery flow (NOT_STARTED, RECOVERING, RECOVERED, FAILED).
+      enum:
+        - NOT_STARTED
+        - RECOVERING
+        - RECOVERED
         - FAILED
     WorkspaceBillingUsageResponse:
       required:
@@ -13729,6 +13777,8 @@ components:
             Id of the RW 2.0 workspace created during migration
         migrationState:
           $ref: '#/components/schemas/MigrationState'
+        recoveryState:
+          $ref: '#/components/schemas/WorkspaceRecoveryStatus'
         focusOnUnderrepresentedPopulations:
           type: boolean
           description: |-

@@ -73,6 +73,10 @@ public class TaskQueueService {
   public static final TaskQueuePair FOLDER_SYNC_STATUS =
       new TaskQueuePair("folderSyncStatusTaskQueue", "checkFolderSyncStatus");
 
+  // Workspace UnArchival queue
+  public static final TaskQueuePair WORKSPACE_RECOVERY_STATUS =
+      new TaskQueuePair("workspaceRecoveryStatusTaskQueue", "checkWorkspaceRecoveryStatus");
+
   // initial credits queues and cloud tasks:
   //
   // INITIAL_CREDITS_EXPIRATION - run as part of the cron checkInitialCreditsExpiration to check
@@ -315,6 +319,15 @@ public class TaskQueueService {
             "workspaceNamespace", namespace,
             "workspaceName", terraName,
             "jobName", jobName));
+  }
+
+  public void pushWorkspaceRecoveryStatusTask(String namespace, String terraName) {
+
+    createAndPushTask(
+        WORKSPACE_RECOVERY_STATUS,
+        Map.of(
+            "workspaceNamespace", namespace,
+            "workspaceName", terraName));
   }
 
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {

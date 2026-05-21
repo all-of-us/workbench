@@ -203,6 +203,9 @@ queue:
 - name: workspaceArchiveStatusTaskQueue
   target: api
 
+- name: workspaceRecoveryStatusTaskQueue
+  target: api
+
   # rate parameters
   bucket_size: 500
   rate: 1/s

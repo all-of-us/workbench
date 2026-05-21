@@ -825,6 +825,190 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     }
   }
 
+  @Override
+  public void startWorkspaceRecovery(String namespace, String terraName, String podId) {
+
+    Duration bucketDelay = Duration.ofSeconds(10);
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+
+    logger.log(Level.INFO, namespace + ": Starting workspace recovery");
+
+    try {
+
+      List<DbWorkspaceBucketArchive> archives =
+          workspaceBucketArchiveDao.findByLegacyWorkspaceId(dbWorkspace.getWorkspaceId());
+
+      if (archives.isEmpty()) {
+        throw new RuntimeException(namespace + ": Archive metadata not found");
+      }
+
+      DbWorkspaceBucketArchive archive = archives.get(0);
+
+      if (!WorkspaceArchiveStatus.ARCHIVED.toString().equals(archive.getStatus())) {
+
+        throw new RuntimeException(
+            namespace + ": Workspace is not archived. Current state=" + archive.getStatus());
+      }
+
+      logger.log(Level.INFO, namespace + ": Recovery source=" + archive.getGcsPath());
+
+      dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.RECOVERING.name());
+
+      dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+
+      workspaceDao.save(dbWorkspace);
+
+      String gcsPath = archive.getGcsPath().replace("gs://", "");
+
+      String[] pathParts = gcsPath.split("/", 2);
+
+      String archiveBucket = pathParts[0];
+
+      String archivePrefix = pathParts.length > 1 ? pathParts[1] : "";
+
+      logger.log(
+          Level.INFO, namespace + ": Archive bucket=" + archiveBucket + " prefix=" + archivePrefix);
+
+      RawlsWorkspaceDetails fcWorkspace =
+          fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
+
+      Workspace workspace =
+          workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
+
+      String resolvedPodId =
+          podId != null
+              ? podId
+              : Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
+                  .map(DbUser::getVwbUserPod)
+                  .map(DbVwbUserPod::getVwbPodId)
+                  .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
+
+      logger.log(Level.INFO, namespace + ": Creating new recovery workspace");
+
+      WorkspaceDescription vwbWorkspace =
+          wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
+
+      UUID workspaceId = vwbWorkspace.getId();
+
+      dbWorkspace.setMigratedVwbWorkspaceId(workspaceId.toString());
+
+      workspaceDao.save(dbWorkspace);
+
+      wsmClient.shareWorkspaceAsService(
+          workspaceId.toString(), workspace.getCreator(), IamRole.OWNER);
+
+      long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
+
+      CdrVersionForMigration cdrVersionForMigration =
+          workbenchConfigProvider.get().vwb.cdrVersionsForMigration.stream()
+              .filter(c -> c.cdrVersionId == cdrVersionId)
+              .findFirst()
+              .orElse(null);
+
+      if (cdrVersionForMigration == null) {
+        throw new RuntimeException(namespace + ": CDR version unavailable");
+      }
+
+      logger.log(Level.INFO, namespace + ": Starting BQ clone");
+
+      wsmClient.cloneBQDataset(
+          workspaceId,
+          cdrVersionForMigration.workspaceId,
+          UUID.fromString(cdrVersionForMigration.resourceId),
+          UUID.randomUUID().toString());
+
+      logger.log(Level.INFO, namespace + ": BQ clone complete");
+
+      CreatedControlledGcpGcsBucket controlledBucket =
+          wsmClient.createControlledBucket(workspaceId.toString(), namespace);
+
+      Thread.sleep(bucketDelay.toMillis());
+
+      String destinationBucket = controlledBucket.getGcpBucket().getAttributes().getBucketName();
+
+      String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+
+      String projectId = workbenchConfigProvider.get().server.projectId;
+
+      logger.log(Level.INFO, namespace + ": Creating recovery transfer");
+
+      String jobName =
+          storageTransferClient.createTransferJob(
+              archiveBucket,
+              destinationBucket,
+              archivePrefix,
+              "recovery-" + namespace,
+              projectId,
+              null,
+              serviceAccountEmail,
+              false);
+
+      storageTransferClient.runTransferJob(projectId, jobName);
+
+      logger.log(Level.INFO, namespace + ": Recovery transfer started");
+
+      taskQueueService.pushWorkspaceRecoveryStatusTask(namespace, terraName);
+
+    } catch (Exception e) {
+
+      logger.log(Level.SEVERE, namespace + ": Recovery failed", e);
+
+      dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
+
+      dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+
+      workspaceDao.save(dbWorkspace);
+
+      throw new RuntimeException(namespace + ": Recovery failed to start", e);
+    }
+  }
+
+  @Override
+  public void checkRecoveryStatus(String namespace, String terraName) {
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+
+    String projectId = workbenchConfigProvider.get().server.projectId;
+
+    String jobName = "transferJobs/migration-recovery-" + namespace;
+
+    TransferOperation transferOperation =
+        storageTransferClient.getTransferJobStatus(projectId, jobName);
+
+    TransferOperation.Status jobStatus = transferOperation.getStatus();
+
+    logger.log(Level.INFO, namespace + ": Recovery status=" + jobStatus);
+
+    switch (jobStatus) {
+      case IN_PROGRESS:
+      case QUEUED:
+        taskQueueService.pushWorkspaceRecoveryStatusTask(namespace, terraName);
+
+        return;
+
+      case FAILED:
+        dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
+
+        workspaceDao.save(dbWorkspace);
+
+        storageTransferClient.deleteTransferJob(projectId, jobName);
+
+        return;
+
+      case SUCCESS:
+        dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.RECOVERED.name());
+
+        workspaceDao.save(dbWorkspace);
+
+        storageTransferClient.deleteTransferJob(projectId, jobName);
+
+        logger.log(Level.INFO, namespace + ": Recovery completed");
+
+        return;
+    }
+  }
+
   private IamRole mapTerraRoleToVwbRole(String terraAccessLevel) {
     if (terraAccessLevel == null) return null;
     return switch (terraAccessLevel) {
