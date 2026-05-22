@@ -4630,6 +4630,21 @@ paths:
         200:
           description: Archive status checked successfully
           content: { }
+  /v1/cloudTask/checkWorkspaceRecoveryStatus:
+    post:
+      tags:
+        - cloudTaskWorkspaces
+      description: Checks recovery STS status and requeues if still running
+      operationId: checkWorkspaceRecoveryStatus
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckWorkspaceRecoveryStatusRequest'
+      responses:
+        200:
+          description: Recovery status checked successfully＀
   /v1/workspaces/{namespace}/{terraName}/recovery:
     post:
       tags:
@@ -8236,6 +8251,13 @@ components:
         workspaceNamespace:
           type: string
         workspaceName:
+          type: string
+    CheckWorkspaceRecoveryStatusRequest:
+      type: object
+      properties:
+        namespace:
+          type: string
+        terraName:
           type: string
     WorkspaceRecoveryRequest:
       type: object
