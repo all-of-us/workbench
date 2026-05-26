@@ -452,7 +452,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     TransferOperation transferOperation =
         storageTransferClient.getTransferJobStatus(projectId, jobName);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
-    logger.log(Level.INFO, "Job status: " + jobStatus);
+    logger.log(Level.INFO, namespace + ": Job status: " + jobStatus);
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
@@ -460,10 +460,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         taskQueueService.pushWorkspaceMigrationStatusTask(namespace, terraName);
         return;
       case FAILED:
+        logger.log(
+            Level.INFO, namespace + ": Job errors: " + transferOperation.getErrorBreakdownsList());
         dbWorkspace.setMigrationState(MigrationState.FAILED.name());
         dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
         workspaceDao.save(dbWorkspace);
-        storageTransferClient.deleteTransferJob(projectId, jobName);
         return;
       case SUCCESS:
         dbWorkspace.setMigrationState(MigrationState.FINISHED.name());
@@ -488,7 +489,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     TransferOperation transferOperation =
         storageTransferClient.getTransferJobStatus(projectId, jobName);
     TransferOperation.Status jobStatus = transferOperation.getStatus();
-    logger.log(Level.INFO, "Job status: " + jobStatus);
+    logger.log(Level.INFO, namespace + ": Job status: " + jobStatus);
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
@@ -496,7 +497,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         taskQueueService.pushFolderSyncStatusTask(namespace, terraName, jobName);
         return;
       case FAILED:
-        storageTransferClient.deleteTransferJob(projectId, jobName);
+        logger.log(
+            Level.INFO, namespace + ": Job errors: " + transferOperation.getErrorBreakdownsList());
         dbFolderSyncTransfer
             .setTransferState(TransferState.FAILED.toString())
             .setFinished(new Timestamp(clock.instant().toEpochMilli()));
