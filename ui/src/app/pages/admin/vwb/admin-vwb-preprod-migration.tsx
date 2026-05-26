@@ -90,13 +90,14 @@ export const AdminVwbPreprodMigration = (
       });
       const preprodMigrationRequest: PreprodMigrationRequest = {
         preprodWorkspace: preprodWorkspaces[workspaceToMigrate],
-        ownerEmail: prodUsername,
+        ownerUsername: prodUsername,
         researchPurpose: JSON.stringify(
           rwToVwbResearchPurpose(
             preprodWorkspaces[workspaceToMigrate].researchPurpose
           )
         ),
         sourceBucket: bucketName,
+        billingPod: selectedPod,
       };
       await vwbWorkspaceAdminApi().migratePreprodWorkspace(
         preprodMigrationRequest

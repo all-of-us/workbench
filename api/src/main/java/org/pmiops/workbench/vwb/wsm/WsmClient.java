@@ -255,7 +255,7 @@ public class WsmClient {
    */
   public void waitForWorkspaceCreation(String workspaceId)
       throws InterruptedException, ApiException {
-    Duration timeout = Duration.ofMinutes(2);
+    Duration timeout = Duration.ofMinutes(5);
     Duration pollInterval = Duration.ofSeconds(10);
     Instant deadline = Instant.now().plus(timeout);
     State state = State.CREATING;

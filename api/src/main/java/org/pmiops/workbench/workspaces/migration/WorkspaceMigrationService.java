@@ -21,7 +21,11 @@ public interface WorkspaceMigrationService {
   void checkFolderSyncStatus(String namespace, String terraName, String jobName);
 
   void startPreprodWorkspaceMigration(
-      PreprodWorkspace preprodWorkspace, String email, String researchPurpose, String bucketName);
+      PreprodWorkspace preprodWorkspace,
+      String email,
+      String researchPurpose,
+      String bucketName,
+      String billingPod);
 
   void startWorkspaceArchive(String namespace, String terraName);
 

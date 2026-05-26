@@ -14656,14 +14656,15 @@ components:
     PreprodMigrationRequest:
       required:
         - preprodWorkspace
-        - ownerEmail
+        - ownerUsername
         - researchPurpose
         - sourceBucket
+        - billingPod
       type: object
       properties:
         preprodWorkspace:
           $ref: '#/components/schemas/PreprodWorkspace'
-        ownerEmail:
+        ownerUsername:
           type: string
           description: User to set as owner of the RW 2.0 workspace
         researchPurpose:
@@ -14672,6 +14673,9 @@ components:
         sourceBucket:
           type: string
           description: Source bucket to be migrated to RW 2.0
+        billingPod:
+          type: string
+          description: Billing pod to use for RW 2.0 workspace
     VwbWorkspace:
       required:
         - displayName
