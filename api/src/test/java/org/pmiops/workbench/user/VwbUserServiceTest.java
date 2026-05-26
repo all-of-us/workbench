@@ -140,20 +140,16 @@ class VwbUserServiceTest {
     verify(vwbUserManagerClient).sharePodWithUserWithRole(uuid, "test@example.com", PodRole.ADMIN);
   }
 
-  private void stubGetUserPods(String userEmail) {
+  private void stubGetUserPods() {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
     config.vwb.organizationId = "test-org-id";
     when(workbenchConfigProvider.get()).thenReturn(config);
-
-    DbUser dbUser = mock(DbUser.class);
-    when(dbUser.getUsername()).thenReturn(userEmail);
-    when(userProvider.get()).thenReturn(dbUser);
   }
 
   @Test
   void getUserPods_matchesByDescription() {
     String email = "user@example.com";
-    stubGetUserPods(email);
+    stubGetUserPods();
 
     UUID podId = UUID.randomUUID();
     PodDescription pod =
@@ -168,7 +164,7 @@ class VwbUserServiceTest {
         .thenReturn(new PodDescriptionList().results(List.of(pod)));
     when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of());
 
-    List<PodDescription> result = vwbUserService.getUserPods();
+    List<PodDescription> result = vwbUserService.getUserPods(email);
 
     assertEquals(1, result.size());
     assertEquals(podId, result.get(0).getPodId());
@@ -177,7 +173,7 @@ class VwbUserServiceTest {
   @Test
   void getUserPods_matchesByCreatedBy() {
     String email = "user@example.com";
-    stubGetUserPods(email);
+    stubGetUserPods();
 
     UUID podId = UUID.randomUUID();
     PodDescription pod =
@@ -192,7 +188,7 @@ class VwbUserServiceTest {
         .thenReturn(new PodDescriptionList().results(List.of(pod)));
     when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of());
 
-    List<PodDescription> result = vwbUserService.getUserPods();
+    List<PodDescription> result = vwbUserService.getUserPods(email);
 
     assertEquals(1, result.size());
     assertEquals(podId, result.get(0).getPodId());
@@ -201,7 +197,7 @@ class VwbUserServiceTest {
   @Test
   void getUserPods_matchesByBqPodRoles() {
     String email = "user@example.com";
-    stubGetUserPods(email);
+    stubGetUserPods();
 
     UUID podId = UUID.randomUUID();
     PodDescription pod =
@@ -217,7 +213,7 @@ class VwbUserServiceTest {
         .thenReturn(new PodDescriptionList().results(List.of(pod)));
     when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of(podId.toString()));
 
-    List<PodDescription> result = vwbUserService.getUserPods();
+    List<PodDescription> result = vwbUserService.getUserPods(email);
 
     assertEquals(1, result.size());
     assertEquals(podId, result.get(0).getPodId());
@@ -226,7 +222,7 @@ class VwbUserServiceTest {
   @Test
   void getUserPods_noMatch() {
     String email = "user@example.com";
-    stubGetUserPods(email);
+    stubGetUserPods();
 
     UUID podId = UUID.randomUUID();
     PodDescription pod =
@@ -235,7 +231,7 @@ class VwbUserServiceTest {
         .thenReturn(new PodDescriptionList().results(List.of(pod)));
     when(vwbAdminQueryService.queryPodIdsByUserEmail(email)).thenReturn(Set.of());
 
-    List<PodDescription> result = vwbUserService.getUserPods();
+    List<PodDescription> result = vwbUserService.getUserPods(email);
 
     assertTrue(result.isEmpty());
   }

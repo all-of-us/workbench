@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { Dropdown } from 'primereact/dropdown';
 
 import {
   MigrationState,
@@ -20,7 +21,10 @@ import {
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { rwToVwbResearchPurpose } from 'app/pages/admin/vwb/vwb-research-purpose-text';
-import { vwbWorkspaceAdminApi } from 'app/services/swagger-fetch-clients';
+import {
+  profileApi,
+  vwbWorkspaceAdminApi,
+} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 
 export const AdminVwbPreprodMigration = (
@@ -33,6 +37,11 @@ export const AdminVwbPreprodMigration = (
     useState<PreprodWorkspace[]>(null);
   const [fetchError, setFetchError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [validUsername, setValidUsername] = useState(false);
+  const [selectedPod, setSelectedPod] = useState('');
+  const [pods, setPods] = useState<string[]>([]);
+  const [loadingPods, setLoadingPods] = useState(false);
   const [startingMigration, setStartingMigration] = useState(false);
   const [migrationState, setMigrationState] = useState<MigrationState>(
     MigrationState.NOT_STARTED
@@ -58,6 +67,15 @@ export const AdminVwbPreprodMigration = (
     }
   };
 
+  const clearForm = () => {
+    setWorkspaceToMigrate(-1);
+    setProdUsername('');
+    setBucketName('');
+    setSelectedPod('');
+    setValidUsername(false);
+    setMigrationState(MigrationState.NOT_STARTED);
+  };
+
   const handlePreprodMigration = async () => {
     try {
       setMigrationState(MigrationState.STARTING);
@@ -80,18 +98,45 @@ export const AdminVwbPreprodMigration = (
         ),
         sourceBucket: bucketName,
       };
-      await vwbWorkspaceAdminApi().migratePreprodWorkspace(
-        preprodMigrationRequest
-      );
-      setWorkspaceToMigrate(-1);
-      setProdUsername('');
-      setBucketName('');
-      setMigrationState(MigrationState.NOT_STARTED);
+      console.log(preprodMigrationRequest);
+      // await vwbWorkspaceAdminApi().migratePreprodWorkspace(
+      //   preprodMigrationRequest
+      // );
+      clearForm();
     } catch (error) {
       console.error(error);
       setMigrationState(MigrationState.FAILED);
     } finally {
       setStartingMigration(false);
+    }
+  };
+
+  const getPods = async () => {
+    setLoadingPods(true);
+    try {
+      const podsResp = await vwbWorkspaceAdminApi().getPods(prodUsername);
+      setPods(podsResp);
+      setPods([
+        'nph-consortium-users',
+        ...(podsResp || []),
+        'aou-system-billing-prod',
+      ]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingPods(false);
+    }
+  };
+
+  const checkUsername = async () => {
+    setCheckingUsername(true);
+    try {
+      const userResp = await profileApi().isUsernameTaken(prodUsername);
+      setValidUsername(userResp.taken);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setCheckingUsername(false);
     }
   };
 
@@ -106,14 +151,14 @@ export const AdminVwbPreprodMigration = (
         onChange={setPreprodNamespace}
         onKeyDown={(event: KeyboardEvent) => {
           if (!!preprodNamespace && event.key === 'Enter') {
-            findPreprodWorkspace();
+            void findPreprodWorkspace();
           }
         }}
       />
       <Button
         style={{ height: '2.25rem' }}
         disabled={!preprodNamespace}
-        onClick={() => findPreprodWorkspace()}
+        onClick={findPreprodWorkspace}
       >
         Get Workspaces
       </Button>
@@ -175,7 +220,9 @@ export const AdminVwbPreprodMigration = (
                 style={{ width: '22.5rem', margin: '1.5rem' }}
                 labelText='Prod username of owner'
                 value={prodUsername}
+                invalid={!!prodUsername && !checkingUsername && !validUsername}
                 onChange={setProdUsername}
+                onBlur={checkUsername}
               />
               <TextInputWithLabel
                 containerStyle={{
@@ -187,6 +234,41 @@ export const AdminVwbPreprodMigration = (
                 value={bucketName}
                 onChange={setBucketName}
               />
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: colors.dark,
+                  fontWeight: 500,
+                  marginBottom: '4px',
+                }}
+              >
+                Researcher Workbench 2.0 billing pod
+              </div>
+              <Dropdown
+                value={selectedPod}
+                options={pods}
+                placeholder={loadingPods ? 'Loading pods...' : 'Select a pod'}
+                onChange={(e) => setSelectedPod(e.value)}
+                disabled={loadingPods}
+                style={{
+                  width: '300px',
+                  borderRadius: '6px',
+                }}
+              />
+              <Button
+                type='primarySmall'
+                style={{ marginTop: '8px' }}
+                onClick={() => getPods()}
+                disabled={
+                  startingMigration ||
+                  loadingPods ||
+                  !prodUsername ||
+                  !validUsername ||
+                  checkingUsername
+                }
+              >
+                Load user pods
+              </Button>
             </div>
           </ModalBody>
 
@@ -194,11 +276,7 @@ export const AdminVwbPreprodMigration = (
           <ModalFooter style={{ justifyContent: 'flex-end', gap: '1rem' }}>
             <Button
               type='secondary'
-              onClick={() => {
-                setWorkspaceToMigrate(-1);
-                setProdUsername('');
-                setBucketName('');
-              }}
+              onClick={clearForm}
               disabled={startingMigration}
             >
               Cancel
@@ -207,7 +285,14 @@ export const AdminVwbPreprodMigration = (
             <Button
               type='primary'
               onClick={() => handlePreprodMigration()}
-              disabled={startingMigration || !prodUsername || !bucketName}
+              disabled={
+                startingMigration ||
+                !prodUsername ||
+                checkingUsername ||
+                !validUsername ||
+                !bucketName ||
+                !selectedPod
+              }
             >
               {startingMigration
                 ? 'Starting...'

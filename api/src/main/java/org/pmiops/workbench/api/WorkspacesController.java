@@ -911,8 +911,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<List<VwbPodDescription>> getUserPods() {
+    String userEmail = userProvider.get().getUsername();
     return ResponseEntity.ok(
-        vwbUserService.getUserPods().stream()
+        vwbUserService.getUserPods(userEmail).stream()
             .map(
                 p -> {
                   VwbPodDescription pod = new VwbPodDescription();

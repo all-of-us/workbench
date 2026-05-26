@@ -7028,6 +7028,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v2/admin/vwb/pods:
+    get:
+      tags:
+        - vwbWorkspaceAdmin
+      description: Returns all VWB pods available for the provided username. Requires
+        RESEARCHER_DATA_VIEW authority.
+      operationId: getPods
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of VWB pods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+        403:
+          description: User doesn't have the RESEARCHER_DATA_VIEW authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v2/admin/vwb/workspaces/preprod/{workspaceNamespace}:
     get:
       tags:

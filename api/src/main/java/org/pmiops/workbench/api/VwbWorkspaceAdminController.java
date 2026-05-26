@@ -1,10 +1,12 @@
 package org.pmiops.workbench.api;
 
+import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
@@ -15,7 +17,9 @@ import org.pmiops.workbench.model.VwbWorkspaceAdminView;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
 import org.pmiops.workbench.model.VwbWorkspaceListResponse;
 import org.pmiops.workbench.model.VwbWorkspaceSearchParamType;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
+import org.pmiops.workbench.vwb.user.model.PodDescription;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
@@ -31,6 +35,8 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   private final VwbUserManagerClient vwbUserManagerClient;
   private final WsmClient wsmClient;
   private final WorkspaceMigrationService workspaceMigrationService;
+  private final VwbUserService vwbUserService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
@@ -40,11 +46,15 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
       VwbAdminQueryService vwbAdminQueryService,
       VwbUserManagerClient vwbUserManagerClient,
       WsmClient wsmClient,
-      WorkspaceMigrationService workspaceMigrationService) {
+      WorkspaceMigrationService workspaceMigrationService,
+      VwbUserService vwbUserService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.vwbAdminQueryService = vwbAdminQueryService;
     this.vwbUserManagerClient = vwbUserManagerClient;
     this.wsmClient = wsmClient;
     this.workspaceMigrationService = workspaceMigrationService;
+    this.vwbUserService = vwbUserService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -103,6 +113,18 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<List<PreprodWorkspace>> getPreprodWorkspace(String namespace) {
     return ResponseEntity.ok(vwbAdminQueryService.queryPreprodWorkspaceByNamespace(namespace));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<String>> getPods(String username) {
+    final String userEmail =
+        String.format(
+            "%s@%s", username, workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
+    return ResponseEntity.ok(
+        vwbUserService.getUserPods(userEmail).stream()
+            .map(PodDescription::getUserFacingId)
+            .toList());
   }
 
   @Override

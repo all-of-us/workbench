@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.inject.Provider;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.UserRole;
@@ -20,6 +22,7 @@ import org.pmiops.workbench.model.VwbWorkspace;
 import org.pmiops.workbench.model.VwbWorkspaceAdminView;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
 import org.pmiops.workbench.model.VwbWorkspaceListResponse;
+import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
@@ -35,12 +38,14 @@ public class VwbWorkspaceAdminControllerTest {
   @Mock private VwbUserManagerClient mockVwbUserManagerClient;
   @Mock private WsmClient mockWsmClient;
   @Mock private WorkspaceMigrationService mockWorkspaceMigrationService;
+  @Mock private VwbUserService vwbUserService;
 
   private VwbWorkspaceAdminController controller;
 
   private List<VwbWorkspace> testWorkspaces;
   private List<UserRole> testCollaborators;
   private List<VwbWorkspaceAuditLog> testAuditLogs;
+  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @BeforeEach
   public void setUp() {
@@ -51,7 +56,9 @@ public class VwbWorkspaceAdminControllerTest {
             mockVwbAdminQueryService,
             mockVwbUserManagerClient,
             mockWsmClient,
-            mockWorkspaceMigrationService);
+            mockWorkspaceMigrationService,
+            vwbUserService,
+            workbenchConfigProvider);
 
     // Set up test data
     VwbWorkspace testWorkspace = new VwbWorkspace();
