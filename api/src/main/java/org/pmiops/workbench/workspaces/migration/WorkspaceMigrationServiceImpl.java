@@ -518,39 +518,17 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
   @Override
   public void startPreprodWorkspaceMigration(
-      PreprodWorkspace preprodWorkspace, String email, String researchPurpose, String bucketName) {
+      PreprodWorkspace preprodWorkspace,
+      String email,
+      String researchPurpose,
+      String bucketName,
+      String billingPod) {
 
     Duration bucketDelay = Duration.ofSeconds(10);
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
 
     try {
-
-      String resolvedPodId =
-          podApiProvider
-              .get()
-              .getPod(organizationId, "~nph-consortium-users", PodAction.READ_METADATA)
-              .getPodId()
-              .toString();
-      logger.log(
-          Level.INFO, preprodWorkspace.getWorkspaceNamespace() + ": Starting workspace creation");
-
-      WorkspaceDescription vwbWorkspace =
-          wsmClient.createWorkspaceFromPreprodAsService(preprodWorkspace, resolvedPodId);
-
-      UUID workspaceId = vwbWorkspace.getId();
-
-      wsmClient.shareWorkspaceAsService(workspaceId.toString(), email, IamRole.OWNER);
-
-      List<Property> properties =
-          List.of(
-              new Property().key("terra-default-location").value("us-central1"),
-              new Property().key("terra-required-data-use-metadata").value(researchPurpose),
-              new Property().key("terra-workspace-short-description").value(""));
-      wsmClient.updateWorkspaceProperties(properties, workspaceId.toString());
-      logger.log(
-          Level.INFO,
-          preprodWorkspace.getWorkspaceNamespace() + ": Workspace created: " + vwbWorkspace);
-
+      // Verify CDR version is valid before creating workspace
       // Manually map preprod cdrs to data collection ids from config since preprod cdrVersionIds
       // will not match prod
       long cdrVersionId = preprodWorkspace.getCdrVersionId();
@@ -581,6 +559,32 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
                 preprodWorkspace.getWorkspaceNamespace()
                     + ": Preprod CDR version not available for migration");
           };
+
+      String resolvedPodId =
+          podApiProvider
+              .get()
+              .getPod(organizationId, "~" + billingPod, PodAction.READ_METADATA)
+              .getPodId()
+              .toString();
+      logger.log(
+          Level.INFO, preprodWorkspace.getWorkspaceNamespace() + ": Starting workspace creation");
+
+      WorkspaceDescription vwbWorkspace =
+          wsmClient.createWorkspaceFromPreprodAsService(preprodWorkspace, resolvedPodId);
+
+      UUID workspaceId = vwbWorkspace.getId();
+
+      wsmClient.shareWorkspaceAsService(workspaceId.toString(), email, IamRole.OWNER);
+
+      List<Property> properties =
+          List.of(
+              new Property().key("terra-default-location").value("us-central1"),
+              new Property().key("terra-required-data-use-metadata").value(researchPurpose),
+              new Property().key("terra-workspace-short-description").value(""));
+      wsmClient.updateWorkspaceProperties(properties, workspaceId.toString());
+      logger.log(
+          Level.INFO,
+          preprodWorkspace.getWorkspaceNamespace() + ": Workspace created: " + vwbWorkspace);
 
       logger.log(Level.INFO, preprodWorkspace.getWorkspaceNamespace() + ": Starting BQ clone");
       wsmClient.cloneBQDataset(

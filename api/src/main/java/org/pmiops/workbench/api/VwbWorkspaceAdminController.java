@@ -130,11 +130,17 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<Void> migratePreprodWorkspace(PreprodMigrationRequest request) {
+    final String ownerEmail =
+        String.format(
+            "%s@%s",
+            request.getOwnerUsername(),
+            workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
     workspaceMigrationService.startPreprodWorkspaceMigration(
         request.getPreprodWorkspace(),
-        request.getOwnerEmail(),
+        ownerEmail,
         request.getResearchPurpose(),
-        request.getSourceBucket());
+        request.getSourceBucket(),
+        request.getBillingPod());
     return ResponseEntity.ok().build();
   }
 
