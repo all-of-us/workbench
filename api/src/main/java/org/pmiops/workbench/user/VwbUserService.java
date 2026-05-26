@@ -223,9 +223,8 @@ public class VwbUserService {
             .orElse("");
   }
 
-  public List<PodDescription> getUserPods() {
+  public List<PodDescription> getUserPods(String userEmail) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
-    String userEmail = userProvider.get().getUsername();
     PodDescriptionList podList = vwbUserManagerClient.listUserPods(organizationId);
     if (podList == null || podList.getResults() == null) {
       return List.of();
