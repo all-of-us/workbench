@@ -138,7 +138,8 @@
     "enableTierAccessCheckInDb": true,
     "enableVWBHomepageBanner": true,
     "enableCTPlusCards": true,
-    "enableVwbMigration": true
+    "enableVwbMigration": true,
+    "enableWorkspaceArchiveRecovery": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

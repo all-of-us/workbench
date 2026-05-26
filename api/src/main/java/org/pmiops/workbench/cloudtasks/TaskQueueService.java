@@ -52,6 +52,8 @@ public class TaskQueueService {
       new TaskQueuePair("synchronizeAccessQueue", "synchronizeUserAccess");
   public static final TaskQueuePair CLEANUP_ORPHANED_WORKSPACES =
       new TaskQueuePair("cleanupOrphanedWorkspacesQueue", "cleanupOrphanedWorkspaces");
+  public static final TaskQueuePair WORKSPACE_ARCHIVE_STATUS =
+      new TaskQueuePair("workspaceArchiveStatusTaskQueue", "checkWorkspaceArchiveStatus");
 
   // RDR exporting uniquely uses the same queue for two endpoints
 
@@ -70,6 +72,10 @@ public class TaskQueueService {
 
   public static final TaskQueuePair FOLDER_SYNC_STATUS =
       new TaskQueuePair("folderSyncStatusTaskQueue", "checkFolderSyncStatus");
+
+  // Workspace UnArchival queue
+  public static final TaskQueuePair WORKSPACE_RECOVERY_STATUS =
+      new TaskQueuePair("workspaceRecoveryStatusTaskQueue", "checkWorkspaceRecoveryStatus");
 
   // initial credits queues and cloud tasks:
   //
@@ -315,6 +321,15 @@ public class TaskQueueService {
             "jobName", jobName));
   }
 
+  public void pushWorkspaceRecoveryStatusTask(String namespace, String terraName) {
+
+    createAndPushTask(
+        WORKSPACE_RECOVERY_STATUS,
+        Map.of(
+            "workspaceNamespace", namespace,
+            "workspaceName", terraName));
+  }
+
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {
     return new TaskQueuePair(pair.queueName(), pair.endpoint() + "?backfill=true");
   }
@@ -369,5 +384,14 @@ public class TaskQueueService {
                         .putAllHeaders(extraHeaders))
                 .build())
         .getName();
+  }
+
+  public void pushWorkspaceArchiveStatusTask(String namespace, String terraName) {
+
+    createAndPushTask(
+        WORKSPACE_ARCHIVE_STATUS,
+        Map.of(
+            "workspaceNamespace", namespace,
+            "workspaceName", terraName));
   }
 }

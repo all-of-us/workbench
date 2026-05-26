@@ -3401,6 +3401,29 @@ paths:
         200:
           description: Folders migrated successfully
           content: {}
+  /v1/workspaces/{namespace}/{terraName}/archive:
+    post:
+      tags:
+        - workspaces
+      description: Starts the archive flow for the RW1.0 workspace bucket.
+      operationId: startWorkspaceArchive
+      parameters:
+        - name: namespace
+          in: path
+          description: The workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          description: The workspace Terra name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workspace archive started successfully
+          content: { }
   /v1/workspaces/{namespace}/migration/folder-sync-status:
     get:
       tags:
@@ -4590,6 +4613,63 @@ paths:
           description: Folder sync status checked successfully
           content: { }
       x-codegen-request-body-name: request
+  /v1/cloudTask/checkWorkspaceArchiveStatus:
+    post:
+      tags:
+        - cloudTaskWorkspaces
+      description: Checks the status of a workspace archive STS job and updates the archive state when complete. Requeues itself if still running.
+      operationId: checkWorkspaceArchiveStatus
+      requestBody:
+        description: Workspace archive status task to process.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckWorkspaceArchiveStatusRequest'
+      responses:
+        200:
+          description: Archive status checked successfully
+          content: { }
+  /v1/cloudTask/checkWorkspaceRecoveryStatus:
+    post:
+      tags:
+        - cloudTaskWorkspaces
+      description: Checks recovery STS status and requeues if still running
+      operationId: checkWorkspaceRecoveryStatus
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckWorkspaceRecoveryStatusRequest'
+      responses:
+        200:
+          description: Recovery status checked successfully＀
+  /v1/workspaces/{namespace}/{terraName}/recovery:
+    post:
+      tags:
+        - workspaces
+      description: Starts archived workspace recovery flow.
+      operationId: startWorkspaceRecovery
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceRecoveryRequest'
+      responses:
+        200:
+          description: Recovery started successfully
   /v1/cloudTask/deleteTestUserWorkspaces:
     post:
       tags:
@@ -7972,6 +8052,18 @@ components:
           type: boolean
           default: false
           description: If true, will display the "Migrate to Verily Workbench" button on workspace pages.
+        enableWorkspaceArchiveRecovery:
+          type: boolean
+          default: false
+          description: If true, will display the archived workspace recovery flow and recovery UI on workspace pages.
+        RecoveryState:
+          type: string
+          description: Indicates recovery lifecycle state.
+          enum:
+            - NOT_STARTED
+            - RECOVERING
+            - RECOVERED
+            - FAILED
         cdrVersionsForMigration:
           type: array
           items:
@@ -8179,6 +8271,28 @@ components:
           type: string
         jobName:
           type: string
+    CheckWorkspaceArchiveStatusRequest:
+      type: object
+      required:
+        - workspaceNamespace
+        - workspaceName
+      properties:
+        workspaceNamespace:
+          type: string
+        workspaceName:
+          type: string
+    CheckWorkspaceRecoveryStatusRequest:
+      type: object
+      properties:
+        namespace:
+          type: string
+        terraName:
+          type: string
+    WorkspaceRecoveryRequest:
+      type: object
+      properties:
+        podId:
+          type: string
     StartWorkspaceMigrationRequest:
       type: object
       properties:
@@ -8302,6 +8416,8 @@ components:
           description: UUID of the VWB workspace this workspace was migrated to
         migrationState:
           $ref: '#/components/schemas/MigrationState'
+        recoveryState:
+          $ref: '#/components/schemas/WorkspaceRecoveryStatus'
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
@@ -8361,6 +8477,22 @@ components:
         - NOT_STARTED
         - STARTING
         - FINISHED
+        - FAILED
+    WorkspaceArchiveStatus:
+      type: string
+      description: Indicates the status of the workspace archive flow (PENDING, IN_PROGRESS, ARCHIVED, FAILED).
+      enum:
+        - PENDING
+        - IN_PROGRESS
+        - ARCHIVED
+        - FAILED
+    WorkspaceRecoveryStatus:
+      type: string
+      description: Indicates the status of the workspace recovery flow (NOT_STARTED, RECOVERING, RECOVERED, FAILED).
+      enum:
+        - NOT_STARTED
+        - RECOVERING
+        - RECOVERED
         - FAILED
     WorkspaceBillingUsageResponse:
       required:
@@ -13696,6 +13828,8 @@ components:
             Id of the RW 2.0 workspace created during migration
         migrationState:
           $ref: '#/components/schemas/MigrationState'
+        recoveryState:
+          $ref: '#/components/schemas/WorkspaceRecoveryStatus'
         focusOnUnderrepresentedPopulations:
           type: boolean
           description: |-

@@ -77,11 +77,15 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableCTPlusCards", source = "config.featureFlags.enableCTPlusCards")
   @Mapping(target = "enableVwbMigration", source = "config.featureFlags.enableVwbMigration")
   @Mapping(
+      target = "enableWorkspaceArchiveRecovery",
+      source = "config.featureFlags.enableWorkspaceArchiveRecovery")
+  @Mapping(
       target = "enableVWBWorkspaceCreation",
       source = "config.featureFlags.enableVWBWorkspaceCreation")
   @Mapping(
       target = "enableVWBHomepageBanner",
       source = "config.featureFlags.enableVWBHomepageBanner")
   @Mapping(target = "cdrVersionsForMigration", source = "config.vwb.cdrVersionsForMigration")
+  @Mapping(target = "recoveryState", ignore = true)
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

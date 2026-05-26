@@ -356,6 +356,8 @@ public class WorkbenchConfig {
     public boolean enableCTPlusCards;
     // If true, enables the workspace migration button to Verily Workbench.
     public boolean enableVwbMigration;
+    // if true, enables the workspace archival recovery flow to users
+    public boolean enableWorkspaceArchiveRecovery;
   }
 
   public static class ActionAuditConfig {
