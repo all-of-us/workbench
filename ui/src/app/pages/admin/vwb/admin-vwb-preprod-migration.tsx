@@ -98,10 +98,9 @@ export const AdminVwbPreprodMigration = (
         ),
         sourceBucket: bucketName,
       };
-      console.log(preprodMigrationRequest);
-      // await vwbWorkspaceAdminApi().migratePreprodWorkspace(
-      //   preprodMigrationRequest
-      // );
+      await vwbWorkspaceAdminApi().migratePreprodWorkspace(
+        preprodMigrationRequest
+      );
       clearForm();
     } catch (error) {
       console.error(error);
@@ -236,9 +235,9 @@ export const AdminVwbPreprodMigration = (
               />
               <div
                 style={{
-                  fontSize: '12px',
-                  color: colors.dark,
-                  fontWeight: 500,
+                  fontSize: '14px',
+                  color: colors.primary,
+                  fontWeight: 600,
                   marginBottom: '4px',
                 }}
               >
