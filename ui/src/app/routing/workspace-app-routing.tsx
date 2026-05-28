@@ -33,6 +33,7 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
+import { WorkspaceRecovery } from 'app/pages/workspace/workspace-recovery';
 import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 
@@ -66,6 +67,7 @@ const DataExplorerPage = fp.flow(
 const DataComponentPage = fp.flow(withRouteData)(DataComponentSplitter);
 const MigrationPage = fp.flow(withRouteData)(Migration);
 const MigrationFolderSyncPage = fp.flow(withRouteData)(MigrationFolderSync);
+const WorkspaceRecoveryPage = fp.flow(withRouteData)(WorkspaceRecovery);
 const DataSetComponentPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -276,6 +278,20 @@ export const WorkspaceRoutes = () => {
         <MigrationPage
           routeData={{
             title: 'Workspace Migration',
+            breadcrumb: BreadcrumbType.Workspace,
+            workspaceNavBarTab: 'data',
+            pageKey: 'data',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/recovery`}
+        guards={[adminLockedGuard(ns, terraName)]}
+      >
+        <WorkspaceRecoveryPage
+          routeData={{
+            title: 'Workspace Recovery',
             breadcrumb: BreadcrumbType.Workspace,
             workspaceNavBarTab: 'data',
             pageKey: 'data',
