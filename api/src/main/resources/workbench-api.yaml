@@ -13675,6 +13675,9 @@ components:
           type: integer
           description: Foreign key into CDR table.
           format: int64
+        cdrVersionName:
+          type: string
+          description: Human-readable name for the CDR version.
         creationTime:
           type: string
           description: Time workspace was initially created.

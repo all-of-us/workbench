@@ -578,6 +578,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  a.short_name AS access_tier_short_name,\n"
             + "  billing_account_name,\n"
             + "  w.cdr_version_id AS cdr_version_id,\n"
+            + "  c.name AS cdr_version_name,\n"
             + "  w.creation_time AS creation_time,\n"
             + "  creator_id,\n"
             + "  disseminate_research_other,\n"
@@ -644,6 +645,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                   getBillingAccountType(
                       rs.getString("billing_account_name"), workbenchConfigProvider.get()))
               .cdrVersionId(rs.getLong("cdr_version_id"))
+              .cdrVersionName(rs.getString("cdr_version_name"))
               .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
               .creatorId(rs.getLong("creator_id"))
               .disseminateResearchOther(rs.getString("disseminate_research_other"))

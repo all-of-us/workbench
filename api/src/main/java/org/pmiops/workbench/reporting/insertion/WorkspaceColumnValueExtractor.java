@@ -15,6 +15,7 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   ACCESS_TIER_SHORT_NAME("access_tier_short_name", ReportingWorkspace::getAccessTierShortName),
   BILLING_ACCOUNT_TYPE("billing_account_type", w -> enumToString(w.getBillingAccountType())),
   CDR_VERSION_ID("cdr_version_id", ReportingWorkspace::getCdrVersionId),
+  CDR_VERSION_NAME("cdr_version_name", ReportingWorkspace::getCdrVersionName),
   CREATION_TIME("creation_time", w -> toInsertRowString(w.getCreationTime())),
   CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId),
   DISSEMINATE_RESEARCH_OTHER(

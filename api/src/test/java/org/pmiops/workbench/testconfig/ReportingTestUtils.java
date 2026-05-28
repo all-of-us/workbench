@@ -28,6 +28,7 @@ public class ReportingTestUtils {
       BillingAccountType.FREE_TIER;
   public static final String WORKSPACE__BILLING_ACCOUNT_ID = "free_tier";
   public static final Long WORKSPACE__CDR_VERSION_ID = 2L;
+  public static final String WORKSPACE__CDR_VERSION_NAME = "CDR Version";
   public static final Timestamp WORKSPACE__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
   public static final Long WORKSPACE__CREATOR_ID = 4L;
@@ -122,6 +123,7 @@ public class ReportingTestUtils {
         .accessTierShortName(WORKSPACE__ACCESS_TIER_SHORT_NAME)
         .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)
+        .cdrVersionName(WORKSPACE__CDR_VERSION_NAME)
         .creationTime(offsetDateTimeUtc(WORKSPACE__CREATION_TIME))
         .creatorId(WORKSPACE__CREATOR_ID)
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
