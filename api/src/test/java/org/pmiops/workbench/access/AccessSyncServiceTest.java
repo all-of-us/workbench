@@ -1,6 +1,7 @@
 package org.pmiops.workbench.access;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -409,4 +410,82 @@ public class AccessSyncServiceTest {
     // Verify that the VWB pod creation task was NOT pushed since save failed
     verify(taskQueueService, times(0)).pushVwbPodCreationTask(any());
   }
+
+  @Test
+  public void testUpdateUserAccessTiers_retryAfterUserSaveFailure_createsPodTask() {
+    DbUser dbUser = createDbUser();
+    Agent agent = Agent.asUser(dbUser);
+
+    // Set up workbench config
+    stubWorkbenchConfig_enableInitialCreditsExpiration(false);
+
+    // Set up required modules for registered tier
+    for (DbAccessModuleName moduleName : getRequiredModulesForRegisteredTierAccess()) {
+      when(accessModuleService.isModuleCompliant(dbUser, moduleName)).thenReturn(true);
+    }
+
+    // Track whether addUserToTier was called (simulating the persistence side effect)
+    AtomicReference<List<DbAccessTier>> simulatedPersistedTiers = new AtomicReference<>(List.of());
+
+    // Mock getAccessTiersForUser to simulate that tiers persist after addUserToTier
+    when(accessTierService.getAccessTiersForUser(dbUser))
+        .thenAnswer(invocation -> simulatedPersistedTiers.get());
+
+    // Track when addUserToTier is called and simulate the persistence
+    doAnswer(invocation -> {
+      DbAccessTier tier = (DbAccessTier) invocation.getArguments()[1];
+      List<DbAccessTier> currentTiers = new java.util.ArrayList<>(simulatedPersistedTiers.get());
+      if (!currentTiers.contains(tier)) {
+        currentTiers.add(tier);
+        simulatedPersistedTiers.set(currentTiers);
+      }
+      return null;
+    }).when(accessTierService).addUserToTier(any(), any());
+
+    // Mock userDao.save to fail on first call, succeed on second (simulating retry)
+    when(userDao.save(dbUser))
+        .thenThrow(new DataIntegrityViolationException("Duplicate user_code_of_conduct_agreement"))
+        .thenReturn(dbUser);
+
+    // Mock VWB pod DAO
+    when(vwbUserPodDao.findByUserUserId(any())).thenReturn(null);
+    when(vwbUserPodDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
+
+    // Mock audit and task queue
+    doNothing().when(userServiceAuditor).fireUpdateAccessTiersAction(any(), any(), any(), any());
+    doNothing().when(taskQueueService).pushVwbPodCreationTask(any());
+
+    // First attempt - should fail
+    try {
+      accessSyncService.updateUserAccessTiers(dbUser, agent);
+      fail("Expected DataIntegrityViolationException");
+    } catch (DataIntegrityViolationException e) {
+      // Expected exception
+    }
+
+    // WITH THE FIX: addUserToTier should NOT have been called because user save failed first
+    verify(accessTierService, times(0)).addUserToTier(any(), any());
+    verify(vwbUserPodDao, times(0)).save(any());
+    verify(taskQueueService, times(0)).pushVwbPodCreationTask(any());
+
+    // Reset mock invocation counts for clearer verification
+    Mockito.clearInvocations(accessTierService, taskQueueService, vwbUserPodDao);
+
+    // Second attempt (retry) - should succeed
+    DbUser result = accessSyncService.updateUserAccessTiers(dbUser, agent);
+
+    assertEquals(dbUser, result);
+
+    // WITH THE FIX: On retry, previousAccessTiers is still empty (no tiers were persisted in the failed attempt)
+    // So userHasFirstAccessToTiers([], [registeredTier]) returns true
+    // Pod creation task should be triggered
+
+    // Verify tier operations happen on the successful retry
+    verify(accessTierService, times(1)).addUserToTier(dbUser, registeredTier);
+
+    // Verify pod creation happens on the successful retry
+    verify(vwbUserPodDao, times(1)).save(any());
+    verify(taskQueueService, times(1)).pushVwbPodCreationTask(dbUser.getUsername());
+  }
+
 }
