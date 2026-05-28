@@ -432,15 +432,19 @@ public class AccessSyncServiceTest {
         .thenAnswer(invocation -> simulatedPersistedTiers.get());
 
     // Track when addUserToTier is called and simulate the persistence
-    doAnswer(invocation -> {
-      DbAccessTier tier = (DbAccessTier) invocation.getArguments()[1];
-      List<DbAccessTier> currentTiers = new java.util.ArrayList<>(simulatedPersistedTiers.get());
-      if (!currentTiers.contains(tier)) {
-        currentTiers.add(tier);
-        simulatedPersistedTiers.set(currentTiers);
-      }
-      return null;
-    }).when(accessTierService).addUserToTier(any(), any());
+    doAnswer(
+            invocation -> {
+              DbAccessTier tier = (DbAccessTier) invocation.getArguments()[1];
+              List<DbAccessTier> currentTiers =
+                  new java.util.ArrayList<>(simulatedPersistedTiers.get());
+              if (!currentTiers.contains(tier)) {
+                currentTiers.add(tier);
+                simulatedPersistedTiers.set(currentTiers);
+              }
+              return null;
+            })
+        .when(accessTierService)
+        .addUserToTier(any(), any());
 
     // Mock userDao.save to fail on first call, succeed on second (simulating retry)
     when(userDao.save(dbUser))
@@ -476,7 +480,8 @@ public class AccessSyncServiceTest {
 
     assertEquals(dbUser, result);
 
-    // WITH THE FIX: On retry, previousAccessTiers is still empty (no tiers were persisted in the failed attempt)
+    // WITH THE FIX: On retry, previousAccessTiers is still empty (no tiers were persisted in the
+    // failed attempt)
     // So userHasFirstAccessToTiers([], [registeredTier]) returns true
     // Pod creation task should be triggered
 
@@ -487,5 +492,4 @@ public class AccessSyncServiceTest {
     verify(vwbUserPodDao, times(1)).save(any());
     verify(taskQueueService, times(1)).pushVwbPodCreationTask(dbUser.getUsername());
   }
-
 }
