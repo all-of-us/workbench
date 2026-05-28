@@ -173,7 +173,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
       const enableWorkspaceArchiveRecovery =
-        serverConfigStore.get().config.enableWorkspaceArchiveRecovery;
+        serverConfigStore.get()?.config?.enableWorkspaceArchiveRecovery ??
+        false;
       return (
         <React.Fragment>
           <WorkspaceCardBase>

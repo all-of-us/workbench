@@ -146,7 +146,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       const migrationTestingGroup = profile?.migrationTestingGroup;
 
       const enableWorkspaceArchiveRecovery =
-        serverConfigStore.get().config.enableWorkspaceArchiveRecovery;
+        serverConfigStore.get().config?.enableWorkspaceArchiveRecovery ?? false;
 
       const filters = [
         {
