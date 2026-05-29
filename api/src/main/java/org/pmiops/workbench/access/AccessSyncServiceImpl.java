@@ -73,8 +73,19 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   @Override
   public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
-
     final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
+
+    log.info(
+        String.format(
+            "Updating access tiers for user %s (id: %d). Previous tiers: %s, New tiers: %s",
+            dbUser.getUsername(),
+            dbUser.getUserId(),
+            previousAccessTiers.stream()
+                .map(DbAccessTier::getShortName)
+                .collect(java.util.stream.Collectors.joining(", ")),
+            newAccessTiers.stream()
+                .map(DbAccessTier::getShortName)
+                .collect(java.util.stream.Collectors.joining(", "))));
 
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
@@ -82,6 +93,21 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     }
 
     addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
+
+    // Save the user first
+    log.info("Saving user " + dbUser.getUsername() + " before updating tier memberships");
+    DbUser savedUser;
+    try {
+      savedUser = userDao.save(dbUser);
+      log.info("Successfully saved user " + savedUser.getUsername());
+    } catch (DataIntegrityViolationException e) {
+      log.warning(
+          String.format(
+              "Failed to save user %s due to DataIntegrityViolationException: %s. "
+                  + "Tier operations not performed. Exception will propagate for retry.",
+              dbUser.getUsername(), e.getMessage()));
+      throw e;
+    }
 
     // Tiers to add are those present in the new set of tiers but not in the previous set.
     // We use ListUtils.subtract() to find the difference: (new - previous) = toAdd.
@@ -92,22 +118,55 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     final List<DbAccessTier> tiersToRemove =
         ListUtils.subtract(previousAccessTiers, newAccessTiers);
 
+    if (!tiersToRemove.isEmpty()) {
+      log.info(
+          String.format(
+              "Removing user %s from tiers: %s",
+              dbUser.getUsername(),
+              tiersToRemove.stream()
+                  .map(DbAccessTier::getShortName)
+                  .collect(java.util.stream.Collectors.joining(", "))));
+    }
     // remove user from all other Access Tier DB tables and the tiers' Terra Auth Domains
     tiersToRemove.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
 
+    if (!tiersToAdd.isEmpty()) {
+      log.info(
+          String.format(
+              "Adding user %s to tiers: %s",
+              dbUser.getUsername(),
+              tiersToAdd.stream()
+                  .map(DbAccessTier::getShortName)
+                  .collect(java.util.stream.Collectors.joining(", "))));
+    }
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
     tiersToAdd.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
-    // Save the user first
-    DbUser savedUser = userDao.save(dbUser);
-
     // Only after successful save, create the pod lock and push the task
     if (userHasFirstAccessToTiers(previousAccessTiers, newAccessTiers)) {
+      log.info(
+          String.format(
+              "User %s is gaining first-time tier access. Attempting to create VWB pod.",
+              savedUser.getUsername()));
       // Try to create the lock row - only push task if we successfully created it
       boolean podLockCreated = createVwbUserLockIfNeeded(savedUser);
       if (podLockCreated) {
+        log.info(
+            String.format(
+                "Successfully created VWB pod lock for user %s. Pushing pod creation task.",
+                savedUser.getUsername()));
         taskQueueService.pushVwbPodCreationTask(savedUser.getUsername());
+      } else {
+        log.info(
+            String.format(
+                "VWB pod lock already exists for user %s. Skipping pod creation task.",
+                savedUser.getUsername()));
       }
+    } else {
+      log.info(
+          String.format(
+              "User %s is not gaining first-time tier access (prev: %d tiers, new: %d tiers). Skipping pod creation.",
+              savedUser.getUsername(), previousAccessTiers.size(), newAccessTiers.size()));
     }
 
     return savedUser;
