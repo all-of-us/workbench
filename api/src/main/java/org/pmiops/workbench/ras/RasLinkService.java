@@ -177,6 +177,9 @@ public class RasLinkService {
               "Successfully retrieved OIDC user information "
                   + "from RAS access token for user (%s), txn:  %s",
               aouUsername, txnClaim));
+      log.info(
+          String.format(
+              "fetchUserInfo response for %s: %s", aouUsername, userInfoResponse.toString()));
     } catch (IOException e) {
       log.warning(
           String.format(
