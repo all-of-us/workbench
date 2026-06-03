@@ -8,10 +8,10 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexRow } from 'app/components/flex';
 import { SmallHeader } from 'app/components/headers';
-import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 interface Props {
@@ -24,14 +24,12 @@ export const WorkspaceRecovery = withCurrentWorkspace()(
 
     const [selectedPod, setSelectedPod] = useState('');
     const [requestSubmitted, setRequestSubmitted] = useState(false);
-    const [loading, setLoading] = useState(true);
     const [loadingPods, setLoadingPods] = useState(false);
     const [pods, setPods] = useState([]);
 
     useEffect(() => {
       const loadData = async () => {
         try {
-          setLoading(true);
           setLoadingPods(true);
 
           const podsResponse = await workspacesApi().getUserPods();
@@ -40,13 +38,18 @@ export const WorkspaceRecovery = withCurrentWorkspace()(
         } catch (e) {
           console.error('Failed loading recovery data', e);
         } finally {
-          setLoading(false);
           setLoadingPods(false);
         }
       };
 
       loadData();
     }, []);
+
+    const { cdrVersionsForMigration } = serverConfigStore.get().config;
+
+    const showDatasetUpgradeWarning = !cdrVersionsForMigration.some(
+      (c) => +workspace.cdrVersionId === c.cdrVersionId
+    );
 
     const submitRecovery = async () => {
       if (!selectedPod) {
@@ -68,18 +71,8 @@ export const WorkspaceRecovery = withCurrentWorkspace()(
       }
     };
 
-    if (loading || !workspace) {
-      return (
-        <FadeBox
-          style={{
-            padding: '4rem',
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <Spinner />
-        </FadeBox>
-      );
+    if (!workspace) {
+      return null;
     }
 
     if (requestSubmitted) {
@@ -243,11 +236,15 @@ export const WorkspaceRecovery = withCurrentWorkspace()(
 
             <FlexRow
               style={{
-                justifyContent: 'space-between',
+                gap: '2rem',
                 marginBottom: '2rem',
               }}
             >
-              <div>
+              <div
+                style={{
+                  flex: 1,
+                }}
+              >
                 <b>Workspace ID</b>
 
                 <div
@@ -259,7 +256,11 @@ export const WorkspaceRecovery = withCurrentWorkspace()(
                 </div>
               </div>
 
-              <div>
+              <div
+                style={{
+                  flex: 1,
+                }}
+              >
                 <b>Workspace Creator</b>
 
                 <div
@@ -274,13 +275,13 @@ export const WorkspaceRecovery = withCurrentWorkspace()(
 
             <FlexRow
               style={{
-                justifyContent: 'space-between',
+                gap: '2rem',
                 alignItems: 'flex-start',
               }}
             >
               <div
                 style={{
-                  width: '45%',
+                  flex: 1,
                 }}
               >
                 <b>Workspace Dataset Version</b>
@@ -292,27 +293,27 @@ export const WorkspaceRecovery = withCurrentWorkspace()(
                 >
                   {workspace.accessTierShortName}
                 </div>
-
-                <div
-                  style={{
-                    marginTop: '12px',
-                    padding: '12px',
-                    background: '#fff2df',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                  }}
-                >
-                  This dataset version is no longer supported.
-                  <br />
-                  <br />
-                  Upon recovery, the workspace will automatically upgrade to the
-                  newest dataset version.
-                </div>
+                {showDatasetUpgradeWarning && (
+                  <div
+                    style={{
+                      marginTop: '12px',
+                      padding: '12px',
+                      background: '#fff2df',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                    }}
+                  >
+                    This dataset version is no longer supported.
+                    <br />
+                    <br />
+                    Upon recovery, the workspace will automatically upgrade to
+                    the newest dataset version.
+                  </div>
+                )}
               </div>
-
               <div
                 style={{
-                  width: '40%',
+                  flex: 1,
                 }}
               >
                 <b>Select Billing Pod</b>
