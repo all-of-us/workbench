@@ -19,7 +19,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` cr,
     \`$BQ_PROJECT.$BQ_DATASET.concept\` c1,
     \`$BQ_PROJECT.$BQ_DATASET.concept\` c2,
     \`$BQ_PROJECT.$BQ_DATASET.relationship\` r,
-    \`$BQ_PROJECT.$BQ_DATASET.relationship\` ca
+    \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` ca
 WHERE cr.concept_id_1 = c1.concept_id
     AND cr.concept_id_2 = c2.concept_id
     AND cr.relationship_id = r.relationship_id
