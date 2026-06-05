@@ -18,19 +18,18 @@ SELECT DISTINCT c1.concept_id AS p_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` cr,
     \`$BQ_PROJECT.$BQ_DATASET.concept\` c1,
     \`$BQ_PROJECT.$BQ_DATASET.concept\` c2,
-    \`$BQ_PROJECT.$BQ_DATASET.relationship\` r,
-    \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` ca
+    \`$BQ_PROJECT.$BQ_DATASET.relationship\` r
 WHERE cr.concept_id_1 = c1.concept_id
     AND cr.concept_id_2 = c2.concept_id
     AND cr.relationship_id = r.relationship_id
-    AND ca.descendant_concept_id = cr.concept_id_2
-    AND ca.ancestor_concept_id = 441840
     AND c1.vocabulary_id = 'SNOMED'
     AND c2.vocabulary_id = 'SNOMED'
     AND c1.standard_concept = 'S'
     AND c2.standard_concept = 'S'
     AND r.is_hierarchical = '1'
     AND r.defines_ancestry = '1'
+    AND c1.domain_id = 'Condition'
+    AND c2.domain_id = 'Condition'
     AND cr.relationship_id = 'Subsumes'"
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - temp table adding level 0"
@@ -53,9 +52,8 @@ WHERE concept_id in
         SELECT DISTINCT condition_concept_id
         FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
         JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.condition_concept_id = b.concept_id
-        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` ca on b.concept_id = ca.descendant_concept_id
         WHERE a.condition_concept_id != 0
-            and ca.ancestor_concept_id = 441840
+            and b.domain_id = 'Condition'
             and b.standard_concept = 'S'
             and b.vocabulary_id = 'SNOMED'
     )"
