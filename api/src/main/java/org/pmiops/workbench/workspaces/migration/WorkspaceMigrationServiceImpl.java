@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageTransferClient;
@@ -145,14 +146,25 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       WorkspaceDescription vwbWorkspace;
       if (workspace.getMigratedVwbWorkspaceId() == null) {
         try {
-          logger.log(Level.INFO, namespace + ": Starting workspace creation");
+          logger.log(Level.INFO, namespace + ": Checking for existing workspace");
 
-          vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
-        } catch (Exception e) {
-          dbWorkspace.setMigrationState(MigrationState.NOT_STARTED.name());
-          dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
-          workspaceDao.save(dbWorkspace);
-          throw new RuntimeException(namespace + ": Workspace creation failed", e);
+          vwbWorkspace = wsmClient.getWorkspaceAsService(workspace.getNamespace());
+          logger.log(Level.INFO, namespace + ": Existing workspace found: " + vwbWorkspace);
+        } catch (NotFoundException e) {
+          vwbWorkspace = null;
+          logger.log(Level.INFO, namespace + ": Existing workspace not found");
+        }
+        if (vwbWorkspace == null) {
+          try {
+            logger.log(Level.INFO, namespace + ": Starting workspace creation");
+
+            vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
+          } catch (Exception e) {
+            dbWorkspace.setMigrationState(MigrationState.NOT_STARTED.name());
+            dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+            workspaceDao.save(dbWorkspace);
+            throw new RuntimeException(namespace + ": Workspace creation failed", e);
+          }
         }
       } else {
         try {
