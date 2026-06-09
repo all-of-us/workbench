@@ -2,7 +2,11 @@ import * as React from 'react';
 import RSelect from 'react-select';
 import * as fp from 'lodash/fp';
 
-import { Profile, WorkspaceAccessLevel } from 'generated/fetch';
+import {
+  Profile,
+  WorkspaceAccessLevel,
+  WorkspaceRecoveryStatus,
+} from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { CommonToggle } from 'app/components/admin/common-toggle';
@@ -55,7 +59,11 @@ const styles = reactStyles({
 });
 
 interface WorkspaceListProps extends WithSpinnerOverlayProps {
-  profileState: { profile: Profile; reload: Function; updateCache: Function };
+  profileState: {
+    profile: Profile;
+    reload: Function;
+    updateCache: Function;
+  };
 }
 
 interface State {
@@ -73,6 +81,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
 
     constructor(props) {
       super(props);
+
       this.state = {
         workspacesLoading: true,
         workspaceList: [],
@@ -93,7 +102,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
     }
 
     async reloadWorkspaces() {
-      this.setState({ workspacesLoading: true });
+      this.setState({
+        workspacesLoading: true,
+      });
+
       try {
         const workspacesReceived = (await workspacesApi().getWorkspaces())
           .items;
@@ -110,7 +122,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         });
       } catch (e) {
         const response = await convertAPIError(e);
-        this.setState({ errorText: response.message });
+
+        this.setState({
+          errorText: response.message,
+        });
       }
     }
 
@@ -127,13 +142,29 @@ export const WorkspaceList = fp.flow(withUserProfile())(
 
       const enableVwbMigration =
         serverConfigStore.get().config.enableVwbMigration;
+
       const migrationTestingGroup = profile?.migrationTestingGroup;
 
+      const enableWorkspaceArchiveRecovery =
+        serverConfigStore.get().config?.enableWorkspaceArchiveRecovery ?? false;
+
       const filters = [
-        { label: 'Owner', value: ['OWNER'] },
-        { label: 'Writer', value: ['WRITER'] },
-        { label: 'Reader', value: ['READER'] },
-        { label: 'All', value: null },
+        {
+          label: 'Owner',
+          value: ['OWNER'],
+        },
+        {
+          label: 'Writer',
+          value: ['WRITER'],
+        },
+        {
+          label: 'Reader',
+          value: ['READER'],
+        },
+        {
+          label: 'All',
+          value: null,
+        },
       ];
 
       const defaultFilter = filters.find((f) => f.label === 'All');
@@ -150,14 +181,55 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         (wp) => wp.workspace.migrationState !== 'FINISHED'
       );
 
+      const archivedWorkspaces = enableWorkspaceArchiveRecovery
+        ? filteredList.filter((wp) =>
+            [
+              WorkspaceRecoveryStatus.NOT_STARTED,
+              WorkspaceRecoveryStatus.RECOVERING,
+              WorkspaceRecoveryStatus.RECOVERED,
+              WorkspaceRecoveryStatus.FAILED,
+            ].includes(wp.workspace.recoveryState)
+          )
+        : [];
+
+      /**
+       * Active workspaces exclude archived workspaces
+       * so cards do not render twice.
+       */
+
+      const activeWorkspaces = nonMigratedWorkspaces.filter(
+        (wp) =>
+          ![
+            WorkspaceRecoveryStatus.NOT_STARTED,
+            WorkspaceRecoveryStatus.RECOVERING,
+            WorkspaceRecoveryStatus.RECOVERED,
+            WorkspaceRecoveryStatus.FAILED,
+          ].includes(wp.workspace.recoveryState)
+      );
+
       return (
         <FadeBox style={styles.fadeBox}>
-          <div id='workspaces-list' style={{ padding: '0 1.5rem' }}>
+          <div
+            id='workspaces-list'
+            style={{
+              padding: '0 1.5rem',
+            }}
+          >
             <ListPageHeader>Workspaces</ListPageHeader>
 
-            {/* FILTER ROW */}
-            <FlexRow style={{ marginTop: '0.5em', alignItems: 'center' }}>
-              <div style={{ paddingRight: '0.75em' }}>Filter by</div>
+            <FlexRow
+              style={{
+                marginTop: '0.5em',
+                alignItems: 'center',
+              }}
+            >
+              <div
+                style={{
+                  paddingRight: '0.75em',
+                }}
+              >
+                Filter by
+              </div>
 
               <RSelect
                 aria-label='Access level filter selector'
@@ -178,7 +250,6 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                 }}
               />
 
-              {/* RIGHT SIDE */}
               <div
                 style={{
                   marginLeft: 'auto',
@@ -188,7 +259,12 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                 }}
               >
                 {(enableVwbMigration || migrationTestingGroup) && (
-                  <FlexRow style={{ alignItems: 'center', gap: '6px' }}>
+                  <FlexRow
+                    style={{
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
                     <CommonToggle
                       name='show-migrated'
                       checked={showMigrated}
@@ -206,14 +282,15 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   onClick={() =>
                     window.open(`${environment.vwbUiUrl}/workspaces`, '_blank')
                   }
-                  style={{ height: '2.25rem' }}
+                  style={{
+                    height: '2.25rem',
+                  }}
                 >
                   Open Verily Workbench <NewWindowIcon />
                 </Button>
               </div>
             </FlexRow>
 
-            {/* ERROR */}
             {errorText && (
               <AlertDanger>
                 <ClrIcon shape='exclamation-circle' />
@@ -221,10 +298,13 @@ export const WorkspaceList = fp.flow(withUserProfile())(
               </AlertDanger>
             )}
 
-            {/* CARDS */}
             <div style={styles.cardArea}>
               {workspacesLoading ? (
-                <Spinner style={{ margin: '2rem auto' }} />
+                <Spinner
+                  style={{
+                    margin: '2rem auto',
+                  }}
+                />
               ) : (
                 <div
                   style={{
@@ -235,9 +315,29 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                 >
                   {showMigrated ? (
                     <>
-                      {/* MIGRATED */}
-                      <div style={{ width: '100%', marginBottom: '12px' }}>
+                      <div
+                        style={{
+                          width: '100%',
+                          marginBottom: '12px',
+                        }}
+                      >
                         <SmallHeader>Migrated Workspaces</SmallHeader>
+                        <div style={{ marginBottom: '2px' }}>
+                          <FlexRow style={styles.banner}>
+                            <ClrIcon
+                              shape='exclamation-triangle'
+                              size={16}
+                              style={styles.icon}
+                            />
+
+                            <div style={styles.text}>
+                              The following workspaces have already been
+                              migrated. You’re still being billed for these
+                              workspaces. To avoid duplicate charges, we
+                              recommend deleting them when you’re finished.
+                            </div>
+                          </FlexRow>
+                        </div>
                       </div>
 
                       {migratedWorkspaces.map((wp) => (
@@ -256,25 +356,19 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                         />
                       ))}
 
-                      {/* LEGACY */}
-                      <div style={{ width: '100%', marginTop: '16px' }}>
-                        <div style={{ marginBottom: '12px' }}>
+                      <div
+                        style={{
+                          width: '100%',
+                          marginTop: '16px',
+                        }}
+                      >
+                        <div
+                          style={{
+                            marginBottom: '12px',
+                          }}
+                        >
                           <SmallHeader>Legacy Workspaces</SmallHeader>
                         </div>
-                        <FlexRow style={styles.banner}>
-                          <ClrIcon
-                            shape='exclamation-triangle'
-                            size={16}
-                            style={styles.icon}
-                          />
-
-                          <div style={styles.text}>
-                            The following workspaces have already been migrated.
-                            You’re still being billed for these workspaces. To
-                            avoid duplicate charges, we recommend deleting them
-                            when you’re finished.
-                          </div>
-                        </FlexRow>
                       </div>
                       <NewWorkspaceButton />
                       {filteredList.map((wp) => (
@@ -296,12 +390,17 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   ) : (
                     <>
                       {(enableVwbMigration || migrationTestingGroup) && (
-                        <div style={{ width: '100%', marginBottom: '12px' }}>
+                        <div
+                          style={{
+                            width: '100%',
+                            marginBottom: '12px',
+                          }}
+                        >
                           <SmallHeader>Non-migrated Workspaces</SmallHeader>
                         </div>
                       )}
                       <NewWorkspaceButton />
-                      {nonMigratedWorkspaces.map((wp) => (
+                      {activeWorkspaces.map((wp) => (
                         <WorkspaceCard
                           key={wp.workspace.namespace}
                           workspace={wp.workspace}
@@ -316,6 +415,42 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           isMigratedView={false}
                         />
                       ))}
+                      {enableWorkspaceArchiveRecovery &&
+                        archivedWorkspaces.length > 0 && (
+                          <>
+                            <div
+                              style={{
+                                width: '100%',
+                                marginTop: '32px',
+                                marginBottom: '12px',
+                              }}
+                            >
+                              <SmallHeader>Archived Workspaces</SmallHeader>
+                            </div>
+
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                marginBottom: '24px',
+                              }}
+                            >
+                              {archivedWorkspaces.map((wp) => (
+                                <WorkspaceCard
+                                  key={wp.workspace.namespace}
+                                  workspace={wp.workspace}
+                                  accessLevel={wp.accessLevel}
+                                  reload={() => this.reloadWorkspaces()}
+                                  tierAccessDisabled={false}
+                                  isMigratedView={false}
+                                  isArchivedWorkspace={
+                                    wp.workspace.recoveryState !== undefined
+                                  }
+                                />
+                              ))}
+                            </div>
+                          </>
+                        )}
                     </>
                   )}
                 </div>

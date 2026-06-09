@@ -3,7 +3,11 @@ import * as fp from 'lodash/fp';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
+import {
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspaceRecoveryStatus,
+} from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
@@ -30,6 +34,7 @@ import {
 import { AnalyticsTracker, triggerEvent } from 'app/utils/analytics';
 import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { isCommunityWorkspace } from 'app/utils/workspace-utils';
 
@@ -99,6 +104,7 @@ interface WorkspaceCardProps extends NavigationProps {
   tierAccessDisabled?: boolean;
   useFeaturedWorkspacePageUi?: boolean;
   isMigratedView?: boolean;
+  isArchivedWorkspace?: boolean;
 }
 
 export const WorkspaceCard = fp.flow(withNavigation)(
@@ -163,8 +169,12 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         navigate,
         useFeaturedWorkspacePageUi,
         isMigratedView,
+        isArchivedWorkspace,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
+      const enableWorkspaceArchiveRecovery =
+        serverConfigStore.get()?.config?.enableWorkspaceArchiveRecovery ??
+        false;
       return (
         <React.Fragment>
           <WorkspaceCardBase>
@@ -176,7 +186,10 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     closeOnClick
                     content={
                       <WorkspaceActionsMenu
-                        workspaceData={{ ...workspace, accessLevel }}
+                        workspaceData={{
+                          ...workspace,
+                          accessLevel,
+                        }}
                         onDuplicate={() => {
                           !!workspace.featuredCategory
                             ? AnalyticsTracker.Workspaces.DuplicateFeatured(
@@ -208,7 +221,10 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                             'delete',
                             'Card menu - click delete'
                           );
-                          this.setState({ confirmDeleting: true });
+
+                          this.setState({
+                            confirmDeleting: true,
+                          });
                         }}
                         onShare={() => {
                           AnalyticsTracker.Workspaces.OpenShareModal('Card');
@@ -217,7 +233,10 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                             'share',
                             'Card menu - click share'
                           );
-                          this.setState({ showShareModal: true });
+
+                          this.setState({
+                            showShareModal: true,
+                          });
                         }}
                       />
                     }
@@ -244,7 +263,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       analyticsFn={() => this.trackWorkspaceNavigation()}
                       data-test-id={'workspace-card-link'}
                       propagateDataTestId
-                      path={dataTabPath(namespace, terraName)}
+                      path={
+                        isArchivedWorkspace
+                          ? ['workspaces', namespace, terraName, 'recovery']
+                          : dataTabPath(namespace, terraName)
+                      }
                     >
                       <TooltipTrigger
                         content={
@@ -294,19 +317,69 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                   </FlexColumn>
                   {workspace.researchPurpose.reviewRequested === true &&
                     workspace.researchPurpose.approved === false && (
-                      <div style={{ color: colors.danger }}>
+                      <div
+                        style={{
+                          color: colors.danger,
+                        }}
+                      >
                         <ClrIcon
                           shape='exclamation-triangle'
                           className='is-solid'
-                          style={{ fill: colors.danger }}
+                          style={{
+                            fill: colors.danger,
+                          }}
                         />
                         Rejected
                       </div>
                     )}
                 </FlexColumn>
-                <FlexRow style={{ justifyContent: 'space-between' }}>
+                <FlexRow
+                  style={{
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <FlexColumn>
-                    <FlexRow style={{ gap: '6px', alignItems: 'center' }}>
+                    {/* Recovery Pending Chip */}
+
+                    {enableWorkspaceArchiveRecovery &&
+                      isArchivedWorkspace &&
+                      workspace.recoveryState ===
+                        WorkspaceRecoveryStatus.RECOVERING && (
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            background: '#8a8a8a',
+                            color: 'white',
+                            borderRadius: '4px',
+                            padding: '4px 10px',
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            width: 'fit-content',
+                            marginBottom: '12px',
+                            textTransform: 'uppercase',
+                          }}
+                        >
+                          <ClrIcon
+                            shape='sync'
+                            style={{
+                              width: '10px',
+                              height: '10px',
+                            }}
+                          />
+                          Recovery Pending
+                        </div>
+                      )}
+
+                    {/* Access Row */}
+
+                    <FlexRow
+                      style={{
+                        gap: '6px',
+                        alignItems: 'center',
+                      }}
+                    >
                       <div
                         data-test-id='workspace-access-level'
                         style={{
@@ -318,24 +391,59 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         {accessLevel}
                       </div>
 
+                      {/* Archived Badge */}
+                      {enableWorkspaceArchiveRecovery &&
+                        isArchivedWorkspace && (
+                          <div
+                            style={{
+                              fontSize: '10px',
+                              padding: '2px 8px',
+                              borderRadius: '10px',
+                              background: '#E5E5E5',
+                              color: '#555',
+                              fontWeight: 600,
+                            }}
+                          >
+                            ARCHIVED
+                          </div>
+                        )}
+
                       {workspace.migrationState && (
                         <MigrationBadge state={workspace.migrationState} />
                       )}
                     </FlexRow>
-                    <div style={{ fontSize: 12 }}>
+
+                    {/* Last Changed */}
+
+                    <div
+                      style={{
+                        fontSize: 12,
+                      }}
+                    >
                       Last Changed: {displayDate(workspace.lastModifiedTime)}
                     </div>
                     {useFeaturedWorkspacePageUi && (
-                      <div style={{ fontSize: 12 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
                         Created By:{' '}
                         {workspace.creatorUser.userName.split('@')[0]}
                       </div>
                     )}
                   </FlexColumn>
                   <FlexColumn
-                    style={{ justifyContent: 'flex-end', marginLeft: '1.2rem' }}
+                    style={{
+                      justifyContent: 'flex-end',
+                      marginLeft: '1.2rem',
+                    }}
                   >
-                    <FlexRow style={{ alignContent: 'space-between' }}>
+                    <FlexRow
+                      style={{
+                        alignContent: 'space-between',
+                      }}
+                    >
                       {accessTierShortName ===
                         AccessTierShortNames.Controlled && (
                         <ControlledTierBadge />
@@ -351,7 +459,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                             }}
                           >
                             <TooltipTrigger content='Workspace is published as Community Workspace'>
-                              {/* Keeping the style consistent with Controlled Tier Badge*/}
                               <CommunityIcon />
                             </TooltipTrigger>
                           </FlexColumn>
@@ -359,7 +466,9 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       {adminLocked && (
                         <FlexColumn
                           data-test-id='workspace-lock'
-                          style={{ justifyContent: 'flex-end' }}
+                          style={{
+                            justifyContent: 'flex-end',
+                          }}
                         >
                           <TooltipTrigger content='Workspace compliance action is required'>
                             <FontAwesomeIcon
@@ -379,7 +488,9 @@ export const WorkspaceCard = fp.flow(withNavigation)(
             <ConfirmWorkspaceDeleteModal
               data-test-id='confirm-delete-modal'
               closeFunction={() => {
-                this.setState({ confirmDeleting: false });
+                this.setState({
+                  confirmDeleting: false,
+                });
               }}
               receiveDelete={() => {
                 AnalyticsTracker.Workspaces.Delete();
@@ -391,7 +502,10 @@ export const WorkspaceCard = fp.flow(withNavigation)(
           {showShareModal && (
             <WorkspaceShare
               data-test-id='workspace-share-modal'
-              workspace={{ ...workspace, accessLevel }}
+              workspace={{
+                ...workspace,
+                accessLevel,
+              }}
               onClose={() => this.handleShareDialogClose()}
             />
           )}
