@@ -160,7 +160,7 @@ public class WorkspaceMigrationServiceImplTest {
     } catch (ApiException e) {
       throw new RuntimeException("Bucket test", e);
     }
-    when(wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId())).thenReturn(vwbWorkspace);
+    when(wsmClient.getWorkspaceAsService(workspace.getNamespace())).thenReturn(null, vwbWorkspace);
 
     when(storageTransferClient.createTransferJob(
             any(), any(), any(), any(), any(), any(), any(), any()))
