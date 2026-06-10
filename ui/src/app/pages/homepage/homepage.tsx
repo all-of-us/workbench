@@ -87,7 +87,13 @@ const WelcomeHeader = () => {
   );
 };
 
-const Workspaces = ({ onChange }: { onChange: () => void }) => {
+const Workspaces = ({
+  onChange,
+  disableCreation,
+}: {
+  onChange: () => void;
+  disableCreation: boolean;
+}) => {
   const [navigate] = useNavigation();
 
   return (
@@ -109,7 +115,9 @@ const Workspaces = ({ onChange }: { onChange: () => void }) => {
                   height: '2.5rem',
                   marginLeft: '1.5rem',
                   padding: '0 1rem',
+                  opacity: disableCreation ? 0.4 : 1,
                 }}
+                disabled={disableCreation}
                 onClick={() => {
                   AnalyticsTracker.Workspaces.OpenCreatePage();
                   navigate(['workspaces', 'build']);
@@ -331,7 +339,7 @@ export const Homepage = fp.flow(
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
             {serverConfigStore.get().config.enableVWBHomepageBanner ? (
-              enableVwbMigration || migrationTestingGroup ? (
+              enableVwbMigration ? (
                 <VwbMigrationBanner />
               ) : (
                 <VwbBanner />
@@ -342,7 +350,10 @@ export const Homepage = fp.flow(
             <div style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
-                <Workspaces onChange={() => this.fetchWorkspaces()} />
+                <Workspaces
+                  onChange={() => this.fetchWorkspaces()}
+                  disableCreation={migrationTestingGroup}
+                />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
                     <RecentResources
