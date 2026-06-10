@@ -18,11 +18,7 @@ import { withCurrentWorkspace } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { displayDate } from 'app/utils/dates';
 import { useNavigation } from 'app/utils/navigation';
-import {
-  cdrVersionStore,
-  profileStore,
-  serverConfigStore,
-} from 'app/utils/stores';
+import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { PdWarningModal } from './pd-warning-modal';
@@ -67,13 +63,11 @@ export const MigrationFolderSync = withCurrentWorkspace()(
       return null;
     }
 
-    const profile = profileStore.get().profile;
     const { cdrVersionsForMigration, enableVwbMigration } =
       serverConfigStore.get().config;
-    const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
 
     if (
-      (!enableVwbMigration && !migrationTestingGroup) ||
+      !enableVwbMigration ||
       !cdrVersionsForMigration.some(
         (c) => +workspace.cdrVersionId === c.cdrVersionId
       ) ||

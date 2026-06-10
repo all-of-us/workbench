@@ -127,7 +127,6 @@ export const WorkspaceList = fp.flow(withUserProfile())(
 
       const enableVwbMigration =
         serverConfigStore.get().config.enableVwbMigration;
-      const migrationTestingGroup = profile?.migrationTestingGroup;
 
       const filters = [
         { label: 'Owner', value: ['OWNER'] },
@@ -187,7 +186,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   gap: '12px',
                 }}
               >
-                {(enableVwbMigration || migrationTestingGroup) && (
+                {enableVwbMigration && (
                   <FlexRow style={{ alignItems: 'center', gap: '6px' }}>
                     <CommonToggle
                       name='show-migrated'
@@ -276,7 +275,9 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           </div>
                         </FlexRow>
                       </div>
-                      <NewWorkspaceButton />
+                      <NewWorkspaceButton
+                        disabled={profile.migrationTestingGroup}
+                      />
                       {filteredList.map((wp) => (
                         <WorkspaceCard
                           key={wp.workspace.namespace + '-l'}
@@ -295,12 +296,14 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     </>
                   ) : (
                     <>
-                      {(enableVwbMigration || migrationTestingGroup) && (
+                      {enableVwbMigration && (
                         <div style={{ width: '100%', marginBottom: '12px' }}>
                           <SmallHeader>Non-migrated Workspaces</SmallHeader>
                         </div>
                       )}
-                      <NewWorkspaceButton />
+                      <NewWorkspaceButton
+                        disabled={profile.migrationTestingGroup}
+                      />
                       {nonMigratedWorkspaces.map((wp) => (
                         <WorkspaceCard
                           key={wp.workspace.namespace}

@@ -21,7 +21,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
@@ -115,8 +115,6 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const allChecked = Object.values(checks).every(Boolean);
-  const profile = profileStore.get().profile;
-  const migrationTestingGroup = profile?.migrationTestingGroup ?? false;
   const {
     cdrVersionsForMigration,
     enableVwbMigration,
@@ -173,7 +171,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     <React.Fragment>
       <div style={{ paddingLeft: '2.25rem' }}>
         <div style={styles.cardButtonArea}>
-          {(enableVwbMigration || migrationTestingGroup) &&
+          {enableVwbMigration &&
             cdrVersionsForMigration.some(
               (c) => +workspace.cdrVersionId === c.cdrVersionId
             ) && (
