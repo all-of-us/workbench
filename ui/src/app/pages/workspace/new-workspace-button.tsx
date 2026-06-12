@@ -15,20 +15,16 @@ const styles = reactStyles({
   },
 });
 
-export const NewWorkspaceButton = ({ disabled }: { disabled: boolean }) => {
+export const NewWorkspaceButton = () => {
   const [navigate] = useNavigation();
 
   return (
     <CardButton
-      disabled={disabled}
       onClick={() => {
         AnalyticsTracker.Workspaces.OpenCreatePage();
         navigate(['workspaces', 'build']);
       }}
-      style={{
-        ...styles.addCard,
-        opacity: disabled ? 0.4 : 1,
-      }}
+      style={styles.addCard}
     >
       Create Legacy Workspace
       <ClrIcon shape='plus-circle' style={{ height: '32px', width: '32px' }} />

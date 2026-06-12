@@ -605,7 +605,7 @@ export const WorkspaceEdit = fp.flow(
 
     async componentDidMount() {
       if (
-        this.props.profileState.profile.migrationTestingGroup &&
+        !this.props.profileState.profile.migrationTestingGroup &&
         this.isMode(WorkspaceEditMode.Create)
       ) {
         this.props.navigate([]);

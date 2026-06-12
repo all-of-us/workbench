@@ -275,9 +275,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           </div>
                         </FlexRow>
                       </div>
-                      <NewWorkspaceButton
-                        disabled={profile.migrationTestingGroup}
-                      />
+                      {profile.migrationTestingGroup && <NewWorkspaceButton />}
                       {filteredList.map((wp) => (
                         <WorkspaceCard
                           key={wp.workspace.namespace + '-l'}
@@ -301,9 +299,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           <SmallHeader>Non-migrated Workspaces</SmallHeader>
                         </div>
                       )}
-                      <NewWorkspaceButton
-                        disabled={profile.migrationTestingGroup}
-                      />
+                      {profile.migrationTestingGroup && <NewWorkspaceButton />}
                       {nonMigratedWorkspaces.map((wp) => (
                         <WorkspaceCard
                           key={wp.workspace.namespace}

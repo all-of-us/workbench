@@ -107,29 +107,29 @@ const Workspaces = ({
               <SemiBoldHeader style={{ fontSize: '28px', marginTop: '0px' }}>
                 Legacy Workspaces
               </SemiBoldHeader>
-              <Button
-                aria-label='Create Legacy Workspace'
-                style={{
-                  background: colors.accent,
-                  borderRadius: '2rem',
-                  height: '2.5rem',
-                  marginLeft: '1.5rem',
-                  padding: '0 1rem',
-                  opacity: disableCreation ? 0.4 : 1,
-                }}
-                disabled={disableCreation}
-                onClick={() => {
-                  AnalyticsTracker.Workspaces.OpenCreatePage();
-                  navigate(['workspaces', 'build']);
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={faPlus}
-                  style={{ marginRight: '0.5rem' }}
-                  size='lg'
-                />
-                Create Legacy Workspace
-              </Button>
+              {!disableCreation && (
+                <Button
+                  aria-label='Create Legacy Workspace'
+                  style={{
+                    background: colors.accent,
+                    borderRadius: '2rem',
+                    height: '2.5rem',
+                    marginLeft: '1.5rem',
+                    padding: '0 1rem',
+                  }}
+                  onClick={() => {
+                    AnalyticsTracker.Workspaces.OpenCreatePage();
+                    navigate(['workspaces', 'build']);
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    style={{ marginRight: '0.5rem' }}
+                    size='lg'
+                  />
+                  Create Legacy Workspace
+                </Button>
+              )}
             </>
           ) : (
             <>
@@ -352,7 +352,7 @@ export const Homepage = fp.flow(
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
                 <Workspaces
                   onChange={() => this.fetchWorkspaces()}
-                  disableCreation={migrationTestingGroup}
+                  disableCreation={!migrationTestingGroup}
                 />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
