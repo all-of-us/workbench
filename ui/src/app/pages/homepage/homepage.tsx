@@ -56,6 +56,10 @@ export const styles = reactStyles({
   },
 });
 
+const VWB_USER_SUPPORT_HUB_URL =
+  'https://support.researchallofus.org/hc/en-us/articles/' +
+  '48266066855188-Migrating-Workspaces-from-Legacy-Workbench-to-Researcher-Workbench-2-0';
+
 const WelcomeHeader = () => {
   return (
     <FlexColumn style={{ marginLeft: '3%', width: '50%' }}>
@@ -107,29 +111,29 @@ const Workspaces = ({
               <SemiBoldHeader style={{ fontSize: '28px', marginTop: '0px' }}>
                 Legacy Workspaces
               </SemiBoldHeader>
-              <Button
-                aria-label='Create Legacy Workspace'
-                style={{
-                  background: colors.accent,
-                  borderRadius: '2rem',
-                  height: '2.5rem',
-                  marginLeft: '1.5rem',
-                  padding: '0 1rem',
-                  opacity: disableCreation ? 0.4 : 1,
-                }}
-                disabled={disableCreation}
-                onClick={() => {
-                  AnalyticsTracker.Workspaces.OpenCreatePage();
-                  navigate(['workspaces', 'build']);
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={faPlus}
-                  style={{ marginRight: '0.5rem' }}
-                  size='lg'
-                />
-                Create Legacy Workspace
-              </Button>
+              {!disableCreation && (
+                <Button
+                  aria-label='Create Legacy Workspace'
+                  style={{
+                    background: colors.accent,
+                    borderRadius: '2rem',
+                    height: '2.5rem',
+                    marginLeft: '1.5rem',
+                    padding: '0 1rem',
+                  }}
+                  onClick={() => {
+                    AnalyticsTracker.Workspaces.OpenCreatePage();
+                    navigate(['workspaces', 'build']);
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    style={{ marginRight: '0.5rem' }}
+                    size='lg'
+                  />
+                  Create Legacy Workspace
+                </Button>
+              )}
             </>
           ) : (
             <>
@@ -165,6 +169,31 @@ const Workspaces = ({
           See all workspaces
         </span>
       </FlexRow>
+      {disableCreation && (
+        <div
+          style={{
+            padding: '8px',
+            background: '#E9EDF5',
+            fontSize: '12.5px',
+            marginTop: '12px',
+            lineHeight: '20px',
+            color: colors.dark,
+          }}
+        >
+          All new workspaces need to be created in RW 2.0. Any existing
+          workspaces must be migrated by June 30th. Learn more{' '}
+          <StyledExternalLink
+            href={VWB_USER_SUPPORT_HUB_URL}
+            style={{
+              color: colors.accent,
+              textDecoration: 'underline',
+            }}
+            target='_blank'
+          >
+            here
+          </StyledExternalLink>
+        </div>
+      )}
       <RecentWorkspaces {...{ onChange }} />
     </FlexColumn>
   );
@@ -352,7 +381,7 @@ export const Homepage = fp.flow(
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
                 <Workspaces
                   onChange={() => this.fetchWorkspaces()}
-                  disableCreation={migrationTestingGroup}
+                  disableCreation={!migrationTestingGroup}
                 />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
