@@ -180,7 +180,7 @@ const Workspaces = ({
             color: colors.dark,
           }}
         >
-          All new workspaces need to be created in RW2.0. Any existing
+          All new workspaces need to be created in RW 2.0. Any existing
           workspaces must be migrated by June 30th. Learn more{' '}
           <StyledExternalLink
             href={VWB_USER_SUPPORT_HUB_URL}
