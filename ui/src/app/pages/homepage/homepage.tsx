@@ -56,6 +56,10 @@ export const styles = reactStyles({
   },
 });
 
+const VWB_USER_SUPPORT_HUB_URL =
+  'https://support.researchallofus.org/hc/en-us/articles/' +
+  '48266066855188-Migrating-Workspaces-from-Legacy-Workbench-to-Researcher-Workbench-2-0';
+
 const WelcomeHeader = () => {
   return (
     <FlexColumn style={{ marginLeft: '3%', width: '50%' }}>
@@ -165,6 +169,31 @@ const Workspaces = ({
           See all workspaces
         </span>
       </FlexRow>
+      {disableCreation && (
+        <div
+          style={{
+            padding: '8px',
+            background: '#E9EDF5',
+            fontSize: '12.5px',
+            marginTop: '12px',
+            lineHeight: '20px',
+            color: colors.dark,
+          }}
+        >
+          All new workspaces need to be created in RW2.0. Any existing
+          workspaces must be migrated by June 30th. Learn more{' '}
+          <StyledExternalLink
+            href={VWB_USER_SUPPORT_HUB_URL}
+            style={{
+              color: colors.accent,
+              textDecoration: 'underline',
+            }}
+            target='_blank'
+          >
+            here
+          </StyledExternalLink>
+        </div>
+      )}
       <RecentWorkspaces {...{ onChange }} />
     </FlexColumn>
   );

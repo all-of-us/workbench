@@ -24,6 +24,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 import { NewWorkspaceButton } from './new-workspace-button';
+import { VwbImportantBanner } from './vwb-important-banner';
 
 const styles = reactStyles({
   fadeBox: {
@@ -53,6 +54,9 @@ const styles = reactStyles({
     marginRight: 10,
   },
 });
+
+const VWB_MIGRATION_SUPPORT_HUB_URL =
+  'https://support.researchallofus.org/hc/en-us/sections/41021971832724-Researcher-Workbench-2-0-Migration';
 
 interface WorkspaceListProps extends WithSpinnerOverlayProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };
@@ -150,178 +154,197 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       );
 
       return (
-        <FadeBox style={styles.fadeBox}>
-          <div id='workspaces-list' style={{ padding: '0 1.5rem' }}>
-            <ListPageHeader>Workspaces</ListPageHeader>
+        <>
+          <div style={styles.fadeBox}>
+            <VwbImportantBanner
+              title='The All of Us Workbench migration is ending soon!'
+              message={`Make sure all of your work is migrated over from the legacy app otherwise it will be archived.`}
+              actionText='Migration Wiki'
+              onAction={() =>
+                window.open(VWB_MIGRATION_SUPPORT_HUB_URL, '_blank')
+              }
+            />
+          </div>
+          <FadeBox style={styles.fadeBox}>
+            <div id='workspaces-list' style={{ padding: '0 1.5rem' }}>
+              <ListPageHeader>Workspaces</ListPageHeader>
 
-            {/* FILTER ROW */}
-            <FlexRow style={{ marginTop: '0.5em', alignItems: 'center' }}>
-              <div style={{ paddingRight: '0.75em' }}>Filter by</div>
+              {/* FILTER ROW */}
+              <FlexRow style={{ marginTop: '0.5em', alignItems: 'center' }}>
+                <div style={{ paddingRight: '0.75em' }}>Filter by</div>
 
-              <RSelect
-                aria-label='Access level filter selector'
-                options={filters}
-                defaultValue={defaultFilter}
-                onChange={({ value }) =>
-                  this.setState({
-                    filterLevels: value
-                      ? value.map((l) => WorkspaceAccessLevel[l])
-                      : null,
-                  })
-                }
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    width: '100px',
-                  }),
-                }}
-              />
-
-              {/* RIGHT SIDE */}
-              <div
-                style={{
-                  marginLeft: 'auto',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                }}
-              >
-                {enableVwbMigration && (
-                  <FlexRow style={{ alignItems: 'center', gap: '6px' }}>
-                    <CommonToggle
-                      name='show-migrated'
-                      checked={showMigrated}
-                      onToggle={() =>
-                        this.setState((prev) => ({
-                          showMigrated: !prev.showMigrated,
-                        }))
-                      }
-                    />
-                  </FlexRow>
-                )}
-
-                <Button
-                  type='primary'
-                  onClick={() =>
-                    window.open(`${environment.vwbUiUrl}/workspaces`, '_blank')
+                <RSelect
+                  aria-label='Access level filter selector'
+                  options={filters}
+                  defaultValue={defaultFilter}
+                  onChange={({ value }) =>
+                    this.setState({
+                      filterLevels: value
+                        ? value.map((l) => WorkspaceAccessLevel[l])
+                        : null,
+                    })
                   }
-                  style={{ height: '2.25rem' }}
-                >
-                  Open Verily Workbench <NewWindowIcon />
-                </Button>
-              </div>
-            </FlexRow>
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      width: '100px',
+                    }),
+                  }}
+                />
 
-            {/* ERROR */}
-            {errorText && (
-              <AlertDanger>
-                <ClrIcon shape='exclamation-circle' />
-                {errorText}
-              </AlertDanger>
-            )}
-
-            {/* CARDS */}
-            <div style={styles.cardArea}>
-              {workspacesLoading ? (
-                <Spinner style={{ margin: '2rem auto' }} />
-              ) : (
+                {/* RIGHT SIDE */}
                 <div
                   style={{
+                    marginLeft: 'auto',
                     display: 'flex',
-                    marginTop: '2rem',
-                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    gap: '12px',
                   }}
                 >
-                  {showMigrated ? (
-                    <>
-                      {/* MIGRATED */}
-                      <div style={{ width: '100%', marginBottom: '12px' }}>
-                        <SmallHeader>Migrated Workspaces</SmallHeader>
-                      </div>
-
-                      {migratedWorkspaces.map((wp) => (
-                        <WorkspaceCard
-                          key={wp.workspace.namespace + '-m'}
-                          workspace={wp.workspace}
-                          accessLevel={wp.accessLevel}
-                          reload={() => this.reloadWorkspaces()}
-                          tierAccessDisabled={
-                            !hasTierAccess(
-                              profile,
-                              wp.workspace.accessTierShortName
-                            )
-                          }
-                          isMigratedView={showMigrated}
-                        />
-                      ))}
-
-                      {/* LEGACY */}
-                      <div style={{ width: '100%', marginTop: '16px' }}>
-                        <div style={{ marginBottom: '12px' }}>
-                          <SmallHeader>Legacy Workspaces</SmallHeader>
-                        </div>
-                        <FlexRow style={styles.banner}>
-                          <ClrIcon
-                            shape='exclamation-triangle'
-                            size={16}
-                            style={styles.icon}
-                          />
-
-                          <div style={styles.text}>
-                            The following workspaces have already been migrated.
-                            You’re still being billed for these workspaces. To
-                            avoid duplicate charges, we recommend deleting them
-                            when you’re finished.
-                          </div>
-                        </FlexRow>
-                      </div>
-                      {profile.migrationTestingGroup && <NewWorkspaceButton />}
-                      {filteredList.map((wp) => (
-                        <WorkspaceCard
-                          key={wp.workspace.namespace + '-l'}
-                          workspace={wp.workspace}
-                          accessLevel={wp.accessLevel}
-                          reload={() => this.reloadWorkspaces()}
-                          tierAccessDisabled={
-                            !hasTierAccess(
-                              profile,
-                              wp.workspace.accessTierShortName
-                            )
-                          }
-                          isMigratedView={false}
-                        />
-                      ))}
-                    </>
-                  ) : (
-                    <>
-                      {enableVwbMigration && (
-                        <div style={{ width: '100%', marginBottom: '12px' }}>
-                          <SmallHeader>Non-migrated Workspaces</SmallHeader>
-                        </div>
-                      )}
-                      {profile.migrationTestingGroup && <NewWorkspaceButton />}
-                      {nonMigratedWorkspaces.map((wp) => (
-                        <WorkspaceCard
-                          key={wp.workspace.namespace}
-                          workspace={wp.workspace}
-                          accessLevel={wp.accessLevel}
-                          reload={() => this.reloadWorkspaces()}
-                          tierAccessDisabled={
-                            !hasTierAccess(
-                              profile,
-                              wp.workspace.accessTierShortName
-                            )
-                          }
-                          isMigratedView={false}
-                        />
-                      ))}
-                    </>
+                  {enableVwbMigration && (
+                    <FlexRow style={{ alignItems: 'center', gap: '6px' }}>
+                      <CommonToggle
+                        name='show-migrated'
+                        checked={showMigrated}
+                        onToggle={() =>
+                          this.setState((prev) => ({
+                            showMigrated: !prev.showMigrated,
+                          }))
+                        }
+                      />
+                    </FlexRow>
                   )}
+
+                  <Button
+                    type='primary'
+                    onClick={() =>
+                      window.open(
+                        `${environment.vwbUiUrl}/workspaces`,
+                        '_blank'
+                      )
+                    }
+                    style={{ height: '2.25rem' }}
+                  >
+                    Open Verily Workbench <NewWindowIcon />
+                  </Button>
                 </div>
+              </FlexRow>
+
+              {/* ERROR */}
+              {errorText && (
+                <AlertDanger>
+                  <ClrIcon shape='exclamation-circle' />
+                  {errorText}
+                </AlertDanger>
               )}
+
+              {/* CARDS */}
+              <div style={styles.cardArea}>
+                {workspacesLoading ? (
+                  <Spinner style={{ margin: '2rem auto' }} />
+                ) : (
+                  <div
+                    style={{
+                      display: 'flex',
+                      marginTop: '2rem',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    {showMigrated ? (
+                      <>
+                        {/* MIGRATED */}
+                        <div style={{ width: '100%', marginBottom: '12px' }}>
+                          <SmallHeader>Migrated Workspaces</SmallHeader>
+                        </div>
+
+                        {migratedWorkspaces.map((wp) => (
+                          <WorkspaceCard
+                            key={wp.workspace.namespace + '-m'}
+                            workspace={wp.workspace}
+                            accessLevel={wp.accessLevel}
+                            reload={() => this.reloadWorkspaces()}
+                            tierAccessDisabled={
+                              !hasTierAccess(
+                                profile,
+                                wp.workspace.accessTierShortName
+                              )
+                            }
+                            isMigratedView={showMigrated}
+                          />
+                        ))}
+
+                        {/* LEGACY */}
+                        <div style={{ width: '100%', marginTop: '16px' }}>
+                          <div style={{ marginBottom: '12px' }}>
+                            <SmallHeader>Legacy Workspaces</SmallHeader>
+                          </div>
+                          <FlexRow style={styles.banner}>
+                            <ClrIcon
+                              shape='exclamation-triangle'
+                              size={16}
+                              style={styles.icon}
+                            />
+
+                            <div style={styles.text}>
+                              The following workspaces have already been
+                              migrated. You’re still being billed for these
+                              workspaces. To avoid duplicate charges, we
+                              recommend deleting them when you’re finished.
+                            </div>
+                          </FlexRow>
+                        </div>
+                        {profile.migrationTestingGroup && (
+                          <NewWorkspaceButton />
+                        )}
+                        {filteredList.map((wp) => (
+                          <WorkspaceCard
+                            key={wp.workspace.namespace + '-l'}
+                            workspace={wp.workspace}
+                            accessLevel={wp.accessLevel}
+                            reload={() => this.reloadWorkspaces()}
+                            tierAccessDisabled={
+                              !hasTierAccess(
+                                profile,
+                                wp.workspace.accessTierShortName
+                              )
+                            }
+                            isMigratedView={false}
+                          />
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        {enableVwbMigration && (
+                          <div style={{ width: '100%', marginBottom: '12px' }}>
+                            <SmallHeader>Non-migrated Workspaces</SmallHeader>
+                          </div>
+                        )}
+                        {profile.migrationTestingGroup && (
+                          <NewWorkspaceButton />
+                        )}
+                        {nonMigratedWorkspaces.map((wp) => (
+                          <WorkspaceCard
+                            key={wp.workspace.namespace}
+                            workspace={wp.workspace}
+                            accessLevel={wp.accessLevel}
+                            reload={() => this.reloadWorkspaces()}
+                            tierAccessDisabled={
+                              !hasTierAccess(
+                                profile,
+                                wp.workspace.accessTierShortName
+                              )
+                            }
+                            isMigratedView={false}
+                          />
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </FadeBox>
+          </FadeBox>
+        </>
       );
     }
   }
