@@ -70,9 +70,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Provider<DbUser> userProvider;
   private final Clock clock;
   private final WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
-  private static final String CONTROLLED_TIER_ARCHIVE_BUCKET = "all-of-us-archive-ct-bucket";
+  private static final String CONTROLLED_TIER_ARCHIVE_BUCKET =
+      "all-of-us-archive-ct-bucket-wb-blazing-lime-5817";
 
-  private static final String REGISTERED_TIER_ARCHIVE_BUCKET = "all-of-us-archive-rt-bucket";
+  private static final String REGISTERED_TIER_ARCHIVE_BUCKET =
+      "all-of-us-archive-rt-bucket-wb-potent-lentil-2807";
 
   @Autowired
   public WorkspaceMigrationServiceImpl(
@@ -160,6 +162,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
             vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
           } catch (Exception e) {
+            logger.log(
+                Level.INFO, namespace + ": Workspace creation failed message: " + e.getMessage());
             dbWorkspace.setMigrationState(MigrationState.NOT_STARTED.name());
             dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
             workspaceDao.save(dbWorkspace);
@@ -657,6 +661,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
+  public WorkspaceDao.WorkspaceArchiveView getNextWorkspaceToArchive() {
+    return workspaceDao.findNextLowRiskWorkspaceToArchive();
+  }
+
+  @Override
   public void startWorkspaceArchive(String namespace, String terraName) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
@@ -825,8 +834,6 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         archive.setStatus(WorkspaceArchiveStatus.FAILED.toString());
 
         workspaceBucketArchiveDao.save(archive);
-
-        storageTransferClient.deleteTransferJob(projectId, jobName);
 
         return;
 

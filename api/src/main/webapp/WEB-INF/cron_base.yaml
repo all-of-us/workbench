@@ -103,3 +103,11 @@ cron:
   schedule: every day 21:30
   timezone: America/Chicago
   target: api
+- description: Archives next legacy workspace to RW 2.0 archive bucket
+  url: /v1/cron/archiveNextLegacyWorkspace
+  schedule: every day 20:15
+  timezone: America/Chicago
+  target: api
+  retry_parameters:
+    job_retry_limit: 3
+    min_backoff_seconds: 5

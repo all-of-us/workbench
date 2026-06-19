@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces.migration;
 
 import java.util.List;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.model.MigrationBucketContentsResponse;
 import org.pmiops.workbench.model.PreprodWorkspace;
 
@@ -26,6 +27,8 @@ public interface WorkspaceMigrationService {
       String researchPurpose,
       String bucketName,
       String billingPod);
+
+  WorkspaceDao.WorkspaceArchiveView getNextWorkspaceToArchive();
 
   void startWorkspaceArchive(String namespace, String terraName);
 

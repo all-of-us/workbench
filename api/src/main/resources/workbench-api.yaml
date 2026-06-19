@@ -2688,6 +2688,18 @@ paths:
         204:
           description: No content.
           content: {}
+  /v1/cron/archiveNextLegacyWorkspace:
+    get:
+      tags:
+      - offlineWorkspace
+      - cron
+      description: Will transfer all files for a legacy workspace to an archive bucket in RW 2.0
+      operationId: archiveNextLegacyWorkspace
+      security: []
+      responses:
+        204:
+          description: No content.
+          content: {}
   /v1/cron/deleteTestUserWorkspacesOrphanedInRawls:
     get:
       tags:
