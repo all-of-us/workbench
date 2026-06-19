@@ -3,3 +3,5 @@ cron:
   schedule: every 24 hours
 - url: /v1/cron/checkInitialCreditsUsage
   schedule: every 24 hours
+- url: /v1/cron/archiveNextLegacyWorkspace
+  aou_skip_reason: Only run in prod

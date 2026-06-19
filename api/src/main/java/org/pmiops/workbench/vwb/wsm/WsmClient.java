@@ -135,11 +135,38 @@ public class WsmClient {
                   .organizationId(workbenchConfigProvider.get().vwb.organizationId)
                   .jobControl(new JobControl().id(UUID.randomUUID().toString()));
 
-          workspaceServiceApi.get().createWorkspaceV2(createWorkspaceRequest);
+          try {
+            CreateWorkspaceV2Result createWorkspaceV2Result =
+                workspaceServiceApi.get().createWorkspaceV2(createWorkspaceRequest);
+            if (createWorkspaceV2Result.getErrorReport() != null) {
+              logger.error(
+                  targetWorkspace.getNamespace()
+                      + ": Create workspace response with error report: "
+                      + createWorkspaceV2Result.getErrorReport());
+              throw new WorkbenchException(
+                  targetWorkspace.getNamespace() + ": WSM workspace creation failed");
+            }
+          } catch (ApiException e) {
+            logger.error(
+                targetWorkspace.getNamespace()
+                    + ": Create workspace failed, exception from WSM: "
+                    + e.getResponseBody());
+            throw new WorkbenchException(e);
+          }
 
           try {
             waitForWorkspaceCreation(workspaceId.toString()); // ← reuse existing poller!
-          } catch (InterruptedException | ApiException e) {
+          } catch (InterruptedException e) {
+            logger.error(
+                targetWorkspace.getNamespace()
+                    + ": Interrupted waiting for workspace creation, exception from WSM: "
+                    + e.getMessage());
+            throw new WorkbenchException(e);
+          } catch (ApiException e) {
+            logger.error(
+                targetWorkspace.getNamespace()
+                    + ": Error waiting for workspace creation, exception from WSM: "
+                    + e.getResponseBody());
             throw new WorkbenchException(e);
           }
 
