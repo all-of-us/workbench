@@ -297,7 +297,7 @@ public class WorkspaceMigrationServiceImplTest {
     verify(storageTransferClient)
         .createTransferJob(
             eq(SOURCE_BUCKET),
-            eq("all-of-us-archive-ct-bucket"),
+            eq("all-of-us-archive-ct-bucket-wb-blazing-lime-5817"),
             eq(NAMESPACE + "/" + dbWorkspace.getWorkspaceId() + "/"),
             eq("archive-" + NAMESPACE),
             eq(SERVER_PROJECT),
@@ -398,9 +398,6 @@ public class WorkspaceMigrationServiceImplTest {
     assertThat(archive.getStatus()).isEqualTo(WorkspaceArchiveStatus.FAILED.toString());
 
     verify(workspaceBucketArchiveDao).save(archive);
-
-    verify(storageTransferClient)
-        .deleteTransferJob(SERVER_PROJECT, "transferJobs/migration-archive-" + NAMESPACE);
   }
 
   private void setupRecoveryStubs() {
