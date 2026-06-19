@@ -144,14 +144,17 @@ public class WsmClient {
                       + ": Create workspace response with error report: "
                       + createWorkspaceV2Result.getErrorReport());
               throw new WorkbenchException(
-                  targetWorkspace.getNamespace() + ": WSM workspace creation failed");
+                  targetWorkspace.getNamespace()
+                      + ": Failed WSM workspace creation result: "
+                      + createWorkspaceV2Result);
             }
           } catch (ApiException e) {
             logger.error(
                 targetWorkspace.getNamespace()
                     + ": Create workspace failed, exception from WSM: "
                     + e.getResponseBody());
-            throw new WorkbenchException(e);
+            throw new WorkbenchException(
+                targetWorkspace.getNamespace() + ": Failed WSM workspace creation exception: " + e);
           }
 
           try {
@@ -161,13 +164,19 @@ public class WsmClient {
                 targetWorkspace.getNamespace()
                     + ": Interrupted waiting for workspace creation, exception from WSM: "
                     + e.getMessage());
-            throw new WorkbenchException(e);
+            throw new WorkbenchException(
+                targetWorkspace.getNamespace()
+                    + ": Interrupted waiting for workspace creation, exception from WSM: "
+                    + e);
           } catch (ApiException e) {
             logger.error(
                 targetWorkspace.getNamespace()
                     + ": Error waiting for workspace creation, exception from WSM: "
                     + e.getResponseBody());
-            throw new WorkbenchException(e);
+            throw new WorkbenchException(
+                targetWorkspace.getNamespace()
+                    + ": Error waiting for workspace creation, exception from WSM: "
+                    + e);
           }
 
           return workspaceServiceApi.get().getWorkspace(workspaceId.toString(), null);
