@@ -14,6 +14,7 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 public class OfflineWorkspaceControllerTest {
 
   @Mock private WorkspaceService workspaceService;
+  @Mock private WorkspaceMigrationService workspaceMigrationService;
   @Mock private WorkspaceUserCacheService mockWorkspaceUserCacheService;
   @Mock private TaskQueueService mockTaskQueueService;
 
@@ -33,7 +35,10 @@ public class OfflineWorkspaceControllerTest {
   public void setUp() {
     offlineWorkspaceController =
         new OfflineWorkspaceController(
-            mockTaskQueueService, workspaceService, mockWorkspaceUserCacheService);
+            mockTaskQueueService,
+            workspaceService,
+            mockWorkspaceUserCacheService,
+            workspaceMigrationService);
   }
 
   @Test
