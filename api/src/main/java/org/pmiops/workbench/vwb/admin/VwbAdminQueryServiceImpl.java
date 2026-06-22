@@ -113,7 +113,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
       "SELECT u.pod_id \n"
           + "FROM %s u \n"
           + "JOIN %s p ON u.pod_id = p.pod_id \n"
-          + "WHERE u.user_email=@USER_EMAIL \n"
+          + "WHERE LOWER(u.user_email)=LOWER(@USER_EMAIL) \n"
           + "AND p.billing_account_id IS NOT NULL \n"
           + "AND p.billing_account_id != '' ";
 

@@ -766,19 +766,8 @@ jobs:
                       {
                         "type": "mention",
                         "attrs": {
-                          "id": "557058:706ddbed-1979-4f5b-845e-29c4a92b3074",
-                          "text": "Asmita Gauchan"
-                        }
-                      },
-                      {
-                        "text": " or ",
-                        "type": "text"
-                      },
-                      {
-                        "type": "mention",
-                        "attrs": {
-                          "id": "61795b54062f4c0069b69057",
-                          "text": "Moira Dillon"
+                          "id": "557058:95ba8005-a9cf-45cc-bd2c-82cf43169401",
+                          "text": "Keri Wolfe"
                         }
                       },
                       {

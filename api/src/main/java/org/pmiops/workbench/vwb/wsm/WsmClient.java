@@ -12,6 +12,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.utils.WorkbenchStringUtils;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi;
 import org.pmiops.workbench.wsmanager.api.WorkspaceApi;
@@ -129,8 +130,12 @@ public class WsmClient {
                   .displayName(targetWorkspace.getDisplayName())
                   .properties(
                       stringMapToProperties(
-                          Map.of("terra-workspace-short-description", shortDescription)))
-                  .description(formatWorkspaceDescription(targetWorkspace))
+                          Map.of(
+                              "terra-workspace-short-description",
+                              WorkbenchStringUtils.encodeUserInput(shortDescription))))
+                  .description(
+                      WorkbenchStringUtils.encodeUserInput(
+                          formatWorkspaceDescription(targetWorkspace)))
                   .cloudResourceGroupId(podId)
                   .organizationId(workbenchConfigProvider.get().vwb.organizationId)
                   .jobControl(new JobControl().id(UUID.randomUUID().toString()));
@@ -154,7 +159,9 @@ public class WsmClient {
                     + ": Create workspace failed, exception from WSM: "
                     + e.getResponseBody());
             throw new WorkbenchException(
-                targetWorkspace.getNamespace() + ": Failed WSM workspace creation exception: " + e);
+                targetWorkspace.getNamespace()
+                    + ": Failed WSM workspace creation exception: "
+                    + e.getResponseBody());
           }
 
           try {
@@ -167,7 +174,7 @@ public class WsmClient {
             throw new WorkbenchException(
                 targetWorkspace.getNamespace()
                     + ": Interrupted waiting for workspace creation, exception from WSM: "
-                    + e);
+                    + e.getMessage());
           } catch (ApiException e) {
             logger.error(
                 targetWorkspace.getNamespace()
@@ -176,7 +183,7 @@ public class WsmClient {
             throw new WorkbenchException(
                 targetWorkspace.getNamespace()
                     + ": Error waiting for workspace creation, exception from WSM: "
-                    + e);
+                    + e.getResponseBody());
           }
 
           return workspaceServiceApi.get().getWorkspace(workspaceId.toString(), null);

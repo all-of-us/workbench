@@ -1,7 +1,9 @@
 package org.pmiops.workbench.utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -78,5 +80,15 @@ public class WorkbenchStringUtils {
     }
 
     return outLines;
+  }
+
+  private static final String BASE64_PREFIX = "BASE64\u001F";
+
+  public static String encodeUserInput(String input) {
+    if (input == null || input.isEmpty()) {
+      return input;
+    }
+    return BASE64_PREFIX
+        + Base64.getEncoder().encodeToString(input.getBytes(StandardCharsets.UTF_8));
   }
 }
