@@ -29,6 +29,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.user.VwbUserService;
+import org.pmiops.workbench.utils.WorkbenchStringUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.model.OrganizationMember;
@@ -265,7 +266,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       List<Property> properties =
           List.of(
               new Property().key("terra-default-location").value("us-central1"),
-              new Property().key("terra-required-data-use-metadata").value(researchPurpose),
+              new Property()
+                  .key("terra-required-data-use-metadata")
+                  .value(WorkbenchStringUtils.encodeUserInput(researchPurpose)),
               new Property().key("terra-workspace-short-description").value(""));
       wsmClient.updateWorkspaceProperties(properties, workspaceId.toString());
       logger.log(Level.INFO, namespace + ": Workspace created: " + vwbWorkspace);
