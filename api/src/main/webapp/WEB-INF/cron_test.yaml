@@ -4,7 +4,7 @@ cron:
 - url: /v1/cron/checkInitialCreditsUsage
   schedule: every 24 hours
 - url: /v1/cron/archiveNextLegacyWorkspace
-  schedule: every 0.5 minutes
+  schedule: every 1 minutes
   timezone: America/Chicago
   target: api
   retry_parameters:
