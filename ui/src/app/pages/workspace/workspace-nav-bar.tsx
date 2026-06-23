@@ -17,7 +17,7 @@ import {
   hasDefaultCdrVersion,
 } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams, profileStore, serverConfigStore } from 'app/utils/stores';
 
 import { CdrVersionUpgradeModal } from './cdr-version-upgrade-modal';
 
@@ -189,7 +189,10 @@ const tabs: Tab[] = [
   },
   { name: 'About', link: 'about' },
 ];
-
+const restrictedUser = !profileStore.get().profile?.migrationTestingGroup;
+const visibleTabs = restrictedUser
+  ? tabs.filter((tab) => tab.name === 'Data' || tab.name === 'About')
+  : tabs;
 const navSeparator = <div style={styles.separator} />;
 
 const restrictTab = (workspace: Workspace, tab: Tab) =>
@@ -201,7 +204,7 @@ export const WorkspaceNavBar = fp.flow(
 )((props) => {
   const { tabPath, workspace, cdrVersionTiersResponse } = props;
   // default to Data tab if the tabPath is not set
-  const activeTabIndex = fp.findIndex(['link', tabPath ?? 'data'], tabs);
+  const activeTabIndex = fp.findIndex(['link', tabPath ?? 'data'], visibleTabs);
   const [navigate] = useNavigation();
   const { ns, terraName } = useParams<MatchParams>();
 
@@ -222,7 +225,7 @@ export const WorkspaceNavBar = fp.flow(
 
   const navTab = (currentTab, disabled) => {
     const { name, link } = currentTab;
-    const currentTabIndex = tabs.indexOf(currentTab);
+    const currentTabIndex = visibleTabs.indexOf(currentTab);
     const selected = activeTabIndex === currentTabIndex;
     const hideSeparator = selected || activeTabIndex === currentTabIndex + 1;
 
@@ -257,7 +260,10 @@ export const WorkspaceNavBar = fp.flow(
       style={styles.container}
     >
       {activeTabIndex > 0 && navSeparator}
-      {fp.map((tab) => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
+      {fp.map(
+        (tab) => navTab(tab, restrictTab(props.workspace, tab)),
+        visibleTabs
+      )}
       <div style={{ flexGrow: 1 }} />
 
       {enableVwbMigration && workspace && (
