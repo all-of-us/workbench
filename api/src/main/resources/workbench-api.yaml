@@ -14205,6 +14205,26 @@ components:
         sourceWorkspaceNamespace:
           type: string
           description: Namespace of the source RW 1.0 workspace
+    ReportingWorkspaceBucketArchive:
+      allOf:
+        - $ref: '#/components/schemas/ReportingBase'
+      type: object
+      properties:
+        legacyWorkspaceId:
+          type: integer
+          description: Id of the RW 1.0 workspace
+          format: int64
+        gcsPath:
+          type: string
+          description: URL path to the folder in the RW 2.0 archive bucket
+          format: string
+        created:
+          type: string
+          description: Created time of the archive
+          format: date-time
+        status:
+          type: string
+          description: Status of the archive job
     GenomicExtractionJobListResponse:
       type: object
       properties:

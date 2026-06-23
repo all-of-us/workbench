@@ -34,6 +34,7 @@ import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceBucketArchive;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.ReportingWorkspaceUser;
 import org.pmiops.workbench.utils.FieldValues;
@@ -818,6 +819,28 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .transferJobName(rs.getString("transfer_job_name"))
                 .transferState(rs.getString("transfer_state"))
                 .sourceWorkspaceNamespace(rs.getString("source_workspace_namespace")));
+  }
+
+  @Override
+  public List<ReportingWorkspaceBucketArchive> getWorkspaceBucketArchiveBatch(
+      long limit, long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT \n"
+                + "  wba.legacy_workspace_id,\n"
+                + "  wba.gcs_path,\n"
+                + "  wba.created,\n"
+                + "  wba.status\n"
+                + "FROM workspace_bucket_archive wba\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingWorkspaceBucketArchive()
+                .legacyWorkspaceId(rs.getLong("legacy_workspace_id"))
+                .gcsPath(rs.getString("gcs_path"))
+                .created(offsetDateTimeUtc(rs.getTimestamp("created")))
+                .status(rs.getString("status")));
   }
 
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
