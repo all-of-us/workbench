@@ -34,8 +34,9 @@ import analysisIcon from 'assets/images/analysis-icon.svg';
 import cohortIcon from 'assets/images/cohort-icon.svg';
 import workspaceIcon from 'assets/images/workspace-icon.svg';
 
+import { LegacyWorkbenchEndedBanner } from './legacy-workbench-ended-banner';
 import { QuickTourAndVideos } from './quick-tour-and-videos';
-import { VwbBanner } from './vwb-banner';
+// import { VwbBanner } from './vwb-banner';
 import { VwbMigrationBanner } from './vwb-migration-banner';
 
 export const styles = reactStyles({
@@ -94,9 +95,11 @@ const WelcomeHeader = () => {
 const Workspaces = ({
   onChange,
   disableCreation,
+  migrationTestingGroup,
 }: {
   onChange: () => void;
   disableCreation: boolean;
+  migrationTestingGroup: boolean;
 }) => {
   const [navigate] = useNavigation();
 
@@ -194,7 +197,10 @@ const Workspaces = ({
           </StyledExternalLink>
         </div>
       )}
-      <RecentWorkspaces {...{ onChange }} />
+      <RecentWorkspaces
+        onChange={onChange}
+        migrationTestingGroup={migrationTestingGroup}
+      />
     </FlexColumn>
   );
 };
@@ -348,10 +354,6 @@ export const Homepage = fp.flow(
       return userWorkspacesResponse?.items?.length > 0;
     }
 
-    openMigrationModal = () => {
-      this.setState({ showMigrationModal: true });
-    };
-
     closeMigrationModal = () => {
       this.setState({ showMigrationModal: false });
     };
@@ -364,14 +366,15 @@ export const Homepage = fp.flow(
       } = this.props;
       const { firstVisit, userWorkspacesResponse } = this.state;
       const { enableVwbMigration } = serverConfigStore.get().config;
+      const showMigrationBanner = migrationTestingGroup || enableVwbMigration;
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
             {serverConfigStore.get().config.enableVWBHomepageBanner ? (
-              enableVwbMigration ? (
+              showMigrationBanner ? (
                 <VwbMigrationBanner />
               ) : (
-                <VwbBanner />
+                <LegacyWorkbenchEndedBanner />
               )
             ) : (
               <WelcomeHeader />
@@ -382,6 +385,7 @@ export const Homepage = fp.flow(
                 <Workspaces
                   onChange={() => this.fetchWorkspaces()}
                   disableCreation={!migrationTestingGroup}
+                  migrationTestingGroup={migrationTestingGroup}
                 />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (

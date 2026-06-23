@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { RecentWorkspace } from 'generated/fetch';
+import { MigrationState, RecentWorkspace } from 'generated/fetch';
 
 import { FlexRow } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -10,6 +10,7 @@ import colors from 'app/styles/colors';
 
 interface Props {
   onChange: () => void;
+  migrationTestingGroup: boolean;
 }
 interface State {
   loading: boolean;
@@ -43,10 +44,17 @@ export const RecentWorkspaces = class extends React.Component<Props, State> {
 
   render() {
     // Needs a min-height so the spinner will render when loading and position: relative so said spinner will center.
+    const visibleWorkspaces = this.props.migrationTestingGroup
+      ? this.state.recentWorkspaces
+      : this.state.recentWorkspaces.filter(
+          (rw) =>
+            rw.workspace.migrationState === MigrationState.FINISHED ||
+            rw.workspace.migrationState === MigrationState.NOT_STARTED
+        );
     return (
       <div style={{ position: 'relative' }}>
         {this.state.loading && <SpinnerOverlay dark={true} />}
-        {this.state.recentWorkspaces.length === 0 && !this.state.loading ? (
+        {visibleWorkspaces.length === 0 && !this.state.loading ? (
           <div style={{ color: colors.primary, margin: '.5em 2em' }}>
             <h2 style={{ fontWeight: 600, lineHeight: 1.5 }}>
               Create your first workspace
@@ -70,7 +78,7 @@ export const RecentWorkspaces = class extends React.Component<Props, State> {
                 overflow: 'auto',
               }}
             >
-              {this.state.recentWorkspaces.map((recentWorkspace) => {
+              {visibleWorkspaces.map((recentWorkspace) => {
                 return (
                   <WorkspaceCard
                     key={recentWorkspace.workspace.namespace}
