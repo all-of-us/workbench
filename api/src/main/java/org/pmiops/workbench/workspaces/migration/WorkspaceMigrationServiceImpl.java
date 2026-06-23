@@ -817,24 +817,25 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           Level.INFO,
           namespace + ": Test archive record created with status=" + archiveRecord.getStatus());
 
-//      String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
-//
-//      String projectId = workbenchConfigProvider.get().server.projectId;
+      //      String serviceAccountEmail =
+      // workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+      //
+      //      String projectId = workbenchConfigProvider.get().server.projectId;
 
-//      String jobName =
-//          storageTransferClient.createTransferJob(
-//              sourceBucket,
-//              archiveBucket,
-//              archivePath,
-//              "archive-" + namespace,
-//              projectId,
-//              null,
-//              serviceAccountEmail,
-//              false);
+      //      String jobName =
+      //          storageTransferClient.createTransferJob(
+      //              sourceBucket,
+      //              archiveBucket,
+      //              archivePath,
+      //              "archive-" + namespace,
+      //              projectId,
+      //              null,
+      //              serviceAccountEmail,
+      //              false);
 
       logger.log(Level.INFO, namespace + ": Test archive transfer job created");
 
-//      storageTransferClient.runTransferJob(projectId, jobName);
+      //      storageTransferClient.runTransferJob(projectId, jobName);
 
       logger.log(Level.INFO, namespace + ": Test archive transfer job started");
 
@@ -842,7 +843,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       workspaceBucketArchiveDao.save(archiveRecord);
 
-//      taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
+      //      taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
 
       logger.log(Level.INFO, namespace + ": Test archive metadata saved successfully");
 
