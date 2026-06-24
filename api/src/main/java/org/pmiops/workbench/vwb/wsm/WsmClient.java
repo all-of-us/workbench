@@ -468,4 +468,15 @@ public class WsmClient {
     description.append("# Anticipated Findings\n").append(anticipatedFindings).append("\n\n");
     return description.toString();
   }
+
+  public void deleteResource(UUID destinationWorkspaceId, UUID resourceId) {
+    wsmRetryHandler.run(
+        context -> {
+          controlledGcpResourceApiProvider
+              .get()
+              .deleteBigQueryDataset(destinationWorkspaceId.toString(), resourceId);
+          return null;
+        });
+  }
+
 }
