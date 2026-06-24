@@ -139,7 +139,8 @@
     "enableVWBHomepageBanner": true,
     "enableCTPlusCards": true,
     "enableVwbMigration": true,
-    "enableWorkspaceArchiveRecovery": true
+    "enableWorkspaceArchiveRecovery": true,
+    "restrictLegacyAccess": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

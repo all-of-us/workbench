@@ -17,7 +17,7 @@ import {
   hasDefaultCdrVersion,
 } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
-import { MatchParams, profileStore, serverConfigStore } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 
 import { CdrVersionUpgradeModal } from './cdr-version-upgrade-modal';
 
@@ -189,9 +189,10 @@ const tabs: Tab[] = [
   },
   { name: 'About', link: 'about' },
 ];
-const restrictedUser = !profileStore.get().profile?.migrationTestingGroup;
-const visibleTabs = restrictedUser
-  ? tabs.filter((tab) => tab.name === 'Data' || tab.name === 'About')
+const restrictedLegacyAccess =
+  serverConfigStore.get().config.restrictLegacyAccess;
+const visibleTabs = restrictedLegacyAccess
+  ? tabs.filter((tab) => tab.name === 'About')
   : tabs;
 const navSeparator = <div style={styles.separator} />;
 

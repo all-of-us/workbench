@@ -38,7 +38,7 @@ import {
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { profileStore } from 'app/utils/stores';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
@@ -354,11 +354,12 @@ export const WorkspaceAbout = fp.flow(
       // false           false        false
       const publishButtonToolTipDisabled =
         isWorkspaceOwner && notPublished && !workspaceLocked;
-      const restrictedUser = !profileStore.get().profile?.migrationTestingGroup;
+      const restrictedLegacyAccess =
+        serverConfigStore.get().config.restrictLegacyAccess;
       return (
         <div style={styles.mainPage}>
           <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
-            {restrictedUser && (
+            {restrictedLegacyAccess && (
               <div style={styles.migrationNotice}>
                 <div style={styles.migrationNoticeIcon}>
                   <FontAwesomeIcon icon={faCircleInfo} />

@@ -8068,6 +8068,12 @@ components:
           type: boolean
           default: false
           description: If true, will display the archived workspace recovery flow and recovery UI on workspace pages.
+        restrictLegacyAccess:
+          type: boolean
+          default: false
+          description: >
+            If true, blocks access to all RW1.0 functionality for standard users.
+            Only archive recovery functionality remains available.
         RecoveryState:
           type: string
           description: Indicates recovery lifecycle state.

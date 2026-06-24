@@ -34,7 +34,11 @@ import {
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
 import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
-import { MatchParams, profileStore, withParamsKey } from 'app/utils/stores';
+import {
+  MatchParams,
+  serverConfigStore,
+  withParamsKey,
+} from 'app/utils/stores';
 
 import { analysisTabName } from './utils';
 
@@ -108,66 +112,24 @@ const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
   const { ns, terraName } = useParams<MatchParams>();
-  const restrictedUser = !profileStore.get().profile?.migrationTestingGroup;
-  if (restrictedUser) {
+  const restrictedLegacyAccess =
+    serverConfigStore.get().config.restrictLegacyAccess;
+  if (restrictedLegacyAccess) {
     return (
       <Switch>
         <AppRoute exact path={`${path}/about`}>
           <WorkspaceAboutPage
             routeData={{
               title: 'View Workspace Details',
+
               breadcrumb: BreadcrumbType.Workspace,
+
               workspaceNavBarTab: 'about',
+
               pageKey: 'about',
             }}
           />
         </AppRoute>
-
-        <AppRoute
-          exact
-          path={`${path}/data`}
-          guards={[adminLockedGuard(ns, terraName)]}
-        >
-          <DataComponentPage
-            routeData={{
-              title: 'Data Page',
-              breadcrumb: BreadcrumbType.Workspace,
-              workspaceNavBarTab: 'data',
-              pageKey: 'data',
-            }}
-          />
-        </AppRoute>
-        <AppRoute
-          exact
-          path={`${path}/migration`}
-          guards={[adminLockedGuard(ns, terraName)]}
-        >
-          <MigrationPage
-            routeData={{
-              title: 'Workspace Migration',
-              breadcrumb: BreadcrumbType.Workspace,
-              workspaceNavBarTab: 'data',
-              pageKey: 'data',
-            }}
-          />
-        </AppRoute>
-
-        <AppRoute
-          exact
-          path={`${path}/folder-sync`}
-          guards={[adminLockedGuard(ns, terraName)]}
-        >
-          <MigrationFolderSyncPage
-            routeData={{
-              title: 'Workspace Folder Sync',
-              breadcrumb: BreadcrumbType.Workspace,
-              workspaceNavBarTab: 'data',
-              pageKey: 'data',
-            }}
-          />
-        </AppRoute>
-
-        {/* recovery route here once added */}
 
         <Redirect to={`${path}/about`} />
       </Switch>
