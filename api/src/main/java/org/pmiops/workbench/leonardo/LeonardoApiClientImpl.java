@@ -76,23 +76,30 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
   private final LeonardoApiClientFactory leonardoApiClientFactory;
+
   private final Provider<RuntimesApi> runtimesApiProvider;
   private final Provider<RuntimesApi> serviceRuntimesApiProvider;
+  private final Provider<RuntimesApi> serviceRuntimesLenientTimeoutApiProvider;
+
+  private final Provider<DisksApi> disksApiProvider;
+  private final Provider<DisksApi> serviceDisksApiProvider;
+  private final Provider<DisksApi> serviceDisksLenientTimeoutApiProvider;
+
+  private final Provider<AppsApi> appsApiProvider;
+  private final Provider<AppsApi> serviceAppsApiProvider;
+  private final Provider<AppsApi> serviceAppsLenientTimeoutApiProvider;
 
   private final Provider<ResourcesApi> resourcesApiProvider;
   private final Provider<ProxyApi> proxyApiProvider;
   private final Provider<ServiceInfoApi> serviceInfoApiProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final Provider<DbUser> userProvider;
-  private final Provider<DisksApi> disksApiProvider;
-  private final Provider<DisksApi> serviceDisksApiProvider;
-  private final Provider<AppsApi> appsApiProvider;
-  private final Provider<AppsApi> serviceAppsApiProvider;
+
   private final FireCloudService fireCloudService;
-  private final NotebooksRetryHandler notebooksRetryHandler;
-  private final LeonardoMapper leonardoMapper;
   private final LegacyLeonardoRetryHandler legacyLeonardoRetryHandler;
+  private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
+  private final NotebooksRetryHandler notebooksRetryHandler;
+  private final Provider<DbUser> userProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
 
   @Autowired
@@ -101,6 +108,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       @Qualifier(LeonardoConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
           Provider<RuntimesApi> serviceRuntimesApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_LENIENT_TIMEOUT_API)
+          Provider<RuntimesApi> serviceRuntimesLenientTimeoutApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_RESOURCE_API) Provider<ResourcesApi> resourcesApiProvider,
       Provider<ProxyApi> proxyApiProvider,
       Provider<ServiceInfoApi> serviceInfoApiProvider,
@@ -108,8 +117,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<DbUser> userProvider,
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> disksApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> serviceDisksApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_DISKS_LENIENT_TIMEOUT_API)
+          Provider<DisksApi> serviceDisksLenientTimeoutApiProvider,
       @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_APPS_LENIENT_TIMEOUT_API)
+          Provider<AppsApi> serviceAppsLenientTimeoutApiProvider,
       FireCloudService fireCloudService,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
@@ -119,6 +132,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.leonardoApiClientFactory = leonardoApiClientFactory;
     this.runtimesApiProvider = runtimesApiProvider;
     this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
+    this.serviceRuntimesLenientTimeoutApiProvider = serviceRuntimesLenientTimeoutApiProvider;
     this.resourcesApiProvider = resourcesApiProvider;
     this.proxyApiProvider = proxyApiProvider;
     this.serviceInfoApiProvider = serviceInfoApiProvider;
@@ -126,8 +140,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.userProvider = userProvider;
     this.disksApiProvider = disksApiProvider;
     this.serviceDisksApiProvider = serviceDisksApiProvider;
+    this.serviceDisksLenientTimeoutApiProvider = serviceDisksLenientTimeoutApiProvider;
     this.appsApiProvider = appsApiProvider;
     this.serviceAppsApiProvider = serviceAppsApiProvider;
+    this.serviceAppsLenientTimeoutApiProvider = serviceAppsLenientTimeoutApiProvider;
     this.fireCloudService = fireCloudService;
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
@@ -277,13 +293,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesAsService() {
-    RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    RuntimesApi runtimesApi = serviceRuntimesLenientTimeoutApiProvider.get();
     return legacyLeonardoRetryHandler.run((context) -> runtimesApi.listRuntimes(/* labels */ null));
   }
 
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
-    RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    RuntimesApi runtimesApi = serviceRuntimesLenientTimeoutApiProvider.get();
     return legacyLeonardoRetryHandler.run(
         (context) -> runtimesApi.listRuntimesByProject(googleProject, /* labels */ null));
   }
@@ -495,13 +511,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public List<ListPersistentDiskResponse> listDisksAsService() {
-    DisksApi disksApi = serviceDisksApiProvider.get();
-
-    // this call can be slow, so let a long timeout
-    disksApi
-        .getApiClient()
-        .setReadTimeout(workbenchConfigProvider.get().firecloud.lenientTimeoutInSeconds * 1000);
-
+    DisksApi disksApi = serviceDisksLenientTimeoutApiProvider.get();
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisks(
@@ -513,8 +523,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject) {
-
-    DisksApi disksApi = serviceDisksApiProvider.get();
+    DisksApi disksApi = serviceDisksLenientTimeoutApiProvider.get();
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(
@@ -633,7 +642,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public List<UserAppEnvironment> listAppsInProjectAsService(String googleProjectId) {
-    AppsApi appsApi = serviceAppsApiProvider.get();
+    AppsApi appsApi = serviceAppsLenientTimeoutApiProvider.get();
     return getUserAppEnvironments(googleProjectId, appsApi, null);
   }
 
