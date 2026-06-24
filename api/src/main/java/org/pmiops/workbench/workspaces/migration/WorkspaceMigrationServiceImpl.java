@@ -843,6 +843,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       case SUCCESS:
         archive.setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
 
+        dbWorkspace.setRecoveryState(
+                WorkspaceRecoveryStatus.NOT_STARTED.name());
+
+        workspaceDao.save(dbWorkspace);
+
         workspaceBucketArchiveDao.save(archive);
 
         storageTransferClient.deleteTransferJob(projectId, jobName);
