@@ -165,6 +165,13 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         isMigratedView,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
+      const getWorkspacePath = () => {
+        if (workspace.recoveryState === 'NOT_STARTED') {
+          return `/workspaces/${namespace}/${terraName}/recovery`;
+        }
+
+        return dataTabPath(namespace, terraName);
+      };
       return (
         <React.Fragment>
           <WorkspaceCardBase>
@@ -244,7 +251,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       analyticsFn={() => this.trackWorkspaceNavigation()}
                       data-test-id={'workspace-card-link'}
                       propagateDataTestId
-                      path={dataTabPath(namespace, terraName)}
+                      path={getWorkspacePath()}
                     >
                       <TooltipTrigger
                         content={

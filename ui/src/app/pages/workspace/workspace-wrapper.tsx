@@ -37,6 +37,7 @@ import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
 
 import { WorkspaceMigrationNoticeModal } from './workspace-migration-notice-modal';
+import { WorkspaceRecovery } from './workspace-recovery';
 
 const styles = reactStyles({
   bannerNotification: {
@@ -369,51 +370,60 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
     workspace &&
     new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
 
-  return (
+  if (!workspace) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Spinner title='loading workspaces spinner' />
+      </div>
+    );
+  }
+
+  const isRecoveryWorkspace = workspace.recoveryState === 'NOT_STARTED';
+
+  return isRecoveryWorkspace ? (
+    <WorkspaceRecovery workspace={workspace} />
+  ) : (
     <>
-      {workspace ? (
-        <>
-          {!routeData.minimizeChrome && (
-            <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab} />
-          )}
-          <MigrationBanner state={migrationState} />
-          {showNewCtNotification && (
-            <NewCtNotification
-              onCancel={() => setShowNewCtNotification(false)}
-            />
-          )}
-          {showMultiRegionWorkspaceNotification && (
-            <MultiRegionWorkspaceNotification />
-          )}
-          {showUnlinkedBillingNotification && <UnlinkedBillingNotification />}
-          <HelpSidebar pageKey={routeData.pageKey} />
-          <div
-            style={{
-              marginRight: '45px',
-              height: !routeData.contentFullHeightOverride ? 'auto' : '100%',
-            }}
-          >
-            <WorkspaceRoutes />
-            {shouldShowMigrationModal && showMigrationNotice && (
-              <WorkspaceMigrationNoticeModal
-                onClose={() => setShowMigrationNotice(false)}
-              />
-            )}
-          </div>
-        </>
-      ) : (
-        <div
-          style={{
-            display: 'flex',
-            height: '100%',
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Spinner title='loading workspaces spinner' />
-        </div>
+      {!routeData.minimizeChrome && (
+        <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab} />
       )}
+
+      <MigrationBanner state={migrationState} />
+
+      {showNewCtNotification && (
+        <NewCtNotification onCancel={() => setShowNewCtNotification(false)} />
+      )}
+
+      {showMultiRegionWorkspaceNotification && (
+        <MultiRegionWorkspaceNotification />
+      )}
+
+      {showUnlinkedBillingNotification && <UnlinkedBillingNotification />}
+
+      <HelpSidebar pageKey={routeData.pageKey} />
+
+      <div
+        style={{
+          marginRight: '45px',
+          height: !routeData.contentFullHeightOverride ? 'auto' : '100%',
+        }}
+      >
+        <WorkspaceRoutes />
+
+        {shouldShowMigrationModal && showMigrationNotice && (
+          <WorkspaceMigrationNoticeModal
+            onClose={() => setShowMigrationNotice(false)}
+          />
+        )}
+      </div>
     </>
   );
 };
