@@ -122,7 +122,11 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         this.state;
 
       const { profile } = this.props.profileState;
-      const isSupportUser = profile.migrationTestingGroup;
+      const restrictLegacyAccess =
+        serverConfigStore.get().config.restrictLegacyAccess;
+
+      const isRestrictedUser =
+        restrictLegacyAccess && !profile.migrationTestingGroup;
       const enableVwbMigration =
         serverConfigStore.get().config.enableVwbMigration;
 
@@ -201,7 +205,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     gap: '12px',
                   }}
                 >
-                  {enableVwbMigration && isSupportUser && (
+                  {enableVwbMigration && !isRestrictedUser && (
                     <FlexRow style={{ alignItems: 'center', gap: '6px' }}>
                       <CommonToggle
                         name='show-migrated'
@@ -244,7 +248,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   flexWrap: 'wrap',
                 }}
               >
-                {isSupportUser ? (
+                {!isRestrictedUser ? (
                   <>
                     {showMigrated ? (
                       <>

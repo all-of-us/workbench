@@ -189,11 +189,7 @@ const tabs: Tab[] = [
   },
   { name: 'About', link: 'about' },
 ];
-const restrictedLegacyAccess =
-  serverConfigStore.get().config.restrictLegacyAccess;
-const visibleTabs = restrictedLegacyAccess
-  ? tabs.filter((tab) => tab.name === 'About')
-  : tabs;
+
 const navSeparator = <div style={styles.separator} />;
 
 const restrictTab = (workspace: Workspace, tab: Tab) =>
@@ -205,7 +201,7 @@ export const WorkspaceNavBar = fp.flow(
 )((props) => {
   const { tabPath, workspace, cdrVersionTiersResponse } = props;
   // default to Data tab if the tabPath is not set
-  const activeTabIndex = fp.findIndex(['link', tabPath ?? 'data'], visibleTabs);
+  const activeTabIndex = fp.findIndex(['link', tabPath ?? 'data'], tabs);
   const [navigate] = useNavigation();
   const { ns, terraName } = useParams<MatchParams>();
 
@@ -226,7 +222,7 @@ export const WorkspaceNavBar = fp.flow(
 
   const navTab = (currentTab, disabled) => {
     const { name, link } = currentTab;
-    const currentTabIndex = visibleTabs.indexOf(currentTab);
+    const currentTabIndex = tabs.indexOf(currentTab);
     const selected = activeTabIndex === currentTabIndex;
     const hideSeparator = selected || activeTabIndex === currentTabIndex + 1;
 
@@ -261,10 +257,7 @@ export const WorkspaceNavBar = fp.flow(
       style={styles.container}
     >
       {activeTabIndex > 0 && navSeparator}
-      {fp.map(
-        (tab) => navTab(tab, restrictTab(props.workspace, tab)),
-        visibleTabs
-      )}
+      {fp.map((tab) => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
       <div style={{ flexGrow: 1 }} />
 
       {enableVwbMigration && workspace && (

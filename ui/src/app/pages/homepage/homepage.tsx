@@ -367,6 +367,11 @@ export const Homepage = fp.flow(
       const { firstVisit, userWorkspacesResponse } = this.state;
       const { enableVwbMigration } = serverConfigStore.get().config;
       const showMigrationBanner = migrationTestingGroup || enableVwbMigration;
+      const restrictLegacyAccess =
+        serverConfigStore.get().config.restrictLegacyAccess;
+      const canCreateLegacyWorkspace =
+        migrationTestingGroup && !restrictLegacyAccess;
+
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
@@ -384,7 +389,7 @@ export const Homepage = fp.flow(
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
                 <Workspaces
                   onChange={() => this.fetchWorkspaces()}
-                  disableCreation={!migrationTestingGroup}
+                  disableCreation={!canCreateLegacyWorkspace}
                   migrationTestingGroup={migrationTestingGroup}
                 />
                 {userWorkspacesResponse &&

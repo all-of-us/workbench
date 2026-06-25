@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { faCircleInfo, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -38,7 +38,6 @@ import {
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
@@ -63,36 +62,6 @@ const styles = reactStyles({
     justifyContent: 'space-between',
     alignItems: 'stretch',
     height: 'calc(100% - 60px)',
-  },
-  migrationNotice: {
-    padding: '18px 24px',
-    borderRadius: '8px',
-    border: `1px solid ${colorWithWhiteness(colors.accent, 0.4)}`,
-    backgroundColor: '#F4F8FF',
-    marginBottom: '24px',
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '16px',
-  },
-  migrationNoticeIcon: {
-    color: colors.accent,
-    fontSize: '24px',
-    flexShrink: 0,
-    marginTop: '2px',
-  },
-  migrationNoticeTitle: {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: colors.primary,
-    marginBottom: '8px',
-  },
-  migrationNoticeText: {
-    fontSize: '14px',
-    lineHeight: '22px',
-    color: colors.primary,
-  },
-  migrationNoticeHighlight: {
-    fontWeight: 600,
   },
   rightSidebar: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.85),
@@ -354,46 +323,10 @@ export const WorkspaceAbout = fp.flow(
       // false           false        false
       const publishButtonToolTipDisabled =
         isWorkspaceOwner && notPublished && !workspaceLocked;
-      const restrictedLegacyAccess =
-        serverConfigStore.get().config.restrictLegacyAccess;
+
       return (
         <div style={styles.mainPage}>
           <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
-            {restrictedLegacyAccess && (
-              <div style={styles.migrationNotice}>
-                <div style={styles.migrationNoticeIcon}>
-                  <FontAwesomeIcon icon={faCircleInfo} />
-                </div>
-
-                <div>
-                  <div style={styles.migrationNoticeTitle}>
-                    Researcher Workbench 1.0 Access Restricted
-                  </div>
-
-                  <div style={styles.migrationNoticeText}>
-                    New cohorts, datasets, notebooks, analyses, and other
-                    research activities can no longer be performed in Researcher
-                    Workbench 1.0.
-                  </div>
-
-                  <div
-                    style={{
-                      ...styles.migrationNoticeText,
-                      marginTop: '8px',
-                    }}
-                  >
-                    <span style={styles.migrationNoticeHighlight}>
-                      To continue working with this workspace:
-                    </span>{' '}
-                    use <strong>Workspace Migration</strong> to move your
-                    workspace to Researcher Workbench 2.0, use{' '}
-                    <strong>Folder Sync</strong> to transfer additional files,
-                    or use <strong>Data Recovery</strong> for archived
-                    workspaces.
-                  </div>
-                </div>
-              </div>
-            )}
             {workspaceLocked && (
               <div data-test-id='lock-workspace-msg' style={styles.lockMessage}>
                 <FlexRow>

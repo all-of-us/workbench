@@ -34,11 +34,7 @@ import {
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
 import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
-import {
-  MatchParams,
-  serverConfigStore,
-  withParamsKey,
-} from 'app/utils/stores';
+import { MatchParams, withParamsKey } from 'app/utils/stores';
 
 import { analysisTabName } from './utils';
 
@@ -112,29 +108,6 @@ const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
   const { ns, terraName } = useParams<MatchParams>();
-  const restrictedLegacyAccess =
-    serverConfigStore.get().config.restrictLegacyAccess;
-  if (restrictedLegacyAccess) {
-    return (
-      <Switch>
-        <AppRoute exact path={`${path}/about`}>
-          <WorkspaceAboutPage
-            routeData={{
-              title: 'View Workspace Details',
-
-              breadcrumb: BreadcrumbType.Workspace,
-
-              workspaceNavBarTab: 'about',
-
-              pageKey: 'about',
-            }}
-          />
-        </AppRoute>
-
-        <Redirect to={`${path}/about`} />
-      </Switch>
-    );
-  }
 
   return (
     <Switch>

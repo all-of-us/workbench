@@ -1,12 +1,17 @@
 import * as React from 'react';
 
-import { MigrationState, RecentWorkspace } from 'generated/fetch';
+import {
+  MigrationState,
+  RecentWorkspace,
+  WorkspaceRecoveryStatus,
+} from 'generated/fetch';
 
 import { FlexRow } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import { serverConfigStore } from 'app/utils/stores';
 
 interface Props {
   onChange: () => void;
@@ -44,13 +49,18 @@ export const RecentWorkspaces = class extends React.Component<Props, State> {
 
   render() {
     // Needs a min-height so the spinner will render when loading and position: relative so said spinner will center.
-    const visibleWorkspaces = this.props.migrationTestingGroup
-      ? this.state.recentWorkspaces
-      : this.state.recentWorkspaces.filter(
+    const restrictLegacyAccess =
+      serverConfigStore.get().config.restrictLegacyAccess;
+
+    const isRestrictedUser =
+      restrictLegacyAccess && !this.props.migrationTestingGroup;
+    const visibleWorkspaces = isRestrictedUser
+      ? this.state.recentWorkspaces.filter(
           (rw) =>
             rw.workspace.migrationState === MigrationState.FINISHED ||
-            rw.workspace.migrationState === MigrationState.NOT_STARTED
-        );
+            rw.workspace.recoveryState === WorkspaceRecoveryStatus.NOT_STARTED
+        )
+      : this.state.recentWorkspaces;
     return (
       <div style={{ position: 'relative' }}>
         {this.state.loading && <SpinnerOverlay dark={true} />}
