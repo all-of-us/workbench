@@ -771,6 +771,17 @@ jobs:
                         }
                       },
                       {
+                        "text": " or ",
+                        "type": "text"
+                      },
+                      {
+                        "type": "mention",
+                        "attrs": {
+                          "id": "61f987d1b3ec760068c1401e",
+                          "text": "Justin Cook"
+                        }
+                      },
+                      {
                         "text": " (business)",
                         "type": "text"
                       }
