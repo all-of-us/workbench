@@ -17,6 +17,7 @@ import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceBucketArchive;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.ReportingWorkspaceUser;
 
@@ -50,6 +51,8 @@ public interface ReportingQueryService {
   List<ReportingLeonardoAppUsage> getLeonardoAppUsageBatch(long limit, long offset);
 
   List<ReportingFolderSync> getFolderSyncBatch(long limit, long offset);
+
+  List<ReportingWorkspaceBucketArchive> getWorkspaceBucketArchiveBatch(long limit, long offset);
 
   default <T> List<T> getBatchByIndex(
       BiFunction<Long, Long, List<T>> getter, long batchSize, long batchIndex) {

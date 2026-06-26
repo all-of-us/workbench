@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceBucketArchive;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.ReportingWorkspaceUser;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
@@ -35,6 +36,7 @@ import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnV
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceBucketArchiveColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceUserColumnValueExtractor;
@@ -71,6 +73,7 @@ public class ReportingTableService {
   private static final String WORKSPACE_USER_CACHE_TABLE_NAME = "workspace_user_cache";
   private static final String WORKSPACE_USER_CACHE_BQ_TABLE_NAME = "workspace_user";
   private static final String FOLDER_SYNC_TABLE_NAME = "folder_sync_transfer";
+  private static final String WORKSPACE_BUCKET_ARCHIVE_TABLE_NAME = "workspace_bucket_archive";
 
   private final ReportingQueryService reportingQueryService;
 
@@ -96,6 +99,7 @@ public class ReportingTableService {
         userGeneralDiscoverySource(),
         userPartnerDiscoverySource(),
         workspace(),
+        workspaceBucketArchive(),
         workspaceUser(),
         workspaceFreeTierUsage());
   }
@@ -240,5 +244,14 @@ public class ReportingTableService {
         FolderSyncColumnValueExtractor::values,
         reportingQueryService::getFolderSyncBatch,
         () -> reportingQueryService.getTableRowCount(FOLDER_SYNC_TABLE_NAME));
+  }
+
+  public final ReportingTableParams<ReportingWorkspaceBucketArchive> workspaceBucketArchive() {
+    return new ReportingTableParams<>(
+        WORKSPACE_BUCKET_ARCHIVE_TABLE_NAME,
+        batchSize(WORKSPACE_BUCKET_ARCHIVE_TABLE_NAME),
+        WorkspaceBucketArchiveColumnValueExtractor::values,
+        reportingQueryService::getWorkspaceBucketArchiveBatch,
+        () -> reportingQueryService.getTableRowCount(WORKSPACE_BUCKET_ARCHIVE_TABLE_NAME));
   }
 }

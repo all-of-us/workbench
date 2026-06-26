@@ -34,6 +34,7 @@ import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceBucketArchive;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.ReportingWorkspaceUser;
 import org.pmiops.workbench.utils.FieldValues;
@@ -578,6 +579,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  a.short_name AS access_tier_short_name,\n"
             + "  billing_account_name,\n"
             + "  w.cdr_version_id AS cdr_version_id,\n"
+            + "  c.name AS cdr_version_name,\n"
             + "  w.creation_time AS creation_time,\n"
             + "  creator_id,\n"
             + "  disseminate_research_other,\n"
@@ -613,7 +615,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  w.active_status,\n"
             + "  sp.specific_populations,\n"
             + "  migrated_vwb_workspace_id,\n"
-            + "  migration_state\n"
+            + "  migration_state,\n"
+            + "  recovery_state\n"
             + "FROM workspace w\n"
             // some Tanagra workspaces don't have CDR version IDs
             + "  LEFT JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
@@ -635,6 +638,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         (rs, unused) -> {
           String specificPopulationsStr = rs.getString("specific_populations");
           String migrationStateStr = rs.getString("migration_state");
+          String recoveryStateStr = rs.getString("recovery_state");
           boolean focusOnUnderrepresentedPopulations =
               specificPopulationsStr != null && !specificPopulationsStr.isEmpty();
 
@@ -644,6 +648,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                   getBillingAccountType(
                       rs.getString("billing_account_name"), workbenchConfigProvider.get()))
               .cdrVersionId(rs.getLong("cdr_version_id"))
+              .cdrVersionName(rs.getString("cdr_version_name"))
               .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
               .creatorId(rs.getLong("creator_id"))
               .disseminateResearchOther(rs.getString("disseminate_research_other"))
@@ -683,7 +688,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                   toModelWorkspaceDemographic(getSpecificPopulationsSet(specificPopulationsStr)))
               .migratedVwbWorkspaceId(rs.getString("migrated_vwb_workspace_id"))
               .migrationState(
-                  migrationStateStr == null ? null : MigrationState.valueOf(migrationStateStr));
+                  migrationStateStr == null ? null : MigrationState.valueOf(migrationStateStr))
+              .recoveryState(
+                  recoveryStateStr == null
+                      ? null
+                      : WorkspaceRecoveryStatus.valueOf(recoveryStateStr));
         },
         limit,
         offset);
@@ -810,6 +819,28 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .transferJobName(rs.getString("transfer_job_name"))
                 .transferState(rs.getString("transfer_state"))
                 .sourceWorkspaceNamespace(rs.getString("source_workspace_namespace")));
+  }
+
+  @Override
+  public List<ReportingWorkspaceBucketArchive> getWorkspaceBucketArchiveBatch(
+      long limit, long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT \n"
+                + "  wba.legacy_workspace_id,\n"
+                + "  wba.gcs_path,\n"
+                + "  wba.created,\n"
+                + "  wba.status\n"
+                + "FROM workspace_bucket_archive wba\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingWorkspaceBucketArchive()
+                .legacyWorkspaceId(rs.getLong("legacy_workspace_id"))
+                .gcsPath(rs.getString("gcs_path"))
+                .created(offsetDateTimeUtc(rs.getTimestamp("created")))
+                .status(rs.getString("status")));
   }
 
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */

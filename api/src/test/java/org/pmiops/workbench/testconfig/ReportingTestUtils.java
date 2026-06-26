@@ -28,6 +28,7 @@ public class ReportingTestUtils {
       BillingAccountType.FREE_TIER;
   public static final String WORKSPACE__BILLING_ACCOUNT_ID = "free_tier";
   public static final Long WORKSPACE__CDR_VERSION_ID = 2L;
+  public static final String WORKSPACE__CDR_VERSION_NAME = "CDR Version";
   public static final Timestamp WORKSPACE__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
   public static final Long WORKSPACE__CREATOR_ID = 4L;
@@ -68,6 +69,8 @@ public class ReportingTestUtils {
   public static final String WORKSPACE__ACTIVE_STATUS = "Active";
   public static final String WORKSPACE__MIGRATED_VWB_WORKSPACE_ID = "12345";
   public static final MigrationState WORKSPACE__MIGRATION_STATE = MigrationState.NOT_STARTED;
+  public static final WorkspaceRecoveryStatus WORKSPACE__RECOVERY_STATUS =
+      WorkspaceRecoveryStatus.NOT_STARTED;
   public static final Boolean WORKSPACE__FOCUS_ON_UNDER_REPRESENTED_POPULATIONS = true;
   public static final WorkspaceDemographic WORKSPACE__WORKSPACE_DEMOGRAPHIC =
       new WorkspaceDemographic()
@@ -122,6 +125,7 @@ public class ReportingTestUtils {
         .accessTierShortName(WORKSPACE__ACCESS_TIER_SHORT_NAME)
         .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)
+        .cdrVersionName(WORKSPACE__CDR_VERSION_NAME)
         .creationTime(offsetDateTimeUtc(WORKSPACE__CREATION_TIME))
         .creatorId(WORKSPACE__CREATOR_ID)
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
@@ -157,6 +161,7 @@ public class ReportingTestUtils {
         .activeStatus(WORKSPACE__ACTIVE_STATUS)
         .migratedVwbWorkspaceId(WORKSPACE__MIGRATED_VWB_WORKSPACE_ID)
         .migrationState(WORKSPACE__MIGRATION_STATE)
+        .recoveryState(WORKSPACE__RECOVERY_STATUS)
         .focusOnUnderrepresentedPopulations(WORKSPACE__FOCUS_ON_UNDER_REPRESENTED_POPULATIONS)
         .workspaceDemographic(WORKSPACE__WORKSPACE_DEMOGRAPHIC);
   }
