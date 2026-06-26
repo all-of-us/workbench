@@ -370,7 +370,7 @@ export const Homepage = fp.flow(
       const restrictLegacyAccess =
         serverConfigStore.get().config.restrictLegacyAccess;
       const canCreateLegacyWorkspace =
-        migrationTestingGroup && !restrictLegacyAccess;
+        migrationTestingGroup || !restrictLegacyAccess;
 
       return (
         <React.Fragment>
