@@ -55,10 +55,11 @@ export const RecentWorkspaces = class extends React.Component<Props, State> {
     const isRestrictedUser =
       restrictLegacyAccess && !this.props.migrationTestingGroup;
     const visibleWorkspaces = isRestrictedUser
-      ? this.state.recentWorkspaces.filter(
-          (rw) =>
-            rw.workspace.migrationState === MigrationState.FINISHED ||
-            rw.workspace.recoveryState === WorkspaceRecoveryStatus.NOT_STARTED
+      ? this.state.recentWorkspaces.filter((rw) =>
+          [
+            MigrationState.FINISHED.toString(),
+            WorkspaceRecoveryStatus.NOT_STARTED.toString(),
+          ].includes(rw.workspace.migrationState)
         )
       : this.state.recentWorkspaces;
     return (
