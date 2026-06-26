@@ -3,7 +3,11 @@ import * as fp from 'lodash/fp';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
+import {
+  MigrationState,
+  Workspace,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
@@ -175,8 +179,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         isMigratedView,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
-
       const isArchived = workspace.recoveryState != null;
+
+      const hideWorkspaceActions =
+        workspace.recoveryState != null ||
+        workspace.migrationState === MigrationState.FINISHED;
 
       const getWorkspacePath = () => {
         if (workspace.recoveryState === 'NOT_STARTED') {
@@ -196,7 +203,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     : styles.workspaceMenuWrapper
                 }
               >
-                {!tierAccessDisabled && !isArchived && (
+                {!tierAccessDisabled && !hideWorkspaceActions && (
                   <PopupTrigger
                     side='bottom'
                     closeOnClick
