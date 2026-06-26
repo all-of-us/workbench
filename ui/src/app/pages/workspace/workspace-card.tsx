@@ -16,6 +16,7 @@ import {
   ControlledTierBadge,
 } from 'app/components/icons';
 import { MigrationBadge } from 'app/components/migration/migration-badge';
+import { RecoveryBadge } from 'app/components/migration/recovery-badge';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
@@ -81,6 +82,15 @@ const styles = reactStyles({
     width: '21px',
     height: '21px',
     viewBox: '0 0 25 27',
+  },
+  workspaceMenuWrapperDisabled: {
+    paddingTop: '.75rem',
+    borderRight: '1px solid',
+    borderColor: colorWithWhiteness(colors.dark, 0.3),
+    flex: '0 0 1.5rem',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: colors.light,
   },
 });
 
@@ -165,6 +175,9 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         isMigratedView,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
+
+      const isArchived = workspace.recoveryState != null;
+
       const getWorkspacePath = () => {
         if (workspace.recoveryState === 'NOT_STARTED') {
           return `/workspaces/${namespace}/${terraName}/recovery`;
@@ -176,8 +189,14 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         <React.Fragment>
           <WorkspaceCardBase>
             <FlexRow style={{ height: '100%' }}>
-              <FlexColumn style={styles.workspaceMenuWrapper}>
-                {!tierAccessDisabled && (
+              <FlexColumn
+                style={
+                  isArchived
+                    ? styles.workspaceMenuWrapperDisabled
+                    : styles.workspaceMenuWrapper
+                }
+              >
+                {!tierAccessDisabled && !isArchived && (
                   <PopupTrigger
                     side='bottom'
                     closeOnClick
@@ -325,8 +344,12 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         {accessLevel}
                       </div>
 
-                      {workspace.migrationState && (
-                        <MigrationBadge state={workspace.migrationState} />
+                      {isArchived ? (
+                        <RecoveryBadge state={workspace.recoveryState} />
+                      ) : (
+                        workspace.migrationState && (
+                          <MigrationBadge state={workspace.migrationState} />
+                        )
                       )}
                     </FlexRow>
                     <div style={{ fontSize: 12 }}>
