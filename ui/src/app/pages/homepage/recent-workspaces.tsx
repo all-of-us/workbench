@@ -1,15 +1,21 @@
 import * as React from 'react';
 
-import { RecentWorkspace } from 'generated/fetch';
+import {
+  MigrationState,
+  RecentWorkspace,
+  WorkspaceRecoveryStatus,
+} from 'generated/fetch';
 
 import { FlexRow } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import { serverConfigStore } from 'app/utils/stores';
 
 interface Props {
   onChange: () => void;
+  migrationTestingGroup: boolean;
 }
 interface State {
   loading: boolean;
@@ -43,10 +49,22 @@ export const RecentWorkspaces = class extends React.Component<Props, State> {
 
   render() {
     // Needs a min-height so the spinner will render when loading and position: relative so said spinner will center.
+    const restrictLegacyAccess =
+      serverConfigStore.get().config.restrictLegacyAccess;
+
+    const isRestrictedUser =
+      restrictLegacyAccess && !this.props.migrationTestingGroup;
+    const visibleWorkspaces = isRestrictedUser
+      ? this.state.recentWorkspaces.filter(
+          (rw) =>
+            rw.workspace.migrationState === MigrationState.FINISHED ||
+            rw.workspace.recoveryState === WorkspaceRecoveryStatus.NOT_STARTED
+        )
+      : this.state.recentWorkspaces;
     return (
       <div style={{ position: 'relative' }}>
         {this.state.loading && <SpinnerOverlay dark={true} />}
-        {this.state.recentWorkspaces.length === 0 && !this.state.loading ? (
+        {visibleWorkspaces.length === 0 && !this.state.loading ? (
           <div style={{ color: colors.primary, margin: '.5em 2em' }}>
             <h2 style={{ fontWeight: 600, lineHeight: 1.5 }}>
               Create your first workspace
@@ -70,7 +88,7 @@ export const RecentWorkspaces = class extends React.Component<Props, State> {
                 overflow: 'auto',
               }}
             >
-              {this.state.recentWorkspaces.map((recentWorkspace) => {
+              {visibleWorkspaces.map((recentWorkspace) => {
                 return (
                   <WorkspaceCard
                     key={recentWorkspace.workspace.namespace}
