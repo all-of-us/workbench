@@ -3,8 +3,8 @@ package org.pmiops.workbench.api;
 import java.util.List;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
@@ -46,8 +46,14 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     WorkspaceDao.WorkspaceArchiveView workspaceArchiveView =
         workspaceMigrationService.getNextWorkspaceToArchive();
     if (workspaceArchiveView == null) {
-      throw new NotFoundException("Next legacy workspace not found. Update query to continue archives");
+      throw new NotFoundException(
+          "Next legacy workspace not found. Update query to continue archives");
     }
+    log.info(
+        "Next legacy workspace found: "
+            + workspaceArchiveView.getWorkspaceNamespace()
+            + "/"
+            + workspaceArchiveView.getFirecloudName());
     workspaceMigrationService.startWorkspaceArchive(
         workspaceArchiveView.getWorkspaceNamespace(), workspaceArchiveView.getFirecloudName());
 
