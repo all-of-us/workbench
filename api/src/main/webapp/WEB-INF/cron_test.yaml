@@ -4,4 +4,9 @@ cron:
 - url: /v1/cron/checkInitialCreditsUsage
   schedule: every 24 hours
 - url: /v1/cron/archiveNextLegacyWorkspace
-  aou_skip_reason: Only run in prod
+  schedule: every 1 minutes
+  timezone: America/Chicago
+  target: api
+  retry_parameters:
+    job_retry_limit: 3
+    min_backoff_seconds: 5

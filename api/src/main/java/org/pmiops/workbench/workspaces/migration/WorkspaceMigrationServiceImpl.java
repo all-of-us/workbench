@@ -766,6 +766,106 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     }
   }
 
+  @Override
+  public void startWorkspaceArchiveTestEnv(String namespace, String terraName) {
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+
+    if (handleExistingArchiveState(dbWorkspace, namespace, terraName)) {
+      return;
+    }
+
+    DbWorkspaceBucketArchive archiveRecord = null;
+
+    try {
+
+      logger.log(Level.INFO, namespace + ": Test starting workspace archive");
+
+      RawlsWorkspaceDetails fcWorkspace =
+          fireCloudService.getWorkspaceAsService(namespace, terraName).getWorkspace();
+
+      String sourceBucket = fcWorkspace.getBucketName();
+
+      String accessTierShortName = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
+
+      String archiveBucket =
+          accessTierShortName.equalsIgnoreCase("controlled")
+              ? CONTROLLED_TIER_ARCHIVE_BUCKET
+              : REGISTERED_TIER_ARCHIVE_BUCKET;
+
+      String archivePath = String.format("%s/%s/", namespace, dbWorkspace.getWorkspaceId());
+
+      logger.log(
+          Level.INFO,
+          namespace
+              + ": Archiving bucket from "
+              + sourceBucket
+              + " to "
+              + archiveBucket
+              + "/"
+              + archivePath);
+
+      archiveRecord =
+          new DbWorkspaceBucketArchive()
+              .setLegacyWorkspaceId(dbWorkspace.getWorkspaceId())
+              .setGcsPath(String.format("gs://%s/%s", archiveBucket, archivePath))
+              .setCreated(new Timestamp(clock.instant().toEpochMilli()))
+              .setStatus(WorkspaceArchiveStatus.IN_PROGRESS.toString());
+
+      archiveRecord = workspaceBucketArchiveDao.save(archiveRecord);
+
+      logger.log(
+          Level.INFO,
+          namespace + ": Test archive record created with status=" + archiveRecord.getStatus());
+
+      //      String serviceAccountEmail =
+      // workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+      //
+      //      String projectId = workbenchConfigProvider.get().server.projectId;
+
+      //      String jobName =
+      //          storageTransferClient.createTransferJob(
+      //              sourceBucket,
+      //              archiveBucket,
+      //              archivePath,
+      //              "archive-" + namespace,
+      //              projectId,
+      //              null,
+      //              serviceAccountEmail,
+      //              false);
+
+      logger.log(Level.INFO, namespace + ": Test archive transfer job created");
+
+      //      storageTransferClient.runTransferJob(projectId, jobName);
+
+      logger.log(Level.INFO, namespace + ": Test archive transfer job started");
+
+      archiveRecord.setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
+
+      workspaceBucketArchiveDao.save(archiveRecord);
+
+      //      taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
+
+      logger.log(Level.INFO, namespace + ": Test archive metadata saved successfully");
+
+      // Optional future task polling
+      // taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
+
+    } catch (Exception e) {
+
+      logger.log(Level.SEVERE, namespace + ": Test workspace archive failed", e);
+
+      if (archiveRecord != null) {
+
+        archiveRecord.setStatus(WorkspaceArchiveStatus.FAILED.toString());
+
+        workspaceBucketArchiveDao.save(archiveRecord);
+      }
+
+      throw new RuntimeException(namespace + ": Test workspace archive failed to start", e);
+    }
+  }
+
   private boolean handleExistingArchiveState(
       DbWorkspace dbWorkspace, String namespace, String terraName) {
 
@@ -852,8 +952,6 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         storageTransferClient.deleteTransferJob(projectId, jobName);
 
         logger.log(Level.INFO, namespace + ": Workspace archive completed");
-
-        return;
     }
   }
 

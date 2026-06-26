@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { MigrationState, Workspace } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { HelpSidebar } from 'app/components/help-sidebar';
@@ -25,6 +26,7 @@ import {
 } from 'app/utils/navigation';
 import {
   MatchParams,
+  profileStore,
   routeDataStore,
   runtimeDiskStore,
   runtimeStore,
@@ -267,6 +269,11 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   const migrationState = workspace?.migrationState;
   const shouldShowMigrationModal =
     migrationState === MigrationState.NOT_STARTED;
+  const profile = profileStore.get().profile;
+
+  const restrictedLegacyUser =
+    serverConfigStore.get().config.restrictLegacyAccess &&
+    !profile?.migrationTestingGroup;
 
   useEffect(() => {
     hideSpinner();
@@ -277,6 +284,23 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!workspace || !restrictedLegacyUser) {
+      return;
+    }
+    // archived workspaces are allowed
+    if (workspace.recoveryState === 'NOT_STARTED') {
+      return;
+    }
+    // migrated workspaces should go to RW2
+    if (workspace.migrationState === MigrationState.FINISHED) {
+      window.location.href = `${environment.vwbUiUrl}/workspaces`;
+      return;
+    }
+    // everything else
+    navigate(['/workspaces']);
+  }, [workspace]);
 
   useEffect(() => {
     // abort if the routing is invalid (though this should never happen)

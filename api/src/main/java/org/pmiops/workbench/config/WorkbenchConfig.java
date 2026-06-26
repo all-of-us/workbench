@@ -358,6 +358,8 @@ public class WorkbenchConfig {
     public boolean enableVwbMigration;
     // if true, enables the workspace archival recovery flow to users
     public boolean enableWorkspaceArchiveRecovery;
+    // if true, blocks access to RW1.0 functionality for non-admin users
+    public boolean restrictLegacyAccess;
   }
 
   public static class ActionAuditConfig {

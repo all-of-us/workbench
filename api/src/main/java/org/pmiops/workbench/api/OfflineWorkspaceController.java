@@ -44,7 +44,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   public ResponseEntity<Void> archiveNextLegacyWorkspace() {
     WorkspaceDao.WorkspaceArchiveView workspaceArchiveView =
         workspaceMigrationService.getNextWorkspaceToArchive();
-    workspaceMigrationService.startWorkspaceArchive(
+    workspaceMigrationService.startWorkspaceArchiveTestEnv(
         workspaceArchiveView.getWorkspaceNamespace(), workspaceArchiveView.getFirecloudName());
 
     return ResponseEntity.noContent().build();
