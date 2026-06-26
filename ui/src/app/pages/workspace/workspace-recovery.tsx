@@ -4,7 +4,13 @@ import fp from 'lodash/fp';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 
+import { Workspace } from 'generated/fetch';
+
 import { WorkspaceRecoverySuccessModal } from 'app/components/migration/workspace-recovery-success-modal';
+import {
+  withSpinnerOverlay,
+  WithSpinnerOverlayProps,
+} from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
@@ -129,196 +135,200 @@ const styles = reactStyles({
     marginTop: 36,
   },
 });
+interface Props extends WithSpinnerOverlayProps {
+  workspace: Workspace;
+}
 
-export const WorkspaceRecovery = fp.flow(withCurrentWorkspace())(
-  ({ workspace }) => {
-    const [pods, setPods] = useState([]);
-    const [selectedPod, setSelectedPod] = useState<string>();
-    const [loadingPods, setLoadingPods] = useState(true);
-    const [recovering, setRecovering] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [navigate] = useNavigation();
+export const WorkspaceRecovery = fp.flow(
+  withSpinnerOverlay(),
+  withCurrentWorkspace()
+)(({ workspace, hideSpinner }: Props) => {
+  const [pods, setPods] = useState([]);
+  const [selectedPod, setSelectedPod] = useState<string>();
+  const [loadingPods, setLoadingPods] = useState(true);
+  const [recovering, setRecovering] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [navigate] = useNavigation();
 
-    const loadPods = async () => {
-      try {
-        setLoadingPods(true);
+  const loadPods = async () => {
+    try {
+      setLoadingPods(true);
 
-        const response = await workspacesApi().getUserPods();
-        setPods(response || []);
-      } catch (e) {
-        console.error('Failed to load billing pods', e);
-      } finally {
-        setLoadingPods(false);
-      }
-    };
-    useEffect(() => {
-      loadPods();
-    }, []);
+      const response = await workspacesApi().getUserPods();
+      setPods(response || []);
+    } catch (e) {
+      console.error('Failed to load billing pods', e);
+    } finally {
+      setLoadingPods(false);
+    }
+  };
+  useEffect(() => {
+    loadPods();
+  }, []);
 
-    const startRecovery = async () => {
-      if (!selectedPod) {
-        return;
-      }
+  useEffect(() => {
+    hideSpinner();
+  }, [hideSpinner]);
+  const startRecovery = async () => {
+    if (!selectedPod) {
+      return;
+    }
 
-      try {
-        setRecovering(true);
+    try {
+      setRecovering(true);
 
-        await workspacesApi().startWorkspaceRecovery(
-          workspace.namespace,
-          workspace.terraName,
-          {
-            podId: selectedPod,
-          }
-        );
-        setShowSuccessModal(true);
-      } finally {
-        setRecovering(false);
-      }
-    };
+      await workspacesApi().startWorkspaceRecovery(
+        workspace.namespace,
+        workspace.terraName,
+        {
+          podId: selectedPod,
+        }
+      );
+      setShowSuccessModal(true);
+    } finally {
+      setRecovering(false);
+    }
+  };
 
-    return (
-      <>
-        <div style={styles.page}>
-          <div style={styles.cards}>
-            {/* LEFT CARD */}
+  return (
+    <>
+      <div style={styles.page}>
+        <div style={styles.cards}>
+          {/* LEFT CARD */}
 
-            <div style={styles.leftCard}>
-              <div style={styles.cardTitle}>Recovering Your Workspace</div>
+          <div style={styles.leftCard}>
+            <div style={styles.cardTitle}>Recovering Your Workspace</div>
 
-              <div style={styles.divider} />
+            <div style={styles.divider} />
 
-              <div style={styles.sectionTitle}>How It Works</div>
+            <div style={styles.sectionTitle}>How It Works</div>
 
-              <div style={styles.paragraph}>
-                To recover this workspace, here's what you need to do:
-              </div>
-
-              <ol style={styles.orderedList}>
-                <li>
-                  Review the workspace information displayed to confirm this is
-                  the workspace you want to recover.
-                </li>
-
-                <li>Select a billing pod to associate with this workspace.</li>
-
-                <li>
-                  Select <b>Request Workspace Recovery</b>.
-                </li>
-              </ol>
-
-              <div style={styles.sectionTitle}>What Happens Next</div>
-
-              <ul style={styles.unorderedList}>
-                <li>
-                  If your workspace has an older CDR version (lower than CDRv7),
-                  we'll automatically upgrade it to the newest supported
-                  version.
-                </li>
-
-                <li>
-                  You will not lose any notebooks or analysis associated with
-                  this workspace.
-                </li>
-
-                <li>
-                  We'll notify you once your workspace has been restored and is
-                  ready to use.
-                </li>
-
-                <li>
-                  Once recovered, normal storage charges for the workspace will
-                  resume.
-                </li>
-              </ul>
+            <div style={styles.paragraph}>
+              To recover this workspace, here's what you need to do:
             </div>
 
-            {/* RIGHT CARD */}
+            <ol style={styles.orderedList}>
+              <li>
+                Review the workspace information displayed to confirm this is
+                the workspace you want to recover.
+              </li>
 
-            <div style={styles.rightCard}>
-              <div style={styles.cardTitle}>Recover Workspace From Storage</div>
+              <li>Select a billing pod to associate with this workspace.</li>
 
-              <div style={styles.paragraph}>
-                This workspace and its data are currently archived in storage.
-                Verify the information below and select a billing pod before
-                requesting recovery.
+              <li>
+                Select <b>Request Workspace Recovery</b>.
+              </li>
+            </ol>
+
+            <div style={styles.sectionTitle}>What Happens Next</div>
+
+            <ul style={styles.unorderedList}>
+              <li>
+                If your workspace has an older CDR version (lower than CDRv7),
+                we'll automatically upgrade it to the newest supported version.
+              </li>
+
+              <li>
+                You will not lose any notebooks or analysis associated with this
+                workspace.
+              </li>
+
+              <li>
+                We'll notify you once your workspace has been restored and is
+                ready to use.
+              </li>
+
+              <li>
+                Once recovered, normal storage charges for the workspace will
+                resume.
+              </li>
+            </ul>
+          </div>
+
+          {/* RIGHT CARD */}
+
+          <div style={styles.rightCard}>
+            <div style={styles.cardTitle}>Recover Workspace From Storage</div>
+
+            <div style={styles.paragraph}>
+              This workspace and its data are currently archived in storage.
+              Verify the information below and select a billing pod before
+              requesting recovery.
+            </div>
+
+            <div style={styles.divider} />
+
+            <div style={styles.fieldLabel}>Workspace Name</div>
+            <div style={styles.fieldValue}>{workspace.name}</div>
+
+            <div style={styles.grid}>
+              <div>
+                <div style={styles.fieldLabel}>Workspace ID</div>
+                <div style={styles.fieldValue}>{workspace.namespace}</div>
               </div>
 
-              <div style={styles.divider} />
-
-              <div style={styles.fieldLabel}>Workspace Name</div>
-              <div style={styles.fieldValue}>{workspace.name}</div>
-
-              <div style={styles.grid}>
-                <div>
-                  <div style={styles.fieldLabel}>Workspace ID</div>
-                  <div style={styles.fieldValue}>{workspace.namespace}</div>
+              <div>
+                <div style={styles.fieldLabel}>Workspace Creator</div>
+                <div style={styles.fieldValue}>
+                  {workspace.creatorUser?.userName}
                 </div>
+              </div>
+            </div>
 
-                <div>
-                  <div style={styles.fieldLabel}>Workspace Creator</div>
-                  <div style={styles.fieldValue}>
-                    {workspace.creatorUser?.userName}
-                  </div>
+            <div style={styles.grid}>
+              <div>
+                <div style={styles.fieldLabel}>Workspace Dataset Version</div>
+
+                <div style={styles.fieldValue}>{workspace.cdrVersionId}</div>
+
+                <div style={styles.warning}>
+                  This dataset version is no longer supported. Upon recovery,
+                  the workspace will automatically be upgraded to the newest
+                  supported dataset version.
                 </div>
               </div>
 
-              <div style={styles.grid}>
-                <div>
-                  <div style={styles.fieldLabel}>Workspace Dataset Version</div>
+              <div>
+                <div style={styles.fieldLabel}>Select a Billing Pod</div>
 
-                  <div style={styles.fieldValue}>
-                    {workspace.cdrVersionName}
-                  </div>
-
-                  <div style={styles.warning}>
-                    This dataset version is no longer supported. Upon recovery,
-                    the workspace will automatically be upgraded to the newest
-                    supported dataset version.
-                  </div>
-                </div>
-
-                <div>
-                  <div style={styles.fieldLabel}>Select a Billing Pod</div>
-
-                  <Dropdown
-                    value={selectedPod}
-                    options={pods}
-                    optionLabel='userFacingId'
-                    optionValue='podId'
-                    disabled={loadingPods}
-                    placeholder={
-                      loadingPods
-                        ? 'Loading billing pods...'
-                        : 'Select a billing pod'
-                    }
-                    onChange={(e) => setSelectedPod(e.value)}
-                  />
-                </div>
-              </div>
-
-              <div style={styles.buttonRow}>
-                <Button
-                  label='Cancel'
-                  className='p-button-outlined'
-                  onClick={() => navigate(['/workspaces'])}
+                <Dropdown
+                  value={selectedPod}
+                  options={pods}
+                  optionLabel='userFacingId'
+                  optionValue='podId'
+                  disabled={loadingPods}
+                  placeholder={
+                    loadingPods
+                      ? 'Loading billing pods...'
+                      : 'Select a billing pod'
+                  }
+                  onChange={(e) => setSelectedPod(e.value)}
                 />
-                <Button
-                  label='Request Workspace Recovery'
-                  disabled={!selectedPod || recovering}
-                  loading={recovering}
-                  onClick={startRecovery}
-                />
               </div>
+            </div>
+
+            <div style={styles.buttonRow}>
+              <Button
+                label='Cancel'
+                className='p-button-outlined'
+                onClick={() => navigate(['/workspaces'])}
+              />
+              <Button
+                label='Request Workspace Recovery'
+                disabled={!selectedPod || recovering}
+                loading={recovering}
+                onClick={startRecovery}
+              />
             </div>
           </div>
         </div>
-        {showSuccessModal && (
-          <WorkspaceRecoverySuccessModal
-            onClose={() => setShowSuccessModal(false)}
-            onReturn={() => navigate(['/workspaces'])}
-          />
-        )}
-      </>
-    );
-  }
-);
+      </div>
+      {showSuccessModal && (
+        <WorkspaceRecoverySuccessModal
+          onClose={() => setShowSuccessModal(false)}
+          onReturn={() => navigate(['/workspaces'])}
+        />
+      )}
+    </>
+  );
+});
