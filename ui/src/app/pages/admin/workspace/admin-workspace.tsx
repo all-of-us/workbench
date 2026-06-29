@@ -32,6 +32,7 @@ import { CloudStorageObjects } from './cloud-storage-objects';
 import { CloudStorageTrafficChart } from './cloud-storage-traffic-chart';
 import { CohortBuilder } from './cohort-builder';
 import { Collaborators } from './collaborators';
+import { WorkspaceArchiveInfo } from './workspace-archival-info';
 import { WorkspaceMigrationInfo } from './workspace-migration-info';
 
 interface Props
@@ -135,6 +136,7 @@ const AdminWorkspaceImpl = (props: Props) => {
             reload={populateWorkspaceDetails}
           />
           <WorkspaceMigrationInfo workspace={workspace} />
+          <WorkspaceArchiveInfo workspace={workspace} />
           <Accordion>
             <AccordionTab header='Research Purpose'>
               <ResearchPurposeSection
