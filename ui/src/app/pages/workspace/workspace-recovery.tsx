@@ -164,11 +164,9 @@ export const WorkspaceRecovery = fp.flow(
   };
   useEffect(() => {
     loadPods();
+    hideSpinner();
   }, []);
 
-  useEffect(() => {
-    hideSpinner();
-  }, [hideSpinner]);
   const startRecovery = async () => {
     if (!selectedPod) {
       return;
