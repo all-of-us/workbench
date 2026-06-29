@@ -277,11 +277,6 @@ export const SideNav = (props: SideNavProps) => {
   const onToggleUser = () => setShowUserOptions(!showUserOptions);
 
   const { minimal, profile, onToggleSideNav } = props;
-  const workspaceRecoveryAdminActive = () => {
-    return window.location.pathname.startsWith(
-      '/admin/workspace-archive-recovery'
-    );
-  };
 
   const openContactWidget = () => {
     openZendeskWidget(
@@ -454,15 +449,6 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href='/admin/vwb/workspaces'
             active={vwbWorkspaceAdminActive()}
-          />
-        )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) &&
-        showAdminOptions && (
-          <SideNavItem
-            content='Workspace Archive Recovery'
-            onToggleSideNav={() => onToggleSideNav()}
-            href='/admin/workspace/admin-workspace-archive-recovery'
-            active={workspaceRecoveryAdminActive()}
           />
         )}
       {environment.enableVwbAdmin &&

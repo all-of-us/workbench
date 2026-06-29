@@ -26,6 +26,7 @@ import { cdrVersionStore, MatchParams, profileStore } from 'app/utils/stores';
 import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 
 import { AdminLockWorkspace } from './admin-lock-workspace';
+import { AdminWorkspaceRecoveryModal } from './admin-workspace-recovery-modal';
 import { BasicInformation } from './basic-information';
 import { CloudEnvironmentsTable } from './cloud-environments-table';
 import { CloudStorageObjects } from './cloud-storage-objects';
@@ -48,6 +49,7 @@ const AdminWorkspaceImpl = (props: Props) => {
   const [dataLoadError, setDataLoadError] = useState<Response>();
   const [runtimes, setRuntimes] = useState<AdminRuntimeFields[]>();
   const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
 
   const handleDataLoadError = async (error) => {
     if (error instanceof Response) {
@@ -136,7 +138,10 @@ const AdminWorkspaceImpl = (props: Props) => {
             reload={populateWorkspaceDetails}
           />
           <WorkspaceMigrationInfo workspace={workspace} />
-          <WorkspaceArchiveInfo workspace={workspace} />
+          <WorkspaceArchiveInfo
+            workspace={workspace}
+            onRecover={() => setShowRecoveryModal(true)}
+          />
           <Accordion>
             <AccordionTab header='Research Purpose'>
               <ResearchPurposeSection
@@ -182,6 +187,14 @@ const AdminWorkspaceImpl = (props: Props) => {
               <h2>Disks</h2>
               <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
             </>
+          )}
+
+          {showRecoveryModal && (
+            <AdminWorkspaceRecoveryModal
+              workspace={workspace}
+              onClose={() => setShowRecoveryModal(false)}
+              reload={populateWorkspaceDetails}
+            />
           )}
         </div>
       )}
