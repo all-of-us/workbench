@@ -7,6 +7,7 @@ import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion
 
 import com.google.storagetransfer.v1.proto.TransferTypes;
 import jakarta.inject.Provider;
+import jakarta.mail.MessagingException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -28,6 +29,7 @@ import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageTransferClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.MigrationState;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceArchiveStatus;
@@ -36,6 +38,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.model.CloneControlledGcpBigQueryDatasetResult;
 import org.pmiops.workbench.wsmanager.model.CreatedControlledGcpGcsBucket;
@@ -82,6 +85,8 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private StorageTransferClient storageTransferClient;
   @Mock private TaskQueueService taskQueueService;
   @Mock private WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
+  @Mock private MailService mailService;
+  @Mock private WorkspaceService workspaceService;
   // Clock MOCK
   @Mock private Clock clock;
 
@@ -400,50 +405,51 @@ public class WorkspaceMigrationServiceImplTest {
     verify(workspaceBucketArchiveDao).save(archive);
   }
 
-  private void setupRecoveryStubs() {
-
-    // Rawls workspace lookup
-    when(fireCloudService.getWorkspace(anyString(), anyString()))
-        .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
-
-    // Workspace returned from mapper/service
-    when(workspaceMapper.toApiWorkspace(
-            eq(dbWorkspace), any(RawlsWorkspaceDetails.class), eq(initialCreditsService)))
-        .thenReturn(workspace);
-
-    // User pod lookup
-    DbUser dbUser = new DbUser();
-
-    DbVwbUserPod pod = new DbVwbUserPod();
-    pod.setVwbPodId(POD_ID);
-
-    dbUser.setVwbUserPod(pod);
-
-    when(userDao.findUserByUsername(any())).thenReturn(dbUser);
-
-    // New VWB workspace creation
-    WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
-
-    vwbWorkspace.setId(UUID.randomUUID());
-
-    when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
-
-    // BQ clone
-    when(wsmClient.cloneBQDataset(any(), any(), any(), any())).thenReturn(CLONED_DATASET_RESULT);
-
-    // Archive lookup
-    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
-        .thenReturn(
-            List.of(
-                new DbWorkspaceBucketArchive()
-                    .setStatus(WorkspaceArchiveStatus.ARCHIVED.toString())
-                    .setGcsPath(ARCHIVE_PATH)));
-
-    // Recovery transfer job
-    when(storageTransferClient.createTransferJob(
-            any(), any(), any(), any(), any(), any(), any(), any()))
-        .thenReturn(RECOVERY_JOB_NAME);
-  }
+  //  private void setupRecoveryStubs() {
+  //
+  //    // Rawls workspace lookup
+  //    when(fireCloudService.getWorkspace(anyString(), anyString()))
+  //        .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
+  //
+  //    // Workspace returned from mapper/service
+  //    when(workspaceMapper.toApiWorkspace(
+  //            eq(dbWorkspace), any(RawlsWorkspaceDetails.class), eq(initialCreditsService)))
+  //        .thenReturn(workspace);
+  //
+  //    // User pod lookup
+  //    DbUser dbUser = new DbUser();
+  //
+  //    DbVwbUserPod pod = new DbVwbUserPod();
+  //    pod.setVwbPodId(POD_ID);
+  //
+  //    dbUser.setVwbUserPod(pod);
+  //
+  //    when(userDao.findUserByUsername(any())).thenReturn(dbUser);
+  //
+  //    // New VWB workspace creation
+  //    WorkspaceDescription vwbWorkspace = new WorkspaceDescription();
+  //
+  //    vwbWorkspace.setId(UUID.randomUUID());
+  //
+  //    when(wsmClient.createWorkspaceAsService(any(), any())).thenReturn(vwbWorkspace);
+  //
+  //    // BQ clone
+  //    when(wsmClient.cloneBQDataset(any(), any(), any(),
+  // any())).thenReturn(CLONED_DATASET_RESULT);
+  //
+  //    // Archive lookup
+  //    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+  //        .thenReturn(
+  //            List.of(
+  //                new DbWorkspaceBucketArchive()
+  //                    .setStatus(WorkspaceArchiveStatus.ARCHIVED.toString())
+  //                    .setGcsPath(ARCHIVE_PATH)));
+  //
+  //    // Recovery transfer job
+  //    when(storageTransferClient.createTransferJob(
+  //            any(), any(), any(), any(), any(), any(), any(), any()))
+  //        .thenReturn(RECOVERY_JOB_NAME);
+  //  }
 
   @Test
   void startWorkspaceRecovery_findsArchiveMetadata() {
@@ -493,7 +499,14 @@ public class WorkspaceMigrationServiceImplTest {
   }
 
   @Test
-  void checkRecoveryStatus_marksRecoveredWhenSuccessful() {
+  void checkRecoveryStatus_marksRecoveredWhenSuccessful() throws MessagingException {
+
+    when(workbenchConfigProvider.get()).thenReturn(config);
+
+    when(workspaceService.getWorkspaceOwnerList(any(DbWorkspace.class)))
+        .thenReturn(List.of(new DbUser()));
+
+    doNothing().when(mailService).sendWorkspaceUnarchivedEmail(any(), anyList());
 
     TransferTypes.TransferOperation transferOperation =
         TransferTypes.TransferOperation.newBuilder()

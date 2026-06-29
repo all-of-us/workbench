@@ -103,4 +103,7 @@ public interface MailService {
    */
   void sendWorkspaceMigrationCompleteEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
+
+  void sendWorkspaceUnarchivedEmail(DbWorkspace workspace, List<DbUser> recipients)
+      throws MessagingException;
 }

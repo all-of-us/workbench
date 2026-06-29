@@ -365,21 +365,19 @@ export const Homepage = fp.flow(
         },
       } = this.props;
       const { firstVisit, userWorkspacesResponse } = this.state;
-      const { enableVwbMigration } = serverConfigStore.get().config;
-      const showMigrationBanner = migrationTestingGroup || enableVwbMigration;
-      const restrictLegacyAccess =
-        serverConfigStore.get().config.restrictLegacyAccess;
+      const { enableVWBHomepageBanner, restrictLegacyAccess } =
+        serverConfigStore.get().config;
       const canCreateLegacyWorkspace =
         migrationTestingGroup || !restrictLegacyAccess;
 
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
-            {serverConfigStore.get().config.enableVWBHomepageBanner ? (
-              showMigrationBanner ? (
-                <VwbMigrationBanner />
-              ) : (
+            {enableVWBHomepageBanner ? (
+              restrictLegacyAccess && !migrationTestingGroup ? (
                 <LegacyWorkbenchEndedBanner />
+              ) : (
+                <VwbMigrationBanner />
               )
             ) : (
               <WelcomeHeader />
@@ -394,9 +392,11 @@ export const Homepage = fp.flow(
                 />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
-                    <RecentResources
-                      workspaces={userWorkspacesResponse.items}
-                    />
+                    !restrictLegacyAccess && (
+                      <RecentResources
+                        workspaces={userWorkspacesResponse.items}
+                      />
+                    )
                   ) : (
                     <GettingStarted />
                   ))}

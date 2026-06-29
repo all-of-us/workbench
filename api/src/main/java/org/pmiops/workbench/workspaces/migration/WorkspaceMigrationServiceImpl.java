@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces.migration;
 import com.google.cloud.storage.Blob;
 import com.google.storagetransfer.v1.proto.TransferTypes.TransferOperation;
 import jakarta.inject.Provider;
+import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -943,8 +944,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       case SUCCESS:
         archive.setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
 
-        workspaceBucketArchiveDao.save(archive);
+        dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.NOT_STARTED.name());
 
+        workspaceDao.save(dbWorkspace);
+
+        workspaceBucketArchiveDao.save(archive);
         storageTransferClient.deleteTransferJob(projectId, jobName);
 
         logger.log(Level.INFO, namespace + ": Workspace archive completed");
@@ -1126,6 +1130,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.RECOVERED.name());
 
         workspaceDao.save(dbWorkspace);
+        List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
+        try {
+          mailService.sendWorkspaceUnarchivedEmail(dbWorkspace, owners);
+        } catch (MessagingException e) {
+          logger.log(Level.WARNING, "Failed to send workspace unarchive email", e);
+        }
 
         storageTransferClient.deleteTransferJob(projectId, jobName);
 

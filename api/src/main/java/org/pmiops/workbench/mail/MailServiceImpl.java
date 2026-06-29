@@ -552,6 +552,28 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void sendWorkspaceUnarchivedEmail(DbWorkspace workspace, List<DbUser> recipients)
+      throws MessagingException {
+
+    final String subject = "Your workspace has been successfully unarchived";
+
+    // Add support email
+    List<String> toEmails =
+        recipients.stream().map(DbUser::getContactEmail).collect(Collectors.toList());
+
+    sendWithRetries(
+        toEmails,
+        Collections.singletonList("support@researchallofus.org"),
+        subject,
+        String.format(
+            "Unarchive email sent for workspace '%s' (%s)",
+            workspace.getName(), workspace.getWorkspaceNamespace()),
+        buildHtml(
+            "emails/workspace_unarchived/content.html",
+            workspaceUnarchivedSubstitutionMap(workspace)));
+  }
+
+  @Override
   public void sendWorkspaceMigrationCompleteEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
 
@@ -910,6 +932,20 @@ public class MailServiceImpl implements MailService {
           "%s's initial credits ($%.2f remaining)",
           workspace.getCreator().getUsername(), initialCreditsRemaining);
     }
+  }
+
+  private Map<EmailSubstitutionField, String> workspaceUnarchivedSubstitutionMap(
+      DbWorkspace workspace) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.WORKSPACE_CREATOR, workspace.getCreator().getUsername())
+        .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(workspace))
+        .put(EmailSubstitutionField.SUPPORT_EMAIL, "support@researchallofus.org")
+        .build();
   }
 
   private String buildWorkspaceUrl(DbWorkspace workspace) {
