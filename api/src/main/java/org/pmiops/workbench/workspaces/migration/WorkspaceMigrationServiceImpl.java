@@ -684,7 +684,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       logger.log(Level.INFO, namespace + ": Starting workspace archive");
 
       RawlsWorkspaceDetails fcWorkspace =
-          fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
+          fireCloudService.getWorkspaceAsService(namespace, terraName).getWorkspace();
 
       String sourceBucket = fcWorkspace.getBucketName();
 
