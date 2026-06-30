@@ -55,11 +55,16 @@ export const RecentWorkspaces = class extends React.Component<Props, State> {
     const isRestrictedUser =
       restrictLegacyAccess && !this.props.migrationTestingGroup;
     const visibleWorkspaces = isRestrictedUser
-      ? this.state.recentWorkspaces.filter((rw) =>
-          [
-            MigrationState.FINISHED.toString(),
-            WorkspaceRecoveryStatus.NOT_STARTED.toString(),
-          ].includes(rw.workspace.migrationState)
+      ? this.state.recentWorkspaces.filter(
+          (rw) =>
+            rw.workspace.migrationState !==
+              MigrationState.FINISHED.toString() &&
+            [
+              WorkspaceRecoveryStatus.NOT_STARTED.toString(),
+              WorkspaceRecoveryStatus.RECOVERING.toString(),
+              WorkspaceRecoveryStatus.FAILED.toString(),
+              null,
+            ].includes(rw.workspace.recoveryState)
         )
       : this.state.recentWorkspaces;
     return (
@@ -99,6 +104,10 @@ export const RecentWorkspaces = class extends React.Component<Props, State> {
                       this.loadWorkspaces();
                       this.props.onChange();
                     }}
+                    tierAccessDisabled={
+                      typeof recentWorkspace.workspace.recoveryState ===
+                      'undefined'
+                    }
                   />
                 );
               })}

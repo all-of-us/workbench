@@ -148,8 +148,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       const filteredList = workspaceList.filter(
         ({ accessLevel }) => !filterLevels || filterLevels.includes(accessLevel)
       );
-      const archivedWorkspaces = filteredList.filter(
-        (wp) => wp.workspace.migrationState === 'NOT_STARTED'
+      const archivedWorkspaces = filteredList.filter((wp) =>
+        ['NOT_STARTED', 'RECOVERING', 'FAILED'].includes(
+          wp.workspace.recoveryState
+        )
       );
 
       const migratedWorkspaces = filteredList.filter(
@@ -370,7 +372,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                             <SmallHeader>Workspaces</SmallHeader>
                           </div>
 
-                          {migratedWorkspaces.map((wp) => (
+                          {nonMigratedWorkspaces.map((wp) => (
                             <WorkspaceCard
                               key={`${wp.workspace.namespace}-migrated`}
                               workspace={wp.workspace}
