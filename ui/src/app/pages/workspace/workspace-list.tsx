@@ -149,7 +149,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         ({ accessLevel }) => !filterLevels || filterLevels.includes(accessLevel)
       );
       const archivedWorkspaces = filteredList.filter(
-        (wp) => wp.workspace.migrationState === 'NOT_STARTED'
+        (wp) => wp.workspace.recoveryState === 'NOT_STARTED'
       );
 
       const migratedWorkspaces = filteredList.filter(
@@ -364,10 +364,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   ) : (
                     <>
                       {/* NORMAL USERS ONLY SEE MIGRATED */}
-                      {nonMigratedWorkspaces.length > 0 && (
+                      {migratedWorkspaces.length > 0 && (
                         <>
                           <div style={{ width: '100%', marginBottom: '12px' }}>
-                            <SmallHeader>Workspaces</SmallHeader>
+                            <SmallHeader>Migrated Workspaces</SmallHeader>
                           </div>
 
                           {migratedWorkspaces.map((wp) => (
@@ -424,7 +424,12 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                               workspace={wp.workspace}
                               accessLevel={wp.accessLevel}
                               reload={() => this.reloadWorkspaces()}
-                              tierAccessDisabled={typeof wp.workspace.recoveryState === 'undefined'}
+                              tierAccessDisabled={
+                                !hasTierAccess(
+                                  profile,
+                                  wp.workspace.accessTierShortName
+                                )
+                              }
                               isMigratedView={false}
                             />
                           ))}

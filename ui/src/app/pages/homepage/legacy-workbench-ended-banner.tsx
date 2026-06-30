@@ -8,7 +8,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
 import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
-import migrationEnded from 'assets/images/migration-ended.jpg';
+import noImageBanner from 'assets/images/no-image-banner.png';
 
 const SUPPORT_ARTICLE_URL =
   'https://support.researchallofus.org/hc/en-us/articles/39985865987732-What-to-expect-during-the-Researcher-Workbench-Migration';
@@ -58,6 +58,7 @@ export const LegacyWorkbenchEndedBanner = () => {
             <Button
               style={{
                 height: '45px',
+                minWidth: '380px',
                 padding: '0 1rem',
                 whiteSpace: 'nowrap',
               }}
@@ -74,6 +75,7 @@ export const LegacyWorkbenchEndedBanner = () => {
               type='secondaryOutline'
               style={{
                 height: '45px',
+                minWidth: '300px',
                 padding: '0 1rem',
                 whiteSpace: 'nowrap',
               }}
@@ -92,11 +94,11 @@ export const LegacyWorkbenchEndedBanner = () => {
       <FlexColumn
         style={{
           marginLeft: '1.5rem',
-          flex: 1.5,
+          flex: 1.35,
         }}
       >
         <img
-          src={migrationEnded}
+          src={noImageBanner}
           alt='Legacy Workbench Ended'
           style={{
             marginTop: '1%',
