@@ -148,8 +148,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       const filteredList = workspaceList.filter(
         ({ accessLevel }) => !filterLevels || filterLevels.includes(accessLevel)
       );
-      const archivedWorkspaces = filteredList.filter(
-        (wp) => wp.workspace.recoveryState === 'NOT_STARTED'
+      const archivedWorkspaces = filteredList.filter((wp) =>
+        ['NOT_STARTED', 'RECOVERING', 'FAILED'].includes(
+          wp.workspace.recoveryState
+        )
       );
 
       const migratedWorkspaces = filteredList.filter(
@@ -364,13 +366,13 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   ) : (
                     <>
                       {/* NORMAL USERS ONLY SEE MIGRATED */}
-                      {migratedWorkspaces.length > 0 && (
+                      {nonMigratedWorkspaces.length > 0 && (
                         <>
                           <div style={{ width: '100%', marginBottom: '12px' }}>
-                            <SmallHeader>Migrated Workspaces</SmallHeader>
+                            <SmallHeader>Workspaces</SmallHeader>
                           </div>
 
-                          {migratedWorkspaces.map((wp) => (
+                          {nonMigratedWorkspaces.map((wp) => (
                             <WorkspaceCard
                               key={`${wp.workspace.namespace}-migrated`}
                               workspace={wp.workspace}
@@ -425,10 +427,8 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                               accessLevel={wp.accessLevel}
                               reload={() => this.reloadWorkspaces()}
                               tierAccessDisabled={
-                                !hasTierAccess(
-                                  profile,
-                                  wp.workspace.accessTierShortName
-                                )
+                                typeof wp.workspace.recoveryState ===
+                                'undefined'
                               }
                               isMigratedView={false}
                             />

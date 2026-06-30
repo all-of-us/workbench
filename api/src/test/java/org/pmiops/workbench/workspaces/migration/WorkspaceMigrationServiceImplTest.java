@@ -62,7 +62,7 @@ public class WorkspaceMigrationServiceImplTest {
   private static final String SOURCE_BUCKET = "source-bucket";
   private static final String DEST_BUCKET = "dest-bucket";
   private static final String ARCHIVE_BUCKET = "all-of-us-archive-ct-bucket";
-  private static final String ARCHIVE_PATH = "gs://" + ARCHIVE_BUCKET + "/test-ns/123/";
+  private static final String ARCHIVE_PATH = "gs://" + ARCHIVE_BUCKET + "/test-ns/";
   private static final String RECOVERY_JOB_NAME = "transferJobs/migration-recovery-" + NAMESPACE;
   private static final String JOB_ID = UUID.randomUUID().toString();
   private static final CloneControlledGcpBigQueryDatasetResult CLONED_DATASET_RESULT =
@@ -303,7 +303,7 @@ public class WorkspaceMigrationServiceImplTest {
         .createTransferJob(
             eq(SOURCE_BUCKET),
             eq("all-of-us-archive-ct-bucket-wb-blazing-lime-5817"),
-            eq(NAMESPACE + "/" + dbWorkspace.getWorkspaceId() + "/"),
+            eq(NAMESPACE + "/"),
             eq("archive-" + NAMESPACE),
             eq(SERVER_PROJECT),
             isNull(),
