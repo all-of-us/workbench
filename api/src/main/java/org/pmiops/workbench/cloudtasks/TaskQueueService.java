@@ -387,7 +387,7 @@ public class TaskQueueService {
   }
 
   public void pushWorkspaceArchiveStatusTask(String namespace, String terraName) {
-
+    LOGGER.info(namespace + ": pushing workspace archive status task");
     createAndPushTask(
         WORKSPACE_ARCHIVE_STATUS,
         Map.of(

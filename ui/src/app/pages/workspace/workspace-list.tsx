@@ -424,7 +424,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                               workspace={wp.workspace}
                               accessLevel={wp.accessLevel}
                               reload={() => this.reloadWorkspaces()}
-                              tierAccessDisabled={typeof wp.workspace.recoveryState === 'undefined'}
+                              tierAccessDisabled={
+                                typeof wp.workspace.recoveryState ===
+                                'undefined'
+                              }
                               isMigratedView={false}
                             />
                           ))}

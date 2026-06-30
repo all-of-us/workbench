@@ -4629,11 +4629,13 @@ paths:
     post:
       tags:
         - cloudTaskWorkspaces
-      description: Checks the status of a workspace archive STS job and updates the archive state when complete. Requeues itself if still running.
+      description: |
+        Checks the status of a workspace archive STS job and updates the archive state when
+        complete. Requeues itself if still running.
       operationId: checkWorkspaceArchiveStatus
+      security: [ ]
       requestBody:
         description: Workspace archive status task to process.
-        required: true
         content:
           application/json:
             schema:
@@ -4648,7 +4650,7 @@ paths:
         - cloudTaskWorkspaces
       description: Checks recovery STS status and requeues if still running
       operationId: checkWorkspaceRecoveryStatus
-
+      security: [ ]
       requestBody:
         content:
           application/json:

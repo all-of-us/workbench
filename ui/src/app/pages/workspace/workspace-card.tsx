@@ -351,7 +351,9 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         {accessLevel}
                       </div>
 
-                      {isArchived ? (
+                      {isArchived ||
+                      (workspace.migrationState !== MigrationState.FINISHED &&
+                        typeof workspace.recoveryState === 'undefined') ? (
                         <RecoveryBadge state={workspace.recoveryState} />
                       ) : (
                         workspace.migrationState && (

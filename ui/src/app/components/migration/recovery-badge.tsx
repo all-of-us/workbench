@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { faArrowsRotate } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { WorkspaceRecoveryStatus } from 'generated/fetch';
 
@@ -29,6 +27,7 @@ const styles = reactStyles({
   recovering: {
     backgroundColor: colors.light,
     color: colors.dark,
+    fontSize: '9px',
   },
 
   recovered: {
@@ -39,6 +38,12 @@ const styles = reactStyles({
   failed: {
     backgroundColor: addOpacity(colors.danger, 0.15).toString(),
     color: colors.danger,
+  },
+
+  waiting: {
+    backgroundColor: colors.disabled,
+    color: colors.white,
+    fontSize: '9px',
   },
 });
 
@@ -53,15 +58,19 @@ export const RecoveryBadge = ({ state }: Props) => {
         <span style={{ ...styles.badge, ...styles.archived }}>ARCHIVED</span>
       );
 
+    // Include FAILED here as users can't take any action and don't need to see a failed status. These will be handled internally
+    case WorkspaceRecoveryStatus.FAILED:
     case WorkspaceRecoveryStatus.RECOVERING:
       return (
         <span style={{ ...styles.badge, ...styles.recovering }}>
-          <FontAwesomeIcon
-            icon={faArrowsRotate}
-            spin
-            style={{ marginRight: 6, fontSize: 10 }}
-          />
-          RECOVERING
+          {/* Commenting out the spinner for now */}
+          {/* We may want to add a status to differentiate between waiting for approval and recovery in progress */}
+          {/* <FontAwesomeIcon */}
+          {/*  icon={faArrowsRotate}*/}
+          {/*  spin*/}
+          {/*  style={{ marginRight: 6, fontSize: 10 }}*/}
+          {/* /> */}
+          RECOVERY PENDING
         </span>
       );
 
@@ -70,10 +79,11 @@ export const RecoveryBadge = ({ state }: Props) => {
         <span style={{ ...styles.badge, ...styles.recovered }}>RECOVERED</span>
       );
 
-    case WorkspaceRecoveryStatus.FAILED:
-      return <span style={{ ...styles.badge, ...styles.failed }}>FAILED</span>;
-
     default:
-      return null;
+      return (
+        <span style={{ ...styles.badge, ...styles.waiting }}>
+          WAITING TO ARCHIVE
+        </span>
+      );
   }
 };

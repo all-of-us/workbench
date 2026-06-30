@@ -696,7 +696,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               ? CONTROLLED_TIER_ARCHIVE_BUCKET
               : REGISTERED_TIER_ARCHIVE_BUCKET;
 
-      String archivePath = String.format("%s/%s/", namespace, dbWorkspace.getWorkspaceId());
+      String archivePath = String.format("%s/", namespace);
 
       logger.log(
           Level.INFO,
@@ -905,6 +905,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   @Override
   public void checkArchiveStatus(String namespace, String terraName) {
 
+    logger.log(Level.INFO, namespace + ": Checking archive queue status");
+
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
     List<DbWorkspaceBucketArchive> archives =
@@ -930,11 +932,13 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
+        logger.log(Level.INFO, namespace + ": Archive transfer in progress, requeue");
         taskQueueService.pushWorkspaceArchiveStatusTask(namespace, terraName);
 
         return;
 
       case FAILED:
+        logger.log(Level.INFO, namespace + ": Archive transfer failed");
         archive.setStatus(WorkspaceArchiveStatus.FAILED.toString());
 
         workspaceBucketArchiveDao.save(archive);
@@ -942,6 +946,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         return;
 
       case SUCCESS:
+        logger.log(Level.INFO, namespace + ": Archive transfer success");
         archive.setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
 
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.NOT_STARTED.name());
