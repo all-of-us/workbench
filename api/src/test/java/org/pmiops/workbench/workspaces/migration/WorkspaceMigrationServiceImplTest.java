@@ -134,7 +134,7 @@ public class WorkspaceMigrationServiceImplTest {
   }
 
   private void setupStartMigrationStubs() {
-    when(fireCloudService.getWorkspaceAsService(NAMESPACE, TERRA_NAME))
+    when(fireCloudService.getWorkspace(NAMESPACE, TERRA_NAME))
         .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspace));
 
     when(workspaceMapper.toApiWorkspace(
