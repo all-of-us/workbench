@@ -18,6 +18,8 @@ public class DbParams extends Params {
     hostname = envVars.get("CDR_DB_HOST").orElse(null);
     cloudSqlInstanceName = envVars.get("CDR_CLOUD_SQL_INSTANCE_NAME").orElse(null);
     password = envVars.get("CDR_DB_PASSWORD").orElse(null);
+    iamDbUser = envVars.get("CDR_CLOUD_SQL_IAM_USER").orElse(null);
+    targetPrincipal = envVars.get("CDR_CLOUD_SQL_TARGET_PRINCIPAL").orElse(null);
     try {
       validate();
       log.info("CDR SQL instance params: " + this.toString());
