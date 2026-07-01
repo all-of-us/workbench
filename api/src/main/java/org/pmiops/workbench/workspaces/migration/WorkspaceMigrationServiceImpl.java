@@ -666,7 +666,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
   @Override
   public WorkspaceDao.WorkspaceArchiveView getNextWorkspaceToArchive() {
-    return workspaceDao.findNextLowRiskWorkspaceToArchive();
+    return workspaceDao.findNextWorkspaceToArchive();
   }
 
   @Override
