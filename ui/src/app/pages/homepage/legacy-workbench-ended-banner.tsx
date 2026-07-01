@@ -10,8 +10,7 @@ import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import migrationEnded from 'assets/images/migration-ended.jpg';
 
-const SUPPORT_ARTICLE_URL =
-  'https://support.researchallofus.org/hc/en-us/articles/39985865987732-What-to-expect-during-the-Researcher-Workbench-Migration';
+const SUPPORT_ARTICLE_URL = 'https://support.researchallofus.org/hc/en-us';
 
 export const LegacyWorkbenchEndedBanner = () => {
   return (
@@ -79,7 +78,7 @@ export const LegacyWorkbenchEndedBanner = () => {
               }}
               onClick={() => window.open(SUPPORT_ARTICLE_URL, '_blank')}
             >
-              View Support Article
+              View User Support Hub
               <FontAwesomeIcon
                 icon={faUpRightFromSquare}
                 style={{ marginLeft: '0.5rem' }}

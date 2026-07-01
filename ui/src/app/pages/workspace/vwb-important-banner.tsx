@@ -68,9 +68,11 @@ export const VwbImportantBanner = ({
                 {actionText}
               </Clickable>
             )}
-            <Clickable style={{ cursor: 'pointer' }} onClick={onClose}>
-              <FontAwesomeIcon icon={faXmark} />
-            </Clickable>
+            {!!onClose && (
+              <Clickable style={{ cursor: 'pointer' }} onClick={onClose}>
+                <FontAwesomeIcon icon={faXmark} />
+              </Clickable>
+            )}
           </FlexRow>
 
           <FlexRow>
