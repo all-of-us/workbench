@@ -140,7 +140,7 @@
     "enableCTPlusCards": false,
     "enableVwbMigration": true,
     "enableWorkspaceArchiveRecovery": false,
-    "restrictLegacyAccess": false
+    "restrictLegacyAccess": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
