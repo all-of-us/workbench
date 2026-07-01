@@ -55,9 +55,6 @@ const styles = reactStyles({
   },
 });
 
-const VWB_MIGRATION_SUPPORT_HUB_URL =
-  'https://support.researchallofus.org/hc/en-us/sections/41021971832724-Researcher-Workbench-2-0-Migration';
-
 interface WorkspaceListProps extends WithSpinnerOverlayProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };
 }
@@ -176,10 +173,6 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                 'active use. Existing workspaces have been archived and ' +
                 'can be recovered through the workspace recovery process.'
               }
-              actionText='Learn More'
-              onAction={() =>
-                window.open(VWB_MIGRATION_SUPPORT_HUB_URL, '_blank')
-              }
             />
           </div>
           <FadeBox style={styles.fadeBox}>
@@ -241,7 +234,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     }
                     style={{ height: '2.25rem' }}
                   >
-                    Open Verily Workbench <NewWindowIcon />
+                    Open RW 2.0 <NewWindowIcon />
                   </Button>
                 </div>
               </FlexRow>
