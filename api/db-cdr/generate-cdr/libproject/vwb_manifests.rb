@@ -133,27 +133,16 @@ def generate_aw4_destination_path(source_path, input_section, rid, destination_b
   File.join(destination_base, dest_name)
 end
 
-# Helper to build output row for existing RID in delta release
-def build_output_row_for_existing_rid(rid, aw4_row, input_section, destination_base)
-  return nil unless input_section["outputManifestSpec"]
-
-  output_row = {"person_id" => rid}
-
-  input_section["outputManifestSpec"].each do |aw4_col, output_col|
-    source_path = aw4_row[aw4_col]
-    next if source_path.nil? || source_path.empty?
-
-    destination_path = generate_aw4_destination_path(source_path, input_section, rid, destination_base)
-    output_row[output_col] = destination_path
-  end
-
-  output_row
-end
-
 # Helper to process existing RID from previous manifest
-def process_existing_rid_from_previous_manifest(rid, aw4_row, input_section, destination_base, output_rows_by_rid)
-  output_row = build_output_row_for_existing_rid(rid, aw4_row, input_section, destination_base)
-  output_rows_by_rid[rid] = output_row if output_row
+def process_existing_rid_from_previous_manifest(rid, aw4_row, input_section, destination_base, output_rows_by_rid, prev_manifest)
+  # For delta releases, reuse the existing row from previous manifest as-is
+  # This preserves the original paths (e.g., v8_base) instead of creating new ones (e.g., v9_delta)
+  prev_row = prev_manifest[rid]
+  if prev_row
+    # Convert CSV::Row to hash if needed
+    output_row = prev_row.is_a?(CSV::Row) ? prev_row.to_h : prev_row
+    output_rows_by_rid[rid] = output_row
+  end
 end
 
 # Helper to initialize output row for new RID
@@ -170,28 +159,22 @@ def valid_source_path?(source_path)
 end
 
 # Helper to create copy manifest entry for AW4 file
-def create_aw4_copy_manifest_entry(source_path, destination_path, dest_name, storage_class)
-  {
+def create_aw4_copy_manifest_entry(source_path, destination_path, dest_name, storage_class, staging_path = nil)
+  entry = {
     "source" => source_path,
-    "destination" => destination_path,
+    "destination" => staging_path || destination_path,
     "outputFileName" => dest_name,
     "storageClass" => storage_class
   }
-end
 
-# Helper to map output column for AW4 file
-def map_aw4_output_column(aw4_column, destination_path, input_section, rid, output_rows_by_rid)
-  return unless input_section["outputManifestSpec"]
+  # Add finalDestination if using staging
+  entry["finalDestination"] = destination_path if staging_path
 
-  input_section["outputManifestSpec"].each do |aw4_col, output_col|
-    if aw4_col == aw4_column
-      output_rows_by_rid[rid][output_col] = destination_path
-    end
-  end
+  entry
 end
 
 # Helper to process single AW4 column
-def process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid)
+def process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid, staging_base = nil)
   source_path = aw4_row[aw4_column]
   return unless valid_source_path?(source_path)
 
@@ -199,29 +182,47 @@ def process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base
   source_name = File.basename(source_path)
   dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
   destination_path = File.join(destination_base, dest_name)
+  staging_path = staging_base ? File.join(staging_base, dest_name) : nil
   storage_class = input_section.fetch("storageClass", "STANDARD")
 
-  manifest_entry = create_aw4_copy_manifest_entry(source_path, destination_path, dest_name, storage_class)
+  manifest_entry = create_aw4_copy_manifest_entry(source_path, destination_path, dest_name, storage_class, staging_path)
   copy_manifest.push(manifest_entry)
-
-  # Map to output manifest if specified
-  map_aw4_output_column(aw4_column, destination_path, input_section, rid, output_rows_by_rid)
 end
 
-# Helper to process all AW4 columns for a single row
-def process_aw4_columns_for_row(aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid)
-  input_section["aw4Columns"].each do |aw4_column|
-    process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid)
+# Helper to map all columns from outputManifestSpec to output row
+def map_all_output_manifest_columns(aw4_row, rid, input_section, destination_base, output_rows_by_rid)
+  return unless input_section["outputManifestSpec"]
+
+  input_section["outputManifestSpec"].each do |aw4_col, output_col|
+    source_path = aw4_row[aw4_col]
+    next unless valid_source_path?(source_path)
+
+    source_name = File.basename(source_path)
+    dest_name = apply_aw4_filename_replacement(source_name, input_section, rid)
+    destination_path = File.join(destination_base, dest_name)
+
+    output_rows_by_rid[rid][output_col] = destination_path
   end
 end
 
+# Helper to process all AW4 columns for a single row
+def process_aw4_columns_for_row(aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid, staging_base = nil)
+  # Process columns for copy manifest
+  input_section["aw4Columns"].each do |aw4_column|
+    process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid, staging_base)
+  end
+
+  # Map all columns from outputManifestSpec to output manifest (not just aw4Columns)
+  map_all_output_manifest_columns(aw4_row, rid, input_section, destination_base, output_rows_by_rid)
+end
+
 # Helper to process single AW4 row
-def process_single_aw4_row(aw4_row, input_section, destination_base, prev_manifest, copy_manifest, output_rows_by_rid)
+def process_single_aw4_row(aw4_row, input_section, destination_base, prev_manifest, copy_manifest, output_rows_by_rid, staging_base = nil)
   rid = aw4_row["research_id"]
 
   # Check if RID exists in previous manifest
   if rid_exists_in_previous_manifest?(rid, prev_manifest)
-    process_existing_rid_from_previous_manifest(rid, aw4_row, input_section, destination_base, output_rows_by_rid)
+    process_existing_rid_from_previous_manifest(rid, aw4_row, input_section, destination_base, output_rows_by_rid, prev_manifest)
     return # Skip copy manifest generation for existing research_ids
   end
 
@@ -229,7 +230,7 @@ def process_single_aw4_row(aw4_row, input_section, destination_base, prev_manife
   initialize_output_row_if_needed(rid, input_section, output_rows_by_rid)
 
   # Process all columns
-  process_aw4_columns_for_row(aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid)
+  process_aw4_columns_for_row(aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid, staging_base)
 end
 
 # Helper to convert output rows hash to array
@@ -244,6 +245,13 @@ def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_
   path_prefix = _get_vwb_pooled_path(input_section['pooledDestPathInfix'], display_version_id, input_section["deltaRelease"])
   destination_base = File.join(dest_bucket, path_prefix)
 
+  # Calculate staging base path if stagingPathInfix is specified
+  staging_base = nil
+  if input_section['stagingPathInfix']
+    staging_path_prefix = _get_vwb_pooled_path(input_section['stagingPathInfix'], display_version_id, input_section["deltaRelease"])
+    staging_base = File.join(dest_bucket, staging_path_prefix)
+  end
+
   # Load previous manifest for delta releases
   prev_manifest = load_aw4_previous_manifest(input_section, dest_bucket, project)
 
@@ -253,7 +261,7 @@ def build_vwb_copy_manifest_for_aw4_section(input_section, dest_bucket, display_
 
   # Process each AW4 row
   aw4_rows.each do |aw4_row|
-    process_single_aw4_row(aw4_row, input_section, destination_base, prev_manifest, copy_manifest, output_rows_by_rid)
+    process_single_aw4_row(aw4_row, input_section, destination_base, prev_manifest, copy_manifest, output_rows_by_rid, staging_base)
   end
 
   # Convert output rows to array
@@ -1134,7 +1142,8 @@ def execute_single_sts_job(project, job, index, total_jobs, common)
   if job['job_type'] == 'file_list_transfer' && job['file_group']
     create_and_execute_file_list_transfer(project, job)
   else
-    create_transfer_job_via_api(project, job['config'])
+    service_account = job['config']['serviceAccount']
+    create_transfer_job_via_api(project, job['config'], service_account)
   end
 end
 
@@ -1194,7 +1203,7 @@ end
 # Helper to upload pre-created manifest to GCS
 def upload_pre_created_manifest(common, local_path, gcs_path, impersonate_args)
   common.status "Uploading pre-created manifest to GCS: #{File.basename(local_path)}"
-  common.run_inline(["gsutil"] + impersonate_args + ["cp", local_path, gcs_path])
+  common.run_inline(["gsutil", "-u", "fc-aou-cdr-prod-ct"] + impersonate_args + ["cp", local_path, gcs_path])
 end
 
 # Helper to create and upload manifest on the fly
@@ -1233,18 +1242,18 @@ end
 
 # Helper to execute transfer job and cleanup
 def execute_transfer_and_cleanup(common, project, job_config, manifest_path, impersonate_args)
-  begin
-    # Create the transfer job
-    create_transfer_job_via_api(project, job_config)
+  # Create the transfer job
+  service_account = job_config['serviceAccount']
+  create_transfer_job_via_api(project, job_config, service_account)
 
-    # Clean up temporary manifest from GCS using SA impersonation
-    common.status "Cleaning up manifest from GCS"
-    common.run_inline(["gsutil"] + impersonate_args + ["rm", manifest_path])
-  rescue => e
-    # If job creation fails, still try to clean up the manifest
-    common.run_inline(["gsutil"] + impersonate_args + ["rm", manifest_path]) rescue nil
-    raise e
-  end
+  # NOTE: Do NOT delete the manifest file immediately!
+  # Storage Transfer Service needs time to read the manifest after the job is created.
+  # The manifest files are small and will remain in gs://vwb-aou-datasets-controlled/temp-manifests/
+  # They can be cleaned up manually after all STS jobs have started processing:
+  #   gsutil -u fc-aou-cdr-prod-ct -i deploy@all-of-us-rw-prod.iam.gserviceaccount.com \
+  #     rm gs://vwb-aou-datasets-controlled/temp-manifests/RW-*-manifest.txt
+  common.status "Manifest uploaded to: #{manifest_path}"
+  common.status "NOTE: Manifest will remain in GCS for STS to read. Clean up manually after STS jobs complete."
 end
 
 # Helper to create manifest and execute file list transfer
@@ -1285,7 +1294,7 @@ end
 def process_single_microarray_source(source_name, section, tier, opts, microarray_aw4_rows, output_manifest_path, common, copy_manifests, output_manifests)
   common.status("building VWB manifest for '#{source_name}'")
   copy, output = build_vwb_copy_manifest_for_aw4_section(
-    section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name), opts.project)
+    section, tier[:dest_cdr_bucket], opts.display_version_id, microarray_aw4_rows, opts.project)
 
   key_name = "aw4_microarray_" + source_name
   store_copy_manifest_if_present(copy_manifests, key_name, copy)
@@ -1351,16 +1360,31 @@ end
 def process_single_wgs_source(source_name, section, tier, opts, wgs_aw4_rows, output_manifest_path, common, copy_manifests, combined_output_rows)
   common.status("building VWB manifest for '#{source_name}'")
   copy, output = build_vwb_copy_manifest_for_aw4_section(
-    section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name), opts.project)
+    section, tier[:dest_cdr_bucket], opts.display_version_id, wgs_aw4_rows, opts.project)
 
   key_name = "aw4_wgs_" + source_name
   store_copy_manifest_if_present(copy_manifests, key_name, copy)
   merge_output_rows(combined_output_rows, output)
 end
 
+# Helper to validate WGS output row has both cram and crai
+def valid_wgs_output_row?(row)
+  # A valid WGS row must have both cram_uri and cram_index_uri
+  # Rows with only crai (no cram) should be filtered out
+  return false if row.nil?
+
+  cram_uri = row["cram_uri"]
+  cram_index_uri = row["cram_index_uri"]
+
+  # Both must be present and non-empty
+  !cram_uri.nil? && !cram_uri.to_s.strip.empty? &&
+  !cram_index_uri.nil? && !cram_index_uri.to_s.strip.empty?
+end
+
 # Helper to store combined output manifest if not empty
 def store_combined_output_manifest(output_manifests, combined_output_rows)
-  combined_output = combined_output_rows.values
+  # Filter out invalid rows (those with only crai but no cram)
+  combined_output = combined_output_rows.values.select { |row| valid_wgs_output_row?(row) }
   return if combined_output.empty?
   output_manifests["aw4_wgs_combined"] = combined_output
 end
@@ -1568,6 +1592,26 @@ def vwb_publish_mode(opts, copy_manifest_files, working_dir)
     common.status "Finished: VWB publishing dry run"
   else
     common.status "Finished: VWB publishing"
+    common.status ""
+    common.status "="*60
+    common.status "IMPORTANT: Manifest File Cleanup"
+    common.status "="*60
+    common.status "Manifest files have been uploaded to GCS and left in place for STS to read."
+    common.status "After all STS jobs have completed, you can clean them up with:"
+    common.status ""
+
+    env = ENVIRONMENTS[opts.project]
+    deploy_account = env.fetch(:publisher_account)
+    jira_ticket = opts.respond_to?(:jira_ticket) ? opts.jira_ticket : nil
+
+    if jira_ticket
+      common.status "  gsutil -u fc-aou-cdr-prod-ct -i #{deploy_account} \\"
+      common.status "    rm 'gs://vwb-aou-datasets-controlled/temp-manifests/#{jira_ticket}-*-manifest.txt'"
+    else
+      common.status "  gsutil -u fc-aou-cdr-prod-ct -i #{deploy_account} \\"
+      common.status "    rm 'gs://vwb-aou-datasets-controlled/temp-manifests/*-manifest.txt'"
+    end
+    common.status "="*60
   end
 
   copy_manifest_files
@@ -1649,9 +1693,35 @@ def vwb_post_process_mode(opts, copy_manifest_files, working_dir)
   use_v2 = from_command_line || determine_v2_mode(opts, working_dir, common)
   log_v2_mode_detection(use_v2, from_command_line, common)
 
-  post_process_vwb_files(opts.project, copy_manifest_files, opts.dry_run, use_v2)
+  # Get batch and thread options
+  batch_total = opts.respond_to?(:batch_total) ? opts.batch_total : nil
+  batch_index = opts.respond_to?(:batch_index) ? opts.batch_index : nil
+  num_threads = opts.respond_to?(:post_process_threads) ? opts.post_process_threads : 32
+  skip_confirmation = opts.respond_to?(:skip_confirmation) ? opts.skip_confirmation : false
+
+  post_process_vwb_files(opts.project, copy_manifest_files, opts.dry_run, use_v2, batch_total, batch_index, num_threads, skip_confirmation)
 
   common.status get_post_process_finish_message(opts.dry_run)
+end
+
+# Helper to split files into batches
+def apply_batching(files, batch_total, batch_index)
+  total_files = files.length
+  batch_size = (total_files.to_f / batch_total).ceil
+
+  start_index = (batch_index - 1) * batch_size
+  end_index = [start_index + batch_size, total_files].min
+
+  batch_files = files[start_index...end_index]
+
+  batch_info = {
+    start_index: start_index,
+    end_index: end_index,
+    batch_size: batch_files.length,
+    total_files: total_files
+  }
+
+  return batch_files, batch_info
 end
 
 # Helper to collect files that need renaming from manifest files
@@ -1662,6 +1732,7 @@ def collect_files_to_rename(manifest_files)
     CSV.foreach(manifest_file, headers: true) do |row|
       source = row["source"]
       destination = row["destination"]
+      final_destination = row["finalDestination"]  # Use finalDestination if staging is enabled
       output_filename = row["outputFileName"]
 
       # Skip if it's a folder
@@ -1669,7 +1740,14 @@ def collect_files_to_rename(manifest_files)
 
       # Extract filenames
       source_filename = File.basename(source)
-      dest_filename = output_filename || File.basename(destination)
+      dest_filename = output_filename || File.basename(final_destination || destination)
+
+      # If finalDestination is present, that's the actual target (staging mode)
+      # Otherwise use destination (non-staging mode)
+      target_path = final_destination || destination
+
+      # Determine staging path (only set if using staging mode)
+      staging_path = final_destination ? destination : nil
 
       # Check if renaming or moving is needed
       # STS preserves the source path structure in the destination bucket
@@ -1678,7 +1756,8 @@ def collect_files_to_rename(manifest_files)
                              :source_path => source,
                              :source_name => source_filename,
                              :dest_name => dest_filename,
-                             :destination_path => destination
+                             :destination_path => target_path,
+                             :staging_path => staging_path  # Where STS actually copied the file (only in staging mode)
                            })
     end
   end
@@ -1687,11 +1766,15 @@ def collect_files_to_rename(manifest_files)
 end
 
 # Helper to display dry run summary for file renaming
-def display_rename_dry_run(common, files_to_rename, use_v2 = false)
+def display_rename_dry_run(common, files_to_rename, use_v2 = false, batch_total = nil, batch_index = nil, original_total = nil)
   total_files = files_to_rename.length
 
   common.status "="*60
-  common.status "DRY RUN: Would move/rename #{total_files} file(s)"
+  if batch_total && batch_index
+    common.status "DRY RUN: Would move/rename #{total_files} file(s) in batch #{batch_index}/#{batch_total} (of #{original_total} total)"
+  else
+    common.status "DRY RUN: Would move/rename #{total_files} file(s)"
+  end
   common.status "="*60
   common.status ""
 
@@ -1701,18 +1784,7 @@ def display_rename_dry_run(common, files_to_rename, use_v2 = false)
 
   files_to_rename.take(sample_size).each do |file|
     # Calculate where STS actually copied the file based on v1 or v2 behavior
-    if use_v2
-      # V2: Files are already in the correct destination directory with original names
-      dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
-      dest_path = File.dirname(file[:destination_path].gsub(/^gs:\/\/[^\/]+\//, ""))
-      original_filename = file[:source_name]
-      current_path = "gs://#{dest_bucket}/#{dest_path}/#{original_filename}"
-    else
-      # V1: STS preserves the source directory structure in the destination bucket
-      dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
-      source_object_path = file[:source_path].gsub(/^gs:\/\/[^\/]+\//, "")
-      current_path = "gs://#{dest_bucket}/#{source_object_path}"
-    end
+    current_path = calculate_current_file_path(file, use_v2)
 
     common.status "\n  File: #{file[:source_name]} -> #{file[:dest_name]}"
     common.status "    From: #{current_path}"
@@ -1747,11 +1819,14 @@ end
 
 # Helper to calculate current file path based on v1/v2 mode
 def calculate_current_file_path(file, use_v2)
-  dest_bucket = file[:destination_path].gsub("gs://", "").split("/")[0]
+  # If staging_path is present, use it as the base for V2 mode (file is currently in staging)
+  # Otherwise use destination_path
+  base_path = file[:staging_path] || file[:destination_path]
+  dest_bucket = base_path.gsub("gs://", "").split("/")[0]
 
   if use_v2
-    # V2: Files are in destination directory with original names
-    dest_path = File.dirname(file[:destination_path].gsub(/^gs:\/\/[^\/]+\//, ""))
+    # V2: Files are in destination/staging directory with original names
+    dest_path = File.dirname(base_path.gsub(/^gs:\/\/[^\/]+\//, ""))
     original_filename = file[:source_name]
     "gs://#{dest_bucket}/#{dest_path}/#{original_filename}"
   else
@@ -1800,7 +1875,10 @@ end
 # Helper to execute file rename command
 def execute_file_rename(current_path, new_path, deploy_account)
   require 'open3'
-  cmd = ["gcloud", "storage", "mv", "--impersonate-service-account", deploy_account, current_path, new_path]
+  cmd = ["gcloud", "storage", "mv",
+         "--billing-project", "fc-aou-cdr-prod-ct",
+         "--impersonate-service-account", deploy_account,
+         current_path, new_path]
   Open3.capture3(*cmd)
 end
 
@@ -1900,7 +1978,7 @@ def perform_file_renaming(common, files_to_rename, deploy_account, num_threads =
   return successful_renames[0], failed_renames[0]
 end
 
-def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = false)
+def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = false, batch_total = nil, batch_index = nil, num_threads = 32, skip_confirmation = false)
   common = Common.new
 
   # Get the publisher account for impersonation
@@ -1913,36 +1991,59 @@ def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = fa
   files_to_rename = collect_files_to_rename(manifest_files)
   total_files_to_rename = files_to_rename.length
 
-  if total_files_to_rename == 0
-    common.status "No files need renaming. Post-processing complete."
+  # Apply batching if specified
+  if batch_total && batch_index
+    files_to_rename, batch_info = apply_batching(files_to_rename, batch_total, batch_index)
+    common.status "BATCHING: Processing batch #{batch_index}/#{batch_total} (#{batch_info[:start_index]+1}-#{batch_info[:end_index]} of #{total_files_to_rename} files)"
+  end
+
+  current_batch_size = files_to_rename.length
+
+  if current_batch_size == 0
+    common.status "No files in this batch. Post-processing complete."
     return
   end
 
   if dry_run
-    display_rename_dry_run(common, files_to_rename, use_v2)
+    display_rename_dry_run(common, files_to_rename, use_v2, batch_total, batch_index, total_files_to_rename)
     return
   end
 
   # Get user confirmation for actual renaming
   common.status "="*60
-  common.status "POST-PROCESSING: About to rename #{total_files_to_rename} file(s)"
+  if batch_total && batch_index
+    common.status "POST-PROCESSING: About to rename #{current_batch_size} file(s) (batch #{batch_index}/#{batch_total})"
+  else
+    common.status "POST-PROCESSING: About to rename #{current_batch_size} file(s)"
+  end
   common.status "="*60
 
-  get_user_confirmation(
-    "\nAbout to rename #{total_files_to_rename} file(s) in the VWB CDR bucket.\n" +
-    "This will modify file names in place.\n\n" +
-    "Are you sure you want to proceed?"
-  )
+  unless skip_confirmation
+    confirmation_msg = batch_total && batch_index ?
+      "\nAbout to rename #{current_batch_size} file(s) in batch #{batch_index}/#{batch_total} (of #{total_files_to_rename} total) in the VWB CDR bucket.\n" +
+      "This will modify file names in place.\n\n" +
+      "Are you sure you want to proceed?" :
+      "\nAbout to rename #{current_batch_size} file(s) in the VWB CDR bucket.\n" +
+      "This will modify file names in place.\n\n" +
+      "Are you sure you want to proceed?"
+
+    get_user_confirmation(confirmation_msg)
+  else
+    common.status "(Skipping confirmation prompt - running in batch mode)"
+  end
 
   common.status ""
-  common.status "Renaming files..."
+  common.status "Renaming files with #{num_threads} threads..."
 
   # Create failure log path in the same directory as manifest files
   working_dir = File.dirname(manifest_files.first)
-  failure_log_path = File.join(working_dir, "post_process_failures.csv")
+  failure_log_filename = batch_total && batch_index ?
+    "post_process_failures_batch_#{batch_index}_of_#{batch_total}.csv" :
+    "post_process_failures.csv"
+  failure_log_path = File.join(working_dir, failure_log_filename)
 
   # Perform the actual renaming with failure logging and v2 flag
-  successful_renames, failed_renames = perform_file_renaming(common, files_to_rename, deploy_account, 32, failure_log_path, use_v2)
+  successful_renames, failed_renames = perform_file_renaming(common, files_to_rename, deploy_account, num_threads, failure_log_path, use_v2)
 
   # Display summary
   common.status ""
