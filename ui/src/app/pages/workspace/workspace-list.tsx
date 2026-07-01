@@ -170,9 +170,13 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         <>
           <div style={styles.fadeBox}>
             <VwbImportantBanner
-              title='The All of Us Workbench migration is ending soon!'
-              message={`Make sure all of your work is migrated over from the legacy app otherwise it will be archived.`}
-              actionText='Migration Wiki'
+              title='The All of Us Workbench migration has ended'
+              message={
+                'Legacy Researcher Workbench is no longer available for ' +
+                'active use. Existing workspaces have been archived and ' +
+                'can be recovered through the workspace recovery process.'
+              }
+              actionText='Learn More'
               onAction={() =>
                 window.open(VWB_MIGRATION_SUPPORT_HUB_URL, '_blank')
               }
