@@ -20,8 +20,7 @@ export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
 
   const canRecover =
     !migrated &&
-    workspace.recoveryState !== WorkspaceRecoveryStatus.RECOVERING &&
-    workspace.recoveryState !== WorkspaceRecoveryStatus.RECOVERED;
+    workspace.recoveryState !== WorkspaceRecoveryStatus.NOT_STARTED;
 
   return (
     <>
@@ -45,7 +44,7 @@ export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
         {canRecover && onRecover && (
           <div style={{ marginTop: '1rem' }}>
             <Button
-              style={{ border: '2px solid' , marginBottom: '0.5rem' }}
+              style={{ border: '2px solid', marginBottom: '0.5rem' }}
               type='secondary'
               onClick={onRecover}
             >
