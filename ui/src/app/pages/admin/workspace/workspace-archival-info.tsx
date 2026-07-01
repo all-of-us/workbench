@@ -20,7 +20,7 @@ export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
 
   const canRecover =
     !migrated &&
-    workspace.recoveryState !== WorkspaceRecoveryStatus.NOT_STARTED;
+    workspace.recoveryState === WorkspaceRecoveryStatus.NOT_STARTED;
 
   return (
     <>
