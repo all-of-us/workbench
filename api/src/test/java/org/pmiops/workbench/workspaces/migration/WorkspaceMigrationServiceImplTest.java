@@ -474,16 +474,14 @@ public class WorkspaceMigrationServiceImplTest {
     dbWorkspace.setWorkspaceId(123L);
     dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
 
-    when(workspaceDao.getRequired(eq(NAMESPACE), eq(TERRA_NAME)))
-            .thenReturn(dbWorkspace);
+    when(workspaceDao.getRequired(eq(NAMESPACE), eq(TERRA_NAME))).thenReturn(dbWorkspace);
 
-    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
-            .thenReturn(List.of());
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of());
 
     RuntimeException ex =
-            assertThrows(
-                    RuntimeException.class,
-                    () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, POD_ID));
+        assertThrows(
+            RuntimeException.class,
+            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, POD_ID));
 
     assertThat(ex.getMessage()).contains("Recovery failed to start");
     assertThat(ex.getCause()).isNotNull();
@@ -495,12 +493,12 @@ public class WorkspaceMigrationServiceImplTest {
     workspace.setRecoveryState(WorkspaceRecoveryStatus.NOT_STARTED);
 
     RuntimeException ex =
-            assertThrows(
-                    RuntimeException.class,
-                    () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, POD_ID));
+        assertThrows(
+            RuntimeException.class,
+            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, POD_ID));
 
     assertThat(ex.getMessage())
-            .contains("Workspace recovery can only start when state is REQUESTED");
+        .contains("Workspace recovery can only start when state is REQUESTED");
   }
 
   @Test
