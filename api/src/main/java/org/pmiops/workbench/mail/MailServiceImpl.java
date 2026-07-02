@@ -40,11 +40,14 @@ import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MailServiceImpl implements MailService {
+  private static final Logger logger =
+      Logger.getLogger(WorkspaceMigrationServiceImpl.class.getName());
   private static final String AOU_ITALICS = "<i>All of Us</i>";
   private static final String EGRESS_FORM_LINK =
       "<a href=\"https://redcap.pmi-ops.org/surveys/?s=K4PA9H8E979AHJEP\">Researcher Account Activity Confirmation</a>";
@@ -585,9 +588,9 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         fromEmail,
-        Collections.emptyList(),
-        Collections.emptyList(),
         recipients,
+        Collections.emptyList(),
+        Collections.emptyList(),
         subject,
         String.format(
             "Recovery request email for workspace '%s' (%s) sent to support",
