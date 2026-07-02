@@ -4684,6 +4684,26 @@ paths:
       responses:
         200:
           description: Recovery started successfully
+  /v1/workspaces/{namespace}/{terraName}/requestRecovery:
+    post:
+      tags:
+        - workspaces
+      description: Requests archived workspace recovery by sending a recovery request email to administrators.
+      operationId: requestWorkspaceRecovery
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Recovery request submitted successfully
   /v1/cloudTask/deleteTestUserWorkspaces:
     post:
       tags:
@@ -8508,9 +8528,10 @@ components:
         - FAILED
     WorkspaceRecoveryStatus:
       type: string
-      description: Indicates the status of the workspace recovery flow (NOT_STARTED, RECOVERING, RECOVERED, FAILED).
+      description: Indicates the status of the workspace recovery flow (NOT_STARTED, REQUESTED, RECOVERING, RECOVERED, FAILED).
       enum:
         - NOT_STARTED
+        - REQUESTED
         - RECOVERING
         - RECOVERED
         - FAILED

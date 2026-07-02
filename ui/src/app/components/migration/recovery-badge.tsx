@@ -24,6 +24,11 @@ const styles = reactStyles({
     color: colors.warningAlt,
   },
 
+  requested: {
+    backgroundColor: '#FEF08A',
+    color: '#92400E',
+  },
+
   recovering: {
     backgroundColor: colors.light,
     color: colors.dark,
@@ -56,6 +61,11 @@ export const RecoveryBadge = ({ state }: Props) => {
     case WorkspaceRecoveryStatus.NOT_STARTED:
       return (
         <span style={{ ...styles.badge, ...styles.archived }}>ARCHIVED</span>
+      );
+
+    case WorkspaceRecoveryStatus.REQUESTED:
+      return (
+        <span style={{ ...styles.badge, ...styles.requested }}>REQUESTED</span>
       );
 
     // Include FAILED here as users can't take any action and don't need to see a failed status. These will be handled internally

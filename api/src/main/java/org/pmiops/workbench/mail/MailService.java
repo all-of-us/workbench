@@ -106,4 +106,7 @@ public interface MailService {
 
   void sendWorkspaceUnarchivedEmail(DbWorkspace workspace, List<DbUser> recipients)
       throws MessagingException;
+
+  void sendWorkspaceRecoveryRequestEmail(DbWorkspace workspace, DbUser owner, DbUser requestingUser)
+      throws MessagingException;
 }
