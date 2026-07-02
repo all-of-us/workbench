@@ -580,12 +580,14 @@ public class MailServiceImpl implements MailService {
 
     final String subject = "Workspace Recovery Requested";
     final String fromEmail = workbenchConfigProvider.get().mail.fromEmail;
+    final List<String> recipients =
+        workbenchConfigProvider.get().mail.workspaceRecoveryRequestRecipients;
 
     sendWithRetries(
         fromEmail,
         Collections.emptyList(),
         Collections.emptyList(),
-        Collections.singletonList("support@researchallofus.org"),
+        recipients,
         subject,
         String.format(
             "Recovery request email for workspace '%s' (%s) sent to support",

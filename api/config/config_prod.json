@@ -92,7 +92,8 @@
   },
   "mail": {
     "fromEmail": "support@researchallofus.org",
-    "sendRetries": 3
+    "sendRetries": 3,
+    "workspaceRecoveryRequestRecipients": ["support@researchallofus.org"]
   },
   "zendesk": {
     "host": "https:\/\/aousupporthelp.zendesk.com"
