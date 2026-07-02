@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces.migration;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
@@ -469,17 +470,37 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void startWorkspaceRecovery_failsIfArchiveMissing() {
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setWorkspaceId(123L);
+    dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
 
-    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of());
+    when(workspaceDao.getRequired(eq(NAMESPACE), eq(TERRA_NAME)))
+            .thenReturn(dbWorkspace);
+
+    when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong()))
+            .thenReturn(List.of());
 
     RuntimeException ex =
-        org.junit.jupiter.api.Assertions.assertThrows(
-            RuntimeException.class,
-            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, POD_ID));
+            assertThrows(
+                    RuntimeException.class,
+                    () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, POD_ID));
 
     assertThat(ex.getMessage()).contains("Recovery failed to start");
-
+    assertThat(ex.getCause()).isNotNull();
     assertThat(ex.getCause().getMessage()).contains("Archive metadata not found");
+  }
+
+  @Test
+  void startWorkspaceRecovery_failsIfRecoveryNotRequested() {
+    workspace.setRecoveryState(WorkspaceRecoveryStatus.NOT_STARTED);
+
+    RuntimeException ex =
+            assertThrows(
+                    RuntimeException.class,
+                    () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, POD_ID));
+
+    assertThat(ex.getMessage())
+            .contains("Workspace recovery can only start when state is REQUESTED");
   }
 
   @Test
