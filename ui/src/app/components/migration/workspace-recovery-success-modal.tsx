@@ -8,13 +8,7 @@ interface Props {
 
 export const WorkspaceRecoverySuccessModal = ({ onClose, onReturn }: Props) => {
   return (
-    <Modal
-      title=''
-      onRequestClose={onClose}
-      style={{
-        width: '650px',
-      }}
-    >
+    <Modal title='' onRequestClose={onClose} width={750}>
       <div
         style={{
           padding: '32px',
