@@ -140,7 +140,7 @@
     "enableVWBHomepageBanner": true,
     "enableCTPlusCards": false,
     "enableVwbMigration": true,
-    "enableWorkspaceArchiveRecovery": false,
+    "enableWorkspaceArchiveRecovery": true,
     "restrictLegacyAccess": true
   },
   "actionAudit": {

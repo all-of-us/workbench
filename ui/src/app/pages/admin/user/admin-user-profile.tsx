@@ -448,7 +448,7 @@ const MigrationToggle = (props: {
     <div style={{ paddingLeft: '2em' }}>
       <div style={highlightStyle}>
         <CommonToggle
-          name='Enable workspace creation'
+          name='Enable RW 1.0 access'
           checked={currentlyMember}
           onToggle={() => toggleMember()}
         />
