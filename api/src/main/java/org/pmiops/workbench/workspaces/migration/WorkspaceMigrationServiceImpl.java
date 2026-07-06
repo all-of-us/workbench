@@ -938,7 +938,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         return;
 
       case FAILED:
-        logger.log(Level.INFO, namespace + ": Archive transfer failed");
+        logger.log(
+            Level.INFO,
+            namespace + ": Archive transfer failed: " + transferOperation.getErrorBreakdownsList());
         archive.setStatus(WorkspaceArchiveStatus.FAILED.toString());
 
         workspaceBucketArchiveDao.save(archive);
