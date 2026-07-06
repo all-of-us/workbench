@@ -134,7 +134,7 @@ def generate_aw4_destination_path(source_path, input_section, rid, destination_b
 end
 
 # Helper to process existing RID from previous manifest
-def process_existing_rid_from_previous_manifest(rid, aw4_row, input_section, destination_base, output_rows_by_rid, prev_manifest)
+def process_existing_rid_from_previous_manifest(rid, _aw4_row, input_section, destination_base, output_rows_by_rid, prev_manifest)
   # For delta releases, reuse the existing row from previous manifest as-is
   # This preserves the original paths (e.g., v8_base) instead of creating new ones (e.g., v9_delta)
   prev_row = prev_manifest[rid]
@@ -174,7 +174,7 @@ def create_aw4_copy_manifest_entry(source_path, destination_path, dest_name, sto
 end
 
 # Helper to process single AW4 column
-def process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base, copy_manifest, output_rows_by_rid, staging_base = nil)
+def process_aw4_column(aw4_column, aw4_row, rid, input_section, destination_base, copy_manifest, _output_rows_by_rid, staging_base = nil)
   source_path = aw4_row[aw4_column]
   return unless valid_source_path?(source_path)
 
@@ -1978,6 +1978,68 @@ def perform_file_renaming(common, files_to_rename, deploy_account, num_threads =
   return successful_renames[0], failed_renames[0]
 end
 
+def prepare_files_for_post_processing(manifest_files, batch_total, batch_index, common)
+  files_to_rename = collect_files_to_rename(manifest_files)
+  total_files_to_rename = files_to_rename.length
+
+  if batch_total && batch_index
+    files_to_rename, batch_info = apply_batching(files_to_rename, batch_total, batch_index)
+    common.status "BATCHING: Processing batch #{batch_index}/#{batch_total} (#{batch_info[:start_index]+1}-#{batch_info[:end_index]} of #{total_files_to_rename} files)"
+  end
+
+  return files_to_rename, total_files_to_rename
+end
+
+def display_post_process_header(common, current_batch_size, batch_total, batch_index)
+  common.status "="*60
+  if batch_total && batch_index
+    common.status "POST-PROCESSING: About to rename #{current_batch_size} file(s) (batch #{batch_index}/#{batch_total})"
+  else
+    common.status "POST-PROCESSING: About to rename #{current_batch_size} file(s)"
+  end
+  common.status "="*60
+end
+
+def get_post_process_confirmation(current_batch_size, batch_total, batch_index, total_files_to_rename, skip_confirmation, common)
+  return if skip_confirmation
+
+  if batch_total && batch_index
+    confirmation_msg = "\nAbout to rename #{current_batch_size} file(s) in batch #{batch_index}/#{batch_total} (of #{total_files_to_rename} total) in the VWB CDR bucket.\n" +
+      "This will modify file names in place.\n\n" +
+      "Are you sure you want to proceed?"
+  else
+    confirmation_msg = "\nAbout to rename #{current_batch_size} file(s) in the VWB CDR bucket.\n" +
+      "This will modify file names in place.\n\n" +
+      "Are you sure you want to proceed?"
+  end
+
+  get_user_confirmation(confirmation_msg)
+end
+
+def handle_skip_confirmation(skip_confirmation, common)
+  return unless skip_confirmation
+  common.status "(Skipping confirmation prompt - running in batch mode)"
+end
+
+def create_failure_log_path(manifest_files, batch_total, batch_index)
+  working_dir = File.dirname(manifest_files.first)
+  if batch_total && batch_index
+    failure_log_filename = "post_process_failures_batch_#{batch_index}_of_#{batch_total}.csv"
+  else
+    failure_log_filename = "post_process_failures.csv"
+  end
+  File.join(working_dir, failure_log_filename)
+end
+
+def display_post_process_summary(common, successful_renames, failed_renames)
+  common.status ""
+  common.status "="*60
+  common.status "Post-processing complete:"
+  common.status "  Successfully renamed: #{successful_renames} file(s)"
+  common.status "  Failed to rename: #{failed_renames} file(s)" if failed_renames > 0
+  common.status "="*60
+end
+
 def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = false, batch_total = nil, batch_index = nil, num_threads = 32, skip_confirmation = false)
   common = Common.new
 
@@ -1987,16 +2049,8 @@ def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = fa
 
   common.status dry_run ? "Starting VWB post-processing (DRY RUN)..." : "Starting VWB post-processing..."
 
-  # Collect files that need renaming
-  files_to_rename = collect_files_to_rename(manifest_files)
-  total_files_to_rename = files_to_rename.length
-
-  # Apply batching if specified
-  if batch_total && batch_index
-    files_to_rename, batch_info = apply_batching(files_to_rename, batch_total, batch_index)
-    common.status "BATCHING: Processing batch #{batch_index}/#{batch_total} (#{batch_info[:start_index]+1}-#{batch_info[:end_index]} of #{total_files_to_rename} files)"
-  end
-
+  # Prepare files for processing
+  files_to_rename, total_files_to_rename = prepare_files_for_post_processing(manifest_files, batch_total, batch_index, common)
   current_batch_size = files_to_rename.length
 
   if current_batch_size == 0
@@ -2010,46 +2064,17 @@ def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = fa
   end
 
   # Get user confirmation for actual renaming
-  common.status "="*60
-  if batch_total && batch_index
-    common.status "POST-PROCESSING: About to rename #{current_batch_size} file(s) (batch #{batch_index}/#{batch_total})"
-  else
-    common.status "POST-PROCESSING: About to rename #{current_batch_size} file(s)"
-  end
-  common.status "="*60
-
-  unless skip_confirmation
-    confirmation_msg = batch_total && batch_index ?
-      "\nAbout to rename #{current_batch_size} file(s) in batch #{batch_index}/#{batch_total} (of #{total_files_to_rename} total) in the VWB CDR bucket.\n" +
-      "This will modify file names in place.\n\n" +
-      "Are you sure you want to proceed?" :
-      "\nAbout to rename #{current_batch_size} file(s) in the VWB CDR bucket.\n" +
-      "This will modify file names in place.\n\n" +
-      "Are you sure you want to proceed?"
-
-    get_user_confirmation(confirmation_msg)
-  else
-    common.status "(Skipping confirmation prompt - running in batch mode)"
-  end
+  display_post_process_header(common, current_batch_size, batch_total, batch_index)
+  get_post_process_confirmation(current_batch_size, batch_total, batch_index, total_files_to_rename, skip_confirmation, common)
+  handle_skip_confirmation(skip_confirmation, common)
 
   common.status ""
   common.status "Renaming files with #{num_threads} threads..."
 
-  # Create failure log path in the same directory as manifest files
-  working_dir = File.dirname(manifest_files.first)
-  failure_log_filename = batch_total && batch_index ?
-    "post_process_failures_batch_#{batch_index}_of_#{batch_total}.csv" :
-    "post_process_failures.csv"
-  failure_log_path = File.join(working_dir, failure_log_filename)
-
-  # Perform the actual renaming with failure logging and v2 flag
+  # Create failure log path and perform renaming
+  failure_log_path = create_failure_log_path(manifest_files, batch_total, batch_index)
   successful_renames, failed_renames = perform_file_renaming(common, files_to_rename, deploy_account, num_threads, failure_log_path, use_v2)
 
   # Display summary
-  common.status ""
-  common.status "="*60
-  common.status "Post-processing complete:"
-  common.status "  Successfully renamed: #{successful_renames} file(s)"
-  common.status "  Failed to rename: #{failed_renames} file(s)" if failed_renames > 0
-  common.status "="*60
+  display_post_process_summary(common, successful_renames, failed_renames)
 end

@@ -924,23 +924,31 @@ def validate_supported_tier(opts)
   end
 end
 
-def validate_batch_options(opts)
-  if opts.batch_total || opts.batch_index
-    # Both must be specified together
-    unless opts.batch_total && opts.batch_index
-      raise ArgumentError.new("--batch-total and --batch-index must be used together")
-    end
-
-    # Validate batch_index is within range
-    if opts.batch_index < 1 || opts.batch_index > opts.batch_total
-      raise ArgumentError.new("--batch-index must be between 1 and #{opts.batch_total}")
-    end
-
-    # Only applicable for POST_PROCESS
-    unless opts.tasks.include?("POST_PROCESS")
-      raise ArgumentError.new("--batch-total and --batch-index are only applicable for POST_PROCESS task")
-    end
+def validate_batch_options_specified_together(opts)
+  return unless opts.batch_total || opts.batch_index
+  unless opts.batch_total && opts.batch_index
+    raise ArgumentError.new("--batch-total and --batch-index must be used together")
   end
+end
+
+def validate_batch_index_range(opts)
+  return unless opts.batch_total && opts.batch_index
+  if opts.batch_index < 1 || opts.batch_index > opts.batch_total
+    raise ArgumentError.new("--batch-index must be between 1 and #{opts.batch_total}")
+  end
+end
+
+def validate_batch_options_for_post_process(opts)
+  return unless opts.batch_total && opts.batch_index
+  unless opts.tasks.include?("POST_PROCESS")
+    raise ArgumentError.new("--batch-total and --batch-index are only applicable for POST_PROCESS task")
+  end
+end
+
+def validate_batch_options(opts)
+  validate_batch_options_specified_together(opts)
+  validate_batch_index_range(opts)
+  validate_batch_options_for_post_process(opts)
 end
 
 def setup_vwb_publish_validators(op, supported_tasks)
