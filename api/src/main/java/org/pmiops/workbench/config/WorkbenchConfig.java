@@ -255,6 +255,7 @@ public class WorkbenchConfig {
   public static class MailConfig {
     public String fromEmail;
     public int sendRetries;
+    public List<String> workspaceRecoveryRequestRecipients;
   }
 
   public static class AbsorbConfig {

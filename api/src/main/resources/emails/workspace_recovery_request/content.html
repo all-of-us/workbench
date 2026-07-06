@@ -1,0 +1,114 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <style>
+        body {
+            background-color: #FFFFFF;
+            padding-left: 1rem;
+            padding-top: 1rem;
+        }
+        table {
+            width: 600px;
+        }
+        * {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 300;
+        }
+        .title {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #302C71;
+            font-size: 20px;
+            font-weight: 400;
+        }
+        .text {
+            color: #262262;
+            font-size: 16px;
+            margin-bottom: 1rem;
+            line-height: 22px;
+        }
+        .section {
+            border-radius: 8px;
+            background-color: rgba(33, 111, 180, 0.1);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .button {
+            height: 3rem;
+            width: 16rem;
+            border-radius: 5px;
+            background-color: #302C71;
+            font-size: 14px;
+            color: #FFFFFF !important;
+            text-align: center;
+            line-height: 48px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+<table>
+    <tr>
+        <td>
+            <img src="${HEADER_IMG}">
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="title">Workspace Recovery Requested</div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                A researcher has requested recovery for an archived workspace. Please review and approve the recovery request from the Workspace Admin page if appropriate.
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="section">
+                <div class="text"><b>Workspace Name:</b> ${WORKSPACE_NAME}</div>
+                <div class="text"><b>Workspace Namespace:</b> ${WORKSPACE_NAMESPACE}</div>
+                <div class="text"><b>Workspace Owner:</b> ${WORKSPACE_CREATOR}</div>
+                <div class="text"><b>Requesting Researcher:</b> ${REQUESTING_USER}</div>
+                <div class="text"><b>Access Tier:</b> ${ACCESS_TIER}</div>
+                <div class="text"><b>Request Timestamp:</b> ${REQUEST_TIMESTAMP}</div>
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                To proceed with the recovery, please navigate to the Workspace Admin page and approve the recovery request. The recovery process will then begin and may take several minutes to complete.
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                If you have any questions or need additional information about this recovery request, please contact the researcher directly or refer to your standard workspace support procedures.
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="text">
+                Thanks,<br>
+                The ${ALL_OF_US} Research Support team
+            </div>
+        </td>
+    </tr>
+
+</table>
+</body>

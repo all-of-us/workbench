@@ -961,6 +961,58 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
+  public void requestWorkspaceRecovery(String namespace, String terraName) {
+    logger.log(Level.INFO, namespace + ": Requesting workspace recovery");
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+
+    // Validate workspace is eligible for recovery
+    if (!WorkspaceRecoveryStatus.NOT_STARTED.toString().equals(dbWorkspace.getRecoveryState())) {
+      throw new RuntimeException(
+          namespace
+              + ": Recovery has already been requested or is in progress. Current state="
+              + dbWorkspace.getRecoveryState());
+    }
+
+    // Validate archive exists
+    List<DbWorkspaceBucketArchive> archives =
+        workspaceBucketArchiveDao.findByLegacyWorkspaceId(dbWorkspace.getWorkspaceId());
+
+    if (archives.isEmpty()) {
+      throw new RuntimeException(namespace + ": Archive metadata not found");
+    }
+
+    DbWorkspaceBucketArchive archive = archives.get(0);
+
+    if (!WorkspaceArchiveStatus.ARCHIVED.toString().equals(archive.getStatus())) {
+      throw new RuntimeException(
+          namespace + ": Workspace is not archived. Current state=" + archive.getStatus());
+    }
+
+    // Update recovery state to REQUESTED
+    dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
+    dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+    workspaceDao.save(dbWorkspace);
+
+    // Get workspace owner
+    DbUser owner = dbWorkspace.getCreator();
+    if (owner == null) {
+      throw new RuntimeException(namespace + ": Workspace owner not found");
+    }
+
+    // Send recovery request email to admin/support
+    try {
+      mailService.sendWorkspaceRecoveryRequestEmail(dbWorkspace, owner, userProvider.get());
+    } catch (MessagingException e) {
+      logger.log(
+          Level.WARNING, namespace + ": Failed to send recovery request email: " + e.getMessage());
+      // Don't fail the request if email sending fails
+    }
+
+    logger.log(Level.INFO, namespace + ": Workspace recovery request submitted");
+  }
+
+  @Override
   public void startWorkspaceRecovery(String namespace, String terraName, String podId) {
 
     Duration bucketDelay = Duration.ofSeconds(10);
@@ -968,6 +1020,14 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
     logger.log(Level.INFO, namespace + ": Starting workspace recovery");
+
+    // Validate recovery state is REQUESTED before starting
+    if (!WorkspaceRecoveryStatus.REQUESTED.toString().equals(dbWorkspace.getRecoveryState())) {
+      throw new RuntimeException(
+          namespace
+              + ": Workspace recovery can only start when state is REQUESTED. Current state="
+              + dbWorkspace.getRecoveryState());
+    }
 
     try {
 

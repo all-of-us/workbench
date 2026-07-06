@@ -2,9 +2,8 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import fp from 'lodash/fp';
 import { Button } from 'primereact/button';
-import { Dropdown } from 'primereact/dropdown';
 
-import { Workspace } from 'generated/fetch';
+import { Workspace, WorkspaceRecoveryStatus } from 'generated/fetch';
 
 import { WorkspaceRecoverySuccessModal } from 'app/components/migration/workspace-recovery-success-modal';
 import {
@@ -143,46 +142,25 @@ export const WorkspaceRecovery = fp.flow(
   withSpinnerOverlay(),
   withCurrentWorkspace()
 )(({ workspace, hideSpinner }: Props) => {
-  const [pods, setPods] = useState([]);
-  const [selectedPod, setSelectedPod] = useState<string>();
-  const [loadingPods, setLoadingPods] = useState(true);
   const [recovering, setRecovering] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [navigate] = useNavigation();
 
-  const loadPods = async () => {
-    try {
-      setLoadingPods(true);
-
-      const response = await workspacesApi().getUserPods();
-      setPods(response || []);
-    } catch (e) {
-      console.error('Failed to load billing pods', e);
-    } finally {
-      setLoadingPods(false);
-    }
-  };
   useEffect(() => {
-    loadPods();
     hideSpinner();
   }, []);
 
   const startRecovery = async () => {
-    if (!selectedPod) {
-      return;
-    }
-
     try {
       setRecovering(true);
 
-      await workspacesApi().startWorkspaceRecovery(
+      await workspacesApi().requestWorkspaceRecovery(
         workspace.namespace,
-        workspace.terraName,
-        {
-          podId: selectedPod,
-        }
+        workspace.terraName
       );
       setShowSuccessModal(true);
+    } catch (e) {
+      console.error('Failed to request workspace recovery', e);
     } finally {
       setRecovering(false);
     }
@@ -211,10 +189,14 @@ export const WorkspaceRecovery = fp.flow(
                 the workspace you want to recover.
               </li>
 
-              <li>Select a billing pod to associate with this workspace.</li>
+              <li>
+                Select <b>Request Workspace Recovery</b> to submit your recovery
+                request.
+              </li>
 
               <li>
-                Select <b>Request Workspace Recovery</b>.
+                Our support team will review your request and initiate the
+                recovery process.
               </li>
             </ol>
 
@@ -250,8 +232,8 @@ export const WorkspaceRecovery = fp.flow(
 
             <div style={styles.paragraph}>
               This workspace and its data are currently archived in storage.
-              Verify the information below and select a billing pod before
-              requesting recovery.
+              Verify the information below and then request recovery. Our
+              support team will handle the recovery process.
             </div>
 
             <div style={styles.divider} />
@@ -285,24 +267,6 @@ export const WorkspaceRecovery = fp.flow(
                   supported dataset version.
                 </div>
               </div>
-
-              <div>
-                <div style={styles.fieldLabel}>Select a Billing Pod</div>
-
-                <Dropdown
-                  value={selectedPod}
-                  options={pods}
-                  optionLabel='userFacingId'
-                  optionValue='podId'
-                  disabled={loadingPods}
-                  placeholder={
-                    loadingPods
-                      ? 'Loading billing pods...'
-                      : 'Select a billing pod'
-                  }
-                  onChange={(e) => setSelectedPod(e.value)}
-                />
-              </div>
             </div>
 
             <div style={styles.buttonRow}>
@@ -312,8 +276,15 @@ export const WorkspaceRecovery = fp.flow(
                 onClick={() => navigate(['/workspaces'])}
               />
               <Button
-                label='Request Workspace Recovery'
-                disabled={!selectedPod || recovering}
+                label={
+                  workspace.recoveryState === WorkspaceRecoveryStatus.REQUESTED
+                    ? 'Recovery Request Submitted'
+                    : 'Request Workspace Recovery'
+                }
+                disabled={
+                  recovering ||
+                  workspace.recoveryState === WorkspaceRecoveryStatus.REQUESTED
+                }
                 loading={recovering}
                 onClick={startRecovery}
               />
