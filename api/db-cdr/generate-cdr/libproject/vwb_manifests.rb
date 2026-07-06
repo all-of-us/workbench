@@ -134,7 +134,7 @@ def generate_aw4_destination_path(source_path, input_section, rid, destination_b
 end
 
 # Helper to process existing RID from previous manifest
-def process_existing_rid_from_previous_manifest(rid, _aw4_row, input_section, destination_base, output_rows_by_rid, prev_manifest)
+def process_existing_rid_from_previous_manifest(rid, _aw4_row, _input_section, _destination_base, output_rows_by_rid, prev_manifest)
   # For delta releases, reuse the existing row from previous manifest as-is
   # This preserves the original paths (e.g., v8_base) instead of creating new ones (e.g., v9_delta)
   prev_row = prev_manifest[rid]
@@ -2000,7 +2000,7 @@ def display_post_process_header(common, current_batch_size, batch_total, batch_i
   common.status "="*60
 end
 
-def get_post_process_confirmation(current_batch_size, batch_total, batch_index, total_files_to_rename, skip_confirmation, common)
+def get_post_process_confirmation(current_batch_size, batch_total, batch_index, total_files_to_rename, skip_confirmation)
   return if skip_confirmation
 
   if batch_total && batch_index
@@ -2065,7 +2065,7 @@ def post_process_vwb_files(project, manifest_files, dry_run = false, use_v2 = fa
 
   # Get user confirmation for actual renaming
   display_post_process_header(common, current_batch_size, batch_total, batch_index)
-  get_post_process_confirmation(current_batch_size, batch_total, batch_index, total_files_to_rename, skip_confirmation, common)
+  get_post_process_confirmation(current_batch_size, batch_total, batch_index, total_files_to_rename, skip_confirmation)
   handle_skip_confirmation(skip_confirmation, common)
 
   common.status ""
