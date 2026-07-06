@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import fp from 'lodash/fp';
 import { Button } from 'primereact/button';
 
-import { Workspace } from 'generated/fetch';
+import { Workspace, WorkspaceRecoveryStatus } from 'generated/fetch';
 
 import { WorkspaceRecoverySuccessModal } from 'app/components/migration/workspace-recovery-success-modal';
 import {
@@ -276,8 +276,15 @@ export const WorkspaceRecovery = fp.flow(
                 onClick={() => navigate(['/workspaces'])}
               />
               <Button
-                label='Request Workspace Recovery'
-                disabled={recovering}
+                label={
+                  workspace.recoveryState === WorkspaceRecoveryStatus.REQUESTED
+                    ? 'Recovery Request Submitted'
+                    : 'Request Workspace Recovery'
+                }
+                disabled={
+                  recovering ||
+                  workspace.recoveryState === WorkspaceRecoveryStatus.REQUESTED
+                }
                 loading={recovering}
                 onClick={startRecovery}
               />
