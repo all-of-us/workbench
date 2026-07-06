@@ -394,7 +394,25 @@ def publish_cdr(cmd_name, args)
 
   # This is a grep -v filter. It skips cohort builder build-only tables, which
   # follow the convention of having the prefix prep_. See RW-4863.
+  # However, if prep_ or T_ tables are explicitly requested via table_prefixes, don't skip them
   table_skip_filter = "^prep_\|^T_"
+  if op.opts.table_prefixes
+    prefixes = op.opts.table_prefixes.split(",")
+    skip_parts = []
+
+    # Only add prep_ to skip filter if it's not explicitly requested
+    unless prefixes.any? { |prefix| prefix.start_with?("prep_") }
+      skip_parts << "^prep_"
+    end
+
+    # Only add T_ to skip filter if it's not explicitly requested
+    unless prefixes.any? { |prefix| prefix.start_with?("T_") }
+      skip_parts << "^T_"
+    end
+
+    # Build the skip filter from parts that should still be skipped
+    table_skip_filter = skip_parts.empty? ? "^$" : skip_parts.join("\\|")
+  end
 
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
@@ -843,6 +861,31 @@ def setup_vwb_publish_options(op)
     "The access tier associated with this CDR, e.g. controlled." +
       "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
+  op.add_option(
+    "--batch-total [N]",
+    ->(opts, v) { opts.batch_total = v.to_i },
+    "For POST_PROCESS: total number of batches to split the work into. " +
+      "Use with --batch-index to run a specific batch. This allows running multiple " +
+      "POST_PROCESS jobs in parallel."
+  )
+  op.add_option(
+    "--batch-index [N]",
+    ->(opts, v) { opts.batch_index = v.to_i },
+    "For POST_PROCESS: which batch to process (1-based index). " +
+      "Must be used with --batch-total. For example, with --batch-total=20 --batch-index=1, " +
+      "this will process the first 1/20th of files."
+  )
+  op.add_option(
+    "--post-process-threads [N]",
+    ->(opts, v) { opts.post_process_threads = v.to_i },
+    "For POST_PROCESS: number of parallel threads to use for moving/renaming files. " +
+      "Default is 32. Increase for faster processing."
+  )
+  op.add_option(
+    "--yes",
+    ->(opts, _v) { opts.skip_confirmation = true },
+    "Skip confirmation prompts. Required when running batches in background/parallel."
+  )
 
   return supported_tasks
 end
@@ -881,12 +924,40 @@ def validate_supported_tier(opts)
   end
 end
 
+def validate_batch_options_specified_together(opts)
+  return unless opts.batch_total || opts.batch_index
+  unless opts.batch_total && opts.batch_index
+    raise ArgumentError.new("--batch-total and --batch-index must be used together")
+  end
+end
+
+def validate_batch_index_range(opts)
+  return unless opts.batch_total && opts.batch_index
+  if opts.batch_index < 1 || opts.batch_index > opts.batch_total
+    raise ArgumentError.new("--batch-index must be between 1 and #{opts.batch_total}")
+  end
+end
+
+def validate_batch_options_for_post_process(opts)
+  return unless opts.batch_total && opts.batch_index
+  unless opts.tasks.include?("POST_PROCESS")
+    raise ArgumentError.new("--batch-total and --batch-index are only applicable for POST_PROCESS task")
+  end
+end
+
+def validate_batch_options(opts)
+  validate_batch_options_specified_together(opts)
+  validate_batch_index_range(opts)
+  validate_batch_options_for_post_process(opts)
+end
+
 def setup_vwb_publish_validators(op, supported_tasks)
   op.add_validator ->(opts) { validate_project_required(opts) }
   op.add_validator ->(opts) { validate_copy_manifests_requirements(opts) }
   op.add_validator ->(opts) { validate_supported_tasks(opts, supported_tasks) }
   op.add_validator ->(opts) { validate_supported_project(opts) }
   op.add_validator ->(opts) { validate_supported_tier(opts) }
+  op.add_validator ->(opts) { validate_batch_options(opts) }
 end
 
 def execute_vwb_tasks(op, tier, working_dir)
