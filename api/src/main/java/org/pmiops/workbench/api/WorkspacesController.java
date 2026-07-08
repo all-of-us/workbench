@@ -6,9 +6,7 @@ import com.google.common.collect.Maps;
 import jakarta.inject.Provider;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -46,6 +44,7 @@ import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
@@ -85,6 +84,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceServiceFactory workspaceServiceFactory;
   private final WsmClient wsmClient;
   private final FolderSyncTransferDao folderSyncTransferDao;
+  private final VwbAdminQueryService vwbAdminQueryService;
 
   @Autowired
   public WorkspacesController(
@@ -109,6 +109,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceServiceFactory workspaceServiceFactory,
       VwbUserService vwbUserService,
       WsmClient wsmClient,
+      VwbAdminQueryService vwbAdminQueryService,
       FolderSyncTransferDao folderSyncTransferDao) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
@@ -132,6 +133,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.vwbUserService = vwbUserService;
     this.wsmClient = wsmClient;
     this.folderSyncTransferDao = folderSyncTransferDao;
+    this.vwbAdminQueryService = vwbAdminQueryService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -283,6 +285,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                             workspaceMapper,
                             wsmClient)))
         .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<VwbWorkspaceListResponse> getVwbWorkspaces() {
+
+    return ResponseEntity.ok(
+        new VwbWorkspaceListResponse()
+            .items(
+                vwbAdminQueryService.queryAccessibleWorkspaces(userProvider.get().getUsername())));
   }
 
   private void processWorkspaceTask(long operationId, Supplier<Workspace> workspaceAction) {

@@ -1,18 +1,13 @@
 import * as React from 'react';
 
-import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
+import { VwbWorkspace } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { StyledExternalLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ControlledTierBadge } from 'app/components/icons';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import {
-  AccessTierShortNames,
-  displayNameForTier,
-} from 'app/utils/access-tiers';
 import { displayDate } from 'app/utils/dates';
 
 const styles = reactStyles({
@@ -31,16 +26,6 @@ const styles = reactStyles({
     marginBottom: '1rem',
   },
 
-  permissionBox: {
-    color: '#fff',
-    height: '1.5rem',
-    minWidth: '4.5rem',
-    fontSize: 10,
-    textAlign: 'center',
-    borderRadius: '0.3rem',
-    lineHeight: '1.5rem',
-  },
-
   metadataLabel: {
     fontSize: 12,
     color: '#777',
@@ -54,12 +39,11 @@ const styles = reactStyles({
 });
 
 interface Props {
-  workspace: Workspace;
-  accessLevel: WorkspaceAccessLevel;
+  workspace: VwbWorkspace;
 }
 
-export const VwbWorkspaceCard = ({ workspace, accessLevel }: Props) => {
-  const vwbWorkspaceUrl = `${environment.vwbUiUrl}/workspaces/${workspace.namespace}`;
+export const VwbWorkspaceCard = ({ workspace }: Props) => {
+  const vwbWorkspaceUrl = `${environment.vwbUiUrl}/workspaces/${workspace.id}`;
 
   return (
     <WorkspaceCardBase>
@@ -86,34 +70,29 @@ export const VwbWorkspaceCard = ({ workspace, accessLevel }: Props) => {
               style={styles.workspaceName}
               data-test-id='workspace-card-name'
             >
-              {workspace.name}
+              {workspace.displayName}
             </div>
           </FlexColumn>
 
           <FlexRow style={{ justifyContent: 'space-between' }}>
             <FlexColumn>
-              <FlexRow style={{ gap: '6px', alignItems: 'center' }}>
-                <div
-                  style={{
-                    ...styles.permissionBox,
-                    backgroundColor:
-                      colors.workspacePermissionsHighlights[accessLevel],
-                  }}
-                >
-                  {accessLevel}
-                </div>
+              <div style={styles.metadataLabel}>Role</div>
+              <div style={styles.metadataValue}>{workspace.role ?? '-'}</div>
 
-                {workspace.accessTierShortName ===
-                  AccessTierShortNames.Controlled && <ControlledTierBadge />}
-              </FlexRow>
+              <div style={{ height: 8 }} />
 
-              <div style={{ fontSize: 12 }}>
-                Data Collection:{' '}
-                {displayNameForTier(workspace.accessTierShortName)}
+              <div style={styles.metadataLabel}>Data Collection</div>
+              <div style={styles.metadataValue}>
+                {workspace.dataCollection ?? '-'}
               </div>
 
-              <div style={{ fontSize: 12 }}>
-                Last Changed: {displayDate(workspace.lastModifiedTime)}
+              <div style={{ height: 8 }} />
+
+              <div style={styles.metadataLabel}>Last Changed</div>
+              <div style={styles.metadataValue}>
+                {workspace.lastChanged
+                  ? displayDate(Date.parse(workspace.lastChanged))
+                  : '-'}
               </div>
             </FlexColumn>
           </FlexRow>

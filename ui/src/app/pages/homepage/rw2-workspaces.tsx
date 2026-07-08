@@ -1,29 +1,52 @@
 import * as React from 'react';
 
-import { WorkspaceResponse } from 'generated/fetch';
+import { VwbWorkspace } from 'generated/fetch';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { SpinnerOverlay } from 'app/components/spinners';
 import { VwbWorkspaceCard } from 'app/pages/workspace/vwb-workspace-card';
+import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 
-interface Props {
-  workspaces: WorkspaceResponse[];
-  onChange: () => void;
+interface State {
+  loading: boolean;
+  workspaces: VwbWorkspace[];
 }
 
-export const VwbWorkspaces = class extends React.Component<Props> {
-  get migratedWorkspaces(): WorkspaceResponse[] {
-    return this.props.workspaces.filter(
-      (wp) =>
-        wp.workspace.migrationState === 'FINISHED' &&
-        wp.workspace.recoveryState == null
-    );
+export const VwbWorkspaces = class extends React.Component<
+  Record<string, never>,
+  State
+> {
+  state: State = {
+    loading: true,
+    workspaces: [],
+  };
+
+  async componentDidMount() {
+    try {
+      const response = await workspacesApi().getVwbWorkspaces();
+
+      this.setState({
+        workspaces: response.items ?? [],
+        loading: false,
+      });
+    } catch (error) {
+      console.error('Failed to load RW 2.0 workspaces', error);
+
+      this.setState({
+        loading: false,
+      });
+    }
   }
 
   render() {
-    const migratedWorkspaces = this.migratedWorkspaces;
+    const { loading, workspaces } = this.state;
 
-    if (migratedWorkspaces.length === 0) {
+    if (loading) {
+      return <SpinnerOverlay />;
+    }
+
+    if (workspaces.length === 0) {
       return null;
     }
 
@@ -33,7 +56,7 @@ export const VwbWorkspaces = class extends React.Component<Props> {
           <h2 style={{ fontWeight: 600, margin: 0 }}>RW 2.0 Workspaces</h2>
         </FlexRow>
 
-        {migratedWorkspaces.length === 0 ? (
+        {workspaces.length === 0 ? (
           <div style={{ color: colors.primary, margin: '.5em 0' }}>
             No RW 2.0 workspaces found.
           </div>
@@ -45,12 +68,8 @@ export const VwbWorkspaces = class extends React.Component<Props> {
               overflow: 'auto',
             }}
           >
-            {migratedWorkspaces.map((wp) => (
-              <VwbWorkspaceCard
-                key={wp.workspace.namespace}
-                workspace={wp.workspace}
-                accessLevel={wp.accessLevel}
-              />
+            {workspaces.map((workspace) => (
+              <VwbWorkspaceCard key={workspace.id} workspace={workspace} />
             ))}
           </FlexRow>
         )}

@@ -362,12 +362,7 @@ export const Homepage = fp.flow(
                   disableCreation={!canCreateLegacyWorkspace}
                   migrationTestingGroup={migrationTestingGroup}
                 />
-                {userWorkspacesResponse && (
-                  <VwbWorkspaces
-                    workspaces={userWorkspacesResponse.items}
-                    onChange={() => this.fetchWorkspaces()}
-                  />
-                )}
+                {userWorkspacesResponse && <VwbWorkspaces />}
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
                     !restrictLegacyAccess && (

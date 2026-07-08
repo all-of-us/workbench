@@ -6,8 +6,8 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import jakarta.inject.Provider;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
@@ -136,6 +136,28 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  %s r ON w.workspace_id = r.workspace_id \n"
           + "WHERE \n"
           + "  w.is_data_collection = true ";
+
+  private static final String WORKSPACE_ROLE_QUERY =
+      "SELECT \n"
+          + "  w.workspace_user_facing_id, \n"
+          + "  swu.role \n"
+          + "FROM \n"
+          + "  %s swu \n"
+          + "JOIN \n"
+          + "  %s w ON swu.workspace_id = w.workspace_id \n"
+          + "WHERE \n"
+          + "  LOWER(swu.user_email) = LOWER(@USER_EMAIL) ";
+
+  private static final String LAST_CHANGED_QUERY =
+      "SELECT \n"
+          + "  w.workspace_user_facing_id, \n"
+          + "  MAX(wal.change_date) AS last_changed \n"
+          + "FROM \n"
+          + "  %s wal \n"
+          + "JOIN \n"
+          + "  %s w ON wal.workspace_id = w.workspace_id \n"
+          + "GROUP BY \n"
+          + "  w.workspace_user_facing_id ";
 
   private static final String PREPROD_QUERY =
       "SELECT \n"
@@ -360,6 +382,92 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     return StreamSupport.stream(result.iterateAll().spliterator(), false)
         .map(this::fieldValueListToVwbDataCollectionEntry)
         .collect(Collectors.toList());
+  }
+
+  private Map<String, WorkspaceAccessLevel> queryWorkspaceRoles(String email) {
+
+    final String queryString =
+        String.format(
+            WORKSPACE_ROLE_QUERY,
+            getTableName(VWB_WORKSPACE_SAM_USERS_TABLE_PREFIX),
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("USER_EMAIL", QueryParameterValue.string(normalizeEmail(email)))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .collect(
+            Collectors.toMap(
+                row -> FieldValues.getString(row, "workspace_user_facing_id").orElseThrow(),
+                row ->
+                    WorkspaceAccessLevel.valueOf(
+                        FieldValues.getString(row, "role").orElseThrow().toUpperCase())));
+  }
+
+  private Map<String, String> queryWorkspaceLastChanged() {
+
+    final String queryString =
+        String.format(
+            LAST_CHANGED_QUERY,
+            getTableName(VWB_WORKSPACE_ACTIVITY_LOG_TABLE_PREFIX),
+            getTableName(VWB_WORKSPACE_TABLE_PREFIX));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString).build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .collect(
+            Collectors.toMap(
+                row -> FieldValues.getString(row, "workspace_user_facing_id").orElseThrow(),
+                row ->
+                    FieldValues.getDateTime(row, "last_changed")
+                        .map(OffsetDateTime::toString)
+                        .orElse(null)));
+  }
+
+  @Override
+  public List<VwbWorkspace> queryAccessibleWorkspaces(String email) {
+
+    Map<String, VwbWorkspace> workspaces = new LinkedHashMap<>();
+
+    queryVwbWorkspacesByCreator(email).forEach(ws -> workspaces.put(ws.getId(), ws));
+
+    queryVwbWorkspacesByShareActivity(email).forEach(ws -> workspaces.put(ws.getId(), ws));
+
+    Map<String, VwbDataCollectionEntry> dataCollections =
+        queryVwbDataCollections().stream()
+            .collect(
+                Collectors.toMap(
+                    VwbDataCollectionEntry::getWorkspaceUserFacingId,
+                    Function.identity(),
+                    (first, second) -> first));
+
+    Map<String, WorkspaceAccessLevel> roles = queryWorkspaceRoles(email);
+
+    Map<String, String> lastChanged = queryWorkspaceLastChanged();
+
+    workspaces
+        .values()
+        .forEach(
+            workspace -> {
+              VwbDataCollectionEntry dataCollection =
+                  dataCollections.get(workspace.getUserFacingId());
+
+              if (dataCollection != null) {
+                workspace.setDataCollection(dataCollection.getResourceDisplayName());
+              }
+
+              workspace.setRole(roles.get(workspace.getUserFacingId()));
+              workspace.setLastChanged(lastChanged.get(workspace.getUserFacingId()));
+            });
+
+    return new ArrayList<>(workspaces.values());
   }
 
   @Override
