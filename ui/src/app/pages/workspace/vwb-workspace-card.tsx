@@ -1,40 +1,52 @@
 import * as React from 'react';
 
-import { VwbWorkspace } from 'generated/fetch';
+import { VwbWorkspace, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { StyledExternalLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import colors from 'app/styles/colors';
+import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { displayDate } from 'app/utils/dates';
 
 const styles = reactStyles({
   workspaceCard: {
-    display: 'flex',
-    flexDirection: 'column',
+    justifyContent: 'flex-end',
     height: '100%',
+    position: 'relative',
+  },
+
+  workspaceMenuWrapper: {
+    paddingTop: '.75rem',
+    borderRight: '1px solid',
+    borderColor: colorWithWhiteness(colors.dark, 0.6),
+    flex: '0 0 1.5rem',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
 
   workspaceName: {
-    color: colors.primary,
+    color: colors.accent,
+    marginBottom: '.5rem',
     fontSize: 18,
     fontWeight: 600,
+    wordBreak: 'break-all',
     textDecoration: 'none',
-    wordBreak: 'break-word',
-    marginBottom: '1rem',
   },
 
-  metadataLabel: {
-    fontSize: 12,
-    color: '#777',
-    fontWeight: 500,
-  },
-
-  metadataValue: {
-    fontSize: 14,
-    color: colors.primary,
+  permissionBox: {
+    color: colors.white,
+    height: '1.5rem',
+    width: '4.5rem',
+    fontSize: 10,
+    textAlign: 'center',
+    borderRadius: '.3rem',
+    padding: 0,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
@@ -43,61 +55,88 @@ interface Props {
 }
 
 export const VwbWorkspaceCard = ({ workspace }: Props) => {
-  const vwbWorkspaceUrl = `${environment.vwbUiUrl}/workspaces/${workspace.userFacingId}`;
+  const workspaceUrl = `${environment.vwbUiUrl}/workspaces/${workspace.userFacingId}`;
+
+  const role =
+    (workspace.role as WorkspaceAccessLevel) || WorkspaceAccessLevel.READER;
 
   return (
     <WorkspaceCardBase>
-      <StyledExternalLink
-        href={vwbWorkspaceUrl}
-        target='_blank'
-        style={{
-          textDecoration: 'none',
-          color: 'inherit',
-          display: 'block',
-          height: '100%',
-        }}
-      >
+      <FlexRow style={{ height: '100%' }}>
+        {/* Left gray strip (same as Legacy card) */}
+        <FlexColumn style={styles.workspaceMenuWrapper} />
+
         <FlexColumn
           style={{
             ...styles.workspaceCard,
             padding: '.75rem',
-            cursor: 'pointer',
           }}
           data-test-id='vwb-workspace-card'
         >
           <FlexColumn style={{ marginBottom: 'auto' }}>
-            <div
+            <StyledExternalLink
+              href={workspaceUrl}
+              target='_blank'
               style={styles.workspaceName}
-              data-test-id='workspace-card-name'
             >
               {workspace.displayName}
-            </div>
+            </StyledExternalLink>
+
+            <a
+              href={workspaceUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              style={{
+                fontSize: '12px',
+                color: colors.accent,
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                marginBottom: '.75rem',
+              }}
+            >
+              Open in RW 2.0
+              <ClrIcon shape='pop-out' size={10} />
+            </a>
           </FlexColumn>
 
           <FlexRow style={{ justifyContent: 'space-between' }}>
             <FlexColumn>
-              <div style={styles.metadataLabel}>Role</div>
-              <div style={styles.metadataValue}>{workspace.role ?? '-'}</div>
-
-              <div style={{ height: 8 }} />
-
-              <div style={styles.metadataLabel}>Data Collection</div>
-              <div style={styles.metadataValue}>
-                {workspace.dataCollection ?? '-'}
+              <div
+                style={{
+                  ...styles.permissionBox,
+                  backgroundColor: colors.workspacePermissionsHighlights[role],
+                }}
+              >
+                {workspace.role}
               </div>
 
-              <div style={{ height: 8 }} />
-
-              <div style={styles.metadataLabel}>Last Changed</div>
-              <div style={styles.metadataValue}>
+              <div style={{ fontSize: 12, marginTop: '.4rem' }}>
+                Last Changed:{' '}
                 {workspace.lastChanged
                   ? displayDate(Date.parse(workspace.lastChanged))
                   : '-'}
               </div>
+
+              <div style={{ fontSize: 12, marginTop: '.25rem' }}>
+                Data Collection: {workspace.dataCollection ?? '-'}
+              </div>
+            </FlexColumn>
+
+            <FlexColumn
+              style={{
+                justifyContent: 'flex-end',
+                marginLeft: '1.2rem',
+              }}
+            >
+              {workspace.dataCollection === 'Controlled Tier' && (
+                <ControlledTierBadge />
+              )}
             </FlexColumn>
           </FlexRow>
         </FlexColumn>
-      </StyledExternalLink>
+      </FlexRow>
     </WorkspaceCardBase>
   );
 };
