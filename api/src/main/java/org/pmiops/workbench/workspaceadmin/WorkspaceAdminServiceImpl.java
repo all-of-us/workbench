@@ -63,6 +63,7 @@ import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final WsmClient wsmClient;
 
   @Autowired
   public WorkspaceAdminServiceImpl(
@@ -119,7 +121,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      WsmClient wsmClient) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
     this.cloudMonitoringService = cloudMonitoringService;
@@ -142,6 +145,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
+    this.wsmClient = wsmClient;
   }
 
   @Override
@@ -366,9 +370,18 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, AdminLockingRequest adminLockingRequest) {
     log.info(String.format("called setAdminLockedState on wsns %s", workspaceNamespace));
 
-    DbWorkspace dbWorkspace =
+    DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
+
+    // For VWB workspaces, access control lives in the Workspace Manager, so propagate the lock
+    // there. Do this before updating local state so a WSM failure aborts before we mark it locked.
+    // The workspace namespace is the WSM user-facing id.
+    if (dbWorkspace.isVwbWorkspace()) {
+      wsmClient.lockWorkspaceAsService(workspaceNamespace, adminLockingRequest.getRequestReason());
+    }
+
+    dbWorkspace =
         workspaceDao.save(
-            getWorkspaceByNamespaceOrThrow(workspaceNamespace)
+            dbWorkspace
                 .setAdminLocked(true)
                 .setAdminLockedReason(adminLockingRequest.getRequestReason()));
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
@@ -387,8 +400,16 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public void setAdminUnlockedState(String workspaceNamespace) {
     log.info(String.format("called setAdminUnlockedState on wsns %s", workspaceNamespace));
 
-    DbWorkspace dbWorkspace =
-        workspaceDao.save(getWorkspaceByNamespaceOrThrow(workspaceNamespace).setAdminLocked(false));
+    DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
+
+    // For VWB workspaces, access control lives in the Workspace Manager, so propagate the unlock
+    // there. Do this before updating local state so a WSM failure aborts before we mark it unlocked.
+    // The workspace namespace is the WSM user-facing id.
+    if (dbWorkspace.isVwbWorkspace()) {
+      wsmClient.unlockWorkspaceAsService(workspaceNamespace);
+    }
+
+    dbWorkspace = workspaceDao.save(dbWorkspace.setAdminLocked(false));
     adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
   }
 
