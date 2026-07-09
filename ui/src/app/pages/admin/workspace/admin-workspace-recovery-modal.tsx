@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Dropdown } from 'primereact/dropdown';
 
 import { Workspace, WorkspaceRecoveryStatus } from 'generated/fetch';
 
@@ -12,10 +11,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { SpinnerOverlay } from 'app/components/spinners';
-import {
-  vwbWorkspaceAdminApi,
-  workspacesApi,
-} from 'app/services/swagger-fetch-clients';
+import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
@@ -163,36 +159,10 @@ export const AdminWorkspaceRecoveryModal = ({
   onClose: () => void;
   reload: () => void;
 }) => {
-  const [pods, setPods] = useState<string[]>([]);
-  const [selectedPod, setSelectedPod] = useState('');
-  const [loadingPods, setLoadingPods] = useState(false);
   const [startingRecovery, setStartingRecovery] = useState(false);
-  const getPods = async () => {
-    if (!workspace) {
-      return;
-    }
-
-    try {
-      setLoadingPods(true);
-
-      const username = workspace.creatorUser.userName;
-
-      const response = await vwbWorkspaceAdminApi().getPods(username);
-
-      setPods([
-        'nph-consortium-users',
-        ...(response || []),
-        'aou-system-billing-prod',
-      ]);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingPods(false);
-    }
-  };
 
   const handleRecovery = async () => {
-    if (!workspace || !selectedPod) {
+    if (!workspace) {
       return;
     }
 
@@ -200,7 +170,7 @@ export const AdminWorkspaceRecoveryModal = ({
       setStartingRecovery(true);
       await workspacesApi().startWorkspaceRecovery(
         workspace.namespace,
-        selectedPod
+        workspace.terraName
       );
 
       await reload();
@@ -222,6 +192,7 @@ export const AdminWorkspaceRecoveryModal = ({
     <Modal
       data-test-id='workspace-archive-recovery-modal'
       aria={{ label: 'Workspace Archive Recovery' }}
+      width={650}
     >
       <ModalTitle>Workspace archive recovery</ModalTitle>
 
@@ -242,36 +213,6 @@ export const AdminWorkspaceRecoveryModal = ({
               value={workspace.migratedVwbWorkspaceId || 'N/A'}
             />
           </div>
-
-          <hr style={styles.divider} />
-
-          <div style={styles.podSection}>
-            <span style={styles.sectionLabel}>
-              Researcher Workbench 2.0 billing pod
-            </span>
-            <div style={styles.podRow}>
-              <Dropdown
-                value={selectedPod}
-                options={pods}
-                placeholder={
-                  loadingPods ? 'Loading pods...' : 'Select a billing pod'
-                }
-                onChange={(e) => setSelectedPod(e.value)}
-                disabled={loadingPods}
-                style={{
-                  flex: 1,
-                  borderRadius: '6px',
-                }}
-              />
-              <Button
-                type='secondarySmall'
-                onClick={getPods}
-                disabled={loadingPods || startingRecovery}
-              >
-                {loadingPods ? 'Loading...' : 'Load pods'}
-              </Button>
-            </div>
-          </div>
         </div>
       </ModalBody>
 
@@ -282,7 +223,7 @@ export const AdminWorkspaceRecoveryModal = ({
         <Button
           type='primary'
           onClick={handleRecovery}
-          disabled={startingRecovery || !selectedPod}
+          disabled={startingRecovery}
         >
           {recoveryButtonLabel}
         </Button>
