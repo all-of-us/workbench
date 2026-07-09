@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""generate_sts_scripts.py
+"""
+generate_sts_scripts.py.
 
 Reads a CSV of source/destination pairs and generates one shell script per row,
 each containing a curl command to create a Google Cloud Storage Transfer Service job.
@@ -51,8 +52,7 @@ def ensure_trailing_slash(path):
 
 
 def build_transfer_spec(source, destination, storage_class):
-    """
-    Build the transferSpec dict.
+    """Build the transferSpec dict.
 
     - If source ends with '/', it's a folder transfer: gcsDataSource with a path.
     - Otherwise, it's a single-file transfer: gcsDataSource points at the parent
