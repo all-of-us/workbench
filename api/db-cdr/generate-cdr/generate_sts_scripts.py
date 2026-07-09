@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-generate_sts_scripts.py
+"""generate_sts_scripts.py
 
 Reads a CSV of source/destination pairs and generates one shell script per row,
 each containing a curl command to create a Google Cloud Storage Transfer Service job.
@@ -16,7 +15,8 @@ Usage:
 CSV format (header row required):
     source,destination[,description]
 
-    source      - Required. GCS URI. Trailing slash = folder transfer; no trailing slash = single file.
+    source      - Required. GCS URI. Trailing slash = folder transfer;
+                  no trailing slash = single file.
     destination - Required. GCS folder URI (will be treated as a folder).
     description - Optional. Human-readable label used in the job description and output filename.
 """
@@ -27,7 +27,10 @@ import json
 import os
 import re
 import sys
+from collections import namedtuple
 from datetime import date
+
+TransferConfig = namedtuple("TransferConfig", ["project", "service_account", "storage_class"])
 
 
 def parse_gcs_uri(uri):
@@ -43,6 +46,7 @@ def parse_gcs_uri(uri):
 
 
 def ensure_trailing_slash(path):
+    """Append a trailing slash to path if not already present."""
     return path if path.endswith("/") else path + "/"
 
 
@@ -92,15 +96,18 @@ def build_transfer_spec(source, destination, storage_class):
     return transfer_spec
 
 
-def build_job_config(row, index, today, project, service_account, storage_class):
+def build_job_config(row, index, today, config):
+    """Build the STS API job config dict for a single transfer row."""
     source = row["source"].strip()
     destination = row["destination"].strip()
-    description = row.get("description", "").strip() or f"Transfer #{index}: {source} -> {destination}"
+    description = (
+        row.get("description", "").strip() or f"Transfer #{index}: {source} -> {destination}"
+    )
 
-    transfer_spec = build_transfer_spec(source, destination, storage_class)
+    transfer_spec = build_transfer_spec(source, destination, config.storage_class)
 
     job_config = {
-        "projectId": project,
+        "projectId": config.project,
         "description": description,
         "status": "ENABLED",
         "schedule": {
@@ -110,14 +117,15 @@ def build_job_config(row, index, today, project, service_account, storage_class)
         "transferSpec": transfer_spec,
     }
 
-    if service_account:
-        job_config["serviceAccount"] = service_account
+    if config.service_account:
+        job_config["serviceAccount"] = config.service_account
 
     return job_config
 
 
-def build_shell_script(row, index, today, project, service_account, storage_class):
-    job_config = build_job_config(row, index, today, project, service_account, storage_class)
+def build_shell_script(row, index, today, config):
+    """Build the shell script content for a single transfer row."""
+    job_config = build_job_config(row, index, today, config)
     source = row["source"].strip()
     destination = row["destination"].strip()
 
@@ -127,8 +135,13 @@ def build_shell_script(row, index, today, project, service_account, storage_clas
     lines.append(f"# Destination: {destination}")
     lines.append("")
 
-    if service_account:
-        lines.append(f"ACCESS_TOKEN=$(gcloud auth print-access-token --impersonate-service-account={service_account})")
+    if config.service_account:
+        sa = config.service_account
+        token_cmd = (
+            "ACCESS_TOKEN=$(gcloud auth print-access-token"
+            f" --impersonate-service-account={sa})"
+        )
+        lines.append(token_cmd)
     else:
         lines.append("ACCESS_TOKEN=$(gcloud auth print-access-token)")
     lines.append("")
@@ -136,7 +149,7 @@ def build_shell_script(row, index, today, project, service_account, storage_clas
     lines.append("curl -X POST \\")
     lines.append('    -H "Authorization: Bearer ${ACCESS_TOKEN}" \\')
     lines.append('    -H "Content-Type: application/json" \\')
-    lines.append(f'    -H "X-Goog-User-Project: {project}" \\')
+    lines.append(f'    -H "X-Goog-User-Project: {config.project}" \\')
     lines.append('    "https://storagetransfer.googleapis.com/v1/transferJobs" \\')
     lines.append(f"    -d '{json.dumps(job_config, indent=2)}'")
 
@@ -150,13 +163,40 @@ def sanitize_filename(text, max_len=40):
     return text[:max_len]
 
 
+def load_csv(input_path):
+    """Load and validate the input CSV, returning a list of row dicts."""
+    required_columns = {"source", "destination"}
+    with open(input_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        if not required_columns.issubset(set(reader.fieldnames or [])):
+            missing = required_columns - set(reader.fieldnames or [])
+            print(f"ERROR: CSV is missing required columns: {missing}", file=sys.stderr)
+            sys.exit(1)
+        return list(reader)
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    """Parse arguments and generate one shell script per CSV row."""
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--input", required=True, help="Path to the input CSV file")
-    parser.add_argument("--project", required=True, help="GCP billing/execution project, e.g. all-of-us-rw-prod")
-    parser.add_argument("--output-dir", default=".", help="Directory to write the generated .sh scripts (default: current dir)")
-    parser.add_argument("--service-account", default=None, help="Service account to impersonate (optional)")
-    parser.add_argument("--storage-class", default="STANDARD", help="GCS storage class: STANDARD, NEARLINE, COLDLINE, ARCHIVE (default: STANDARD)")
+    parser.add_argument(
+        "--project", required=True,
+        help="GCP billing/execution project, e.g. all-of-us-rw-prod"
+    )
+    parser.add_argument(
+        "--output-dir", default=".",
+        help="Directory to write the generated .sh scripts (default: current dir)"
+    )
+    parser.add_argument(
+        "--service-account", default=None,
+        help="Service account to impersonate (optional)"
+    )
+    parser.add_argument(
+        "--storage-class", default="STANDARD",
+        help="GCS storage class: STANDARD, NEARLINE, COLDLINE, ARCHIVE (default: STANDARD)"
+    )
     args = parser.parse_args()
 
     if not os.path.isfile(args.input):
@@ -165,23 +205,15 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
     today = date.today()
-
-    required_columns = {"source", "destination"}
-
-    with open(args.input, newline="") as f:
-        reader = csv.DictReader(f)
-        if not required_columns.issubset(set(reader.fieldnames or [])):
-            missing = required_columns - set(reader.fieldnames or [])
-            print(f"ERROR: CSV is missing required columns: {missing}", file=sys.stderr)
-            sys.exit(1)
-
-        rows = list(reader)
+    rows = load_csv(args.input)
 
     print(f"Generating {len(rows)} script(s) in {args.output_dir}/")
 
+    config = TransferConfig(args.project, args.service_account, args.storage_class)
+
     for i, row in enumerate(rows, start=1):
         try:
-            script_content = build_shell_script(row, i, today, args.project, args.service_account, args.storage_class)
+            script_content = build_shell_script(row, i, today, config)
         except ValueError as e:
             print(f"ERROR on row {i}: {e}", file=sys.stderr)
             sys.exit(1)
@@ -190,9 +222,9 @@ def main():
         filename = f"transfer_{i:03d}_{sanitize_filename(label)}.sh"
         filepath = os.path.join(args.output_dir, filename)
 
-        with open(filepath, "w") as out:
+        with open(filepath, "w", encoding="utf-8") as out:
             out.write(script_content)
-        os.chmod(filepath, 0o755)
+        os.chmod(filepath, 0o700)
 
         print(f"  {filename}")
 
