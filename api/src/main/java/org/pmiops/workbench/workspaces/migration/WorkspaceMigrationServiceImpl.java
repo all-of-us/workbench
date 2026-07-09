@@ -1103,17 +1103,28 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               .filter(c -> c.cdrVersionId == cdrVersionId)
               .findFirst()
               .orElse(null);
-
+      String sourceWorkspaceId;
+      String resourceId;
       if (cdrVersionForMigration == null) {
-        throw new RuntimeException(namespace + ": CDR version unavailable");
+        // Outdated CDR version, set v9 ids
+        if (dbWorkspace.getCdrVersion().getAccessTier().getShortName().equals("controlled")) {
+          sourceWorkspaceId = "3d83ef80-77d7-43e8-a479-52946619b769";
+          resourceId = "1a27006f-6aea-4a10-bdc1-c4d562d7828d";
+        } else {
+          sourceWorkspaceId = "698c6700-afbe-454a-b73a-c675e629336c";
+          resourceId = "d6ac7edd-2fe6-4221-8680-2cf828665cd3";
+        }
+      } else {
+        sourceWorkspaceId = cdrVersionForMigration.workspaceId;
+        resourceId = cdrVersionForMigration.resourceId;
       }
 
       logger.log(Level.INFO, namespace + ": Starting BQ clone");
 
       wsmClient.cloneBQDataset(
           workspaceId,
-          cdrVersionForMigration.workspaceId,
-          UUID.fromString(cdrVersionForMigration.resourceId),
+          sourceWorkspaceId,
+          UUID.fromString(resourceId),
           UUID.randomUUID().toString());
 
       logger.log(Level.INFO, namespace + ": BQ clone complete");
