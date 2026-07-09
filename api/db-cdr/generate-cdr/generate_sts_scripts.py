@@ -51,13 +51,10 @@ def ensure_trailing_slash(path):
 
 
 def build_transfer_spec(source, destination, storage_class):
-    """
-    Build the transferSpec dict.
-
-    - If source ends with '/', it's a folder transfer: gcsDataSource with a path.
-    - Otherwise, it's a single-file transfer: gcsDataSource points at the parent
-      folder, and objectConditions.includePrefixes filters to just the filename.
-    """
+    """Build the transferSpec dict from source and destination GCS URIs."""
+    # Folder transfer (trailing /): gcsDataSource with a path.
+    # Single-file transfer: gcsDataSource points at the parent folder,
+    # objectConditions.includePrefixes filters to just the filename.
     source_bucket, source_path = parse_gcs_uri(source)
     dest_bucket, dest_path = parse_gcs_uri(destination)
     dest_path = ensure_trailing_slash(dest_path)
