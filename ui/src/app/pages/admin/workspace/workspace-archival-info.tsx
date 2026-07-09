@@ -19,7 +19,9 @@ export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
   const migrated = workspace.migrationState === MigrationState.FINISHED;
 
   const archiveStatus =
-    workspace.recoveryState === null ? 'Not Archived' : 'Archived';
+    typeof workspace.recoveryState === 'undefined'
+      ? 'Not Archived'
+      : 'Archived';
 
   const recoveryStatus = (() => {
     switch (workspace.recoveryState) {

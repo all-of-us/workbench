@@ -4676,11 +4676,6 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkspaceRecoveryRequest'
       responses:
         200:
           description: Recovery started successfully
@@ -4698,6 +4693,11 @@ paths:
             type: string
         - name: terraName
           in: path
+          required: true
+          schema:
+            type: string
+        - name: podId
+          in: query
           required: true
           schema:
             type: string
@@ -8327,11 +8327,6 @@ components:
         namespace:
           type: string
         terraName:
-          type: string
-    WorkspaceRecoveryRequest:
-      type: object
-      properties:
-        podId:
           type: string
     StartWorkspaceMigrationRequest:
       type: object

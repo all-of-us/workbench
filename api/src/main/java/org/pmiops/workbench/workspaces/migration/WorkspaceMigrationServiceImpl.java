@@ -963,7 +963,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void requestWorkspaceRecovery(String namespace, String terraName) {
+  public void requestWorkspaceRecovery(String namespace, String terraName, String podId) {
     logger.log(Level.INFO, namespace + ": Requesting workspace recovery");
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
@@ -991,8 +991,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           namespace + ": Workspace is not archived. Current state=" + archive.getStatus());
     }
 
-    // Update recovery state to REQUESTED
+    // Update recovery state to REQUESTED and set recoveryPodId
     dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
+    dbWorkspace.setRecoveryPodId(podId);
     dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     workspaceDao.save(dbWorkspace);
 
@@ -1015,7 +1016,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void startWorkspaceRecovery(String namespace, String terraName, String podId) {
+  public void startWorkspaceRecovery(String namespace, String terraName) {
 
     Duration bucketDelay = Duration.ofSeconds(10);
 
@@ -1074,8 +1075,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
 
       String resolvedPodId =
-          podId != null
-              ? podId
+          dbWorkspace.getRecoveryPodId() != null
+              ? dbWorkspace.getRecoveryPodId()
               : Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
                   .map(DbUser::getVwbUserPod)
                   .map(DbVwbUserPod::getVwbPodId)
