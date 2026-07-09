@@ -43,7 +43,7 @@ interface Props {
 }
 
 export const VwbWorkspaceCard = ({ workspace }: Props) => {
-  const vwbWorkspaceUrl = `${environment.vwbUiUrl}/workspaces/${workspace.id}`;
+  const vwbWorkspaceUrl = `${environment.vwbUiUrl}/workspaces/${workspace.userFacingId}`;
 
   return (
     <WorkspaceCardBase>
