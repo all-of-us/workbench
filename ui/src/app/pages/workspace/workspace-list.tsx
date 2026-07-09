@@ -14,6 +14,7 @@ import { ListPageHeader, SmallHeader } from 'app/components/headers';
 import { ClrIcon, NewWindowIcon } from 'app/components/icons';
 import { Spinner } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { VwbWorkspaces } from 'app/pages/homepage/rw2-workspaces';
 import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -262,26 +263,42 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     <>
                       {showMigrated ? (
                         <>
-                          {/* MIGRATED */}
-                          <div style={{ width: '100%', marginBottom: '12px' }}>
-                            <SmallHeader>Migrated Workspaces</SmallHeader>
-                          </div>
+                          {/*
+                            MIGRATED SECTION
+                            - migrationTestingGroup users still see the legacy
+                              "Migrated Workspaces" card list (old behavior).
+                            - Everyone else now sees the RW 2.0 workspaces
+                              component in place of the migrated card list.
+                          */}
+                          {profile.migrationTestingGroup ? (
+                            <>
+                              <div
+                                style={{ width: '100%', marginBottom: '12px' }}
+                              >
+                                <SmallHeader>Migrated Workspaces</SmallHeader>
+                              </div>
 
-                          {migratedWorkspaces.map((wp) => (
-                            <WorkspaceCard
-                              key={`${wp.workspace.namespace}-m`}
-                              workspace={wp.workspace}
-                              accessLevel={wp.accessLevel}
-                              reload={() => this.reloadWorkspaces()}
-                              tierAccessDisabled={
-                                !hasTierAccess(
-                                  profile,
-                                  wp.workspace.accessTierShortName
-                                )
-                              }
-                              isMigratedView={true}
-                            />
-                          ))}
+                              {migratedWorkspaces.map((wp) => (
+                                <WorkspaceCard
+                                  key={`${wp.workspace.namespace}-m`}
+                                  workspace={wp.workspace}
+                                  accessLevel={wp.accessLevel}
+                                  reload={() => this.reloadWorkspaces()}
+                                  tierAccessDisabled={
+                                    !hasTierAccess(
+                                      profile,
+                                      wp.workspace.accessTierShortName
+                                    )
+                                  }
+                                  isMigratedView={true}
+                                />
+                              ))}
+                            </>
+                          ) : (
+                            <div style={{ width: '100%' }}>
+                              <VwbWorkspaces />
+                            </div>
+                          )}
                         </>
                       ) : (
                         <>

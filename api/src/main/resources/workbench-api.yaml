@@ -8524,6 +8524,7 @@ components:
       description: Indicates the status of the workspace recovery flow (NOT_STARTED, RECOVERING, RECOVERED, FAILED).
       enum:
         - NOT_STARTED
+        - REQUESTED
         - RECOVERING
         - RECOVERED
         - FAILED
