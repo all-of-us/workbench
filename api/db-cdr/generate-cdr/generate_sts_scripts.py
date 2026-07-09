@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
-"""
-generate_sts_scripts.py.
-
-Reads a CSV of source/destination pairs and generates one shell script per row,
-each containing a curl command to create a Google Cloud Storage Transfer Service job.
-
-Usage:
-    python3 generate_sts_scripts.py \
-        --input transfers.csv \
-        --project all-of-us-rw-prod \
-        --output-dir ./scripts \
-        [--service-account deploy@all-of-us-rw-prod.iam.gserviceaccount.com] \
-        [--storage-class STANDARD]
-
-CSV format (header row required):
-    source,destination[,description]
-
-    source      - Required. GCS URI. Trailing slash = folder transfer;
-                  no trailing slash = single file.
-    destination - Required. GCS folder URI (will be treated as a folder).
-    description - Optional. Human-readable label used in the job description and output filename.
-"""
+# generate_sts_scripts.py
+#
+# Reads a CSV of source/destination pairs and generates one shell script per row,
+# each containing a curl command to create a Google Cloud Storage Transfer Service job.
+#
+# Usage:
+#     python3 generate_sts_scripts.py \
+#         --input transfers.csv \
+#         --project all-of-us-rw-prod \
+#         --output-dir ./scripts \
+#         [--service-account deploy@all-of-us-rw-prod.iam.gserviceaccount.com] \
+#         [--storage-class STANDARD]
+#
+# CSV format (header row required):
+#     source,destination[,description]
+#
+#     source      - Required. GCS URI. Trailing slash = folder transfer;
+#                   no trailing slash = single file.
+#     destination - Required. GCS folder URI (will be treated as a folder).
+#     description - Optional. Human-readable label used in the job description and output filename.
 
 import argparse
 import csv
@@ -178,7 +176,8 @@ def load_csv(input_path):
 def main():
     """Parse arguments and generate one shell script per CSV row."""
     parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        description="Generate STS transfer shell scripts from a CSV of source/destination pairs.",
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--input", required=True, help="Path to the input CSV file")
     parser.add_argument(
