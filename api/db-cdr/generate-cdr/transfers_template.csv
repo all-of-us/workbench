@@ -1,0 +1,3 @@
+source,destination,description
+gs://source-bucket/path/to/folder/,gs://vwb-aou-datasets-controlled/v9/microarray/hail.mt/,Array Hail MT
+gs://source-bucket/manifests/some_manifest.tsv,gs://vwb-aou-datasets-controlled/v9/wgs/cram/,WGS CRAMs
