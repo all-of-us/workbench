@@ -21,7 +21,7 @@ public class StorageTransferClientImpl implements StorageTransferClient {
   public String createTransferJob(
       String sourceBucket,
       String destinationBucket,
-      String destinationPath,
+      String sourcePath,
       String workspaceNamespace,
       String projectId,
       List<String> folders,
@@ -39,8 +39,8 @@ public class StorageTransferClientImpl implements StorageTransferClient {
       com.google.gson.JsonObject gcsSink = new com.google.gson.JsonObject();
       gcsSink.addProperty("bucketName", destinationBucket);
 
-      if (destinationPath != null && !destinationPath.isEmpty()) {
-        gcsSink.addProperty("path", destinationPath);
+      if (sourcePath != null && !sourcePath.isEmpty()) {
+        gcsSource.addProperty("path", sourcePath);
       }
       com.google.gson.JsonObject transferOptions = new com.google.gson.JsonObject();
       transferOptions.addProperty("overwriteObjectsAlreadyExistingInSink", true);
