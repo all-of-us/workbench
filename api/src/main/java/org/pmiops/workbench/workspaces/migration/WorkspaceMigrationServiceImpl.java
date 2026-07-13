@@ -412,15 +412,6 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       String sourceBucket = fcWorkspace.getBucketName();
       String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
       String projectId = workbenchConfigProvider.get().server.projectId;
-
-      List<String> prefixedFolders = null;
-      if (folders != null && !folders.isEmpty()) {
-        prefixedFolders = new ArrayList<>();
-        for (String folder : folders) {
-          prefixedFolders.add(namespace + "/" + folder);
-        }
-      }
-
       String jobName =
           storageTransferClient.createTransferJob(
               sourceBucket,
@@ -428,7 +419,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               null,
               namespace,
               projectId,
-              prefixedFolders,
+              folders,
               serviceAccountEmail,
               true);
       logger.log(Level.INFO, namespace + ": Job created, running transfer job");
