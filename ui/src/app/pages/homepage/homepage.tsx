@@ -184,19 +184,19 @@ const ResourcesPanel = () => {
     {
       title: 'Data Dictionary',
       subtitle: 'Explore available datasets and variables',
-      href: supportUrls.dataDictionary,
+      href: 'https://support.researchallofus.org/hc/en-us/articles/360033200232-Data-Dictionaries',
       icon: 'search',
     },
     {
       title: 'Getting Started Guide',
       subtitle: 'Step-by-step instructions for new users',
-      href: supportUrls.gettingStarted,
+      href: 'https://support.researchallofus.org/hc/en-us/articles/41981050556564-Researcher-Workbench-Getting-Started-Guide',
       icon: 'book',
     },
     {
       title: 'New User Orientation',
       subtitle: 'Onboard to the All of Us Researcher Workbench',
-      href: supportUrls.videos,
+      href: 'https://support.researchallofus.org/hc/en-us/articles/41981050556564-Researcher-Workbench-Getting-Started-Guide',
       icon: 'users',
     },
     {
