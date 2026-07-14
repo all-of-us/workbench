@@ -1,5 +1,7 @@
 package org.pmiops.workbench.vwb.admin;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -7,7 +9,6 @@ import com.google.cloud.bigquery.TableResult;
 import jakarta.inject.Provider;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
@@ -21,12 +22,15 @@ import org.pmiops.workbench.model.VwbWorkspace;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.FieldValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
+  private static final Logger log = LoggerFactory.getLogger(VwbAdminQueryServiceImpl.class);
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
 
@@ -45,6 +49,9 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
   private static final String PREPROD_PROJECT_ID = "all-of-us-rw-preprod";
   private static final String PREPROD_REPORTING_DATASET = "reporting_preprod";
   private static final String PREPROD_REPORTING_WORKSPACES_TABLE = "live_workspace";
+
+  private static final String CONTROLLED_TIER_LABEL = "Controlled Tier";
+  private static final String REGISTERED_TIER_LABEL = "Registered Tier";
 
   private static final String QUERY =
       "SELECT \n"
@@ -158,6 +165,21 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  %s w ON wal.workspace_id = w.workspace_id \n"
           + "GROUP BY \n"
           + "  w.workspace_user_facing_id ";
+
+  private static final String WORKSPACE_RESOURCES_LINEAGE_QUERY =
+      "SELECT \n"
+          + "  r.resource_lineage \n"
+          + "FROM \n"
+          + "  %s r \n"
+          + "WHERE \n"
+          + "  r.workspace_id = @WORKSPACE_ID \n"
+          + "AND \n"
+          + "  r.resource_lineage IS NOT NULL \n"
+          + "AND \n"
+          + "  r.resource_lineage != '' \n"
+          + "AND \n"
+          + "  r.resource_lineage != '[]' \n"
+          + "LIMIT 1 ";
 
   private static final String PREPROD_QUERY =
       "SELECT \n"
@@ -431,6 +453,24 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
                         .orElse(null)));
   }
 
+  private Optional<String> queryDataCollectionTierForWorkspace(String workspaceId) {
+
+    final String queryString =
+        String.format(WORKSPACE_RESOURCES_LINEAGE_QUERY, getTableName(VWB_RESOURCES_TABLE_PREFIX));
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .addNamedParameter("WORKSPACE_ID", QueryParameterValue.string(workspaceId))
+            .build();
+
+    final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
+
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .findFirst()
+        .flatMap(row -> FieldValues.getString(row, "resource_lineage"))
+        .flatMap(this::extractDataCollectionTierFromLineage);
+  }
+
   @Override
   public List<VwbWorkspace> queryAccessibleWorkspaces(String email) {
 
@@ -440,14 +480,6 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
     queryVwbWorkspacesByShareActivity(email).forEach(ws -> workspaces.put(ws.getId(), ws));
 
-    Map<String, VwbDataCollectionEntry> dataCollections =
-        queryVwbDataCollections().stream()
-            .collect(
-                Collectors.toMap(
-                    VwbDataCollectionEntry::getWorkspaceUserFacingId,
-                    Function.identity(),
-                    (first, second) -> first));
-
     Map<String, WorkspaceAccessLevel> roles = queryWorkspaceRoles(email);
 
     Map<String, String> lastChanged = queryWorkspaceLastChanged();
@@ -456,16 +488,20 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
         .values()
         .forEach(
             workspace -> {
-              VwbDataCollectionEntry dataCollection =
-                  dataCollections.get(workspace.getUserFacingId());
-
-              if (dataCollection != null) {
-                workspace.setDataCollection(dataCollection.getResourceDisplayName());
-              }
+              queryDataCollectionTierForWorkspace(workspace.getId())
+                  .ifPresent(workspace::setDataCollection);
 
               workspace.setRole(roles.get(workspace.getUserFacingId()));
               workspace.setLastChanged(lastChanged.get(workspace.getUserFacingId()));
             });
+    workspaces
+        .values()
+        .forEach(
+            workspace ->
+                log.info(
+                    "Workspace: {}, Data Collection: {}",
+                    workspace.getDisplayName(),
+                    workspace.getDataCollection()));
 
     return new ArrayList<>(workspaces.values());
   }
@@ -608,12 +644,39 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     return preprodWorkspace;
   }
 
-  /**
-   * Normalizes email input by appending the configured GSuite domain if no domain is present.
-   *
-   * @param email The email or username to normalize
-   * @return The normalized email address
-   */
+  private Optional<String> extractDataCollectionTierFromLineage(String resourceLineageJson) {
+    if (resourceLineageJson == null
+        || resourceLineageJson.trim().isEmpty()
+        || "[]".equals(resourceLineageJson)) {
+      return Optional.empty();
+    }
+
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode lineageArray = objectMapper.readTree(resourceLineageJson);
+
+      if (lineageArray.isArray() && !lineageArray.isEmpty()) {
+        JsonNode sourceWorkspaceIdNode = lineageArray.get(0).get("sourceWorkspaceId");
+
+        if (sourceWorkspaceIdNode != null) {
+          String sourceWorkspaceId = sourceWorkspaceIdNode.asText();
+
+          VwbConfig vwbConfig = workbenchConfigProvider.get().vwb;
+          log.info("Workspace {} data collection", sourceWorkspaceId);
+          if (sourceWorkspaceId.equals(vwbConfig.ctDataCollection)) {
+            return Optional.of(CONTROLLED_TIER_LABEL);
+          } else if (sourceWorkspaceId.equals(vwbConfig.rtDataCollection)) {
+            return Optional.of(REGISTERED_TIER_LABEL);
+          }
+        }
+      }
+    } catch (Exception e) {
+      // parsing failure returns empty
+    }
+
+    return Optional.empty();
+  }
+
   private String normalizeEmail(String email) {
     if (email == null || email.trim().isEmpty()) {
       return email;
@@ -621,12 +684,10 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
     String trimmedEmail = email.trim();
 
-    // If email already contains '@', return as is (already has a domain)
     if (trimmedEmail.contains("@")) {
       return trimmedEmail;
     }
 
-    // Otherwise, append the configured GSuite domain
     String gSuiteDomain = workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
     return trimmedEmail + "@" + gSuiteDomain;
   }

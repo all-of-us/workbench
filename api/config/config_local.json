@@ -220,6 +220,8 @@
     "organizationUfid": "vwb_aou_test",
     "defaultPodId": "081afa2b-db53-46c2-9923-65a99da0769b",
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-d-1v-ucd.iam.gserviceaccount.com",
+    "ctDataCollection": "7d7b32f1-3481-4e60-b496-4b6175833f3f",
+    "rtDataCollection": "505eb5d3-5b17-42d2-82ed-d3c223ed9e02",
     "adminBigQuery": {
       "logProjectId": "workbench-bq-log-sink",
       "bigQueryDataset": "workbench_monitoring_org_logs_dev"

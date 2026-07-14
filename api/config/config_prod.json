@@ -224,6 +224,8 @@
     "organizationId": "d37dc97e-f8d1-4a43-8a30-669b81a397e9",
     "organizationUfid": "aou_prod",
     "exfilManagerServiceAccount": "workbench-exfil-manager@prj-p-1v-s0i.iam.gserviceaccount.com",
+    "ctDataCollection": "3d83ef80-77d7-43e8-a479-52946619b769",
+    "rtDataCollection": "698c6700-afbe-454a-b73a-c675e629336c",
     "adminBigQuery": {
       "logProjectId": "workbench-bq-log-sink",
       "bigQueryDataset": "workbench_monitoring_org_logs_prod"
