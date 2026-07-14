@@ -169,7 +169,7 @@ public class WorkspaceMigrationServiceImplTest {
     when(wsmClient.getWorkspaceAsService(workspace.getNamespace())).thenReturn(null, vwbWorkspace);
 
     when(storageTransferClient.createTransferJob(
-            any(), any(), any(), any(), any(), any(), any(), any()))
+            any(), any(), any(), any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 
@@ -216,6 +216,7 @@ public class WorkspaceMigrationServiceImplTest {
     verify(storageTransferClient)
         .createTransferJob(
             SOURCE_BUCKET,
+            null,
             DEST_BUCKET,
             null,
             NAMESPACE,
@@ -234,6 +235,7 @@ public class WorkspaceMigrationServiceImplTest {
     verify(storageTransferClient)
         .createTransferJob(
             SOURCE_BUCKET,
+            null,
             DEST_BUCKET,
             null,
             NAMESPACE,
@@ -295,7 +297,7 @@ public class WorkspaceMigrationServiceImplTest {
     when(workspaceBucketArchiveDao.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
     when(storageTransferClient.createTransferJob(
-            any(), any(), any(), any(), any(), any(), any(), any()))
+            any(), any(), any(), any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-archive-" + NAMESPACE);
 
     service.startWorkspaceArchive(NAMESPACE, TERRA_NAME);
@@ -303,6 +305,7 @@ public class WorkspaceMigrationServiceImplTest {
     verify(storageTransferClient)
         .createTransferJob(
             eq(SOURCE_BUCKET),
+            null,
             eq("all-of-us-archive-ct-bucket-wb-blazing-lime-5817"),
             eq(NAMESPACE + "/"),
             eq("archive-" + NAMESPACE),
@@ -328,7 +331,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceArchive(NAMESPACE, TERRA_NAME);
 
     verify(storageTransferClient, never())
-        .createTransferJob(any(), any(), any(), any(), any(), any(), any(), any());
+        .createTransferJob(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
     verify(taskQueueService, never()).pushWorkspaceArchiveStatusTask(any(), any());
   }
