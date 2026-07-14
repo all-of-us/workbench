@@ -1024,11 +1024,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     logger.log(Level.INFO, namespace + ": Starting workspace recovery");
 
-    // Validate recovery state is REQUESTED before starting
-    if (!WorkspaceRecoveryStatus.REQUESTED.toString().equals(dbWorkspace.getRecoveryState())) {
+    // Validate recovery state is REQUESTED or FAILED before starting
+    if (!(WorkspaceRecoveryStatus.REQUESTED.toString().equals(dbWorkspace.getRecoveryState())
+        || WorkspaceRecoveryStatus.FAILED.toString().equals(dbWorkspace.getRecoveryState()))) {
       throw new RuntimeException(
           namespace
-              + ": Workspace recovery can only start when state is REQUESTED. Current state="
+              + ": Workspace recovery can only start when state is REQUESTED or FAILED. Current state="
               + dbWorkspace.getRecoveryState());
     }
 
@@ -1069,7 +1070,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           Level.INFO, namespace + ": Archive bucket=" + archiveBucket + " prefix=" + archivePrefix);
 
       RawlsWorkspaceDetails fcWorkspace =
-          fireCloudService.getWorkspace(namespace, terraName).getWorkspace();
+          fireCloudService.getWorkspaceAsService(namespace, terraName).getWorkspace();
 
       Workspace workspace =
           workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
