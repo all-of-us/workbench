@@ -345,6 +345,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       String jobName =
           storageTransferClient.createTransferJob(
               sourceBucket,
+              null,
               destinationBucket,
               null,
               workspace.getNamespace(),
@@ -415,6 +416,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       String jobName =
           storageTransferClient.createTransferJob(
               sourceBucket,
+              null,
               bucket.getMetadata().getName(),
               null,
               namespace,
@@ -645,6 +647,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       String jobName =
           storageTransferClient.createTransferJob(
               bucketName,
+              null,
               destinationBucket,
               null,
               preprodWorkspace.getWorkspaceNamespace(),
@@ -728,6 +731,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       String jobName =
           storageTransferClient.createTransferJob(
               sourceBucket,
+              null,
               archiveBucket,
               archivePath,
               "archive-" + namespace,
@@ -1146,8 +1150,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       String jobName =
           storageTransferClient.createTransferJob(
               archiveBucket,
-              destinationBucket,
               archivePrefix,
+              destinationBucket,
+              null,
               "recovery-" + namespace,
               projectId,
               null,
