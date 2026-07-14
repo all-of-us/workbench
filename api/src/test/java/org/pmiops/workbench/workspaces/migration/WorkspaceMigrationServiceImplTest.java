@@ -305,7 +305,7 @@ public class WorkspaceMigrationServiceImplTest {
     verify(storageTransferClient)
         .createTransferJob(
             eq(SOURCE_BUCKET),
-            null,
+            isNull(),
             eq("all-of-us-archive-ct-bucket-wb-blazing-lime-5817"),
             eq(NAMESPACE + "/"),
             eq("archive-" + NAMESPACE),
