@@ -1020,7 +1020,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void startWorkspaceRecovery(String namespace, String terraName) {
+  public void startWorkspaceRecovery(String namespace, String terraName, String researchPurpose) {
 
     Duration bucketDelay = Duration.ofSeconds(10);
 
@@ -1101,6 +1101,15 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       wsmClient.shareWorkspaceAsService(
           workspaceId.toString(), workspace.getCreator(), IamRole.OWNER);
 
+      List<Property> properties =
+          List.of(
+              new Property().key("terra-default-location").value("us-central1"),
+              new Property()
+                  .key("terra-required-data-use-metadata")
+                  .value(WorkbenchStringUtils.encodeUserInput(researchPurpose)),
+              new Property().key("terra-workspace-short-description").value(""));
+      wsmClient.updateWorkspaceProperties(properties, workspaceId.toString());
+
       long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
 
       CdrVersionForMigration cdrVersionForMigration =
@@ -1124,20 +1133,29 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         resourceId = cdrVersionForMigration.resourceId;
       }
 
-      logger.log(Level.INFO, namespace + ": Starting BQ clone");
+      try {
+        logger.log(Level.INFO, namespace + ": Starting BQ clone");
+        wsmClient.cloneBQDataset(
+            workspaceId,
+            sourceWorkspaceId,
+            UUID.fromString(resourceId),
+            UUID.randomUUID().toString());
 
-      wsmClient.cloneBQDataset(
-          workspaceId,
-          sourceWorkspaceId,
-          UUID.fromString(resourceId),
-          UUID.randomUUID().toString());
-
-      logger.log(Level.INFO, namespace + ": BQ clone complete");
+        logger.log(Level.INFO, namespace + ": BQ clone complete");
+      } catch (Exception e) {
+        throw new RuntimeException(namespace + ": BQ clone failed", e);
+      }
 
       CreatedControlledGcpGcsBucket controlledBucket =
           wsmClient.createControlledBucket(workspaceId.toString(), namespace);
 
       Thread.sleep(bucketDelay.toMillis());
+
+      WorkspaceDescription vwbWorkspaceWithPolicies =
+          wsmClient.getWorkspaceAsService(vwbWorkspace.getUserFacingId());
+
+      logger.log(
+          Level.INFO, namespace + ": New workspace with policies: " + vwbWorkspaceWithPolicies);
 
       String destinationBucket = controlledBucket.getGcpBucket().getAttributes().getBucketName();
 
@@ -1182,6 +1200,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   @Override
   public void checkRecoveryStatus(String namespace, String terraName) {
 
+    logger.log(Level.INFO, namespace + ": Checking recovery queue status");
+
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
     String projectId = workbenchConfigProvider.get().server.projectId;
@@ -1198,11 +1218,17 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
+        logger.log(Level.INFO, namespace + ": Recovery transfer in progress, requeue");
         taskQueueService.pushWorkspaceRecoveryStatusTask(namespace, terraName);
 
         return;
 
       case FAILED:
+        logger.log(
+            Level.INFO,
+            namespace
+                + ": Recovery transfer failed: "
+                + transferOperation.getErrorBreakdownsList());
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
 
         workspaceDao.save(dbWorkspace);
@@ -1212,6 +1238,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         return;
 
       case SUCCESS:
+        logger.log(Level.INFO, namespace + ": Recovery transfer success");
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.RECOVERED.name());
 
         workspaceDao.save(dbWorkspace);
