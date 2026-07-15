@@ -6,7 +6,11 @@ import { environment } from 'environments/environment';
 import { StyledExternalLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
+import {
+  ClrIcon,
+  ControlledTierBadge,
+  RegisteredTierBadge,
+} from 'app/components/icons';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { displayDate } from 'app/utils/dates';
@@ -59,6 +63,9 @@ export const VwbWorkspaceCard = ({ workspace }: Props) => {
 
   const role =
     (workspace.role as WorkspaceAccessLevel) || WorkspaceAccessLevel.READER;
+
+  const isControlledTier = workspace.dataCollection === 'Controlled Tier';
+  const isRegisteredTier = workspace.dataCollection === 'Registered Tier';
 
   return (
     <WorkspaceCardBase>
@@ -118,22 +125,19 @@ export const VwbWorkspaceCard = ({ workspace }: Props) => {
                   ? displayDate(Date.parse(workspace.lastChanged))
                   : '-'}
               </div>
-
-              <div style={{ fontSize: 12, marginTop: '.25rem' }}>
-                Data Collection: {workspace.dataCollection ?? '-'}
-              </div>
             </FlexColumn>
 
-            <FlexColumn
-              style={{
-                justifyContent: 'flex-end',
-                marginLeft: '1.2rem',
-              }}
-            >
-              {workspace.dataCollection === 'Controlled Tier' && (
-                <ControlledTierBadge />
-              )}
-            </FlexColumn>
+            {(isControlledTier || isRegisteredTier) && (
+              <FlexColumn
+                style={{
+                  justifyContent: 'flex-end',
+                  marginLeft: '1.2rem',
+                }}
+              >
+                {isControlledTier && <ControlledTierBadge />}
+                {isRegisteredTier && <RegisteredTierBadge />}
+              </FlexColumn>
+            )}
           </FlexRow>
         </FlexColumn>
       </FlexRow>
