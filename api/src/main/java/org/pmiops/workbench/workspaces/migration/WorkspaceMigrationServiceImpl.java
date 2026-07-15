@@ -1200,6 +1200,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   @Override
   public void checkRecoveryStatus(String namespace, String terraName) {
 
+    logger.log(Level.INFO, namespace + ": Checking recovery queue status");
+
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
 
     String projectId = workbenchConfigProvider.get().server.projectId;
@@ -1216,11 +1218,17 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     switch (jobStatus) {
       case IN_PROGRESS:
       case QUEUED:
+        logger.log(Level.INFO, namespace + ": Recovery transfer in progress, requeue");
         taskQueueService.pushWorkspaceRecoveryStatusTask(namespace, terraName);
 
         return;
 
       case FAILED:
+        logger.log(
+            Level.INFO,
+            namespace
+                + ": Recovery transfer failed: "
+                + transferOperation.getErrorBreakdownsList());
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.FAILED.name());
 
         workspaceDao.save(dbWorkspace);
@@ -1230,6 +1238,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
         return;
 
       case SUCCESS:
+        logger.log(Level.INFO, namespace + ": Recovery transfer success");
         dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.RECOVERED.name());
 
         workspaceDao.save(dbWorkspace);

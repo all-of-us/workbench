@@ -4658,7 +4658,8 @@ paths:
               $ref: '#/components/schemas/CheckWorkspaceRecoveryStatusRequest'
       responses:
         200:
-          description: Recovery status checked successfully＀
+          description: Recovery status checked successfully
+          content: { }
   /v1/workspaces/{namespace}/{terraName}/recovery:
     post:
       tags:
