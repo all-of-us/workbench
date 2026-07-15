@@ -11,6 +11,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { rwToVwbResearchPurpose } from 'app/pages/admin/vwb/vwb-research-purpose-text';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -170,7 +171,12 @@ export const AdminWorkspaceRecoveryModal = ({
       setStartingRecovery(true);
       await workspacesApi().startWorkspaceRecovery(
         workspace.namespace,
-        workspace.terraName
+        workspace.terraName,
+        {
+          researchPurpose: JSON.stringify(
+            rwToVwbResearchPurpose(workspace.researchPurpose)
+          ),
+        }
       );
 
       await reload();
