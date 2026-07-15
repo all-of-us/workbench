@@ -171,7 +171,8 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   public ResponseEntity<Void> checkWorkspaceRecoveryStatus(
       CheckWorkspaceRecoveryStatusRequest request) {
 
-    workspaceMigrationService.checkRecoveryStatus(request.getNamespace(), request.getTerraName());
+    workspaceMigrationService.checkRecoveryStatus(
+        request.getWorkspaceNamespace(), request.getWorkspaceName());
 
     return ResponseEntity.ok().build();
   }
