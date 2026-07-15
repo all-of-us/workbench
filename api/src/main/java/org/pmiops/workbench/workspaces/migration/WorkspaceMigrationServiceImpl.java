@@ -1101,6 +1101,73 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       wsmClient.shareWorkspaceAsService(
           workspaceId.toString(), workspace.getCreator(), IamRole.OWNER);
 
+      logger.log(Level.INFO, namespace + ": Fetching existing collaborators from Terra");
+      RawlsWorkspaceACL acl = fireCloudService.getWorkspaceAclAsService(namespace, terraName);
+
+      if (acl != null && acl.getAcl() != null) {
+        com.google.gson.Gson gson = new com.google.gson.Gson();
+        String aclJson = gson.toJson(acl.getAcl());
+        Map<String, RawlsWorkspaceAccessEntry> aclMap =
+            gson.fromJson(
+                aclJson,
+                new com.google.gson.reflect.TypeToken<
+                    Map<String, RawlsWorkspaceAccessEntry>>() {}.getType());
+
+        for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : aclMap.entrySet()) {
+          String collaboratorEmail = entry.getKey();
+
+          // Skip creator, already shared above
+          if (collaboratorEmail.equals(workspace.getCreator())) {
+            continue;
+          }
+
+          try {
+            OrganizationMember member = vwbUserService.getOrganizationMember(collaboratorEmail);
+
+            // Skip if not found in VWB
+            if (member == null || member.getUserDescription() == null) {
+              logger.log(
+                  Level.INFO,
+                  namespace + ": Skipping collaborator not found in VWB: " + collaboratorEmail);
+              continue;
+            }
+
+            // Skip if not ENABLED (could be INVITED, DECLINED, DISABLED, ARCHIVED)
+            if (!UserActiveState.ENABLED.equals(member.getUserDescription().getActiveState())) {
+              logger.log(
+                  Level.INFO,
+                  namespace
+                      + ": Skipping inactive collaborator: "
+                      + collaboratorEmail
+                      + " state: "
+                      + member.getUserDescription().getActiveState());
+              continue;
+            }
+
+            // Map Terra role to VWB IamRole
+            IamRole vwbRole = mapTerraRoleToVwbRole(entry.getValue().getAccessLevel());
+            if (vwbRole == null) {
+              logger.log(
+                  Level.INFO,
+                  namespace + ": Skipping collaborator with unmappable role: " + collaboratorEmail);
+              continue;
+            }
+
+            logger.log(
+                Level.INFO,
+                namespace + ": Sharing workspace with collaborator: " + collaboratorEmail);
+            wsmClient.shareWorkspaceAsService(workspaceId.toString(), collaboratorEmail, vwbRole);
+
+          } catch (Exception e) {
+            // Don't fail entire migration for one collaborator
+            logger.log(
+                Level.WARNING,
+                namespace + ": Failed to share with collaborator: " + collaboratorEmail,
+                e);
+          }
+        }
+      }
+
       List<Property> properties =
           List.of(
               new Property().key("terra-default-location").value("us-central1"),
