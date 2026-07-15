@@ -8332,9 +8332,9 @@ components:
     CheckWorkspaceRecoveryStatusRequest:
       type: object
       properties:
-        namespace:
+        workspaceNamespace:
           type: string
-        terraName:
+        workspaceName:
           type: string
     StartWorkspaceMigrationRequest:
       type: object
