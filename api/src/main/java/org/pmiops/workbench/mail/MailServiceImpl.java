@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -39,11 +40,14 @@ import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
+import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MailServiceImpl implements MailService {
+  private static final Logger logger =
+      Logger.getLogger(WorkspaceMigrationServiceImpl.class.getName());
   private static final String AOU_ITALICS = "<i>All of Us</i>";
   private static final String EGRESS_FORM_LINK =
       "<a href=\"https://redcap.pmi-ops.org/surveys/?s=K4PA9H8E979AHJEP\">Researcher Account Activity Confirmation</a>";
@@ -574,6 +578,29 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void sendWorkspaceRecoveryRequestEmail(
+      DbWorkspace workspace, DbUser owner, DbUser requestingUser) throws MessagingException {
+
+    final String subject = "Workspace Recovery Requested";
+    final String fromEmail = workbenchConfigProvider.get().mail.fromEmail;
+    final List<String> recipients =
+        workbenchConfigProvider.get().mail.workspaceRecoveryRequestRecipients;
+
+    sendWithRetries(
+        fromEmail,
+        recipients,
+        Collections.emptyList(),
+        Collections.emptyList(),
+        subject,
+        String.format(
+            "Recovery request email for workspace '%s' (%s) sent to support",
+            workspace.getName(), workspace.getWorkspaceNamespace()),
+        buildHtml(
+            "emails/workspace_recovery_request/content.html",
+            workspaceRecoveryRequestSubstitutionMap(workspace, owner, requestingUser)));
+  }
+
+  @Override
   public void sendWorkspaceMigrationCompleteEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
 
@@ -945,6 +972,32 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.WORKSPACE_CREATOR, workspace.getCreator().getUsername())
         .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(workspace))
         .put(EmailSubstitutionField.SUPPORT_EMAIL, "support@researchallofus.org")
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> workspaceRecoveryRequestSubstitutionMap(
+      DbWorkspace workspace, DbUser owner, DbUser requestingUser) {
+
+    String accessTier = "Unknown";
+    try {
+      if (workspace.getCdrVersion() != null && workspace.getCdrVersion().getAccessTier() != null) {
+        accessTier = workspace.getCdrVersion().getAccessTier().getShortName();
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, "Failed to get access tier for workspace: " + e.getMessage());
+    }
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, AOU_ITALICS)
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.WORKSPACE_CREATOR, owner.getUsername())
+        .put(EmailSubstitutionField.REQUESTING_USER, requestingUser.getUsername())
+        .put(EmailSubstitutionField.ACCESS_TIER, accessTier)
+        .put(
+            EmailSubstitutionField.REQUEST_TIMESTAMP,
+            formatCentralTime(workspace.getLastModifiedTime().toInstant()))
         .build();
   }
 

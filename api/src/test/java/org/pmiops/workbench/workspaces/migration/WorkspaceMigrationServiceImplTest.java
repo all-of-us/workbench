@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces.migration;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
@@ -168,7 +169,7 @@ public class WorkspaceMigrationServiceImplTest {
     when(wsmClient.getWorkspaceAsService(workspace.getNamespace())).thenReturn(null, vwbWorkspace);
 
     when(storageTransferClient.createTransferJob(
-            any(), any(), any(), any(), any(), any(), any(), any()))
+            any(), any(), any(), any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-" + SERVER_PROJECT);
   }
 
@@ -215,6 +216,7 @@ public class WorkspaceMigrationServiceImplTest {
     verify(storageTransferClient)
         .createTransferJob(
             SOURCE_BUCKET,
+            null,
             DEST_BUCKET,
             null,
             NAMESPACE,
@@ -233,6 +235,7 @@ public class WorkspaceMigrationServiceImplTest {
     verify(storageTransferClient)
         .createTransferJob(
             SOURCE_BUCKET,
+            null,
             DEST_BUCKET,
             null,
             NAMESPACE,
@@ -294,7 +297,7 @@ public class WorkspaceMigrationServiceImplTest {
     when(workspaceBucketArchiveDao.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
     when(storageTransferClient.createTransferJob(
-            any(), any(), any(), any(), any(), any(), any(), any()))
+            any(), any(), any(), any(), any(), any(), any(), any(), any()))
         .thenReturn("transferJobs/migration-archive-" + NAMESPACE);
 
     service.startWorkspaceArchive(NAMESPACE, TERRA_NAME);
@@ -302,6 +305,7 @@ public class WorkspaceMigrationServiceImplTest {
     verify(storageTransferClient)
         .createTransferJob(
             eq(SOURCE_BUCKET),
+            isNull(),
             eq("all-of-us-archive-ct-bucket-wb-blazing-lime-5817"),
             eq(NAMESPACE + "/"),
             eq("archive-" + NAMESPACE),
@@ -327,7 +331,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceArchive(NAMESPACE, TERRA_NAME);
 
     verify(storageTransferClient, never())
-        .createTransferJob(any(), any(), any(), any(), any(), any(), any(), any());
+        .createTransferJob(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
     verify(taskQueueService, never()).pushWorkspaceArchiveStatusTask(any(), any());
   }
@@ -469,17 +473,35 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void startWorkspaceRecovery_failsIfArchiveMissing() {
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setWorkspaceId(123L);
+    dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
+
+    when(workspaceDao.getRequired(eq(NAMESPACE), eq(TERRA_NAME))).thenReturn(dbWorkspace);
 
     when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of());
 
     RuntimeException ex =
-        org.junit.jupiter.api.Assertions.assertThrows(
+        assertThrows(
             RuntimeException.class,
-            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, POD_ID));
+            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, RESEARCH_PURPOSE));
 
     assertThat(ex.getMessage()).contains("Recovery failed to start");
-
+    assertThat(ex.getCause()).isNotNull();
     assertThat(ex.getCause().getMessage()).contains("Archive metadata not found");
+  }
+
+  @Test
+  void startWorkspaceRecovery_failsIfRecoveryNotRequested() {
+    workspace.setRecoveryState(WorkspaceRecoveryStatus.NOT_STARTED);
+
+    RuntimeException ex =
+        assertThrows(
+            RuntimeException.class,
+            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, RESEARCH_PURPOSE));
+
+    assertThat(ex.getMessage())
+        .contains("Workspace recovery can only start when state is REQUESTED");
   }
 
   @Test

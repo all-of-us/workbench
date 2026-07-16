@@ -91,7 +91,8 @@
   },
   "mail": {
     "fromEmail": "support@researchallofus.org",
-    "sendRetries": 3
+    "sendRetries": 3,
+    "workspaceRecoveryRequestRecipients": ["william.dolbeer@vumc.org", "al.al.aidaroos@vumc.org", "justin.cook@vumc.org"]
   },
   "zendesk": {
     "host": "https:\/\/aoupreprodsupporthelp.zendesk.com"

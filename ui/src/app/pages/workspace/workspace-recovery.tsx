@@ -4,18 +4,24 @@ import fp from 'lodash/fp';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 
-import { Workspace } from 'generated/fetch';
+import { Workspace, WorkspaceRecoveryStatus } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
+import { ClrIcon } from 'app/components/icons';
 import { WorkspaceRecoverySuccessModal } from 'app/components/migration/workspace-recovery-success-modal';
+import { TooltipTrigger } from 'app/components/popups';
 import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import { userApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { withCurrentWorkspace } from 'app/utils';
-import { reactStyles } from 'app/utils';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { findCdrVersion } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
+import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
+
+import { VwbImportantBanner } from './vwb-important-banner';
 
 const styles = reactStyles({
   page: {
@@ -143,46 +149,57 @@ export const WorkspaceRecovery = fp.flow(
   withSpinnerOverlay(),
   withCurrentWorkspace()
 )(({ workspace, hideSpinner }: Props) => {
-  const [pods, setPods] = useState([]);
-  const [selectedPod, setSelectedPod] = useState<string>();
-  const [loadingPods, setLoadingPods] = useState(true);
   const [recovering, setRecovering] = useState(false);
+  const [selectedPod, setSelectedPod] = useState('');
+  const [pods, setPods] = useState<any[]>([]);
+  const [loadingPods, setLoadingPods] = useState(false);
+  const [loadingTos, setLoadingTos] = useState(true);
+  const [hasAcceptedTos, setHasAcceptedTos] = useState<boolean | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [navigate] = useNavigation();
+  const { cdrVersionsForMigration } = serverConfigStore.get().config;
 
-  const loadPods = async () => {
-    try {
-      setLoadingPods(true);
-
-      const response = await workspacesApi().getUserPods();
-      setPods(response || []);
-    } catch (e) {
-      console.error('Failed to load billing pods', e);
-    } finally {
-      setLoadingPods(false);
-    }
-  };
   useEffect(() => {
-    loadPods();
     hideSpinner();
+    const loadPods = async () => {
+      setLoadingPods(true);
+      try {
+        const response = await workspacesApi().getUserPods();
+        setPods(response || []);
+      } catch (e) {
+        console.error('Failed to load pods', e);
+      } finally {
+        setLoadingPods(false);
+      }
+    };
+    const fetchTos = async () => {
+      try {
+        const res = await userApi().getUserTosStatus();
+        setHasAcceptedTos(res);
+      } catch (e) {
+        console.error('Failed to fetch ToS state', e);
+        setHasAcceptedTos(false);
+      } finally {
+        setLoadingTos(false);
+      }
+    };
+
+    loadPods();
+    fetchTos();
   }, []);
 
   const startRecovery = async () => {
-    if (!selectedPod) {
-      return;
-    }
-
     try {
       setRecovering(true);
 
-      await workspacesApi().startWorkspaceRecovery(
+      await workspacesApi().requestWorkspaceRecovery(
         workspace.namespace,
         workspace.terraName,
-        {
-          podId: selectedPod,
-        }
+        selectedPod
       );
       setShowSuccessModal(true);
+    } catch (e) {
+      console.error('Failed to request workspace recovery', e);
     } finally {
       setRecovering(false);
     }
@@ -191,6 +208,17 @@ export const WorkspaceRecovery = fp.flow(
   return (
     <>
       <div style={styles.page}>
+        {!hasAcceptedTos && (
+          <VwbImportantBanner
+            title='Important'
+            message={`Before starting migration, log into Researcher Workbench 2.0 
+to agree to the terms of service. You only need to do this once.`}
+            actionText='Open Researcher Workbench 2.0'
+            onAction={() => window.open(environment.vwbUiUrl, '_blank')}
+            onClose={() => setHasAcceptedTos(true)}
+            loadingText={loadingTos && 'Checking Terms of Service'}
+          />
+        )}
         <div style={styles.cards}>
           {/* LEFT CARD */}
 
@@ -211,10 +239,14 @@ export const WorkspaceRecovery = fp.flow(
                 the workspace you want to recover.
               </li>
 
-              <li>Select a billing pod to associate with this workspace.</li>
+              <li>
+                Select <b>Request Workspace Recovery</b> to submit your recovery
+                request.
+              </li>
 
               <li>
-                Select <b>Request Workspace Recovery</b>.
+                Our support team will review your request and initiate the
+                recovery process.
               </li>
             </ol>
 
@@ -250,8 +282,8 @@ export const WorkspaceRecovery = fp.flow(
 
             <div style={styles.paragraph}>
               This workspace and its data are currently archived in storage.
-              Verify the information below and select a billing pod before
-              requesting recovery.
+              Verify the information below and then request recovery. Our
+              support team will handle the recovery process.
             </div>
 
             <div style={styles.divider} />
@@ -277,31 +309,72 @@ export const WorkspaceRecovery = fp.flow(
               <div>
                 <div style={styles.fieldLabel}>Workspace Dataset Version</div>
 
-                <div style={styles.fieldValue}>{workspace.cdrVersionId}</div>
-
-                <div style={styles.warning}>
-                  This dataset version is no longer supported. Upon recovery,
-                  the workspace will automatically be upgraded to the newest
-                  supported dataset version.
-                </div>
-              </div>
-
-              <div>
-                <div style={styles.fieldLabel}>Select a Billing Pod</div>
-
-                <Dropdown
-                  value={selectedPod}
-                  options={pods}
-                  optionLabel='userFacingId'
-                  optionValue='podId'
-                  disabled={loadingPods}
-                  placeholder={
-                    loadingPods
-                      ? 'Loading billing pods...'
-                      : 'Select a billing pod'
+                <div style={styles.fieldValue}>
+                  {
+                    findCdrVersion(
+                      workspace.cdrVersionId,
+                      cdrVersionStore.get()
+                    ).name
                   }
-                  onChange={(e) => setSelectedPod(e.value)}
-                />
+                </div>
+
+                {!cdrVersionsForMigration.some(
+                  (c) => +workspace.cdrVersionId === c.cdrVersionId
+                ) && (
+                  <div style={styles.warning}>
+                    This dataset version is no longer supported. Upon recovery,
+                    the workspace will automatically be upgraded to the newest
+                    supported dataset version.
+                  </div>
+                )}
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  flex: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={styles.fieldLabel}>
+                    Researcher Workbench 2.0 billing pod
+                  </div>
+
+                  <Dropdown
+                    value={selectedPod}
+                    options={pods}
+                    optionLabel='userFacingId'
+                    optionValue='podId'
+                    placeholder={
+                      loadingPods ? 'Loading pods...' : 'Select a pod'
+                    }
+                    onChange={(e) => setSelectedPod(e.value)}
+                    disabled={loadingPods}
+                    style={{
+                      width: '300px',
+                      borderRadius: '6px',
+                    }}
+                  />
+                </div>
+
+                <TooltipTrigger
+                  content={
+                    'You are selecting a pod for workspace storage costs in Verily Workbench. There is no cost to recover your workspace.'
+                  }
+                  side='top'
+                >
+                  <ClrIcon
+                    shape='info-circle'
+                    size={24}
+                    style={{
+                      cursor: 'pointer',
+                      color: colors.accent,
+                      marginTop: '18px',
+                    }}
+                  />
+                </TooltipTrigger>
               </div>
             </div>
 
@@ -312,8 +385,18 @@ export const WorkspaceRecovery = fp.flow(
                 onClick={() => navigate(['/workspaces'])}
               />
               <Button
-                label='Request Workspace Recovery'
-                disabled={!selectedPod || recovering}
+                label={
+                  workspace.recoveryState === WorkspaceRecoveryStatus.REQUESTED
+                    ? 'Recovery Request Submitted'
+                    : 'Request Workspace Recovery'
+                }
+                disabled={
+                  recovering ||
+                  workspace.recoveryState ===
+                    WorkspaceRecoveryStatus.REQUESTED ||
+                  !hasAcceptedTos ||
+                  !selectedPod
+                }
                 loading={recovering}
                 onClick={startRecovery}
               />

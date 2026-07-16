@@ -238,6 +238,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "migratedVwbWorkspaceId", ignore = true)
   @Mapping(target = "migrationState", ignore = true)
   @Mapping(target = "recoveryState", ignore = true)
+  @Mapping(target = "recoveryPodId", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

@@ -291,6 +291,7 @@
   <include file="changelog/db.changelog-281-folder-sync-transfer.xml"/>
   <include file="changelog/db.changelog-282-add-workspace-archive-status-column.xml"/>
   <include file="changelog/db.changelog-283-add-workspace-recovery-state-column.xml"/>
+  <include file="changelog/db.changelog-284-add-workspace-recovery-pod-id-column.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

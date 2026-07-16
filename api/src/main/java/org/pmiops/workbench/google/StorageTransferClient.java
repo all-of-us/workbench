@@ -6,6 +6,7 @@ import java.util.List;
 public interface StorageTransferClient {
   String createTransferJob(
       String sourceBucket,
+      String sourcePath,
       String destinationBucket,
       String destinationPath,
       String workspaceNamespace,

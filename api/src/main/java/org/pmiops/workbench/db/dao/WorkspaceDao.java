@@ -194,7 +194,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "join DbVerifiedInstitutionalAffiliation via on w.creator.userId = via.user.userId "
           + "where w.migratedVwbWorkspaceId is null "
           + "and w.activeStatus = 0 "
-          + "and via.verifiedInstitutionalAffiliationId != 1 "
+          + "and via.institution.institutionId != 1 "
           + "and w.workspaceId not in (SELECT legacyWorkspaceId from DbWorkspaceBucketArchive )"
           + "order by w.lastModifiedTime desc limit 1")
   WorkspaceArchiveView findNextWorkspaceToArchive();

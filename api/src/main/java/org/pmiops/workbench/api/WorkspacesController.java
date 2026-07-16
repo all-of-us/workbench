@@ -850,9 +850,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Void> startWorkspaceRecovery(
-      String namespace, String terraName, WorkspaceRecoveryRequest body) {
+      String namespace, String terraName, StartWorkspaceRecoveryRequest request) {
 
-    workspaceMigrationService.startWorkspaceRecovery(namespace, terraName, body.getPodId());
+    workspaceMigrationService.startWorkspaceRecovery(
+        namespace, terraName, request.getResearchPurpose());
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> requestWorkspaceRecovery(
+      String namespace, String terraName, String podId) {
+
+    workspaceMigrationService.requestWorkspaceRecovery(namespace, terraName, podId);
 
     return ResponseEntity.ok().build();
   }

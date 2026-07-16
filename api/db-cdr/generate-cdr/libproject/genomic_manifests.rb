@@ -102,6 +102,10 @@ AW4_INPUT_SECTION_SCHEMA = {
     # If this field exists, then the manifest will be read from it if it can't be read from the
     # regular manifest path.
     "deltaReleaseManifestPath" => String,
+    # The staging path infix for V2 mode. If specified, STS will copy files to this staging
+    # directory, and POST_PROCESS will move them to the pooledDestPathInfix location.
+    # This allows for a two-stage deployment: staging -> production.
+    "stagingPathInfix" => String,
   },
 }
 
@@ -196,7 +200,7 @@ def _aw4_filename_to_datetime(aw4_prefix, f)
   date_part = date_match[1]
   begin
     return DateTime.strptime(date_part, "%Y-%m-%d-%H-%M-%S")
-  rescue Date::Error
+  rescue ArgumentError
     common.warning "Found date-part in AW4 filename but cannot parse it, assuming old: #{date_part}"
     return DateTime.new(1970)
   end

@@ -18,9 +18,32 @@ interface Props {
 export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
   const migrated = workspace.migrationState === MigrationState.FINISHED;
 
-  const canRecover =
-    !migrated &&
-    workspace.recoveryState === WorkspaceRecoveryStatus.NOT_STARTED;
+  const archiveStatus =
+    typeof workspace.recoveryState === 'undefined'
+      ? 'Not Archived'
+      : 'Archived';
+
+  const recoveryStatus = (() => {
+    switch (workspace.recoveryState) {
+      case WorkspaceRecoveryStatus.NOT_STARTED:
+        return 'Not Requested';
+
+      case WorkspaceRecoveryStatus.REQUESTED:
+        return 'Requested by Researcher';
+
+      case WorkspaceRecoveryStatus.RECOVERING:
+        return 'Recovery In Progress';
+
+      case WorkspaceRecoveryStatus.RECOVERED:
+        return 'Recovery Completed';
+
+      case WorkspaceRecoveryStatus.FAILED:
+        return 'Recovery Failed';
+
+      default:
+        return 'N/A';
+    }
+  })();
 
   return (
     <>
@@ -33,24 +56,53 @@ export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
         ) : (
           <>
             <WorkspaceInfoField labelText='Archive Status'>
-              {workspace.recoveryState || WorkspaceRecoveryStatus.NOT_STARTED}
+              {archiveStatus}
             </WorkspaceInfoField>
+
+            <WorkspaceInfoField labelText='Recovery Status'>
+              {recoveryStatus}
+            </WorkspaceInfoField>
+
+            <WorkspaceInfoField labelText='Recovery Action'>
+              <Button
+                type='primary'
+                disabled={
+                  workspace.recoveryState !== WorkspaceRecoveryStatus.REQUESTED
+                }
+                onClick={onRecover}
+                style={{
+                  minWidth: '220px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {(() => {
+                  switch (workspace.recoveryState) {
+                    case WorkspaceRecoveryStatus.NOT_STARTED:
+                      return 'Waiting for Researcher Request';
+
+                    case WorkspaceRecoveryStatus.REQUESTED:
+                      return 'Recover Workspace';
+
+                    case WorkspaceRecoveryStatus.RECOVERING:
+                      return 'Recovery In Progress';
+
+                    case WorkspaceRecoveryStatus.RECOVERED:
+                      return 'Recovery Complete';
+
+                    case WorkspaceRecoveryStatus.FAILED:
+                      return 'Recovery Failed';
+
+                    default:
+                      return 'Not Archived';
+                  }
+                })()}
+              </Button>
+            </WorkspaceInfoField>
+
             <WorkspaceInfoField labelText='Recovered VWB Workspace ID'>
               {workspace.migratedVwbWorkspaceId || 'N/A'}
             </WorkspaceInfoField>
           </>
-        )}
-
-        {canRecover && onRecover && (
-          <div style={{ marginTop: '1rem' }}>
-            <Button
-              style={{ border: '2px solid', marginBottom: '0.5rem' }}
-              type='secondary'
-              onClick={onRecover}
-            >
-              Recover Workspace
-            </Button>
-          </div>
         )}
       </div>
     </>

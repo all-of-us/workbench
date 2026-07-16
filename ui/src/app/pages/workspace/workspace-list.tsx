@@ -137,7 +137,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         ({ accessLevel }) => !filterLevels || filterLevels.includes(accessLevel)
       );
       const archivedWorkspaces = filteredList.filter((wp) =>
-        ['NOT_STARTED', 'RECOVERING', 'FAILED'].includes(
+        ['NOT_STARTED', 'REQUESTED', 'RECOVERING', 'FAILED'].includes(
           wp.workspace.recoveryState
         )
       );
