@@ -6,7 +6,6 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { VwbWorkspaceCard } from 'app/pages/workspace/vwb-workspace-card';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 
 interface State {
   loading: boolean;
@@ -56,23 +55,16 @@ export const VwbWorkspaces = class extends React.Component<
           <h2 style={{ fontWeight: 600, margin: 0 }}>RW 2.0 Workspaces</h2>
         </FlexRow>
 
-        {workspaces.length === 0 ? (
-          <div style={{ color: colors.primary, margin: '.5em 0' }}>
-            No RW 2.0 workspaces found.
-          </div>
-        ) : (
-          <FlexRow
-            style={{
-              marginTop: '1.5rem',
-              minHeight: 247,
-              overflow: 'auto',
-            }}
-          >
-            {workspaces.map((workspace) => (
-              <VwbWorkspaceCard key={workspace.id} workspace={workspace} />
-            ))}
-          </FlexRow>
-        )}
+        <FlexRow
+          style={{
+            marginTop: '1.5rem',
+            flexWrap: 'wrap',
+          }}
+        >
+          {workspaces.map((workspace) => (
+            <VwbWorkspaceCard key={workspace.id} workspace={workspace} />
+          ))}
+        </FlexRow>
       </FlexColumn>
     );
   }

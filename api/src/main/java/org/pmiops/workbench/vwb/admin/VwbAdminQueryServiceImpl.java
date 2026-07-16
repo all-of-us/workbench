@@ -9,6 +9,8 @@ import com.google.cloud.bigquery.TableResult;
 import jakarta.inject.Provider;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
@@ -26,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 @Service
 public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
@@ -166,20 +170,21 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "GROUP BY \n"
           + "  w.workspace_user_facing_id ";
 
-  private static final String WORKSPACE_RESOURCES_LINEAGE_QUERY =
+  private static final String WORKSPACE_RESOURCES_LINEAGE_BATCH_QUERY =
       "SELECT \n"
+          + "  r.workspace_id, \n"
           + "  r.resource_lineage \n"
           + "FROM \n"
           + "  %s r \n"
           + "WHERE \n"
-          + "  r.workspace_id = @WORKSPACE_ID \n"
+          + "  r.workspace_id IN UNNEST(@WORKSPACE_IDS) \n"
           + "AND \n"
           + "  r.resource_lineage IS NOT NULL \n"
           + "AND \n"
           + "  r.resource_lineage != '' \n"
           + "AND \n"
           + "  r.resource_lineage != '[]' \n"
-          + "LIMIT 1 ";
+          + "QUALIFY ROW_NUMBER() OVER (PARTITION BY r.workspace_id ORDER BY r.resource_id) = 1 ";
 
   private static final String PREPROD_QUERY =
       "SELECT \n"
@@ -453,47 +458,120 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
                         .orElse(null)));
   }
 
-  private Optional<String> queryDataCollectionTierForWorkspace(String workspaceId) {
+  /** Returns a workspace-id → tier label map for all given workspace IDs in one BQ query. */
+  private Map<String, String> queryDataCollectionTiersForWorkspaces(List<String> workspaceIds) {
 
     final String queryString =
-        String.format(WORKSPACE_RESOURCES_LINEAGE_QUERY, getTableName(VWB_RESOURCES_TABLE_PREFIX));
+        String.format(
+            WORKSPACE_RESOURCES_LINEAGE_BATCH_QUERY, getTableName(VWB_RESOURCES_TABLE_PREFIX));
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
-            .addNamedParameter("WORKSPACE_ID", QueryParameterValue.string(workspaceId))
+            .addNamedParameter(
+                "WORKSPACE_IDS",
+                QueryParameterValue.array(workspaceIds.toArray(new String[0]), String.class))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
 
-    return StreamSupport.stream(result.iterateAll().spliterator(), false)
-        .findFirst()
-        .flatMap(row -> FieldValues.getString(row, "resource_lineage"))
-        .flatMap(this::extractDataCollectionTierFromLineage);
+    Map<String, String> tierByWorkspaceId = new HashMap<>();
+    StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .forEach(
+            row ->
+                FieldValues.getString(row, "workspace_id")
+                    .ifPresent(
+                        workspaceId ->
+                            FieldValues.getString(row, "resource_lineage")
+                                .flatMap(this::extractDataCollectionTierFromLineage)
+                                .ifPresent(tier -> tierByWorkspaceId.put(workspaceId, tier))));
+    return tierByWorkspaceId;
   }
 
   @Override
   public List<VwbWorkspace> queryAccessibleWorkspaces(String email) {
 
-    Map<String, VwbWorkspace> workspaces = new LinkedHashMap<>();
+    // Propagate Spring request context to worker threads; without this,
+    // request-scoped beans throw "No thread-bound request found".
+    final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-    queryVwbWorkspacesByCreator(email).forEach(ws -> workspaces.put(ws.getId(), ws));
-
-    queryVwbWorkspacesByShareActivity(email).forEach(ws -> workspaces.put(ws.getId(), ws));
-
-    Map<String, WorkspaceAccessLevel> roles = queryWorkspaceRoles(email);
-
-    Map<String, String> lastChanged = queryWorkspaceLastChanged();
-
-    workspaces
-        .values()
-        .forEach(
-            workspace -> {
-              queryDataCollectionTierForWorkspace(workspace.getId())
-                  .ifPresent(workspace::setDataCollection);
-
-              workspace.setRole(roles.get(workspace.getUserFacingId()));
-              workspace.setLastChanged(lastChanged.get(workspace.getUserFacingId()));
+    CompletableFuture<List<VwbWorkspace>> creatorFuture =
+        CompletableFuture.supplyAsync(
+            () -> {
+              RequestContextHolder.setRequestAttributes(requestAttributes);
+              try {
+                return queryVwbWorkspacesByCreator(email);
+              } finally {
+                RequestContextHolder.resetRequestAttributes();
+              }
             });
+
+    CompletableFuture<List<VwbWorkspace>> sharedFuture =
+        CompletableFuture.supplyAsync(
+            () -> {
+              RequestContextHolder.setRequestAttributes(requestAttributes);
+              try {
+                return queryVwbWorkspacesByShareActivity(email);
+              } finally {
+                RequestContextHolder.resetRequestAttributes();
+              }
+            });
+
+    CompletableFuture<Map<String, WorkspaceAccessLevel>> rolesFuture =
+        CompletableFuture.supplyAsync(
+            () -> {
+              RequestContextHolder.setRequestAttributes(requestAttributes);
+              try {
+                return queryWorkspaceRoles(email);
+              } finally {
+                RequestContextHolder.resetRequestAttributes();
+              }
+            });
+
+    CompletableFuture<Map<String, String>> lastChangedFuture =
+        CompletableFuture.supplyAsync(
+            () -> {
+              RequestContextHolder.setRequestAttributes(requestAttributes);
+              try {
+                return queryWorkspaceLastChanged();
+              } finally {
+                RequestContextHolder.resetRequestAttributes();
+              }
+            });
+
+    Map<String, VwbWorkspace> workspaces = new LinkedHashMap<>();
+    try {
+      creatorFuture.get().forEach(ws -> workspaces.put(ws.getId(), ws));
+      sharedFuture.get().forEach(ws -> workspaces.put(ws.getId(), ws));
+    } catch (InterruptedException | ExecutionException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("Failed to query accessible workspaces", e);
+    }
+
+    // Single batch query replaces N per-workspace lineage queries.
+    List<String> workspaceIds = new ArrayList<>(workspaces.keySet());
+    Map<String, String> dataCollectionTiers =
+        workspaceIds.isEmpty() ? Map.of() : queryDataCollectionTiersForWorkspaces(workspaceIds);
+
+    try {
+      Map<String, WorkspaceAccessLevel> roles = rolesFuture.get();
+      Map<String, String> lastChanged = lastChangedFuture.get();
+
+      workspaces
+          .values()
+          .forEach(
+              workspace -> {
+                String tier = dataCollectionTiers.get(workspace.getId());
+                if (tier != null) {
+                  workspace.setDataCollection(tier);
+                }
+                workspace.setRole(roles.get(workspace.getUserFacingId()));
+                workspace.setLastChanged(lastChanged.get(workspace.getUserFacingId()));
+              });
+    } catch (InterruptedException | ExecutionException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("Failed to query workspace metadata", e);
+    }
+
     workspaces
         .values()
         .forEach(

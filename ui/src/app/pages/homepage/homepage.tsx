@@ -20,7 +20,6 @@ import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { RecentResources } from 'app/pages/homepage/recent-resources';
 import { RecentWorkspaces } from 'app/pages/homepage/recent-workspaces';
-import { VwbWorkspaces } from 'app/pages/homepage/rw2-workspaces';
 import { VwbCreateWorkspaceModal } from 'app/pages/workspace/vwb-create-workspace-modal';
 import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
@@ -362,7 +361,6 @@ export const Homepage = fp.flow(
                   disableCreation={!canCreateLegacyWorkspace}
                   migrationTestingGroup={migrationTestingGroup}
                 />
-                {userWorkspacesResponse && <VwbWorkspaces />}
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
                     !restrictLegacyAccess && (
