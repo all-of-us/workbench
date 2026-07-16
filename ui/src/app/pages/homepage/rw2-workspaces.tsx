@@ -12,10 +12,11 @@ interface State {
   workspaces: VwbWorkspace[];
 }
 
-export const VwbWorkspaces = class extends React.Component<
-  Record<string, never>,
-  State
-> {
+interface Props {
+  excludeUserFacingIds?: string[];
+}
+
+export const VwbWorkspaces = class extends React.Component<Props, State> {
   state: State = {
     loading: true,
     workspaces: [],
@@ -40,12 +41,20 @@ export const VwbWorkspaces = class extends React.Component<
 
   render() {
     const { loading, workspaces } = this.state;
+    const excludedUserFacingIds = new Set(
+      (this.props.excludeUserFacingIds ?? []).map((id) => id.toLowerCase())
+    );
+    const visibleWorkspaces = workspaces.filter(
+      (workspace) =>
+        !workspace.userFacingId ||
+        !excludedUserFacingIds.has(workspace.userFacingId.toLowerCase())
+    );
 
     if (loading) {
       return <SpinnerOverlay />;
     }
 
-    if (workspaces.length === 0) {
+    if (visibleWorkspaces.length === 0) {
       return null;
     }
 
@@ -61,7 +70,7 @@ export const VwbWorkspaces = class extends React.Component<
             flexWrap: 'wrap',
           }}
         >
-          {workspaces.map((workspace) => (
+          {visibleWorkspaces.map((workspace) => (
             <VwbWorkspaceCard key={workspace.id} workspace={workspace} />
           ))}
         </FlexRow>

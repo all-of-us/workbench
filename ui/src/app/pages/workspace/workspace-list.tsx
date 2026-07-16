@@ -65,6 +65,7 @@ interface State {
   filterLevels: WorkspaceAccessLevel[] | null;
   errorText: string;
   firstSignIn: Date;
+  workspaceViewFilter: 'all' | 'migration' | 'archival';
 }
 
 export const WorkspaceList = fp.flow(withUserProfile())(
@@ -79,6 +80,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         filterLevels: null,
         errorText: '',
         firstSignIn: undefined,
+        workspaceViewFilter: 'all',
       };
     }
 
@@ -114,15 +116,17 @@ export const WorkspaceList = fp.flow(withUserProfile())(
     }
 
     render() {
-      const { errorText, filterLevels, workspaceList, workspacesLoading } =
-        this.state;
+      const {
+        errorText,
+        filterLevels,
+        workspaceList,
+        workspacesLoading,
+        workspaceViewFilter,
+      } = this.state;
 
       const { profile } = this.props.profileState;
-      const restrictLegacyAccess =
-        serverConfigStore.get().config.restrictLegacyAccess;
-
-      const isRestrictedUser =
-        restrictLegacyAccess && !profile.migrationTestingGroup;
+      const enableVwbMigration =
+        serverConfigStore.get().config.enableVwbMigration;
 
       const filters = [
         { label: 'Owner', value: ['OWNER'] },
@@ -142,11 +146,25 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         )
       );
 
+      // Recovered workspaces came from WB 1.0 and should be shown with migrated.
+      const migratedAndRecoveredWorkspaces = filteredList.filter(
+        (wp) =>
+          wp.workspace.migrationState === 'FINISHED' ||
+          wp.workspace.recoveryState === 'RECOVERED'
+      );
+
       const nonMigratedWorkspaces = filteredList.filter(
         (wp) =>
           wp.workspace.migrationState !== 'FINISHED' &&
           wp.workspace.recoveryState == null
       );
+
+      const legacyNamespaces = workspaceList
+        .map((wp) => wp.workspace.namespace)
+        .filter(Boolean);
+
+      const showMigrationSections = workspaceViewFilter !== 'archival';
+      const showArchivedSection = workspaceViewFilter !== 'migration';
 
       return (
         <>
@@ -185,6 +203,50 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     }),
                   }}
                 />
+
+                <div style={{ marginLeft: '0.75em', paddingRight: '0.5em' }}>
+                  Show
+                </div>
+
+                <FlexRow style={{ gap: '0.4em' }}>
+                  <Button
+                    type={
+                      workspaceViewFilter === 'all' ? 'primary' : 'secondary'
+                    }
+                    onClick={() =>
+                      this.setState({ workspaceViewFilter: 'all' })
+                    }
+                    style={{ height: '2.25rem' }}
+                  >
+                    All
+                  </Button>
+                  <Button
+                    type={
+                      workspaceViewFilter === 'migration'
+                        ? 'primary'
+                        : 'secondary'
+                    }
+                    onClick={() =>
+                      this.setState({ workspaceViewFilter: 'migration' })
+                    }
+                    style={{ height: '2.25rem' }}
+                  >
+                    Migration
+                  </Button>
+                  <Button
+                    type={
+                      workspaceViewFilter === 'archival'
+                        ? 'primary'
+                        : 'secondary'
+                    }
+                    onClick={() =>
+                      this.setState({ workspaceViewFilter: 'archival' })
+                    }
+                    style={{ height: '2.25rem' }}
+                  >
+                    Archival
+                  </Button>
+                </FlexRow>
 
                 {/* RIGHT SIDE */}
                 <div
@@ -230,20 +292,114 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   }}
                 >
                   <div style={{ width: '100%' }}>
-                    <VwbWorkspaces />
+                    <VwbWorkspaces excludeUserFacingIds={legacyNamespaces} />
                   </div>
-                  {!isRestrictedUser ? (
+
+                  {/* MIGRATED + RECOVERED */}
+                  {showMigrationSections &&
+                    migratedAndRecoveredWorkspaces.length > 0 && (
+                      <>
+                        <div
+                          style={{
+                            width: '100%',
+                            marginTop: '24px',
+                            marginBottom: '12px',
+                          }}
+                        >
+                          <SmallHeader>
+                            All Migrated and Recovered Workspaces
+                          </SmallHeader>
+                        </div>
+
+                        {migratedAndRecoveredWorkspaces.map((wp) => (
+                          <WorkspaceCard
+                            key={`${wp.workspace.namespace}-migrated-recovered`}
+                            workspace={wp.workspace}
+                            accessLevel={wp.accessLevel}
+                            reload={() => this.reloadWorkspaces()}
+                            tierAccessDisabled={
+                              !hasTierAccess(
+                                profile,
+                                wp.workspace.accessTierShortName
+                              )
+                            }
+                            isMigratedView={true}
+                          />
+                        ))}
+                      </>
+                    )}
+
+                  {/* NON-MIGRATED (includes waiting-to-archive workspaces) */}
+                  {showMigrationSections &&
+                    nonMigratedWorkspaces.length > 0 && (
+                      <>
+                        <div
+                          style={{
+                            width: '100%',
+                            marginTop:
+                              migratedAndRecoveredWorkspaces.length > 0
+                                ? '24px'
+                                : '0px',
+                            marginBottom: '12px',
+                          }}
+                        >
+                          <SmallHeader>Non-Migrated Workspaces</SmallHeader>
+                        </div>
+
+                        {profile.migrationTestingGroup &&
+                          enableVwbMigration && <NewWorkspaceButton />}
+
+                        {nonMigratedWorkspaces.map((wp) => (
+                          <WorkspaceCard
+                            key={`${wp.workspace.namespace}-non-migrated`}
+                            workspace={wp.workspace}
+                            accessLevel={wp.accessLevel}
+                            reload={() => this.reloadWorkspaces()}
+                            tierAccessDisabled={
+                              !hasTierAccess(
+                                profile,
+                                wp.workspace.accessTierShortName
+                              )
+                            }
+                            isMigratedView={false}
+                          />
+                        ))}
+                      </>
+                    )}
+
+                  {/* ARCHIVED (archived/requested/recovering/failed) */}
+                  {showArchivedSection && archivedWorkspaces.length > 0 && (
                     <>
-                      {/* NON-MIGRATED */}
-                      <div style={{ width: '100%', marginBottom: '12px' }}>
-                        <SmallHeader>Non-Migrated Workspaces</SmallHeader>
+                      <div
+                        style={{
+                          width: '100%',
+                          marginTop: '24px',
+                          marginBottom: '12px',
+                        }}
+                      >
+                        <SmallHeader>Archived Workspaces</SmallHeader>
                       </div>
 
-                      {profile.migrationTestingGroup && <NewWorkspaceButton />}
+                      <div
+                        style={{
+                          width: '100%',
+                          background: '#F5F7FA',
+                          border: '1px solid #D8DDE6',
+                          borderRadius: '6px',
+                          padding: '12px',
+                          marginBottom: '16px',
+                          color: colors.dark,
+                          fontSize: '13px',
+                        }}
+                      >
+                        These workspaces have been archived from Legacy
+                        Workbench. Select Recover Workspace to restore them into
+                        RW 2.0.
+                      </div>
 
-                      {nonMigratedWorkspaces.map((wp) => (
+                      {archivedWorkspaces.map((wp) => (
                         <WorkspaceCard
-                          key={`${wp.workspace.namespace}-nm`}
+                          key={`${wp.workspace.namespace}-archived`}
                           workspace={wp.workspace}
                           accessLevel={wp.accessLevel}
                           reload={() => this.reloadWorkspaces()}
@@ -256,127 +412,6 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           isMigratedView={false}
                         />
                       ))}
-
-                      {/* ARCHIVED - ALWAYS SHOW FOR SUPPORT USERS */}
-                      {archivedWorkspaces.length > 0 && (
-                        <>
-                          <div
-                            style={{
-                              width: '100%',
-                              marginTop: '24px',
-                              marginBottom: '12px',
-                            }}
-                          >
-                            <SmallHeader>Archived Workspaces</SmallHeader>
-                          </div>
-
-                          <div
-                            style={{
-                              width: '100%',
-                              background: '#F5F7FA',
-                              border: '1px solid #D8DDE6',
-                              borderRadius: '6px',
-                              padding: '12px',
-                              marginBottom: '16px',
-                              color: colors.dark,
-                              fontSize: '13px',
-                            }}
-                          >
-                            These workspaces have been archived from Legacy
-                            Workbench. Select Recover Workspace to restore them
-                            into RW 2.0.
-                          </div>
-
-                          {archivedWorkspaces.map((wp) => (
-                            <WorkspaceCard
-                              key={`${wp.workspace.namespace}-archived`}
-                              workspace={wp.workspace}
-                              accessLevel={wp.accessLevel}
-                              reload={() => this.reloadWorkspaces()}
-                              tierAccessDisabled={
-                                !hasTierAccess(
-                                  profile,
-                                  wp.workspace.accessTierShortName
-                                )
-                              }
-                              isMigratedView={false}
-                            />
-                          ))}
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {/* NORMAL USERS ONLY SEE MIGRATED */}
-                      {nonMigratedWorkspaces.length > 0 && (
-                        <>
-                          <div style={{ width: '100%', marginBottom: '12px' }}>
-                            <SmallHeader>Workspaces</SmallHeader>
-                          </div>
-
-                          {nonMigratedWorkspaces.map((wp) => (
-                            <WorkspaceCard
-                              key={`${wp.workspace.namespace}-migrated`}
-                              workspace={wp.workspace}
-                              accessLevel={wp.accessLevel}
-                              reload={() => this.reloadWorkspaces()}
-                              tierAccessDisabled={
-                                !hasTierAccess(
-                                  profile,
-                                  wp.workspace.accessTierShortName
-                                )
-                              }
-                              isMigratedView={true}
-                            />
-                          ))}
-                        </>
-                      )}
-
-                      {/* ARCHIVED */}
-                      {archivedWorkspaces.length > 0 && (
-                        <>
-                          <div
-                            style={{
-                              width: '100%',
-                              marginTop: '24px',
-                              marginBottom: '12px',
-                            }}
-                          >
-                            <SmallHeader>Archived Workspaces</SmallHeader>
-                          </div>
-
-                          <div
-                            style={{
-                              width: '100%',
-                              background: '#F5F7FA',
-                              border: '1px solid #D8DDE6',
-                              borderRadius: '6px',
-                              padding: '12px',
-                              marginBottom: '16px',
-                              color: colors.dark,
-                              fontSize: '13px',
-                            }}
-                          >
-                            These workspaces have been archived from Legacy
-                            Workbench. Select Recover Workspace to restore them
-                            into RW 2.0.
-                          </div>
-
-                          {archivedWorkspaces.map((wp) => (
-                            <WorkspaceCard
-                              key={`${wp.workspace.namespace}-archived`}
-                              workspace={wp.workspace}
-                              accessLevel={wp.accessLevel}
-                              reload={() => this.reloadWorkspaces()}
-                              tierAccessDisabled={
-                                typeof wp.workspace.recoveryState ===
-                                'undefined'
-                              }
-                              isMigratedView={false}
-                            />
-                          ))}
-                        </>
-                      )}
                     </>
                   )}
                 </div>
