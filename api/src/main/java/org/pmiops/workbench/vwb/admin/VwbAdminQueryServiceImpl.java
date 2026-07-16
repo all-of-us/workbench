@@ -572,15 +572,6 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
       throw new RuntimeException("Failed to query workspace metadata", e);
     }
 
-    workspaces
-        .values()
-        .forEach(
-            workspace ->
-                log.info(
-                    "Workspace: {}, Data Collection: {}",
-                    workspace.getDisplayName(),
-                    workspace.getDataCollection()));
-
     return new ArrayList<>(workspaces.values());
   }
 
@@ -740,7 +731,6 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           String sourceWorkspaceId = sourceWorkspaceIdNode.asText();
 
           VwbConfig vwbConfig = workbenchConfigProvider.get().vwb;
-          log.info("Workspace {} data collection", sourceWorkspaceId);
           if (sourceWorkspaceId.equals(vwbConfig.ctDataCollection)) {
             return Optional.of(CONTROLLED_TIER_LABEL);
           } else if (sourceWorkspaceId.equals(vwbConfig.rtDataCollection)) {
