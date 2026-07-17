@@ -22,7 +22,6 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { ActiveWorkspaces } from './active-workspaces';
 import { LegacyWorkbenchEndedBanner } from './legacy-workbench-ended-banner';
-import { QuickTourAndVideos } from './quick-tour-and-videos';
 // import { VwbBanner } from './vwb-banner';
 import { VwbMigrationBanner } from './vwb-migration-banner';
 
@@ -404,7 +403,7 @@ export const Homepage = fp.flow(
           profile: { migrationTestingGroup },
         },
       } = this.props;
-      const { firstVisit, userWorkspacesResponse } = this.state;
+      const { userWorkspacesResponse } = this.state;
       const { enableVWBHomepageBanner, restrictLegacyAccess } =
         serverConfigStore.get().config;
       const workspaces = userWorkspacesResponse?.items || [];
@@ -433,7 +432,6 @@ export const Homepage = fp.flow(
               </FlexColumn>
             </FlexRow>
           </FlexColumn>
-          <QuickTourAndVideos showQuickTourInitially={firstVisit} />
           {this.state.showMigrationModal && (
             <MigrationModal onClose={this.closeMigrationModal} />
           )}
