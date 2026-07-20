@@ -413,10 +413,10 @@ export const Homepage = fp.flow(
           <FlexColumn style={styles.pageWrapper}>
             <HomepageHeader />
             {enableVWBHomepageBanner &&
-              (restrictLegacyAccess && !migrationTestingGroup ? (
-                <LegacyWorkbenchEndedBanner />
-              ) : (
+              (migrationTestingGroup ? (
                 <VwbMigrationBanner />
+              ) : (
+                <LegacyWorkbenchEndedBanner />
               ))}
 
             <FlexRow style={styles.contentGrid}>
