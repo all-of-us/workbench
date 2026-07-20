@@ -738,7 +738,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               projectId,
               null,
               serviceAccountEmail,
-              false);
+              true);
 
       logger.log(Level.INFO, namespace + ": Archive transfer job created");
 
