@@ -312,7 +312,7 @@ public class WorkspaceMigrationServiceImplTest {
             eq(SERVER_PROJECT),
             isNull(),
             eq(SERVICE_ACCOUNT_EMAIL),
-            eq(false));
+            eq(true));
 
     verify(storageTransferClient)
         .runTransferJob(SERVER_PROJECT, "transferJobs/migration-archive-" + NAMESPACE);
