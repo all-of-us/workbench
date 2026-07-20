@@ -404,8 +404,7 @@ export const Homepage = fp.flow(
         },
       } = this.props;
       const { userWorkspacesResponse } = this.state;
-      const { enableVWBHomepageBanner, restrictLegacyAccess } =
-        serverConfigStore.get().config;
+      const { enableVWBHomepageBanner } = serverConfigStore.get().config;
       const workspaces = userWorkspacesResponse?.items || [];
 
       return (
