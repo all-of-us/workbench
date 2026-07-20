@@ -1,5 +1,6 @@
 package org.pmiops.workbench.vwb.admin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.bigquery.FieldValueList;
@@ -10,12 +11,12 @@ import jakarta.inject.Provider;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
@@ -539,38 +540,28 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
             });
 
     Map<String, VwbWorkspace> workspaces = new LinkedHashMap<>();
-    try {
-      creatorFuture.get().forEach(ws -> workspaces.put(ws.getId(), ws));
-      sharedFuture.get().forEach(ws -> workspaces.put(ws.getId(), ws));
-    } catch (InterruptedException | ExecutionException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException("Failed to query accessible workspaces", e);
-    }
+    creatorFuture.join().forEach(ws -> workspaces.put(ws.getId(), ws));
+    sharedFuture.join().forEach(ws -> workspaces.put(ws.getId(), ws));
 
     // Single batch query replaces N per-workspace lineage queries.
     List<String> workspaceIds = new ArrayList<>(workspaces.keySet());
     Map<String, String> dataCollectionTiers =
         workspaceIds.isEmpty() ? Map.of() : queryDataCollectionTiersForWorkspaces(workspaceIds);
 
-    try {
-      Map<String, WorkspaceAccessLevel> roles = rolesFuture.get();
-      Map<String, String> lastChanged = lastChangedFuture.get();
+    Map<String, WorkspaceAccessLevel> roles = rolesFuture.join();
+    Map<String, String> lastChanged = lastChangedFuture.join();
 
-      workspaces
-          .values()
-          .forEach(
-              workspace -> {
-                String tier = dataCollectionTiers.get(workspace.getId());
-                if (tier != null) {
-                  workspace.setDataCollection(tier);
-                }
-                workspace.setRole(roles.get(workspace.getUserFacingId()));
-                workspace.setLastChanged(lastChanged.get(workspace.getUserFacingId()));
-              });
-    } catch (InterruptedException | ExecutionException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException("Failed to query workspace metadata", e);
-    }
+    workspaces
+        .values()
+        .forEach(
+            workspace -> {
+              String tier = dataCollectionTiers.get(workspace.getId());
+              if (tier != null) {
+                workspace.setDataCollection(tier);
+              }
+              workspace.setRole(roles.get(workspace.getUserFacingId()));
+              workspace.setLastChanged(lastChanged.get(workspace.getUserFacingId()));
+            });
 
     return new ArrayList<>(workspaces.values());
   }
@@ -738,8 +729,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           }
         }
       }
-    } catch (Exception e) {
-      // parsing failure returns empty
+    } catch (JsonProcessingException e) {
+      throw new ServerErrorException("Failed to parse resource lineage JSON", e);
     }
 
     return Optional.empty();
