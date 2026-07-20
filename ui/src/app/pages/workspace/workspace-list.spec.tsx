@@ -47,7 +47,10 @@ describe('WorkspaceList', () => {
     accessLevelText: string
   ) {
     await user.click(dropdown);
-    const accessLevelOption = await screen.findByText(accessLevelText);
+
+    const listbox = await screen.findByRole('listbox');
+
+    const accessLevelOption = within(listbox).getByText(accessLevelText);
 
     await user.click(accessLevelOption);
   }

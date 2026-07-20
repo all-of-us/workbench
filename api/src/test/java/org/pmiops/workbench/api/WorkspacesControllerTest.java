@@ -153,6 +153,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
@@ -207,6 +208,7 @@ public class WorkspacesControllerTest {
   @MockitoBean private WorkspaceMigrationService workspaceMigrationService;
   @MockitoBean private WsmClient wsmClient;
   @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private VwbAdminQueryService vwbAdminQueryService;
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";
 

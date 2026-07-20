@@ -532,6 +532,9 @@ public class WorkbenchConfig {
     // later authZ check.
     public String exfilManagerServiceAccount;
     public String userManagerBaseUrl;
+    // Workspace IDs used to determine data collection tier from resource lineage.
+    public String ctDataCollection;
+    public String rtDataCollection;
 
     public static class AdminBigQuery {
       public String logProjectId;

@@ -5184,6 +5184,19 @@ paths:
           description: Successfully removed the Institution-specific user instructions
             to be sent by email after registration.
           content: {}
+  /v1/workspaces/vwb:
+    get:
+      tags:
+        - workspaces
+      description: Returns all RW2.0 workspaces the current user has access to.
+      operationId: getVwbWorkspaces
+      responses:
+        200:
+          description: List of VWB workspaces
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbWorkspaceListResponse'
   /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortId}:
     post:
       tags:
@@ -14780,6 +14793,15 @@ components:
         creationTime:
           type: string
           description: Timestamp the workspace was created
+        dataCollection:
+          type: string
+          description: The data collection associated with the workspace CT/RT
+        role:
+          $ref: '#/components/schemas/WorkspaceAccessLevel'
+          description: The role of the user in the workspace
+        lastChanged:
+          type: string
+          description: The timestamp of the last change to the workspace
     VwbWorkspaceSearchParamType:
       type: string
       description: Type for the search parameter used to query for VWB workspaces

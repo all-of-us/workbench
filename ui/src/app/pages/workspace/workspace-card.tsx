@@ -304,7 +304,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       </TooltipTrigger>
                     </StyledRouterLink>
 
-                    {workspace.migrationState === 'FINISHED' &&
+                    {(workspace.migrationState === 'FINISHED' ||
+                      workspace.recoveryState === 'RECOVERED') &&
                       isMigratedView && (
                         <a
                           href={`${environment.vwbUiUrl}/workspaces/${workspace.namespace}`}

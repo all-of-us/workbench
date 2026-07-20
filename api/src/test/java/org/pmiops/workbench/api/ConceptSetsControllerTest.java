@@ -88,6 +88,7 @@ import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
@@ -143,6 +144,7 @@ public class ConceptSetsControllerTest {
   @MockitoBean private WorkspaceMigrationService workspaceMigrationService;
   @MockitoBean private VwbAccessService vwbAccessService;
   @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private VwbAdminQueryService vwbAdminQueryService;
   public static final String UPDATED_DESC = "Updated Desc";
   private static final Criteria CRITERIA_CONDITION_1 =
       new Criteria()

@@ -35,5 +35,7 @@ public interface VwbAdminQueryService {
 
   List<VwbDataCollectionEntry> queryVwbDataCollections();
 
+  List<VwbWorkspace> queryAccessibleWorkspaces(String email);
+
   List<PreprodWorkspace> queryPreprodWorkspaceByNamespace(String workspaceNamespace);
 }

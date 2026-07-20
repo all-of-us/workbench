@@ -139,6 +139,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
@@ -184,6 +185,7 @@ public class CohortReviewControllerTest {
   @MockitoBean private WsmClient wsmClient;
   @MockitoBean private WorkspaceMigrationService workspaceMigrationService;
   @MockitoBean private VwbUserService vwbUserService;
+  @MockitoBean private VwbAdminQueryService vwbAdminQueryService;
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE2_NAMESPACE = "namespace2";
