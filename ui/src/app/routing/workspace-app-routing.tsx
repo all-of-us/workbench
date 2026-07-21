@@ -455,13 +455,17 @@ export const WorkspaceRoutes = () => {
           }}
         />
       </AppRoute>
-      <AppRoute exact path={`${path}/recovery`}>
+      <AppRoute
+        exact
+        path={`${path}/recovery`}
+        guards={[adminLockedGuard(ns, terraName)]}
+      >
         <WorkspaceRecoveryPage
           routeData={{
             title: 'Workspace Recovery',
             breadcrumb: BreadcrumbType.Workspace,
-            workspaceNavBarTab: 'about',
-            pageKey: 'recovery',
+            workspaceNavBarTab: 'data',
+            pageKey: 'data',
           }}
         />
       </AppRoute>
