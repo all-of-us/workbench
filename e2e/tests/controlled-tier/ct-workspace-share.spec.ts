@@ -29,10 +29,8 @@ describe.skip('Share Controlled Tier Workspace', () => {
     await signInWithAccessToken(page, notCTUser);
 
     const homePage = new HomePage(page);
-    const createNewWorkspace = homePage.getCreateNewWorkspaceLink();
-    await createNewWorkspace.clickAndWait();
-
-    const createPage = new WorkspaceEditPage(page);
+    await homePage.goToAllWorkspacesPage();
+    const createPage = await new WorkspacesPage(page).clickCreateNewWorkspace();
     let modal = await selectControlledTier(page, createPage);
 
     const modalText = await modal.getTextContent();
