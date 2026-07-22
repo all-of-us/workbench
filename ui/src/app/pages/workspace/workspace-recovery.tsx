@@ -4,7 +4,7 @@ import fp from 'lodash/fp';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 
-import { Workspace, WorkspaceRecoveryStatus } from 'generated/fetch';
+import { WorkspaceAccessLevel, WorkspaceRecoveryStatus } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { ClrIcon } from 'app/components/icons';
@@ -20,6 +20,7 @@ import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { VwbImportantBanner } from './vwb-important-banner';
 
@@ -142,7 +143,7 @@ const styles = reactStyles({
   },
 });
 interface Props extends WithSpinnerOverlayProps {
-  workspace: Workspace;
+  workspace: WorkspaceData;
 }
 
 export const WorkspaceRecovery = fp.flow(
@@ -158,6 +159,10 @@ export const WorkspaceRecovery = fp.flow(
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [navigate] = useNavigation();
   const { cdrVersionsForMigration } = serverConfigStore.get().config;
+
+  if (workspace.accessLevel !== WorkspaceAccessLevel.OWNER) {
+    navigate(['workspaces']);
+  }
 
   useEffect(() => {
     hideSpinner();

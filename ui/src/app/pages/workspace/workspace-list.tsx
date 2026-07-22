@@ -407,7 +407,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                             !hasTierAccess(
                               profile,
                               wp.workspace.accessTierShortName
-                            )
+                            ) || wp.accessLevel !== WorkspaceAccessLevel.OWNER
                           }
                           isMigratedView={false}
                         />

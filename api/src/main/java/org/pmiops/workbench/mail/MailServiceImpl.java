@@ -582,7 +582,7 @@ public class MailServiceImpl implements MailService {
       DbWorkspace workspace, DbUser owner, DbUser requestingUser) throws MessagingException {
 
     final String subject = "Workspace Recovery Requested";
-    final String fromEmail = workbenchConfigProvider.get().mail.fromEmail;
+    final String fromEmail = "recoverySupport@researchallofus.org";
     final List<String> recipients =
         workbenchConfigProvider.get().mail.workspaceRecoveryRequestRecipients;
 

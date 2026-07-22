@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { MigrationState, Workspace } from 'generated/fetch';
+import { MigrationState } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { StyledExternalLink } from 'app/components/buttons';
@@ -35,6 +35,7 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
+import { WorkspaceData } from 'app/utils/workspace-data';
 import { isUsingInitialCredits } from 'app/utils/workspace-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
 
@@ -221,7 +222,7 @@ const updateRuntimeStores = async ({
 
 interface GetWorkspaceProps {
   terraName: string;
-  setWorkspace: (w: Workspace) => void;
+  setWorkspace: (w: WorkspaceData) => void;
   navigate: NavigateFn;
 }
 const getWorkspaceAndUpdateStores = async ({
@@ -246,7 +247,10 @@ const getWorkspaceAndUpdateStores = async ({
       pollAborter,
       setPollAborter,
     });
-    setWorkspace(workspace);
+    setWorkspace({
+      ...workspace,
+      accessLevel,
+    });
   } catch (ex) {
     if (ex.status === 403) {
       navigate(['/workspaces']);
@@ -261,7 +265,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   const [navigate] = useNavigation();
 
   const [pollAborter, setPollAborter] = useState(new AbortController());
-  const [workspace, setWorkspace] = useState<Workspace>(undefined);
+  const [workspace, setWorkspace] = useState<WorkspaceData>(undefined);
   const [showNewCtNotification, setShowNewCtNotification] = useState(false);
   const [showUnlinkedBillingNotification, setShowUnlinkedBillingNotification] =
     useState(false);
