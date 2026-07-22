@@ -433,7 +433,20 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
                 row -> FieldValues.getString(row, "workspace_user_facing_id").orElseThrow(),
                 row ->
                     WorkspaceAccessLevel.valueOf(
-                        FieldValues.getString(row, "role").orElseThrow().toUpperCase())));
+                        FieldValues.getString(row, "role").orElseThrow().toUpperCase()),
+                (existing, incoming) -> {
+                  if (existing == WorkspaceAccessLevel.OWNER
+                      || incoming == WorkspaceAccessLevel.OWNER) {
+                    return WorkspaceAccessLevel.OWNER;
+                  }
+
+                  if (existing == WorkspaceAccessLevel.WRITER
+                      || incoming == WorkspaceAccessLevel.WRITER) {
+                    return WorkspaceAccessLevel.WRITER;
+                  }
+
+                  return WorkspaceAccessLevel.READER;
+                }));
   }
 
   private Map<String, String> queryWorkspaceLastChanged() {
