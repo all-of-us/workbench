@@ -7,13 +7,21 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { VwbWorkspaceCard } from 'app/pages/workspace/vwb-workspace-card';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 
+type VwbWorkspaceCardModel = VwbWorkspace & {
+  role?: 'OWNER' | 'WRITER' | 'READER';
+  dataCollection?: string;
+  lastChanged?: string;
+  createdBy?: string;
+};
+
 interface State {
   loading: boolean;
-  workspaces: VwbWorkspace[];
+  workspaces: VwbWorkspaceCardModel[];
 }
 
 interface Props {
   excludeUserFacingIds?: string[];
+  currentUsername?: string;
 }
 
 export const VwbWorkspaces = class extends React.Component<Props, State> {
@@ -24,10 +32,10 @@ export const VwbWorkspaces = class extends React.Component<Props, State> {
 
   async componentDidMount() {
     try {
-      const response = await workspacesApi().getVwbWorkspaces();
+      const response = await (workspacesApi() as any).getVwbWorkspaces();
 
       this.setState({
-        workspaces: response.items ?? [],
+        workspaces: (response.items ?? []) as VwbWorkspaceCardModel[],
         loading: false,
       });
     } catch (error) {
@@ -71,7 +79,11 @@ export const VwbWorkspaces = class extends React.Component<Props, State> {
           }}
         >
           {visibleWorkspaces.map((workspace) => (
-            <VwbWorkspaceCard key={workspace.id} workspace={workspace} />
+            <VwbWorkspaceCard
+              key={workspace.id}
+              workspace={workspace}
+              currentUsername={this.props.currentUsername}
+            />
           ))}
         </FlexRow>
       </FlexColumn>

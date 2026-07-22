@@ -57,6 +57,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
   private static final String CONTROLLED_TIER_LABEL = "Controlled Tier";
   private static final String REGISTERED_TIER_LABEL = "Registered Tier";
+  private static final String GRANT_WORKSPACE_ROLE = "GRANT_WORKSPACE_ROLE";
+  private static final String REMOVE_WORKSPACE_ROLE = "REMOVE_WORKSPACE_ROLE";
 
   private static final String QUERY =
       "SELECT \n"
@@ -105,9 +107,13 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "JOIN \n"
           + " %s wal ON w.workspace_id = wal.workspace_id \n"
           + "WHERE \n"
-          + " wal.change_type='GRANT_WORKSPACE_ROLE' \n"
+          + " LOWER(wal.change_subject_id)=LOWER(@SEARCH_PARAM) \n"
           + "AND \n"
-          + " (wal.change_subject_id=@SEARCH_PARAM OR wal.actor_email=@SEARCH_PARAM) ";
+          + " wal.change_type IN (@GRANT_EVENT, @REMOVE_EVENT) \n"
+          + "QUALIFY \n"
+          + " ROW_NUMBER() OVER (PARTITION BY w.workspace_id ORDER BY wal.change_date DESC) = 1 \n"
+          + "AND \n"
+          + " wal.change_type = @GRANT_EVENT ";
 
   private static final String AUDIT_QUERY =
       "SELECT \n"
@@ -314,6 +320,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .addNamedParameter("SEARCH_PARAM", QueryParameterValue.string(normalizedEmail))
+            .addNamedParameter("GRANT_EVENT", QueryParameterValue.string(GRANT_WORKSPACE_ROLE))
+            .addNamedParameter("REMOVE_EVENT", QueryParameterValue.string(REMOVE_WORKSPACE_ROLE))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);
@@ -552,9 +560,8 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
               }
             });
 
-    Map<String, VwbWorkspace> workspaces = new LinkedHashMap<>();
-    creatorFuture.join().forEach(ws -> workspaces.put(ws.getId(), ws));
-    sharedFuture.join().forEach(ws -> workspaces.put(ws.getId(), ws));
+    Map<String, VwbWorkspace> workspaces =
+        mergeCreatorAndSharedWorkspaces(creatorFuture.join(), sharedFuture.join());
 
     // Single batch query replaces N per-workspace lineage queries.
     List<String> workspaceIds = new ArrayList<>(workspaces.keySet());
@@ -563,6 +570,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
     Map<String, WorkspaceAccessLevel> roles = rolesFuture.join();
     Map<String, String> lastChanged = lastChangedFuture.join();
+    final String normalizedEmail = normalizeEmail(email);
 
     workspaces
         .values()
@@ -572,7 +580,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
               if (tier != null) {
                 workspace.setDataCollection(tier);
               }
-              workspace.setRole(roles.get(workspace.getUserFacingId()));
+              workspace.setRole(determineEffectiveRole(workspace, normalizedEmail, roles));
               workspace.setLastChanged(lastChanged.get(workspace.getUserFacingId()));
             });
 
@@ -762,5 +770,29 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
 
     String gSuiteDomain = workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
     return trimmedEmail + "@" + gSuiteDomain;
+  }
+
+  private boolean isWorkspaceCreator(VwbWorkspace workspace, String normalizedEmail) {
+    return workspace.getCreatedBy() != null
+        && normalizedEmail != null
+        && workspace.getCreatedBy().equalsIgnoreCase(normalizedEmail);
+  }
+
+  WorkspaceAccessLevel determineEffectiveRole(
+      VwbWorkspace workspace,
+      String normalizedEmail,
+      Map<String, WorkspaceAccessLevel> rolesByUserFacingId) {
+    if (isWorkspaceCreator(workspace, normalizedEmail)) {
+      return WorkspaceAccessLevel.OWNER;
+    }
+    return rolesByUserFacingId.get(workspace.getUserFacingId());
+  }
+
+  Map<String, VwbWorkspace> mergeCreatorAndSharedWorkspaces(
+      List<VwbWorkspace> creatorWorkspaces, List<VwbWorkspace> sharedWorkspaces) {
+    Map<String, VwbWorkspace> workspaces = new LinkedHashMap<>();
+    creatorWorkspaces.forEach(ws -> workspaces.put(ws.getId(), ws));
+    sharedWorkspaces.forEach(ws -> workspaces.put(ws.getId(), ws));
+    return workspaces;
   }
 }

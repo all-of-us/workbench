@@ -292,7 +292,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   }}
                 >
                   <div style={{ width: '100%' }}>
-                    <VwbWorkspaces excludeUserFacingIds={legacyNamespaces} />
+                    <VwbWorkspaces
+                      excludeUserFacingIds={legacyNamespaces}
+                      currentUsername={profile.username}
+                    />
                   </div>
 
                   {/* MIGRATED + RECOVERED */}
