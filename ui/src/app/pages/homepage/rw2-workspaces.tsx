@@ -19,7 +19,11 @@ interface Props {
   currentUsername?: string;
 }
 
-export const VwbWorkspaces = ({ loading, workspaces, currentUsername }: Props) => {
+export const VwbWorkspaces = ({
+  loading,
+  workspaces,
+  currentUsername,
+}: Props) => {
   if (loading) {
     return <SpinnerOverlay />;
   }

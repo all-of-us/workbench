@@ -2,11 +2,7 @@ import * as React from 'react';
 import RSelect from 'react-select';
 import * as fp from 'lodash/fp';
 
-import {
-  Profile,
-  VwbWorkspace,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
+import { Profile, VwbWorkspace, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { AlertDanger } from 'app/components/alert';
@@ -117,7 +113,8 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         ]);
 
         const workspacesReceived = legacyResponse.items;
-        const resolvedVwbWorkspaces = (vwbResponse.items ?? []) as VwbWorkspaceCardModel[];
+        const resolvedVwbWorkspaces = (vwbResponse.items ??
+          []) as VwbWorkspaceCardModel[];
 
         workspacesReceived.sort((a, b) =>
           a.workspace.name.localeCompare(b.workspace.name)
@@ -132,7 +129,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         });
       } catch (e) {
         const response = await convertAPIError(e);
-        this.setState({ errorText: response.message, workspacesLoading: false });
+        this.setState({
+          errorText: response.message,
+          workspacesLoading: false,
+        });
       }
     }
 
@@ -177,19 +177,17 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       ];
 
       // If a workspace exists in both RW 1.0 and RW 2.0, keep only the RW 2.0 card.
-      const filteredLegacyList = filteredList.filter(
-        (wp) => {
-          // Always keep archival-related items in the legacy archived section.
-          if (archivalRecoveryStates.includes(wp.workspace.recoveryState)) {
-            return true;
-          }
-
-          return (
-            !wp.workspace.namespace ||
-            !vwbUserFacingIds.has(wp.workspace.namespace.toLowerCase())
-          );
+      const filteredLegacyList = filteredList.filter((wp) => {
+        // Always keep archival-related items in the legacy archived section.
+        if (archivalRecoveryStates.includes(wp.workspace.recoveryState)) {
+          return true;
         }
-      );
+
+        return (
+          !wp.workspace.namespace ||
+          !vwbUserFacingIds.has(wp.workspace.namespace.toLowerCase())
+        );
+      });
 
       const nonMigratedWorkspaces = filteredLegacyList.filter(
         (wp) =>
