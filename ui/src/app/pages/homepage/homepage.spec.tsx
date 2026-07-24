@@ -63,6 +63,8 @@ describe('HomepageComponent', () => {
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
+        enableVWBHomepageBanner: true,
+        restrictLegacyAccess: true,
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);
@@ -76,50 +78,64 @@ describe('HomepageComponent', () => {
 
   it('should render the homepage', () => {
     component();
-    expect(screen.getByText('Welcome to the')).toBeInTheDocument();
-  });
-
-  it('should display quick tour when clicked', () => {
-    // Mock offsetWidth needed for horizontal scroll for quick tour/video list
-    const originalOffsetWidth = Object.getOwnPropertyDescriptor(
-      HTMLElement.prototype,
-      'offsetWidth'
-    );
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-      configurable: true,
-      value: 1000,
-    });
-    component();
-
-    screen.getByAltText('show quick tour').click();
-    expect(screen.getByTestId('quick-tour-react')).toBeInTheDocument();
-    // set offsetWidth back to original
-    Object.defineProperty(
-      HTMLElement.prototype,
-      'offsetWidth',
-      originalOffsetWidth
-    );
-  });
-
-  it('should not auto-display quick tour it not first visit', () => {
-    const newProfile = {
-      ...profile,
-      pageVisits: [{ page: 'homepage' }],
-    };
-    profileStore.set({ profile: newProfile, load, reload, updateCache });
-    component();
-    expect(screen.queryByTestId('quick-tour-react')).not.toBeInTheDocument();
-  });
-
-  it('should display quick tour if first visit', async () => {
-    component();
-    expect(screen.getByTestId('quick-tour-react')).toBeInTheDocument();
-  });
-
-  it('should not display the zero workspace UI while workspaces are being fetched', async () => {
-    component();
     expect(
-      screen.queryByText('Here are some tips to get you started')
+      screen.getByText('Welcome to your Researcher Workbench')
+    ).toBeInTheDocument();
+  });
+
+  it('shows migration ended banner for non-migration-testing users', () => {
+    profileStore.set({
+      profile: { ...profile, migrationTestingGroup: false },
+      load,
+      reload,
+      updateCache,
+    });
+
+    component();
+
+    expect(screen.getByText('Migration has ended.')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Migrate your Workspaces to Researcher Workbench 2.0')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows migration banner for migration testing users', () => {
+    profileStore.set({
+      profile: { ...profile, migrationTestingGroup: true },
+      load,
+      reload,
+      updateCache,
+    });
+
+    component();
+
+    expect(
+      screen.getByText('Migrate your Workspaces to Researcher Workbench 2.0')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Migration has ended.')).not.toBeInTheDocument();
+  });
+
+  it('hides homepage banners when the feature flag is disabled', () => {
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        enableVWBHomepageBanner: false,
+      },
+    });
+
+    component();
+
+    expect(
+      screen.queryByText('Migrate your Workspaces to Researcher Workbench 2.0')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Migration has ended.')).not.toBeInTheDocument();
+  });
+
+  it('should not display the zero workspace UI while workspaces are being fetched', () => {
+    component();
+
+    expect(
+      screen.queryByText('Create your first workspace')
     ).not.toBeInTheDocument();
   });
 });

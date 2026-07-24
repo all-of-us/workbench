@@ -25,8 +25,8 @@ describe('login tests', () => {
     await withPageTest()(async (page) => {
       await signInWithAccessToken(page, config.READER_USER);
       const homePage = new HomePage(page);
-      const plusIcon = homePage.getCreateNewWorkspaceLink();
-      expect(await plusIcon.asElementHandle()).toBeTruthy();
+      const allWorkspacesLink = homePage.getSeeAllWorkspacesLink();
+      expect(await allWorkspacesLink.asElementHandle()).toBeTruthy();
     });
   });
 
