@@ -279,7 +279,7 @@ const TutorialVideoPanel = () => {
 const EventCalendarPanel = () => {
   const calendarUrl =
     'https://calendar.google.com/calendar/embed?height=600&wkst=1' +
-    '&ctz=America%2FChicago&showPrint=0' +
+    '&showPrint=0&showCalendars=0' +
     '&src=c2FtYW50aGFsLnN0ZXdhcnRAdnVtYy5vcmc' +
     '&src=MjEydGJ2bWY2a3VpZXRpcXUxdGVxZGpjdmtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ' +
     '&color=%23039be5&color=%233f51b5';
