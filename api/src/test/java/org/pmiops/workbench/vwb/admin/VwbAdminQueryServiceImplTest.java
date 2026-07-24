@@ -9,6 +9,9 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import jakarta.inject.Provider;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -16,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.VwbWorkspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 public class VwbAdminQueryServiceImplTest {
 
@@ -155,6 +160,76 @@ public class VwbAdminQueryServiceImplTest {
     QueryJobConfiguration capturedConfig = configCaptor.getValue();
     String normalizedEmail = capturedConfig.getNamedParameters().get("SEARCH_PARAM").getValue();
     assertEquals("testuser@example.com", normalizedEmail);
+  }
+
+  @Test
+  public void testShareActivityQuery_usesLatestAccessEventFilter() {
+    service.queryVwbWorkspacesByShareActivity("testuser@example.com");
+
+    ArgumentCaptor<QueryJobConfiguration> configCaptor =
+        ArgumentCaptor.forClass(QueryJobConfiguration.class);
+    verify(mockBigQueryService).executeQuery(configCaptor.capture());
+
+    QueryJobConfiguration capturedConfig = configCaptor.getValue();
+    String query = capturedConfig.getQuery();
+
+    // Current access is determined from latest grant/remove event for this user.
+    org.junit.jupiter.api.Assertions.assertTrue(query.contains("ROW_NUMBER() OVER"));
+    org.junit.jupiter.api.Assertions.assertTrue(query.contains("@GRANT_EVENT"));
+    org.junit.jupiter.api.Assertions.assertTrue(query.contains("@REMOVE_EVENT"));
+    org.junit.jupiter.api.Assertions.assertTrue(
+        query.contains("LOWER(wal.change_subject_id)=LOWER(@SEARCH_PARAM)"));
+    assertEquals(
+        "GRANT_WORKSPACE_ROLE", capturedConfig.getNamedParameters().get("GRANT_EVENT").getValue());
+    assertEquals(
+        "REMOVE_WORKSPACE_ROLE",
+        capturedConfig.getNamedParameters().get("REMOVE_EVENT").getValue());
+  }
+
+  @Test
+  public void testDetermineEffectiveRole_creatorGetsOwnerWhenRoleMissing() {
+    VwbWorkspace creatorWorkspace = new VwbWorkspace();
+    creatorWorkspace.setUserFacingId("ws-ufid-1");
+    creatorWorkspace.setCreatedBy("creator@example.com");
+
+    WorkspaceAccessLevel effectiveRole =
+        service.determineEffectiveRole(
+            creatorWorkspace, "creator@example.com", Collections.emptyMap());
+
+    assertEquals(WorkspaceAccessLevel.OWNER, effectiveRole);
+  }
+
+  @Test
+  public void testDetermineEffectiveRole_creatorOverridesNonOwnerRole() {
+    VwbWorkspace creatorWorkspace = new VwbWorkspace();
+    creatorWorkspace.setUserFacingId("ws-ufid-2");
+    creatorWorkspace.setCreatedBy("creator@example.com");
+
+    Map<String, WorkspaceAccessLevel> roles = new HashMap<>();
+    roles.put("ws-ufid-2", WorkspaceAccessLevel.WRITER);
+
+    WorkspaceAccessLevel effectiveRole =
+        service.determineEffectiveRole(creatorWorkspace, "creator@example.com", roles);
+
+    assertEquals(WorkspaceAccessLevel.OWNER, effectiveRole);
+  }
+
+  @Test
+  public void testMergeCreatorAndSharedWorkspaces_deduplicatesByWorkspaceId() {
+    VwbWorkspace sharedWorkspace = new VwbWorkspace();
+    sharedWorkspace.setId("ws-id-3");
+    sharedWorkspace.setUserFacingId("ws-ufid-3");
+
+    VwbWorkspace sameWorkspaceFromCreator = new VwbWorkspace();
+    sameWorkspaceFromCreator.setId("ws-id-3");
+    sameWorkspaceFromCreator.setUserFacingId("ws-ufid-3");
+    sameWorkspaceFromCreator.setCreatedBy("creator@example.com");
+
+    Map<String, VwbWorkspace> merged =
+        service.mergeCreatorAndSharedWorkspaces(
+            List.of(sameWorkspaceFromCreator), List.of(sharedWorkspace));
+
+    assertEquals(1, merged.size());
   }
 
   @Test

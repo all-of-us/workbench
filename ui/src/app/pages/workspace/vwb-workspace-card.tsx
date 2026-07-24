@@ -55,14 +55,47 @@ const styles = reactStyles({
 });
 
 interface Props {
-  workspace: VwbWorkspace;
+  workspace: VwbWorkspace & {
+    role?: WorkspaceAccessLevel;
+    dataCollection?: string;
+    lastChanged?: string;
+    createdBy?: string;
+  };
+  currentUsername?: string;
 }
 
-export const VwbWorkspaceCard = ({ workspace }: Props) => {
-  const workspaceUrl = `${environment.vwbUiUrl}/workspaces/${workspace.userFacingId}`;
+const normalizeIdentity = (value?: string): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  return value.trim().toLowerCase();
+};
 
-  const role =
-    (workspace.role as WorkspaceAccessLevel) || WorkspaceAccessLevel.READER;
+const isCreatorForUser = (
+  createdBy?: string,
+  currentUsername?: string
+): boolean => {
+  const normalizedCreatedBy = normalizeIdentity(createdBy);
+  const normalizedCurrentUsername = normalizeIdentity(currentUsername);
+
+  if (!normalizedCreatedBy || !normalizedCurrentUsername) {
+    return false;
+  }
+
+  if (normalizedCreatedBy === normalizedCurrentUsername) {
+    return true;
+  }
+
+  return normalizedCreatedBy.startsWith(`${normalizedCurrentUsername}@`);
+};
+
+export const VwbWorkspaceCard = ({ workspace, currentUsername }: Props) => {
+  const workspaceUrl = `${environment.vwbUiUrl}/workspaces/${workspace.userFacingId}`;
+  const creatorOwned = isCreatorForUser(workspace.createdBy, currentUsername);
+
+  const role = creatorOwned
+    ? WorkspaceAccessLevel.OWNER
+    : (workspace.role as WorkspaceAccessLevel) || WorkspaceAccessLevel.READER;
 
   const isControlledTier = workspace.dataCollection === 'Controlled Tier';
   const isRegisteredTier = workspace.dataCollection === 'Registered Tier';
@@ -116,7 +149,7 @@ export const VwbWorkspaceCard = ({ workspace }: Props) => {
                   backgroundColor: colors.workspacePermissionsHighlights[role],
                 }}
               >
-                {workspace.role}
+                {role}
               </div>
 
               <div style={{ fontSize: 12, marginTop: '.4rem' }}>
