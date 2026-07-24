@@ -2,7 +2,12 @@ import * as React from 'react';
 import RSelect from 'react-select';
 import * as fp from 'lodash/fp';
 
-import { Profile, VwbWorkspace, WorkspaceAccessLevel } from 'generated/fetch';
+import {
+  Profile,
+  VwbWorkspace,
+  WorkspaceAccessLevel,
+  WorkspaceRecoveryStatus,
+} from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { AlertDanger } from 'app/components/alert';
@@ -107,7 +112,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       try {
         const [legacyResponse, vwbResponse] = await Promise.all([
           workspacesApi().getWorkspaces(),
-          (workspacesApi() as any)
+          workspacesApi()
             .getVwbWorkspaces()
             .catch(() => ({ items: [] })),
         ]);
@@ -328,11 +333,11 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   }}
                 >
                   <div style={{ width: '100%' }}>
-                    {React.createElement(VwbWorkspaces as any, {
-                      loading: workspacesLoading,
-                      workspaces: vwbWorkspaces,
-                      currentUsername: profile.username,
-                    })}
+                    <VwbWorkspaces
+                      loading={workspacesLoading}
+                      workspaces={vwbWorkspaces}
+                      currentUsername={profile.username}
+                    />
                   </div>
 
                   {/* NON-MIGRATED (includes waiting-to-archive workspaces) */}
@@ -362,7 +367,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                               !hasTierAccess(
                                 profile,
                                 wp.workspace.accessTierShortName
-                              )
+                              ) || !profile.migrationTestingGroup
                             }
                             isMigratedView={false}
                           />
@@ -410,7 +415,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                             !hasTierAccess(
                               profile,
                               wp.workspace.accessTierShortName
-                            ) || wp.accessLevel !== WorkspaceAccessLevel.OWNER
+                            ) ||
+                            wp.accessLevel !== WorkspaceAccessLevel.OWNER ||
+                            wp.workspace.recoveryState !==
+                              WorkspaceRecoveryStatus.NOT_STARTED
                           }
                           isMigratedView={false}
                         />
