@@ -18,7 +18,6 @@ import { fetchWithSystemErrorHandler } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { supportUrls } from 'app/utils/zendesk';
 
 import { ActiveWorkspaces } from './active-workspaces';
 import { LegacyWorkbenchEndedBanner } from './legacy-workbench-ended-banner';
@@ -126,6 +125,7 @@ const HomepageHeader = () => {
   );
 };
 
+/*
 const SpotlightPanel = () => {
   return (
     <div style={{ ...styles.panel, ...styles.spotlightPanel }}>
@@ -177,6 +177,7 @@ const SpotlightPanel = () => {
     </div>
   );
 };
+*/
 
 const ResourcesPanel = () => {
   const resources = [
@@ -425,7 +426,7 @@ export const Homepage = fp.flow(
               </FlexColumn>
 
               <FlexColumn style={styles.rightColumn}>
-                <SpotlightPanel />
+                {/* <SpotlightPanel /> */}
                 <ResourcesPanel />
                 <EventCalendarPanel />
               </FlexColumn>
