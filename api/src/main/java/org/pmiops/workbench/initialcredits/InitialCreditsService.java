@@ -511,8 +511,10 @@ public class InitialCreditsService {
    */
   public boolean hasOnlyUserProvidedBillingWorkspaces(DbUser user) {
     // A user with a VWB pod on the initial credits billing account still has initial credits
-    // exposure, even if all of their Terra workspaces use user-provided billing. Such users must not
-    // be skipped, otherwise their VWB billing is never unlinked on exhaustion/expiration (RW-18074).
+    // exposure, even if all of their Terra workspaces use user-provided billing. Such users must
+    // not
+    // be skipped, otherwise their VWB billing is never unlinked on exhaustion/expiration
+    // (RW-18074).
     DbVwbUserPod vwbUserPod = user.getVwbUserPod();
     if (vwbUserPod != null
         && vwbUserPod.getVwbPodId() != null

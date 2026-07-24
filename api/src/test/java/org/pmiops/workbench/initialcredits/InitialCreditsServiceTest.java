@@ -1458,7 +1458,8 @@ public class InitialCreditsServiceTest {
 
   @Test
   public void hasOnlyUserProvidedBillingWorkspaces_falseWhenVwbPodUsesInitialCredits() {
-    // RW-18074: a user whose active Terra workspaces all use user-provided billing but who has a VWB
+    // RW-18074: a user whose active Terra workspaces all use user-provided billing but who has a
+    // VWB
     // pod actively on initial credits must NOT be treated as user-provided-billing-only. Otherwise
     // they are filtered out of the exhaustion/expiration flow and their VWB billing is never
     // unlinked.
