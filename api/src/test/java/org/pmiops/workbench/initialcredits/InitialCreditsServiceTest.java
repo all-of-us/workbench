@@ -1456,6 +1456,41 @@ public class InitialCreditsServiceTest {
     assertWithinBillingTolerance(dbEntry.getCost(), cost);
   }
 
+  @Test
+  public void hasOnlyUserProvidedBillingWorkspaces_falseWhenVwbPodUsesInitialCredits() {
+    // RW-18074: a user whose active Terra workspaces all use user-provided billing but who has a
+    // VWB
+    // pod actively on initial credits must NOT be treated as user-provided-billing-only. Otherwise
+    // they are filtered out of the exhaustion/expiration flow and their VWB billing is never
+    // unlinked.
+    DbUser user = createUser("vwb-credits@test.com");
+    createUserProvidedBillingWorkspace(user, "byo-project");
+    user.setVwbUserPod(createVwbPodForUser(user, true));
+
+    assertThat(initialCreditsService.hasOnlyUserProvidedBillingWorkspaces(user)).isFalse();
+  }
+
+  @Test
+  public void hasOnlyUserProvidedBillingWorkspaces_trueWhenVwbPodInitialCreditsInactive() {
+    // A user with only user-provided-billing workspaces and an inactive VWB pod is still
+    // user-provided-billing-only.
+    DbUser user = createUser("inactive-vwb@test.com");
+    createUserProvidedBillingWorkspace(user, "byo-project");
+    user.setVwbUserPod(createVwbPodForUser(user, false));
+
+    assertThat(initialCreditsService.hasOnlyUserProvidedBillingWorkspaces(user)).isTrue();
+  }
+
+  private DbWorkspace createUserProvidedBillingWorkspace(DbUser creator, String project) {
+    return workspaceDao.save(
+        new DbWorkspace()
+            .setCreator(creator)
+            .setWorkspaceNamespace(project + "-ns")
+            .setGoogleProject(project)
+            .setBillingAccountName("billingAccounts/user-provided-account")
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE));
+  }
+
   private DbUser createUser(String email) {
     return userDao.save(new DbUser().setUsername(email));
   }

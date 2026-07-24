@@ -503,12 +503,25 @@ public class InitialCreditsService {
   /**
    * Check if all of the user's active workspaces use user-provided billing accounts. Returns true
    * if the user has at least one active workspace and none of them use initial credits billing.
-   * Returns false if the user has no active workspaces.
+   * Returns false if the user has no active workspaces, or if the user has a VWB pod actively using
+   * initial credits (regardless of their Terra workspaces' billing).
    *
    * @param user The user to check
    * @return True if all active workspaces use user-provided billing
    */
   public boolean hasOnlyUserProvidedBillingWorkspaces(DbUser user) {
+    // A user with a VWB pod on the initial credits billing account still has initial credits
+    // exposure, even if all of their Terra workspaces use user-provided billing. Such users must
+    // not
+    // be skipped, otherwise their VWB billing is never unlinked on exhaustion/expiration
+    // (RW-18074).
+    DbVwbUserPod vwbUserPod = user.getVwbUserPod();
+    if (vwbUserPod != null
+        && vwbUserPod.getVwbPodId() != null
+        && Boolean.TRUE.equals(vwbUserPod.isInitialCreditsActive())) {
+      return false;
+    }
+
     List<DbWorkspace> activeWorkspaces =
         workspaceDao.findAllByCreator(user).stream()
             .filter(ws -> ws.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE)
