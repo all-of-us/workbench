@@ -12,6 +12,9 @@ import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import { SideNav, SideNavProps } from './side-nav';
 
+const USER_SUPPORT_HUB_URL = 'https://support.researchallofus.org/hc/en-us';
+const SUPPORT_EMAIL = 'support@researchallofus.org';
+
 describe(SideNav.name, () => {
   const props: SideNavProps = {
     profile: ProfileStubVariables.PROFILE_STUB,
@@ -72,10 +75,26 @@ describe(SideNav.name, () => {
     const disabledItemText = [
       'Your Workspaces',
       'Featured Workspaces',
-      'User Support Hub',
     ];
     disabledItemText.forEach((name) =>
       expectButtonElementDisabled(getByRole('button', { name }))
     );
+  });
+
+  it('opens support links from side nav', () => {
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    const { getByText } = render(<SideNav {...props} />);
+
+    fireEvent.click(getByText('User Support Hub'));
+    expect(openSpy).toHaveBeenCalledWith(USER_SUPPORT_HUB_URL, '_blank');
+
+    fireEvent.click(getByText('Contact Us'));
+    expect(openSpy).toHaveBeenCalledWith(
+      `mailto:${SUPPORT_EMAIL}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+
+    openSpy.mockRestore();
   });
 });
