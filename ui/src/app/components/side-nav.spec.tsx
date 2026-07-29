@@ -72,10 +72,7 @@ describe(SideNav.name, () => {
     fireEvent.click(getByText(`${givenName} ${familyName}`));
 
     // These are our expected items to be disabled when you are not registered
-    const disabledItemText = [
-      'Your Workspaces',
-      'Featured Workspaces',
-    ];
+    const disabledItemText = ['Your Workspaces', 'Featured Workspaces'];
     disabledItemText.forEach((name) =>
       expectButtonElementDisabled(getByRole('button', { name }))
     );
