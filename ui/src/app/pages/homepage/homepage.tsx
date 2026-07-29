@@ -281,7 +281,7 @@ const EventCalendarPanel = () => {
   // is private and causes a "no permission to view" error in the embed.
   const calendarUrl =
     'https://calendar.google.com/calendar/embed?height=600&wkst=1' +
-    '&showPrint=0&showCalendars=0' +
+    '&showPrint=0&showCalendars=0&showTz=0' +
     '&src=MjEydGJ2bWY2a3VpZXRpcXUxdGVxZGpjdmtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ' +
     '&color=%233f51b5';
 
