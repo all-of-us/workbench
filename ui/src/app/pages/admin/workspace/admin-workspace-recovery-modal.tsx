@@ -211,7 +211,7 @@ export const AdminWorkspaceRecoveryModal = ({
               value={workspace.creatorUser.userName}
             />
             <StatusField
-              label='Archive status'
+              label='Recovery status'
               status={workspace.recoveryState}
             />
             <ReadOnlyField
