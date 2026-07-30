@@ -67,7 +67,9 @@ export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
               <Button
                 type='primary'
                 disabled={
-                  workspace.recoveryState !== WorkspaceRecoveryStatus.REQUESTED
+                  workspace.recoveryState !==
+                    WorkspaceRecoveryStatus.REQUESTED &&
+                  workspace.recoveryState !== WorkspaceRecoveryStatus.FAILED
                 }
                 onClick={onRecover}
                 style={{
@@ -90,7 +92,7 @@ export const WorkspaceArchiveInfo = ({ workspace, onRecover }: Props) => {
                       return 'Recovery Complete';
 
                     case WorkspaceRecoveryStatus.FAILED:
-                      return 'Recovery Failed';
+                      return 'Retry Recovery';
 
                     default:
                       return 'Not Archived';
