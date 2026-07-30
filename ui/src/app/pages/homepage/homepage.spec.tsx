@@ -99,7 +99,7 @@ describe('HomepageComponent', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows migration banner for migration testing users', () => {
+  it('shows migration ended banner for migration testing users', () => {
     profileStore.set({
       profile: { ...profile, migrationTestingGroup: true },
       load,
@@ -109,10 +109,10 @@ describe('HomepageComponent', () => {
 
     component();
 
+    expect(screen.getByText('Migration has ended.')).toBeInTheDocument();
     expect(
-      screen.getByText('Migrate your Workspaces to Researcher Workbench 2.0')
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Migration has ended.')).not.toBeInTheDocument();
+      screen.queryByText('Migrate your Workspaces to Researcher Workbench 2.0')
+    ).not.toBeInTheDocument();
   });
 
   it('hides homepage banners when the feature flag is disabled', () => {

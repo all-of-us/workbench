@@ -22,7 +22,7 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ActiveWorkspaces } from './active-workspaces';
 import { LegacyWorkbenchEndedBanner } from './legacy-workbench-ended-banner';
 // import { VwbBanner } from './vwb-banner';
-import { VwbMigrationBanner } from './vwb-migration-banner';
+// import { VwbMigrationBanner } from './vwb-migration-banner';
 
 export const styles = reactStyles({
   pageWrapper: {
@@ -196,7 +196,7 @@ const ResourcesPanel = () => {
     {
       title: 'New User Orientation',
       subtitle: 'Onboard to the All of Us Researcher Workbench',
-      href: 'https://support.researchallofus.org/hc/en-us/articles/41981050556564-Researcher-Workbench-Getting-Started-Guide',
+      href: 'https://support.researchallofus.org/hc/en-us/articles/6088582662420-New-User-Orientation',
       icon: 'users',
     },
     {
@@ -277,12 +277,13 @@ const TutorialVideoPanel = () => {
 };
 
 const EventCalendarPanel = () => {
+  // Only use the public All of Us group calendar; the personal vumc.org calendar
+  // is private and causes a "no permission to view" error in the embed.
   const calendarUrl =
     'https://calendar.google.com/calendar/embed?height=600&wkst=1' +
-    '&showPrint=0&showCalendars=0' +
-    '&src=c2FtYW50aGFsLnN0ZXdhcnRAdnVtYy5vcmc' +
+    '&showPrint=0&showCalendars=0&showTz=0' +
     '&src=MjEydGJ2bWY2a3VpZXRpcXUxdGVxZGpjdmtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ' +
-    '&color=%23039be5&color=%233f51b5';
+    '&color=%233f51b5';
 
   return (
     <div style={styles.panel}>
@@ -399,11 +400,6 @@ export const Homepage = fp.flow(
     };
 
     render() {
-      const {
-        profileState: {
-          profile: { migrationTestingGroup },
-        },
-      } = this.props;
       const { userWorkspacesResponse } = this.state;
       const { enableVWBHomepageBanner } = serverConfigStore.get().config;
       const workspaces = userWorkspacesResponse?.items || [];
@@ -412,12 +408,7 @@ export const Homepage = fp.flow(
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
             <HomepageHeader />
-            {enableVWBHomepageBanner &&
-              (migrationTestingGroup ? (
-                <VwbMigrationBanner />
-              ) : (
-                <LegacyWorkbenchEndedBanner />
-              ))}
+            {enableVWBHomepageBanner && <LegacyWorkbenchEndedBanner />}
 
             <FlexRow style={styles.contentGrid}>
               <FlexColumn style={styles.leftColumn}>

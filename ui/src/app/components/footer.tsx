@@ -1,18 +1,14 @@
 import * as React from 'react';
 
 import { environment } from 'environments/environment';
-import {
-  LinkButton,
-  StyledExternalLink,
-  StyledRouterLink,
-} from 'app/components/buttons';
+import { StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SemiBoldHeader } from 'app/components/headers';
 import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
+import { supportUrls } from 'app/utils/zendesk';
 import aouFooterLogo from 'assets/images/all-of-us-logo-footer.svg';
 import nihFooterLogo from 'assets/images/nih-logo-footer.png';
 
@@ -227,21 +223,12 @@ const WorkbenchFooter = withUserProfile()(
                   >
                     Videos
                   </NewTabFooterAnchorTag>
-                  <LinkButton
-                    style={styles.footerAnchor}
-                    onClick={() => {
-                      tracker.ContactUs('Zendesk');
-                      openZendeskWidget(
-                        this.props.profileState.profile.givenName,
-                        this.props.profileState.profile.familyName,
-                        this.props.profileState.profile.username,
-                        this.props.profileState.profile.contactEmail
-                      );
-                    }}
-                    href='#'
+                  <NewTabFooterAnchorTag
+                    href={`mailto:${SUPPORT_EMAIL}`}
+                    analyticsFn={() => tracker.ContactUs('Email')}
                   >
                     Contact Us
-                  </LinkButton>
+                  </NewTabFooterAnchorTag>
                 </FlexColumn>
               </FlexRow>
             </FooterSection>

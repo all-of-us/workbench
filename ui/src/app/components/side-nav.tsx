@@ -18,7 +18,9 @@ import {
 } from 'app/utils/authorities';
 import { useNavigation } from 'app/utils/navigation';
 import { getProfilePictureSrc } from 'app/utils/profile-utils';
-import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
+
+const USER_SUPPORT_HUB_URL = 'https://support.researchallofus.org/hc/en-us';
+const SUPPORT_EMAIL = 'support@researchallofus.org';
 
 const styles = reactStyles({
   flex: {
@@ -278,14 +280,9 @@ export const SideNav = (props: SideNavProps) => {
 
   const { minimal, profile, onToggleSideNav } = props;
 
-  const openContactWidget = () => {
-    openZendeskWidget(
-      profile.givenName,
-      profile.familyName,
-      profile.username,
-      profile.contactEmail
-    );
-  };
+  const openSupportHub = () => window.open(USER_SUPPORT_HUB_URL, '_blank');
+  const openSupportEmail = () =>
+    window.open(`mailto:${SUPPORT_EMAIL}`, '_blank', 'noopener,noreferrer');
   const userOptionsSubMenu = [
     {
       label: 'Profile',
@@ -370,14 +367,13 @@ export const SideNav = (props: SideNavProps) => {
         icon='help'
         content='User Support Hub'
         onToggleSideNav={() => onToggleSideNav()}
-        parentOnClick={() => window.open(supportUrls.helpCenter, '_blank')}
-        disabled={!hasRegisteredTierAccess(profile)}
+        parentOnClick={openSupportHub}
       />
       <SideNavItem
         icon='envelope'
         content='Contact Us'
         onToggleSideNav={() => onToggleSideNav()}
-        parentOnClick={() => openContactWidget()}
+        parentOnClick={openSupportEmail}
       />
 
       {!minimal &&
