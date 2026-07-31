@@ -291,6 +291,8 @@ public class WorkbenchConfig {
     public boolean enableRasLoginGovLinking;
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
+    // The newest DUCC version users should sign going forward.
+    public Integer latestDuccVersion;
 
     public static class Renewal {
       // Days a user's module completion is good for until it expires

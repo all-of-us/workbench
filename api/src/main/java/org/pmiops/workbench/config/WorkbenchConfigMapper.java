@@ -43,6 +43,7 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "tanagraBaseUrl", source = "config.tanagra.baseUrl")
   @Mapping(target = "initialCreditsBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
+  @Mapping(target = "latestDuccVersion", source = "config.access.latestDuccVersion")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
   @Mapping(target = "enableGKEAppPausing", source = "config.featureFlags.enableGKEAppPausing")
