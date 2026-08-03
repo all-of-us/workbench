@@ -32,6 +32,7 @@ import { AdminVwbWorkspace } from 'app/pages/admin/vwb/admin-vwb-workspace';
 import { AdminVwbWorkspaceSearch } from 'app/pages/admin/vwb/admin-vwb-workspace-search';
 import { AdminWorkspace } from 'app/pages/admin/workspace/admin-workspace';
 import { AdminWorkspaceSearch } from 'app/pages/admin/workspace/admin-workspace-search';
+import { AdminWorkspacesWaitingForRetrieval } from 'app/pages/admin/workspace/admin-workspaces-waiting-for-retrieval';
 import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
@@ -165,6 +166,10 @@ const WorkspaceSearchAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminWorkspaceSearch);
+const AdminWorkspacesWaitingForRetrievalPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminWorkspacesWaitingForRetrieval);
 
 export const SignedInRoutes = () => {
   const location = useLocation();
@@ -296,6 +301,18 @@ export const SignedInRoutes = () => {
       >
         <WorkspaceSearchAdminPage
           routeData={{ title: 'Workspace Admin', minimizeChrome: true }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/admin/workspaces/waiting-for-retrieval'
+        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
+      >
+        <AdminWorkspacesWaitingForRetrievalPage
+          routeData={{
+            title: 'Workspaces Waiting for Retrieval',
+            minimizeChrome: true,
+          }}
         />
       </AppRoute>
       <AppRoute

@@ -130,7 +130,18 @@ const userAuditActive = () => {
 };
 
 const workspaceAdminActive = () => {
-  return window.location.pathname.startsWith('/admin/workspaces');
+  return (
+    window.location.pathname.startsWith('/admin/workspaces') &&
+    !window.location.pathname.startsWith(
+      '/admin/workspaces/waiting-for-retrieval'
+    )
+  );
+};
+
+const workspaceWaitingForRetrievalActive = () => {
+  return window.location.pathname.startsWith(
+    '/admin/workspaces/waiting-for-retrieval'
+  );
 };
 
 const vwbWorkspaceAdminActive = () => {
@@ -432,6 +443,15 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href='/admin/workspaces'
             active={workspaceAdminActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) &&
+        showAdminOptions && (
+          <SideNavItem
+            content='Waiting for Retrieval'
+            onToggleSideNav={() => onToggleSideNav()}
+            href='/admin/workspaces/waiting-for-retrieval'
+            active={workspaceWaitingForRetrievalActive()}
           />
         )}
       {environment.enableVwbAdmin &&
