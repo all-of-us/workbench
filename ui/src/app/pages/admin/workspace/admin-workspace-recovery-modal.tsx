@@ -1,9 +1,23 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Dropdown } from 'primereact/dropdown';
+import {
+  faCheckCircle,
+  faEdit,
+  faXmarkCircle,
+} from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Workspace, WorkspaceRecoveryStatus } from 'generated/fetch';
+import {
+  VwbPodDescription,
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspaceRecoveryStatus,
+  WorkspaceUserAdminView,
+} from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
+import { Button, Clickable } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
 import {
   Modal,
   ModalBody,
@@ -12,7 +26,10 @@ import {
 } from 'app/components/modals';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { rwToVwbResearchPurpose } from 'app/pages/admin/vwb/vwb-research-purpose-text';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import {
+  vwbWorkspaceAdminApi,
+  workspacesApi,
+} from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
@@ -101,6 +118,30 @@ const ReadOnlyField = ({ label, value }: { label: string; value?: string }) => (
   </div>
 );
 
+const PodField = ({
+  label,
+  value,
+  onEdit,
+}: {
+  label: string;
+  value?: string;
+  onEdit: () => void;
+}) => (
+  <div>
+    <span style={styles.fieldLabel}>
+      {label}{' '}
+      <span title='Update Recovery Pod' onClick={onEdit}>
+        {' '}
+        <FontAwesomeIcon icon={faEdit} style={{ cursor: 'pointer' }} />
+      </span>
+    </span>
+
+    <div style={styles.fieldValue} title={value || 'N/A'}>
+      {value || 'N/A'}
+    </div>
+  </div>
+);
+
 const statusDotStyle = (status: WorkspaceRecoveryStatus) => {
   let background = colors.disabled;
 
@@ -153,14 +194,57 @@ const StatusField = ({
 
 export const AdminWorkspaceRecoveryModal = ({
   workspace,
+  collaborators,
   onClose,
   reload,
 }: {
   workspace: Workspace;
+  collaborators: WorkspaceUserAdminView[];
   onClose: () => void;
   reload: () => void;
 }) => {
   const [startingRecovery, setStartingRecovery] = useState(false);
+  const [showUpdatePod, setShowUpdatePod] = useState(false);
+  const [updatedPodId, setUpdatedPodId] = useState<string>(
+    workspace.recoveryPodId
+  );
+  const [selectedPod, setSelectedPod] = useState<VwbPodDescription>();
+  const [selectedUser, setSelectedUser] = useState(
+    collaborators.find((c) => c.userModel.userName === workspace.creator)
+      ?.userModel.userName ?? collaborators[0]?.userModel.userName
+  );
+  const [pods, setPods] = useState<VwbPodDescription[]>([]);
+  const [loadingPods, setLoadingPods] = useState(false);
+
+  const getPods = async (username: string) => {
+    setLoadingPods(true);
+    try {
+      const podsResp = await vwbWorkspaceAdminApi().getPods(username);
+      setPods([
+        ...podsResp,
+        {
+          podId: 'b7a2-4ba8-9a8e-a2fb7f9b2c12-662ec7f0',
+          userFacingId: 'pod-dolbeew-7f5a-user',
+          description: 'Pod 2 for dolbeew@fake-research-aou.org',
+        },
+        {
+          podId: '4ba8-9a8e-a2fb7f9b2c12-662ec7f0-b7a2',
+          userFacingId: 'dolbeew-7f5a-user-pod',
+          description: 'Pod 3 for dolbeew@fake-research-aou.org',
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingPods(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedUser) {
+      getPods(selectedUser.split('@')[0]);
+    }
+  }, [selectedUser]);
 
   const handleRecovery = async () => {
     if (!workspace) {
@@ -186,6 +270,15 @@ export const AdminWorkspaceRecoveryModal = ({
     } finally {
       setStartingRecovery(false);
     }
+  };
+
+  const cancelPodUpdate = () => {
+    setShowUpdatePod(false);
+  };
+
+  const savePodUpdate = () => {
+    setShowUpdatePod(false);
+    setUpdatedPodId(selectedPod.podId);
   };
 
   const recoveryButtonLabel = startingRecovery
@@ -214,11 +307,57 @@ export const AdminWorkspaceRecoveryModal = ({
               label='Recovery status'
               status={workspace.recoveryState}
             />
-            <ReadOnlyField
-              label='Recovered VWB Workspace ID'
-              value={workspace.migratedVwbWorkspaceId || 'N/A'}
+            <PodField
+              label='Recovery Pod ID'
+              value={updatedPodId || 'Not set'}
+              onEdit={() => setShowUpdatePod(true)}
             />
           </div>
+          {showUpdatePod && (
+            <>
+              <span style={styles.fieldLabel}>Update Pod</span>
+              <FlexRow>
+                <Dropdown
+                  style={{ flex: 1, marginRight: '4px' }}
+                  value={selectedUser}
+                  options={collaborators
+                    .filter((c) => c.role === WorkspaceAccessLevel.OWNER)
+                    .map((c) => c.userModel.userName)}
+                  onChange={(e) => setSelectedUser(e.value)}
+                  disabled={loadingPods}
+                />
+                <Dropdown
+                  style={{ flex: 0.75, marginRight: '4px' }}
+                  value={selectedPod}
+                  options={pods}
+                  optionLabel='userFacingId'
+                  placeholder={loadingPods ? 'Loading pods...' : 'Select a pod'}
+                  onChange={(e) => setSelectedPod(e.value)}
+                  disabled={loadingPods}
+                />
+                <div style={{ flex: 0.1 }}>
+                  <Clickable title='Cancel' onClick={cancelPodUpdate}>
+                    {' '}
+                    <FontAwesomeIcon
+                      icon={faXmarkCircle}
+                      style={{ color: colors.danger, cursor: 'pointer' }}
+                    />
+                  </Clickable>
+                  <Clickable
+                    title='Save Pod'
+                    onClick={savePodUpdate}
+                    disabled={!selectedPod}
+                  >
+                    {' '}
+                    <FontAwesomeIcon
+                      icon={faCheckCircle}
+                      style={{ color: colors.success, cursor: 'pointer' }}
+                    />
+                  </Clickable>
+                </div>
+              </FlexRow>
+            </>
+          )}
         </div>
       </ModalBody>
 
@@ -229,7 +368,7 @@ export const AdminWorkspaceRecoveryModal = ({
         <Button
           type='primary'
           onClick={handleRecovery}
-          disabled={startingRecovery}
+          disabled={startingRecovery || showUpdatePod}
         >
           {recoveryButtonLabel}
         </Button>

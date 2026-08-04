@@ -115,10 +115,9 @@ export const AdminVwbPreprodMigration = (
     setLoadingPods(true);
     try {
       const podsResp = await vwbWorkspaceAdminApi().getPods(prodUsername);
-      setPods(podsResp);
       setPods([
         'nph-consortium-users',
-        ...(podsResp || []),
+        ...(podsResp.map(({ userFacingId }) => userFacingId) || []),
         'aou-system-billing-prod',
       ]);
     } catch (error) {

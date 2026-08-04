@@ -484,7 +484,7 @@ public class WorkspaceMigrationServiceImplTest {
     RuntimeException ex =
         assertThrows(
             RuntimeException.class,
-            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, RESEARCH_PURPOSE));
+            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, RESEARCH_PURPOSE, POD_ID));
 
     assertThat(ex.getMessage()).contains("Recovery failed to start");
     assertThat(ex.getCause()).isNotNull();
@@ -498,7 +498,7 @@ public class WorkspaceMigrationServiceImplTest {
     RuntimeException ex =
         assertThrows(
             RuntimeException.class,
-            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, RESEARCH_PURPOSE));
+            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, RESEARCH_PURPOSE, POD_ID));
 
     assertThat(ex.getMessage())
         .contains("Workspace recovery can only start when state is REQUESTED");

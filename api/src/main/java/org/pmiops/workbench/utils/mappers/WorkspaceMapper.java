@@ -82,6 +82,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "migratedVwbWorkspaceId", source = "dbWorkspace.migratedVwbWorkspaceId")
   @Mapping(target = "migrationState", source = "dbWorkspace.migrationState")
   @Mapping(target = "recoveryState", source = "dbWorkspace.recoveryState")
+  @Mapping(target = "recoveryPodId", source = "dbWorkspace.recoveryPodId")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
@@ -173,6 +174,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "migratedVwbWorkspaceId", source = "dbWorkspace.migratedVwbWorkspaceId")
   @Mapping(target = "migrationState", source = "dbWorkspace.migrationState")
   @Mapping(target = "recoveryState", source = "dbWorkspace.recoveryState")
+  @Mapping(target = "recoveryPodId", ignore = true)
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(
       DbWorkspace dbWorkspace, @Context InitialCreditsService initialCreditsService);

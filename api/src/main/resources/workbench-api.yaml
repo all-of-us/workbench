@@ -7184,7 +7184,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
+                  $ref: '#/components/schemas/VwbPodDescription'
 
         403:
           description: User doesn't have the RESEARCHER_DATA_VIEW authority
@@ -8366,6 +8366,8 @@ components:
       properties:
         researchPurpose:
           type: string
+        podId:
+          type: string
     SyncWorkspaceFoldersRequest:
       type: object
       properties:
@@ -8479,6 +8481,9 @@ components:
           $ref: '#/components/schemas/MigrationState'
         recoveryState:
           $ref: '#/components/schemas/WorkspaceRecoveryStatus'
+        recoveryPodId:
+          type: string
+          description: UUID of the VWB billing pod to use for archive recovery
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
