@@ -220,19 +220,7 @@ export const AdminWorkspaceRecoveryModal = ({
     setLoadingPods(true);
     try {
       const podsResp = await vwbWorkspaceAdminApi().getPods(username);
-      setPods([
-        ...podsResp,
-        {
-          podId: 'b7a2-4ba8-9a8e-a2fb7f9b2c12-662ec7f0',
-          userFacingId: 'pod-dolbeew-7f5a-user',
-          description: 'Pod 2 for dolbeew@fake-research-aou.org',
-        },
-        {
-          podId: '4ba8-9a8e-a2fb7f9b2c12-662ec7f0-b7a2',
-          userFacingId: 'dolbeew-7f5a-user-pod',
-          description: 'Pod 3 for dolbeew@fake-research-aou.org',
-        },
-      ]);
+      setPods(podsResp);
     } catch (error) {
       console.error(error);
     } finally {
