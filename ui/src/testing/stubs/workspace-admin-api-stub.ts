@@ -14,7 +14,10 @@ export class WorkspaceAdminApiStub extends WorkspaceAdminApi {
   getWorkspacesWaitingForRetrieval(): Promise<WorkspaceWaitingForRetrievalListResponse> {
     return Promise.resolve({
       items: this.workspaces
-        .filter((workspace) => workspace.recoveryState === WorkspaceRecoveryStatus.REQUESTED)
+        .filter(
+          (workspace) =>
+            workspace.recoveryState === WorkspaceRecoveryStatus.REQUESTED
+        )
         .map((workspace) => ({
           workspaceNamespace: workspace.namespace,
           workspaceName: workspace.displayName || workspace.name,

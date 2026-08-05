@@ -27,7 +27,8 @@ export const AdminWorkspacesWaitingForRetrieval = (
     try {
       setFetchError(false);
       setLoading(true);
-      const response = await workspaceAdminApi().getWorkspacesWaitingForRetrieval();
+      const response =
+        await workspaceAdminApi().getWorkspacesWaitingForRetrieval();
       setWorkspaceResponses(response.items || []);
     } catch (error) {
       console.error(error);
@@ -43,11 +44,9 @@ export const AdminWorkspacesWaitingForRetrieval = (
 
   const waitingWorkspaces = useMemo(
     () =>
-      workspaceResponses
-        .sort(
-          (a, b) =>
-            (b.lastModifiedTime || 0) - (a.lastModifiedTime || 0)
-        ),
+      workspaceResponses.sort(
+        (a, b) => (b.lastModifiedTime || 0) - (a.lastModifiedTime || 0)
+      ),
     [workspaceResponses]
   );
 
@@ -83,18 +82,24 @@ export const AdminWorkspacesWaitingForRetrieval = (
             <Column
               header='Namespace'
               body={(workspace: WorkspaceWaitingForRetrieval) => (
-                <StyledRouterLink path={`/admin/workspaces/${workspace.workspaceNamespace}`}>
+                <StyledRouterLink
+                  path={`/admin/workspaces/${workspace.workspaceNamespace}`}
+                >
                   {workspace.workspaceNamespace}
                 </StyledRouterLink>
               )}
             />
             <Column
               header='Workspace Name'
-              body={(workspace: WorkspaceWaitingForRetrieval) => workspace.workspaceName}
+              body={(workspace: WorkspaceWaitingForRetrieval) =>
+                workspace.workspaceName
+              }
             />
             <Column
               header='Creator'
-              body={(workspace: WorkspaceWaitingForRetrieval) => workspace.creator || 'N/A'}
+              body={(workspace: WorkspaceWaitingForRetrieval) =>
+                workspace.creator || 'N/A'
+              }
             />
             <Column
               header='Last Updated'
