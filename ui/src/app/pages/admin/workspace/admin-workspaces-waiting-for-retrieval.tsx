@@ -27,7 +27,7 @@ export const AdminWorkspacesWaitingForRetrieval = (
     try {
       setFetchError(false);
       setLoading(true);
-      const response = await workspacesApi().getWorkspaces();
+      const response = await workspacesApi().getWorkspacesWaitingForRetrieval();
       setWorkspaceResponses(response.items || []);
     } catch (error) {
       console.error(error);

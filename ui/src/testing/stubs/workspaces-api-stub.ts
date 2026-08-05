@@ -77,6 +77,19 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  getWorkspacesWaitingForRetrieval(): Promise<WorkspaceResponseListResponse> {
+    return new Promise<WorkspaceResponseListResponse>((resolve) => {
+      resolve({
+        items: this.workspaces
+          .filter((workspace) => workspace.recoveryState === 'REQUESTED')
+          .map((workspace) => ({
+            workspace: { ...workspace },
+            accessLevel: WorkspaceAccessLevel.OWNER,
+          })),
+      });
+    });
+  }
+
   createWorkspace(workspace?: Workspace): Promise<Workspace> {
     return new Promise((resolve) => {
       workspace.terraName = `created-${++this.newWorkspaceCount}`;

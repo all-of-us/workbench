@@ -100,6 +100,12 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  public List<WorkspaceResponse> getWorkspacesWaitingForRetrieval() {
+    logger.warn("getWorkspacesWaitingForRetrieval not implemented in VWB");
+    return Collections.emptyList();
+  }
+
+  @Override
   public List<String> getActiveWorkspaceNamespacesAsService() {
     logger.warn("getActiveWorkspaceNamespacesAsService not implemented in VWB");
     return Collections.emptyList();

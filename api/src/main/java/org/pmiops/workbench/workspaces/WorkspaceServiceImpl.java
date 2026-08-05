@@ -11,15 +11,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,12 +47,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
@@ -175,6 +163,40 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             workspaceDao, fireCloudService.listWorkspaces(), initialCreditsService)
         .stream()
         .filter(WorkspaceServiceImpl::filterToNonPublished)
+        .toList();
+  }
+
+  @Override
+  public List<WorkspaceResponse> getWorkspacesWaitingForRetrieval() {
+    final String requestedStatus = WorkspaceRecoveryStatus.REQUESTED.toString();
+    return workspaceDao.findAllByRecoveryState(requestedStatus).stream()
+        .map(
+            dbWorkspace -> {
+              try {
+                RawlsWorkspaceDetails rawlsWorkspaceDetails =
+                    fireCloudService
+                        .getWorkspaceAsService(
+                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+                        .getWorkspace();
+
+                return new WorkspaceResponse()
+                    .workspace(
+                        workspaceMapper.toApiWorkspace(
+                            dbWorkspace, rawlsWorkspaceDetails, initialCreditsService))
+                    .accessLevel(WorkspaceAccessLevel.OWNER);
+              } catch (Exception e) {
+                log.log(
+                    Level.WARNING,
+                    String.format(
+                        "Error loading workspace %s/%s for retrieval list: %s",
+                        dbWorkspace.getWorkspaceNamespace(),
+                        dbWorkspace.getFirecloudName(),
+                        e.getMessage()),
+                    e);
+                return null;
+              }
+            })
+        .filter(Objects::nonNull)
         .toList();
   }
 

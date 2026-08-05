@@ -1219,6 +1219,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Workspace'
       x-codegen-request-body-name: workspace
+  /v1/workspaces/waitingForRetrieval:
+    get:
+      tags:
+      - workspaces
+      description: Returns all workspaces with recovery state REQUESTED.
+      operationId: getWorkspacesWaitingForRetrieval
+      responses:
+        200:
+          description: A list of workspaces waiting for retrieval.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponseListResponse'
   /v1/workspaces/createAsync:
     post:
       tags:
