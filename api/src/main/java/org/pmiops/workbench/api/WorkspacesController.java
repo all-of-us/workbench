@@ -860,7 +860,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String namespace, String terraName, StartWorkspaceRecoveryRequest request) {
 
     workspaceMigrationService.startWorkspaceRecovery(
-        namespace, terraName, request.getResearchPurpose());
+        namespace, terraName, request.getResearchPurpose(), request.getPodId());
 
     return ResponseEntity.ok().build();
   }

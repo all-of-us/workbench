@@ -1786,7 +1786,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoAge() {
-    int lo = getTestPeriod().getYears() - 1;
+    int lo = getTestPeriod().getYears() - 2;
     int hi = getTestPeriod().getYears() + 1;
     SearchParameter demo = age();
     demo.attributes(

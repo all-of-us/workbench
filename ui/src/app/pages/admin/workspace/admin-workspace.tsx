@@ -192,6 +192,7 @@ const AdminWorkspaceImpl = (props: Props) => {
           {showRecoveryModal && (
             <AdminWorkspaceRecoveryModal
               workspace={workspace}
+              collaborators={collaborators}
               onClose={() => setShowRecoveryModal(false)}
               reload={populateWorkspaceDetails}
             />

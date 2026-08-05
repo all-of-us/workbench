@@ -13,13 +13,13 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.PreprodMigrationRequest;
 import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.VwbAodRequest;
+import org.pmiops.workbench.model.VwbPodDescription;
 import org.pmiops.workbench.model.VwbWorkspaceAdminView;
 import org.pmiops.workbench.model.VwbWorkspaceAuditLog;
 import org.pmiops.workbench.model.VwbWorkspaceListResponse;
 import org.pmiops.workbench.model.VwbWorkspaceSearchParamType;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
-import org.pmiops.workbench.vwb.user.model.PodDescription;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
@@ -117,13 +117,18 @@ public class VwbWorkspaceAdminController implements VwbWorkspaceAdminApiDelegate
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<String>> getPods(String username) {
+  public ResponseEntity<List<VwbPodDescription>> getPods(String username) {
     final String userEmail =
         String.format(
             "%s@%s", username, workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
     return ResponseEntity.ok(
         vwbUserService.getUserPods(userEmail).stream()
-            .map(PodDescription::getUserFacingId)
+            .map(
+                podDescription ->
+                    new VwbPodDescription()
+                        .podId(podDescription.getPodId())
+                        .userFacingId(podDescription.getUserFacingId())
+                        .description(podDescription.getDescription()))
             .toList());
   }
 

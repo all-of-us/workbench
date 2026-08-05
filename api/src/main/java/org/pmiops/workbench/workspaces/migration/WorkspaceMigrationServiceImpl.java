@@ -1020,7 +1020,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void startWorkspaceRecovery(String namespace, String terraName, String researchPurpose) {
+  public void startWorkspaceRecovery(
+      String namespace, String terraName, String researchPurpose, String podId) {
 
     Duration bucketDelay = Duration.ofSeconds(10);
 
@@ -1080,8 +1081,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
 
       String resolvedPodId =
-          dbWorkspace.getRecoveryPodId() != null
-              ? dbWorkspace.getRecoveryPodId()
+          podId != null
+              ? podId
               : Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
                   .map(DbUser::getVwbUserPod)
                   .map(DbVwbUserPod::getVwbPodId)
