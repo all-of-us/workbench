@@ -485,12 +485,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         new WorkspaceResponseListResponse().items(workspaceService.listWorkspaces()));
   }
 
-  @Override
-  public ResponseEntity<WorkspaceResponseListResponse> getWorkspacesWaitingForRetrieval() {
-    return ResponseEntity.ok(
-        new WorkspaceResponseListResponse()
-            .items(workspaceService.getWorkspacesWaitingForRetrieval()));
-  }
 
   @Override
   public ResponseEntity<Boolean> notebookTransferComplete(

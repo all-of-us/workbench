@@ -166,39 +166,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .toList();
   }
 
-  @Override
-  public List<WorkspaceResponse> getWorkspacesWaitingForRetrieval() {
-    final String requestedStatus = WorkspaceRecoveryStatus.REQUESTED.toString();
-    return workspaceDao.findAllByRecoveryState(requestedStatus).stream()
-        .map(
-            dbWorkspace -> {
-              try {
-                RawlsWorkspaceDetails rawlsWorkspaceDetails =
-                    fireCloudService
-                        .getWorkspaceAsService(
-                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-                        .getWorkspace();
-
-                return new WorkspaceResponse()
-                    .workspace(
-                        workspaceMapper.toApiWorkspace(
-                            dbWorkspace, rawlsWorkspaceDetails, initialCreditsService))
-                    .accessLevel(WorkspaceAccessLevel.OWNER);
-              } catch (Exception e) {
-                log.log(
-                    Level.WARNING,
-                    String.format(
-                        "Error loading workspace %s/%s for retrieval list: %s",
-                        dbWorkspace.getWorkspaceNamespace(),
-                        dbWorkspace.getFirecloudName(),
-                        e.getMessage()),
-                    e);
-                return null;
-              }
-            })
-        .filter(Objects::nonNull)
-        .toList();
-  }
 
   private static boolean filterToNonPublished(WorkspaceResponse response) {
     return response.getAccessLevel() == WorkspaceAccessLevel.OWNER

@@ -57,6 +57,8 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceRecoveryStatus;
+import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
@@ -324,6 +326,25 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
     return actionAuditQueryService.queryEventsForWorkspace(
         workspaceDatabaseId, limit, after, before);
+  }
+
+  @Override
+  public List<WorkspaceWaitingForRetrieval> getWorkspacesWaitingForRetrieval() {
+    return workspaceDao.findAllByRecoveryState(WorkspaceRecoveryStatus.REQUESTED.toString()).stream()
+        .map(
+            dbWorkspace ->
+                new WorkspaceWaitingForRetrieval()
+                    .workspaceNamespace(dbWorkspace.getWorkspaceNamespace())
+                    .workspaceName(dbWorkspace.getName())
+                    .creator(
+                        Optional.ofNullable(dbWorkspace.getCreator())
+                            .map(DbUser::getUsername)
+                            .orElse(null))
+                    .lastModifiedTime(
+                        Optional.ofNullable(dbWorkspace.getLastModifiedTime())
+                            .map(ts -> ts.getTime())
+                            .orElse(null)))
+        .toList();
   }
 
   @Override

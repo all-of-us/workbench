@@ -36,7 +36,6 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> listWorkspaces();
 
-  List<WorkspaceResponse> getWorkspacesWaitingForRetrieval();
 
   List<String> getActiveWorkspaceNamespacesAsService();
 
