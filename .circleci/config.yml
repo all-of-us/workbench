@@ -84,7 +84,7 @@ executors:
   # due to garbage collection timeout. This should be reassessed after upgrading to Junit 5. See RW-6460.
   api-unit-test-executor:
     <<: *workbench-executor
-    resource_class: medium+
+    resource_class: large
     environment:
       <<: *env-default
       # The medium+ machine has 6GB. The Gradle build JVM (controlled by GRADLE_OPTS) and the
