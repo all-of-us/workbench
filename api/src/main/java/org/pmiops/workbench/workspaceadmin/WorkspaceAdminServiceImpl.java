@@ -58,8 +58,8 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceRecoveryStatus;
-import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
+import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -330,7 +330,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public List<WorkspaceWaitingForRetrieval> getWorkspacesWaitingForRetrieval() {
-    return workspaceDao.findAllByRecoveryState(WorkspaceRecoveryStatus.REQUESTED.toString()).stream()
+    return workspaceDao
+        .findAllByRecoveryState(WorkspaceRecoveryStatus.REQUESTED.toString())
+        .stream()
         .map(
             dbWorkspace ->
                 new WorkspaceWaitingForRetrieval()

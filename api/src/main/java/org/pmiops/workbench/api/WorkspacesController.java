@@ -485,7 +485,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         new WorkspaceResponseListResponse().items(workspaceService.listWorkspaces()));
   }
 
-
   @Override
   public ResponseEntity<Boolean> notebookTransferComplete(
       String workspaceNamespace, String workspaceTerraName) {

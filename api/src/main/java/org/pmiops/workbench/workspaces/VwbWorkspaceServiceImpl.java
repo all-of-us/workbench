@@ -99,7 +99,6 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
     return Collections.emptyList();
   }
 
-
   @Override
   public List<String> getActiveWorkspaceNamespacesAsService() {
     logger.warn("getActiveWorkspaceNamespacesAsService not implemented in VWB");

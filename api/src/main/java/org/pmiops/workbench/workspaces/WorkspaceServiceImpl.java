@@ -166,7 +166,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .toList();
   }
 
-
   private static boolean filterToNonPublished(WorkspaceResponse response) {
     return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
         || response.getAccessLevel() == WorkspaceAccessLevel.WRITER

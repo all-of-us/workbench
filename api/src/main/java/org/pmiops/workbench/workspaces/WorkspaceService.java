@@ -36,7 +36,6 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> listWorkspaces();
 
-
   List<String> getActiveWorkspaceNamespacesAsService();
 
   List<String> getOrphanedWorkspaceNamespacesAsService();
