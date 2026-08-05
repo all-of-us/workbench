@@ -17,6 +17,7 @@ import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceWaitingForRetrievalListResponse;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +77,15 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(
         workspaceAdminService.getWorkspaceAuditLogEntries(
             workspaceNamespace, limit, afterMillis, beforeMillisNullable));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<WorkspaceWaitingForRetrievalListResponse>
+      getWorkspacesWaitingForRetrieval() {
+    return ResponseEntity.ok(
+        new WorkspaceWaitingForRetrievalListResponse()
+            .items(workspaceAdminService.getWorkspacesWaitingForRetrieval()));
   }
 
   @Override

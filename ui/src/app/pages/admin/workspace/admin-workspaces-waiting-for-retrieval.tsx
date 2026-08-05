@@ -3,20 +3,20 @@ import { useEffect, useMemo, useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { WorkspaceRecoveryStatus, WorkspaceResponse } from 'generated/fetch';
+import { WorkspaceWaitingForRetrieval } from 'generated/fetch';
 
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { ListPageHeader } from 'app/components/headers';
 import { Error as ErrorMessage } from 'app/components/inputs';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 
 export const AdminWorkspacesWaitingForRetrieval = (
   spinnerProps: WithSpinnerOverlayProps
 ) => {
   const [workspaceResponses, setWorkspaceResponses] = useState<
-    WorkspaceResponse[]
+    WorkspaceWaitingForRetrieval[]
   >([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(false);
@@ -27,7 +27,8 @@ export const AdminWorkspacesWaitingForRetrieval = (
     try {
       setFetchError(false);
       setLoading(true);
-      const response = await workspacesApi().getWorkspaces();
+      const response =
+        await workspaceAdminApi().getWorkspacesWaitingForRetrieval();
       setWorkspaceResponses(response.items || []);
     } catch (error) {
       console.error(error);
@@ -43,16 +44,9 @@ export const AdminWorkspacesWaitingForRetrieval = (
 
   const waitingWorkspaces = useMemo(
     () =>
-      workspaceResponses
-        .filter(
-          ({ workspace }) =>
-            workspace.recoveryState === WorkspaceRecoveryStatus.REQUESTED
-        )
-        .sort(
-          (a, b) =>
-            (b.workspace.lastModifiedTime || 0) -
-            (a.workspace.lastModifiedTime || 0)
-        ),
+      workspaceResponses.sort(
+        (a, b) => (b.lastModifiedTime || 0) - (a.lastModifiedTime || 0)
+      ),
     [workspaceResponses]
   );
 
@@ -87,29 +81,29 @@ export const AdminWorkspacesWaitingForRetrieval = (
           >
             <Column
               header='Namespace'
-              body={({ workspace }: WorkspaceResponse) => (
+              body={(workspace: WorkspaceWaitingForRetrieval) => (
                 <StyledRouterLink
-                  path={`/admin/workspaces/${workspace.namespace}`}
+                  path={`/admin/workspaces/${workspace.workspaceNamespace}`}
                 >
-                  {workspace.namespace}
+                  {workspace.workspaceNamespace}
                 </StyledRouterLink>
               )}
             />
             <Column
               header='Workspace Name'
-              body={({ workspace }: WorkspaceResponse) =>
-                workspace.displayName || workspace.name
+              body={(workspace: WorkspaceWaitingForRetrieval) =>
+                workspace.workspaceName
               }
             />
             <Column
               header='Creator'
-              body={({ workspace }: WorkspaceResponse) =>
-                workspace.creatorUser?.userName || workspace.creator || 'N/A'
+              body={(workspace: WorkspaceWaitingForRetrieval) =>
+                workspace.creator || 'N/A'
               }
             />
             <Column
               header='Last Updated'
-              body={({ workspace }: WorkspaceResponse) =>
+              body={(workspace: WorkspaceWaitingForRetrieval) =>
                 workspace.lastModifiedTime
                   ? new Date(workspace.lastModifiedTime).toLocaleString()
                   : 'N/A'

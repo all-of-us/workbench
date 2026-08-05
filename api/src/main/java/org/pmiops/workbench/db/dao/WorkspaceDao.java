@@ -212,4 +212,10 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "and w.workspaceId not in (SELECT legacyWorkspaceId from DbWorkspaceBucketArchive )"
           + "order by w.lastModifiedTime asc limit 1")
   WorkspaceArchiveView findNextLowRiskWorkspaceToArchive();
+
+  @Query(
+      "SELECT w FROM DbWorkspace w "
+          + "WHERE w.recoveryState = :recoveryState "
+          + "ORDER BY w.lastModifiedTime DESC")
+  List<DbWorkspace> findAllByRecoveryState(@Param("recoveryState") String recoveryState);
 }

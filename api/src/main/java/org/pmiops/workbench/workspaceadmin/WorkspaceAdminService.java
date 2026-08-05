@@ -15,6 +15,7 @@ import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 
 public interface WorkspaceAdminService {
   Optional<DbWorkspace> getFirstWorkspaceByNamespace(String workspaceNamespace);
@@ -37,6 +38,8 @@ public interface WorkspaceAdminService {
       Integer limit,
       Long afterMillis,
       @Nullable Long beforeMillisNullable);
+
+  List<WorkspaceWaitingForRetrieval> getWorkspacesWaitingForRetrieval();
 
   String getReadOnlyNotebook(
       String workspaceNamespace, String notebookName, AccessReason accessReason);

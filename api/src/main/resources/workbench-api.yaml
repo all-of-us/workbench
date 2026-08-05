@@ -1761,6 +1761,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
+  /v1/admin/workspaces/waitingForRetrieval:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Returns all workspaces with recovery state REQUESTED.
+      operationId: getWorkspacesWaitingForRetrieval
+      responses:
+        200:
+          description: A list of workspaces waiting for retrieval.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceWaitingForRetrievalListResponse'
   /v1/admin/workspaces/{workspaceNamespace}/audit:
     get:
       tags:
@@ -8391,6 +8404,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WorkspaceResponse'
+    WorkspaceWaitingForRetrievalListResponse:
+      required:
+      - items
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceWaitingForRetrieval'
+    WorkspaceWaitingForRetrieval:
+      required:
+      - workspaceNamespace
+      - workspaceName
+      type: object
+      properties:
+        workspaceNamespace:
+          type: string
+        workspaceName:
+          type: string
+        creator:
+          type: string
+        lastModifiedTime:
+          type: integer
+          format: int64
     Workspace:
       required:
       - name
