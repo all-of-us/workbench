@@ -10,6 +10,24 @@ import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import migrationEnded from 'assets/images/migration-ended.jpg';
 
+export const shouldShowDuccUpdateBanner = (
+  duccSignedVersion: number | undefined,
+  latestDuccVersion: number | undefined,
+  currentDuccVersions: number[] = []
+): boolean => {
+  const fallbackLatestVersion =
+    currentDuccVersions.length > 0
+      ? Math.max(...currentDuccVersions)
+      : undefined;
+  const resolvedLatestVersion = latestDuccVersion ?? fallbackLatestVersion;
+
+  return (
+    typeof duccSignedVersion === 'number' &&
+    typeof resolvedLatestVersion === 'number' &&
+    duccSignedVersion < resolvedLatestVersion
+  );
+};
+
 const styles = reactStyles({
   banner: {
     background: colors.banner,
@@ -64,13 +82,13 @@ export const DuccUpdateBanner = () => {
   const { profile } = useStore(profileStore);
   const { config } = useStore(serverConfigStore);
   const [navigate] = useNavigation();
-  const currentDuccVersions = config?.currentDuccVersions || [];
-  const showBanner =
-    !!profile &&
-    currentDuccVersions.length > 0 &&
-    !currentDuccVersions.includes(profile.duccSignedVersion);
+  const showBanner = shouldShowDuccUpdateBanner(
+    profile?.duccSignedVersion,
+    config?.latestDuccVersion,
+    config?.currentDuccVersions || []
+  );
 
-  // Hide while profile/config are loading or user has already signed a current DUCC version.
+  // Hide while profile/config are loading or user is already on latest DUCC.
   if (!showBanner) {
     return null;
   }
@@ -79,11 +97,11 @@ export const DuccUpdateBanner = () => {
     <FlexRow role='alert' aria-label='Action required: updated Data User Code of Conduct' style={styles.banner}>
       <FlexColumn style={styles.textColumn}>
         <div>
-          <Header style={styles.title}>Updated Data User Code of Conduct Required</Header>
+          <Header style={styles.title}>Updated Data User Code of Conduct Available</Header>
 
           <SmallHeader style={styles.body}>
-            A revised Data User Code of Conduct is now available. Please review and sign the
-            updated agreement to continue accessing Researcher Workbench features.
+            A revised Data User Code of Conduct is available. Please review and sign the updated
+            agreement.
           </SmallHeader>
 
           <FlexRow style={styles.buttonRow}>

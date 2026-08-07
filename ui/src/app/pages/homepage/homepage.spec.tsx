@@ -63,6 +63,8 @@ describe('HomepageComponent', () => {
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
+        currentDuccVersions: [profile.duccSignedVersion],
+        latestDuccVersion: profile.duccSignedVersion,
         enableVWBHomepageBanner: true,
         restrictLegacyAccess: true,
       },
@@ -128,6 +130,45 @@ describe('HomepageComponent', () => {
     expect(
       screen.queryByText('Migrate your Workspaces to Researcher Workbench 2.0')
     ).not.toBeInTheDocument();
+    expect(screen.queryByText('Migration has ended.')).not.toBeInTheDocument();
+  });
+
+  it('shows DUCC update banner when signed version is below latest and hides migration banner', () => {
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        currentDuccVersions: [profile.duccSignedVersion, profile.duccSignedVersion + 1],
+        latestDuccVersion: profile.duccSignedVersion + 1,
+      },
+    });
+
+    component();
+
+    expect(
+      screen.getByText('Updated Data User Code of Conduct Available')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'A revised Data User Code of Conduct is available. Please review and sign the updated agreement.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Migration has ended.')).not.toBeInTheDocument();
+  });
+
+  it('shows DUCC update banner when latestDuccVersion is absent and current versions include newer DUCC', () => {
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        currentDuccVersions: [profile.duccSignedVersion, profile.duccSignedVersion + 1],
+        latestDuccVersion: undefined,
+      },
+    });
+
+    component();
+
+    expect(
+      screen.getByText('Updated Data User Code of Conduct Available')
+    ).toBeInTheDocument();
     expect(screen.queryByText('Migration has ended.')).not.toBeInTheDocument();
   });
 

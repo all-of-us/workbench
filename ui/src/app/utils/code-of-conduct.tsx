@@ -12,8 +12,14 @@ export const getCurrentDUCCVersions = (): number[] =>
  * This may not be the only DUCC version considered to be current for access tier membership requirements;
  * use getCurrentDUCCVersions() to retrieve the full list.
  */
-export const getLiveDUCCVersion = (): number =>
-  Math.max(...getCurrentDUCCVersions());
+export const getLiveDUCCVersion = (): number => {
+  const latestDuccVersion = (serverConfigStore.get().config as any)
+    ?.latestDuccVersion as number | undefined;
+  if (latestDuccVersion != null) {
+    return latestDuccVersion;
+  }
+  return Math.max(...getCurrentDUCCVersions());
+};
 
 export const isCurrentDUCCVersion = (
   duccSignedVersion: number | undefined
@@ -45,6 +51,11 @@ const VERSIONS: VersionInfo[] = [
     version: 6,
     path: '/data-user-code-of-conduct-v6.html',
     height: '175em', // no inner vertical scrollbars at min width, via trial and error
+  },
+  {
+    version: 7,
+    path: '/data-user-code-of-conduct-v7.html',
+    height: '175em',
   },
 ];
 
