@@ -5,7 +5,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
+
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import migrationEnded from 'assets/images/migration-ended.jpg';
@@ -114,11 +114,7 @@ export const DuccUpdateBanner = () => {
             <Button
               aria-label='Review updated Data User Code of Conduct'
               style={styles.reviewButton}
-              onClick={() =>
-                navigate([DATA_ACCESS_REQUIREMENTS_PATH], {
-                  queryParams: { duccUpgrade: '1' },
-                })
-              }
+              onClick={() => navigate(['data-code-of-conduct'])}
             >
               Review DUCC
             </Button>
