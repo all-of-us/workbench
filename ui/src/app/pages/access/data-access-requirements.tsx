@@ -638,7 +638,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    const duccUpgradeRequested = urlParams.get('duccUpgrade') === '1';
 
     const pageModeParam = urlParams.get('pageMode');
     const pageMode =
@@ -662,7 +661,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const resolvedLatestDuccVersion =
       latestDuccVersion ?? fallbackLatestDuccVersion;
     const shouldFocusDuccUpgrade =
-      duccUpgradeRequested &&
       typeof profile?.duccSignedVersion === 'number' &&
       typeof resolvedLatestDuccVersion === 'number' &&
       profile.duccSignedVersion < resolvedLatestDuccVersion;
