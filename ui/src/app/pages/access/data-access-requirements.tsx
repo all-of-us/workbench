@@ -670,7 +670,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       pageMode === DARPageMode.ANNUAL_RENEWAL &&
       isCompliant(moduleStatus, profile.duccSignedVersion) &&
       !isRenewalCompleteForModule(moduleStatus, profile.duccSignedVersion);
-    const showCompletionBanner = profile && !nextRequired && !ctNeedsRenewal;
+    const showCompletionBanner =
+      profile &&
+      !nextRequired &&
+      !ctNeedsRenewal &&
+      profile.duccSignedVersion === resolvedLatestDuccVersion;
 
     // CT+ access rule:
     // - Card is always visible during initial registration
