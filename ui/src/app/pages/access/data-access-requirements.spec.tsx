@@ -1113,7 +1113,6 @@ describe('DataAccessRequirements', () => {
     'Should display ineligible CT Compliance Training module in CT card ' +
       'when user is not eligible for CT',
     async () => {
-
       profileStore.set({
         profile: {
           ...ProfileStubVariables.PROFILE_STUB,
