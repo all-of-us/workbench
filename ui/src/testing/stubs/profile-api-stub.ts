@@ -28,7 +28,7 @@ export class ProfileStubVariables {
     authorities: [],
     initialCreditsUsage: 1.23,
     initialCreditsLimit: 34.56,
-    duccSignedVersion: 4,
+    duccSignedVersion: 7,
     duccSignedInitials: 'abc',
     duccCompletionTimeEpochMillis: 1,
     address: {
