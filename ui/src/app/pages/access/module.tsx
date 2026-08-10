@@ -70,8 +70,23 @@ export const Module = (props: ModuleProps) => {
     status,
     style,
   } = props;
-  const { enableRasIdMeLinking, blockComplianceTraining } =
+  const {
+    enableRasIdMeLinking,
+    blockComplianceTraining,
+    currentDuccVersions,
+    latestDuccVersion,
+  } =
     serverConfigStore.get().config;
+
+  const isModuleCompliant = isCompliant(status, profile.duccSignedVersion);
+  const fallbackLatestDuccVersion =
+    currentDuccVersions?.length > 0 ? Math.max(...currentDuccVersions) : undefined;
+  const resolvedLatestDuccVersion = latestDuccVersion ?? fallbackLatestDuccVersion;
+  const shouldShowCompletionDate =
+    isModuleCompliant &&
+    (moduleName !== AccessModule.DATA_USER_CODE_OF_CONDUCT ||
+      typeof resolvedLatestDuccVersion !== 'number' ||
+      profile.duccSignedVersion >= resolvedLatestDuccVersion);
 
   const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
@@ -119,7 +134,7 @@ export const Module = (props: ModuleProps) => {
       >
         <ModuleIcon
           {...{ moduleName, eligible }}
-          completedOrBypassed={isCompliant(status, profile.duccSignedVersion)}
+          completedOrBypassed={isModuleCompliant}
         />
         <FlexColumn style={{ flex: 1 }}>
           <div
@@ -143,7 +158,7 @@ export const Module = (props: ModuleProps) => {
               }}
             />
           </div>
-          {isCompliant(status, profile.duccSignedVersion) && (
+          {shouldShowCompletionDate && (
             <div style={styles.moduleDate}>
               {getStatusText(status, profile.duccSignedVersion)}
             </div>
