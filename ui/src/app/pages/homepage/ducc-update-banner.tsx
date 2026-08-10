@@ -5,7 +5,6 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import migrationEnded from 'assets/images/migration-ended.jpg';
