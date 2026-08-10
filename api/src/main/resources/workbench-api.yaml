@@ -5197,6 +5197,29 @@ paths:
           description: Successfully removed the Institution-specific user instructions
             to be sent by email after registration.
           content: {}
+  /v1/institutions/addUsersToGroup:
+    post:
+      tags:
+        - institution
+      description: Adds all users for an institution to the specified user group
+        sent by email after registration. Requires INSTITUTION_ADMIN authority.
+      operationId: setInstitutionUserInstructions
+      requestBody:
+        description: Text to include in an email sent to users for an Institution
+          after they are registered.
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/InstitutionUserInstructions'
+        required: false
+      responses:
+        200:
+          description: Successfully set or updated the Institution-specific user instructions
+            to be sent by email after registration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionUserInstructions'
   /v1/workspaces/vwb:
     get:
       tags:
