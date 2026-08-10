@@ -2991,6 +2991,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .contains(new DemoChartInfo().name("MALE").ageRange("18-44").count(1L)))
         .isTrue();
   }
+
   private void assertCurrentAgeDemographics(DemoChartInfoListResponse response) {
     final String person1AgeRange = getAgeRange(LocalDate.of(1981, 8, 1));
     final String person99AgeRange = getAgeRange(LocalDate.of(1970, 2, 17));
@@ -3000,8 +3001,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       assertThat(
               response
                   .getItems()
-                  .contains(
-                      new DemoChartInfo().name("MALE").ageRange(person1AgeRange).count(2L)))
+                  .contains(new DemoChartInfo().name("MALE").ageRange(person1AgeRange).count(2L)))
           .isTrue();
       return;
     }
