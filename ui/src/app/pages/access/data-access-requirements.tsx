@@ -631,11 +631,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         initialCreditsValidityPeriodDays,
         initialCreditsExtensionPeriodDays,
         enableCTPlusCards,
+        currentDuccVersions,
+        latestDuccVersion,
       },
     } = useStore(serverConfigStore);
 
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const duccUpgradeRequested = urlParams.get('duccUpgrade') === '1';
 
     const pageModeParam = urlParams.get('pageMode');
     const pageMode =
@@ -652,6 +655,17 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       profile,
       pageMode
     );
+    const fallbackLatestDuccVersion =
+      currentDuccVersions?.length > 0
+        ? Math.max(...currentDuccVersions)
+        : undefined;
+    const resolvedLatestDuccVersion =
+      latestDuccVersion ?? fallbackLatestDuccVersion;
+    const shouldFocusDuccUpgrade =
+      duccUpgradeRequested &&
+      typeof profile?.duccSignedVersion === 'number' &&
+      typeof resolvedLatestDuccVersion === 'number' &&
+      profile.duccSignedVersion < resolvedLatestDuccVersion;
 
     const moduleStatus = getAccessModuleStatusByName(profile, ctModule);
     const ctNeedsRenewal =
@@ -794,6 +808,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
+      if (shouldFocusDuccUpgrade) {
+        setFocusedModule(AccessModule.DATA_USER_CODE_OF_CONDUCT);
+        setActiveModules([AccessModule.DATA_USER_CODE_OF_CONDUCT]);
+        return;
+      }
       setFocusedModule(nextFocused);
       setActiveModules(
         fp.flow(
@@ -801,7 +820,21 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
           fp.uniq
         )([nextFocused, nextRequired])
       );
-    }, [nextFocused, nextRequired]);
+    }, [nextFocused, nextRequired, shouldFocusDuccUpgrade]);
+
+    useEffect(() => {
+      if (!shouldFocusDuccUpgrade) {
+        return;
+      }
+      const scrollToDucc = () =>
+        document
+          .getElementById('ducc-card')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Delay scroll until cards are rendered and layout is stable.
+      const timeoutId = window.setTimeout(scrollToDucc, 0);
+      return () => window.clearTimeout(timeoutId);
+    }, [shouldFocusDuccUpgrade]);
 
     const daysRemaining = maybeDaysRemaining(profile);
     const hasExpired = daysRemaining && daysRemaining <= 0;

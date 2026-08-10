@@ -108,7 +108,11 @@ export const DuccUpdateBanner = () => {
             <Button
               aria-label='Review updated Data User Code of Conduct'
               style={styles.reviewButton}
-              onClick={() => navigate([DATA_ACCESS_REQUIREMENTS_PATH])}
+              onClick={() =>
+                navigate([DATA_ACCESS_REQUIREMENTS_PATH], {
+                  queryParams: { duccUpgrade: '1' },
+                })
+              }
             >
               Review DUCC
             </Button>
