@@ -137,7 +137,10 @@ describe('HomepageComponent', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        currentDuccVersions: [profile.duccSignedVersion, profile.duccSignedVersion + 1],
+        currentDuccVersions: [
+          profile.duccSignedVersion,
+          profile.duccSignedVersion + 1,
+        ],
         latestDuccVersion: profile.duccSignedVersion + 1,
       },
     });
@@ -159,7 +162,10 @@ describe('HomepageComponent', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        currentDuccVersions: [profile.duccSignedVersion, profile.duccSignedVersion + 1],
+        currentDuccVersions: [
+          profile.duccSignedVersion,
+          profile.duccSignedVersion + 1,
+        ],
         latestDuccVersion: undefined,
       },
     });

@@ -75,13 +75,15 @@ export const Module = (props: ModuleProps) => {
     blockComplianceTraining,
     currentDuccVersions,
     latestDuccVersion,
-  } =
-    serverConfigStore.get().config;
+  } = serverConfigStore.get().config;
 
   const isModuleCompliant = isCompliant(status, profile.duccSignedVersion);
   const fallbackLatestDuccVersion =
-    currentDuccVersions?.length > 0 ? Math.max(...currentDuccVersions) : undefined;
-  const resolvedLatestDuccVersion = latestDuccVersion ?? fallbackLatestDuccVersion;
+    currentDuccVersions?.length > 0
+      ? Math.max(...currentDuccVersions)
+      : undefined;
+  const resolvedLatestDuccVersion =
+    latestDuccVersion ?? fallbackLatestDuccVersion;
   const shouldShowCompletionDate =
     isModuleCompliant &&
     (moduleName !== AccessModule.DATA_USER_CODE_OF_CONDUCT ||

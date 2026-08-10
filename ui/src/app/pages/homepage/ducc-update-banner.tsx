@@ -94,14 +94,20 @@ export const DuccUpdateBanner = () => {
   }
 
   return (
-    <FlexRow role='alert' aria-label='Action required: updated Data User Code of Conduct' style={styles.banner}>
+    <FlexRow
+      role='alert'
+      aria-label='Action required: updated Data User Code of Conduct'
+      style={styles.banner}
+    >
       <FlexColumn style={styles.textColumn}>
         <div>
-          <Header style={styles.title}>Updated Data User Code of Conduct Available</Header>
+          <Header style={styles.title}>
+            Updated Data User Code of Conduct Available
+          </Header>
 
           <SmallHeader style={styles.body}>
-            A revised Data User Code of Conduct is available. Please review and sign the updated
-            agreement.
+            A revised Data User Code of Conduct is available. Please review and
+            sign the updated agreement.
           </SmallHeader>
 
           <FlexRow style={styles.buttonRow}>
@@ -121,9 +127,12 @@ export const DuccUpdateBanner = () => {
       </FlexColumn>
 
       <FlexColumn style={styles.imageColumn}>
-        <img src={migrationEnded} alt='Homepage notification illustration' style={styles.image} />
+        <img
+          src={migrationEnded}
+          alt='Homepage notification illustration'
+          style={styles.image}
+        />
       </FlexColumn>
     </FlexRow>
   );
 };
-

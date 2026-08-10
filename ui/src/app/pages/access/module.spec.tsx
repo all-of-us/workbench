@@ -82,7 +82,11 @@ describe(Module.name, () => {
           completionEpochMillis: 12345,
         },
       },
-      { ...defaultServerConfig, currentDuccVersions: [6, 7], latestDuccVersion: 7 }
+      {
+        ...defaultServerConfig,
+        currentDuccVersions: [6, 7],
+        latestDuccVersion: 7,
+      }
     );
 
     expect(screen.queryByText(/Completed on:/i)).not.toBeInTheDocument();
@@ -102,7 +106,11 @@ describe(Module.name, () => {
           completionEpochMillis: 12345,
         },
       },
-      { ...defaultServerConfig, currentDuccVersions: [6, 7], latestDuccVersion: 7 }
+      {
+        ...defaultServerConfig,
+        currentDuccVersions: [6, 7],
+        latestDuccVersion: 7,
+      }
     );
 
     expect(screen.getByText(/Completed on:/i)).toBeInTheDocument();

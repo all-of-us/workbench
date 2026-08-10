@@ -37,4 +37,3 @@ describe('code-of-conduct', () => {
     expect(getLiveDUCCVersion()).toBe(7);
   });
 });
-

@@ -20,7 +20,10 @@ import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 import { ActiveWorkspaces } from './active-workspaces';
-import { DuccUpdateBanner, shouldShowDuccUpdateBanner } from './ducc-update-banner';
+import {
+  DuccUpdateBanner,
+  shouldShowDuccUpdateBanner,
+} from './ducc-update-banner';
 import { LegacyWorkbenchEndedBanner } from './legacy-workbench-ended-banner';
 // import { VwbBanner } from './vwb-banner';
 // import { VwbMigrationBanner } from './vwb-migration-banner';
