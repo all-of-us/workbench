@@ -949,8 +949,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should display Institution has signed agreement when the user has a Tier Eligibility object for CT', async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -964,7 +962,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(findControlledSignedStepEligible(container)).toBeTruthy();
     expect(findControlledSignedStepIneligible(container)).toBeFalsy();
@@ -975,8 +973,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it("Should not display Institution has signed agreement when the user doesn't have a Tier Eligibility object for CT", async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -990,7 +986,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(findControlledSignedStepEligible(container)).toBeFalsy();
     expect(findControlledSignedStepIneligible(container)).toBeTruthy();
@@ -1001,8 +997,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it("Should display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=true", async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -1017,7 +1011,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(findControlledUserEligible(container)).toBeTruthy();
     expect(findControlledUserIneligible(container)).toBeFalsy();
@@ -1027,8 +1021,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it("Should not display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=false", async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -1047,7 +1039,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(findControlledUserEligible(container)).toBeFalsy();
     expect(findControlledUserIneligible(container)).toBeTruthy();
@@ -1057,8 +1049,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object', async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -1074,7 +1064,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(findControlledUserEligible(container)).toBeFalsy();
     expect(findControlledUserIneligible(container)).toBeTruthy();
@@ -1093,8 +1083,6 @@ describe('DataAccessRequirements', () => {
     'Should display ineligible CT Compliance Training module in CT card ' +
       "when user's institution has not signed CT Institution agreement",
     async () => {
-      let { container } = component();
-
       profileStore.set({
         profile: {
           ...ProfileStubVariables.PROFILE_STUB,
@@ -1110,7 +1098,7 @@ describe('DataAccessRequirements', () => {
         reload,
         updateCache,
       });
-      ({ container } = component());
+      const { container } = component();
 
       expect(
         findIneligibleModule(
@@ -1125,7 +1113,6 @@ describe('DataAccessRequirements', () => {
     'Should display ineligible CT Compliance Training module in CT card ' +
       'when user is not eligible for CT',
     async () => {
-      let { container } = component();
 
       profileStore.set({
         profile: {
@@ -1147,7 +1134,7 @@ describe('DataAccessRequirements', () => {
         reload,
         updateCache,
       });
-      ({ container } = component());
+      const { container } = component();
 
       expect(
         findIneligibleModule(
@@ -1201,8 +1188,6 @@ describe('DataAccessRequirements', () => {
         config: { ...defaultServerConfig, enableComplianceTraining: false },
       });
 
-      let { container } = component();
-
       profileStore.set({
         profile: {
           ...ProfileStubVariables.PROFILE_STUB,
@@ -1221,7 +1206,7 @@ describe('DataAccessRequirements', () => {
         reload,
         updateCache,
       });
-      ({ container } = component());
+      const { container } = component();
 
       expect(
         findModule(
@@ -1233,8 +1218,6 @@ describe('DataAccessRequirements', () => {
   );
 
   it('Should display CT training when ineligible', async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -1253,7 +1236,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(
       findIneligibleModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
@@ -1261,8 +1244,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should display CT training when no institutional DUA', async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -1277,7 +1258,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(
       findIneligibleModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
@@ -1285,8 +1266,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should display CT training when eligible', async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -1305,7 +1284,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(
       findIncompleteModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
@@ -1313,8 +1292,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should allow CT and DUCC to be simultaneously clickable', async () => {
-    let { container } = component();
-
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -1348,7 +1325,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     // Both are clickable.
     expect(
@@ -1368,7 +1345,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should enable clicking on DUCC when it is non-compliant due to an incorrect signed version', async () => {
-    let { container } = component();
     const duccSignedVersion =
       Math.min(...defaultServerConfig.currentDuccVersions) - 1;
 
@@ -1397,7 +1373,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(
       findClickableModuleText(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
@@ -1408,7 +1384,6 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should enable clicking on DUCC when it is missing due to an incorrect signed version', async () => {
-    let { container } = component();
     const duccSignedVersion = undefined;
 
     profileStore.set({
@@ -1436,7 +1411,7 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
-    ({ container } = component());
+    const { container } = component();
 
     expect(
       findClickableModuleText(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
