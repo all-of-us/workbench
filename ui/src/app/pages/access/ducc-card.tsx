@@ -28,7 +28,7 @@ export const DuccCard = (props: {
     stepNumber,
   } = props;
   return (
-    <FlexRow style={styles.card}>
+    <FlexRow id='ducc-card' data-test-id='ducc-card' style={styles.card}>
       <FlexColumn>
         <div style={styles.cardStep}>Step {stepNumber}</div>
         <div style={styles.cardHeader}>Sign the Code of Conduct</div>

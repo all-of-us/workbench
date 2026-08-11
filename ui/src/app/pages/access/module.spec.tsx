@@ -67,4 +67,51 @@ describe(Module.name, () => {
     // Not clickable
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+  it('hides DUCC completed date when user is on an older signed DUCC version', () => {
+    const profile = createEmptyProfile();
+    profile.duccSignedVersion = 6;
+
+    setup(
+      {
+        ...createProps(),
+        moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+        profile,
+        status: {
+          moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+          completionEpochMillis: 12345,
+        },
+      },
+      {
+        ...defaultServerConfig,
+        currentDuccVersions: [6, 7],
+        latestDuccVersion: 7,
+      }
+    );
+
+    expect(screen.queryByText(/Completed on:/i)).not.toBeInTheDocument();
+  });
+
+  it('shows DUCC completed date when user is on the latest/current DUCC version', () => {
+    const profile = createEmptyProfile();
+    profile.duccSignedVersion = 7;
+
+    setup(
+      {
+        ...createProps(),
+        moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+        profile,
+        status: {
+          moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+          completionEpochMillis: 12345,
+        },
+      },
+      {
+        ...defaultServerConfig,
+        currentDuccVersions: [6, 7],
+        latestDuccVersion: 7,
+      }
+    );
+
+    expect(screen.getByText(/Completed on:/i)).toBeInTheDocument();
+  });
 });

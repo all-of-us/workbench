@@ -8042,6 +8042,9 @@ components:
           type: array
           items:
             type: integer
+        latestDuccVersion:
+          type: integer
+          description: The newest DUCC version users should sign.
         enableCaptcha:
           type: boolean
           description: Whether a captcha check is part of the new user registration
