@@ -2961,44 +2961,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return new CohortDefinition().includes(groups);
   }
 
-  private void assertCurrentAgeDemographics(DemoChartInfoListResponse response) {
-    final String person1AgeRange = getAgeRange(LocalDate.of(1981, 8, 1));
-    final String person99AgeRange = getAgeRange(LocalDate.of(1970, 2, 17));
-
-    if (person1AgeRange.equals(person99AgeRange)) {
-      assertThat(response.getItems().size()).isEqualTo(1);
-      assertThat(
-              response
-                  .getItems()
-                  .contains(new DemoChartInfo().name("MALE").ageRange(person1AgeRange).count(2L)))
-          .isTrue();
-      return;
-    }
-
-    assertThat(response.getItems().size()).isEqualTo(2);
-    assertThat(
-            response
-                .getItems()
-                .contains(new DemoChartInfo().name("MALE").ageRange(person1AgeRange).count(1L)))
-        .isTrue();
-    assertThat(
-            response
-                .getItems()
-                .contains(new DemoChartInfo().name("MALE").ageRange(person99AgeRange).count(1L)))
-        .isTrue();
-  }
-
-  private String getAgeRange(LocalDate birthDate) {
-    int age = Period.between(birthDate, LocalDate.now()).getYears();
-    if (age >= 18 && age <= 44) {
-      return "18-44";
-    }
-    if (age >= 45 && age <= 64) {
-      return "45-64";
-    }
-    return "> 65";
-  }
-
   private void assertParticipants(ResponseEntity<Long> response, Integer expectedCount) {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
