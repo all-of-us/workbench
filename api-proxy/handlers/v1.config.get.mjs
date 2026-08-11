@@ -82,7 +82,8 @@ const body = JSON.stringify(
       requiredForCTAccess: true
     }
   ],
-  currentDuccVersions: [ 3, 4, 5 ],
+  currentDuccVersions: [ 6, 7 ],
+  latestDuccVersion: 7,
   enableUpdatedDemographicSurvey: true,
   enableInitialCreditsExpiration: true,
 }

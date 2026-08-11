@@ -302,6 +302,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setIsEnrolledIn2Sv(true);
 
     config.access.currentDuccVersions = ImmutableList.of(CURRENT_DUCC_VERSION);
+    config.access.latestDuccVersion = CURRENT_DUCC_VERSION;
 
     when(mockDirectoryService.getUserOrThrow(FULL_USER_NAME)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, FULL_USER_NAME, CONTACT_EMAIL))
@@ -537,22 +538,22 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testSubmitDUCC_success_multiple_current() {
+  public void testSubmitDUCC_success_multiple_current_latest_only() {
     config.access.currentDuccVersions = ImmutableList.of(7, 8, 9);
+    config.access.latestDuccVersion = 9;
 
     createAccountAndDbUserWithAffiliation();
     String initials = "NIH";
 
-    config.access.currentDuccVersions.forEach(
-        version -> {
-          assertThat(profileController.submitDUCC(version, initials).getStatusCode())
-              .isEqualTo(HttpStatus.OK);
-          DbUserCodeOfConductAgreement duccAgreement = dbUser.getDuccAgreement();
-          assertThat(duccAgreement.getSignedVersion()).isEqualTo(version);
-          assertThat(duccAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
-          assertThat(duccAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
-          assertThat(duccAgreement.getUserInitials()).isEqualTo(initials);
-        });
+    assertThat(profileController.submitDUCC(9, initials).getStatusCode()).isEqualTo(HttpStatus.OK);
+    DbUserCodeOfConductAgreement duccAgreement = dbUser.getDuccAgreement();
+    assertThat(duccAgreement.getSignedVersion()).isEqualTo(9);
+    assertThat(duccAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
+    assertThat(duccAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
+    assertThat(duccAgreement.getUserInitials()).isEqualTo(initials);
+
+    assertThrows(BadRequestException.class, () -> profileController.submitDUCC(7, initials));
+    assertThrows(BadRequestException.class, () -> profileController.submitDUCC(8, initials));
   }
 
   @Test
@@ -605,6 +606,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // set the current DUCC version to version A
     config.access.currentDuccVersions = ImmutableList.of(versionA);
+    config.access.latestDuccVersion = versionA;
 
     // sign the current version (A)
 
@@ -615,6 +617,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // time passes and the system now requires a newer version (B)
     config.access.currentDuccVersions = ImmutableList.of(versionB);
+    config.access.latestDuccVersion = versionB;
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352

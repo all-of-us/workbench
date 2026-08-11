@@ -631,6 +631,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         initialCreditsValidityPeriodDays,
         initialCreditsExtensionPeriodDays,
         enableCTPlusCards,
+        currentDuccVersions,
+        latestDuccVersion,
       },
     } = useStore(serverConfigStore);
 
@@ -653,12 +655,27 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       pageMode
     );
 
+    const fallbackLatestDuccVersion =
+      currentDuccVersions?.length > 0
+        ? Math.max(...currentDuccVersions)
+        : undefined;
+    const resolvedLatestDuccVersion =
+      latestDuccVersion ?? fallbackLatestDuccVersion;
+    const shouldFocusDuccUpgrade =
+      typeof profile?.duccSignedVersion === 'number' &&
+      typeof resolvedLatestDuccVersion === 'number' &&
+      profile.duccSignedVersion < resolvedLatestDuccVersion;
+
     const moduleStatus = getAccessModuleStatusByName(profile, ctModule);
     const ctNeedsRenewal =
       pageMode === DARPageMode.ANNUAL_RENEWAL &&
       isCompliant(moduleStatus, profile.duccSignedVersion) &&
       !isRenewalCompleteForModule(moduleStatus, profile.duccSignedVersion);
-    const showCompletionBanner = profile && !nextRequired && !ctNeedsRenewal;
+    const showCompletionBanner =
+      profile &&
+      !nextRequired &&
+      !ctNeedsRenewal &&
+      profile.duccSignedVersion === resolvedLatestDuccVersion;
 
     // CT+ access rule:
     // - Card is always visible during initial registration
@@ -794,6 +811,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
+      if (shouldFocusDuccUpgrade) {
+        setFocusedModule(AccessModule.DATA_USER_CODE_OF_CONDUCT);
+        setActiveModules([AccessModule.DATA_USER_CODE_OF_CONDUCT]);
+        return;
+      }
       setFocusedModule(nextFocused);
       setActiveModules(
         fp.flow(
@@ -801,7 +823,22 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
           fp.uniq
         )([nextFocused, nextRequired])
       );
-    }, [nextFocused, nextRequired]);
+    }, [nextFocused, nextRequired, shouldFocusDuccUpgrade]);
+
+    // Auto-scroll to the DUCC card when arriving from the DUCC update banner
+    useEffect(() => {
+      if (!shouldFocusDuccUpgrade) {
+        return;
+      }
+      const timeoutId = window.setTimeout(
+        () =>
+          document
+            .getElementById('ducc-card')
+            ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        0
+      );
+      return () => window.clearTimeout(timeoutId);
+    }, [shouldFocusDuccUpgrade]);
 
     const daysRemaining = maybeDaysRemaining(profile);
     const hasExpired = daysRemaining && daysRemaining <= 0;

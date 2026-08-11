@@ -370,8 +370,12 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public DbUser submitDUCC(DbUser dbUser, Integer duccSignedVersion, String initials) {
-    if (!accessModuleService.isSignedDuccVersionCurrent(duccSignedVersion)) {
-      throw new BadRequestException("Data User Code of Conduct Version is not up to date");
+    final Integer latestDuccVersion = getLatestDuccVersion();
+    if (duccSignedVersion == null || !duccSignedVersion.equals(latestDuccVersion)) {
+      throw new BadRequestException(
+          String.format(
+              "Data User Code of Conduct Version must be the latest version (%d)",
+              latestDuccVersion));
     }
     final Timestamp timestamp = clockNow();
     return updateUserWithRetries(
@@ -382,6 +386,16 @@ public class UserServiceImpl implements UserService {
         },
         dbUser,
         Agent.asUser(dbUser));
+  }
+
+  private Integer getLatestDuccVersion() {
+    final WorkbenchConfig.AccessConfig accessConfig = configProvider.get().access;
+    if (accessConfig.latestDuccVersion != null) {
+      return accessConfig.latestDuccVersion;
+    }
+    return accessConfig.currentDuccVersions.stream()
+        .max(Integer::compareTo)
+        .orElseThrow(() -> new BadRequestException("No current DUCC versions are configured"));
   }
 
   private DbUser updateDuccAgreement(

@@ -20,6 +20,10 @@ import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 import { ActiveWorkspaces } from './active-workspaces';
+import {
+  DuccUpdateBanner,
+  shouldShowDuccUpdateBanner,
+} from './ducc-update-banner';
 import { LegacyWorkbenchEndedBanner } from './legacy-workbench-ended-banner';
 // import { VwbBanner } from './vwb-banner';
 // import { VwbMigrationBanner } from './vwb-migration-banner';
@@ -400,15 +404,28 @@ export const Homepage = fp.flow(
     };
 
     render() {
+      const {
+        profileState: { profile },
+      } = this.props;
       const { userWorkspacesResponse } = this.state;
-      const { enableVWBHomepageBanner } = serverConfigStore.get().config;
+      const { enableVWBHomepageBanner, latestDuccVersion } =
+        serverConfigStore.get().config;
+      const showDuccBanner = shouldShowDuccUpdateBanner(
+        profile?.duccSignedVersion,
+        latestDuccVersion,
+        serverConfigStore.get().config.currentDuccVersions || []
+      );
       const workspaces = userWorkspacesResponse?.items || [];
 
       return (
         <React.Fragment>
           <FlexColumn style={styles.pageWrapper}>
             <HomepageHeader />
-            {enableVWBHomepageBanner && <LegacyWorkbenchEndedBanner />}
+            {showDuccBanner ? (
+              <DuccUpdateBanner />
+            ) : (
+              enableVWBHomepageBanner && <LegacyWorkbenchEndedBanner />
+            )}
 
             <FlexRow style={styles.contentGrid}>
               <FlexColumn style={styles.leftColumn}>
