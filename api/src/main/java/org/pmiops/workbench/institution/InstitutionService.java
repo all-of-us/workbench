@@ -10,6 +10,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.UserGroupAction;
 import org.pmiops.workbench.model.UserTierEligibility;
 
 public interface InstitutionService {
@@ -132,4 +133,12 @@ public interface InstitutionService {
 
   /** If true, this institution's users are exempt from credit expiration. */
   boolean shouldBypassForCreditsExpiration(DbUser user);
+
+  /**
+   * Set users to be added or removed on the specified user group.
+   *
+   * @param shortName the short name (key) used to refer to this institution in the API
+   * @param action the action to be taken on the user group (add or remove)
+   */
+  void updateUsersInGroup(String shortName, UserGroupAction action);
 }

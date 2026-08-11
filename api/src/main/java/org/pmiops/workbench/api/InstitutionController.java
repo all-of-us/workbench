@@ -17,6 +17,7 @@ import org.pmiops.workbench.model.CheckEmailResponse;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
 import org.pmiops.workbench.model.GetPublicInstitutionDetailsResponse;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserGroupActionRequest;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -141,6 +142,18 @@ public class InstitutionController implements InstitutionApiDelegate {
   @Override
   @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Void> deleteInstitutionUserInstructions(final String shortName) {
+    if (institutionService.deleteInstitutionUserInstructions(shortName)) {
+      return ResponseEntity.noContent().build();
+    } else {
+      final String msg =
+          String.format("Could not delete user instructions for institution %s", shortName);
+      throw new BadRequestException(msg);
+    }
+  }
+
+  @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
+  public ResponseEntity<Void> updateUsersInGroup(InstitutionUserGroupActionRequest request) {
     if (institutionService.deleteInstitutionUserInstructions(shortName)) {
       return ResponseEntity.noContent().build();
     } else {

@@ -12,11 +12,6 @@ import java.sql.Timestamp;
 @Table(name = "user_group_action")
 public class DbUserGroupAction {
 
-  public enum UserGroupAction {
-    ADD,
-    REMOVE
-  }
-
   public enum UserGroupActionStatus {
     INCOMPLETE,
     COMPLETE,

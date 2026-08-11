@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.UserGroupAction;
 import org.pmiops.workbench.model.UserTierEligibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -579,5 +580,10 @@ public class InstitutionServiceImpl implements InstitutionService {
             throw new BadRequestException("Email Address is not valid");
           }
         });
+  }
+
+  @Override
+  public void updateUsersInGroup(String shortName, UserGroupAction action) {
+    return getByUser(user).map(Institution::isBypassInitialCreditsExpiration).orElse(false);
   }
 }

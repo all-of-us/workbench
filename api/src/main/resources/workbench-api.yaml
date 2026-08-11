@@ -5197,29 +5197,23 @@ paths:
           description: Successfully removed the Institution-specific user instructions
             to be sent by email after registration.
           content: {}
-  /v1/institutions/addUsersToGroup:
+  /v1/institutions/updateGroup:
     post:
       tags:
         - institution
-      description: Adds all users for an institution to the specified user group
-        sent by email after registration. Requires INSTITUTION_ADMIN authority.
-      operationId: setInstitutionUserInstructions
+      description: Adds or removes all users for an institution for the specified user group.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: updateUsersInGroup
       requestBody:
-        description: Text to include in an email sent to users for an Institution
-          after they are registered.
         content:
-          '*/*':
+          application/json:
             schema:
-              $ref: '#/components/schemas/InstitutionUserInstructions'
+              $ref: '#/components/schemas/InstitutionUserGroupActionRequest'
         required: false
       responses:
         200:
-          description: Successfully set or updated the Institution-specific user instructions
-            to be sent by email after registration.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InstitutionUserInstructions'
+          description: Successfully updated the user group with the specified action.
+          content: {}
   /v1/workspaces/vwb:
     get:
       tags:
@@ -11297,6 +11291,28 @@ components:
           items:
             type: string
       description: Institution-specific access tier membership requirement and configs.
+    InstitutionUserGroupActionRequest:
+      required:
+        - institutionShortName
+        - userGroupName
+        - userGroupAction
+      type: object
+      properties:
+        institutionShortName:
+          type: string
+          description: The short unique name for the Institution used as an identifier,
+            such as 'VUMC'.
+        userGroupName:
+          type: string
+          description: Name of the user group to be updated.
+        userGroupAction:
+          $ref: '#/components/schemas/UserGroupAction'
+    UserGroupAction:
+      type: string
+      description: Action to be taken on the user group
+      enum:
+        - ADD
+        - REMOVE
     ExhaustedInitialCreditsEventRequest:
       required:
         - users
