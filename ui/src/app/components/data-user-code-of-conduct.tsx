@@ -12,7 +12,7 @@ import { HtmlViewer } from 'app/components/html-viewer';
 import { TextInput } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { SpinnerOverlay } from 'app/components/spinners';
+import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
@@ -375,7 +375,10 @@ const DuccSignaturePage = (props: SignatureProps) => {
               disabled={errors || submitting}
               onClick={() => onAccept()}
             >
-              Accept
+              {submitting && (
+                <Spinner style={{ marginRight: '0.375rem' }} size={18} />
+              )}
+              {submitting ? 'Accepting...' : 'Accept'}
             </Button>
           </TooltipTrigger>
         </FlexRow>
@@ -448,13 +451,13 @@ export const DataUserCodeOfConduct = fp.flow(
     profileState.updateCache(updatedProfile);
   });
 
-  const submitDataUserCodeOfConduct = (initials) => {
-    profileApi()
-      .submitDUCC(getLiveDUCCVersion(), initials)
-      .then((updatedProfile) => {
-        profileState.updateCache(updatedProfile);
-        history.back();
-      });
+  const submitDataUserCodeOfConduct = async (initials) => {
+    const updatedProfile = await profileApi().submitDUCC(
+      getLiveDUCCVersion(),
+      initials
+    );
+    profileState.updateCache(updatedProfile);
+    history.back();
   };
 
   const errors = validate(
@@ -491,15 +494,18 @@ export const DataUserCodeOfConduct = fp.flow(
       ? canRenderSignedDucc(duccSignedVersion)
       : page === DataUserCodeOfConductPage.SIGNATURE;
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     setSubmitting(true);
     // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
     // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
     AnalyticsTracker.Registration.AcceptDUCC();
-    wasReferredFromRenewal(location.search)
-      ? submitCodeOfConductWithRenewal(initialMonitoring)
-      : submitDataUserCodeOfConduct(initialMonitoring);
-    setSubmitting(false);
+    try {
+      await (wasReferredFromRenewal(location.search)
+        ? submitCodeOfConductWithRenewal(initialMonitoring)
+        : submitDataUserCodeOfConduct(initialMonitoring));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
