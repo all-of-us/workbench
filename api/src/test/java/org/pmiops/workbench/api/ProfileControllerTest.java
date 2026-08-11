@@ -606,6 +606,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // set the current DUCC version to version A
     config.access.currentDuccVersions = ImmutableList.of(versionA);
+    config.access.latestDuccVersion = versionA;
 
     // sign the current version (A)
 
@@ -616,6 +617,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // time passes and the system now requires a newer version (B)
     config.access.currentDuccVersions = ImmutableList.of(versionB);
+    config.access.latestDuccVersion = versionB;
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
