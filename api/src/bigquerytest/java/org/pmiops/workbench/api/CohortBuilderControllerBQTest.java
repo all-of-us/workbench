@@ -2485,7 +2485,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE.toString(),
                 cohortDefinition)
             .getBody();
-    assertCurrentAgeDemographics(Objects.requireNonNull(response));
+    assertDemographics(Objects.requireNonNull(response));
   }
 
   @Test
