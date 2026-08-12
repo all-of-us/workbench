@@ -1055,6 +1055,40 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testDeleteWorkspace_creatorCanDeleteWithoutOwnerAccess() {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    // Simulate creator no longer having OWNER access in Rawls.
+    stubGetWorkspace(
+        workspace.getNamespace(),
+        workspace.getTerraName(),
+        workspace.getCreatorUser().getUserName(),
+        WorkspaceAccessLevel.READER);
+
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getTerraName());
+    verify(mockWorkspaceAuditor).fireDeleteAction(any(DbWorkspace.class));
+  }
+
+  @Test
+  public void testDeleteWorkspace_nonCreatorRequiresOwnerAccess() {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    final String namespace = workspace.getNamespace();
+    final String terraName = workspace.getTerraName();
+
+    currentUser = createUser("notcreator@gmail.com");
+    stubGetWorkspace(
+        namespace,
+        terraName,
+        workspace.getCreatorUser().getUserName(),
+        WorkspaceAccessLevel.READER);
+
+    assertThrows(
+        ForbiddenException.class, () -> workspacesController.deleteWorkspace(namespace, terraName));
+  }
+
+  @Test
   public void testUpdateWorkspace() throws Exception {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();

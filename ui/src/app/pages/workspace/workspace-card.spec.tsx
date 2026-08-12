@@ -19,12 +19,17 @@ import { WorkspaceCard } from './workspace-card';
 describe('WorkspaceCard', () => {
   const reload = jest.fn();
 
-  const component = (accessLevel: WorkspaceAccessLevel) => {
+  const component = (
+    accessLevel: WorkspaceAccessLevel,
+    opts: { showDeleteAction?: boolean; canDeleteAction?: boolean } = {}
+  ) => {
     return renderWithRouter(
       <WorkspaceCard
         accessLevel={accessLevel}
         reload={reload}
         workspace={workspaceStubs[0]}
+        showDeleteAction={opts.showDeleteAction}
+        canDeleteAction={opts.canDeleteAction}
       />
     );
   };
@@ -33,6 +38,8 @@ describe('WorkspaceCard', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
 
     serverConfigStore.set({ config: { gsuiteDomain: 'abc' } });
+    workspaceStubs[0].adminLocked = false;
+    workspaceStubs[0].featuredCategory = null;
   });
 
   it('should not show locked status for workspace that has adminLocked false', async () => {
@@ -62,5 +69,27 @@ describe('WorkspaceCard', () => {
       name: /community workspace/i,
     });
     expect(communityWorkspaceImg).toBeInTheDocument();
+  });
+
+  it('shows migrated delete icon when enabled and allowed', async () => {
+    component(WorkspaceAccessLevel.READER, {
+      showDeleteAction: true,
+      canDeleteAction: true,
+    });
+
+    expect(
+      await screen.findByTestId('delete-migrated-workspace')
+    ).toBeInTheDocument();
+  });
+
+  it('hides migrated delete icon when enabled but not allowed', async () => {
+    component(WorkspaceAccessLevel.READER, {
+      showDeleteAction: true,
+      canDeleteAction: false,
+    });
+
+    expect(
+      screen.queryByTestId('delete-migrated-workspace')
+    ).not.toBeInTheDocument();
   });
 });

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  MigrationState,
   ProfileApi,
   WorkspaceAccessLevel,
   WorkspacesApi,
@@ -135,5 +136,50 @@ describe('WorkspaceList', () => {
 
     await pickAccessLevel(accessLevelDropdown, 'All');
     expect(getCardNames().length).toEqual(3);
+  });
+
+  it('shows migrated RW1 section and delete action for owners', async () => {
+    const migratedWorkspace = {
+      ...buildWorkspaceStub('migrated-owner'),
+      migrationState: MigrationState.FINISHED,
+      creatorUser: { userName: 'someone-else@fake-research-aou.org' },
+    };
+    workspacesApiStub.workspaces = [migratedWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [migratedWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(screen.getByText('Migrated RW1.0 Workspaces')).toBeInTheDocument();
+    expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
+  });
+
+  it('shows migrated delete action for creators and hides it for other non-owners', async () => {
+    const creatorMigratedWorkspace = {
+      ...buildWorkspaceStub('migrated-creator'),
+      migrationState: MigrationState.FINISHED,
+      creatorUser: { userName: profile.username },
+    };
+    const nonCreatorMigratedWorkspace = {
+      ...buildWorkspaceStub('migrated-reader'),
+      migrationState: MigrationState.FINISHED,
+      creatorUser: { userName: 'another-user@fake-research-aou.org' },
+    };
+    workspacesApiStub.workspaces = [
+      creatorMigratedWorkspace,
+      nonCreatorMigratedWorkspace,
+    ];
+    workspacesApiStub.workspaceAccess = new Map([
+      [creatorMigratedWorkspace.terraName, WorkspaceAccessLevel.READER],
+      [nonCreatorMigratedWorkspace.terraName, WorkspaceAccessLevel.READER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    // Exactly one card is deletable: reader + creator.
+    expect(screen.getAllByTestId('delete-migrated-workspace')).toHaveLength(1);
   });
 });

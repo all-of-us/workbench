@@ -446,6 +446,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceTerraName) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
+    boolean isCreator =
+        dbWorkspace.getCreator() != null
+            && dbWorkspace
+                .getCreator()
+                .getUsername()
+                .equalsIgnoreCase(userProvider.get().getUsername());
+    if (!isCreator) {
+      workspaceAuthService.enforceWorkspaceAccessLevel(
+          workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.OWNER);
+    }
     workspaceService.deleteWorkspace(dbWorkspace);
     workspaceAuditor.fireDeleteAction(dbWorkspace);
 

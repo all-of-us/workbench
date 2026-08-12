@@ -78,7 +78,7 @@ interface State {
   filterLevels: WorkspaceAccessLevel[] | null;
   errorText: string;
   firstSignIn: Date;
-  workspaceViewFilter: 'all' | 'non-migrated' | 'archival';
+  workspaceViewFilter: 'all' | 'non-migrated' | 'archival' | 'migrated';
 }
 
 export const WorkspaceList = fp.flow(withUserProfile())(
@@ -204,8 +204,19 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         archivalRecoveryStates.includes(wp.workspace.recoveryState)
       );
 
-      const showNonMigratedSection = workspaceViewFilter !== 'archival';
-      const showArchivedSection = workspaceViewFilter !== 'non-migrated';
+      // RW1.0 workspaces that have finished migration and are not in archival/recovery flow.
+      const migratedRW1Workspaces = filteredList.filter(
+        (wp) =>
+          wp.workspace.migrationState === 'FINISHED' &&
+          !archivalRecoveryStates.includes(wp.workspace.recoveryState)
+      );
+
+      const showNonMigratedSection =
+        workspaceViewFilter === 'all' || workspaceViewFilter === 'non-migrated';
+      const showArchivedSection =
+        workspaceViewFilter === 'all' || workspaceViewFilter === 'archival';
+      const showMigratedSection =
+        workspaceViewFilter === 'all' || workspaceViewFilter === 'migrated';
 
       return (
         <>
@@ -286,6 +297,19 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     style={{ height: '2.25rem' }}
                   >
                     Archival
+                  </Button>
+                  <Button
+                    type={
+                      workspaceViewFilter === 'migrated'
+                        ? 'primary'
+                        : 'secondary'
+                    }
+                    onClick={() =>
+                      this.setState({ workspaceViewFilter: 'migrated' })
+                    }
+                    style={{ height: '2.25rem' }}
+                  >
+                    Migrated
                   </Button>
                 </FlexRow>
 
@@ -423,6 +447,58 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           isMigratedView={false}
                         />
                       ))}
+                    </>
+                  )}
+
+                  {showMigratedSection && migratedRW1Workspaces.length > 0 && (
+                    <>
+                      <div
+                        style={{
+                          width: '100%',
+                          marginTop: '24px',
+                          marginBottom: '12px',
+                        }}
+                      >
+                        <SmallHeader>Migrated RW1.0 Workspaces</SmallHeader>
+                      </div>
+
+                      <div
+                        style={{
+                          width: '100%',
+                          background: '#FFF8E7',
+                          border: '1px solid #F5C842',
+                          borderRadius: '6px',
+                          padding: '12px',
+                          marginBottom: '16px',
+                          color: colors.dark,
+                          fontSize: '13px',
+                        }}
+                      >
+                        These legacy RW1.0 workspaces have already been migrated
+                        to RW 2.0. Workspace owners and creators can delete them
+                        to stop incurring charges for unused legacy resources.
+                      </div>
+
+                      {migratedRW1Workspaces.map((wp) => {
+                        const isOwner =
+                          wp.accessLevel === WorkspaceAccessLevel.OWNER;
+                        const isCreator =
+                          wp.workspace.creatorUser?.userName?.toLowerCase() ===
+                          profile.username?.toLowerCase();
+
+                        return (
+                          <WorkspaceCard
+                            key={`${wp.workspace.namespace}-migrated`}
+                            workspace={wp.workspace}
+                            accessLevel={wp.accessLevel}
+                            reload={() => this.reloadWorkspaces()}
+                            tierAccessDisabled={false}
+                            isMigratedView={false}
+                            showDeleteAction={true}
+                            canDeleteAction={isOwner || isCreator}
+                          />
+                        );
+                      })}
                     </>
                   )}
                 </div>

@@ -35,6 +35,7 @@ import {
 import { AnalyticsTracker, triggerEvent } from 'app/utils/analytics';
 import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
+import { notificationStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { isCommunityWorkspace } from 'app/utils/workspace-utils';
 
@@ -80,6 +81,25 @@ const styles = reactStyles({
     borderRadius: '0.3rem',
     padding: 0,
   },
+  deleteBadge: {
+    height: '1.5rem',
+    minWidth: '6.3rem',
+    padding: '0 8px',
+    borderRadius: '0.3rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 9,
+    fontWeight: 600,
+    lineHeight: 1,
+    whiteSpace: 'nowrap',
+    textTransform: 'uppercase',
+    letterSpacing: '.3px',
+    backgroundColor: '#FEE2E2',
+    color: '#991B1B',
+    cursor: 'pointer',
+    border: '1px solid #FCA5A5',
+  },
   lockWorkspace: {
     color: colors.warning,
     marginBottom: '0.15rem',
@@ -113,6 +133,10 @@ interface WorkspaceCardProps extends NavigationProps {
   tierAccessDisabled?: boolean;
   useFeaturedWorkspacePageUi?: boolean;
   isMigratedView?: boolean;
+  // Show a dedicated delete icon for migrated RW1.0 cards.
+  showDeleteAction?: boolean;
+  // Caller can override who is allowed to use the delete icon.
+  canDeleteAction?: boolean;
 }
 
 export const WorkspaceCard = fp.flow(withNavigation)(
@@ -141,6 +165,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
           this.props.workspace.terraName
         );
         await this.props.reload();
+        notificationStore.set({
+          title: 'Workspace deleted',
+          message: `Workspace '${this.props.workspace.name}' was deleted.`,
+        });
+        this.setState({ confirmDeleting: false });
       }
     );
 
@@ -177,6 +206,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         navigate,
         useFeaturedWorkspacePageUi,
         isMigratedView,
+        showDeleteAction = false,
+        canDeleteAction,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
       const isArchived = workspace.recoveryState != null;
@@ -184,6 +215,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       const hideWorkspaceActions =
         workspace.recoveryState != null ||
         workspace.migrationState === MigrationState.FINISHED;
+      const canUseDeleteAction =
+        canDeleteAction ?? accessLevel === WorkspaceAccessLevel.OWNER;
 
       const getWorkspacePath = () => {
         if (workspace.recoveryState === 'NOT_STARTED') {
@@ -258,6 +291,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     <SnowmanButton style={{ marginLeft: 0 }} />
                   </PopupTrigger>
                 )}
+
+                {/* ...existing code... */}
               </FlexColumn>
               <FlexColumn
                 style={{
@@ -340,7 +375,14 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 </FlexColumn>
                 <FlexRow style={{ justifyContent: 'space-between' }}>
                   <FlexColumn>
-                    <FlexRow style={{ gap: '6px', alignItems: 'center' }}>
+                    <FlexRow
+                      style={{
+                        gap: '6px',
+                        rowGap: '6px',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                      }}
+                    >
                       <div
                         data-test-id='workspace-access-level'
                         style={{
@@ -361,6 +403,35 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           <MigrationBadge state={workspace.migrationState} />
                         )
                       )}
+
+                      {showDeleteAction &&
+                        canUseDeleteAction &&
+                        !adminLocked && (
+                          <TooltipTrigger
+                            side='top'
+                            content='Delete this legacy RW1.0 workspace'
+                          >
+                            <div
+                              role='button'
+                              aria-label='Delete workspace'
+                              data-test-id='delete-migrated-workspace'
+                              style={styles.deleteBadge}
+                              onClick={() => {
+                                AnalyticsTracker.Workspaces.OpenDeleteModal(
+                                  'Card'
+                                );
+                                triggerEvent(
+                                  EVENT_CATEGORY,
+                                  'delete',
+                                  'Migrated workspace - click delete badge'
+                                );
+                                this.setState({ confirmDeleting: true });
+                              }}
+                            >
+                              DELETE RW1
+                            </div>
+                          </TooltipTrigger>
+                        )}
                     </FlexRow>
                     <div style={{ fontSize: 12 }}>
                       Last Changed: {displayDate(workspace.lastModifiedTime)}
