@@ -409,7 +409,10 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         !adminLocked && (
                           <TooltipTrigger
                             side='top'
-                            content='Delete this legacy RW1.0 workspace'
+                            content={
+                              'Delete this Legacy Workbench workspace. Your RW 2.0 workspace will not ' +
+                              'be affected. Deleting will stop incurring charges for unused legacy resources.'
+                            }
                           >
                             <div
                               role='button'
@@ -428,7 +431,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                                 this.setState({ confirmDeleting: true });
                               }}
                             >
-                              DELETE RW1
+                              DELETE
                             </div>
                           </TooltipTrigger>
                         )}

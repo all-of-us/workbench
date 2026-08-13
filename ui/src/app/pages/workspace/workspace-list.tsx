@@ -78,7 +78,7 @@ interface State {
   filterLevels: WorkspaceAccessLevel[] | null;
   errorText: string;
   firstSignIn: Date;
-  workspaceViewFilter: 'all' | 'non-migrated' | 'archival' | 'migrated';
+  workspaceViewFilter: 'all' | 'migrated' | 'archival-flow';
 }
 
 export const WorkspaceList = fp.flow(withUserProfile())(
@@ -168,55 +168,33 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         ({ accessLevel }) => !filterLevels || filterLevels.includes(accessLevel)
       );
 
-      const vwbUserFacingIds = new Set(
-        vwbWorkspaces
-          .map((workspace) => workspace.userFacingId?.toLowerCase())
-          .filter(Boolean)
-      );
-
       const archivalRecoveryStates = [
         'NOT_STARTED',
         'REQUESTED',
         'RECOVERING',
         'FAILED',
+        'RECOVERED',
       ];
 
-      // If a workspace exists in both RW 1.0 and RW 2.0, keep only the RW 2.0 card.
-      const filteredLegacyList = filteredList.filter((wp) => {
-        // Always keep archival-related items in the legacy archived section.
-        if (archivalRecoveryStates.includes(wp.workspace.recoveryState)) {
-          return true;
+      const legacyWorkspaces = filteredList;
+
+      const filteredLegacyWorkspaces = legacyWorkspaces.filter((wp) => {
+        const recoveryState = wp.workspace.recoveryState;
+        const isMigrationFinished = wp.workspace.migrationState === 'FINISHED';
+        const isInArchivalFlow =
+          (recoveryState && archivalRecoveryStates.includes(recoveryState)) ||
+          (!recoveryState && !isMigrationFinished);
+        const isMigrated = isMigrationFinished && !isInArchivalFlow;
+
+        switch (workspaceViewFilter) {
+          case 'migrated':
+            return isMigrated;
+          case 'archival-flow':
+            return isInArchivalFlow;
+          default:
+            return true;
         }
-
-        return (
-          !wp.workspace.namespace ||
-          !vwbUserFacingIds.has(wp.workspace.namespace.toLowerCase())
-        );
       });
-
-      const nonMigratedWorkspaces = filteredLegacyList.filter(
-        (wp) =>
-          wp.workspace.migrationState !== 'FINISHED' &&
-          wp.workspace.recoveryState == null
-      );
-
-      const archivedWorkspaces = filteredLegacyList.filter((wp) =>
-        archivalRecoveryStates.includes(wp.workspace.recoveryState)
-      );
-
-      // RW1.0 workspaces that have finished migration and are not in archival/recovery flow.
-      const migratedRW1Workspaces = filteredList.filter(
-        (wp) =>
-          wp.workspace.migrationState === 'FINISHED' &&
-          !archivalRecoveryStates.includes(wp.workspace.recoveryState)
-      );
-
-      const showNonMigratedSection =
-        workspaceViewFilter === 'all' || workspaceViewFilter === 'non-migrated';
-      const showArchivedSection =
-        workspaceViewFilter === 'all' || workspaceViewFilter === 'archival';
-      const showMigratedSection =
-        workspaceViewFilter === 'all' || workspaceViewFilter === 'migrated';
 
       return (
         <>
@@ -274,32 +252,6 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   </Button>
                   <Button
                     type={
-                      workspaceViewFilter === 'non-migrated'
-                        ? 'primary'
-                        : 'secondary'
-                    }
-                    onClick={() =>
-                      this.setState({ workspaceViewFilter: 'non-migrated' })
-                    }
-                    style={{ height: '2.25rem' }}
-                  >
-                    Non-Migrated
-                  </Button>
-                  <Button
-                    type={
-                      workspaceViewFilter === 'archival'
-                        ? 'primary'
-                        : 'secondary'
-                    }
-                    onClick={() =>
-                      this.setState({ workspaceViewFilter: 'archival' })
-                    }
-                    style={{ height: '2.25rem' }}
-                  >
-                    Archival
-                  </Button>
-                  <Button
-                    type={
                       workspaceViewFilter === 'migrated'
                         ? 'primary'
                         : 'secondary'
@@ -310,6 +262,19 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     style={{ height: '2.25rem' }}
                   >
                     Migrated
+                  </Button>
+                  <Button
+                    type={
+                      workspaceViewFilter === 'archival-flow'
+                        ? 'primary'
+                        : 'secondary'
+                    }
+                    onClick={() =>
+                      this.setState({ workspaceViewFilter: 'archival-flow' })
+                    }
+                    style={{ height: '2.25rem' }}
+                  >
+                    Archival Flow
                   </Button>
                 </FlexRow>
 
@@ -332,7 +297,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     }
                     style={{ height: '2.25rem' }}
                   >
-                    Open RW 2.0 <NewWindowIcon />
+                    Open Verily <NewWindowIcon />
                   </Button>
                 </div>
               </FlexRow>
@@ -364,43 +329,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     />
                   </div>
 
-                  {/* NON-MIGRATED (includes waiting-to-archive workspaces) */}
-                  {showNonMigratedSection &&
-                    nonMigratedWorkspaces.length > 0 && (
-                      <>
-                        <div
-                          style={{
-                            width: '100%',
-                            marginTop: '24px',
-                            marginBottom: '12px',
-                          }}
-                        >
-                          <SmallHeader>Non-Migrated Workspaces</SmallHeader>
-                        </div>
-
-                        {profile.migrationTestingGroup &&
-                          enableVwbMigration && <NewWorkspaceButton />}
-
-                        {nonMigratedWorkspaces.map((wp) => (
-                          <WorkspaceCard
-                            key={`${wp.workspace.namespace}-non-migrated`}
-                            workspace={wp.workspace}
-                            accessLevel={wp.accessLevel}
-                            reload={() => this.reloadWorkspaces()}
-                            tierAccessDisabled={
-                              !hasTierAccess(
-                                profile,
-                                wp.workspace.accessTierShortName
-                              ) || !profile.migrationTestingGroup
-                            }
-                            isMigratedView={false}
-                          />
-                        ))}
-                      </>
-                    )}
-
-                  {/* ARCHIVED (archived/requested/recovering/failed) */}
-                  {showArchivedSection && archivedWorkspaces.length > 0 && (
+                  {legacyWorkspaces.length > 0 && (
                     <>
                       <div
                         style={{
@@ -409,57 +338,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           marginBottom: '12px',
                         }}
                       >
-                        <SmallHeader>Archived Workspaces</SmallHeader>
-                      </div>
-
-                      <div
-                        style={{
-                          width: '100%',
-                          background: '#F5F7FA',
-                          border: '1px solid #D8DDE6',
-                          borderRadius: '6px',
-                          padding: '12px',
-                          marginBottom: '16px',
-                          color: colors.dark,
-                          fontSize: '13px',
-                        }}
-                      >
-                        These workspaces have been archived from Legacy
-                        Workbench. Select Recover Workspace to restore them into
-                        RW 2.0.
-                      </div>
-
-                      {archivedWorkspaces.map((wp) => (
-                        <WorkspaceCard
-                          key={`${wp.workspace.namespace}-archived`}
-                          workspace={wp.workspace}
-                          accessLevel={wp.accessLevel}
-                          reload={() => this.reloadWorkspaces()}
-                          tierAccessDisabled={
-                            !hasTierAccess(
-                              profile,
-                              wp.workspace.accessTierShortName
-                            ) ||
-                            wp.accessLevel !== WorkspaceAccessLevel.OWNER ||
-                            wp.workspace.recoveryState !==
-                              WorkspaceRecoveryStatus.NOT_STARTED
-                          }
-                          isMigratedView={false}
-                        />
-                      ))}
-                    </>
-                  )}
-
-                  {showMigratedSection && migratedRW1Workspaces.length > 0 && (
-                    <>
-                      <div
-                        style={{
-                          width: '100%',
-                          marginTop: '24px',
-                          marginBottom: '12px',
-                        }}
-                      >
-                        <SmallHeader>Migrated RW1.0 Workspaces</SmallHeader>
+                        <SmallHeader>Legacy Workspaces</SmallHeader>
                       </div>
 
                       <div
@@ -474,31 +353,74 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           fontSize: '13px',
                         }}
                       >
-                        These legacy RW1.0 workspaces have already been migrated
-                        to RW 2.0. Workspace owners and creators can delete them
-                        to stop incurring charges for unused legacy resources.
+                        Legacy workspaces may be migrated or in archival flow.
+                        Use the status badges and filters to find what you need.
+                        Deleting a migrated or recovered Legacy workspace
+                        reduces legacy costs and does not affect the matching
+                        Verily workspace.
                       </div>
 
-                      {migratedRW1Workspaces.map((wp) => {
+                      {profile.migrationTestingGroup && enableVwbMigration && (
+                        <NewWorkspaceButton />
+                      )}
+
+                      {filteredLegacyWorkspaces.map((wp) => {
+                        const recoveryState = wp.workspace.recoveryState;
+                        const isMigrationFinished =
+                          wp.workspace.migrationState === 'FINISHED';
+                        const isInArchivalFlow =
+                          (recoveryState &&
+                            archivalRecoveryStates.includes(recoveryState)) ||
+                          (!recoveryState && !isMigrationFinished);
+                        const isMigrated =
+                          isMigrationFinished && !isInArchivalFlow;
+                        const isRecovered =
+                          recoveryState === WorkspaceRecoveryStatus.RECOVERED;
                         const isOwner =
                           wp.accessLevel === WorkspaceAccessLevel.OWNER;
                         const isCreator =
                           wp.workspace.creatorUser?.userName?.toLowerCase() ===
                           profile.username?.toLowerCase();
+                        const nonMigratedTierAccessDisabled =
+                          !hasTierAccess(
+                            profile,
+                            wp.workspace.accessTierShortName
+                          ) || !profile.migrationTestingGroup;
+
+                        const archivalFlowTierAccessDisabled =
+                          !hasTierAccess(
+                            profile,
+                            wp.workspace.accessTierShortName
+                          ) ||
+                          wp.accessLevel !== WorkspaceAccessLevel.OWNER ||
+                          wp.workspace.recoveryState !==
+                            WorkspaceRecoveryStatus.NOT_STARTED;
+
+                        const tierAccessDisabled = isMigrated
+                          ? false
+                          : isInArchivalFlow
+                          ? archivalFlowTierAccessDisabled
+                          : nonMigratedTierAccessDisabled;
 
                         return (
                           <WorkspaceCard
-                            key={`${wp.workspace.namespace}-migrated`}
+                            key={`${wp.workspace.namespace}-${wp.workspace.terraName}-legacy`}
                             workspace={wp.workspace}
                             accessLevel={wp.accessLevel}
                             reload={() => this.reloadWorkspaces()}
-                            tierAccessDisabled={false}
+                            tierAccessDisabled={tierAccessDisabled}
                             isMigratedView={false}
-                            showDeleteAction={true}
+                            showDeleteAction={isMigrated || isRecovered}
                             canDeleteAction={isOwner || isCreator}
                           />
                         );
                       })}
+
+                      {filteredLegacyWorkspaces.length === 0 && (
+                        <div style={{ width: '100%', marginBottom: '16px' }}>
+                          No legacy workspaces match this filter.
+                        </div>
+                      )}
                     </>
                   )}
                 </div>

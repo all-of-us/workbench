@@ -4,6 +4,7 @@ import {
   MigrationState,
   ProfileApi,
   WorkspaceAccessLevel,
+  WorkspaceRecoveryStatus,
   WorkspacesApi,
 } from 'generated/fetch';
 
@@ -138,7 +139,7 @@ describe('WorkspaceList', () => {
     expect(getCardNames().length).toEqual(3);
   });
 
-  it('shows migrated RW1 section and delete action for owners', async () => {
+  it('shows legacy section and delete action for migrated owners', async () => {
     const migratedWorkspace = {
       ...buildWorkspaceStub('migrated-owner'),
       migrationState: MigrationState.FINISHED,
@@ -152,8 +153,38 @@ describe('WorkspaceList', () => {
     component();
     await waitForNoSpinner();
 
-    expect(screen.getByText('Migrated RW1.0 Workspaces')).toBeInTheDocument();
+    expect(screen.getByText('Legacy Workspaces')).toBeInTheDocument();
     expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
+  });
+
+  it('filters legacy list by migrated and archival flow status', async () => {
+    const migratedWorkspace = {
+      ...buildWorkspaceStub('migrated'),
+      migrationState: MigrationState.FINISHED,
+    };
+    const archivalWorkspace = {
+      ...buildWorkspaceStub('archival'),
+      recoveryState: WorkspaceRecoveryStatus.NOT_STARTED,
+    };
+
+    workspacesApiStub.workspaces = [migratedWorkspace, archivalWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [migratedWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+      [archivalWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(screen.getAllByTestId('workspace-card-name')).toHaveLength(2);
+
+    await user.click(screen.getByRole('button', { name: 'Migrated' }));
+    expect(screen.getAllByTestId('workspace-card-name')).toHaveLength(1);
+    expect(screen.getByText(migratedWorkspace.name)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Archival Flow' }));
+    expect(screen.getAllByTestId('workspace-card-name')).toHaveLength(1);
+    expect(screen.getByText(archivalWorkspace.name)).toBeInTheDocument();
   });
 
   it('shows migrated delete action for creators and hides it for other non-owners', async () => {
@@ -181,5 +212,22 @@ describe('WorkspaceList', () => {
 
     // Exactly one card is deletable: reader + creator.
     expect(screen.getAllByTestId('delete-migrated-workspace')).toHaveLength(1);
+  });
+  it('shows delete action for recovered workspaces', async () => {
+    const recoveredWorkspace = {
+      ...buildWorkspaceStub('recovered'),
+      recoveryState: WorkspaceRecoveryStatus.RECOVERED,
+      creatorUser: { userName: profile.username },
+    };
+    workspacesApiStub.workspaces = [recoveredWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [recoveredWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(screen.getByText('Legacy Workspaces')).toBeInTheDocument();
+    expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
   });
 });
