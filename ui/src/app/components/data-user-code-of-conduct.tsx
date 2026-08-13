@@ -229,6 +229,8 @@ interface SignatureProps {
   username: string;
   onChangeMonitoring: (v: string) => void;
   onChangePublic: (v: string) => void;
+  onChangeWorkspace: (v: string) => void;
+  onChangeStigmatize: (v: string) => void;
   onChangeAccess: (v: string) => void;
   onBack: () => void;
   onAccept: () => void;
@@ -244,6 +246,8 @@ const DuccSignaturePage = (props: SignatureProps) => {
     submitting,
     onChangeMonitoring,
     onChangePublic,
+    onChangeWorkspace,
+    onChangeStigmatize,
     onChangeAccess,
     onBack,
     onAccept,
@@ -256,16 +260,15 @@ const DuccSignaturePage = (props: SignatureProps) => {
           <h1>Accept Data User Code of Conduct</h1>
         )}
         <div style={{ ...styles.bold, ...styles.smallTopMargin }}>
-          I,
+          I{' '}
           <ReadOnlyTextField
             {...{ signatureState }}
             style={{ margin: '0 1ex' }}
             value={fullName}
             dataTestId='ducc-name-input'
-          />
-          ("Authorized Data User"), have personally reviewed this Data User Code
-          of Conduct. I agree to follow each of the policies and procedures it
-          describes.
+          />{' '}
+          (Authorized Data User) have personally reviewed this Data User Code of
+          Conduct. I agree to follow all terms of use described therein.
         </div>
         <div style={styles.smallTopMargin}>
           By entering my initials next to each statement below, I acknowledge
@@ -275,56 +278,73 @@ const DuccSignaturePage = (props: SignatureProps) => {
           {...{ signatureState, signedInitials }}
           onChange={(v) => onChangeMonitoring(v)}
         >
-          My work, including any external data, files, or software I upload into
-          the Researcher Workbench, will be logged and monitored by the <AoU />{' '}
-          Research Program to ensure compliance with policies and procedures.
+          My work, including any external data, files, software, or tools that I
+          use in or in conjunction with my Workspace(s), will be logged and
+          monitored to ensure compliance.
         </InitialsAgreement>
         <InitialsAgreement
           {...{ signatureState, signedInitials }}
           onChange={(v) => onChangePublic(v)}
         >
-          My name, affiliation, profile information and research description
-          will be made public. My research description will be used by the{' '}
-          <AoU /> Research Program to provide participants with meaningful
-          information about the research being conducted.
+          My name, affiliation, profile information, research description, and
+          citations for work products will be made publicly available to provide
+          participants and the public with meaningful information about the
+          research I conduct with the research resources.
+        </InitialsAgreement>
+        <InitialsAgreement
+          {...{ signatureState, signedInitials }}
+          onChange={(v) => onChangeWorkspace(v)}
+        >
+          My Workspace description(s) and other information related to my
+          research will be used to assess my compliance with the terms of this
+          Code of Conduct.
+        </InitialsAgreement>
+        <InitialsAgreement
+          {...{ signatureState, signedInitials }}
+          onChange={(v) => onChangeStigmatize(v)}
+        >
+          The <AoU /> Research Program and its partners and collaborators retain
+          the right to request revisions to or terminate my research if they
+          assess that my project has significant potential to stigmatize or
+          otherwise harm individuals, families, communities, populations, and/or
+          other groups.
         </InitialsAgreement>
         <InitialsAgreement
           {...{ signatureState, signedInitials }}
           onChange={(v) => onChangeAccess(v)}
         >
-          <AoU /> retains the discretion to make decisions about my access,
-          including the provision or revocation thereof, at any time that take
-          into account any data use violations, data management incidents,
-          research misconduct, and legal or regulatory violations related to the
-          conduct of research for which I’ve been penalized in the past or that
-          I may commit or am found to have committed subsequent to becoming an{' '}
-          <AoU /> Authorized Data User.
+          The <AoU /> Research Program and its partners and collaborators retain
+          the discretion to make decisions at any time about my access,
+          including the provision, modification, or revocation thereof, for any
+          reason, including but not limited to research and/or professional
+          misconduct for which I've been penalized in the past or that I may
+          commit or am found to have committed subsequent to becoming an <AoU />{' '}
+          Authorized Data User.
         </InitialsAgreement>
         <div style={{ ...styles.bold, ...styles.smallTopMargin }}>
-          I acknowledge that failure to comply with the requirements outlined in
-          this Data User Code of Conduct may result in termination of my <AoU />{' '}
-          Research Program account and/or other sanctions, including, but not
-          limited to:
+          I understand and acknowledge that failure to comply with the
+          requirements outlined in this Data User Code of Conduct may result in
+          termination of my <AoU /> account and/or other sanctions, including,
+          but not limited to:
         </div>
         <ul style={{ ...styles.bold, ...styles.smallTopMargin }}>
           <li>
-            the posting of my name and affiliation on a publicly accessible list
-            of violators, and
+            The posting of my name and affiliation on a publicly accessible list
+            of violators;
           </li>
           <li>
-            notification of the National Institutes of Health or other federal
-            agencies as to my actions.
+            Notification of the National Institutes of Health or other
+            appropriate entities about my actions; and/or
           </li>
+          <li>Financial or legal repercussions.</li>
         </ul>
         <div style={{ ...styles.bold, ...styles.smallTopMargin }}>
-          I understand that failure to comply with these requirements may also
-          carry financial or legal repercussions. Any misuse of the <AoU />{' '}
-          Research Hub, Researcher Workbench or data resources is taken very
-          seriously, and other sanctions may be sought.
+          Misuse of any <AoU /> analytical platform or any data or other
+          research resources made available by the <AoU /> Research Program and
+          its partners and collaborators is taken very seriously, and other
+          sanctions may be sought.
         </div>
-        <label style={{ ...styles.bold, ...styles.largeTopMargin }}>
-          Authorized Data User Name
-        </label>
+        <label style={{ ...styles.bold, ...styles.largeTopMargin }}>Name</label>
         <ReadOnlyTextField
           {...{ signatureState }}
           disabled
@@ -332,7 +352,7 @@ const DuccSignaturePage = (props: SignatureProps) => {
           value={fullName}
         />
         <label style={{ ...styles.bold, ...styles.largeTopMargin }}>
-          User ID
+          Authorized Data User ID
         </label>
         <ReadOnlyTextField
           {...{ signatureState }}
@@ -418,6 +438,8 @@ export const DataUserCodeOfConduct = fp.flow(
 
   const [initialMonitoring, setInitialMonitoring] = useState('');
   const [initialPublic, setInitialPublic] = useState('');
+  const [initialWorkspace, setInitialWorkspace] = useState('');
+  const [initialStigmatize, setInitialStigmatize] = useState('');
   const [initialAccess, setInitialAccess] = useState('');
   const [page, setPage] = useState(DataUserCodeOfConductPage.CONTENT);
   const [submitting, setSubmitting] = useState(false);
@@ -461,13 +483,27 @@ export const DataUserCodeOfConduct = fp.flow(
   };
 
   const errors = validate(
-    { initialMonitoring, initialPublic, initialAccess },
+    {
+      initialMonitoring,
+      initialPublic,
+      initialWorkspace,
+      initialStigmatize,
+      initialAccess,
+    },
     {
       initialMonitoring: {
         presence: { allowEmpty: false },
         length: { maxiumum: 6 },
       },
       initialPublic: {
+        presence: { allowEmpty: false },
+        equality: { attribute: 'initialMonitoring' },
+      },
+      initialWorkspace: {
+        presence: { allowEmpty: false },
+        equality: { attribute: 'initialMonitoring' },
+      },
+      initialStigmatize: {
         presence: { allowEmpty: false },
         equality: { attribute: 'initialMonitoring' },
       },
@@ -535,6 +571,8 @@ export const DataUserCodeOfConduct = fp.flow(
           signedDate={duccCompletionTimeEpochMillis}
           onChangeMonitoring={setInitialMonitoring}
           onChangePublic={setInitialPublic}
+          onChangeWorkspace={setInitialWorkspace}
+          onChangeStigmatize={setInitialStigmatize}
           onChangeAccess={setInitialAccess}
           onBack={() => setPage(DataUserCodeOfConductPage.CONTENT)}
           onAccept={handleAccept}
