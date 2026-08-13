@@ -12,6 +12,7 @@ import { SupportMailto } from 'app/components/support';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { serverConfigStore } from 'app/utils/stores';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { isAbortError } from './errors';
@@ -140,6 +141,12 @@ export function getTierEmailDomains(
 ): Array<string> {
   const tierConfig = getTierConfigOrDefault(tierConfigs, accessTierShortName);
   return tierConfig.emailDomains || [];
+}
+
+export function getTierEchoGroup(accessTierShortName: string): string {
+  return accessTierShortName === AccessTierShortNames.Controlled
+    ? serverConfigStore.get().config.echoUserGroupCt
+    : serverConfigStore.get().config.echoUserGroupCt;
 }
 
 function mergeTierConfigs(

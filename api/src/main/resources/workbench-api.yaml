@@ -8150,18 +8150,17 @@ components:
           description: >
             If true, blocks access to all RW1.0 functionality for standard users.
             Only archive recovery functionality remains available.
-        RecoveryState:
-          type: string
-          description: Indicates recovery lifecycle state.
-          enum:
-            - NOT_STARTED
-            - RECOVERING
-            - RECOVERED
-            - FAILED
         cdrVersionsForMigration:
           type: array
           items:
             $ref: '#/components/schemas/CdrVersionForMigration'
+        echoUserGroups:
+          type: object
+          properties:
+            controlled:
+              type: string
+            registered:
+              type: string
     CdrVersionForMigration:
       required:
       - cdrVersion
@@ -11287,6 +11286,10 @@ components:
           items:
             type: string
         emailAddresses:
+          type: array
+          items:
+            type: string
+        userGroups:
           type: array
           items:
             type: string

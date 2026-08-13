@@ -43,6 +43,7 @@ import { convertAPIError } from 'app/utils/errors';
 import {
   defaultTierConfig,
   getTierConfig,
+  getTierEchoGroup,
   getTierEmailAddresses,
   getTierEmailDomains,
   updateEnableControlledTier,
@@ -81,7 +82,7 @@ const styles = reactStyles({
   },
   tierConfigContainer: {
     width: '46.5rem',
-    height: '30rem',
+    height: '35rem',
     borderRadius: '0.465rem',
     backgroundColor: 'rgba(33,111,180,0.1)',
     marginBottom: '1.5rem',
@@ -134,6 +135,24 @@ const EnableCtSwitch = (props: {
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
           ?.membershipRequirement !== InstitutionMembershipRequirement.NO_ACCESS
+      }
+      disabled={false} // TODO
+    />
+  );
+};
+const EnableEchoSwitch = (props: {
+  institution: Institution;
+  accessTier: string;
+  onToggle: (boolean) => void;
+}) => {
+  const { institution, accessTier, onToggle } = props;
+  return (
+    <CommonToggle
+      name='ECHO Access'
+      onToggle={(e) => onToggle(e)}
+      checked={
+        getTierConfig(institution, accessTier)
+          ?.userGroups.includes(getTierEchoGroup(accessTier))
       }
       disabled={false} // TODO
     />
@@ -306,6 +325,13 @@ const TierConfig = (props: TierConfigProps) => {
             )}
           </div>
         )}
+        <FlexRow style={{ gap: '0.45rem' }}>
+          <EnableEchoSwitch
+            institution={institution}
+            accessTier={accessTierShortName}
+            onToggle={setEnableControlledTier}
+          />
+        </FlexRow>
       </FlexColumn>
     </FlexRow>
   );
@@ -896,7 +922,7 @@ export const AdminInstitutionEdit = fp.flow(
                         )
                       )
                     }
-                    checked={institution.bypassInitialCreditsExpiration}
+                    checked={!!institution.bypassInitialCreditsExpiration}
                   />
                 </div>
                 <InstitutionExpirationBypassExplanation
