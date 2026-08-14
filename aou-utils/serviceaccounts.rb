@@ -19,14 +19,15 @@ class ServiceAccountContext
   ]
   SERVICE_ACCOUNT_KEY_PATH = "sa-key.json"
 
-  def initialize(project, service_account = nil, keyfile_path = nil)
+  def initialize(project, service_account = nil, keyfile_path = nil, iam_mode: false)
     @project = project
+    @iam_mode = iam_mode
     @service_account = service_account
     if not service_account
       @service_account = "#{@project}@appspot.gserviceaccount.com"
     end
     @keyfile_path = keyfile_path
-    if not @keyfile_path
+    if not @keyfile_path and not @iam_mode
       if TEST_SERVICE_ACCOUNTS.include? @service_account
         @keyfile_path = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
       else
@@ -52,6 +53,13 @@ class ServiceAccountContext
 
   def run()
     common = Common.new
+    if @iam_mode
+      common.status "Using IAM auth with impersonation of #{@service_account}"
+      ENV["CLOUD_SQL_TARGET_PRINCIPAL"] = @service_account
+      ENV["CDR_CLOUD_SQL_TARGET_PRINCIPAL"] = @service_account
+      yield(self)
+      return
+    end
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = @keyfile_path
     if @service_account == existing_file_account(@keyfile_path)
       # Don't generate another key if this account is already active. This can
