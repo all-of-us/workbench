@@ -190,12 +190,12 @@ export const WorkspaceList = fp.flow(withUserProfile())(
         <>
           <div style={styles.fadeBox}>
             <VwbImportantBanner
-                title='The Workspaces migration has ended'
-                message={
-                    'The original Researcher Workbench is no longer available for active use. ' +
-                    'Existing workspaces have been archived and can be recovered through the ' +
-                    'workspace recovery process.'
-                }
+              title='The Workspaces migration has ended'
+              message={
+                'The original Researcher Workbench is no longer available for active use. ' +
+                'Existing workspaces have been archived and can be recovered through the ' +
+                'workspace recovery process.'
+              }
             />
           </div>
           <FadeBox style={styles.fadeBox}>
@@ -274,11 +274,14 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   }}
                 >
                   <Button
-                      type='primary'
-                      onClick={() =>
-                          window.open(`${environment.vwbUiUrl}/workspaces`, '_blank')
-                      }
-                      style={{ height: '2.25rem' }}
+                    type='primary'
+                    onClick={() =>
+                      window.open(
+                        `${environment.vwbUiUrl}/workspaces`,
+                        '_blank'
+                      )
+                    }
+                    style={{ height: '2.25rem' }}
                   >
                     Open Researcher Workbench <NewWindowIcon />
                   </Button>
@@ -323,25 +326,26 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           marginBottom: '12px',
                         }}
                       >
-                         <SmallHeader>Legacy Workspaces</SmallHeader>
+                        <SmallHeader>Legacy Workspaces</SmallHeader>
                       </div>
 
                       <div
-                          style={{
-                            width: '100%',
-                            background: '#FFF8E7',
-                            border: '1px solid #F5C842',
-                            borderRadius: '6px',
-                            padding: '12px',
-                            marginBottom: '16px',
-                            color: colors.dark,
-                            fontSize: '13px',
-                          }}
+                        style={{
+                          width: '100%',
+                          background: '#FFF8E7',
+                          border: '1px solid #F5C842',
+                          borderRadius: '6px',
+                          padding: '12px',
+                          marginBottom: '16px',
+                          color: colors.dark,
+                          fontSize: '13px',
+                        }}
                       >
-                        Workspaces may be migrated or in archival flow. Use the status badges and
-                        filters to find what you need. Deleting a migrated or recovered workspace
-                        reduces legacy costs and does not affect the matching Researcher Workbench
-                        workspace.
+                        Workspaces may be migrated or in archival flow. Use the
+                        status badges and filters to find what you need.
+                        Deleting a migrated or recovered workspace reduces
+                        legacy costs and does not affect the matching Researcher
+                        Workbench workspace.
                       </div>
 
                       {profile.migrationTestingGroup && enableVwbMigration && (

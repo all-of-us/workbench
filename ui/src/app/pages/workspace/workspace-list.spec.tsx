@@ -153,7 +153,9 @@ describe('WorkspaceList', () => {
     component();
     await waitForNoSpinner();
 
-    expect(screen.getByRole('heading', { name: 'Legacy Workspaces' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
     expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
   });
 
@@ -182,9 +184,7 @@ describe('WorkspaceList', () => {
     ).not.toBeInTheDocument();
 
     // Click "Legacy Workspaces" button → legacy section heading visible again
-    await user.click(
-      screen.getByRole('button', { name: 'Legacy Workspaces' })
-    );
+    await user.click(screen.getByRole('button', { name: 'Legacy Workspaces' }));
     expect(
       screen.getByRole('heading', { name: 'Legacy Workspaces' })
     ).toBeInTheDocument();
@@ -230,7 +230,9 @@ describe('WorkspaceList', () => {
     component();
     await waitForNoSpinner();
 
-    expect(screen.getByRole('heading', { name: 'Legacy Workspaces' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
     expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
   });
 });
