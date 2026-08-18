@@ -78,7 +78,7 @@ interface State {
   filterLevels: WorkspaceAccessLevel[] | null;
   errorText: string;
   firstSignIn: Date;
-  workspaceViewFilter: 'all' | 'migrated' | 'archival-flow';
+  workspaceViewFilter: 'all' | 'verily' | 'legacy';
 }
 
 export const WorkspaceList = fp.flow(withUserProfile())(
@@ -178,34 +178,24 @@ export const WorkspaceList = fp.flow(withUserProfile())(
 
       const legacyWorkspaces = filteredList;
 
-      const filteredLegacyWorkspaces = legacyWorkspaces.filter((wp) => {
-        const recoveryState = wp.workspace.recoveryState;
-        const isMigrationFinished = wp.workspace.migrationState === 'FINISHED';
-        const isInArchivalFlow =
-          (recoveryState && archivalRecoveryStates.includes(recoveryState)) ||
-          (!recoveryState && !isMigrationFinished);
-        const isMigrated = isMigrationFinished && !isInArchivalFlow;
+      // All legacy workspaces shown; section visibility is controlled by workspaceViewFilter
+      const filteredLegacyWorkspaces = legacyWorkspaces;
 
-        switch (workspaceViewFilter) {
-          case 'migrated':
-            return isMigrated;
-          case 'archival-flow':
-            return isInArchivalFlow;
-          default:
-            return true;
-        }
-      });
+      const showVerilySection =
+        workspaceViewFilter === 'all' || workspaceViewFilter === 'verily';
+      const showLegacySection =
+        workspaceViewFilter === 'all' || workspaceViewFilter === 'legacy';
 
       return (
         <>
           <div style={styles.fadeBox}>
             <VwbImportantBanner
-              title='The All of Us Workbench migration has ended'
-              message={
-                'Legacy Researcher Workbench is no longer available for ' +
-                'active use. Existing workspaces have been archived and ' +
-                'can be recovered through the workspace recovery process.'
-              }
+                title='The Workspaces migration has ended'
+                message={
+                    'The original Researcher Workbench is no longer available for active use. ' +
+                    'Existing workspaces have been archived and can be recovered through the ' +
+                    'workspace recovery process.'
+                }
             />
           </div>
           <FadeBox style={styles.fadeBox}>
@@ -252,29 +242,25 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   </Button>
                   <Button
                     type={
-                      workspaceViewFilter === 'migrated'
-                        ? 'primary'
-                        : 'secondary'
+                      workspaceViewFilter === 'verily' ? 'primary' : 'secondary'
                     }
                     onClick={() =>
-                      this.setState({ workspaceViewFilter: 'migrated' })
+                      this.setState({ workspaceViewFilter: 'verily' })
                     }
                     style={{ height: '2.25rem' }}
                   >
-                    Migrated
+                    Workspaces
                   </Button>
                   <Button
                     type={
-                      workspaceViewFilter === 'archival-flow'
-                        ? 'primary'
-                        : 'secondary'
+                      workspaceViewFilter === 'legacy' ? 'primary' : 'secondary'
                     }
                     onClick={() =>
-                      this.setState({ workspaceViewFilter: 'archival-flow' })
+                      this.setState({ workspaceViewFilter: 'legacy' })
                     }
                     style={{ height: '2.25rem' }}
                   >
-                    Archival Flow
+                    Legacy Workspaces
                   </Button>
                 </FlexRow>
 
@@ -288,16 +274,13 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   }}
                 >
                   <Button
-                    type='primary'
-                    onClick={() =>
-                      window.open(
-                        `${environment.vwbUiUrl}/workspaces`,
-                        '_blank'
-                      )
-                    }
-                    style={{ height: '2.25rem' }}
+                      type='primary'
+                      onClick={() =>
+                          window.open(`${environment.vwbUiUrl}/workspaces`, '_blank')
+                      }
+                      style={{ height: '2.25rem' }}
                   >
-                    Open Verily <NewWindowIcon />
+                    Open Researcher Workbench <NewWindowIcon />
                   </Button>
                 </div>
               </FlexRow>
@@ -321,15 +304,17 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     flexWrap: 'wrap',
                   }}
                 >
-                  <div style={{ width: '100%' }}>
-                    <VwbWorkspaces
-                      loading={workspacesLoading}
-                      workspaces={vwbWorkspaces}
-                      currentUsername={profile.username}
-                    />
-                  </div>
+                  {showVerilySection && (
+                    <div style={{ width: '100%' }}>
+                      <VwbWorkspaces
+                        loading={workspacesLoading}
+                        workspaces={vwbWorkspaces}
+                        currentUsername={profile.username}
+                      />
+                    </div>
+                  )}
 
-                  {legacyWorkspaces.length > 0 && (
+                  {showLegacySection && legacyWorkspaces.length > 0 && (
                     <>
                       <div
                         style={{
@@ -338,26 +323,25 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           marginBottom: '12px',
                         }}
                       >
-                        <SmallHeader>Legacy Workspaces</SmallHeader>
+                         <SmallHeader>Legacy Workspaces</SmallHeader>
                       </div>
 
                       <div
-                        style={{
-                          width: '100%',
-                          background: '#FFF8E7',
-                          border: '1px solid #F5C842',
-                          borderRadius: '6px',
-                          padding: '12px',
-                          marginBottom: '16px',
-                          color: colors.dark,
-                          fontSize: '13px',
-                        }}
+                          style={{
+                            width: '100%',
+                            background: '#FFF8E7',
+                            border: '1px solid #F5C842',
+                            borderRadius: '6px',
+                            padding: '12px',
+                            marginBottom: '16px',
+                            color: colors.dark,
+                            fontSize: '13px',
+                          }}
                       >
-                        Legacy workspaces may be migrated or in archival flow.
-                        Use the status badges and filters to find what you need.
-                        Deleting a migrated or recovered Legacy workspace
-                        reduces legacy costs and does not affect the matching
-                        Verily workspace.
+                        Workspaces may be migrated or in archival flow. Use the status badges and
+                        filters to find what you need. Deleting a migrated or recovered workspace
+                        reduces legacy costs and does not affect the matching Researcher Workbench
+                        workspace.
                       </div>
 
                       {profile.migrationTestingGroup && enableVwbMigration && (

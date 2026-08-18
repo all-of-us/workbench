@@ -153,38 +153,41 @@ describe('WorkspaceList', () => {
     component();
     await waitForNoSpinner();
 
-    expect(screen.getByText('Legacy Workspaces')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Legacy Workspaces' })).toBeInTheDocument();
     expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
   });
 
-  it('filters legacy list by migrated and archival flow status', async () => {
+  it('show filter hides/shows sections correctly', async () => {
     const migratedWorkspace = {
       ...buildWorkspaceStub('migrated'),
       migrationState: MigrationState.FINISHED,
     };
-    const archivalWorkspace = {
-      ...buildWorkspaceStub('archival'),
-      recoveryState: WorkspaceRecoveryStatus.NOT_STARTED,
-    };
-
-    workspacesApiStub.workspaces = [migratedWorkspace, archivalWorkspace];
+    workspacesApiStub.workspaces = [migratedWorkspace];
     workspacesApiStub.workspaceAccess = new Map([
       [migratedWorkspace.terraName, WorkspaceAccessLevel.OWNER],
-      [archivalWorkspace.terraName, WorkspaceAccessLevel.OWNER],
     ]);
 
     component();
     await waitForNoSpinner();
 
-    expect(screen.getAllByTestId('workspace-card-name')).toHaveLength(2);
+    // All: legacy section heading visible
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Migrated' }));
-    expect(screen.getAllByTestId('workspace-card-name')).toHaveLength(1);
-    expect(screen.getByText(migratedWorkspace.name)).toBeInTheDocument();
+    // Click "Workspaces" → legacy section heading hidden
+    await user.click(screen.getByRole('button', { name: 'Workspaces' }));
+    expect(
+      screen.queryByRole('heading', { name: 'Legacy Workspaces' })
+    ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Archival Flow' }));
-    expect(screen.getAllByTestId('workspace-card-name')).toHaveLength(1);
-    expect(screen.getByText(archivalWorkspace.name)).toBeInTheDocument();
+    // Click "Legacy Workspaces" button → legacy section heading visible again
+    await user.click(
+      screen.getByRole('button', { name: 'Legacy Workspaces' })
+    );
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
   });
 
   it('shows migrated delete action for creators and hides it for other non-owners', async () => {
@@ -227,7 +230,7 @@ describe('WorkspaceList', () => {
     component();
     await waitForNoSpinner();
 
-    expect(screen.getByText('Legacy Workspaces')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Legacy Workspaces' })).toBeInTheDocument();
     expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
   });
 });
