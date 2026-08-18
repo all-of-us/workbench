@@ -362,8 +362,6 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                           (!recoveryState && !isMigrationFinished);
                         const isMigrated =
                           isMigrationFinished && !isInArchivalFlow;
-                        const isRecovered =
-                          recoveryState === WorkspaceRecoveryStatus.RECOVERED;
                         const isOwner =
                           wp.accessLevel === WorkspaceAccessLevel.OWNER;
                         const isCreator =
@@ -398,7 +396,10 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                             reload={() => this.reloadWorkspaces()}
                             tierAccessDisabled={tierAccessDisabled}
                             isMigratedView={false}
-                            showDeleteAction={isMigrated || isRecovered}
+                            showDeleteAction={
+                              recoveryState !==
+                              WorkspaceRecoveryStatus.RECOVERING
+                            }
                             canDeleteAction={isOwner || isCreator}
                           />
                         );

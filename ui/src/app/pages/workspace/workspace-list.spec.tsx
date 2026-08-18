@@ -235,4 +235,26 @@ describe('WorkspaceList', () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
   });
+
+  it('hides delete action for recovering workspaces', async () => {
+    const recoveringWorkspace = {
+      ...buildWorkspaceStub('recovering'),
+      recoveryState: WorkspaceRecoveryStatus.RECOVERING,
+      creatorUser: { userName: profile.username },
+    };
+    workspacesApiStub.workspaces = [recoveringWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [recoveringWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('delete-migrated-workspace')
+    ).not.toBeInTheDocument();
+  });
 });
