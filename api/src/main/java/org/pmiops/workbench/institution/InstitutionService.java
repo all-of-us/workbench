@@ -132,4 +132,11 @@ public interface InstitutionService {
 
   /** If true, this institution's users are exempt from credit expiration. */
   boolean shouldBypassForCreditsExpiration(DbUser user);
+
+  /**
+   * Process the next user to be added or removed for the specified institution.
+   *
+   * @param institutionId ID for institution for which the group action is being made
+   */
+  void processNextUserGroupAction(long institutionId);
 }

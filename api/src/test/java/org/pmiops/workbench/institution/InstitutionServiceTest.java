@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -35,9 +36,11 @@ import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.UserTierEligibility;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @Import({
@@ -49,6 +52,9 @@ import org.springframework.context.annotation.Import;
   InstitutionTierConfigMapperImpl.class,
 })
 public class InstitutionServiceTest {
+
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
 
   @Autowired private InstitutionService service;
   @Autowired private UserDao userDao;

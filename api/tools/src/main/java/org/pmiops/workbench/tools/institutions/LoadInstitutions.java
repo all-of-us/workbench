@@ -9,6 +9,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -18,6 +19,7 @@ import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.tools.CommandLineToolConfig;
 import org.pmiops.workbench.tools.Tool;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,6 +55,45 @@ public class LoadInstitutions extends Tool {
 
   private static final Options options =
       new Options().addOption(importFilename).addOption(dryRunOpt);
+
+  /** Local CLI execution has no request context; provide a no-op client for institution imports. */
+  private static class NoopVwbUserManagerClient extends VwbUserManagerClient {
+    NoopVwbUserManagerClient() {
+      super(() -> null, () -> null, () -> null, null, () -> null, () -> null, () -> null);
+    }
+
+    @Override
+    public void addUserToGroup(String groupName, String email) {
+      // no-op for loadInstitutions CLI usage
+    }
+
+    @Override
+    public void removeUserFromGroup(String groupName, String email) {
+      // no-op for loadInstitutions CLI usage
+    }
+  }
+
+  /** No-op queue service for CLI execution to avoid cloud task wiring. */
+  private static class NoopTaskQueueService extends TaskQueueService {
+    NoopTaskQueueService() {
+      super(null, null, null, () -> null);
+    }
+
+    @Override
+    public void pushUserGroupActionTask(long institutionId) {
+      // no-op for loadInstitutions CLI usage
+    }
+  }
+
+  @Bean
+  public TaskQueueService taskQueueService() {
+    return new NoopTaskQueueService();
+  }
+
+  @Bean
+  public VwbUserManagerClient vwbUserManagerClient() {
+    return new NoopVwbUserManagerClient();
+  }
 
   @Bean
   public CommandLineRunner run(InstitutionService institutionService) {

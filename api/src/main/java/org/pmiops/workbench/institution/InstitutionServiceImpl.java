@@ -2,14 +2,19 @@ package org.pmiops.workbench.institution;
 
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessUtils.getAccessTierByShortNameOrThrow;
+import static org.pmiops.workbench.institution.InstitutionUtils.getAllUserGroups;
 import static org.pmiops.workbench.institution.InstitutionUtils.getEmailAddressesByTierOrEmptySet;
 import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsByTierOrEmptySet;
 import static org.pmiops.workbench.institution.InstitutionUtils.getTierConfigByTier;
+import static org.pmiops.workbench.institution.InstitutionUtils.getUsergroupsByTierOrEmptySet;
 
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -21,12 +26,16 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
 import org.pmiops.workbench.db.dao.InstitutionTierRequirementDao;
+import org.pmiops.workbench.db.dao.InstitutionUserGroupDao;
 import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserGroupActionDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -34,8 +43,11 @@ import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
+import org.pmiops.workbench.db.model.DbInstitutionUserGroup;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserGroupAction;
+import org.pmiops.workbench.db.model.DbUserGroupAction.UserGroupActionStatus;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -47,7 +59,9 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.UserGroupAction;
 import org.pmiops.workbench.model.UserTierEligibility;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -65,14 +79,20 @@ public class InstitutionServiceImpl implements InstitutionService {
   private final InstitutionDao institutionDao;
   private final InstitutionEmailDomainDao institutionEmailDomainDao;
   private final InstitutionEmailAddressDao institutionEmailAddressDao;
+  private final InstitutionUserGroupDao institutionUserGroupDao;
   private final InstitutionUserInstructionsDao institutionUserInstructionsDao;
   private final InstitutionTierRequirementDao institutionTierRequirementDao;
+  private final UserDao userDao;
+  private final UserGroupActionDao userGroupActionDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final InstitutionMapper institutionMapper;
   private final InstitutionUserInstructionsMapper institutionUserInstructionsMapper;
   private final InstitutionTierConfigMapper institutionTierConfigMapper;
   private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
+  private final TaskQueueService taskQueueService;
+  private final VwbUserManagerClient vwbUserManagerClient;
+  private final Clock clock;
 
   @Autowired
   InstitutionServiceImpl(
@@ -80,24 +100,36 @@ public class InstitutionServiceImpl implements InstitutionService {
       InstitutionDao institutionDao,
       InstitutionEmailDomainDao institutionEmailDomainDao,
       InstitutionEmailAddressDao institutionEmailAddressDao,
+      InstitutionUserGroupDao institutionUserGroupDao,
       InstitutionUserInstructionsDao institutionUserInstructionsDao,
       InstitutionTierRequirementDao institutionTierRequirementDao,
+      UserDao userDao,
+      UserGroupActionDao userGroupActionDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       InstitutionMapper institutionMapper,
       InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
       InstitutionTierConfigMapper institutionTierConfigMapper,
-      PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
+      PublicInstitutionDetailsMapper publicInstitutionDetailsMapper,
+      TaskQueueService taskQueueService,
+      VwbUserManagerClient vwbUserManagerClient,
+      Clock clock) {
     this.accessTierDao = accessTierDao;
     this.institutionDao = institutionDao;
     this.institutionEmailDomainDao = institutionEmailDomainDao;
     this.institutionEmailAddressDao = institutionEmailAddressDao;
+    this.institutionUserGroupDao = institutionUserGroupDao;
     this.institutionUserInstructionsDao = institutionUserInstructionsDao;
     this.institutionTierRequirementDao = institutionTierRequirementDao;
+    this.userDao = userDao;
+    this.userGroupActionDao = userGroupActionDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.institutionMapper = institutionMapper;
     this.institutionUserInstructionsMapper = institutionUserInstructionsMapper;
     this.institutionTierConfigMapper = institutionTierConfigMapper;
     this.publicInstitutionDetailsMapper = publicInstitutionDetailsMapper;
+    this.taskQueueService = taskQueueService;
+    this.vwbUserManagerClient = vwbUserManagerClient;
+    this.clock = clock;
   }
 
   @Override
@@ -382,6 +414,14 @@ public class InstitutionServiceImpl implements InstitutionService {
                     Collectors.mapping(
                         DbInstitutionEmailAddress::getEmailAddress,
                         Collectors.toCollection(TreeSet::new))));
+    Map<String, Set<String>> userGroupsMapByTier =
+        institutionUserGroupDao.getByInstitution(dbInstitution).stream()
+            .collect(
+                Collectors.groupingBy(
+                    d -> d.getAccessTier().getShortName(),
+                    Collectors.mapping(
+                        DbInstitutionUserGroup::getUserGroup,
+                        Collectors.toCollection(TreeSet::new))));
 
     return institutionTierRequirementDao.getByInstitution(dbInstitution).stream()
         .map(
@@ -389,7 +429,8 @@ public class InstitutionServiceImpl implements InstitutionService {
                 institutionTierConfigMapper.dbToTierConfigModel(
                     t,
                     emailAddressMapByTier.get(t.getAccessTier().getShortName()),
-                    emailDomainMapByTier.get(t.getAccessTier().getShortName())))
+                    emailDomainMapByTier.get(t.getAccessTier().getShortName()),
+                    userGroupsMapByTier.get(t.getAccessTier().getShortName())))
         .collect(Collectors.toList());
   }
 
@@ -429,6 +470,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     setInstitutionEmailDomains(modelInstitution, dbInstitution, dbAccessTiers);
     setInstitutionEmailAddresses(modelInstitution, dbInstitution, dbAccessTiers);
     setInstitutionTierRequirement(modelInstitution, dbInstitution, dbAccessTiers);
+    setInstitutionUserGroups(modelInstitution, dbInstitution, dbAccessTiers);
 
     final String userInstructions = modelInstitution.getUserInstructions();
     if (!Strings.isNullOrEmpty(userInstructions)) {
@@ -473,6 +515,117 @@ public class InstitutionServiceImpl implements InstitutionService {
               getEmailAddressesByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
               dbInstitution,
               dbAccessTier));
+    }
+  }
+
+  // note that this replaces all user groups for this institution with the passed-in groups
+  private void setInstitutionUserGroups(
+      final Institution modelInstitution,
+      final DbInstitution dbInstitution,
+      final List<DbAccessTier> dbAccessTiers) {
+    List<String> currentGroups =
+        institutionUserGroupDao.getByInstitution(dbInstitution).stream()
+            .map(DbInstitutionUserGroup::getUserGroup)
+            .collect(Collectors.toList());
+    maybeUpdateUserGroups(
+        currentGroups, getAllUserGroups(modelInstitution), dbInstitution.getInstitutionId());
+    institutionUserGroupDao.deleteByInstitution(dbInstitution);
+    for (DbAccessTier dbAccessTier : dbAccessTiers) {
+      institutionUserGroupDao.saveAll(
+          institutionTierConfigMapper.userGroupsToDb(
+              getUsergroupsByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
+              dbInstitution,
+              dbAccessTier));
+    }
+  }
+
+  private void maybeUpdateUserGroups(
+      final List<String> previousUserGroups,
+      final List<String> updatedUserGroups,
+      final long institutionId) {
+    List<String> addedGroups = new ArrayList<>(updatedUserGroups);
+    List<String> removedGroups = new ArrayList<>(previousUserGroups);
+    addedGroups.removeAll(previousUserGroups);
+    removedGroups.removeAll(updatedUserGroups);
+    if (addedGroups.isEmpty() && removedGroups.isEmpty()) {
+      return;
+    }
+    List<String> institutionEmails =
+        userDao.findActiveUserEmailsWithCurrentDuccByInstitution(institutionId);
+    addedGroups.forEach(
+        addedGroup ->
+            insertUserGroupActions(
+                institutionEmails, institutionId, addedGroup, UserGroupAction.ADD));
+    removedGroups.forEach(
+        removedGroup ->
+            insertUserGroupActions(
+                institutionEmails, institutionId, removedGroup, UserGroupAction.REMOVE));
+    taskQueueService.pushUserGroupActionTask(institutionId);
+  }
+
+  private void insertUserGroupActions(
+      List<String> emails, long institutionId, String group, UserGroupAction action) {
+    emails.forEach(
+        email -> {
+          DbUserGroupAction groupAction =
+              new DbUserGroupAction()
+                  .setUserEmail(email)
+                  .setInstitutionId(institutionId)
+                  .setGroupName(group)
+                  .setAddedTime(new Timestamp(clock.instant().toEpochMilli()))
+                  .setUserGroupAction(action.toString())
+                  .setUserGroupActionStatus(UserGroupActionStatus.INCOMPLETE.toString());
+          userGroupActionDao.save(groupAction);
+        });
+  }
+
+  @Override
+  public void processNextUserGroupAction(long institutionId) {
+    // Make sure UserGroupActionDao inserts complete before running task
+    try {
+      Duration queueDelay = Duration.ofSeconds(1);
+      Thread.sleep(queueDelay.toMillis());
+    } catch (Exception e) {
+      log.info("Queue delay failed");
+    }
+    DbUserGroupAction action =
+        userGroupActionDao.findFirstByInstitutionIdAndUserGroupActionStatusOrderByAddedTime(
+            institutionId, UserGroupActionStatus.INCOMPLETE.toString());
+    if (action == null) {
+      log.info("No incomplete user group actions found");
+      return;
+    }
+    try {
+      log.info(
+          String.format(
+              "Processing action '%s' on group '%s' for user '%s'",
+              action.getUserGroupAction(), action.getGroupName(), action.getUserEmail()));
+      switch (action.getUserGroupAction()) {
+        case "ADD":
+          vwbUserManagerClient.addUserToGroup(action.getGroupName(), action.getUserEmail());
+          break;
+        case "REMOVE":
+          vwbUserManagerClient.removeUserFromGroup(action.getGroupName(), action.getUserEmail());
+          break;
+        default:
+          log.info(
+              String.format(
+                  "Invalid action '%s' on group '%s' for user '%s'",
+                  action.getUserGroupAction(), action.getGroupName(), action.getUserEmail()));
+      }
+      action.setUserGroupActionStatus(UserGroupActionStatus.COMPLETE.toString());
+      action.setCompletedTime(new Timestamp(clock.instant().toEpochMilli()));
+
+    } catch (Exception e) {
+      action.setUserGroupActionStatus(UserGroupActionStatus.COMPLETE.toString());
+      throw new ServerErrorException(
+          String.format(
+              "Error processing action '%s' on group '%s' for user '%s'",
+              action.getUserGroupAction(), action.getGroupName(), action.getUserEmail()),
+          e);
+    } finally {
+      userGroupActionDao.save(action);
+      taskQueueService.pushUserGroupActionTask(institutionId);
     }
   }
 
@@ -580,4 +733,9 @@ public class InstitutionServiceImpl implements InstitutionService {
           }
         });
   }
+
+  //  @Override
+  //  public void updateUsersInGroup(String shortName, UserGroupAction action) {
+  //    return getByUser(user).map(Institution::isBypassInitialCreditsExpiration).orElse(false);
+  //  }
 }

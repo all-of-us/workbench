@@ -119,6 +119,7 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -142,6 +143,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private LeonardoApiClient leonardoApiClient;
   @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
   @MockitoBean private WorkspaceMapper workspaceMapper;
   @MockitoBean private VwbUserService vwbUserService;
   @MockitoBean private CaptchaVerificationService mockCaptchaVerificationService;

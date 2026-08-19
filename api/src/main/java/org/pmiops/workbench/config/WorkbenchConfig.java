@@ -5,6 +5,7 @@ import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.pmiops.workbench.config.WorkbenchConfig.VwbConfig.EchoUserGroups;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.CDRv8PlusConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig.LegacyWorkflowConfig;
 
@@ -80,6 +81,7 @@ public class WorkbenchConfig {
     config.artifactRegistry = new ArtifactRegistryConfig();
     config.vwb = new VwbConfig();
     config.vwb.cdrVersionsForMigration = List.of();
+    config.vwb.echoUserGroups = new EchoUserGroups();
     return config;
   }
 
@@ -552,5 +554,12 @@ public class WorkbenchConfig {
     }
 
     public List<CdrVersionForMigration> cdrVersionsForMigration;
+
+    public static class EchoUserGroups {
+      public String controlled;
+      public String registered;
+    }
+
+    public EchoUserGroups echoUserGroups;
   }
 }

@@ -51,6 +51,7 @@ import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -73,6 +74,7 @@ public class UserControllerTest {
   @MockitoBean private MailService mailService;
   @MockitoBean private UserServiceAuditor userServiceAuditor;
   @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
   @MockitoBean private VwbUserService vwbUserService;
   @MockitoBean private TaskQueueService taskQueueService;
 

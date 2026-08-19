@@ -45,13 +45,15 @@ import {
   getTierConfig,
   getTierEmailAddresses,
   getTierEmailDomains,
+  getTierUserGroups,
   updateEnableControlledTier,
   updateMembershipRequirement,
   updateTierEmailAddresses,
   updateTierEmailDomains,
+  updateTierUserGroups,
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
@@ -81,7 +83,7 @@ const styles = reactStyles({
   },
   tierConfigContainer: {
     width: '46.5rem',
-    height: '30rem',
+    height: '35rem',
     borderRadius: '0.465rem',
     backgroundColor: 'rgba(33,111,180,0.1)',
     marginBottom: '1.5rem',
@@ -136,6 +138,24 @@ const EnableCtSwitch = (props: {
           ?.membershipRequirement !== InstitutionMembershipRequirement.NO_ACCESS
       }
       disabled={false} // TODO
+    />
+  );
+};
+const EnableEchoSwitch = (props: {
+  institution: Institution;
+  accessTier: string;
+  onToggle: (boolean) => void;
+}) => {
+  const { institution, accessTier, onToggle } = props;
+  return (
+    <CommonToggle
+      name='ECHO Access'
+      onToggle={(e) => onToggle(e)}
+      checked={
+        !!getTierConfig(institution, accessTier)?.userGroups?.includes(
+          serverConfigStore.get().config?.echoUserGroups?.[accessTier]
+        )
+      }
     />
   );
 };
@@ -196,6 +216,7 @@ interface TierConfigProps {
   institution: Institution;
   accessTierShortName: string;
   setEnableControlledTier?: (boolean) => void;
+  setEnableEchoAccess?: (boolean) => void;
   setTierRequirement: (InstitutionMembershipRequirement) => void;
   filterEmptyAddresses: Function;
   setTierAddresses: (string) => void;
@@ -207,6 +228,7 @@ const TierConfig = (props: TierConfigProps) => {
     institution,
     accessTierShortName,
     setEnableControlledTier,
+    setEnableEchoAccess,
     setTierRequirement,
     filterEmptyAddresses,
     setTierAddresses,
@@ -306,6 +328,13 @@ const TierConfig = (props: TierConfigProps) => {
             )}
           </div>
         )}
+        <FlexRow style={{ gap: '0.45rem', marginTop: '1.5rem' }}>
+          <EnableEchoSwitch
+            institution={institution}
+            accessTier={accessTierShortName}
+            onToggle={setEnableEchoAccess}
+          />
+        </FlexRow>
       </FlexColumn>
     </FlexRow>
   );
@@ -491,6 +520,32 @@ export const AdminInstitutionEdit = fp.flow(
           institution.tierConfigs,
           institutionBeforeEdits?.tierConfigs,
           enableControlled
+        )
+      );
+    }
+
+    private setEnableEchoAccess(
+      accessTierShortName: string,
+      enableEcho: boolean
+    ) {
+      const { institution, institutionBeforeEdits } = this.state;
+      const echoGroup =
+        serverConfigStore.get().config?.echoUserGroups?.[accessTierShortName];
+      if (!echoGroup) {
+        return;
+      }
+      const currentGroups = getTierUserGroups(
+        institutionBeforeEdits.tierConfigs,
+        accessTierShortName
+      );
+      const updatedUserGroups = enableEcho
+        ? Array.from(new Set([...currentGroups, echoGroup]))
+        : currentGroups.filter((group) => group !== echoGroup);
+      this.setTierConfigs(
+        updateTierUserGroups(
+          institution.tierConfigs,
+          accessTierShortName,
+          updatedUserGroups
         )
       );
     }
@@ -896,7 +951,7 @@ export const AdminInstitutionEdit = fp.flow(
                         )
                       )
                     }
-                    checked={institution.bypassInitialCreditsExpiration}
+                    checked={!!institution.bypassInitialCreditsExpiration}
                   />
                 </div>
                 <InstitutionExpirationBypassExplanation
@@ -922,6 +977,9 @@ export const AdminInstitutionEdit = fp.flow(
                   institution={institution}
                   setEnableControlledTier={(value) =>
                     this.setEnableControlledTier(value)
+                  }
+                  setEnableEchoAccess={(value) =>
+                    this.setEnableEchoAccess(accessTierShortName, value)
                   }
                   setTierRequirement={(requirement) =>
                     this.setMembershipRequirement(

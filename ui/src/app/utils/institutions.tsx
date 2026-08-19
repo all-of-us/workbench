@@ -107,6 +107,7 @@ export const defaultTierConfig = (
   membershipRequirement: InstitutionMembershipRequirement.NO_ACCESS,
   emailAddresses: [],
   emailDomains: [],
+  userGroups: [],
 });
 
 export function getTierConfigOrDefault(
@@ -142,6 +143,14 @@ export function getTierEmailDomains(
   return tierConfig.emailDomains || [];
 }
 
+export function getTierUserGroups(
+  tierConfigs: Array<InstitutionTierConfig>,
+  accessTierShortName: string
+): Array<string> {
+  const tierConfig = getTierConfigOrDefault(tierConfigs, accessTierShortName);
+  return tierConfig.userGroups || [];
+}
+
 function mergeTierConfigs(
   configs: InstitutionTierConfig[],
   tierConfig: InstitutionTierConfig
@@ -173,6 +182,18 @@ export function updateTierEmailDomains(
   return mergeTierConfigs(tierConfigs, {
     ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
     emailDomains,
+  });
+}
+
+// Update the user groups of a single tier and return the new tier configs.
+export function updateTierUserGroups(
+  tierConfigs: InstitutionTierConfig[],
+  accessTierShortName: string,
+  userGroups: Array<string>
+): Array<InstitutionTierConfig> {
+  return mergeTierConfigs(tierConfigs, {
+    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
+    userGroups,
   });
 }
 

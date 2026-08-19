@@ -60,6 +60,7 @@ import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.user.VwbUserService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -88,6 +89,7 @@ public class UserServiceAccessTest {
   @MockitoBean private UserServiceAuditor userServiceAuditor;
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
   @MockitoBean private VwbUserService vwbUserService;
   @MockitoBean private TaskQueueService taskQueueService;
   private static final String USERNAME = "abc@fake-research-aou.org";

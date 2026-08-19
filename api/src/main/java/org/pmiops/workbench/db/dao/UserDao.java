@@ -103,6 +103,18 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       @Param("minCreationTime") Timestamp minCreationTime,
       @Param("maxCreationTime") Timestamp maxCreationTime);
 
+  @Query(
+      value =
+          "select u.username "
+              + "from DbUser u "
+              + "join DbVerifiedInstitutionalAffiliation uvia on (u.userId = uvia.user.userId) "
+              + "join DbUserCodeOfConductAgreement ucca on (u.userId = ucca.user.userId) "
+              + "where uvia.institution.institutionId = :institutionId "
+              + "and ucca.signedVersion >= 7 "
+              + "and u.disabled = false ")
+  List<String> findActiveUserEmailsWithCurrentDuccByInstitution(
+      @Param("institutionId") long institutionId);
+
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {
     Long getUserId();
