@@ -137,6 +137,8 @@ interface WorkspaceCardProps extends NavigationProps {
   showDeleteAction?: boolean;
   // Caller can override who is allowed to use the delete icon.
   canDeleteAction?: boolean;
+  // Prevent navigating into the workspace from the card.
+  disableOpenAction?: boolean;
 }
 
 export const WorkspaceCard = fp.flow(withNavigation)(
@@ -208,6 +210,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         isMigratedView,
         showDeleteAction = false,
         canDeleteAction,
+        disableOpenAction = false,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
       const isArchived = workspace.recoveryState != null;
@@ -303,41 +306,58 @@ export const WorkspaceCard = fp.flow(withNavigation)(
               >
                 <FlexColumn style={{ marginBottom: 'auto' }}>
                   <FlexColumn>
-                    <StyledRouterLink
-                      style={
-                        tierAccessDisabled
-                          ? styles.workspaceNameDisabled
-                          : styles.workspaceName
-                      }
-                      analyticsFn={() => this.trackWorkspaceNavigation()}
-                      data-test-id={'workspace-card-link'}
-                      propagateDataTestId
-                      path={getWorkspacePath()}
-                    >
+                    {!disableOpenAction ? (
+                      <StyledRouterLink
+                        style={
+                          tierAccessDisabled
+                            ? styles.workspaceNameDisabled
+                            : styles.workspaceName
+                        }
+                        analyticsFn={() => this.trackWorkspaceNavigation()}
+                        data-test-id={'workspace-card-link'}
+                        propagateDataTestId
+                        path={getWorkspacePath()}
+                      >
+                        <TooltipTrigger
+                          content={
+                            tierAccessDisabled && (
+                              <div>
+                                This workspace is a{' '}
+                                {displayNameForTier(accessTierShortName)}{' '}
+                                workspace. You do not have access. Please
+                                complete the data access requirements to gain
+                                access.
+                              </div>
+                            )
+                          }
+                        >
+                          <div
+                            style={
+                              tierAccessDisabled
+                                ? styles.workspaceNameDisabled
+                                : styles.workspaceName
+                            }
+                            data-test-id='workspace-card-name'
+                          >
+                            {workspace.name}
+                          </div>
+                        </TooltipTrigger>
+                      </StyledRouterLink>
+                    ) : (
                       <TooltipTrigger
                         content={
-                          tierAccessDisabled && (
-                            <div>
-                              This workspace is a{' '}
-                              {displayNameForTier(accessTierShortName)}{' '}
-                              workspace. You do not have access. Please complete
-                              the data access requirements to gain access.
-                            </div>
-                          )
+                          'This migrated Legacy Workbench workspace can no longer be opened. ' +
+                          'Use the matching Verily Workbench workspace instead.'
                         }
                       >
                         <div
-                          style={
-                            tierAccessDisabled
-                              ? styles.workspaceNameDisabled
-                              : styles.workspaceName
-                          }
+                          style={styles.workspaceNameDisabled}
                           data-test-id='workspace-card-name'
                         >
                           {workspace.name}
                         </div>
                       </TooltipTrigger>
-                    </StyledRouterLink>
+                    )}
 
                     {(workspace.migrationState === 'FINISHED' ||
                       workspace.recoveryState === 'RECOVERED') &&

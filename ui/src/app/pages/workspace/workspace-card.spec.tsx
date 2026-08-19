@@ -21,7 +21,11 @@ describe('WorkspaceCard', () => {
 
   const component = (
     accessLevel: WorkspaceAccessLevel,
-    opts: { showDeleteAction?: boolean; canDeleteAction?: boolean } = {}
+    opts: {
+      showDeleteAction?: boolean;
+      canDeleteAction?: boolean;
+      disableOpenAction?: boolean;
+    } = {}
   ) => {
     return renderWithRouter(
       <WorkspaceCard
@@ -30,6 +34,7 @@ describe('WorkspaceCard', () => {
         workspace={workspaceStubs[0]}
         showDeleteAction={opts.showDeleteAction}
         canDeleteAction={opts.canDeleteAction}
+        disableOpenAction={opts.disableOpenAction}
       />
     );
   };
@@ -91,5 +96,14 @@ describe('WorkspaceCard', () => {
     expect(
       screen.queryByTestId('delete-migrated-workspace')
     ).not.toBeInTheDocument();
+  });
+
+  it('disables opening workspace when disableOpenAction is true', async () => {
+    component(WorkspaceAccessLevel.OWNER, { disableOpenAction: true });
+
+    expect(
+      await screen.findByTestId('workspace-card-name')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('workspace-card-link')).not.toBeInTheDocument();
   });
 });

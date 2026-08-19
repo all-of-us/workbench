@@ -157,6 +157,7 @@ describe('WorkspaceList', () => {
       screen.getByRole('heading', { name: 'Legacy Workspaces' })
     ).toBeInTheDocument();
     expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
+    expect(screen.queryByTestId('workspace-card-link')).not.toBeInTheDocument();
   });
 
   it('show filter hides/shows sections correctly', async () => {

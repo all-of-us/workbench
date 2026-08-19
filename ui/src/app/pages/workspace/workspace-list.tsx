@@ -396,6 +396,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                             reload={() => this.reloadWorkspaces()}
                             tierAccessDisabled={tierAccessDisabled}
                             isMigratedView={false}
+                            disableOpenAction={isMigrated}
                             showDeleteAction={
                               recoveryState !==
                               WorkspaceRecoveryStatus.RECOVERING
