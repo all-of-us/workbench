@@ -1,8 +1,10 @@
 import * as React from 'react';
 
 import {
+  MigrationState,
   ProfileApi,
   WorkspaceAccessLevel,
+  WorkspaceRecoveryStatus,
   WorkspacesApi,
 } from 'generated/fetch';
 
@@ -135,5 +137,125 @@ describe('WorkspaceList', () => {
 
     await pickAccessLevel(accessLevelDropdown, 'All');
     expect(getCardNames().length).toEqual(3);
+  });
+
+  it('shows legacy section and delete action for migrated owners', async () => {
+    const migratedWorkspace = {
+      ...buildWorkspaceStub('migrated-owner'),
+      migrationState: MigrationState.FINISHED,
+      creatorUser: { userName: 'someone-else@fake-research-aou.org' },
+    };
+    workspacesApiStub.workspaces = [migratedWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [migratedWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
+    expect(screen.queryByTestId('workspace-card-link')).not.toBeInTheDocument();
+  });
+
+  it('show filter hides/shows sections correctly', async () => {
+    const migratedWorkspace = {
+      ...buildWorkspaceStub('migrated'),
+      migrationState: MigrationState.FINISHED,
+    };
+    workspacesApiStub.workspaces = [migratedWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [migratedWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    // All: legacy section heading visible
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
+
+    // Click "Workspaces" → legacy section heading hidden
+    await user.click(screen.getByRole('button', { name: 'Workspaces' }));
+    expect(
+      screen.queryByRole('heading', { name: 'Legacy Workspaces' })
+    ).not.toBeInTheDocument();
+
+    // Click "Legacy Workspaces" button → legacy section heading visible again
+    await user.click(screen.getByRole('button', { name: 'Legacy Workspaces' }));
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
+  });
+
+  it('shows migrated delete action for creators and hides it for other non-owners', async () => {
+    const creatorMigratedWorkspace = {
+      ...buildWorkspaceStub('migrated-creator'),
+      migrationState: MigrationState.FINISHED,
+      creatorUser: { userName: profile.username },
+    };
+    const nonCreatorMigratedWorkspace = {
+      ...buildWorkspaceStub('migrated-reader'),
+      migrationState: MigrationState.FINISHED,
+      creatorUser: { userName: 'another-user@fake-research-aou.org' },
+    };
+    workspacesApiStub.workspaces = [
+      creatorMigratedWorkspace,
+      nonCreatorMigratedWorkspace,
+    ];
+    workspacesApiStub.workspaceAccess = new Map([
+      [creatorMigratedWorkspace.terraName, WorkspaceAccessLevel.READER],
+      [nonCreatorMigratedWorkspace.terraName, WorkspaceAccessLevel.READER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    // Exactly one card is deletable: reader + creator.
+    expect(screen.getAllByTestId('delete-migrated-workspace')).toHaveLength(1);
+  });
+  it('shows delete action for recovered workspaces', async () => {
+    const recoveredWorkspace = {
+      ...buildWorkspaceStub('recovered'),
+      recoveryState: WorkspaceRecoveryStatus.RECOVERED,
+      creatorUser: { userName: profile.username },
+    };
+    workspacesApiStub.workspaces = [recoveredWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [recoveredWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('delete-migrated-workspace')).toBeInTheDocument();
+  });
+
+  it('hides delete action for recovering workspaces', async () => {
+    const recoveringWorkspace = {
+      ...buildWorkspaceStub('recovering'),
+      recoveryState: WorkspaceRecoveryStatus.RECOVERING,
+      creatorUser: { userName: profile.username },
+    };
+    workspacesApiStub.workspaces = [recoveringWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [recoveringWorkspace.terraName, WorkspaceAccessLevel.OWNER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(
+      screen.getByRole('heading', { name: 'Legacy Workspaces' })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('delete-migrated-workspace')
+    ).not.toBeInTheDocument();
   });
 });

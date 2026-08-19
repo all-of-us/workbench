@@ -35,7 +35,7 @@ export const VwbWorkspaces = ({
   return (
     <FlexColumn style={{ marginTop: '2rem' }}>
       <FlexRow style={{ alignItems: 'center' }}>
-        <h2 style={{ fontWeight: 600, margin: 0 }}>RW 2.0 Workspaces</h2>
+        <h2 style={{ fontWeight: 600, margin: 0 }}>Researcher Workbench</h2>
       </FlexRow>
 
       <FlexRow
