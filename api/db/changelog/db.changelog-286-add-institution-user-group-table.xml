@@ -16,7 +16,9 @@
       <column name="user_group" type="VARCHAR(80)">
         <constraints nullable="false"/>
       </column>
-      <column name="access_tier_id" type="bigint"/>
+      <column name="access_tier_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <createIndex tableName="institution_user_group" indexName="fk_institution_user_group_idx" unique="false">
       <column name="institution_id"/>

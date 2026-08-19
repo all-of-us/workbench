@@ -201,7 +201,8 @@ public class InstitutionTierConfigMapperTest {
             .accessTierShortName(RT_ACCESS_TIER_SHORT_NAME)
             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
             .emailAddresses(emailAddresses);
-    assertThat(mapper.dbToTierConfigModel(tierRequirement, new TreeSet<>(emailAddresses), null))
+    assertThat(
+            mapper.dbToTierConfigModel(tierRequirement, new TreeSet<>(emailAddresses), null, null))
         .isEqualTo(expectedTierConfig);
   }
 }

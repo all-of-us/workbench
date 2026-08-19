@@ -14,6 +14,7 @@ import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -552,19 +553,24 @@ public class InstitutionServiceImpl implements InstitutionService {
     List<String> institutionEmails =
         userDao.findActiveUserEmailsWithCurrentDuccByInstitution(institutionId);
     addedGroups.forEach(
-        addedGroup -> insertUserGroupActions(institutionEmails, addedGroup, UserGroupAction.ADD));
+        addedGroup ->
+            insertUserGroupActions(
+                institutionEmails, institutionId, addedGroup, UserGroupAction.ADD));
     removedGroups.forEach(
         removedGroup ->
-            insertUserGroupActions(institutionEmails, removedGroup, UserGroupAction.REMOVE));
+            insertUserGroupActions(
+                institutionEmails, institutionId, removedGroup, UserGroupAction.REMOVE));
     taskQueueService.pushUserGroupActionTask(institutionId);
   }
 
-  private void insertUserGroupActions(List<String> emails, String group, UserGroupAction action) {
+  private void insertUserGroupActions(
+      List<String> emails, long institutionId, String group, UserGroupAction action) {
     emails.forEach(
         email -> {
           DbUserGroupAction groupAction =
               new DbUserGroupAction()
                   .setUserEmail(email)
+                  .setInstitutionId(institutionId)
                   .setGroupName(group)
                   .setAddedTime(new Timestamp(clock.instant().toEpochMilli()))
                   .setUserGroupAction(action.toString())
@@ -575,6 +581,13 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public void processNextUserGroupAction(long institutionId) {
+    // Make sure UserGroupActionDao inserts complete before running task
+    try {
+      Duration queueDelay = Duration.ofSeconds(1);
+      Thread.sleep(queueDelay.toMillis());
+    } catch (Exception e) {
+      log.info("Queue delay failed");
+    }
     DbUserGroupAction action =
         userGroupActionDao.findFirstByInstitutionIdAndUserGroupActionStatusOrderByAddedTime(
             institutionId, UserGroupActionStatus.INCOMPLETE.toString());
@@ -600,14 +613,18 @@ public class InstitutionServiceImpl implements InstitutionService {
                   "Invalid action '%s' on group '%s' for user '%s'",
                   action.getUserGroupAction(), action.getGroupName(), action.getUserEmail()));
       }
+      action.setUserGroupActionStatus(UserGroupActionStatus.COMPLETE.toString());
+      action.setCompletedTime(new Timestamp(clock.instant().toEpochMilli()));
 
     } catch (Exception e) {
+      action.setUserGroupActionStatus(UserGroupActionStatus.COMPLETE.toString());
       throw new ServerErrorException(
           String.format(
               "Error processing action '%s' on group '%s' for user '%s'",
               action.getUserGroupAction(), action.getGroupName(), action.getUserEmail()),
           e);
     } finally {
+      userGroupActionDao.save(action);
       taskQueueService.pushUserGroupActionTask(institutionId);
     }
   }

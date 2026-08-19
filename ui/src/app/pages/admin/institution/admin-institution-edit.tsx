@@ -153,7 +153,7 @@ const EnableEchoSwitch = (props: {
       onToggle={(e) => onToggle(e)}
       checked={
         !!getTierConfig(institution, accessTier)?.userGroups?.includes(
-          serverConfigStore.get().config.echoUserGroups[accessTier]
+          serverConfigStore.get().config?.echoUserGroups?.[accessTier]
         )
       }
     />
@@ -530,13 +530,16 @@ export const AdminInstitutionEdit = fp.flow(
     ) {
       const { institution, institutionBeforeEdits } = this.state;
       const echoGroup =
-        serverConfigStore.get().config.echoUserGroups[accessTierShortName];
+        serverConfigStore.get().config?.echoUserGroups?.[accessTierShortName];
+      if (!echoGroup) {
+        return;
+      }
       const currentGroups = getTierUserGroups(
         institutionBeforeEdits.tierConfigs,
         accessTierShortName
       );
       const updatedUserGroups = enableEcho
-        ? [...currentGroups, echoGroup]
+        ? Array.from(new Set([...currentGroups, echoGroup]))
         : currentGroups.filter((group) => group !== echoGroup);
       this.setTierConfigs(
         updateTierUserGroups(

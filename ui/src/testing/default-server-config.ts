@@ -79,6 +79,10 @@ const defaultServerConfig: ConfigResponse = {
   blockComplianceTraining: false,
   defaultGceVmZone: 'us-central1-a',
   gceVmZones: ['us-central1-a', 'us-central1-b'],
+  echoUserGroups: {
+    controlled: 'aou-test-echo-ct',
+    registered: 'aou-test-echo-rt'
+  }
 };
 
 export default defaultServerConfig;

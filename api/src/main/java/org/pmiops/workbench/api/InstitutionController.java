@@ -149,16 +149,4 @@ public class InstitutionController implements InstitutionApiDelegate {
       throw new BadRequestException(msg);
     }
   }
-
-  //  @Override
-  //  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
-  //  public ResponseEntity<Void> updateUsersInGroup(InstitutionUserGroupActionRequest request) {
-  //    if (institutionService.deleteInstitutionUserInstructions(shortName)) {
-  //      return ResponseEntity.noContent().build();
-  //    } else {
-  //      final String msg =
-  //          String.format("Could not delete user instructions for institution %s", shortName);
-  //      throw new BadRequestException(msg);
-  //    }
-  //  }
 }

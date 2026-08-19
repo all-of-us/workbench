@@ -31,5 +31,11 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <createIndex tableName="user_group_action" indexName="idx_user_group_action_institution_status_time" unique="false">
+            <column name="institution_id"/>
+            <column name="status"/>
+            <column name="added_time"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>

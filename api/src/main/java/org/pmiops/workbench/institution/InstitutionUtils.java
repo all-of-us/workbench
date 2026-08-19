@@ -70,6 +70,9 @@ public class InstitutionUtils {
    * tier. Returns empty result if access tier is not found in tier requirement.
    */
   public static List<String> getAllUserGroups(Institution institution) {
+    if (institution.getTierConfigs() == null) {
+      return List.of();
+    }
     List<String> allUserGroups = new ArrayList<>();
     institution
         .getTierConfigs()

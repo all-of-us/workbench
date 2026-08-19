@@ -55,7 +55,7 @@ public class TaskQueueService {
   public static final TaskQueuePair WORKSPACE_ARCHIVE_STATUS =
       new TaskQueuePair("workspaceArchiveStatusTaskQueue", "checkWorkspaceArchiveStatus");
   public static final TaskQueuePair USER_GROUP_ACTION =
-      new TaskQueuePair("userGroupActionQueue", "processUserGroupAction");
+      new TaskQueuePair("userGroupActionQueue", "userGroupAction");
 
   // RDR exporting uniquely uses the same queue for two endpoints
 
