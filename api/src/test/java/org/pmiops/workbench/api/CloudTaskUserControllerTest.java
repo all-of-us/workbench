@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.initialcredits.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -39,6 +40,7 @@ public class CloudTaskUserControllerTest {
   @MockitoBean private AccessModuleService mockAccessModuleService;
   @MockitoBean private InitialCreditsBatchUpdateService mockInitialCreditsBatchUpdateService;
   @MockitoBean private InitialCreditsService mockInitialCreditsService;
+  @MockitoBean private InstitutionService mockInstitutionService;
   @MockitoBean private UserService mockUserService;
 
   @Autowired private CloudResourceManagerService mockCloudResourceManagerService;

@@ -148,6 +148,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.vwb.admin.VwbAdminQueryService;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.*;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
@@ -200,6 +201,7 @@ public class DataSetControllerTest {
   @MockitoBean private WsmClient wsmClient;
   @MockitoBean private WorkspaceMigrationService workspaceMigrationService;
   @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
   @MockitoBean private VwbUserService vwbUserService;
   @MockitoBean private VwbAdminQueryService vwbAdminQueryService;
   private static final String CONCEPT_SET_ONE_NAME = "concept set";

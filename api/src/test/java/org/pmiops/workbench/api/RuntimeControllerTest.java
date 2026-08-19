@@ -115,6 +115,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,6 +147,7 @@ public class RuntimeControllerTest {
   @MockitoBean private UserServiceAuditor userServiceAuditor;
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private VwbAccessService vwbAccessService;
+  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
   @MockitoBean private VwbUserService vwbUserService;
   @MockitoBean private TaskQueueService taskQueueService;
   private static final String WORKSPACE_NS = "workspace-ns";
