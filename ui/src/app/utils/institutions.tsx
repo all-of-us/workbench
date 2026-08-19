@@ -12,7 +12,6 @@ import { SupportMailto } from 'app/components/support';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { serverConfigStore } from 'app/utils/stores';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { isAbortError } from './errors';
@@ -108,6 +107,7 @@ export const defaultTierConfig = (
   membershipRequirement: InstitutionMembershipRequirement.NO_ACCESS,
   emailAddresses: [],
   emailDomains: [],
+  userGroups: [],
 });
 
 export function getTierConfigOrDefault(
@@ -143,10 +143,12 @@ export function getTierEmailDomains(
   return tierConfig.emailDomains || [];
 }
 
-export function getTierEchoGroup(accessTierShortName: string): string {
-  return accessTierShortName === AccessTierShortNames.Controlled
-    ? serverConfigStore.get().config.echoUserGroupCt
-    : serverConfigStore.get().config.echoUserGroupCt;
+export function getTierUserGroups(
+  tierConfigs: Array<InstitutionTierConfig>,
+  accessTierShortName: string
+): Array<string> {
+  const tierConfig = getTierConfigOrDefault(tierConfigs, accessTierShortName);
+  return tierConfig.userGroups || [];
 }
 
 function mergeTierConfigs(
@@ -180,6 +182,18 @@ export function updateTierEmailDomains(
   return mergeTierConfigs(tierConfigs, {
     ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
     emailDomains,
+  });
+}
+
+// Update the user groups of a single tier and return the new tier configs.
+export function updateTierUserGroups(
+  tierConfigs: InstitutionTierConfig[],
+  accessTierShortName: string,
+  userGroups: Array<string>
+): Array<InstitutionTierConfig> {
+  return mergeTierConfigs(tierConfigs, {
+    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
+    userGroups,
   });
 }
 

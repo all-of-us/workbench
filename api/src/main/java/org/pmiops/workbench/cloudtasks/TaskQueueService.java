@@ -54,6 +54,8 @@ public class TaskQueueService {
       new TaskQueuePair("cleanupOrphanedWorkspacesQueue", "cleanupOrphanedWorkspaces");
   public static final TaskQueuePair WORKSPACE_ARCHIVE_STATUS =
       new TaskQueuePair("workspaceArchiveStatusTaskQueue", "checkWorkspaceArchiveStatus");
+  public static final TaskQueuePair USER_GROUP_ACTION =
+      new TaskQueuePair("userGroupActionQueue", "processUserGroupAction");
 
   // RDR exporting uniquely uses the same queue for two endpoints
 
@@ -393,5 +395,10 @@ public class TaskQueueService {
         Map.of(
             "workspaceNamespace", namespace,
             "workspaceName", terraName));
+  }
+
+  public void pushUserGroupActionTask(long institutionId) {
+    LOGGER.info("Pushing user group action task");
+    createAndPushTask(USER_GROUP_ACTION, Map.of("institutionId", institutionId));
   }
 }

@@ -20,6 +20,7 @@ public class DbUserGroupAction {
 
   private long id;
   private String userEmail;
+  private long institutionId;
   private String groupName;
   private Timestamp addedTime;
   private Timestamp completedTime;
@@ -45,6 +46,16 @@ public class DbUserGroupAction {
 
   public DbUserGroupAction setUserEmail(String userEmail) {
     this.userEmail = userEmail;
+    return this;
+  }
+
+  @Column(name = "institution_id")
+  public long getInstitutionId() {
+    return institutionId;
+  }
+
+  public DbUserGroupAction setInstitutionId(long institutionId) {
+    this.institutionId = institutionId;
     return this;
   }
 

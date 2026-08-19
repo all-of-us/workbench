@@ -1,6 +1,8 @@
 package org.pmiops.workbench.institution;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.pmiops.workbench.model.Institution;
@@ -47,5 +49,36 @@ public class InstitutionUtils {
       return new HashSet<>();
     }
     return new HashSet<>(tierConfig.get().getEmailDomains());
+  }
+
+  /**
+   * Finds the list of user groups which from a {@link Institution}'s tier requirement by given
+   * tier. Returns empty result if access tier is not found in tier requirement.
+   */
+  public static Set<String> getUsergroupsByTierOrEmptySet(
+      Institution institution, String accessTierShortName) {
+    Optional<InstitutionTierConfig> tierConfig =
+        getTierConfigByTier(institution, accessTierShortName);
+    if (tierConfig.isEmpty() || tierConfig.get().getUserGroups() == null) {
+      return new HashSet<>();
+    }
+    return new HashSet<>(tierConfig.get().getUserGroups());
+  }
+
+  /**
+   * Finds the list of user groups which from a {@link Institution}'s tier requirement by given
+   * tier. Returns empty result if access tier is not found in tier requirement.
+   */
+  public static List<String> getAllUserGroups(Institution institution) {
+    List<String> allUserGroups = new ArrayList<>();
+    institution
+        .getTierConfigs()
+        .forEach(
+            (tierConfig) -> {
+              if (tierConfig.getUserGroups() != null) {
+                allUserGroups.addAll(tierConfig.getUserGroups());
+              }
+            });
+    return allUserGroups;
   }
 }

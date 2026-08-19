@@ -4859,6 +4859,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/cloudTask/userGroupAction:
+    post:
+      tags:
+        - cloudTaskUser
+        - cloudTask
+      description: Process the next user group action
+      operationId: processUserGroupActionTask
+      security: []
+      requestBody:
+        description: Institution for which the group is being updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupActionRequest'
+        required: true
+      responses:
+        204:
+          description: No Error
+          content: {}
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/cloudTask/deleteUnsharedWorkspaceEnvironments:
     post:
       tags:
@@ -13130,6 +13155,15 @@ components:
       items:
         type: integer
         format: int64
+    UserGroupActionRequest:
+      required:
+      - institutionId
+      type: object
+      properties:
+        institutionId:
+          type: integer
+          description: ID for user's institution
+          format: int64
     WorkspaceNamespaceList:
       type: array
       items:

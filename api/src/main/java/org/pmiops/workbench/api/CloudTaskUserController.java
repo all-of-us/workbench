@@ -24,7 +24,9 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.initialcredits.InitialCreditsBatchUpdateService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.AccessModuleStatus;
+import org.pmiops.workbench.model.UserGroupActionRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,6 +63,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final InitialCreditsService initialCreditsService;
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserService userService;
+  private final InstitutionService institutionService;
 
   CloudTaskUserController(
       AccessModuleService accessModuleService,
@@ -68,13 +71,15 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       InitialCreditsBatchUpdateService initialCreditsBatchUpdateService,
       InitialCreditsService initialCreditsService,
       Provider<Stopwatch> stopwatchProvider,
-      UserService userService) {
+      UserService userService,
+      InstitutionService institutionService) {
     this.accessModuleService = accessModuleService;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.initialCreditsBatchUpdateService = initialCreditsBatchUpdateService;
     this.initialCreditsService = initialCreditsService;
     this.stopwatchProvider = stopwatchProvider;
     this.userService = userService;
+    this.institutionService = institutionService;
   }
 
   @Override
@@ -213,6 +218,17 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
           return 0;
         });
 
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Checks for the next user group action to be processed
+   *
+   * @param request : The institution ID for which the group updates are being made
+   */
+  @Override
+  public ResponseEntity<Void> processUserGroupActionTask(UserGroupActionRequest request) {
+    institutionService.processNextUserGroupAction(request.getInstitutionId());
     return ResponseEntity.noContent().build();
   }
 

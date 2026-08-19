@@ -11,7 +11,7 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="institution_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_institution_email_domain" references="institution(institution_id)"/>
+        <constraints nullable="false" foreignKeyName="fk_institution_user_group" references="institution(institution_id)"/>
       </column>
       <column name="user_group" type="VARCHAR(80)">
         <constraints nullable="false"/>

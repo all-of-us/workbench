@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
+import org.pmiops.workbench.db.model.DbInstitutionUserGroup;
 import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -82,9 +83,26 @@ public interface InstitutionTierConfigMapper {
         .setAccessTier(dbAccessTier);
   }
 
-  // Combine DbInstitutionTierRequirement, emailAddresses, and emailDomains into
+  // InstitutionTierConfig to DbInstitutionUserGroup
+  Set<DbInstitutionUserGroup> userGroupsToDb(
+      Set<String> userGroups,
+      @Context DbInstitution dbInstitution,
+      @Context DbAccessTier dbAccessTier);
+
+  default DbInstitutionUserGroup userGroupToDb(
+      String userGroup, @Context DbInstitution dbInstitution, @Context DbAccessTier dbAccessTier) {
+    return new DbInstitutionUserGroup()
+        .setUserGroup(userGroup)
+        .setInstitution(dbInstitution)
+        .setAccessTier(dbAccessTier);
+  }
+
+  // Combine DbInstitutionTierRequirement, emailAddresses emailDomains and userGroups into
   // InstitutionTierConfig.
   @Mapping(target = "accessTierShortName", source = "source.accessTier.shortName")
   InstitutionTierConfig dbToTierConfigModel(
-      DbInstitutionTierRequirement source, Set<String> emailAddresses, Set<String> emailDomains);
+      DbInstitutionTierRequirement source,
+      Set<String> emailAddresses,
+      Set<String> emailDomains,
+      Set<String> userGroups);
 }
