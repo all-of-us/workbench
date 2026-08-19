@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -15,6 +16,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -34,6 +36,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class VerifiedInstitutionalAffiliationMapperTest {
   @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private TaskQueueService taskQueueService;
+  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
   @Autowired VerifiedInstitutionalAffiliationMapper mapper;
 
   @Autowired InstitutionService institutionService;
