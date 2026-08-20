@@ -108,7 +108,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           "select distinct u.username "
               + "from DbUser u "
               + "join DbVerifiedInstitutionalAffiliation uvia on (u.userId = uvia.user.userId) "
-              + "join DbUserCodeOfConductAgreement ucca on (u.userId = ucca.user.userId) "
+              + "left join DbUserCodeOfConductAgreement ucca on (u.userId = ucca.user.userId) "
               + "join DbUserAccessModule uam on (u.userId = uam.user.userId) "
               + "where uvia.institution.institutionId = :institutionId "
               + "and (ucca.signedVersion >= 7 "
