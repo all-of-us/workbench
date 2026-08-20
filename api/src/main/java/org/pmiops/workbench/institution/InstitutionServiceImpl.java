@@ -551,7 +551,7 @@ public class InstitutionServiceImpl implements InstitutionService {
       return;
     }
     List<String> institutionEmails =
-        userDao.findActiveUserEmailsWithCurrentDuccByInstitution(institutionId);
+        userDao.findActiveUserEmailsWithCurrentDuccOrBypassByInstitution(institutionId);
     addedGroups.forEach(
         addedGroup ->
             insertUserGroupActions(
