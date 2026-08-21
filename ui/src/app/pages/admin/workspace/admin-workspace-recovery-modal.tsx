@@ -245,6 +245,7 @@ export const AdminWorkspaceRecoveryModal = ({
         workspace.namespace,
         workspace.terraName,
         {
+          podId: updatedPodId,
           researchPurpose: JSON.stringify(
             rwToVwbResearchPurpose(workspace.researchPurpose)
           ),
