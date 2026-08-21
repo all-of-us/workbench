@@ -8,6 +8,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
@@ -89,6 +90,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.vwb.wsm.WsmClient;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +142,7 @@ public class WorkspaceAdminServiceTest {
   @MockitoBean private MailService mailService;
   @MockitoBean private NotebooksService mockNotebooksService;
   @MockitoBean private WorkspaceService mockWorkspaceService;
+  @MockitoBean private WsmClient mockWsmClient;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -424,6 +427,43 @@ public class WorkspaceAdminServiceTest {
   @Test
   public void testSetAdminUnlockedStateCallsAuditor() {
     workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
+    verify(mockAdminAuditor).fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
+  }
+
+  @Test
+  public void testSetAdminLockedState_nonVwbDoesNotCallWsm() {
+    AdminLockingRequest adminLockingRequest =
+        new AdminLockingRequest().requestReason("not a vwb workspace").requestDateInMillis(123L);
+    workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
+    verifyNoInteractions(mockWsmClient);
+  }
+
+  @Test
+  public void testSetAdminLockedState_vwbCallsWsm() {
+    workspaceDao.save(dbWorkspace.setVwbWorkspace(true));
+    AdminLockingRequest adminLockingRequest =
+        new AdminLockingRequest().requestReason("lock the vwb workspace").requestDateInMillis(123L);
+
+    workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
+
+    verify(mockWsmClient).lockWorkspaceAsService(WORKSPACE_NAMESPACE, "lock the vwb workspace");
+    verify(mockAdminAuditor)
+        .fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
+  }
+
+  @Test
+  public void testSetAdminUnlockedState_nonVwbDoesNotCallWsm() {
+    workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
+    verifyNoInteractions(mockWsmClient);
+  }
+
+  @Test
+  public void testSetAdminUnlockedState_vwbCallsWsm() {
+    workspaceDao.save(dbWorkspace.setVwbWorkspace(true));
+
+    workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
+
+    verify(mockWsmClient).unlockWorkspaceAsService(WORKSPACE_NAMESPACE);
     verify(mockAdminAuditor).fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
   }
 

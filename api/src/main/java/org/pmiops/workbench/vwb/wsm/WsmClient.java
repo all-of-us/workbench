@@ -290,6 +290,37 @@ public class WsmClient {
   }
 
   /**
+   * Locks access to a workspace as a service account. The {@code workspaceId} may be either the WSM
+   * workspace UUID or the user-facing id (namespace).
+   *
+   * @param workspaceId UUID or user-facing id of the workspace
+   * @param reason reason the workspace is being locked
+   */
+  public void lockWorkspaceAsService(String workspaceId, String reason) {
+    wsmRetryHandler.run(
+        context -> {
+          workspaceServiceApi
+              .get()
+              .lockWorkspace(new LockWorkspaceRequest().reason(reason), workspaceId);
+          return null;
+        });
+  }
+
+  /**
+   * Unlocks access to a workspace as a service account. The {@code workspaceId} may be either the
+   * WSM workspace UUID or the user-facing id (namespace).
+   *
+   * @param workspaceId UUID or user-facing id of the workspace
+   */
+  public void unlockWorkspaceAsService(String workspaceId) {
+    wsmRetryHandler.run(
+        context -> {
+          workspaceServiceApi.get().unlockWorkspace(workspaceId);
+          return null;
+        });
+  }
+
+  /**
    * Waits for the workspace creation to complete.
    *
    * @param workspaceId ID of the workspace
