@@ -356,10 +356,12 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                         const recoveryState = wp.workspace.recoveryState;
                         const isMigrationFinished =
                           wp.workspace.migrationState === 'FINISHED';
+                        const isWaitingToBeArchived =
+                          !recoveryState && !isMigrationFinished;
                         const isInArchivalFlow =
                           (recoveryState &&
                             archivalRecoveryStates.includes(recoveryState)) ||
-                          (!recoveryState && !isMigrationFinished);
+                          isWaitingToBeArchived;
                         const isMigrated =
                           isMigrationFinished && !isInArchivalFlow;
                         const isOwner =
@@ -367,20 +369,24 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                         const isCreator =
                           wp.workspace.creatorUser?.userName?.toLowerCase() ===
                           profile.username?.toLowerCase();
+                        const userHasTierAccess = hasTierAccess(
+                          profile,
+                          wp.workspace.accessTierShortName
+                        );
+                        const hasRw1AccessToggle =
+                          profile.migrationTestingGroup;
                         const nonMigratedTierAccessDisabled =
-                          !hasTierAccess(
-                            profile,
-                            wp.workspace.accessTierShortName
-                          ) || !profile.migrationTestingGroup;
+                          !userHasTierAccess || !hasRw1AccessToggle;
+
+                        const canOpenArchivalFlowWorkspace =
+                          hasRw1AccessToggle &&
+                          userHasTierAccess &&
+                          (recoveryState ===
+                            WorkspaceRecoveryStatus.NOT_STARTED ||
+                            isWaitingToBeArchived);
 
                         const archivalFlowTierAccessDisabled =
-                          !hasTierAccess(
-                            profile,
-                            wp.workspace.accessTierShortName
-                          ) ||
-                          wp.accessLevel !== WorkspaceAccessLevel.OWNER ||
-                          wp.workspace.recoveryState !==
-                            WorkspaceRecoveryStatus.NOT_STARTED;
+                          !canOpenArchivalFlowWorkspace;
 
                         const tierAccessDisabled = isMigrated
                           ? false

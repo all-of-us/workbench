@@ -258,4 +258,78 @@ describe('WorkspaceList', () => {
       screen.queryByTestId('delete-migrated-workspace')
     ).not.toBeInTheDocument();
   });
+
+  it('allows opening NOT_STARTED legacy workspace when RW 1.0 access toggle is enabled', async () => {
+    profileStore.set({
+      profile: { ...profile, migrationTestingGroup: true },
+      load,
+      reload,
+      updateCache,
+    });
+
+    const notStartedWorkspace = {
+      ...buildWorkspaceStub('not-started-openable'),
+      migrationState: MigrationState.NOT_STARTED,
+      recoveryState: WorkspaceRecoveryStatus.NOT_STARTED,
+    };
+    workspacesApiStub.workspaces = [notStartedWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [notStartedWorkspace.terraName, WorkspaceAccessLevel.READER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(screen.getByTestId('workspace-card-link')).toBeInTheDocument();
+  });
+
+  it('allows opening waiting-to-be-archived workspace when RW 1.0 access toggle is enabled', async () => {
+    profileStore.set({
+      profile: { ...profile, migrationTestingGroup: true },
+      load,
+      reload,
+      updateCache,
+    });
+
+    const waitingToArchiveWorkspace = {
+      ...buildWorkspaceStub('waiting-to-archive-openable'),
+      migrationState: MigrationState.NOT_STARTED,
+      recoveryState: undefined,
+    };
+    workspacesApiStub.workspaces = [waitingToArchiveWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [waitingToArchiveWorkspace.terraName, WorkspaceAccessLevel.READER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    expect(screen.getByTestId('workspace-card-link')).toBeInTheDocument();
+  });
+
+  it('keeps NOT_STARTED legacy workspace non-clickable when RW 1.0 access toggle is disabled', async () => {
+    profileStore.set({
+      profile: { ...profile, migrationTestingGroup: false },
+      load,
+      reload,
+      updateCache,
+    });
+
+    const notStartedWorkspace = {
+      ...buildWorkspaceStub('not-started-disabled'),
+      migrationState: MigrationState.NOT_STARTED,
+      recoveryState: WorkspaceRecoveryStatus.NOT_STARTED,
+    };
+    workspacesApiStub.workspaces = [notStartedWorkspace];
+    workspacesApiStub.workspaceAccess = new Map([
+      [notStartedWorkspace.terraName, WorkspaceAccessLevel.READER],
+    ]);
+
+    component();
+    await waitForNoSpinner();
+
+    const cardLink = screen.getByTestId('workspace-card-link');
+    expect(cardLink).toBeInTheDocument();
+    expect(cardLink).toHaveStyle({ pointerEvents: 'none' });
+  });
 });
