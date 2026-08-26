@@ -107,7 +107,37 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       clearTimeout(this.timer);
     }
 
-    async reloadWorkspaces() {
+    reloadWorkspaces() {
+      // Only call for both workspace lists if the user is registered in Terra. Otherwise, only get RW 2.0 workspaces
+      if (this.props.profileState?.profile?.terraUser) {
+        void this.loadRwAndLegacyWorkspaces();
+      } else {
+        void this.loadRwWorkspaces();
+      }
+    }
+
+    async loadRwWorkspaces() {
+      this.setState({ workspacesLoading: true });
+      try {
+        const vwbResponse = await workspacesApi().getVwbWorkspaces();
+
+        const resolvedVwbWorkspaces = (vwbResponse.items ??
+          []) as VwbWorkspaceCardModel[];
+
+        this.setState({
+          vwbWorkspaces: resolvedVwbWorkspaces,
+          workspacesLoading: false,
+        });
+      } catch (e) {
+        const response = await convertAPIError(e);
+        this.setState({
+          errorText: response.message,
+          workspacesLoading: false,
+        });
+      }
+    }
+
+    async loadRwAndLegacyWorkspaces() {
       this.setState({ workspacesLoading: true });
       try {
         const [legacyResponse, vwbResponse] = await Promise.all([

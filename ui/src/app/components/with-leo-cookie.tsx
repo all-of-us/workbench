@@ -2,14 +2,25 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 
 import { leoProxyApi } from 'app/services/notebooks-swagger-fetch-clients';
-import { authStore, notificationStore, useStore } from 'app/utils/stores';
+import {
+  authStore,
+  notificationStore,
+  profileStore,
+  useStore,
+} from 'app/utils/stores';
 
 const LeoCookieWrapper = ({ children }) => {
   const { auth } = useStore(authStore);
+  const { profile } = useStore(profileStore);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // The Leo cookie call will fail for users not registered in Terra, so we skip it
+    if (!profile?.terraUser) {
+      setLoading(false);
+      return;
+    }
     const pollAborter = new AbortController();
 
     const setLeoCookie = () => {
