@@ -9784,6 +9784,12 @@ components:
           description: Short names of access tiers available to the user.
           items:
             type: string
+        podStatus:
+          type: string
+          description: VWB pod availability status for the user (for example, Pod available or No pod).
+        vwbPodId:
+          type: string
+          description: VWB pod identifier for the user when a pod has been created.
         tierEligibilities:
           type: array
           description: User eligibility of each acces tier based on their institution's

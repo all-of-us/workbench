@@ -39,6 +39,7 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -179,7 +180,26 @@ public class ProfileServiceTest {
 
   @Test
   public void testGetProfile_empty() {
-    assertThat(profileService.getProfile(userDao.save(new DbUser()))).isNotNull();
+    Profile profile = profileService.getProfile(userDao.save(new DbUser()));
+    assertThat(profile).isNotNull();
+    assertThat(profile.getPodStatus()).isEqualTo("No pod");
+    assertThat(profile.getVwbPodId()).isNull();
+  }
+
+  @Test
+  public void testGetProfile_withVwbPod() {
+    DbUser user = userDao.save(new DbUser().setUsername("pod-user@test.com"));
+    DbVwbUserPod pod =
+        new DbVwbUserPod()
+            .setUser(user)
+            .setVwbPodId("f5d4c797-5bf0-40aa-957c-f637f1caefe5")
+            .setInitialCreditsActive(true);
+    user.setVwbUserPod(pod);
+    user = userDao.save(user);
+
+    Profile profile = profileService.getProfile(user);
+    assertThat(profile.getPodStatus()).isEqualTo("Pod available");
+    assertThat(profile.getVwbPodId()).isEqualTo("f5d4c797-5bf0-40aa-957c-f637f1caefe5");
   }
 
   @Test
