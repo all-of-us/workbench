@@ -38,6 +38,8 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
@@ -63,6 +65,7 @@ public class ProfileService {
   private final AddressMapper addressMapper;
   private final Clock clock;
   private final DemographicSurveyMapper demographicSurveyMapper;
+  private final FireCloudService fireCloudService;
   private final InitialCreditsService initialCreditsService;
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
@@ -87,6 +90,7 @@ public class ProfileService {
       AddressMapper addressMapper,
       Clock clock,
       DemographicSurveyMapper demographicSurveyMapper,
+      FireCloudService fireCloudService,
       InitialCreditsService initialCreditsService,
       InstitutionDao institutionDao,
       InstitutionService institutionService,
@@ -108,6 +112,7 @@ public class ProfileService {
     this.addressMapper = addressMapper;
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
+    this.fireCloudService = fireCloudService;
     this.initialCreditsService = initialCreditsService;
     this.institutionDao = institutionDao;
     this.institutionService = institutionService;
@@ -158,6 +163,15 @@ public class ProfileService {
         newUserSatisfactionSurveyService.eligibilityWindowEnd(user);
     final boolean migrationTestingGroup = migrationTestingGroupDao.existsByUserId(user.getUserId());
 
+    boolean isTerraUser;
+    // Check if the user exists in Terra
+    try {
+      FirecloudMe firecloudMe = fireCloudService.getMe();
+      isTerraUser = firecloudMe.getEnabled().isTosAccepted();
+    } catch (Exception e) {
+      isTerraUser = false;
+    }
+
     return profileMapper.toModel(
         user,
         initialCreditsService,
@@ -170,7 +184,8 @@ public class ProfileService {
         accessModules,
         newUserSatisfactionSurveyEligibility,
         newUserSatisfactionSurveyEligibilityEndTime,
-        migrationTestingGroup);
+        migrationTestingGroup,
+        isTerraUser);
   }
 
   public void validateAffiliation(Profile profile) {

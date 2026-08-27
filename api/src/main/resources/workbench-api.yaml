@@ -9928,6 +9928,9 @@ components:
             of their initial credits expiration period.
         migrationTestingGroup:
           type: boolean
+        terraUser:
+          type: boolean
+          description: True if the user has been registered with Terra
     AccessModuleStatus:
       required:
       - moduleName

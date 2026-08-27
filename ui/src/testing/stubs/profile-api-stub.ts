@@ -72,6 +72,7 @@ export class ProfileStubVariables {
       },
     ],
     initialCreditsExpirationBypass: false,
+    terraUser: true,
   };
   static ADMIN_TABLE_USER_STUB = <AdminTableUser>{
     ...ProfileStubVariables.PROFILE_STUB,

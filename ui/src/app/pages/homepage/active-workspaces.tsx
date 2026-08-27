@@ -213,8 +213,8 @@ export const ActiveWorkspaces = ({ workspaces }: Props) => {
         </div>
       ) : (
         <p style={styles.emptyStateText}>
-          You do not have active legacy workspaces yet. Visit your workspace
-          list to recover archived workspaces or create a new one.
+          You do not have any active legacy workspaces. Visit the Researcher
+          Workbench to create a new workspace.
         </p>
       )}
 

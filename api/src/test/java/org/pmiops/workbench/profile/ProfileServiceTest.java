@@ -41,6 +41,7 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
@@ -78,6 +79,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 public class ProfileServiceTest {
   @MockitoBean private AccessModuleService accessModuleService;
   @MockitoBean private AccessTierService accessTierService;
+  @MockitoBean private FireCloudService fireCloudService;
   @MockitoBean private NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
   @MockitoBean private ProfileAuditor profileAuditor;
   @MockitoBean private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
@@ -109,7 +111,8 @@ public class ProfileServiceTest {
         .areaOfResearch("asdfasdfasdf")
         .verifiedInstitutionalAffiliation(BROAD_AFFILIATION)
         .initialCreditsExpirationBypassed(false)
-        .migrationTestingGroup(false);
+        .migrationTestingGroup(false)
+        .terraUser(true);
   }
 
   private static final Profile VALID_PROFILE = createValidProfile();

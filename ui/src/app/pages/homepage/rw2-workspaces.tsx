@@ -28,12 +28,8 @@ export const VwbWorkspaces = ({
     return <SpinnerOverlay />;
   }
 
-  if (workspaces.length === 0) {
-    return null;
-  }
-
   return (
-    <FlexColumn style={{ marginTop: '2rem' }}>
+    <FlexColumn>
       <FlexRow style={{ alignItems: 'center' }}>
         <h2 style={{ fontWeight: 600, margin: 0 }}>Researcher Workbench</h2>
       </FlexRow>
@@ -44,13 +40,17 @@ export const VwbWorkspaces = ({
           flexWrap: 'wrap',
         }}
       >
-        {workspaces.map((workspace) => (
-          <VwbWorkspaceCard
-            key={workspace.id}
-            workspace={workspace}
-            currentUsername={currentUsername}
-          />
-        ))}
+        {workspaces.length === 0 ? (
+          <div>No workspaces found</div>
+        ) : (
+          workspaces.map((workspace) => (
+            <VwbWorkspaceCard
+              key={workspace.id}
+              workspace={workspace}
+              currentUsername={currentUsername}
+            />
+          ))
+        )}
       </FlexRow>
     </FlexColumn>
   );

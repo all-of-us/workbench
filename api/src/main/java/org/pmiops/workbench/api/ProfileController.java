@@ -30,7 +30,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -73,7 +72,6 @@ public class ProfileController implements ProfileApiDelegate {
   private final Clock clock;
   private final DemographicSurveyMapper demographicSurveyMapper;
   private final DirectoryService directoryService;
-  private final FireCloudService fireCloudService;
   private final InstitutionService institutionService;
   private final PageVisitMapper pageVisitMapper;
   private final ProfileAuditor profileAuditor;
@@ -97,7 +95,6 @@ public class ProfileController implements ProfileApiDelegate {
       Clock clock,
       DemographicSurveyMapper demographicSurveyMapper,
       DirectoryService directoryService,
-      FireCloudService fireCloudService,
       InstitutionService institutionService,
       PageVisitMapper pageVisitMapper,
       ProfileAuditor profileAuditor,
@@ -118,7 +115,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
     this.directoryService = directoryService;
-    this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
     this.mailServiceProvider = mailServiceProvider;
     this.pageVisitMapper = pageVisitMapper;
@@ -145,7 +141,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private DbUser maybeInitializeUserWithTerraAndVwb() {
+  private DbUser maybeInitializeUserWithVwb() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
     DbUser dbUser = userAuthentication.getUser();
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
@@ -153,27 +149,9 @@ public class ProfileController implements ProfileApiDelegate {
       return dbUser;
     }
 
-    // On first sign-in register with Terra, submit the Terra ToS (if user accepted latest), and set
-    // the first sign in time. All actions taken here must be idempotent to avoid improper user
-    // initialization.
+    // On first sign-in register with VWB and set the first sign in time. All actions taken here
+    // must be idempotent to avoid improper user initialization.
     if (dbUser.getFirstSignInTime() == null) {
-      // This call should be idempotent. If the user is already registered, their profile will get
-      // updated.
-      // TODO: this assumption is false.  We have seen errors because this is not idempotent.
-      // See RW-11393 for such a user error.  We plan to fix this as part of the Nov 2023 ToS work.
-      fireCloudService.registerUser();
-
-      // By approving the latest AoU Terms of Service, the user also approves the latest Terra ToS.
-      // If the user has not accepted the latest AoU version, then it's not appropriate to call
-      // the Terra ToS acceptance endpoint.  We will require the user to approve the ToS in the UI,
-      // because it will detect that the user is non-compliant at login via
-      // getUserTermsOfServiceStatus(), and it will redirect them to the AoU ToS.
-      // This call should be idempotent.
-      if (userService.hasSignedLatestAoUTermsOfService(dbUser)) {
-        // to be replaced as part of RW-11416
-        userService.acceptTerraTermsOfServiceDeprecated(dbUser);
-      }
-
       // VWB user creation now happens during account creation in createAccount() to avoid
       // login delays and prevent race conditions with access tier assignment.
       // Retry VWB user creation if it failed during account creation (best-effort, non-blocking)
@@ -205,8 +183,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> getMe() {
-    // Record that the user signed in and run Terra initialization as needed.
-    DbUser dbUser = maybeInitializeUserWithTerraAndVwb();
+    // Record that the user signed in
+    DbUser dbUser = maybeInitializeUserWithVwb();
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);
   }
@@ -215,7 +193,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Boolean> getUserTermsOfServiceStatus() {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
     log.info("Checking user ToS status for user " + loggedInUser.getUsername());
-    return ResponseEntity.ok(userService.hasSignedLatestTermsOfServiceForBoth(loggedInUser));
+    return ResponseEntity.ok(userService.hasSignedLatestAoUTermsOfService(loggedInUser));
   }
 
   @Override

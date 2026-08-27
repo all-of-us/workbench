@@ -8,10 +8,11 @@ import {
   leoProxyApi,
   registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
-import { authStore, notificationStore } from 'app/utils/stores';
+import { authStore, notificationStore, profileStore } from 'app/utils/stores';
 import { ProxyApi } from 'notebooks-generated/fetch';
 
 import { LeoProxyApiStub } from 'testing/stubs/leo-proxy-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 const createWrapper = () => {
   const Component = () => <div />;
@@ -37,6 +38,12 @@ describe(withLeoCookie.name, () => {
       },
     });
     notificationStore.set(null);
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn(),
+    });
   });
 
   it('should render the children once the cookie loads', async () => {
