@@ -291,6 +291,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .country(COUNTRY)
             .zipCode(ZIP_CODE));
     profile.setInitialCreditsExpirationBypassed(false);
+    profile.setTerraUser(true);
 
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion);
@@ -453,7 +454,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     Profile profile = profileController.getMe().getBody();
     assertThat(profile.getLatestTermsOfServiceVersion())
         .isEqualTo(config.termsOfService.minimumAcceptedAouVersion);
-    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -633,15 +633,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile);
-    verify(mockFireCloudService).registerUser();
     verify(mockProfileAuditor).fireLoginAction(dbUser);
-  }
-
-  @Test
-  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS() {
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
-    createAccountAndDbUserWithAffiliation();
-    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
   }
 
   @Test
@@ -673,7 +665,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile);
-    verify(mockFireCloudService).registerUser();
 
     // An additional call to getMe() should have no effect.
     fakeClock.increment(1);
