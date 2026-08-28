@@ -224,7 +224,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
           + "from DbWorkspace w "
           + "where w.activeStatus = 0 "
-          + "and (w.isVwbWorkspace = false or w.isVwbWorkspace is null) "
+          + "and (w.vwbWorkspace = false or w.vwbWorkspace is null) "
           + "and (w.recoveryState is null or w.recoveryState in ('NOT_STARTED', 'RECOVERED')) "
           + "and w.workspaceId not in ("
           + "SELECT legacyWorkspaceId from DbWorkspaceBucketArchive "
