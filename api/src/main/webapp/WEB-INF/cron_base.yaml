@@ -102,3 +102,11 @@ cron:
   retry_parameters:
     job_retry_limit: 3
     min_backoff_seconds: 5
+- description: Deletes next migrated or archived legacy workspace and its billing project
+  url: /v1/cron/deleteNextLegacyWorkspace
+  schedule: every 1 minutes
+  timezone: America/Chicago
+  target: api
+  retry_parameters:
+    job_retry_limit: 3
+    min_backoff_seconds: 5

@@ -30,6 +30,7 @@ public class OfflineWorkspaceControllerTest {
 
   @Mock private WorkspaceDao.WorkspaceUserCacheView testWorkspace1;
   @Mock private WorkspaceDao.WorkspaceUserCacheView testWorkspace2;
+  @Mock private WorkspaceDao.WorkspaceArchiveView workspaceArchiveView;
 
   @BeforeEach
   public void setUp() {
@@ -70,5 +71,25 @@ public class OfflineWorkspaceControllerTest {
     verify(mockTaskQueueService).pushWorkspaceUserCacheTask(emptyList);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  @Test
+  public void testDeleteNextLegacyWorkspace() {
+    ResponseEntity<Void> response = offlineWorkspaceController.deleteNextLegacyWorkspace();
+
+    verify(workspaceMigrationService).deleteNextLegacyWorkspace();
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+  }
+
+  @Test
+  public void testArchiveNextLegacyWorkspace() {
+    when(workspaceArchiveView.getWorkspaceNamespace()).thenReturn("ns");
+    when(workspaceArchiveView.getFirecloudName()).thenReturn("terra");
+    when(workspaceMigrationService.getNextWorkspaceToArchive()).thenReturn(workspaceArchiveView);
+
+    ResponseEntity<Void> response = offlineWorkspaceController.archiveNextLegacyWorkspace();
+
+    verify(workspaceMigrationService).startWorkspaceArchive("ns", "terra");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
   }
 }
