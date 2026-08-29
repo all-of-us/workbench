@@ -4161,6 +4161,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SystemVersion'
+  /api/workspaces/v2/{workspaceId}/lock:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    post:
+      summary: Locks access to a workspace.
+      operationId: lockWorkspace
+      tags:
+        - Workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockWorkspaceRequest'
+      responses:
+        '204':
+          description: Workspace locked successfully
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/workspaces/v2/{workspaceId}/unlock:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    post:
+      summary: Unlocks access to a workspace.
+      operationId: unlockWorkspace
+      tags:
+        - Workspace
+      responses:
+        '204':
+          description: Workspace unlocked successfully
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
 components:
   parameters:
     ApplicationId:
@@ -4758,6 +4802,15 @@ components:
           schema:
             $ref: '#/components/schemas/GcpGcsBucketResource'
   schemas:
+    LockWorkspaceRequest:
+      type: object
+      required:
+        - reason
+      description: Request body for locking a workspace.
+      properties:
+        reason:
+          description: Reason why the workspace is being locked.
+          type: string
     AccessOnDemandOperation:
       type: string
       description: Enum of requested AoD operations
