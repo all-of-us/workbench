@@ -90,6 +90,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       fcEndUserWorkspacesApiProvider;
   private final Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
+  private final Provider<WorkspacesApi> serviceAccountLenientTimeoutWorkspaceApiProvider;
 
   // old Terms of Service endpoints, before RW-11416
   @Deprecated
@@ -150,6 +151,8 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider,
       @Qualifier(RawlsConfig.SERVICE_ACCOUNT_WORKSPACE_API)
           Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider,
+      @Qualifier(RawlsConfig.SERVICE_ACCOUNT_LENIENT_TIMEOUT_WORKSPACE_API)
+          Provider<WorkspacesApi> serviceAccountLenientTimeoutWorkspaceApiProvider,
       Provider<StatusApi> statusApiProvider,
       @Qualifier(FireCloudConfig.END_USER_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
@@ -179,6 +182,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.fcEndUserWorkspacesApiProvider = fcEndUserWorkspacesApiProvider;
     this.endUserLenientTimeoutWorkspacesApiProvider = endUserLenientTimeoutWorkspacesApiProvider;
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
+    this.serviceAccountLenientTimeoutWorkspaceApiProvider =
+        serviceAccountLenientTimeoutWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
@@ -489,13 +494,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public List<RawlsWorkspaceListResponse> listWorkspacesAsService() {
-    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
-
-    // this call can be slow, so let a long timeout
-    workspacesApi
-        .getApiClient()
-        .setReadTimeout(configProvider.get().firecloud.lenientTimeoutInSeconds * 1000);
-
+    WorkspacesApi workspacesApi = serviceAccountLenientTimeoutWorkspaceApiProvider.get();
     return rawlsRetryHandler.run(
         context -> workspacesApi.listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
