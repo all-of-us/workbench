@@ -115,7 +115,8 @@
     "nth-check": "^2.0.1",
     "postcss": "^8",
     "rollup": "^3.29.5",
-    "serialize-javascript": "^6.0.2"
+    "serialize-javascript": "^6.0.2",
+    "lodash": "^4.18.0"
   },
   "jest": {
     "collectCoverage": true,
