@@ -391,6 +391,9 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             <WorkspaceInfoField labelText='Creation Time'>
               {new Date(workspace.creationTime).toDateString()}
             </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Pod ID'>
+              {workspace.podUserFacingId || 'No pod attached'}
+            </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Description'>
               {workspace.description}
             </WorkspaceInfoField>

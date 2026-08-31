@@ -14899,6 +14899,9 @@ components:
         lastChanged:
           type: string
           description: The timestamp of the last change to the workspace
+        podUserFacingId:
+          type: string
+          description: The user-facing ID of the VWB billing pod attached to this workspace
     VwbWorkspaceSearchParamType:
       type: string
       description: Type for the search parameter used to query for VWB workspaces
