@@ -23,6 +23,19 @@ public class Params {
   public String password;
   private boolean loaded;
 
+  // Hikari pool sizing. Until this was added, createConfig set no sizing at all, so every pool
+  // took Hikari's defaults -- and Hikari defaults minimumIdle to maximumPoolSize, meaning each
+  // pool eagerly filled to 10 connections and never released one. Because CdrDataSource builds
+  // one pool per CDR version, an app instance pinned (CDR versions + 1) * 10 connections open
+  // regardless of traffic, so total usage scaled with instance count rather than with load. On
+  // a MySQL instance with max_connections=4030 that ceiling is reached by roughly 36 instances,
+  // and exceeding it fails every new connection server-wide (Connection_errors_max_connections).
+  protected static final int DEFAULT_MAX_POOL_SIZE = 10;
+  protected static final int DEFAULT_MIN_IDLE = 2;
+  protected static final long IDLE_TIMEOUT_MS = 300_000; // 5 minutes
+  protected static final long MAX_LIFETIME_MS = 1_500_000; // 25 minutes
+  protected static final long KEEPALIVE_TIME_MS = 120_000; // 2 minutes
+
   public Params(EnvVars envVars) {
     this.envVars = envVars;
     loadFromEnvironment();
@@ -51,7 +64,53 @@ public class Params {
       config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
       config.addDataSourceProperty("cloudSqlInstance", cloudSqlInstanceName);
     }
+    // Named so that a pool can be attributed to its database in Hikari's logs and metrics, which
+    // is how maximumPoolSize below should eventually be tuned (see applyPoolSizing).
+    config.setPoolName("workbench-" + dbName);
+    applyPoolSizing(config);
     return config;
+  }
+
+  /**
+   * Pool sizing for the primary workbench database. This pool serves user-facing request paths, so
+   * it keeps a small idle floor: with minimumIdle=0 the first request after a lull pays TCP, TLS,
+   * MySQL auth and (on Cloud SQL) a token exchange.
+   *
+   * <p>Overridden by {@link org.pmiops.workbench.cdr.DbParams} for the per-CDR-version pools, which
+   * are numerous and mostly idle and so want no floor at all.
+   *
+   * <p>maximumPoolSize is left at Hikari's existing default here deliberately: it caps concurrency,
+   * and lowering it converts a slow query into a pool timeout for user requests. Tune it downward
+   * from observed hikaricp_connections_active peaks, not from a guess.
+   */
+  protected void applyPoolSizing(HikariConfig config) {
+    config.setMaximumPoolSize(intFromEnv("WORKBENCH_DB_MAX_POOL_SIZE", DEFAULT_MAX_POOL_SIZE));
+    config.setMinimumIdle(intFromEnv("WORKBENCH_DB_MIN_IDLE", DEFAULT_MIN_IDLE));
+    config.setIdleTimeout(IDLE_TIMEOUT_MS);
+    config.setMaxLifetime(MAX_LIFETIME_MS);
+    config.setKeepaliveTime(KEEPALIVE_TIME_MS);
+  }
+
+  /**
+   * Reads an integer tuning knob from the environment, falling back to {@code defaultValue} when it
+   * is unset or unparseable. Environment-driven so pool sizes can be adjusted per environment
+   * without a code change.
+   */
+  protected int intFromEnv(String name, int defaultValue) {
+    return envVars
+        .get(name)
+        .map(
+            value -> {
+              try {
+                return Integer.parseInt(value.trim());
+              } catch (NumberFormatException e) {
+                log.warning(
+                    String.format(
+                        "Ignoring non-numeric %s=%s; using %d.", name, value, defaultValue));
+                return defaultValue;
+              }
+            })
+        .orElse(defaultValue);
   }
 
   public void validate() {
