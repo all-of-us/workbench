@@ -104,7 +104,7 @@ cron:
     min_backoff_seconds: 5
 - description: Deletes next migrated or archived legacy workspace and its billing project
   url: /v1/cron/deleteNextLegacyWorkspace
-  schedule: every 1 minutes
+  schedule: every 1 hours
   timezone: America/Chicago
   target: api
   retry_parameters:
