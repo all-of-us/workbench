@@ -30,7 +30,11 @@ public interface WorkspaceMigrationService {
 
   WorkspaceDao.WorkspaceArchiveView getNextWorkspaceToArchive();
 
+  WorkspaceDao.WorkspaceDeletionView getNextWorkspaceToDelete();
+
   void startWorkspaceArchive(String namespace, String terraName);
+
+  void deleteNextLegacyWorkspace();
 
   void startWorkspaceArchiveTestEnv(String namespace, String terraName);
 

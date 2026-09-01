@@ -673,6 +673,27 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
+  public WorkspaceDao.WorkspaceDeletionView getNextWorkspaceToDelete() {
+    return workspaceDao.findNextWorkspaceToDelete();
+  }
+
+  @Override
+  public void deleteNextLegacyWorkspace() {
+    WorkspaceDao.WorkspaceDeletionView workspaceDeletionView = getNextWorkspaceToDelete();
+    if (workspaceDeletionView == null) {
+      throw new NotFoundException(
+          "Next legacy workspace not found. Update query to continue deletions");
+    }
+
+    String namespace = workspaceDeletionView.getWorkspaceNamespace();
+    String terraName = workspaceDeletionView.getFirecloudName();
+    logger.log(Level.INFO, "Deleting legacy workspace " + namespace + "/" + terraName);
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    workspaceService.deleteWorkspace(dbWorkspace);
+  }
+
+  @Override
   public void startWorkspaceArchive(String namespace, String terraName) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);

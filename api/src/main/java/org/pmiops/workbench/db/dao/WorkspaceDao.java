@@ -188,6 +188,13 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
     String getFirecloudName();
   }
 
+  interface WorkspaceDeletionView {
+
+    String getWorkspaceNamespace();
+
+    String getFirecloudName();
+  }
+
   @Query(
       "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
           + "from DbWorkspace w "
@@ -212,6 +219,17 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "and w.workspaceId not in (SELECT legacyWorkspaceId from DbWorkspaceBucketArchive )"
           + "order by w.lastModifiedTime asc limit 1")
   WorkspaceArchiveView findNextLowRiskWorkspaceToArchive();
+
+  @Query(
+      "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
+          + "from DbWorkspace w "
+          + "where w.activeStatus = 0 "
+          + "and ("
+          + "w.migrationState = 'FINISHED' "
+          + "or w.workspaceId in ("
+          + "SELECT legacyWorkspaceId from DbWorkspaceBucketArchive where status = 'ARCHIVED')) "
+          + "order by w.lastModifiedTime asc limit 1")
+  WorkspaceDeletionView findNextWorkspaceToDelete();
 
   @Query(
       "SELECT w FROM DbWorkspace w "

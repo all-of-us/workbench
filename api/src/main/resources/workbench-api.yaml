@@ -2713,6 +2713,18 @@ paths:
         204:
           description: No content.
           content: {}
+  /v1/cron/deleteNextLegacyWorkspace:
+    get:
+      tags:
+      - offlineWorkspace
+      - cron
+      description: Deletes the next legacy workspace that has been successfully migrated or archived.
+      operationId: deleteNextLegacyWorkspace
+      security: []
+      responses:
+        204:
+          description: No content.
+          content: {}
   /v1/cron/deleteTestUserWorkspacesOrphanedInRawls:
     get:
       tags:
