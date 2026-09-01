@@ -35,10 +35,15 @@ const getBypassReasonText = () =>
     name: /Enter description for large file download request./i,
   });
 
+const getVwbWorkspaceIdText = () =>
+  screen.getByRole('textbox', { name: /VWB Workspace ID \(required\)/i });
+
 const getBypassButton = () =>
   screen.getByRole('button', {
     name: 'Temporarily Enable Large File Downloads',
   });
+
+const VWB_WORKSPACE_ID = '7f1c0e2a-1b3d-4c5e-8a9b-0d1e2f3a4b5c';
 
 describe(AdminUserEgressBypass.name, () => {
   const defaultProps: AdminUserEgressBypassProps = {
@@ -65,6 +70,9 @@ describe(AdminUserEgressBypass.name, () => {
     await user.click(getBypassReasonText());
     await user.paste(byPassDescription);
 
+    await user.click(getVwbWorkspaceIdText());
+    await user.paste(VWB_WORKSPACE_ID);
+
     const bypassButton = getBypassButton();
 
     await expectTooltipAbsence(
@@ -81,8 +89,38 @@ describe(AdminUserEgressBypass.name, () => {
       {
         startTime: expect.any(Number),
         byPassDescription,
+        vwbWorkspaceId: VWB_WORKSPACE_ID,
       }
     );
+  });
+
+  it('should disallow egress bypass without a VWB workspace ID', async () => {
+    const user = userEvent.setup();
+
+    component();
+
+    await user.click(getBypassReasonText());
+    await user.paste('test bypass reason');
+
+    const bypassButton = getBypassButton();
+    await expectTooltip(bypassButton, /VWB Workspace ID \(UUID\)/i, user);
+    expectButtonElementDisabled(bypassButton);
+  });
+
+  it('should disallow egress bypass with a whitespace-only VWB workspace ID', async () => {
+    const user = userEvent.setup();
+
+    component();
+
+    await user.click(getBypassReasonText());
+    await user.paste('test bypass reason');
+
+    await user.click(getVwbWorkspaceIdText());
+    await user.paste('   ');
+
+    const bypassButton = getBypassButton();
+    await expectTooltip(bypassButton, /VWB Workspace ID \(UUID\)/i, user);
+    expectButtonElementDisabled(bypassButton);
   });
 
   it('should disallow egress bypass with a too short reason', async () => {

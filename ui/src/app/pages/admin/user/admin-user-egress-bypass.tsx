@@ -51,8 +51,14 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
     bypassDescription.length < MIN_BYPASS_DESCRIPTION ||
     bypassDescription.length > MAX_BYPASS_DESCRIPTION;
 
+  const missingVwbWorkspaceId = !vwbWorkspaceId.trim();
+
   const egressBypassButtonDisabled =
-    bypassing || apiError || invalidReason || !isDateValid(startTime);
+    bypassing ||
+    apiError ||
+    invalidReason ||
+    missingVwbWorkspaceId ||
+    !isDateValid(startTime);
 
   const toolTipContent = apiError ? (
     'Error occurred while creating egress bypass request'
@@ -66,6 +72,7 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
             {MAX_BYPASS_DESCRIPTION})
           </li>
         )}
+        {missingVwbWorkspaceId && <li>VWB Workspace ID (UUID)</li>}
         {!isDateValid(startTime) && (
           <li>Valid Request Date (in YYYY-MM-DD Format)</li>
         )}
@@ -78,7 +85,7 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
       startTime: startTime.valueOf(),
       byPassDescription: bypassDescription,
-      vwbWorkspaceId: vwbWorkspaceId || undefined,
+      vwbWorkspaceId: vwbWorkspaceId.trim(),
     };
     setBypassDescription('');
     setVwbWorkspaceId('');
@@ -132,13 +139,13 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
           />
         </FlexColumn>
 
-        {/* VWB Workspace ID (optional) */}
+        {/* VWB Workspace ID (required) */}
         <FlexRow style={{ paddingTop: '1rem' }}>
           <label
             htmlFor='VWB Workspace ID'
             style={{ fontWeight: 'bold', color: colors.primary }}
           >
-            VWB Workspace ID (optional - for VWB workspaces only)
+            VWB Workspace ID (required)
           </label>
         </FlexRow>
         <FlexRow>
@@ -149,7 +156,7 @@ export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
               setApiError(false);
               setVwbWorkspaceId(s);
             }}
-            placeholder='Enter VWB workspace ID (UUID) if applicable'
+            placeholder='Enter VWB workspace ID (UUID)'
             style={{ width: '60%' }}
           />
         </FlexRow>
