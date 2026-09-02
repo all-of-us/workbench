@@ -223,7 +223,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   WorkspaceArchiveView findNextLowRiskWorkspaceToArchive();
 
   @Query(
-      "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName, u.username "
+      "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName, u.username as userName "
           + "from DbWorkspace w "
           + "join DbUser u on w.creator.userId = u.userId "
           + "where w.activeStatus = 0 "
