@@ -6,4 +6,12 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface WorkspaceBucketArchiveDao extends CrudRepository<DbWorkspaceBucketArchive, Long> {
   List<DbWorkspaceBucketArchive> findByLegacyWorkspaceId(Long legacyWorkspaceId);
+  List<DbWorkspaceBucketArchive> findFirstByStatusAndLastRetryIsNull(String status);
+
+  interface RetryArchiveView {
+
+    String getWorkspaceNamespace();
+
+    String getFirecloudName();
+  }
 }

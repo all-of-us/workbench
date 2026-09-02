@@ -211,6 +211,14 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   @Query(
       "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
           + "from DbWorkspace w "
+          + "join DbWorkspaceBucketArchive wba on w.workspaceId = wba.legacyWorkspaceId "
+          + "where wba.status = :status "
+          + "order by wba.lastRetry nulls first limit 1")
+  WorkspaceArchiveView findNextArchiveToRetry(@Param("status") String status);
+
+  @Query(
+      "SELECT w.workspaceNamespace as workspaceNamespace, w.firecloudName as firecloudName "
+          + "from DbWorkspace w "
           + "join DbUser u on w.creator.userId = u.userId "
           + "join DbVerifiedInstitutionalAffiliation via on w.creator.userId = via.user.userId "
           + "where w.migratedVwbWorkspaceId is null "

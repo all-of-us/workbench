@@ -67,6 +67,25 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Void> retryNextFailedArchive() {
+    WorkspaceDao.WorkspaceArchiveView workspaceArchiveView =
+        workspaceMigrationService.getNextArchiveToRetry();
+    if (workspaceArchiveView == null) {
+      throw new NotFoundException(
+          "Next legacy workspace not found. Update query to continue archives");
+    }
+    log.info(
+        "Next legacy workspace found: "
+            + workspaceArchiveView.getWorkspaceNamespace()
+            + "/"
+            + workspaceArchiveView.getFirecloudName());
+    workspaceMigrationService.startWorkspaceArchive(
+        workspaceArchiveView.getWorkspaceNamespace(), workspaceArchiveView.getFirecloudName());
+
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
   public ResponseEntity<Void> cacheWorkspaceAcls() {
     log.info("Starting cacheWorkspaceAcls cron job");
     log.info("Finding all workspaces in need of a cache update");

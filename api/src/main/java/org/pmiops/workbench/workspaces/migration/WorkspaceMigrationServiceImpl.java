@@ -704,6 +704,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
+  public WorkspaceDao.WorkspaceArchiveView getNextArchiveToRetry() {
+    return workspaceDao.findNextArchiveToRetry();
+  }
+
+  @Override
   public void startWorkspaceArchive(String namespace, String terraName) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);

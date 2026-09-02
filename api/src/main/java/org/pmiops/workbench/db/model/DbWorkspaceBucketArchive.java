@@ -17,6 +17,8 @@ public class DbWorkspaceBucketArchive {
   private String gcsPath;
   private Timestamp created;
   private String status;
+  private Timestamp lastRetry;
+  private String originalBilling;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,6 +68,26 @@ public class DbWorkspaceBucketArchive {
 
   public DbWorkspaceBucketArchive setStatus(String status) {
     this.status = status;
+    return this;
+  }
+
+  @Column(name = "last_retry_time")
+  public Timestamp getLastRetry() {
+    return lastRetry;
+  }
+
+  public DbWorkspaceBucketArchive setLastRetry(Timestamp lastRetry) {
+    this.lastRetry = lastRetry;
+    return this;
+  }
+
+  @Column(name = "original_billing_account")
+  public String getOriginalBilling() {
+    return originalBilling;
+  }
+
+  public DbWorkspaceBucketArchive setOriginalBilling(String originalBilling) {
+    this.originalBilling = originalBilling;
     return this;
   }
 

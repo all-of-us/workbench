@@ -294,6 +294,7 @@
   <include file="changelog/db.changelog-284-add-workspace-recovery-pod-id-column.xml"/>
   <include file="changelog/db.changelog-285-add-user-group-action-table.xml"/>
   <include file="changelog/db.changelog-286-add-institution-user-group-table.xml"/>
+  <include file="changelog/db.changelog-287-add-workspace-archive-retry-columns.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
