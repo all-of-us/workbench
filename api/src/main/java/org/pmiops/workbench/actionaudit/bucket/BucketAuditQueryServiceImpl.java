@@ -36,7 +36,7 @@ public class BucketAuditQueryServiceImpl implements BucketAuditQueryService {
           + "FROM \n"
           + "  %s \n"
           + "WHERE \n"
-          + "  datetime(timestamp) > datetime_sub(CURRENT_DATETIME(), INTERVAL 8 HOUR) \n"
+          + "  timestamp > TIMESTAMP_SUB(CURRENT_DATETIME(), INTERVAL 8 HOUR) \n"
           + "  AND protopayload_auditlog.methodName=\"storage.objects.create\" \n"
           + "  AND protopayload_auditlog.resourceName LIKE \"projects/_/buckets/%%\" \n"
           + "GROUP BY \n"
