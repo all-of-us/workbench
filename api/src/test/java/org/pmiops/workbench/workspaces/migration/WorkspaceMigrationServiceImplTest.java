@@ -30,6 +30,7 @@ import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageTransferClient;
+import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.MigrationState;
@@ -55,6 +56,7 @@ public class WorkspaceMigrationServiceImplTest {
   private static final String NAMESPACE = "test-ns";
   private static final String JOB_NAME = "transferJobs/migration-" + NAMESPACE;
   private static final String TERRA_NAME = "test-ws";
+  private static final String CREATOR = "user@test.com";
   private static final String POD_ID = "pod-123";
   private static final String RESEARCH_PURPOSE = "[{}]";
   private static final String GOOGLE_PROJECT = "gcp-project-123";
@@ -88,6 +90,7 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private TaskQueueService taskQueueService;
   @Mock private WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
   @Mock private MailService mailService;
+  @Mock private ImpersonatedWorkspaceService impersonatedWorkspaceService;
   @Mock private WorkspaceService workspaceService;
   // Clock MOCK
   @Mock private Clock clock;
@@ -115,7 +118,7 @@ public class WorkspaceMigrationServiceImplTest {
     workspace = new Workspace();
     workspace.setNamespace(NAMESPACE);
     workspace.setName(TERRA_NAME);
-    workspace.setCreator("user@test.com");
+    workspace.setCreator(CREATOR);
 
     rawlsWorkspace = new RawlsWorkspaceDetails();
     rawlsWorkspace.setBucketName(SOURCE_BUCKET);
@@ -293,12 +296,12 @@ public class WorkspaceMigrationServiceImplTest {
         mock(WorkspaceDao.WorkspaceDeletionView.class);
     when(workspaceDeletionView.getWorkspaceNamespace()).thenReturn(NAMESPACE);
     when(workspaceDeletionView.getFirecloudName()).thenReturn(TERRA_NAME);
+    when(workspaceDeletionView.getUserName()).thenReturn(CREATOR);
     when(workspaceDao.findNextWorkspaceToDelete()).thenReturn(workspaceDeletionView);
 
     service.deleteNextLegacyWorkspace();
 
-    verify(workspaceDao).getRequired(NAMESPACE, TERRA_NAME);
-    verify(workspaceService).deleteWorkspace(dbWorkspace);
+    verify(impersonatedWorkspaceService).deleteWorkspace(CREATOR, NAMESPACE, TERRA_NAME, true);
   }
 
   @Test

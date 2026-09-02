@@ -23,6 +23,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageTransferClient;
+import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.*;
@@ -67,6 +68,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final TaskQueueService taskQueueService;
   private final VwbUserService vwbUserService;
   private final MailService mailService;
+  private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
   private final WorkspaceService workspaceService;
   private final Provider<PodApi> podApiProvider;
   private final Provider<DbUser> userProvider;
@@ -93,6 +95,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       TaskQueueService taskQueueService,
       VwbUserService vwbUserService,
       MailService mailService,
+      ImpersonatedWorkspaceService impersonatedWorkspaceService,
       WorkspaceService workspaceService,
       Provider<PodApi> podApiProvider,
       Provider<DbUser> userProvider,
@@ -112,6 +115,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.taskQueueService = taskQueueService;
     this.vwbUserService = vwbUserService;
     this.mailService = mailService;
+    this.impersonatedWorkspaceService = impersonatedWorkspaceService;
     this.workspaceService = workspaceService;
     this.podApiProvider = podApiProvider;
     this.userProvider = userProvider;
@@ -687,10 +691,16 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     String namespace = workspaceDeletionView.getWorkspaceNamespace();
     String terraName = workspaceDeletionView.getFirecloudName();
+    String username = workspaceDeletionView.getUserName();
     logger.log(Level.INFO, "Deleting legacy workspace " + namespace + "/" + terraName);
 
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
-    workspaceService.deleteWorkspace(dbWorkspace);
+    try {
+      impersonatedWorkspaceService.deleteWorkspace(username, namespace, terraName, true);
+      logger.log(Level.INFO, "Legacy workspace " + namespace + "/" + terraName + " deleted");
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Legacy workspace " + namespace + "/" + terraName + " deletion failed", e);
+    }
   }
 
   @Override
