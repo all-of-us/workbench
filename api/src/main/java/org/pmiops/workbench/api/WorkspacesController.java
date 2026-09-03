@@ -859,6 +859,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Void> retryWorkspaceArchive(String status) {
+
+    workspaceMigrationService.retryNextArchiveByStatus(status);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
   public ResponseEntity<Void> startWorkspaceRecovery(
       String namespace, String terraName, StartWorkspaceRecoveryRequest request) {
 

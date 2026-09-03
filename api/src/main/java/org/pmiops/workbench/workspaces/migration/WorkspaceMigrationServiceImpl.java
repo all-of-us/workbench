@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageTransferClient;
@@ -700,6 +701,172 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     } catch (Exception e) {
       throw new RuntimeException(
           "Legacy workspace " + namespace + "/" + terraName + " deletion failed", e);
+    }
+  }
+
+  @Override
+  public WorkspaceDao.WorkspaceArchiveView getNextArchiveToRetry(String status) {
+    return workspaceDao.findNextArchiveToRetry(status);
+  }
+
+  @Override
+  public void retryNextArchiveByStatus(String status) {
+    WorkspaceDao.WorkspaceArchiveView workspaceArchiveView =
+        workspaceDao.findNextArchiveToRetry(status);
+    if (workspaceArchiveView == null) {
+      throw new NotFoundException(
+          "Next failed archive not found. Update query to continue archives");
+    }
+    String namespace = workspaceArchiveView.getWorkspaceNamespace();
+    String terraName = workspaceArchiveView.getFirecloudName();
+    logger.log(Level.INFO, "Next failed archive found: " + namespace);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    DbWorkspaceBucketArchive archiveRecord =
+        workspaceBucketArchiveDao.findFirstByLegacyWorkspaceId(dbWorkspace.getWorkspaceId());
+
+    if (archiveRecord == null) {
+      logger.log(Level.WARNING, "Archive record not found for workspace " + namespace);
+      return;
+    }
+
+    // Save the original billing account before changing
+    archiveRecord.setOriginalBilling(dbWorkspace.getBillingAccountName());
+    workspaceBucketArchiveDao.save(archiveRecord);
+
+    // Update the billing account to AoU initial credits
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
+    } catch (ServerErrorException e) {
+      throw new ServerErrorException("Could not update the billing account for " + namespace, e);
+    }
+
+    DbUser creator = dbWorkspace.getCreator();
+    boolean hasInitialCreditsRemaining =
+        initialCreditsService.userHasRemainingInitialCredits(creator);
+    // If the creator has no remaining credits, increase limit to the current usage plus 10 to
+    // complete the transfer
+    if (!hasInitialCreditsRemaining) {
+      Double currentUsage = initialCreditsService.getCachedInitialCreditsUsage(creator);
+      double newDollarLimit =
+          currentUsage != null
+              ? currentUsage + 10
+              : workbenchConfigProvider.get().billing.defaultInitialCreditsDollarLimit + 10;
+      logger.log(
+          Level.INFO,
+          "User "
+              + creator.getUsername()
+              + " has no credits remaining. Increasing limit to "
+              + newDollarLimit
+              + " before starting archive retry for: "
+              + namespace);
+      if (currentUsage != null) {
+        initialCreditsService.maybeSetDollarLimitOverride(creator, newDollarLimit);
+      }
+    }
+
+    try {
+      logger.log(Level.INFO, " Starting archive retry for: " + namespace);
+
+      archiveRecord
+          .setStatus(WorkspaceArchiveStatus.RETRYING.toString())
+          .setLastRetry(new Timestamp(clock.instant().toEpochMilli()));
+
+      RawlsWorkspaceDetails fcWorkspace =
+          fireCloudService.getWorkspaceAsService(namespace, terraName).getWorkspace();
+      String accessTierShortName = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
+      String archiveBucket =
+          accessTierShortName.equalsIgnoreCase("controlled")
+              ? CONTROLLED_TIER_ARCHIVE_BUCKET
+              : REGISTERED_TIER_ARCHIVE_BUCKET;
+      String archivePath = String.format("%s/", namespace);
+      String serviceAccountEmail = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
+      String projectId = workbenchConfigProvider.get().server.projectId;
+
+      String jobName =
+          storageTransferClient.createTransferJob(
+              fcWorkspace.getBucketName(),
+              null,
+              archiveBucket,
+              archivePath,
+              "archive-retry-" + namespace,
+              projectId,
+              null,
+              serviceAccountEmail,
+              true);
+
+      logger.log(Level.INFO, "Archive retry transfer job created: " + namespace);
+
+      storageTransferClient.runTransferJob(projectId, jobName);
+
+      taskQueueService.pushWorkspaceArchiveRetryStatusTask(namespace, terraName);
+
+      logger.log(Level.INFO, "Archive retry transfer job started: " + namespace);
+    } catch (Exception e) {
+      archiveRecord.setStatus(WorkspaceArchiveStatus.RETRY_FAILED.toString());
+
+      workspaceBucketArchiveDao.save(archiveRecord);
+      throw new RuntimeException("Workspace archive retry failed: " + namespace, e);
+    }
+  }
+
+  @Override
+  public void checkArchiveRetryStatus(String namespace, String terraName) {
+
+    logger.log(Level.INFO, namespace + ": Checking archive retry queue status");
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+
+    DbWorkspaceBucketArchive archive =
+        workspaceBucketArchiveDao.findFirstByLegacyWorkspaceId(dbWorkspace.getWorkspaceId());
+
+    if (archive == null) {
+      throw new RuntimeException(namespace + ": Archive retry record not found");
+    }
+
+    String projectId = workbenchConfigProvider.get().server.projectId;
+
+    String jobName = "transferJobs/migration-archive-retry-" + namespace;
+
+    TransferOperation transferOperation =
+        storageTransferClient.getTransferJobStatus(projectId, jobName);
+
+    TransferOperation.Status jobStatus = transferOperation.getStatus();
+
+    logger.log(Level.INFO, namespace + ": Archive retry job status: " + jobStatus);
+
+    switch (jobStatus) {
+      case IN_PROGRESS:
+      case QUEUED:
+        logger.log(Level.INFO, namespace + ": Archive retry transfer in progress, requeue");
+        taskQueueService.pushWorkspaceArchiveRetryStatusTask(namespace, terraName);
+
+        return;
+
+      case FAILED:
+        logger.log(
+            Level.INFO,
+            namespace
+                + ": Archive retry transfer failed: "
+                + transferOperation.getErrorBreakdownsList());
+        archive.setStatus(WorkspaceArchiveStatus.RETRY_FAILED.toString());
+
+        workspaceBucketArchiveDao.save(archive);
+
+        return;
+
+      case SUCCESS:
+        logger.log(Level.INFO, namespace + ": Archive retry transfer success");
+        archive.setStatus(WorkspaceArchiveStatus.ARCHIVED.toString());
+
+        dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.NOT_STARTED.name());
+
+        workspaceDao.save(dbWorkspace);
+
+        workspaceBucketArchiveDao.save(archive);
+        storageTransferClient.deleteTransferJob(projectId, jobName);
+
+        logger.log(Level.INFO, namespace + ": Workspace archive retry completed");
     }
   }
 

@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.WorkspaceArchiveStatus;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceUserCacheService;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationService;
@@ -63,6 +64,12 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   @Override
   public ResponseEntity<Void> deleteNextLegacyWorkspace() {
     workspaceMigrationService.deleteNextLegacyWorkspace();
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> retryNextFailedArchive() {
+    workspaceMigrationService.retryNextArchiveByStatus(WorkspaceArchiveStatus.FAILED.toString());
     return ResponseEntity.noContent().build();
   }
 

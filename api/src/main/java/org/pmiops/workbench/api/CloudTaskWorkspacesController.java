@@ -168,6 +168,16 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   }
 
   @Override
+  public ResponseEntity<Void> checkWorkspaceArchiveRetryStatus(
+      CheckWorkspaceArchiveRetryStatusRequest body) {
+
+    workspaceMigrationService.checkArchiveRetryStatus(
+        body.getWorkspaceNamespace(), body.getTerraName());
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
   public ResponseEntity<Void> checkWorkspaceRecoveryStatus(
       CheckWorkspaceRecoveryStatusRequest request) {
 

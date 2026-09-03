@@ -3,3 +3,5 @@ cron:
   aou_skip_reason: Only run in prod
 - url: /v1/cron/deleteNextLegacyWorkspace
   aou_skip_reason: Only run in prod
+- url: /v1/cron/retryNextFailedArchive
+  aou_skip_reason: Only run in prod
