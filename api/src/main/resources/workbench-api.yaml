@@ -3473,6 +3473,23 @@ paths:
         200:
           description: Workspace archive started successfully
           content: { }
+  /v1/workspaces/archive/{status}:
+    post:
+      tags:
+        - workspaces
+      description: Starts the archive retry flow for the RW 1.0 workspace bucket.
+      operationId: retryWorkspaceArchive
+      parameters:
+        - name: status
+          in: path
+          description: The status of the archive to retry
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workspace archive retry started successfully
+          content: { }
   /v1/workspaces/{namespace}/migration/folder-sync-status:
     get:
       tags:
@@ -4680,6 +4697,25 @@ paths:
       responses:
         200:
           description: Archive status checked successfully
+          content: { }
+  /v1/cloudTask/checkWorkspaceArchiveRetryStatus:
+    post:
+      tags:
+        - cloudTaskWorkspaces
+      description: |
+        Checks the status of a workspace archive retry STS job and updates the archive state when
+        complete. Requeues itself if still running.
+      operationId: checkWorkspaceArchiveRetryStatus
+      security: [ ]
+      requestBody:
+        description: Workspace archive retry status task to process.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckWorkspaceArchiveRetryStatusRequest'
+      responses:
+        200:
+          description: Archive retry status checked successfully
           content: { }
   /v1/cloudTask/checkWorkspaceRecoveryStatus:
     post:
@@ -8406,6 +8442,16 @@ components:
           type: string
         workspaceName:
           type: string
+    CheckWorkspaceArchiveRetryStatusRequest:
+      type: object
+      required:
+        - workspaceNamespace
+        - terraName
+      properties:
+        workspaceNamespace:
+          type: string
+        terraName:
+          type: string
     CheckWorkspaceRecoveryStatusRequest:
       type: object
       properties:
@@ -8634,12 +8680,14 @@ components:
         - FAILED
     WorkspaceArchiveStatus:
       type: string
-      description: Indicates the status of the workspace archive flow (PENDING, IN_PROGRESS, ARCHIVED, FAILED).
+      description: Indicates the status of the workspace archive flow (PENDING, IN_PROGRESS, ARCHIVED, FAILED, RETRYING, RETRY_FAILED).
       enum:
         - PENDING
         - IN_PROGRESS
         - ARCHIVED
         - FAILED
+        - RETRYING
+        - RETRY_FAILED
     WorkspaceRecoveryStatus:
       type: string
       description: Indicates the status of the workspace recovery flow (NOT_STARTED, REQUESTED, RECOVERING, RECOVERED, FAILED).
