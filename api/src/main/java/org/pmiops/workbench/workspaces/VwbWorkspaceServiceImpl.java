@@ -217,6 +217,11 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  public void deleteWorkspaceAsService(DbWorkspace dbWorkspace) {
+    logger.warn("deleteWorkspaceAsService not implemented in VWB");
+  }
+
+  @Override
   public RawlsWorkspaceDetails createWorkspace(Workspace workspace, DbCdrVersion cdrVersion) {
     String workspaceToClone = cdrVersion.getVwbTemplateId();
 

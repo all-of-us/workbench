@@ -55,6 +55,8 @@ public interface WorkspaceService {
 
   void deleteWorkspace(DbWorkspace dbWorkspace);
 
+  void deleteWorkspaceAsService(DbWorkspace dbWorkspace);
+
   /*
    * This function will call the Google Cloud Billing API to set the given billing
    * account name to the given workspace. It will also update the billingAccountName
