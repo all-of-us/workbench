@@ -771,6 +771,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       archiveRecord
           .setStatus(WorkspaceArchiveStatus.RETRYING.toString())
           .setLastRetry(new Timestamp(clock.instant().toEpochMilli()));
+      workspaceBucketArchiveDao.save(archiveRecord);
 
       RawlsWorkspaceDetails fcWorkspace =
           fireCloudService.getWorkspaceAsService(namespace, terraName).getWorkspace();
@@ -793,7 +794,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               projectId,
               null,
               serviceAccountEmail,
-              true);
+              false);
 
       logger.log(Level.INFO, "Archive retry transfer job created: " + namespace);
 
