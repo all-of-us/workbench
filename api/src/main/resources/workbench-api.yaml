@@ -132,6 +132,60 @@ paths:
       responses:
         204:
           description: Request Received.
+  /v2/admin/vwb/system-notification:
+    get:
+      tags:
+      - vwbSystemNotificationAdmin
+      description: Returns the Verily Workbench system notifications created for the All of Us
+        organization, most recently created first.
+      operationId: listVwbSystemNotifications
+      responses:
+        200:
+          description: The Verily Workbench system notifications.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VwbSystemNotification'
+    post:
+      tags:
+      - vwbSystemNotificationAdmin
+      description: Creates a notification in Verily Workbench, shown to all users in the All of Us
+        organization. This is the Verily Workbench equivalent of an All of Us service banner.
+      operationId: createVwbSystemNotification
+      requestBody:
+        description: the Verily Workbench system notification to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VwbSystemNotification'
+        required: true
+      responses:
+        200:
+          description: The created Verily Workbench system notification.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VwbSystemNotification'
+      x-codegen-request-body-name: vwbSystemNotification
+  /v2/admin/vwb/system-notification/{id}:
+    delete:
+      tags:
+      - vwbSystemNotificationAdmin
+      description: Deletes the specified Verily Workbench system notification, in Verily Workbench
+        and in the Workbench database
+      operationId: deleteVwbSystemNotification
+      parameters:
+      - name: id
+        in: path
+        description: The Verily Workbench notification ID (UUID) to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        204:
+          description: Request Received.
   /v1/profile:
     get:
       tags:
@@ -10895,6 +10949,51 @@ components:
         endTimeEpochMillis:
           type: integer
           description: End time for when this alert should no longer be shown, in milliseconds since epoch. Null means it never expires.
+          format: int64
+    VwbSystemNotificationType:
+      type: string
+      description: Whether the banner blocks user action until acknowledged, or is passively
+        available in the notification center
+      enum:
+        - BLOCKING
+        - PASSIVE
+    VwbSystemNotificationPriority:
+      type: string
+      description: Display priority of the banner in Verily Workbench
+      enum:
+        - INFO
+        - WARNING
+        - ERROR
+    VwbSystemNotification:
+      required:
+      - title
+      - message
+      - notificationType
+      - notificationPriority
+      type: object
+      properties:
+        id:
+          type: string
+          description: The notification ID Verily Workbench assigned. Set on responses only
+        title:
+          type: string
+          description: 'Title of the banner, e.g. ''Service Incident: December 6, 2019'''
+        message:
+          type: string
+          description: The actual message of the banner
+        notificationType:
+          $ref: '#/components/schemas/VwbSystemNotificationType'
+        notificationPriority:
+          $ref: '#/components/schemas/VwbSystemNotificationPriority'
+        startTimeEpochMillis:
+          type: integer
+          description: Start time for when this banner should be shown, in milliseconds since
+            epoch. Null starts immediately.
+          format: int64
+        endTimeEpochMillis:
+          type: integer
+          description: End time for when this banner should no longer be shown, in milliseconds
+            since epoch. Null means it never expires.
           format: int64
     SumologicEgressEventRequest:
       type: object

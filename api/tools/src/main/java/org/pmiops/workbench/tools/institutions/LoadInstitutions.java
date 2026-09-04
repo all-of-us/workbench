@@ -59,7 +59,8 @@ public class LoadInstitutions extends Tool {
   /** Local CLI execution has no request context; provide a no-op client for institution imports. */
   private static class NoopVwbUserManagerClient extends VwbUserManagerClient {
     NoopVwbUserManagerClient() {
-      super(() -> null, () -> null, () -> null, null, () -> null, () -> null, () -> null);
+      super(
+          () -> null, () -> null, () -> null, null, () -> null, () -> null, () -> null, () -> null);
     }
 
     @Override

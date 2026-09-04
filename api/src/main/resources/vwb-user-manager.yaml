@@ -1411,6 +1411,133 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  #################
+  # Notifications #
+  #################
+  /api/notifications:
+    get:
+      summary: Get notifications for current user or list org notifications (dual mode)
+      operationId: getNotifications
+      description: |
+        Dual-mode endpoint:
+        - Without orgId/scopeType/scopeId/isActive filters: Returns active notifications for current user
+        - With any admin filter params: Returns notifications for organization (requires read permission)
+      tags: [ Notifications ]
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Organization ID for admin listing
+        - name: notificationType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/NotificationType'
+          description: Filter by notification type (user view)
+        - name: scopeType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/NotificationScopeType'
+          description: Filter by scope type (admin view)
+        - name: scopeId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by scope ID (admin view)
+        - name: isActive
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filter by active status (admin view)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Maximum number of results
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: Create a new notification
+      operationId: createNotification
+      description: |
+        Creates a new notification. Requires appropriate permissions based on scope type:
+        - SYSTEM: requires WORKBENCH_USE_ADMIN_APIS permission
+        - ORGANIZATION: requires ORGANIZATION_CREATE_NOTIFICATION permission
+        - GROUP: requires WORKBENCH_GROUP_CREATE_NOTIFICATION permission on the group
+        - USER: requires either org admin or notification_admin on a group containing the user
+      tags: [ Notifications ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationCreateRequest'
+      responses:
+        '200':
+          description: Notification created successfully (or already exists if idempotent)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationDescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/notifications/{id}:
+    delete:
+      summary: Delete a notification
+      operationId: deleteNotification
+      description: |
+        Deletes a notification. Requires appropriate permissions based on the notification's scope.
+      tags: [ Notifications ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Notification ID (UUID)
+      responses:
+        '204':
+          description: Notification deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
 components:
   schemas:
     # Please keep alphabetized
@@ -1756,6 +1883,182 @@ components:
         targetOrgUfid:
           type: string
           description: The user facing id of the organization to move the user to
+
+    NotificationCreateRequest:
+      type: object
+      required:
+        - scopeType
+        - title
+        - message
+      description: Request to create a new notification
+      properties:
+        id:
+          description: Optional ID for idempotency. If not provided, a random UUID will be generated.
+          type: string
+          format: uuid
+        orgId:
+          description: Organization ID (required for non-system notifications)
+          type: string
+          format: uuid
+        notes:
+          description: Internal notes about the notification
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/NotificationScopeType'
+        scopeId:
+          description: ID of the scope entity (for group/user notifications)
+          type: string
+        title:
+          description: Title of the notification
+          type: string
+        message:
+          description: Message content of the notification
+          type: string
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        notificationPriority:
+          $ref: '#/components/schemas/NotificationPriority'
+        startTime:
+          description: When the notification becomes active
+          type: string
+          format: date-time
+        endTime:
+          description: When the notification expires
+          type: string
+          format: date-time
+
+    NotificationDescription:
+      type: object
+      required:
+        - id
+        - scopeType
+        - title
+        - message
+        - notificationType
+        - notificationPriority
+        - status
+        - createdBy
+        - createdAt
+      description: |
+        A notification that can be displayed to users in the application.
+        Notifications can be scoped to system-wide, organization, group, or individual users.
+      properties:
+        id:
+          description: Unique identifier for the notification
+          type: string
+          format: uuid
+        orgId:
+          description: |
+            Organization ID for the notification. Required for non-system notifications.
+            Must be null for system-level notifications.
+          type: string
+          format: uuid
+        notes:
+          description: Internal notes about the notification (not shown to users)
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/NotificationScopeType'
+        scopeId:
+          description: |
+            The ID of the scope entity (e.g., group ID for group notifications,
+            user email for user notifications). Null for system and organization scopes.
+          type: string
+        title:
+          description: Title of the notification
+          type: string
+        message:
+          description: Message content of the notification
+          type: string
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        notificationPriority:
+          $ref: '#/components/schemas/NotificationPriority'
+        startTime:
+          description: When the notification becomes active (ISO-8601 format)
+          type: string
+          format: date-time
+        endTime:
+          description: When the notification expires (ISO-8601 format)
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/NotificationStatus'
+        createdBy:
+          description: Email of the user who created the notification
+          type: string
+        createdAt:
+          description: Timestamp when the notification was created (ISO-8601 format)
+          type: string
+          format: date-time
+        updatedBy:
+          description: Email of the user who last updated the notification
+          type: string
+        updatedAt:
+          description: Timestamp when the notification was last updated (ISO-8601 format)
+          type: string
+          format: date-time
+
+    NotificationList:
+      type: object
+      required:
+        - notifications
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationDescription'
+        totalCount:
+          description: Total count of notifications (for pagination)
+          type: integer
+        nextPageToken:
+          description: Token for fetching the next page of results
+          type: string
+
+    NotificationPriority:
+      description: |
+        Priority level of the notification affecting display order and styling.
+        - INFO: Informational messages (lowest priority)
+        - WARNING: Warning messages requiring attention
+        - ERROR: Error or critical messages (highest priority)
+      type: string
+      enum:
+        - INFO
+        - WARNING
+        - ERROR
+
+    NotificationScopeType:
+      description: |
+        Scope of the notification determining who can see it.
+        - SYSTEM: Visible to all users across all organizations
+        - ORGANIZATION: Visible to all users in a specific organization
+        - GROUP: Visible to all members of a specific group
+        - USER: Visible to a specific user only
+      type: string
+      enum:
+        - SYSTEM
+        - ORGANIZATION
+        - GROUP
+        - USER
+
+    NotificationStatus:
+      description: |
+        Current status of the notification.
+        - ACTIVE: Currently visible to users
+        - INACTIVE: Soft-deleted or expired, not visible to users
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+
+    NotificationType:
+      description: |
+        Type of notification determining its behavior.
+        - BLOCKING: Blocks user action until acknowledged (e.g., modals, popups)
+        - PASSIVE: Passively available (e.g., in notification center)
+      type: string
+      enum:
+        - BLOCKING
+        - PASSIVE
 
     OrgId:
       type: string

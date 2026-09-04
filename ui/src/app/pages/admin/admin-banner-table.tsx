@@ -3,7 +3,13 @@ import { useEffect, useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
+import {
+  StatusAlert,
+  StatusAlertLocation,
+  VwbSystemNotification,
+  VwbSystemNotificationPriority,
+  VwbSystemNotificationType,
+} from 'generated/fetch';
 
 import { Button, IconButton } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
@@ -11,10 +17,15 @@ import { TrashCan } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { statusAlertApi } from 'app/services/swagger-fetch-clients';
+import {
+  statusAlertApi,
+  vwbSystemNotificationAdminApi,
+} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
 import { AdminBannerModal } from './admin-banner-modal';
+import { AdminVwbSystemNotificationModal } from './admin-vwb-system-notification-modal';
 
 const styles = reactStyles({
   page: {
@@ -62,7 +73,11 @@ const styles = reactStyles({
   createButtonContainer: {
     display: 'flex',
     justifyContent: 'flex-end',
+    gap: '1rem',
     marginBottom: '1rem',
+  },
+  sourceCol: {
+    width: '8%',
   },
   messageText: {
     display: 'block',
@@ -70,6 +85,60 @@ const styles = reactStyles({
     wordBreak: 'normal',
   },
 });
+
+/**
+ * One row of the banner table. All of Us service banners and Verily Workbench system
+ * notifications are stored separately and have different fields, so they are normalized here to
+ * render in a single table.
+ */
+interface BannerRow {
+  key: string;
+  isVwb: boolean;
+  title: string;
+  message: string;
+  link?: string;
+  alertLocation?: StatusAlertLocation;
+  startTimeEpochMillis?: number;
+  endTimeEpochMillis?: number;
+  statusAlertId?: number;
+  vwbNotificationId?: string;
+}
+
+const toBannerRows = (
+  statusAlerts: StatusAlert[],
+  vwbNotifications: VwbSystemNotification[]
+): BannerRow[] => [
+  ...statusAlerts.map((alert) => ({
+    key: `aou-${alert.statusAlertId}`,
+    isVwb: false,
+    title: alert.title,
+    message: alert.message,
+    link: alert.link,
+    alertLocation: alert.alertLocation,
+    startTimeEpochMillis: alert.startTimeEpochMillis,
+    endTimeEpochMillis: alert.endTimeEpochMillis,
+    statusAlertId: alert.statusAlertId,
+  })),
+  ...vwbNotifications.map((notification) => ({
+    key: `vwb-${notification.id}`,
+    isVwb: true,
+    title: notification.title,
+    message: notification.message,
+    startTimeEpochMillis: notification.startTimeEpochMillis,
+    endTimeEpochMillis: notification.endTimeEpochMillis,
+    vwbNotificationId: notification.id,
+  })),
+];
+
+const getDefaultVwbSystemNotification = (): VwbSystemNotification => {
+  return {
+    title: '',
+    message: '',
+    notificationType: VwbSystemNotificationType.PASSIVE,
+    notificationPriority: VwbSystemNotificationPriority.INFO,
+    startTimeEpochMillis: Date.now(),
+  };
+};
 
 const getDefaultStatusAlert = (): StatusAlert => {
   return {
@@ -82,51 +151,88 @@ const getDefaultStatusAlert = (): StatusAlert => {
 };
 
 export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
-  const [banners, setBanners] = useState<StatusAlert[]>([]);
+  const [banners, setBanners] = useState<BannerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newBanner, setNewBanner] = useState<StatusAlert>(
     getDefaultStatusAlert()
   );
+  const [showVwbCreateModal, setShowVwbCreateModal] = useState(false);
+  const [newVwbNotification, setNewVwbNotification] =
+    useState<VwbSystemNotification>(getDefaultVwbSystemNotification());
+  const [error, setError] = useState<string>(null);
+
+  const loadBanners = async () => {
+    // Verily Workbench is the system of record for its own notifications, so listing them depends
+    // on user-manager being reachable. Keep All of Us banners usable if it is not.
+    const [statusAlerts, vwbNotifications] = await Promise.all([
+      statusAlertApi().getStatusAlerts(),
+      vwbSystemNotificationAdminApi()
+        .listVwbSystemNotifications()
+        .catch((e) => {
+          console.error('Error loading Verily Workbench notifications: ', e);
+          setError(
+            'Could not load Verily Workbench notifications. All of Us banners are shown below.'
+          );
+          return [];
+        }),
+    ]);
+    setBanners(toBannerRows(statusAlerts, vwbNotifications));
+  };
 
   useEffect(() => {
-    const loadBanners = async () => {
+    const initialLoad = async () => {
       props.hideSpinner();
       setLoading(true);
       try {
-        const statusAlerts = await statusAlertApi().getStatusAlerts();
-        setBanners(statusAlerts);
+        await loadBanners();
       } catch (e) {
-        console.error('Error loading status alerts: ', e);
+        console.error('Error loading banners: ', e);
+        setError('Failed to load banners.');
         setLoading(false);
       }
     };
 
-    loadBanners();
+    initialLoad();
   }, []);
 
   useEffect(() => {
     setLoading(false);
   }, [banners]);
 
-  const deleteBanner = async (id: number) => {
+  const deleteBanner = async (row: BannerRow) => {
     try {
       setLoading(true);
-      await statusAlertApi().deleteStatusAlert(id);
-      const statusAlerts = await statusAlertApi().getStatusAlerts();
-      setBanners(statusAlerts);
-    } catch (error) {
-      console.error('Error deleting banner:', error);
+      setError(null);
+      if (row.isVwb) {
+        // Removes the notification in Verily Workbench as well as our record of it.
+        await vwbSystemNotificationAdminApi().deleteVwbSystemNotification(
+          row.vwbNotificationId
+        );
+      } else {
+        await statusAlertApi().deleteStatusAlert(row.statusAlertId);
+      }
+      await loadBanners();
+    } catch (e) {
+      console.error('Error deleting banner:', e);
+      setError('Failed to delete the banner. Please try again.');
+      setLoading(false);
     }
   };
 
-  const actionBodyTemplate = (rowData: StatusAlert) => {
+  const actionBodyTemplate = (rowData: BannerRow) => {
     return (
-      <TooltipTrigger content='Delete Banner'>
+      <TooltipTrigger
+        content={
+          rowData.isVwb
+            ? 'Delete Verily Workbench Notification'
+            : 'Delete Banner'
+        }
+      >
         <IconButton
           label='Delete'
           icon={TrashCan}
-          onClick={() => deleteBanner(rowData.statusAlertId)}
+          onClick={() => deleteBanner(rowData)}
           style={{ height: '1.5rem', width: '1.5rem' }}
         />
       </TooltipTrigger>
@@ -135,14 +241,37 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
 
   const handleCreateBanner = async () => {
     try {
+      setError(null);
       await statusAlertApi().postStatusAlert(newBanner);
-      const statusAlerts = await statusAlertApi().getStatusAlerts();
-      setBanners(statusAlerts);
+      await loadBanners();
       setShowCreateModal(false);
       setNewBanner(getDefaultStatusAlert());
-    } catch (error) {
-      console.error('Error creating banner:', error);
+    } catch (e) {
+      console.error('Error creating banner:', e);
+      setError('Failed to create the banner. Please try again.');
     }
+  };
+
+  const handleCreateVwbNotification = async () => {
+    try {
+      setError(null);
+      await vwbSystemNotificationAdminApi().createVwbSystemNotification(
+        newVwbNotification
+      );
+      await loadBanners();
+      setShowVwbCreateModal(false);
+      setNewVwbNotification(getDefaultVwbSystemNotification());
+    } catch (e) {
+      console.error('Error creating Verily Workbench notification:', e);
+      setError(
+        'Failed to create the Verily Workbench notification. Please try again.'
+      );
+    }
+  };
+
+  const handleCloseVwbModal = () => {
+    setShowVwbCreateModal(false);
+    setNewVwbNotification(getDefaultVwbSystemNotification());
   };
 
   const handleCloseModal = () => {
@@ -150,7 +279,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     setNewBanner(getDefaultStatusAlert());
   };
 
-  const messageBodyTemplate = (rowData: StatusAlert) => {
+  const messageBodyTemplate = (rowData: BannerRow) => {
     return (
       <span style={styles.messageText} title={rowData.message}>
         {rowData.message}
@@ -158,7 +287,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     );
   };
 
-  const linkBodyTemplate = (rowData: StatusAlert) => {
+  const linkBodyTemplate = (rowData: BannerRow) => {
     return (
       <span style={styles.messageText} title={rowData.link || '-'}>
         {rowData.link || '-'}
@@ -181,13 +310,26 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     <div style={styles.page}>
       <SemiBoldHeader style={styles.header}>Service Banners</SemiBoldHeader>
       <div style={styles.createButtonContainer}>
+        <Button
+          type='secondary'
+          onClick={() => setShowVwbCreateModal(true)}
+          style={{ maxWidth: 'none' }}
+        >
+          Create Verily Workbench Banner
+        </Button>
         <Button onClick={() => setShowCreateModal(true)}>
           Create New Banner
         </Button>
       </div>
+      {error && (
+        <div style={{ color: colors.danger, marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
       <div style={styles.tableContainer}>
         <DataTable
           value={banners}
+          dataKey='key'
           emptyMessage='No active banners found'
           style={styles.tableStyle}
           columnResizeMode='expand'
@@ -215,11 +357,22 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
             sortable
           />
           <Column
+            field='isVwb'
+            header='Verily Workbench'
+            style={styles.sourceCol}
+            body={(rowData: BannerRow) => (rowData.isVwb ? 'Yes' : 'No')}
+            sortable
+          />
+          <Column
             field='alertLocation'
             header='Location'
             style={styles.colStyle}
-            body={(rowData: StatusAlert) =>
-              rowData.alertLocation === StatusAlertLocation.BEFORE_LOGIN
+            body={(rowData: BannerRow) =>
+              // Location is an All of Us banner concept; Verily Workbench notifications are
+              // always shown inside the app.
+              rowData.isVwb
+                ? '-'
+                : rowData.alertLocation === StatusAlertLocation.BEFORE_LOGIN
                 ? 'Before Login'
                 : 'After Login'
             }
@@ -252,6 +405,15 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
           setBanner={setNewBanner}
           onClose={handleCloseModal}
           onCreate={handleCreateBanner}
+        />
+      )}
+
+      {showVwbCreateModal && (
+        <AdminVwbSystemNotificationModal
+          notification={newVwbNotification}
+          setNotification={setNewVwbNotification}
+          onClose={handleCloseVwbModal}
+          onCreate={handleCreateVwbNotification}
         />
       )}
     </div>
