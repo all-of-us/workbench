@@ -2,7 +2,11 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { VwbBanner, VwbBannerPriority, VwbBannerType } from 'generated/fetch';
+import {
+  VwbSystemNotification,
+  VwbSystemNotificationPriority,
+  VwbSystemNotificationType,
+} from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,33 +18,33 @@ import {
 } from 'testing/react-test-helpers';
 
 import {
-  AdminVwbBannerModal,
-  MAX_VWB_BANNER_MESSAGE,
-  MAX_VWB_BANNER_TITLE,
-  validateVwbBanner,
-} from './admin-vwb-banner-modal';
+  AdminVwbSystemNotificationModal,
+  MAX_VWB_NOTIFICATION_MESSAGE,
+  MAX_VWB_NOTIFICATION_TITLE,
+  validateVwbSystemNotification,
+} from './admin-vwb-system-notification-modal';
 
-const validBanner = (): VwbBanner => ({
+const validNotification = (): VwbSystemNotification => ({
   title: 'Scheduled maintenance',
   message: 'Verily Workbench will be unavailable on Saturday.',
-  notificationType: VwbBannerType.PASSIVE,
-  notificationPriority: VwbBannerPriority.INFO,
+  notificationType: VwbSystemNotificationType.PASSIVE,
+  notificationPriority: VwbSystemNotificationPriority.INFO,
   startTimeEpochMillis: Date.now(),
 });
 
 const getCreateButton = () =>
   screen.getByRole('button', { name: 'Create Banner' });
 
-describe('AdminVwbBannerModal', () => {
-  const mockSetBanner = jest.fn();
+describe('AdminVwbSystemNotificationModal', () => {
+  const mockSetNotification = jest.fn();
   const mockOnClose = jest.fn();
   const mockOnCreate = jest.fn();
 
-  const component = (banner: VwbBanner) =>
+  const component = (notification: VwbSystemNotification) =>
     renderModal(
-      <AdminVwbBannerModal
-        banner={banner}
-        setBanner={mockSetBanner}
+      <AdminVwbSystemNotificationModal
+        notification={notification}
+        setNotification={mockSetNotification}
         onClose={mockOnClose}
         onCreate={mockOnCreate}
       />
@@ -51,7 +55,7 @@ describe('AdminVwbBannerModal', () => {
   });
 
   it('should tell the admin the audience is All of Us only', () => {
-    component(validBanner());
+    component(validNotification());
 
     // Admins need to know this is not a system-wide Verily Workbench banner.
     expect(
@@ -60,11 +64,15 @@ describe('AdminVwbBannerModal', () => {
     expect(
       screen.getByText(/not a system-wide Verily Workbench banner/i)
     ).toBeInTheDocument();
+    // The notification is listed in the table and deleting it there removes it from VWB.
+    expect(
+      screen.getByText(/deleting it there removes it from Verily Workbench too/i)
+    ).toBeInTheDocument();
   });
 
   it('should create a banner when title and message are provided', async () => {
     const user = userEvent.setup();
-    component(validBanner());
+    component(validNotification());
 
     const createButton = getCreateButton();
     expectButtonElementEnabled(createButton);
@@ -74,55 +82,59 @@ describe('AdminVwbBannerModal', () => {
   });
 
   it('should disable create when the title is blank', () => {
-    component({ ...validBanner(), title: '   ' });
+    component({ ...validNotification(), title: '   ' });
 
     expectButtonElementDisabled(getCreateButton());
     expect(mockOnCreate).not.toHaveBeenCalled();
   });
 
   it('should disable create when the message is blank', () => {
-    component({ ...validBanner(), message: '' });
+    component({ ...validNotification(), message: '' });
 
     expectButtonElementDisabled(getCreateButton());
     expect(mockOnCreate).not.toHaveBeenCalled();
   });
 
-  describe(validateVwbBanner.name, () => {
+  describe(validateVwbSystemNotification.name, () => {
     it('should accept a fully populated banner', () => {
-      expect(validateVwbBanner(validBanner())).toEqual([]);
+      expect(validateVwbSystemNotification(validNotification())).toEqual([]);
     });
 
     it('should require a title and a message', () => {
       expect(
-        validateVwbBanner({ ...validBanner(), title: '', message: '' })
+        validateVwbSystemNotification({
+          ...validNotification(),
+          title: '',
+          message: '',
+        })
       ).toEqual(['Title is required', 'Message is required']);
     });
 
     it('should reject an over-long title', () => {
-      const errors = validateVwbBanner({
-        ...validBanner(),
-        title: 'a'.repeat(MAX_VWB_BANNER_TITLE + 1),
+      const errors = validateVwbSystemNotification({
+        ...validNotification(),
+        title: 'a'.repeat(MAX_VWB_NOTIFICATION_TITLE + 1),
       });
       expect(errors).toEqual([
-        `Title must be ${MAX_VWB_BANNER_TITLE} characters or fewer`,
+        `Title must be ${MAX_VWB_NOTIFICATION_TITLE} characters or fewer`,
       ]);
     });
 
     it('should reject an over-long message', () => {
-      const errors = validateVwbBanner({
-        ...validBanner(),
-        message: 'a'.repeat(MAX_VWB_BANNER_MESSAGE + 1),
+      const errors = validateVwbSystemNotification({
+        ...validNotification(),
+        message: 'a'.repeat(MAX_VWB_NOTIFICATION_MESSAGE + 1),
       });
       expect(errors).toEqual([
-        `Message must be ${MAX_VWB_BANNER_MESSAGE} characters or fewer`,
+        `Message must be ${MAX_VWB_NOTIFICATION_MESSAGE} characters or fewer`,
       ]);
     });
 
     it('should reject an end time at or before the start time', () => {
       const start = Date.now();
       expect(
-        validateVwbBanner({
-          ...validBanner(),
+        validateVwbSystemNotification({
+          ...validNotification(),
           startTimeEpochMillis: start,
           endTimeEpochMillis: start,
         })
@@ -131,7 +143,10 @@ describe('AdminVwbBannerModal', () => {
 
     it('should accept a missing end time, which means never expires', () => {
       expect(
-        validateVwbBanner({ ...validBanner(), endTimeEpochMillis: null })
+        validateVwbSystemNotification({
+          ...validNotification(),
+          endTimeEpochMillis: null,
+        })
       ).toEqual([]);
     });
   });

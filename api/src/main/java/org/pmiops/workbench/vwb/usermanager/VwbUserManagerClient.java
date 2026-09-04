@@ -106,6 +106,20 @@ public class VwbUserManagerClient {
         context -> notificationsApiProvider.get().createNotification(request));
   }
 
+  /**
+   * Deletes a notification in VWB.
+   *
+   * @param notificationId The notification ID VWB assigned when the notification was created
+   */
+  public void deleteNotification(String notificationId) {
+    logger.info("Deleting VWB notification {}", notificationId);
+    vwbUserManagerRetryHandler.run(
+        context -> {
+          notificationsApiProvider.get().deleteNotification(notificationId);
+          return null;
+        });
+  }
+
   public OrganizationMember getOrganizationMember(String userName) {
     String organizationId = workbenchConfigProvider.get().vwb.organizationId;
     return vwbUserManagerRetryHandler.run(

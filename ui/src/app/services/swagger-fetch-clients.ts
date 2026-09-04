@@ -48,6 +48,7 @@ import {
   UserMetricsApi,
   VwbDataCollectionAdminApi,
   VwbGroupAdminApi,
+  VwbSystemNotificationAdminApi,
   VwbWorkspaceAdminApi,
   WorkspaceAdminApi,
   WorkspacesApi,
@@ -128,6 +129,9 @@ export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
 export const vwbDataCollectionAdminApi = bindCtor(VwbDataCollectionAdminApi);
 export const vwbGroupAdminApi = bindCtor(VwbGroupAdminApi);
+export const vwbSystemNotificationAdminApi = bindCtor(
+  VwbSystemNotificationAdminApi
+);
 export const vwbWorkspaceAdminApi = bindCtor(VwbWorkspaceAdminApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);

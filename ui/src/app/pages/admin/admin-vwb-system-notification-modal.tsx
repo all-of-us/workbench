@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import { VwbBanner, VwbBannerPriority, VwbBannerType } from 'generated/fetch';
+import {
+  VwbSystemNotification,
+  VwbSystemNotificationPriority,
+  VwbSystemNotificationType,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { Select, TextInput } from 'app/components/inputs';
@@ -40,12 +44,12 @@ const styles = reactStyles({
   },
 });
 
-export const MAX_VWB_BANNER_TITLE = 200;
-export const MAX_VWB_BANNER_MESSAGE = 4000;
+export const MAX_VWB_NOTIFICATION_TITLE = 200;
+export const MAX_VWB_NOTIFICATION_MESSAGE = 4000;
 
-interface AdminVwbBannerModalProps {
-  banner: VwbBanner;
-  setBanner: React.Dispatch<React.SetStateAction<VwbBanner>>;
+interface AdminVwbSystemNotificationModalProps {
+  notification: VwbSystemNotification;
+  setNotification: React.Dispatch<React.SetStateAction<VwbSystemNotification>>;
   onClose: () => void;
   onCreate: () => void;
 }
@@ -65,55 +69,62 @@ const ModalField = ({ label, children, fieldId }: ModalFieldProps) => (
   </div>
 );
 
-export const validateVwbBanner = (banner: VwbBanner): string[] => {
+export const validateVwbSystemNotification = (
+  notification: VwbSystemNotification
+): string[] => {
   const errors: string[] = [];
-  if (!banner.title?.trim()) {
+  if (!notification.title?.trim()) {
     errors.push('Title is required');
-  } else if (banner.title.length > MAX_VWB_BANNER_TITLE) {
-    errors.push(`Title must be ${MAX_VWB_BANNER_TITLE} characters or fewer`);
-  }
-  if (!banner.message?.trim()) {
-    errors.push('Message is required');
-  } else if (banner.message.length > MAX_VWB_BANNER_MESSAGE) {
+  } else if (notification.title.length > MAX_VWB_NOTIFICATION_TITLE) {
     errors.push(
-      `Message must be ${MAX_VWB_BANNER_MESSAGE} characters or fewer`
+      `Title must be ${MAX_VWB_NOTIFICATION_TITLE} characters or fewer`
+    );
+  }
+  if (!notification.message?.trim()) {
+    errors.push('Message is required');
+  } else if (notification.message.length > MAX_VWB_NOTIFICATION_MESSAGE) {
+    errors.push(
+      `Message must be ${MAX_VWB_NOTIFICATION_MESSAGE} characters or fewer`
     );
   }
   if (
-    banner.endTimeEpochMillis &&
-    banner.startTimeEpochMillis &&
-    banner.endTimeEpochMillis <= banner.startTimeEpochMillis
+    notification.endTimeEpochMillis &&
+    notification.startTimeEpochMillis &&
+    notification.endTimeEpochMillis <= notification.startTimeEpochMillis
   ) {
     errors.push('End time must be after start time');
   }
   return errors;
 };
 
-export const AdminVwbBannerModal = ({
-  banner,
-  setBanner,
+export const AdminVwbSystemNotificationModal = ({
+  notification,
+  setNotification,
   onClose,
   onCreate,
-}: AdminVwbBannerModalProps) => {
+}: AdminVwbSystemNotificationModalProps) => {
   const [isCreating, setIsCreating] = useState(false);
 
   const typeOptions = [
-    { value: VwbBannerType.PASSIVE, label: 'Passive (notification center)' },
     {
-      value: VwbBannerType.BLOCKING,
+      value: VwbSystemNotificationType.PASSIVE,
+      label: 'Passive (notification center)',
+    },
+    {
+      value: VwbSystemNotificationType.BLOCKING,
       label: 'Blocking (requires acknowledgement)',
     },
   ];
 
   const priorityOptions = [
-    { value: VwbBannerPriority.INFO, label: 'Info' },
-    { value: VwbBannerPriority.WARNING, label: 'Warning' },
-    { value: VwbBannerPriority.ERROR, label: 'Error' },
+    { value: VwbSystemNotificationPriority.INFO, label: 'Info' },
+    { value: VwbSystemNotificationPriority.WARNING, label: 'Warning' },
+    { value: VwbSystemNotificationPriority.ERROR, label: 'Error' },
   ];
 
   const errors: string[] = isCreating
     ? ['Creating banner...']
-    : validateVwbBanner(banner);
+    : validateVwbSystemNotification(notification);
 
   const handleCreate = async () => {
     if (isCreating || errors.length > 0) {
@@ -127,24 +138,25 @@ export const AdminVwbBannerModal = ({
     }
   };
 
-  const handleBannerChange = (field: keyof VwbBanner, value: any) =>
-    setBanner({ ...banner, [field]: value });
+  const handleChange = (field: keyof VwbSystemNotification, value: any) =>
+    setNotification({ ...notification, [field]: value });
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = convertLocalDateTimeToEpochMillis(e.target.value);
-    setBanner({
-      ...banner,
+    setNotification({
+      ...notification,
       startTimeEpochMillis: selected,
       endTimeEpochMillis:
-        banner.endTimeEpochMillis && banner.endTimeEpochMillis <= selected
+        notification.endTimeEpochMillis &&
+        notification.endTimeEpochMillis <= selected
           ? null
-          : banner.endTimeEpochMillis,
+          : notification.endTimeEpochMillis,
     });
   };
 
   const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setBanner({
-      ...banner,
+    setNotification({
+      ...notification,
       endTimeEpochMillis: convertLocalDateTimeToEpochMillis(e.target.value),
     });
 
@@ -163,16 +175,17 @@ export const AdminVwbBannerModal = ({
             of other organizations.
           </div>
           <div>
-            It is stored in Verily Workbench rather than the All of Us database,
-            so it will not appear in the table on this page.
+            Verily Workbench owns the notification itself. It is listed in the
+            table on this page with Verily Workbench set to Yes, and deleting it
+            there removes it from Verily Workbench too.
           </div>
         </div>
 
         <ModalField label='Title' fieldId='vwb-banner-title'>
           <TextInput
             id='vwb-banner-title'
-            value={banner.title}
-            onChange={(value) => handleBannerChange('title', value)}
+            value={notification.title}
+            onChange={(value) => handleChange('title', value)}
             placeholder='Enter banner title'
             style={styles.input}
           />
@@ -181,8 +194,8 @@ export const AdminVwbBannerModal = ({
         <ModalField label='Message' fieldId='vwb-banner-message'>
           <TextInput
             id='vwb-banner-message'
-            value={banner.message}
-            onChange={(value) => handleBannerChange('message', value)}
+            value={notification.message}
+            onChange={(value) => handleChange('message', value)}
             placeholder='Enter banner message'
             style={styles.input}
           />
@@ -191,20 +204,18 @@ export const AdminVwbBannerModal = ({
         <ModalField label='Type' fieldId='vwb-banner-type'>
           <Select
             id='vwb-banner-type'
-            value={banner.notificationType}
+            value={notification.notificationType}
             options={typeOptions}
-            onChange={(value) => handleBannerChange('notificationType', value)}
+            onChange={(value) => handleChange('notificationType', value)}
           />
         </ModalField>
 
         <ModalField label='Priority' fieldId='vwb-banner-priority'>
           <Select
             id='vwb-banner-priority'
-            value={banner.notificationPriority}
+            value={notification.notificationPriority}
             options={priorityOptions}
-            onChange={(value) =>
-              handleBannerChange('notificationPriority', value)
-            }
+            onChange={(value) => handleChange('notificationPriority', value)}
           />
         </ModalField>
 
@@ -214,9 +225,9 @@ export const AdminVwbBannerModal = ({
             type='datetime-local'
             min={formatDateTimeLocal(Date.now())}
             max={formatDateTimeLocal(
-              banner.endTimeEpochMillis || Date.now() + MILLIS_PER_YEAR
+              notification.endTimeEpochMillis || Date.now() + MILLIS_PER_YEAR
             )}
-            value={formatDateTimeLocal(banner.startTimeEpochMillis)}
+            value={formatDateTimeLocal(notification.startTimeEpochMillis)}
             onChange={handleStartTimeChange}
             style={styles.input}
           />
@@ -226,9 +237,9 @@ export const AdminVwbBannerModal = ({
           <input
             id='vwb-end-time'
             type='datetime-local'
-            min={formatDateTimeLocal(banner.startTimeEpochMillis + 1)}
+            min={formatDateTimeLocal(notification.startTimeEpochMillis + 1)}
             max={formatDateTimeLocal(Date.now() + MILLIS_PER_YEAR)}
-            value={formatDateTimeLocal(banner.endTimeEpochMillis)}
+            value={formatDateTimeLocal(notification.endTimeEpochMillis)}
             onChange={handleEndTimeChange}
             style={styles.input}
           />
