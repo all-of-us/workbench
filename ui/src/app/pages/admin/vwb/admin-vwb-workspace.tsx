@@ -373,8 +373,8 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             <WorkspaceInfoField labelText='Billing Account Type'>
               {workspace.billingAccountId ===
               serverConfigStore.get().config.initialCreditsBillingAccountId
-                ? `Initial credits (${workspace.createdBy})`
-                : 'User provided'}
+                ? `Initial credits (${workspace.podUserFacingId || 'No pod'})`
+                : `User provided (${workspace.podUserFacingId || 'No pod'})`}
             </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Google Project Id'>
               {workspace.googleProjectId}
@@ -390,9 +390,6 @@ export const AdminVwbWorkspace = fp.flow(withRouter)((props: Props) => {
             </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Creation Time'>
               {new Date(workspace.creationTime).toDateString()}
-            </WorkspaceInfoField>
-            <WorkspaceInfoField labelText='Pod ID'>
-              {workspace.podUserFacingId || 'No pod attached'}
             </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Description'>
               {workspace.description}
