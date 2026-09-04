@@ -179,11 +179,10 @@ paths:
       parameters:
       - name: id
         in: path
-        description: The primary key of the Verily Workbench system notification to delete
+        description: The Verily Workbench notification ID (UUID) to delete
         required: true
         schema:
-          type: integer
-          format: int64
+          type: string
       responses:
         204:
           description: Request Received.
@@ -10943,15 +10942,9 @@ components:
       - notificationPriority
       type: object
       properties:
-        vwbSystemNotificationId:
-          type: integer
-          description: The primary key of the notification in the Workbench database. Set on
-            responses only
-          format: int64
-        vwbNotificationId:
+        id:
           type: string
-          description: The notification ID Verily Workbench assigned to this banner. Set on
-            responses only
+          description: The notification ID Verily Workbench assigned. Set on responses only
         title:
           type: string
           description: 'Title of the banner, e.g. ''Service Incident: December 6, 2019'''

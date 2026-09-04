@@ -1415,6 +1415,72 @@ paths:
   # Notifications #
   #################
   /api/notifications:
+    get:
+      summary: Get notifications for current user or list org notifications (dual mode)
+      operationId: getNotifications
+      description: |
+        Dual-mode endpoint:
+        - Without orgId/scopeType/scopeId/isActive filters: Returns active notifications for current user
+        - With any admin filter params: Returns notifications for organization (requires read permission)
+      tags: [ Notifications ]
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Organization ID for admin listing
+        - name: notificationType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/NotificationType'
+          description: Filter by notification type (user view)
+        - name: scopeType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/NotificationScopeType'
+          description: Filter by scope type (admin view)
+        - name: scopeId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by scope ID (admin view)
+        - name: isActive
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filter by active status (admin view)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Maximum number of results
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/PermissionDenied'
+        '500':
+          $ref: '#/components/responses/ServerError'
     post:
       summary: Create a new notification
       operationId: createNotification
@@ -1931,6 +1997,22 @@ components:
           description: Timestamp when the notification was last updated (ISO-8601 format)
           type: string
           format: date-time
+
+    NotificationList:
+      type: object
+      required:
+        - notifications
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationDescription'
+        totalCount:
+          description: Total count of notifications (for pagination)
+          type: integer
+        nextPageToken:
+          description: Token for fetching the next page of results
+          type: string
 
     NotificationPriority:
       description: |

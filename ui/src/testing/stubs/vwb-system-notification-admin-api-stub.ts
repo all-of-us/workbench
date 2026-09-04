@@ -24,17 +24,14 @@ export class VwbSystemNotificationAdminApiStub extends VwbSystemNotificationAdmi
   ): Promise<VwbSystemNotification> {
     const created = {
       ...notification,
-      vwbSystemNotificationId: this.nextId++,
-      vwbNotificationId: `vwb-notification-uuid-${this.nextId}`,
+      id: `vwb-notification-uuid-${this.nextId++}`,
     };
     this.notifications.push(created);
     return Promise.resolve(created);
   }
 
-  public async deleteVwbSystemNotification(id: number): Promise<void> {
-    this.notifications = this.notifications.filter(
-      (n) => n.vwbSystemNotificationId !== id
-    );
+  public async deleteVwbSystemNotification(id: string): Promise<void> {
+    this.notifications = this.notifications.filter((n) => n.id !== id);
     return Promise.resolve();
   }
 }
@@ -42,8 +39,7 @@ export class VwbSystemNotificationAdminApiStub extends VwbSystemNotificationAdmi
 export const stubVwbSystemNotification = (
   overrides: Partial<VwbSystemNotification> = {}
 ): VwbSystemNotification => ({
-  vwbSystemNotificationId: 1,
-  vwbNotificationId: 'vwb-notification-uuid-1',
+  id: 'vwb-notification-uuid-1',
   title: 'VWB Stub Title',
   message: 'This is a stub Verily Workbench notification.',
   notificationType: VwbSystemNotificationType.PASSIVE,

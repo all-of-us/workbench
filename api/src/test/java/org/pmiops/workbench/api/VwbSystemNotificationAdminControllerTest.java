@@ -4,19 +4,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.db.dao.VwbSystemNotificationDao;
-import org.pmiops.workbench.db.model.DbVwbSystemNotification;
-import org.pmiops.workbench.exceptions.NotFoundException;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.VwbSystemNotification;
 import org.pmiops.workbench.model.VwbSystemNotificationPriority;
@@ -25,34 +24,37 @@ import org.pmiops.workbench.vwb.user.model.NotificationDescription;
 import org.pmiops.workbench.vwb.user.model.NotificationPriority;
 import org.pmiops.workbench.vwb.user.model.NotificationType;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@DataJpaTest
 public class VwbSystemNotificationAdminControllerTest {
-  private static final String VWB_NOTIFICATION_ID = "b6a1c0f2-1234-4c5e-8a9b-0d1e2f3a4b5c";
+  private static final UUID VWB_NOTIFICATION_ID =
+      UUID.fromString("b6a1c0f2-1234-4c5e-8a9b-0d1e2f3a4b5c");
   private static final String TITLE = "Scheduled maintenance";
   private static final String MESSAGE = "Verily Workbench will be unavailable on Saturday.";
+  private static final Instant START_TIME = Instant.ofEpochMilli(1_760_000_000_000L);
+  private static final Instant END_TIME = START_TIME.plusSeconds(3600);
 
-  @Autowired private VwbSystemNotificationAdminController controller;
-  @Autowired private VwbSystemNotificationDao vwbSystemNotificationDao;
+  @Mock private VwbUserManagerClient vwbUserManagerClient;
 
-  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
+  private VwbSystemNotificationAdminController controller;
 
-  @TestConfiguration
-  @Import({FakeClockConfiguration.class, VwbSystemNotificationAdminController.class})
-  static class Configuration {}
-
-  private void stubVwbCreate() {
-    when(vwbUserManagerClient.createOrganizationNotification(
-            any(), any(), any(), any(), any(), any()))
-        .thenReturn(new NotificationDescription().id(UUID.fromString(VWB_NOTIFICATION_ID)));
+  @BeforeEach
+  public void setUp() {
+    MockitoAnnotations.openMocks(this);
+    controller = new VwbSystemNotificationAdminController(vwbUserManagerClient);
   }
 
-  private VwbSystemNotification request() {
+  private static NotificationDescription vwbNotification() {
+    return new NotificationDescription()
+        .id(VWB_NOTIFICATION_ID)
+        .title(TITLE)
+        .message(MESSAGE)
+        .notificationType(NotificationType.BLOCKING)
+        .notificationPriority(NotificationPriority.WARNING)
+        .startTime(OffsetDateTime.ofInstant(START_TIME, ZoneOffset.UTC))
+        .endTime(OffsetDateTime.ofInstant(END_TIME, ZoneOffset.UTC));
+  }
+
+  private static VwbSystemNotification request() {
     return new VwbSystemNotification()
         .title(TITLE)
         .message(MESSAGE)
@@ -62,16 +64,16 @@ public class VwbSystemNotificationAdminControllerTest {
 
   @Test
   public void testCreate() {
-    stubVwbCreate();
-    Instant startTime = Instant.ofEpochMilli(1_760_000_000_000L);
-    Instant endTime = startTime.plusSeconds(3600);
+    when(vwbUserManagerClient.createOrganizationNotification(
+            any(), any(), any(), any(), any(), any()))
+        .thenReturn(vwbNotification());
 
     VwbSystemNotification created =
         controller
             .createVwbSystemNotification(
                 request()
-                    .startTimeEpochMillis(startTime.toEpochMilli())
-                    .endTimeEpochMillis(endTime.toEpochMilli()))
+                    .startTimeEpochMillis(START_TIME.toEpochMilli())
+                    .endTimeEpochMillis(END_TIME.toEpochMilli()))
             .getBody();
 
     verify(vwbUserManagerClient)
@@ -80,26 +82,23 @@ public class VwbSystemNotificationAdminControllerTest {
             MESSAGE,
             NotificationType.BLOCKING,
             NotificationPriority.WARNING,
-            startTime,
-            endTime);
+            START_TIME,
+            END_TIME);
 
-    // The VWB notification ID is recorded so the notification can be deleted there later.
-    assertThat(created.getVwbNotificationId()).isEqualTo(VWB_NOTIFICATION_ID);
-    assertThat(created.getVwbSystemNotificationId()).isNotNull();
+    // The ID Verily Workbench assigned is what the admin page deletes by.
+    assertThat(created.getId()).isEqualTo(VWB_NOTIFICATION_ID.toString());
     assertThat(created.getTitle()).isEqualTo(TITLE);
-    assertThat(created.getStartTimeEpochMillis()).isEqualTo(startTime.toEpochMilli());
-    assertThat(created.getEndTimeEpochMillis()).isEqualTo(endTime.toEpochMilli());
-
-    DbVwbSystemNotification saved =
-        vwbSystemNotificationDao.findById(created.getVwbSystemNotificationId()).orElseThrow();
-    assertThat(saved.getVwbNotificationId()).isEqualTo(VWB_NOTIFICATION_ID);
-    assertThat(saved.getNotificationType()).isEqualTo("BLOCKING");
-    assertThat(saved.getNotificationPriority()).isEqualTo("WARNING");
+    assertThat(created.getNotificationType()).isEqualTo(VwbSystemNotificationType.BLOCKING);
+    assertThat(created.getNotificationPriority()).isEqualTo(VwbSystemNotificationPriority.WARNING);
+    assertThat(created.getStartTimeEpochMillis()).isEqualTo(START_TIME.toEpochMilli());
+    assertThat(created.getEndTimeEpochMillis()).isEqualTo(END_TIME.toEpochMilli());
   }
 
   @Test
   public void testCreate_nullTimesArePassedThrough() {
-    stubVwbCreate();
+    when(vwbUserManagerClient.createOrganizationNotification(
+            any(), any(), any(), any(), any(), any()))
+        .thenReturn(vwbNotification().startTime(null).endTime(null));
 
     // Null start/end mean "shown immediately" and "never expires"; VWB applies its own defaults.
     VwbSystemNotification created = controller.createVwbSystemNotification(request()).getBody();
@@ -112,71 +111,61 @@ public class VwbSystemNotificationAdminControllerTest {
   }
 
   @Test
-  public void testCreate_vwbFailure_doesNotRecordNotification() {
+  public void testCreate_vwbFailurePropagates() {
     doThrow(new ServerErrorException("user manager unavailable"))
         .when(vwbUserManagerClient)
         .createOrganizationNotification(any(), any(), any(), any(), any(), any());
 
     assertThrows(
         ServerErrorException.class, () -> controller.createVwbSystemNotification(request()));
+  }
 
-    // A notification VWB never created must not be listed for admins.
+  @Test
+  public void testList() {
+    when(vwbUserManagerClient.listOrganizationNotifications(100))
+        .thenReturn(List.of(vwbNotification()));
+
+    List<VwbSystemNotification> listed = controller.listVwbSystemNotifications().getBody();
+
+    assertThat(listed).hasSize(1);
+    assertThat(listed.get(0).getId()).isEqualTo(VWB_NOTIFICATION_ID.toString());
+    assertThat(listed.get(0).getMessage()).isEqualTo(MESSAGE);
+  }
+
+  @Test
+  public void testList_empty() {
+    when(vwbUserManagerClient.listOrganizationNotifications(100)).thenReturn(List.of());
+
     assertThat(controller.listVwbSystemNotifications().getBody()).isEmpty();
   }
 
   @Test
-  public void testList_mostRecentFirst() {
-    DbVwbSystemNotification first = save("first", "id-1");
-    DbVwbSystemNotification second = save("second", "id-2");
+  public void testList_toleratesMissingTypeAndPriority() {
+    // Both are optional in the Verily Workbench API, so a notification created elsewhere may
+    // omit them.
+    when(vwbUserManagerClient.listOrganizationNotifications(100))
+        .thenReturn(List.of(vwbNotification().notificationType(null).notificationPriority(null)));
 
-    List<VwbSystemNotification> listed = controller.listVwbSystemNotifications().getBody();
-
-    assertThat(listed).hasSize(2);
-    assertThat(listed.get(0).getVwbSystemNotificationId())
-        .isEqualTo(second.getVwbSystemNotificationId());
-    assertThat(listed.get(1).getVwbSystemNotificationId())
-        .isEqualTo(first.getVwbSystemNotificationId());
+    VwbSystemNotification listed = controller.listVwbSystemNotifications().getBody().get(0);
+    assertThat(listed.getNotificationType()).isNull();
+    assertThat(listed.getNotificationPriority()).isNull();
   }
 
   @Test
   public void testDelete() {
-    DbVwbSystemNotification saved = save(TITLE, VWB_NOTIFICATION_ID);
+    controller.deleteVwbSystemNotification(VWB_NOTIFICATION_ID.toString());
 
-    controller.deleteVwbSystemNotification(saved.getVwbSystemNotificationId());
-
-    verify(vwbUserManagerClient).deleteNotification(VWB_NOTIFICATION_ID);
-    assertThat(controller.listVwbSystemNotifications().getBody()).isEmpty();
+    verify(vwbUserManagerClient).deleteNotification(VWB_NOTIFICATION_ID.toString());
   }
 
   @Test
-  public void testDelete_vwbFailure_keepsNotification() {
-    DbVwbSystemNotification saved = save(TITLE, VWB_NOTIFICATION_ID);
+  public void testDelete_vwbFailurePropagates() {
     doThrow(new ServerErrorException("user manager unavailable"))
         .when(vwbUserManagerClient)
         .deleteNotification(any());
 
     assertThrows(
         ServerErrorException.class,
-        () -> controller.deleteVwbSystemNotification(saved.getVwbSystemNotificationId()));
-
-    // The notification is still up in VWB, so admins must still be able to find and retry it.
-    assertThat(controller.listVwbSystemNotifications().getBody()).hasSize(1);
-  }
-
-  @Test
-  public void testDelete_unknownId() {
-    assertThrows(NotFoundException.class, () -> controller.deleteVwbSystemNotification(404L));
-    verify(vwbUserManagerClient, never()).deleteNotification(any());
-  }
-
-  private DbVwbSystemNotification save(String title, String vwbNotificationId) {
-    return vwbSystemNotificationDao.save(
-        new DbVwbSystemNotification()
-            .setVwbNotificationId(vwbNotificationId)
-            .setTitle(title)
-            .setMessage(MESSAGE)
-            .setNotificationType("PASSIVE")
-            .setNotificationPriority("INFO")
-            .setStartTime(new Timestamp(1_760_000_000_000L)));
+        () -> controller.deleteVwbSystemNotification(VWB_NOTIFICATION_ID.toString()));
   }
 }

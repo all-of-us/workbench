@@ -101,7 +101,7 @@ interface BannerRow {
   startTimeEpochMillis?: number;
   endTimeEpochMillis?: number;
   statusAlertId?: number;
-  vwbSystemNotificationId?: number;
+  vwbNotificationId?: string;
 }
 
 const toBannerRows = (
@@ -120,13 +120,13 @@ const toBannerRows = (
     statusAlertId: alert.statusAlertId,
   })),
   ...vwbNotifications.map((notification) => ({
-    key: `vwb-${notification.vwbSystemNotificationId}`,
+    key: `vwb-${notification.id}`,
     isVwb: true,
     title: notification.title,
     message: notification.message,
     startTimeEpochMillis: notification.startTimeEpochMillis,
     endTimeEpochMillis: notification.endTimeEpochMillis,
-    vwbSystemNotificationId: notification.vwbSystemNotificationId,
+    vwbNotificationId: notification.id,
   })),
 ];
 
@@ -163,9 +163,19 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
   const [error, setError] = useState<string>(null);
 
   const loadBanners = async () => {
+    // Verily Workbench is the system of record for its own notifications, so listing them depends
+    // on user-manager being reachable. Keep All of Us banners usable if it is not.
     const [statusAlerts, vwbNotifications] = await Promise.all([
       statusAlertApi().getStatusAlerts(),
-      vwbSystemNotificationAdminApi().listVwbSystemNotifications(),
+      vwbSystemNotificationAdminApi()
+        .listVwbSystemNotifications()
+        .catch((e) => {
+          console.error('Error loading Verily Workbench notifications: ', e);
+          setError(
+            'Could not load Verily Workbench notifications. All of Us banners are shown below.'
+          );
+          return [];
+        }),
     ]);
     setBanners(toBannerRows(statusAlerts, vwbNotifications));
   };
@@ -197,7 +207,7 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
       if (row.isVwb) {
         // Removes the notification in Verily Workbench as well as our record of it.
         await vwbSystemNotificationAdminApi().deleteVwbSystemNotification(
-          row.vwbSystemNotificationId
+          row.vwbNotificationId
         );
       } else {
         await statusAlertApi().deleteStatusAlert(row.statusAlertId);

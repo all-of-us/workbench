@@ -4,6 +4,7 @@ import jakarta.inject.Provider;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -104,6 +105,32 @@ public class VwbUserManagerClient {
         title);
     return vwbUserManagerRetryHandler.run(
         context -> notificationsApiProvider.get().createNotification(request));
+  }
+
+  /**
+   * Lists the organization-scoped notifications for the AoU organization in VWB, active and expired
+   * alike.
+   *
+   * @param limit Maximum number of notifications to return. VWB caps this at 100
+   */
+  public List<NotificationDescription> listOrganizationNotifications(int limit) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    NotificationList notifications =
+        vwbUserManagerRetryHandler.run(
+            context ->
+                notificationsApiProvider
+                    .get()
+                    .getNotifications(
+                        organizationId,
+                        /* notificationType= */ null,
+                        // Supplying scopeType puts the request in VWB's admin listing mode, which
+                        // returns the org's notifications rather than the caller's own.
+                        NotificationScopeType.ORGANIZATION,
+                        /* scopeId= */ null,
+                        /* isActive= */ null,
+                        limit,
+                        /* offset= */ 0));
+    return notifications.getNotifications() == null ? List.of() : notifications.getNotifications();
   }
 
   /**

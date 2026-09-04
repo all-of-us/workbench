@@ -8,7 +8,7 @@ import {
   VwbSystemNotificationAdminApi,
 } from 'generated/fetch';
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   registerApiClient,
@@ -99,7 +99,7 @@ describe(AdminBannerTable.name, () => {
     const vwbRow = await findRowByTitle('VWB Notification');
     await clickDelete(vwbRow, user);
 
-    expect(vwbDeleteSpy).toHaveBeenCalledWith(1);
+    expect(vwbDeleteSpy).toHaveBeenCalledWith('vwb-notification-uuid-1');
     expect(aouDeleteSpy).not.toHaveBeenCalled();
 
     await waitFor(() =>
@@ -122,6 +122,21 @@ describe(AdminBannerTable.name, () => {
 
     expect(aouDeleteSpy).toHaveBeenCalledWith(1);
     expect(vwbDeleteSpy).not.toHaveBeenCalled();
+  });
+
+  it('should still show All of Us banners when Verily Workbench is unreachable', async () => {
+    jest
+      .spyOn(vwbSystemNotificationAdminApi(), 'listVwbSystemNotifications')
+      .mockRejectedValue(new Error('user-manager unavailable'));
+
+    component();
+
+    // Listing Verily Workbench notifications depends on user-manager, but All of Us banners do
+    // not, so an outage there must not blank the page.
+    expect(await screen.findByText('Stub Title')).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Could not load Verily Workbench notifications/i)
+    ).toBeInTheDocument();
   });
 
   it('should offer a button to create a Verily Workbench banner', async () => {
