@@ -289,13 +289,10 @@ public class WorkspaceMigrationServiceImplTest {
 
   @Test
   void deleteNextLegacyWorkspace_deletesSelectedWorkspace() {
-    WorkspaceDao.WorkspaceDeletionView workspaceDeletionView =
-        mock(WorkspaceDao.WorkspaceDeletionView.class);
-
     service.deleteNextLegacyWorkspace(NAMESPACE, TERRA_NAME);
 
     verify(workspaceDao).getRequired(NAMESPACE, TERRA_NAME);
-    verify(workspaceService).deleteWorkspace(dbWorkspace);
+    verify(workspaceService).deleteWorkspaceAsService(dbWorkspace);
   }
 
   @Test
