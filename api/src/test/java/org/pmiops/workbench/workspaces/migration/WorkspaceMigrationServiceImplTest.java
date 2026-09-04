@@ -27,7 +27,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.*;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageTransferClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -292,24 +291,11 @@ public class WorkspaceMigrationServiceImplTest {
   void deleteNextLegacyWorkspace_deletesSelectedWorkspace() {
     WorkspaceDao.WorkspaceDeletionView workspaceDeletionView =
         mock(WorkspaceDao.WorkspaceDeletionView.class);
-    when(workspaceDeletionView.getWorkspaceNamespace()).thenReturn(NAMESPACE);
-    when(workspaceDeletionView.getFirecloudName()).thenReturn(TERRA_NAME);
-    when(workspaceDao.findNextWorkspaceToDelete()).thenReturn(workspaceDeletionView);
 
     service.deleteNextLegacyWorkspace(NAMESPACE, TERRA_NAME);
 
     verify(workspaceDao).getRequired(NAMESPACE, TERRA_NAME);
     verify(workspaceService).deleteWorkspace(dbWorkspace);
-  }
-
-  @Test
-  void deleteNextLegacyWorkspace_throwsWhenNoWorkspaceFound() {
-    when(workspaceDao.findNextWorkspaceToDelete()).thenReturn(null);
-
-    assertThrows(
-        NotFoundException.class, () -> service.deleteNextLegacyWorkspace(NAMESPACE, TERRA_NAME));
-
-    verify(workspaceService, never()).deleteWorkspace(any());
   }
 
   @Test
