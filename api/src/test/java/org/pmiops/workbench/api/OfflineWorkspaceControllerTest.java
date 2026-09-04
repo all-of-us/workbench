@@ -24,6 +24,7 @@ public class OfflineWorkspaceControllerTest {
   private static final String TERRA_NAME = "test-ws";
 
   @Mock private WorkspaceService workspaceService;
+  @Mock private WorkspaceDao workspaceDao;
   @Mock private WorkspaceMigrationService workspaceMigrationService;
   @Mock private WorkspaceUserCacheService mockWorkspaceUserCacheService;
   @Mock private TaskQueueService mockTaskQueueService;
@@ -33,6 +34,7 @@ public class OfflineWorkspaceControllerTest {
   @Mock private WorkspaceDao.WorkspaceUserCacheView testWorkspace1;
   @Mock private WorkspaceDao.WorkspaceUserCacheView testWorkspace2;
   @Mock private WorkspaceDao.WorkspaceArchiveView workspaceArchiveView;
+  @Mock private WorkspaceDao.WorkspaceDeletionView workspaceDeletionView;
 
   @BeforeEach
   public void setUp() {
@@ -40,6 +42,7 @@ public class OfflineWorkspaceControllerTest {
         new OfflineWorkspaceController(
             mockTaskQueueService,
             workspaceService,
+            workspaceDao,
             mockWorkspaceUserCacheService,
             workspaceMigrationService);
   }
@@ -77,9 +80,12 @@ public class OfflineWorkspaceControllerTest {
 
   @Test
   public void testDeleteNextLegacyWorkspace() {
+    when(workspaceDeletionView.getWorkspaceNamespace()).thenReturn(NAMESPACE);
+    when(workspaceDeletionView.getFirecloudName()).thenReturn(TERRA_NAME);
+    when(workspaceDao.findNextWorkspaceToDelete()).thenReturn(workspaceDeletionView);
     ResponseEntity<Void> response = offlineWorkspaceController.deleteNextLegacyWorkspace();
 
-    verify(workspaceMigrationService).deleteNextLegacyWorkspace(NAMESPACE, TERRA_NAME);
+    verify(mockTaskQueueService).pushDeleteLegacyWorkspaceTask(NAMESPACE, TERRA_NAME);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
   }
 
