@@ -71,6 +71,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  w.gcp_project_id, \n"
           + "  w.workspace_metadata_policy, \n"
           + "  p.billing_account_id, \n"
+          + "  p.pod_user_facing_id, \n"
           + "FROM \n"
           + "  %s w \n"
           + "JOIN \n"
@@ -100,6 +101,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
           + "  w.gcp_project_id, \n"
           + "  w.workspace_metadata_policy, \n"
           + "  p.billing_account_id, \n"
+          + "  p.pod_user_facing_id, \n"
           + "FROM \n"
           + " %s w \n"
           + "JOIN \n"
@@ -637,6 +639,7 @@ public class VwbAdminQueryServiceImpl implements VwbAdminQueryService {
     FieldValues.getString(row, "workspace_metadata_policy")
         .ifPresent(vwbWorkspace::setResearchPurpose);
     FieldValues.getString(row, "billing_account_id").ifPresent(vwbWorkspace::billingAccountId);
+    FieldValues.getString(row, "pod_user_facing_id").ifPresent(vwbWorkspace::setPodUserFacingId);
 
     FieldValues.getDateTime(row, "created_date")
         .map(OffsetDateTime::toString)
