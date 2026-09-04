@@ -4679,6 +4679,26 @@ paths:
           description: Folder sync status checked successfully
           content: { }
       x-codegen-request-body-name: request
+  /v1/cloudTask/deleteLegacyWorkspace:
+    post:
+      tags:
+        - cloudTaskWorkspaces
+      description: |
+        Deletes the specified legacy workspace
+      operationId: deleteLegacyWorkspace
+      security: [ ]
+      requestBody:
+        description: Legacy workspace to delete.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteLegacyWorkspaceRequest'
+        required: true
+      responses:
+        200:
+          description: Legacy workspace deleted successfully
+          content: { }
+      x-codegen-request-body-name: request
   /v1/cloudTask/checkWorkspaceArchiveStatus:
     post:
       tags:
@@ -8443,6 +8463,16 @@ components:
         workspaceName:
           type: string
     CheckWorkspaceArchiveRetryStatusRequest:
+      type: object
+      required:
+        - workspaceNamespace
+        - terraName
+      properties:
+        workspaceNamespace:
+          type: string
+        terraName:
+          type: string
+    DeleteLegacyWorkspaceRequest:
       type: object
       required:
         - workspaceNamespace

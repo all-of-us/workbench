@@ -199,4 +199,11 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
     return ResponseEntity.ok().build();
   }
+
+  @Override
+  public ResponseEntity<Void> deleteLegacyWorkspace(DeleteLegacyWorkspaceRequest request) {
+    workspaceMigrationService.deleteNextLegacyWorkspace(
+        request.getWorkspaceNamespace(), request.getTerraName());
+    return ResponseEntity.ok().build();
+  }
 }

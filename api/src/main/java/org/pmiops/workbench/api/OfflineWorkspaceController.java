@@ -19,6 +19,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
 
   private final TaskQueueService taskQueueService;
   private final WorkspaceService workspaceService;
+  private final WorkspaceDao workspaceDao;
   private final WorkspaceUserCacheService workspaceUserCacheService;
   private final WorkspaceMigrationService workspaceMigrationService;
 
@@ -26,10 +27,12 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   public OfflineWorkspaceController(
       TaskQueueService taskQueueService,
       WorkspaceService workspaceService,
+      WorkspaceDao workspaceDao,
       WorkspaceUserCacheService workspaceUserCacheService,
       WorkspaceMigrationService workspaceMigrationService) {
     this.taskQueueService = taskQueueService;
     this.workspaceService = workspaceService;
+    this.workspaceDao = workspaceDao;
     this.workspaceUserCacheService = workspaceUserCacheService;
     this.workspaceMigrationService = workspaceMigrationService;
   }
@@ -63,7 +66,14 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
 
   @Override
   public ResponseEntity<Void> deleteNextLegacyWorkspace() {
-    workspaceMigrationService.deleteNextLegacyWorkspace();
+    WorkspaceDao.WorkspaceDeletionView workspaceDeletionView =
+        workspaceDao.findNextWorkspaceToDelete();
+    if (workspaceDeletionView == null) {
+      throw new NotFoundException(
+          "Next legacy workspace not found. Update query to continue archives");
+    }
+    taskQueueService.pushDeleteLegacyWorkspaceTask(
+        workspaceDeletionView.getWorkspaceNamespace(), workspaceDeletionView.getFirecloudName());
     return ResponseEntity.noContent().build();
   }
 
