@@ -3,7 +3,13 @@ import { useEffect, useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { StatusAlert, StatusAlertLocation } from 'generated/fetch';
+import {
+  StatusAlert,
+  StatusAlertLocation,
+  VwbBanner,
+  VwbBannerPriority,
+  VwbBannerType,
+} from 'generated/fetch';
 
 import { Button, IconButton } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
@@ -12,9 +18,11 @@ import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
 import { AdminBannerModal } from './admin-banner-modal';
+import { AdminVwbBannerModal } from './admin-vwb-banner-modal';
 
 const styles = reactStyles({
   page: {
@@ -62,6 +70,7 @@ const styles = reactStyles({
   createButtonContainer: {
     display: 'flex',
     justifyContent: 'flex-end',
+    gap: '1rem',
     marginBottom: '1rem',
   },
   messageText: {
@@ -70,6 +79,16 @@ const styles = reactStyles({
     wordBreak: 'normal',
   },
 });
+
+const getDefaultVwbBanner = (): VwbBanner => {
+  return {
+    title: '',
+    message: '',
+    notificationType: VwbBannerType.PASSIVE,
+    notificationPriority: VwbBannerPriority.INFO,
+    startTimeEpochMillis: Date.now(),
+  };
+};
 
 const getDefaultStatusAlert = (): StatusAlert => {
   return {
@@ -88,6 +107,11 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
   const [newBanner, setNewBanner] = useState<StatusAlert>(
     getDefaultStatusAlert()
   );
+  const [showVwbCreateModal, setShowVwbCreateModal] = useState(false);
+  const [newVwbBanner, setNewVwbBanner] = useState<VwbBanner>(
+    getDefaultVwbBanner()
+  );
+  const [vwbError, setVwbError] = useState<string>(null);
 
   useEffect(() => {
     const loadBanners = async () => {
@@ -150,6 +174,28 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     setNewBanner(getDefaultStatusAlert());
   };
 
+  const handleCreateVwbBanner = async () => {
+    try {
+      setVwbError(null);
+      await statusAlertApi().postVwbBanner(newVwbBanner);
+      // VWB banners live in Verily Workbench rather than the Workbench database, so there is
+      // nothing to reload into the table below.
+      setShowVwbCreateModal(false);
+      setNewVwbBanner(getDefaultVwbBanner());
+    } catch (error) {
+      console.error('Error creating Verily Workbench banner:', error);
+      setVwbError(
+        'Failed to create the Verily Workbench banner. Please try again.'
+      );
+    }
+  };
+
+  const handleCloseVwbModal = () => {
+    setShowVwbCreateModal(false);
+    setVwbError(null);
+    setNewVwbBanner(getDefaultVwbBanner());
+  };
+
   const messageBodyTemplate = (rowData: StatusAlert) => {
     return (
       <span style={styles.messageText} title={rowData.message}>
@@ -181,10 +227,22 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
     <div style={styles.page}>
       <SemiBoldHeader style={styles.header}>Service Banners</SemiBoldHeader>
       <div style={styles.createButtonContainer}>
+        <Button
+          type='secondary'
+          onClick={() => setShowVwbCreateModal(true)}
+          style={{ maxWidth: 'none' }}
+        >
+          Create Verily Workbench Banner
+        </Button>
         <Button onClick={() => setShowCreateModal(true)}>
           Create New Banner
         </Button>
       </div>
+      {vwbError && (
+        <div style={{ color: colors.danger, marginBottom: '1rem' }}>
+          {vwbError}
+        </div>
+      )}
       <div style={styles.tableContainer}>
         <DataTable
           value={banners}
@@ -252,6 +310,15 @@ export const AdminBannerTable = (props: WithSpinnerOverlayProps) => {
           setBanner={setNewBanner}
           onClose={handleCloseModal}
           onCreate={handleCreateBanner}
+        />
+      )}
+
+      {showVwbCreateModal && (
+        <AdminVwbBannerModal
+          banner={newVwbBanner}
+          setBanner={setNewVwbBanner}
+          onClose={handleCloseVwbModal}
+          onCreate={handleCreateVwbBanner}
         />
       )}
     </div>

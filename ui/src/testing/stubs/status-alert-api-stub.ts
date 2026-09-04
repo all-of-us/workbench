@@ -2,6 +2,7 @@ import {
   StatusAlert,
   StatusAlertApi,
   StatusAlertLocation,
+  VwbBanner,
 } from 'generated/fetch';
 
 export class StatusAlertApiStub extends StatusAlertApi {
@@ -37,6 +38,19 @@ export class StatusAlertApiStub extends StatusAlertApi {
     };
     this.alerts.push(newAlert);
     return Promise.resolve(newAlert);
+  }
+
+  // VWB banners are created in Verily Workbench rather than stored alongside AoU status alerts,
+  // so they are tracked separately here.
+  public vwbBanners: VwbBanner[] = [];
+
+  public async postVwbBanner(banner: VwbBanner): Promise<VwbBanner> {
+    const created = {
+      ...banner,
+      id: `vwb-banner-${this.vwbBanners.length + 1}`,
+    };
+    this.vwbBanners.push(created);
+    return Promise.resolve(created);
   }
 
   public async deleteStatusAlert(id: number): Promise<void> {

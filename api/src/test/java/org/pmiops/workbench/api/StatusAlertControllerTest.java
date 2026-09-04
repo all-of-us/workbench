@@ -1,11 +1,15 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,14 +17,22 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.model.StatusAlert;
 import org.pmiops.workbench.model.StatusAlertLocation;
+import org.pmiops.workbench.model.VwbBanner;
+import org.pmiops.workbench.model.VwbBannerPriority;
+import org.pmiops.workbench.model.VwbBannerType;
 import org.pmiops.workbench.statusalerts.StatusAlertMapperImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.vwb.user.model.NotificationDescription;
+import org.pmiops.workbench.vwb.user.model.NotificationPriority;
+import org.pmiops.workbench.vwb.user.model.NotificationType;
+import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 public class StatusAlertControllerTest {
@@ -30,6 +42,8 @@ public class StatusAlertControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @Autowired private StatusAlertController statusAlertController;
+
+  @MockitoBean private VwbUserManagerClient vwbUserManagerClient;
 
   @TestConfiguration
   @Import({
@@ -145,5 +159,84 @@ public class StatusAlertControllerTest {
     assertThat(mostRecent.getAlertLocation()).isEqualTo(StatusAlertLocation.AFTER_LOGIN);
     assertThat(second.getTitle()).matches("Scheduled Downtime Notice for the Researcher Workbench");
     assertThat(second.getAlertLocation()).isEqualTo(StatusAlertLocation.BEFORE_LOGIN);
+  }
+
+  @Test
+  public void testPostVwbBanner() {
+    UUID vwbNotificationId = UUID.randomUUID();
+    when(vwbUserManagerClient.createOrganizationNotification(
+            any(), any(), any(), any(), any(), any()))
+        .thenReturn(new NotificationDescription().id(vwbNotificationId));
+
+    // Truncate to millis: the API carries epoch millis, so sub-millisecond precision is lost.
+    Instant startTime = Instant.ofEpochMilli(NOW.toEpochMilli());
+    Instant endTime = startTime.plusSeconds(3600);
+
+    VwbBanner created =
+        statusAlertController
+            .postVwbBanner(
+                new VwbBanner()
+                    .title("VWB Banner Title")
+                    .message("VWB Banner Message")
+                    .notificationType(VwbBannerType.BLOCKING)
+                    .notificationPriority(VwbBannerPriority.WARNING)
+                    .startTimeEpochMillis(startTime.toEpochMilli())
+                    .endTimeEpochMillis(endTime.toEpochMilli()))
+            .getBody();
+
+    verify(vwbUserManagerClient)
+        .createOrganizationNotification(
+            "VWB Banner Title",
+            "VWB Banner Message",
+            NotificationType.BLOCKING,
+            NotificationPriority.WARNING,
+            startTime,
+            endTime);
+
+    // The ID VWB assigned is echoed back so the admin can correlate it.
+    assertThat(created.getId()).isEqualTo(vwbNotificationId.toString());
+  }
+
+  @Test
+  public void testPostVwbBanner_nullTimesArePassedThrough() {
+    when(vwbUserManagerClient.createOrganizationNotification(
+            any(), any(), any(), any(), any(), any()))
+        .thenReturn(new NotificationDescription().id(UUID.randomUUID()));
+
+    // Null start/end mean "starts immediately" and "never expires"; VWB applies its own defaults.
+    statusAlertController.postVwbBanner(
+        new VwbBanner()
+            .title("No Times")
+            .message("No Times Message")
+            .notificationType(VwbBannerType.PASSIVE)
+            .notificationPriority(VwbBannerPriority.INFO));
+
+    verify(vwbUserManagerClient)
+        .createOrganizationNotification(
+            "No Times",
+            "No Times Message",
+            NotificationType.PASSIVE,
+            NotificationPriority.INFO,
+            null,
+            null);
+  }
+
+  @Test
+  public void testPostVwbBanner_doesNotCreateAouStatusAlert() {
+    when(vwbUserManagerClient.createOrganizationNotification(
+            any(), any(), any(), any(), any(), any()))
+        .thenReturn(new NotificationDescription().id(UUID.randomUUID()));
+
+    statusAlertController.postVwbBanner(
+        new VwbBanner()
+            .title("VWB Only")
+            .message("VWB Only Message")
+            .notificationType(VwbBannerType.PASSIVE)
+            .notificationPriority(VwbBannerPriority.INFO));
+
+    // VWB banners live in Verily Workbench, so the AoU status alert table is untouched.
+    List<StatusAlert> statusAlerts = statusAlertController.getStatusAlerts().getBody();
+    assertThat(statusAlerts).hasSize(1);
+    assertThat(statusAlerts.get(0).getTitle()).matches(STATUS_ALERT_INITIAL_TITLE);
   }
 }
