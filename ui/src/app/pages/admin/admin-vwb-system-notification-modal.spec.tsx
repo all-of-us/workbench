@@ -66,7 +66,9 @@ describe('AdminVwbSystemNotificationModal', () => {
     ).toBeInTheDocument();
     // The notification is listed in the table and deleting it there removes it from VWB.
     expect(
-      screen.getByText(/deleting it there removes it from Verily Workbench too/i)
+      screen.getByText(
+        /deleting it there removes it from Verily Workbench too/i
+      )
     ).toBeInTheDocument();
   });
 
