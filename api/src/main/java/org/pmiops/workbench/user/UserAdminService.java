@@ -61,6 +61,18 @@ public class UserAdminService {
       Long userId, Instant startTime, String description, String vwbWorkspaceId) {
     Instant endTime = startTime.plus(BYPASS_PERIOD_IN_DAY, ChronoUnit.DAYS);
 
+    // If VWB workspace ID is provided, the exfil manager must accept the override before we record
+    // the window. Creating the DB row first would leave a window that looks active to admins even
+    // though no override was ever applied in VWB.
+    if (vwbWorkspaceId != null) {
+      DbUser user = userService.getByDatabaseId(userId).orElseThrow();
+      // Send both bounds so the override spans the same window we persist. Sending only the end
+      // time makes the exfil manager default the start to now, and it then rejects any window we
+      // scheduled ahead: "End time cannot be more than 48 hours from start time."
+      exfilManagerClient.createEgressThresholdOverride(
+          user.getUsername(), vwbWorkspaceId, startTime, endTime, description);
+    }
+
     // Save to database
     userEgressBypassWindowDao.save(
         new DbUserEgressBypassWindow()
@@ -69,13 +81,6 @@ public class UserAdminService {
             .setEndTime(Timestamp.from(endTime))
             .setDescription(description)
             .setVwbWorkspaceId(vwbWorkspaceId));
-
-    // If VWB workspace ID is provided, call exfil manager to create egress threshold override
-    if (vwbWorkspaceId != null) {
-      DbUser user = userService.getByDatabaseId(userId).orElseThrow();
-      exfilManagerClient.createEgressThresholdOverride(
-          user.getUsername(), vwbWorkspaceId, endTime, description);
-    }
   }
 
   public EgressBypassWindow getCurrentEgressBypassWindow(Long userId) {

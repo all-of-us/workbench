@@ -1,7 +1,9 @@
 package org.pmiops.workbench.user;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +21,7 @@ import org.pmiops.workbench.db.dao.UserEgressBypassWindowDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.EgressBypassWindow;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.EgressBypassWindowMapperImpl;
@@ -73,7 +76,8 @@ public class UserAdminServiceTest {
         .isEqualTo(Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(2, ChronoUnit.DAYS)));
 
     // Verify exfil manager was NOT called for regular bypass window
-    verify(exfilManagerClient, never()).createEgressThresholdOverride(any(), any(), any(), any());
+    verify(exfilManagerClient, never())
+        .createEgressThresholdOverride(any(), any(), any(), any(), any());
   }
 
   @Test
@@ -189,9 +193,76 @@ public class UserAdminServiceTest {
     assertThat(dbEntity.getStartTime()).isEqualTo(Timestamp.from(startTime));
     assertThat(dbEntity.getEndTime()).isEqualTo(Timestamp.from(expectedEndTime));
 
-    // Verify exfil manager was called
+    // Verify exfil manager was called with both bounds of the same window we persisted.
     verify(exfilManagerClient)
-        .createEgressThresholdOverride(USERNAME, VWB_WORKSPACE_ID, expectedEndTime, DESCRIPTION);
+        .createEgressThresholdOverride(
+            USERNAME, VWB_WORKSPACE_ID, startTime, expectedEndTime, DESCRIPTION);
+  }
+
+  @Test
+  public void testCreateEgressBypassWindow_withVwbWorkspace_futureStartTime() {
+    DbUser dbUser = new DbUser();
+    dbUser.setUserId(USER_ID);
+    dbUser.setUsername(USERNAME);
+    when(userService.getByDatabaseId(USER_ID)).thenReturn(Optional.of(dbUser));
+
+    Instant startTime = FakeClockConfiguration.NOW.toInstant().plus(7, ChronoUnit.DAYS);
+
+    userAdminService.createEgressBypassWindow(USER_ID, startTime, DESCRIPTION, VWB_WORKSPACE_ID);
+
+    // The persisted window still honors the requested start time.
+    Set<DbUserEgressBypassWindow> dbResults =
+        userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(USER_ID);
+    assertThat(dbResults).hasSize(1);
+    DbUserEgressBypassWindow dbEntity = dbResults.stream().findFirst().get();
+    assertThat(dbEntity.getStartTime()).isEqualTo(Timestamp.from(startTime));
+    assertThat(dbEntity.getEndTime()).isEqualTo(Timestamp.from(startTime.plus(2, ChronoUnit.DAYS)));
+
+    // The override carries the same future window. Previously only the end time was sent, so the
+    // exfil manager defaulted the start to now and rejected the 215 hour duration.
+    verify(exfilManagerClient)
+        .createEgressThresholdOverride(
+            USERNAME, VWB_WORKSPACE_ID, startTime, startTime.plus(2, ChronoUnit.DAYS), DESCRIPTION);
+  }
+
+  @Test
+  public void testCreateEgressBypassWindow_withoutVwbWorkspace_futureStartTimeAllowed() {
+    // Non-VWB windows never reach the exfil manager, so they may still be scheduled ahead.
+    Instant startTime = FakeClockConfiguration.NOW.toInstant().plus(7, ChronoUnit.DAYS);
+
+    userAdminService.createEgressBypassWindow(USER_ID, startTime, DESCRIPTION, null);
+
+    Set<DbUserEgressBypassWindow> dbResults =
+        userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(USER_ID);
+    assertThat(dbResults).hasSize(1);
+    assertThat(dbResults.stream().findFirst().get().getStartTime())
+        .isEqualTo(Timestamp.from(startTime));
+    verify(exfilManagerClient, never())
+        .createEgressThresholdOverride(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  public void testCreateEgressBypassWindow_exfilManagerFailure_doesNotSaveWindow() {
+    DbUser dbUser = new DbUser();
+    dbUser.setUserId(USER_ID);
+    dbUser.setUsername(USERNAME);
+    when(userService.getByDatabaseId(USER_ID)).thenReturn(Optional.of(dbUser));
+
+    doThrow(new ServerErrorException("exfil manager unavailable"))
+        .when(exfilManagerClient)
+        .createEgressThresholdOverride(any(), any(), any(), any(), any());
+
+    Instant startTime = FakeClockConfiguration.NOW.toInstant();
+
+    assertThrows(
+        ServerErrorException.class,
+        () ->
+            userAdminService.createEgressBypassWindow(
+                USER_ID, startTime, DESCRIPTION, VWB_WORKSPACE_ID));
+
+    // A window that was never applied in VWB must not be recorded, otherwise admins see a bypass
+    // that is not actually in effect.
+    assertThat(userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(USER_ID)).isEmpty();
   }
 
   @Test

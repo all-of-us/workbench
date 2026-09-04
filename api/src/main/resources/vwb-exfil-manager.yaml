@@ -144,17 +144,21 @@ components:
           type: string
           format: uuid
           description: The workspace ID
+        startTime:
+          type: string
+          format: date-time
+          description: Optional start time for the override. If not provided, defaults to current time.
         endTime:
           type: string
           format: date-time
-          description: Optional end time for the override. If not provided, defaults to 48 hours from creation. Cannot be more than 48 hours in the future.
+          description: Optional end time for the override. If not provided, defaults to 48 hours from start time. Cannot be more than 48 hours from start time.
         description:
           type: string
           description: Optional description of why the override was created
 
     EgressThresholdOverride:
       type: object
-      required: [ egressThresholdOverrideId, username, workspaceId, creationTime, endTime ]
+      required: [ egressThresholdOverrideId, username, workspaceId, startTime, endTime ]
       properties:
         egressThresholdOverrideId:
           type: string
@@ -167,10 +171,10 @@ components:
           type: string
           format: uuid
           description: The workspace ID
-        creationTime:
+        startTime:
           type: string
           format: date-time
-          description: When the override was created
+          description: When the override starts
         endTime:
           type: string
           format: date-time
