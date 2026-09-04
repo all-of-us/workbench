@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class OfflineWorkspaceControllerTest {
+  private static final String NAMESPACE = "test-ns";
+  private static final String TERRA_NAME = "test-ws";
 
   @Mock private WorkspaceService workspaceService;
   @Mock private WorkspaceMigrationService workspaceMigrationService;
@@ -77,7 +79,7 @@ public class OfflineWorkspaceControllerTest {
   public void testDeleteNextLegacyWorkspace() {
     ResponseEntity<Void> response = offlineWorkspaceController.deleteNextLegacyWorkspace();
 
-    verify(workspaceMigrationService).deleteNextLegacyWorkspace();
+    verify(workspaceMigrationService).deleteNextLegacyWorkspace(NAMESPACE, TERRA_NAME);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
   }
 

@@ -40,7 +40,7 @@ public interface WorkspaceMigrationService {
 
   void startWorkspaceArchive(String namespace, String terraName);
 
-  void deleteNextLegacyWorkspace();
+  void deleteNextLegacyWorkspace(String namespace, String terraName);
 
   void startWorkspaceArchiveTestEnv(String namespace, String terraName);
 

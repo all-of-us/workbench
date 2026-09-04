@@ -56,6 +56,8 @@ public class TaskQueueService {
       new TaskQueuePair("workspaceArchiveStatusTaskQueue", "checkWorkspaceArchiveStatus");
   public static final TaskQueuePair WORKSPACE_ARCHIVE_RETRY_STATUS =
       new TaskQueuePair("workspaceArchiveRetryStatusTaskQueue", "checkWorkspaceArchiveRetryStatus");
+  public static final TaskQueuePair DELETE_LEGACY_WORKSPACE =
+      new TaskQueuePair("deleteLegacyWorkspaceQueue", "deleteLegacyWorkspace");
   public static final TaskQueuePair USER_GROUP_ACTION =
       new TaskQueuePair("userGroupActionQueue", "userGroupAction");
 
@@ -403,6 +405,15 @@ public class TaskQueueService {
     LOGGER.info(namespace + ": pushing workspace archive retry status task");
     createAndPushTask(
         WORKSPACE_ARCHIVE_RETRY_STATUS,
+        Map.of(
+            "workspaceNamespace", namespace,
+            "terraName", terraName));
+  }
+
+  public void pushDeleteLegacyWorkspaceTask(String namespace, String terraName) {
+    LOGGER.info(namespace + ": pushing delete legacy workspace  task");
+    createAndPushTask(
+        DELETE_LEGACY_WORKSPACE,
         Map.of(
             "workspaceNamespace", namespace,
             "terraName", terraName));

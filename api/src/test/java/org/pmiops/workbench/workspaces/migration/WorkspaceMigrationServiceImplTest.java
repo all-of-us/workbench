@@ -30,7 +30,6 @@ import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageTransferClient;
-import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.MigrationState;
@@ -90,7 +89,6 @@ public class WorkspaceMigrationServiceImplTest {
   @Mock private TaskQueueService taskQueueService;
   @Mock private WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
   @Mock private MailService mailService;
-  @Mock private ImpersonatedWorkspaceService impersonatedWorkspaceService;
   @Mock private WorkspaceService workspaceService;
   // Clock MOCK
   @Mock private Clock clock;
@@ -296,19 +294,20 @@ public class WorkspaceMigrationServiceImplTest {
         mock(WorkspaceDao.WorkspaceDeletionView.class);
     when(workspaceDeletionView.getWorkspaceNamespace()).thenReturn(NAMESPACE);
     when(workspaceDeletionView.getFirecloudName()).thenReturn(TERRA_NAME);
-    when(workspaceDeletionView.getUserName()).thenReturn(CREATOR);
     when(workspaceDao.findNextWorkspaceToDelete()).thenReturn(workspaceDeletionView);
 
-    service.deleteNextLegacyWorkspace();
+    service.deleteNextLegacyWorkspace(NAMESPACE, TERRA_NAME);
 
-    verify(impersonatedWorkspaceService).deleteWorkspace(CREATOR, NAMESPACE, TERRA_NAME, true);
+    verify(workspaceDao).getRequired(NAMESPACE, TERRA_NAME);
+    verify(workspaceService).deleteWorkspace(dbWorkspace);
   }
 
   @Test
   void deleteNextLegacyWorkspace_throwsWhenNoWorkspaceFound() {
     when(workspaceDao.findNextWorkspaceToDelete()).thenReturn(null);
 
-    assertThrows(NotFoundException.class, () -> service.deleteNextLegacyWorkspace());
+    assertThrows(
+        NotFoundException.class, () -> service.deleteNextLegacyWorkspace(NAMESPACE, TERRA_NAME));
 
     verify(workspaceService, never()).deleteWorkspace(any());
   }
