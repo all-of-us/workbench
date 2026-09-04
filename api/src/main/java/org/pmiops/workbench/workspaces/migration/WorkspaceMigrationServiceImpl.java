@@ -684,7 +684,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     try {
       DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
-      workspaceService.deleteWorkspace(dbWorkspace);
+      workspaceService.deleteWorkspaceAsService(dbWorkspace);
       logger.log(Level.INFO, "Legacy workspace " + namespace + "/" + terraName + " deleted");
     } catch (Exception e) {
       throw new RuntimeException(

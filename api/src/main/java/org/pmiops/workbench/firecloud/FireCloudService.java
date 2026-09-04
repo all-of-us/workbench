@@ -118,6 +118,8 @@ public interface FireCloudService {
 
   void deleteWorkspace(String workspaceNamespace, String firecloudName);
 
+  void deleteWorkspaceAsService(String workspaceNamespace, String firecloudName);
+
   FirecloudManagedGroupWithMembers getGroup(String groupName);
 
   FirecloudManagedGroupWithMembers createGroup(String groupName);

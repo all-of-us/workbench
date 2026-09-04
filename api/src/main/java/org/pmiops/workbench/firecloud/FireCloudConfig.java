@@ -48,6 +48,7 @@ public class FireCloudConfig {
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
   public static final String END_USER_WORKSPACE_API = "workspacesApi";
+  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "serviceAccountWorkspacesApi";
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -117,6 +118,15 @@ public class FireCloudConfig {
   @Bean(name = END_USER_WORKSPACE_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+    WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = SERVICE_ACCOUNT_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspacesApi serviceAccountWorkspacesApi(
+      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     WorkspacesApi api = new WorkspacesApi();
     api.setApiClient(apiClient);
     return api;
