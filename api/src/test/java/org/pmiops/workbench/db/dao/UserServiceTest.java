@@ -435,6 +435,16 @@ public class UserServiceTest {
   }
 
   @Test
+  public void testSubmitDucc_triggersInstitutionUserGroupBackfillCheck() {
+    providedWorkbenchConfig.access.latestDuccVersion = 7;
+
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userService.submitDUCC(user, 7, "AB");
+
+    verify(mockInstitutionService).maybeEnqueueUserGroupActionsForUser(any(DbUser.class));
+  }
+
+  @Test
   public void test_hasAuthority() {
     DbUser user = new DbUser();
     user.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));

@@ -134,6 +134,12 @@ public interface InstitutionService {
   boolean shouldBypassForCreditsExpiration(DbUser user);
 
   /**
+   * Enqueue add-user-group actions for the specified user if their affiliated institution has user
+   * groups configured and they are currently eligible for provisioning.
+   */
+  void maybeEnqueueUserGroupActionsForUser(DbUser user);
+
+  /**
    * Process the next user to be added or removed for the specified institution.
    *
    * @param institutionId ID for institution for which the group action is being made

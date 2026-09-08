@@ -48,6 +48,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
@@ -94,6 +95,7 @@ public class UserServiceImpl implements UserService {
   private final MailService mailService;
   private final DiscoverySourceMapper discoverySourceMapper;
   private final AccessSyncService accessSyncService;
+  private final InstitutionService institutionService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -114,6 +116,7 @@ public class UserServiceImpl implements UserService {
       AccessTierService accessTierService,
       MailService mailService,
       AccessSyncService accessSyncService,
+      InstitutionService institutionService,
       DiscoverySourceMapper discoverySourceMapper) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
@@ -130,6 +133,7 @@ public class UserServiceImpl implements UserService {
     this.accessTierService = accessTierService;
     this.mailService = mailService;
     this.accessSyncService = accessSyncService;
+    this.institutionService = institutionService;
     this.discoverySourceMapper = discoverySourceMapper;
   }
 
@@ -378,14 +382,17 @@ public class UserServiceImpl implements UserService {
               latestDuccVersion));
     }
     final Timestamp timestamp = clockNow();
-    return updateUserWithRetries(
-        (user) -> {
-          accessModuleService.updateCompletionTime(
-              user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
-          return updateDuccAgreement(user, duccSignedVersion, initials, timestamp);
-        },
-        dbUser,
-        Agent.asUser(dbUser));
+    DbUser updatedUser =
+        updateUserWithRetries(
+            (user) -> {
+              accessModuleService.updateCompletionTime(
+                  user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
+              return updateDuccAgreement(user, duccSignedVersion, initials, timestamp);
+            },
+            dbUser,
+            Agent.asUser(dbUser));
+    institutionService.maybeEnqueueUserGroupActionsForUser(updatedUser);
+    return updatedUser;
   }
 
   private Integer getLatestDuccVersion() {

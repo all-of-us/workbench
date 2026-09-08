@@ -580,6 +580,44 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
+  public void maybeEnqueueUserGroupActionsForUser(DbUser user) {
+    if (user == null || Strings.isNullOrEmpty(user.getUsername())) {
+      return;
+    }
+
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(user)
+        .map(DbVerifiedInstitutionalAffiliation::getInstitution)
+        .ifPresent(
+            institution -> {
+              List<String> institutionEmails =
+                  userDao.findActiveUserEmailsWithCurrentDuccOrBypassByInstitution(
+                      institution.getInstitutionId());
+              if (!institutionEmails.contains(user.getUsername())) {
+                return;
+              }
+
+              List<String> groupsToAdd =
+                  institutionUserGroupDao.getByInstitution(institution).stream()
+                      .map(DbInstitutionUserGroup::getUserGroup)
+                      .distinct()
+                      .collect(Collectors.toList());
+              if (groupsToAdd.isEmpty()) {
+                return;
+              }
+
+              groupsToAdd.forEach(
+                  group ->
+                      insertUserGroupActions(
+                          List.of(user.getUsername()),
+                          institution.getInstitutionId(),
+                          group,
+                          UserGroupAction.ADD));
+              taskQueueService.pushUserGroupActionTask(institution.getInstitutionId());
+            });
+  }
+
+  @Override
   public void processNextUserGroupAction(long institutionId) {
     // Make sure UserGroupActionDao inserts complete before running task
     try {
