@@ -182,6 +182,12 @@ const InstitutionalFields = ({
             accessTierShortNames={oldProfile.accessTierShortNames.sort()}
           />
         </FlexRow>
+        <FlexColumn data-test-id='vwb-pod-info'>
+          <div>{updatedProfile.podStatus || 'No pod'}</div>
+          {updatedProfile.vwbPodId && (
+            <div>VWB Pod ID: {updatedProfile.vwbPodId}</div>
+          )}
+        </FlexColumn>
       </FlexColumn>
       <ContactEmailTextInput
         contactEmail={updatedProfile.contactEmail}

@@ -10,10 +10,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVwbUserPod;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Profile;
@@ -66,6 +68,8 @@ public interface ProfileMapper {
       qualifiedByName = "checkInitialCreditsExtensionEligibility")
   @Mapping(target = "migrationTestingGroup", source = "migrationTestingGroup")
   @Mapping(target = "terraUser", source = "terraUser")
+  @Mapping(source = "dbUser.vwbUserPod", target = "podStatus", qualifiedByName = "toPodStatus")
+  @Mapping(source = "dbUser.vwbUserPod", target = "vwbPodId", qualifiedByName = "toVwbPodId")
   Profile toModel(
       DbUser dbUser,
       @Context InitialCreditsService initialCreditsService,
@@ -80,6 +84,16 @@ public interface ProfileMapper {
       Instant newUserSatisfactionSurveyEligibilityEndTime,
       boolean migrationTestingGroup,
       boolean terraUser);
+
+  @Named("toPodStatus")
+  default String toPodStatus(@Nullable DbVwbUserPod pod) {
+    return (pod != null && StringUtils.isNotBlank(pod.getVwbPodId())) ? "Pod available" : "No pod";
+  }
+
+  @Named("toVwbPodId")
+  default String toVwbPodId(@Nullable DbVwbUserPod pod) {
+    return (pod == null || StringUtils.isBlank(pod.getVwbPodId())) ? null : pod.getVwbPodId();
+  }
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 

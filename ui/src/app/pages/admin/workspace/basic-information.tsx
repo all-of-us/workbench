@@ -63,6 +63,9 @@ export const BasicInformation = ({
           {new Date(workspace.lastModifiedTime).toDateString()}
         </WorkspaceInfoField>
         <WorkspacePublishingInfo {...{ workspace, reload }} />
+        <WorkspaceInfoField labelText='Pod ID'>
+          {workspace.recoveryPodId || 'No pod attached'}
+        </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Audit'>
           {
             <Link to={`/admin/workspace-audit/${workspace.namespace}`}>

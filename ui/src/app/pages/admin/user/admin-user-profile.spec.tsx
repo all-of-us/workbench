@@ -114,6 +114,37 @@ describe('AdminUserProfile', () => {
     await waitUntilPageLoaded();
   });
 
+  it('should show pod available status and pod id when user has a pod', async () => {
+    const podId = 'f5d4c797-5bf0-40aa-957c-f637f1caefe5';
+    updateTargetProfile({ podStatus: 'Pod available', vwbPodId: podId });
+
+    component();
+    await waitUntilPageLoaded();
+
+    expect(
+      within(screen.getByTestId('vwb-pod-info')).getByText('Pod available')
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('vwb-pod-info')).getByText(
+        `VWB Pod ID: ${podId}`
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should show no pod status and hide pod id when user has no pod', async () => {
+    updateTargetProfile({ podStatus: 'No pod', vwbPodId: undefined });
+
+    component();
+    await waitUntilPageLoaded();
+
+    expect(
+      within(screen.getByTestId('vwb-pod-info')).getByText('No pod')
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('vwb-pod-info')).queryByText(/VWB Pod ID:/)
+    ).not.toBeInTheDocument();
+  });
+
   it("should display the user's name, username, initial credits information", async () => {
     const givenName = 'John Q';
     const familyName = 'Public';
