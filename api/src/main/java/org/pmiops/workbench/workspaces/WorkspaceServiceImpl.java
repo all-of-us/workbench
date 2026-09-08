@@ -301,10 +301,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspaceAsService(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    dbWorkspace =
-        workspaceDao.saveWithLastModified(
-            dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
-            userProvider.get());
+    dbWorkspace
+        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED)
+        .setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()))
+        .setLastModifiedBy(workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0));
+    workspaceDao.save(dbWorkspace);
     // Since deleted workspace entry still exist in database we have to explicitly remove it from
     // featured_workspace
     // if they exist
