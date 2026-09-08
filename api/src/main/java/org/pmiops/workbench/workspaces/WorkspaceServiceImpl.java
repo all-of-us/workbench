@@ -525,7 +525,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+  public void updateWorkspaceBillingAccount(
+      DbWorkspace workspace, String newBillingAccountName, boolean serviceAccount) {
     if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
       return;
     }
@@ -558,6 +559,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           initialCreditsService.userHasRemainingInitialCredits(creator);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
     }
+  }
+
+  @Override
+  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    updateWorkspaceBillingAccount(workspace, newBillingAccountName, false);
   }
 
   @Override

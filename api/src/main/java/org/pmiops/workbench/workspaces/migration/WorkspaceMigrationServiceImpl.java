@@ -724,7 +724,9 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     // Update the billing account to AoU initial credits
     try {
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
+          dbWorkspace,
+          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
+          true);
     } catch (ServerErrorException e) {
       throw new ServerErrorException("Could not update the billing account for " + namespace, e);
     }

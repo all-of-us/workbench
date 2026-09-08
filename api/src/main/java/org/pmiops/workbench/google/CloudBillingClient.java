@@ -15,9 +15,16 @@ public interface CloudBillingClient {
    * IAM permissions can take several minutes to propagate throughout the system, so we need to wait
    * for access to the billing info endpoint.
    */
+  ProjectBillingInfo pollUntilBillingAccountLinked(
+      String projectId, String billingAccountName, boolean serviceAccount)
+      throws IOException, InterruptedException;
+
   ProjectBillingInfo pollUntilBillingAccountLinked(String projectId, String billingAccountName)
       throws IOException, InterruptedException;
 
   /** Get a project's billing account info. */
   ProjectBillingInfo getProjectBillingInfo(String projectId) throws IOException;
+
+  /** Get a project's billing account info. */
+  ProjectBillingInfo getProjectBillingInfoAsService(String projectId) throws IOException;
 }
