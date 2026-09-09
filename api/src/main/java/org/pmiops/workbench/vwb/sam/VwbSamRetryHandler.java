@@ -3,7 +3,6 @@ package org.pmiops.workbench.vwb.sam;
 import jakarta.inject.Provider;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.SocketTimeoutException;
-import java.util.logging.Logger;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -14,8 +13,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class VwbSamRetryHandler extends TerraServiceRetryHandler<ApiException> {
-
-  private static final Logger logger = Logger.getLogger(VwbSamRetryHandler.class.getName());
 
   private static class SamManagerRetryPolicy extends ResponseCodeRetryPolicy {
 
@@ -35,17 +32,10 @@ public class VwbSamRetryHandler extends TerraServiceRetryHandler<ApiException> {
     }
 
     @Override
-    protected void logNoRetry(Throwable t, int responseCode) {
-      if (t instanceof ApiException) {
-        logger.log(
-            getLogLevel(responseCode),
-            String.format(
-                "Exception calling SamManager API with response: %s",
-                ((ApiException) t).getResponseBody()),
-            t);
-      } else {
-        super.logNoRetry(t, responseCode);
-      }
+    protected String getResponseBody(Throwable lastException) {
+      return lastException instanceof ApiException apiException
+          ? apiException.getResponseBody()
+          : null;
     }
   }
 
