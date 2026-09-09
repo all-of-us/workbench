@@ -542,7 +542,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     try {
       ProjectBillingInfo projectBillingInfo =
           cloudBillingClient.pollUntilBillingAccountLinked(
-              workspace.getGoogleProject(), newBillingAccountName);
+              workspace.getGoogleProject(), newBillingAccountName, serviceAccount);
       if (!projectBillingInfo.getBillingEnabled()) {
         throw new FailedPreconditionException(
             "Provided billing account is closed. Please provide an open account.");

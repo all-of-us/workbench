@@ -394,8 +394,11 @@ public class WorkspacesControllerTest {
     TestMockFactory.stubCreateBillingProject(fireCloudService);
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
+    ProjectBillingInfo billingInfo = new ProjectBillingInfo().setBillingEnabled(true);
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
-        .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
+        .thenReturn(billingInfo);
+    when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any(), anyBoolean()))
+        .thenReturn(billingInfo);
 
     when(workspaceServiceFactory.getWorkspaceService(anyBoolean())).thenReturn(workspaceService);
   }
