@@ -10,6 +10,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rawls.RawlsApiClientFactory;
 import org.pmiops.workbench.vwb.user.ApiClient;
+import org.pmiops.workbench.vwb.user.api.NotificationsApi;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
 import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
@@ -32,6 +33,8 @@ public class VwbUserManagerConfig {
   public static final String VWB_SERVICE_ACCOUNT_GROUP_API = "VWB_SERVICE_ACCOUNT_GROUP_API";
   public static final String VWB_SERVICE_ACCOUNT_ORGANIZATION_API =
       "VWB_SERVICE_ACCOUNT_ORGANIZATION_API";
+  public static final String VWB_SERVICE_ACCOUNT_NOTIFICATIONS_API =
+      "VWB_SERVICE_ACCOUNT_NOTIFICATIONS_API";
   public static final String VWB_SERVICE_ACCOUNT_WORKSPACE_API =
       "VWB_SERVICE_ACCOUNT_WORKSPACE_API";
   public static final String VWB_END_USER_WORKSPACE_API = "VWB_END_USER_WORKSPACE_API";
@@ -103,6 +106,13 @@ public class VwbUserManagerConfig {
   public PodApi podApi(
       @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT_BILLING) ApiClient apiClient) {
     return new PodApi(apiClient);
+  }
+
+  @Bean(name = VWB_SERVICE_ACCOUNT_NOTIFICATIONS_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public NotificationsApi serviceAccountNotificationsApi(
+      @Qualifier(VWB_SERVICE_ACCOUNT_USER_API_CLIENT) ApiClient apiClient) {
+    return new NotificationsApi(apiClient);
   }
 
   @Bean(name = VWB_SERVICE_ACCOUNT_WORKSPACE_API)

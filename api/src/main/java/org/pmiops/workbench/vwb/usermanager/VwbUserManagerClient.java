@@ -1,10 +1,15 @@
 package org.pmiops.workbench.vwb.usermanager;
 
 import jakarta.inject.Provider;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.vwb.user.ApiException;
+import org.pmiops.workbench.vwb.user.api.NotificationsApi;
 import org.pmiops.workbench.vwb.user.api.OrganizationV2Api;
 import org.pmiops.workbench.vwb.user.api.PodApi;
 import org.pmiops.workbench.vwb.user.api.UserV2Api;
@@ -34,6 +39,8 @@ public class VwbUserManagerClient {
 
   private final Provider<WorkspaceApi> workspaceApiProvider;
 
+  private final Provider<NotificationsApi> notificationsApiProvider;
+
   public VwbUserManagerClient(
       @Qualifier(VwbUserManagerConfig.VWB_SERVICE_ACCOUNT_USER_API)
           Provider<UserV2Api> userV2ApiProvider,
@@ -42,7 +49,9 @@ public class VwbUserManagerClient {
       VwbUserManagerRetryHandler vwbUserManagerRetryHandler,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<PodApi> podApiProvider,
-      Provider<WorkspaceApi> workspaceApiProvider) {
+      Provider<WorkspaceApi> workspaceApiProvider,
+      @Qualifier(VwbUserManagerConfig.VWB_SERVICE_ACCOUNT_NOTIFICATIONS_API)
+          Provider<NotificationsApi> notificationsApiProvider) {
     this.userV2ApiProvider = userV2ApiProvider;
     this.organizationV2ApiProvider = organizationV2ApiProvider;
     this.groupApiProvider = groupApiProvider;
@@ -50,6 +59,92 @@ public class VwbUserManagerClient {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.podApiProvider = podApiProvider;
     this.workspaceApiProvider = workspaceApiProvider;
+    this.notificationsApiProvider = notificationsApiProvider;
+  }
+
+  /**
+   * Creates an organization-scoped notification in VWB, visible to every user in the AoU
+   * organization. This is the Verily Workbench equivalent of an AoU service banner.
+   *
+   * @param title Title of the notification
+   * @param message Message body of the notification
+   * @param notificationType BLOCKING to require acknowledgement, PASSIVE for the notification
+   *     center
+   * @param notificationPriority Display priority: INFO, WARNING or ERROR
+   * @param startTime When the notification becomes visible. Null means immediately
+   * @param endTime When the notification expires. Null means it never expires
+   * @return The created notification, including the ID VWB assigned it
+   */
+  public NotificationDescription createOrganizationNotification(
+      String title,
+      String message,
+      NotificationType notificationType,
+      NotificationPriority notificationPriority,
+      Instant startTime,
+      Instant endTime) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    NotificationCreateRequest request =
+        new NotificationCreateRequest()
+            .orgId(UUID.fromString(organizationId))
+            .scopeType(NotificationScopeType.ORGANIZATION)
+            .title(title)
+            .message(message)
+            .notificationType(notificationType)
+            .notificationPriority(notificationPriority);
+    if (startTime != null) {
+      request.startTime(OffsetDateTime.ofInstant(startTime, ZoneOffset.UTC));
+    }
+    if (endTime != null) {
+      request.endTime(OffsetDateTime.ofInstant(endTime, ZoneOffset.UTC));
+    }
+
+    logger.info(
+        "Creating {} notification in VWB organization {} with title {}",
+        notificationType,
+        organizationId,
+        title);
+    return vwbUserManagerRetryHandler.run(
+        context -> notificationsApiProvider.get().createNotification(request));
+  }
+
+  /**
+   * Lists the organization-scoped notifications for the AoU organization in VWB, active and expired
+   * alike.
+   *
+   * @param limit Maximum number of notifications to return. VWB caps this at 100
+   */
+  public List<NotificationDescription> listOrganizationNotifications(int limit) {
+    String organizationId = workbenchConfigProvider.get().vwb.organizationId;
+    NotificationList notifications =
+        vwbUserManagerRetryHandler.run(
+            context ->
+                notificationsApiProvider
+                    .get()
+                    .getNotifications(
+                        organizationId,
+                        /* notificationType= */ null,
+                        // Supplying scopeType puts the request in VWB's admin listing mode, which
+                        // returns the org's notifications rather than the caller's own.
+                        NotificationScopeType.ORGANIZATION,
+                        /* scopeId= */ null,
+                        /* isActive= */ null,
+                        limit,
+                        /* offset= */ 0));
+    return notifications.getNotifications() == null ? List.of() : notifications.getNotifications();
+  }
+
+  /**
+   * Deletes a notification in VWB.
+   *
+   * @param notificationId The notification ID VWB assigned when the notification was created
+   */
+  public void deleteNotification(String notificationId) {
+    logger.info("Deleting VWB notification {}", notificationId);
+    vwbUserManagerRetryHandler.run(
+        context -> {
+          notificationsApiProvider.get().deleteNotification(notificationId);
+          return null;
+        });
   }
 
   public OrganizationMember getOrganizationMember(String userName) {
