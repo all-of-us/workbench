@@ -580,6 +580,71 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
+  public void maybeEnqueueUserGroupActionsForUser(DbUser user) {
+    if (user == null || Strings.isNullOrEmpty(user.getUsername())) {
+      return;
+    }
+
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(user)
+        .map(DbVerifiedInstitutionalAffiliation::getInstitution)
+        .ifPresent(
+            institution -> {
+              List<String> institutionEmails =
+                  userDao.findActiveUserEmailsWithCurrentDuccOrBypassByInstitution(
+                      institution.getInstitutionId());
+              if (!institutionEmails.contains(user.getUsername())) {
+                return;
+              }
+
+              List<String> groupsToAdd =
+                  institutionUserGroupDao.getByInstitution(institution).stream()
+                      .map(DbInstitutionUserGroup::getUserGroup)
+                      .distinct()
+                      .collect(Collectors.toList());
+              if (groupsToAdd.isEmpty()) {
+                return;
+              }
+
+              List<String> groupsToEnqueue = new ArrayList<>();
+              for (String group : groupsToAdd) {
+                // Check if there's already an INCOMPLETE or COMPLETE action for this
+                // user+institution+group combination
+                List<DbUserGroupAction> incompleteActions =
+                    userGroupActionDao
+                        .findByUserEmailAndGroupNameAndInstitutionIdAndUserGroupActionStatus(
+                            user.getUsername(),
+                            group,
+                            institution.getInstitutionId(),
+                            UserGroupActionStatus.INCOMPLETE.toString());
+                List<DbUserGroupAction> completeActions =
+                    userGroupActionDao
+                        .findByUserEmailAndGroupNameAndInstitutionIdAndUserGroupActionStatus(
+                            user.getUsername(),
+                            group,
+                            institution.getInstitutionId(),
+                            UserGroupActionStatus.COMPLETE.toString());
+
+                // Only enqueue if no existing action found (deduplication check)
+                if (incompleteActions.isEmpty() && completeActions.isEmpty()) {
+                  groupsToEnqueue.add(group);
+                }
+              }
+
+              if (!groupsToEnqueue.isEmpty()) {
+                groupsToEnqueue.forEach(
+                    group ->
+                        insertUserGroupActions(
+                            List.of(user.getUsername()),
+                            institution.getInstitutionId(),
+                            group,
+                            UserGroupAction.ADD));
+                taskQueueService.pushUserGroupActionTask(institution.getInstitutionId());
+              }
+            });
+  }
+
+  @Override
   public void processNextUserGroupAction(long institutionId) {
     // Make sure UserGroupActionDao inserts complete before running task
     try {
