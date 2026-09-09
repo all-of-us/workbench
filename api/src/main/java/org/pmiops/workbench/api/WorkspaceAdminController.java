@@ -58,6 +58,13 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(workspaceAdminService.listUserApps(workspaceNamespace));
   }
 
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<Void> updateBillingToCredits(String workspaceNamespace, String terraName) {
+    workspaceAdminService.updateBillingToCredits(workspaceNamespace, terraName);
+    return ResponseEntity.noContent().build();
+  }
+
   /**
    * Get all audit log entries for this workspace
    *

@@ -56,4 +56,6 @@ public interface WorkspaceAdminService {
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest);
 
   void unpublishWorkspaceViaDB(String workspaceNamespace);
+
+  void updateBillingToCredits(String workspaceNamespace, String terraName);
 }

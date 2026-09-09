@@ -2279,6 +2279,29 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserAppEnvironment'
+  /v1/admin/workspaces/{workspaceNamespace}/{terraName}/credits:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Switch specified workspace to AoU credits. RESEARCHER_DATA_VIEW authority required.
+      operationId: updateBillingToCredits
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: terraName
+          in: path
+          description: The Terra name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Billing updated successfully
+          content: {}
   /v1/admin/egressEvents:
     post:
       tags:

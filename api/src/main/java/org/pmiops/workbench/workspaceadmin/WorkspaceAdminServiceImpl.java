@@ -5,6 +5,7 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.common.collect.Streams;
 import com.google.protobuf.util.Timestamps;
 import jakarta.annotation.Nullable;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
@@ -32,6 +34,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -97,6 +100,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public WorkspaceAdminServiceImpl(
@@ -121,7 +125,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
     this.cloudMonitoringService = cloudMonitoringService;
@@ -144,6 +149,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -563,5 +569,19 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .role(userRole.getRole())
             .userModel(userMapper.toApiUser(userRole, null))
         : userMapper.toWorkspaceUserAdminView(userMaybe, userRole);
+  }
+
+  @Override
+  public void updateBillingToCredits(String workspaceNamespace, String terraName) {
+    try {
+      DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, terraName);
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace,
+          workbenchConfigProvider.get().billing.initialCreditsBillingAccountName(),
+          true);
+    } catch (ServerErrorException e) {
+      throw new ServerErrorException(
+          "Could not update the billing account for " + workspaceNamespace, e);
+    }
   }
 }
