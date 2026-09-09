@@ -1,8 +1,7 @@
 package org.pmiops.workbench.utils;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -246,9 +245,16 @@ public class TestMockFactory {
   public static void stubPollCloudBillingLinked(
       CloudBillingClient cloudBillingClient, String billingAccountName) {
     try {
-      doReturn(new ProjectBillingInfo().setBillingEnabled(true).setName(billingAccountName))
+      ProjectBillingInfo billingInfo =
+          new ProjectBillingInfo().setBillingEnabled(true).setName(billingAccountName);
+      // Mock the 2-argument version: pollUntilBillingAccountLinked(String, String)
+      doReturn(billingInfo)
           .when(cloudBillingClient)
           .pollUntilBillingAccountLinked(anyString(), anyString());
+      // Mock the 3-argument version: pollUntilBillingAccountLinked(String, String, boolean)
+      doReturn(billingInfo)
+          .when(cloudBillingClient)
+          .pollUntilBillingAccountLinked(anyString(), anyString(), anyBoolean());
     } catch (IOException | InterruptedException e) {
       throw new RuntimeException(e);
     }
