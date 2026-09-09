@@ -3,6 +3,7 @@ package org.pmiops.workbench.calhoun;
 import jakarta.inject.Provider;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.SocketTimeoutException;
+import java.util.logging.Logger;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CalhounRetryHandler extends TerraServiceRetryHandler<ApiException> {
+
+  private static final Logger logger = Logger.getLogger(CalhounRetryHandler.class.getName());
 
   private static class CalhounRetryPolicy extends ResponseCodeRetryPolicy {
 
@@ -33,10 +36,17 @@ public class CalhounRetryHandler extends TerraServiceRetryHandler<ApiException> 
     }
 
     @Override
-    protected String getResponseBody(Throwable lastException) {
-      return lastException instanceof ApiException apiException
-          ? apiException.getResponseBody()
-          : null;
+    protected void logNoRetry(Throwable t, int responseCode) {
+      if (t instanceof ApiException) {
+        logger.log(
+            getLogLevel(responseCode),
+            String.format(
+                "Exception calling Calhoun API with response: %s",
+                ((ApiException) t).getResponseBody()),
+            t);
+      } else {
+        super.logNoRetry(t, responseCode);
+      }
     }
   }
 

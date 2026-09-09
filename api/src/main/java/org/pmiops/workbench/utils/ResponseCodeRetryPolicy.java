@@ -1,6 +1,5 @@
 package org.pmiops.workbench.utils;
 
-import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,34 +75,7 @@ public abstract class ResponseCodeRetryPolicy extends SimpleRetryPolicy {
   }
 
   protected void logNoRetry(Throwable t, int responseCode) {
-    logger.log(
-        getLogLevel(responseCode),
-        String.format(
-            "Exception calling %s with response: HTTP %d, %s",
-            serviceName, responseCode, describeResponseBody(t)),
-        t);
-  }
-
-  /**
-   * The response body of the failed call, or null if this service cannot supply one. Each service
-   * client is generated separately, so their exception types share no interface exposing it.
-   */
-  @Nullable
-  protected String getResponseBody(Throwable lastException) {
-    return null;
-  }
-
-  /**
-   * Some services answer with no body at all: VWB User Manager rejects deleting an already inactive
-   * notification with a bare 404, for example. Logging the body alone left nothing to go on, so say
-   * the body was empty and fall back to the exception message.
-   */
-  private String describeResponseBody(Throwable t) {
-    String responseBody = getResponseBody(t);
-    if (responseBody != null && !responseBody.isBlank()) {
-      return responseBody;
-    }
-    return String.format("<empty body> (%s)", t.getMessage());
+    logger.log(getLogLevel(responseCode), String.format("Exception calling %s", serviceName), t);
   }
 
   protected abstract int getResponseCode(Throwable lastException);
