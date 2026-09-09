@@ -38,20 +38,6 @@ public class VwbUserManagerRetryHandler extends TerraServiceRetryHandler<ApiExce
           ? apiException.getResponseBody()
           : null;
     }
-
-    /**
-     * User Manager returns some errors with no body at all. Deleting a notification that is already
-     * inactive, for example, is a bare 404, so logging the body alone says nothing about what
-     * failed. Fall back to the exception message and say the body was empty rather than printing a
-     * blank.
-     */
-    private static String describeResponse(ApiException apiException) {
-      String responseBody = apiException.getResponseBody();
-      if (responseBody != null && !responseBody.isBlank()) {
-        return responseBody;
-      }
-      return String.format("<empty body> (%s)", apiException.getMessage());
-    }
   }
 
   public VwbUserManagerRetryHandler(

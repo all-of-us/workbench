@@ -42,10 +42,14 @@ public class VwbUserManagerRetryHandlerTest {
           }
 
           @Override
-          public void flush() {}
+          public void flush() {
+            // Records are kept in memory, so there is nothing to flush.
+          }
 
           @Override
-          public void close() {}
+          public void close() {
+            // Records are kept in memory, so there is nothing to close.
+          }
         };
     logger.addHandler(captureHandler);
     retryHandler = new VwbUserManagerRetryHandler(new NoBackOffPolicy(), () -> null);
