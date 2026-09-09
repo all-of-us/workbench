@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.VwbSystemNotificationPriority;
 import org.pmiops.workbench.model.VwbSystemNotificationType;
 import org.pmiops.workbench.vwb.user.model.NotificationDescription;
 import org.pmiops.workbench.vwb.user.model.NotificationPriority;
+import org.pmiops.workbench.vwb.user.model.NotificationStatus;
 import org.pmiops.workbench.vwb.user.model.NotificationType;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 
@@ -50,6 +51,7 @@ public class VwbSystemNotificationAdminControllerTest {
         .message(MESSAGE)
         .notificationType(NotificationType.BLOCKING)
         .notificationPriority(NotificationPriority.WARNING)
+        .status(NotificationStatus.ACTIVE)
         .startTime(OffsetDateTime.ofInstant(START_TIME, ZoneOffset.UTC))
         .endTime(OffsetDateTime.ofInstant(END_TIME, ZoneOffset.UTC));
   }
@@ -130,6 +132,25 @@ public class VwbSystemNotificationAdminControllerTest {
     assertThat(listed).hasSize(1);
     assertThat(listed.get(0).getId()).isEqualTo(VWB_NOTIFICATION_ID.toString());
     assertThat(listed.get(0).getMessage()).isEqualTo(MESSAGE);
+  }
+
+  @Test
+  public void testList_omitsSoftDeletedNotifications() {
+    // VWB deletes by marking a notification INACTIVE and still returns it from its listing. If we
+    // showed those, an admin would see a notification no user can see and deleting it again would
+    // be a bare 404 from VWB.
+    when(vwbUserManagerClient.listOrganizationNotifications(100))
+        .thenReturn(
+            List.of(
+                vwbNotification().status(NotificationStatus.INACTIVE),
+                vwbNotification()
+                    .id(UUID.fromString("11111111-2222-3333-4444-555555555555"))
+                    .status(NotificationStatus.ACTIVE)));
+
+    List<VwbSystemNotification> listed = controller.listVwbSystemNotifications().getBody();
+
+    assertThat(listed).hasSize(1);
+    assertThat(listed.get(0).getId()).isEqualTo("11111111-2222-3333-4444-555555555555");
   }
 
   @Test

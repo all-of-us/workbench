@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.VwbSystemNotificationPriority;
 import org.pmiops.workbench.model.VwbSystemNotificationType;
 import org.pmiops.workbench.vwb.user.model.NotificationDescription;
 import org.pmiops.workbench.vwb.user.model.NotificationPriority;
+import org.pmiops.workbench.vwb.user.model.NotificationStatus;
 import org.pmiops.workbench.vwb.user.model.NotificationType;
 import org.pmiops.workbench.vwb.usermanager.VwbUserManagerClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,11 @@ public class VwbSystemNotificationAdminController implements VwbSystemNotificati
   public ResponseEntity<List<VwbSystemNotification>> listVwbSystemNotifications() {
     return ResponseEntity.ok(
         vwbUserManagerClient.listOrganizationNotifications(LIST_LIMIT).stream()
+            // VWB deletes notifications by marking them INACTIVE and its listing returns them
+            // regardless, so they have to be dropped here. Leaving them in shows admins
+            // notifications no user can see, and deleting one again is a bare 404 from VWB
+            // because its update matches no rows.
+            .filter(n -> n.getStatus() != NotificationStatus.INACTIVE)
             .map(VwbSystemNotificationAdminController::toApi)
             .toList());
   }
