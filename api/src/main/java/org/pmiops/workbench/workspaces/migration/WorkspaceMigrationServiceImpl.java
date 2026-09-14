@@ -674,8 +674,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public WorkspaceDao.WorkspaceDeletionView getNextWorkspaceToDelete() {
-    return workspaceDao.findNextWorkspaceToDelete();
+  public List<WorkspaceDao.WorkspaceDeletionView> getNextWorkspacesToDelete() {
+    return workspaceDao.findNextWorkspacesToDelete();
   }
 
   @Override

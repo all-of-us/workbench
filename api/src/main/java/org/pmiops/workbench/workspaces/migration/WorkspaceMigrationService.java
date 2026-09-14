@@ -36,7 +36,7 @@ public interface WorkspaceMigrationService {
 
   void checkArchiveRetryStatus(String workspaceNamespace, String terraName);
 
-  WorkspaceDao.WorkspaceDeletionView getNextWorkspaceToDelete();
+  List<WorkspaceDao.WorkspaceDeletionView> getNextWorkspacesToDelete();
 
   void startWorkspaceArchive(String namespace, String terraName);
 
