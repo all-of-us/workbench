@@ -236,8 +236,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "w.migrationState = 'FINISHED' "
           + "or w.workspaceId in ("
           + "SELECT legacyWorkspaceId from DbWorkspaceBucketArchive where status = 'ARCHIVED')) "
-          + "order by w.lastModifiedTime asc limit 1")
-  WorkspaceDeletionView findNextWorkspaceToDelete();
+          + "order by w.lastModifiedTime asc limit 4")
+  List<WorkspaceDeletionView> findNextWorkspacesToDelete();
 
   @Query(
       "SELECT w FROM DbWorkspace w "

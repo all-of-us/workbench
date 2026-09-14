@@ -82,7 +82,7 @@ public class OfflineWorkspaceControllerTest {
   public void testDeleteNextLegacyWorkspace() {
     when(workspaceDeletionView.getWorkspaceNamespace()).thenReturn(NAMESPACE);
     when(workspaceDeletionView.getFirecloudName()).thenReturn(TERRA_NAME);
-    when(workspaceDao.findNextWorkspaceToDelete()).thenReturn(workspaceDeletionView);
+    when(workspaceDao.findNextWorkspacesToDelete()).thenReturn(List.of(workspaceDeletionView));
     ResponseEntity<Void> response = offlineWorkspaceController.deleteNextLegacyWorkspace();
 
     verify(mockTaskQueueService).pushDeleteLegacyWorkspaceTask(NAMESPACE, TERRA_NAME);

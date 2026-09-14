@@ -66,14 +66,23 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
 
   @Override
   public ResponseEntity<Void> deleteNextLegacyWorkspace() {
-    WorkspaceDao.WorkspaceDeletionView workspaceDeletionView =
-        workspaceDao.findNextWorkspaceToDelete();
-    if (workspaceDeletionView == null) {
+    List<WorkspaceDao.WorkspaceDeletionView> workspacesToDelete =
+        workspaceDao.findNextWorkspacesToDelete();
+    if (workspacesToDelete == null || workspacesToDelete.isEmpty()) {
       throw new NotFoundException(
           "Next legacy workspace not found. Update query to continue archives");
     }
-    taskQueueService.pushDeleteLegacyWorkspaceTask(
-        workspaceDeletionView.getWorkspaceNamespace(), workspaceDeletionView.getFirecloudName());
+    workspacesToDelete.forEach(
+        workspaceDeletionView -> {
+          log.info(
+              "Next legacy workspace to delete: "
+                  + workspaceDeletionView.getWorkspaceNamespace()
+                  + "/"
+                  + workspaceDeletionView.getFirecloudName());
+          taskQueueService.pushDeleteLegacyWorkspaceTask(
+              workspaceDeletionView.getWorkspaceNamespace(),
+              workspaceDeletionView.getFirecloudName());
+        });
     return ResponseEntity.noContent().build();
   }
 
