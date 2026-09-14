@@ -47,7 +47,7 @@ public class StorageTransferClientImpl implements StorageTransferClient {
         gcsSink.addProperty("path", destinationPath);
       }
       com.google.gson.JsonObject transferOptions = new com.google.gson.JsonObject();
-      transferOptions.addProperty("overwriteObjectsAlreadyExistingInSink", true);
+      transferOptions.addProperty("overwriteObjectsAlreadyExistingInSink", false);
       transferSpec.add("gcsDataSource", gcsSource);
       transferSpec.add("gcsDataSink", gcsSink);
       transferSpec.add("transferOptions", transferOptions);
