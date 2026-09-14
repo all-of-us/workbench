@@ -782,7 +782,10 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
               null,
               archiveBucket,
               archivePath,
-              "archive-retry-" + namespace + "-" + archiveRecord.getLastRetry(),
+              "archive-retry-"
+                  + namespace
+                  + "-"
+                  + archiveRecord.getLastRetry().toString().replaceAll("[\\s:]+", ""),
               projectId,
               null,
               serviceAccountEmail,
@@ -820,7 +823,10 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     String projectId = workbenchConfigProvider.get().server.projectId;
 
     String jobName =
-        "transferJobs/migration-archive-retry-" + namespace + "-" + archive.getLastRetry();
+        "transferJobs/migration-archive-retry-"
+            + namespace
+            + "-"
+            + archive.getLastRetry().toString().replaceAll("[\\s:]+", "");
 
     TransferOperation transferOperation =
         storageTransferClient.getTransferJobStatus(projectId, jobName);
