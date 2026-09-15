@@ -11,6 +11,7 @@ import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.legacy_leonardo_client.api.ResourcesApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
@@ -26,22 +27,29 @@ import org.springframework.web.context.annotation.RequestScope;
 public class LeonardoConfig {
   public static final String USER_RUNTIMES_API = "userRuntimesApi";
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
+  public static final String SERVICE_RUNTIMES_LENIENT_TIMEOUT_API = "svcRuntimesLenientTimeoutApi";
 
   public static final String USER_DISKS_API = "userDisksApi";
   public static final String SERVICE_DISKS_API = "serviceDisksApi";
+  public static final String SERVICE_DISKS_LENIENT_TIMEOUT_API = "serviceDisksLenientTimeoutApi";
 
   public static final String USER_APPS_API = "userAppsApi";
-
   public static final String SERVICE_APPS_API = "serviceAppsApi";
+  public static final String SERVICE_APPS_LENIENT_TIMEOUT_API = "serviceAppsLenientTimeoutApi";
 
   // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
   private static final String SERVICE_NOTEBOOKS_CLIENT = "notebooksSvcApiClient";
+
   // Identifiers for the new OAS3 APIs from Leonardo. These should be used for runtimes access.
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
   private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceApiClient";
+  private static final String SERVICE_LENIENT_TIMEOUT_LEONARDO_CLIENT =
+      "leonardoServiceLenientTimeoutApiClient";
   private static final String LEGACY_USER_LEONARDO_CLIENT = "legacyLeonardoApiClient";
   private static final String LEGACY_SERVICE_LEONARDO_CLIENT = "legacyLeonardoServiceApiClient";
+  private static final String LEGACY_SERVICE_LENIENT_TIMEOUT_LEONARDO_CLIENT =
+      "legacyLeonardoServiceLenientTimeoutApiClient";
 
   public static final String SERVICE_RESOURCE_API = "serviceResourceApi";
 
@@ -87,6 +95,20 @@ public class LeonardoConfig {
     return apiClient;
   }
 
+  @Bean(name = LEGACY_SERVICE_LENIENT_TIMEOUT_LEONARDO_CLIENT)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public org.pmiops.workbench.legacy_leonardo_client.ApiClient legacyServiceLenientTimeoutApiClient(
+      LeonardoApiClientFactory factory, WorkbenchConfig config) {
+    var apiClient = factory.newLegacyApiClient();
+    try {
+      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
+      apiClient.setReadTimeout(config.firecloud.lenientTimeoutInSeconds * 1000);
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+    return apiClient;
+  }
+
   @Bean(name = LEGACY_USER_LEONARDO_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public org.pmiops.workbench.legacy_leonardo_client.ApiClient legacyUserApiClient(
@@ -111,6 +133,20 @@ public class LeonardoConfig {
     ApiClient apiClient = factory.newApiClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+    return apiClient;
+  }
+
+  @Bean(name = SERVICE_LENIENT_TIMEOUT_LEONARDO_CLIENT)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ApiClient leoServiceLenientTimeoutApiClient(
+      LeonardoApiClientFactory factory, WorkbenchConfig config) {
+    ApiClient apiClient = factory.newApiClient();
+    try {
+      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
+      apiClient.setReadTimeout(config.firecloud.lenientTimeoutInSeconds * 1000);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
@@ -156,6 +192,15 @@ public class LeonardoConfig {
     return api;
   }
 
+  @Bean(name = SERVICE_DISKS_LENIENT_TIMEOUT_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public DisksApi serviceLenientTimeoutDisksApi(
+      @Qualifier(SERVICE_LENIENT_TIMEOUT_LEONARDO_CLIENT) ApiClient apiClient) {
+    var api = new DisksApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ProxyApi proxyApi(
@@ -184,6 +229,16 @@ public class LeonardoConfig {
     return api;
   }
 
+  @Bean(name = SERVICE_RUNTIMES_LENIENT_TIMEOUT_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public RuntimesApi serviceLenientTimeoutRuntimesApi(
+      @Qualifier(LEGACY_SERVICE_LENIENT_TIMEOUT_LEONARDO_CLIENT)
+          org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
+    RuntimesApi api = new RuntimesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ServiceInfoApi serviceInfoApi(
@@ -205,6 +260,15 @@ public class LeonardoConfig {
   @Bean(name = SERVICE_APPS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public AppsApi serviceAppsApi(@Qualifier(SERVICE_LEONARDO_CLIENT) ApiClient apiClient) {
+    AppsApi api = new AppsApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = SERVICE_APPS_LENIENT_TIMEOUT_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public AppsApi serviceAppsLenientTimeoutApi(
+      @Qualifier(SERVICE_LENIENT_TIMEOUT_LEONARDO_CLIENT) ApiClient apiClient) {
     AppsApi api = new AppsApi();
     api.setApiClient(apiClient);
     return api;
