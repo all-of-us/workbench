@@ -1,19 +1,8 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { Criteria, CriteriaSubType, Domain } from 'generated/fetch';
-
 import { colorWithWhiteness } from 'app/styles/colors';
-import {
-  currentCohortCriteriaStore,
-  currentCohortReviewStore,
-  currentCohortSearchContextStore,
-  currentCohortStore,
-  currentConceptSetStore,
-  currentConceptStore,
-  currentWorkspaceStore,
-  systemErrorStore,
-} from 'app/utils/navigation';
+import { currentWorkspaceStore, systemErrorStore } from 'app/utils/navigation';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
@@ -277,37 +266,6 @@ export const useCurrentWorkspace = (): WorkspaceData => {
   return workspace;
 };
 
-// HOC that provides a 'cohort' prop with current Cohort
-export const withCurrentCohort = () => {
-  return connectBehaviorSubject(currentCohortStore, 'cohort');
-};
-
-// HOC that provides a 'cohortReview' prop with current CohortReview
-export const withCurrentCohortReview = () => {
-  return connectBehaviorSubject(currentCohortReviewStore, 'cohortReview');
-};
-
-// HOC that provides a 'criteria' prop with current Cohort
-export const withCurrentCohortCriteria = () => {
-  return connectBehaviorSubject(currentCohortCriteriaStore, 'criteria');
-};
-
-export const withCurrentConcept = () => {
-  return connectBehaviorSubject(currentConceptStore, 'concept');
-};
-
-export const withCurrentCohortSearchContext = () => {
-  return connectBehaviorSubject(
-    currentCohortSearchContextStore,
-    'cohortContext'
-  );
-};
-
-// HOC that provides a 'conceptSet' prop with current ConceptSet
-export const withCurrentConceptSet = () => {
-  return connectBehaviorSubject(currentConceptSetStore, 'conceptSet');
-};
-
 export const withSystemError = () => {
   return connectBehaviorSubject(systemErrorStore, 'systemError');
 };
@@ -325,28 +283,8 @@ export interface WithCdrVersions {
   cdrVersionTiersResponse: CdrVersionStore;
 }
 
-export function formatDomainString(domainString: string): string {
-  return domainString === Domain.PHYSICAL_MEASUREMENT_CSS.toString()
-    ? fp.capitalize(Domain.PHYSICAL_MEASUREMENT.toString())
-    : domainString === Domain.WHOLE_GENOME_VARIANT.toString()
-    ? 'VCF Files'
-    : fp.capitalize(domainString);
-}
-
-export function formatDomain(domain: Domain): string {
-  return formatDomainString(domain.toString());
-}
-
 // Given a value and an array, return a new array with the value appended.
 export const append = fp.curry((value, arr) => fp.concat(arr, [value]));
-
-// Given a value and an array, return a new array that 'toggles' the presence of the value.
-// E.g. remove if it exists, append if it doesn't.
-export const toggleIncludes = fp.curry(
-  <T extends {}>(value: T, arr: Array<T>) => {
-    return fp.includes(value, arr) ? fp.pull(value, arr) : append(value, arr);
-  }
-);
 
 export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
@@ -591,24 +529,3 @@ export const usernameWithoutDomain = (username: string) => {
 
 export const capStringWithEllipsis = (value: string, maxLength: number) =>
   value?.length > maxLength ? value.slice(0, maxLength) + '...' : value;
-
-export const updateCriteriaSelectionStore = (
-  criteriaLookupItems: Criteria[],
-  domain: Domain
-) => {
-  const updatedSelections = currentCohortCriteriaStore.getValue().map((sel) => {
-    const criteriaMatch = criteriaLookupItems.find(
-      (item) =>
-        item.conceptId === sel.conceptId &&
-        item.standard === sel.standard &&
-        (domain !== Domain.SURVEY || item.subtype === sel.subtype) &&
-        (sel.subtype !== CriteriaSubType.ANSWER.toString() ||
-          item.value === sel.code)
-    );
-    if (criteriaMatch) {
-      sel.id = criteriaMatch.id;
-    }
-    return sel;
-  });
-  currentCohortCriteriaStore.next(updatedSelections);
-};

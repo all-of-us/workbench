@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 import * as fp from 'lodash/fp';
-import { faEdit } from '@fortawesome/free-regular-svg-icons';
 import {
   faBook,
   faCircle,
   faDna,
   faFolderOpen,
-  faInbox,
   faInfoCircle,
   faSyncAlt,
   faTerminal,
@@ -17,7 +15,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
-  Criteria,
   GenomicExtractionJob,
   TerraJobStatus,
 } from 'generated/fetch';
@@ -55,18 +52,6 @@ const styles = reactStyles({
   rotate: {
     animation: 'rotation 2s infinite linear',
   },
-  criteriaCount: {
-    position: 'absolute',
-    height: '1.2rem',
-    width: '1.2rem',
-    top: '1.5rem',
-    left: '0.825rem',
-    textAlign: 'center',
-    backgroundColor: colors.danger,
-    borderRadius: '50%',
-    display: 'inline-block',
-    fontSize: '0.6rem',
-  },
   icon: {
     background: colorWithWhiteness(colors.primary, 0.48),
     color: colors.white,
@@ -102,12 +87,9 @@ export const cromwellConfigIconId = 'cromwellConfig';
 export const sasConfigIconId = 'sasConfig';
 
 export type SidebarIconId =
-  | 'criteria'
-  | 'concept'
   | 'help'
   | 'notebooksHelp'
   | 'dataDictionary'
-  | 'annotations'
   | 'apps'
   | 'runtimeConfig'
   | typeof cromwellConfigIconId
@@ -200,36 +182,15 @@ const withinPastTwentyFourHours = (epoch: number) => {
   return completionTimeMoment.isAfter(twentyFourHoursAgo);
 };
 
-const displayFontAwesomeIcon = (
-  icon: IconConfig,
-  criteria: Array<Selection>,
-  concept: Array<Criteria>
-) => (
-  <React.Fragment>
-    {icon.id === 'criteria' && criteria && criteria.length > 0 && (
-      <span data-test-id='criteria-count' style={styles.criteriaCount}>
-        {criteria.length}
-      </span>
-    )}
-    {icon.id === 'concept' && concept && concept.length > 0 && (
-      <span data-test-id='concept-count' style={styles.criteriaCount}>
-        {concept.length}
-      </span>
-    )}
-    <FontAwesomeIcon
-      data-test-id={'help-sidebar-icon-' + icon.id}
-      icon={icon.faIcon}
-      style={icon.style}
-    />
-  </React.Fragment>
+const displayFontAwesomeIcon = (icon: IconConfig) => (
+  <FontAwesomeIcon
+    data-test-id={'help-sidebar-icon-' + icon.id}
+    icon={icon.faIcon}
+    style={icon.style}
+  />
 );
 
-const displayExtractionIcon = (
-  icon: IconConfig,
-  genomicExtractionJobs,
-  criteria: Array<Selection>,
-  concept: Array<Criteria>
-) => {
+const displayExtractionIcon = (icon: IconConfig, genomicExtractionJobs) => {
   const jobsByStatus = fp.groupBy('status', genomicExtractionJobs);
   let status;
   // If any jobs are currently active, show the 'sync' icon corresponding to their status.
@@ -273,7 +234,7 @@ const displayExtractionIcon = (
         justifyContent: 'space-around',
       }}
     >
-      {displayFontAwesomeIcon(icon, criteria, concept)}
+      {displayFontAwesomeIcon(icon)}
       <FlexRow
         data-test-id='extraction-status-icon-container'
         style={styles.statusIconContainer}
@@ -355,21 +316,12 @@ const displayExtractionIcon = (
 
 interface DisplayIconProps {
   workspace: WorkspaceData;
-  criteria: Array<Selection>;
-  concept?: Array<Criteria>;
   genomicExtractionJobs: GenomicExtractionJob[];
   userSuspended: boolean;
   icon: IconConfig;
 }
 const DisplayIcon = (props: DisplayIconProps) => {
-  const {
-    workspace,
-    genomicExtractionJobs,
-    criteria,
-    concept,
-    userSuspended,
-    icon,
-  } = props;
+  const { workspace, genomicExtractionJobs, userSuspended, icon } = props;
 
   return switchCase<SidebarIconId, React.ReactElement>(
     icon.id,
@@ -463,8 +415,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
     ],
     [
       'genomicExtractions',
-      () =>
-        displayExtractionIcon(icon, genomicExtractionJobs, criteria, concept),
+      () => displayExtractionIcon(icon, genomicExtractionJobs),
     ],
     [
       DEFAULT,
@@ -476,15 +427,11 @@ const DisplayIcon = (props: DisplayIconProps) => {
             style={icon.style}
           />
         ) : (
-          displayFontAwesomeIcon(icon, criteria, concept)
+          displayFontAwesomeIcon(icon)
         ),
     ]
   );
 };
-
-export const showCriteriaIcon = (pageKey: string, criteria: Array<Selection>) =>
-  pageKey === 'cohortBuilder' && !!criteria;
-export const showConceptIcon = (pageKey: string) => pageKey === 'conceptSets';
 
 const runtimeTooltip = (
   baseTooltip: string,
@@ -509,13 +456,11 @@ const runtimeTooltip = (
 
 interface IconConfigProps {
   iconId: SidebarIconId;
-  pageKey: string;
-  criteria: Array<Selection>;
   loadingError: Error;
   userSuspended: boolean;
 }
 const iconConfig = (props: IconConfigProps): IconConfig => {
-  const { iconId, pageKey, criteria, loadingError, userSuspended } = props;
+  const { iconId, loadingError, userSuspended } = props;
 
   const disableEnvironmentSidebarIcons = !!loadingError || userSuspended;
 
@@ -535,26 +480,6 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
   });
 
   const config: Record<SidebarIconId, IconConfig> = {
-    criteria: {
-      id: 'criteria',
-      disabled: false,
-      faIcon: faInbox,
-      label: 'Selected Criteria',
-      showIcon: () => showCriteriaIcon(pageKey, criteria),
-      style: { fontSize: '21px' },
-      tooltip: 'Selected Criteria',
-      hasContent: true,
-    },
-    concept: {
-      id: 'concept',
-      disabled: false,
-      faIcon: faInbox,
-      label: 'Selected Concepts',
-      showIcon: () => showConceptIcon(pageKey),
-      style: { fontSize: '21px' },
-      tooltip: 'Selected Concepts',
-      hasContent: true,
-    },
     help: {
       id: 'help',
       disabled: false,
@@ -584,16 +509,6 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       style: { color: colors.white, fontSize: '20px', marginTop: '5px' },
       tooltip: 'Data Dictionary',
       hasContent: false,
-    },
-    annotations: {
-      id: 'annotations',
-      disabled: false,
-      faIcon: faEdit,
-      label: 'Annotations Icon',
-      showIcon: () => pageKey === 'reviewParticipantDetail',
-      style: { fontSize: '20px', marginLeft: '3px' },
-      tooltip: 'Annotations',
-      hasContent: true,
     },
     apps: {
       id: 'apps',
@@ -675,8 +590,6 @@ interface HelpSidebarIconsProps {
   genomicExtractionJobs: GenomicExtractionJob[];
   activeIcon: string;
   onIconClick: (icon: IconConfig) => void;
-  pageKey: string;
-  criteria: Array<Selection>;
   userSuspended: boolean;
 }
 export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
@@ -685,24 +598,17 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     cdrVersionTiersResponse,
     activeIcon,
     onIconClick,
-    pageKey,
-    criteria,
     userSuspended,
   } = props;
   const { loadingError } = useStore(runtimeStore);
   const defaultIcons: SidebarIconId[] = [
-    'criteria',
-    'concept',
     'help',
     'notebooksHelp',
     'dataDictionary',
-    'annotations',
   ];
   const keys: SidebarIconId[] = defaultIcons.filter((iconId) =>
     iconConfig({
       iconId,
-      pageKey,
-      criteria,
       loadingError,
       userSuspended,
     }).showIcon()
@@ -724,7 +630,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   }
 
   const icons = keys.map((iconId) =>
-    iconConfig({ iconId, pageKey, criteria, loadingError, userSuspended })
+    iconConfig({ iconId, loadingError, userSuspended })
   );
 
   return (

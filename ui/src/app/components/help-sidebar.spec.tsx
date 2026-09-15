@@ -27,8 +27,6 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import {
-  currentCohortCriteriaStore,
-  currentCohortReviewStore,
   currentWorkspaceStore,
   sidebarActiveIconStore,
 } from 'app/utils/navigation';
@@ -285,7 +283,6 @@ describe('HelpSidebar', () => {
     registerApiClient(DisksApi, new DisksApiStub());
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
-    currentCohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.set({ config: defaultServerConfig });
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,
@@ -366,30 +363,6 @@ describe('HelpSidebar', () => {
       })
     );
     expect(screen.getByText(/mock workspace share/i)).toBeInTheDocument();
-  });
-
-  it('should hide workspace icon if on criteria search page', async () => {
-    props = { pageKey: 'cohortBuilder' };
-    component();
-    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
-    act(() => currentCohortCriteriaStore.next([]));
-
-    expect(
-      screen.queryByLabelText('Open Actions Menu')
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('criteria-count')).not.toBeInTheDocument();
-
-    act(() => currentCohortCriteriaStore.next([criteria1]));
-    expect(await screen.findByTestId('criteria-count')).toBeInTheDocument();
-  });
-
-  it('should update count if criteria is added', async () => {
-    props = { pageKey: 'cohortBuilder' };
-    component();
-    currentCohortCriteriaStore.next([criteria1, criteria2]);
-    expect(
-      await within(await screen.findByTestId('criteria-count')).findByText('2')
-    ).toBeInTheDocument();
   });
 
   it('should not display runtime config icon for read-only workspaces', async () => {

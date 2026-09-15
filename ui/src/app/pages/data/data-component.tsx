@@ -23,7 +23,6 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
-import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -522,16 +521,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             <CardButton
               style={styles.resourceTypeButton}
               disabled={!writePermission}
-              onClick={() => {
-                navigate([
-                  'workspaces',
-                  workspace.namespace,
-                  workspace.terraName,
-                  'data',
-                  'cohorts',
-                  'build',
-                ]);
-              }}
+              onClick={() => console.log('Cohort builder is decommissioned')}
             >
               <div style={styles.cardHeader}>
                 <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
@@ -568,16 +558,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 ...styles.resourceTypeButtonLast,
               }}
               disabled={!writePermission}
-              onClick={() => {
-                AnalyticsTracker.DatasetBuilder.OpenCreatePage();
-                navigate([
-                  'workspaces',
-                  workspace.namespace,
-                  workspace.terraName,
-                  'data',
-                  'data-sets',
-                ]);
-              }}
+              onClick={() => console.log('Dataset builder is decommissioned')}
             >
               <div style={styles.cardHeader}>
                 <h2 style={styles.cardHeaderText(!writePermission)}>

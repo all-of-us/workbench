@@ -69,27 +69,18 @@ describe('getTrail', () => {
   it('works', () => {
     const ns = 'testNs';
     const terraName = 'testTerraName';
-    const cid = '123';
-    const crid = '456';
-    const pid = '789';
 
     const trail = getTrail(
       BreadcrumbType.Participant,
       workspaceDataStub,
-      exampleCohortStubs[0],
-      cohortReviewStubs[0],
-      ConceptSetsApiStub.stubConceptSets()[0],
-      { ns, terraName, cid, crid, pid }
+      { ns, terraName }
     );
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
       workspaceDataStub.name,
-      cohortReviewStubs[0].cohortName,
-      `Participant ${pid}`,
     ]);
     expect(trail[3].url).toEqual(
-      dataTabPath(ns, terraName) +
-        `/cohorts/${cid}/reviews/${crid}/participants/${pid}`
+      dataTabPath(ns, terraName)
     );
   });
 
@@ -105,10 +96,7 @@ describe('getTrail', () => {
       const trail = getTrail(
         BreadcrumbType[bType],
         workspaceDataStub,
-        exampleCohortStubs[0],
-        cohortReviewStubs[0],
-        ConceptSetsApiStub.stubConceptSets()[0],
-        { ns, terraName, cid, pid }
+        { ns, terraName }
       );
       expect(trail.length).toBeGreaterThan(0);
     }
@@ -126,9 +114,6 @@ describe('getTrail', () => {
     const trail = getTrail(
       BreadcrumbType.Analysis,
       workspaceDataStub,
-      undefined,
-      undefined,
-      undefined,
       { ns, terraName, nbName }
     );
 
@@ -151,9 +136,6 @@ describe('getTrail', () => {
     const trail = getTrail(
       BreadcrumbType.AnalysisPreview,
       workspaceDataStub,
-      undefined,
-      undefined,
-      undefined,
       { ns, terraName, nbName }
     );
 
@@ -177,9 +159,6 @@ describe('getTrail', () => {
     const trail = getTrail(
       BreadcrumbType.UserApp,
       workspaceDataStub,
-      undefined,
-      undefined,
-      undefined,
       { ns, terraName, nbName, appType }
     );
 

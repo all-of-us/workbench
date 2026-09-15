@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
-  Criteria,
   GenomicExtractionJob,
   ParticipantCohortStatus,
   RuntimeError,
@@ -29,38 +28,24 @@ import {
   IconConfig,
   rstudioConfigIconId,
   sasConfigIconId,
-  showConceptIcon,
-  showCriteriaIcon,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { HelpTips } from 'app/components/help-tips';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
-import { Spinner } from 'app/components/spinners';
-import { SelectionList } from 'app/pages/data/cohort/selection-list';
-import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
-import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
-import { participantStore } from 'app/services/review-state.service';
 import { runtimeApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
   withCdrVersions,
-  withCurrentCohortCriteria,
-  withCurrentCohortSearchContext,
-  withCurrentConcept,
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import {
-  currentConceptStore,
-  NavigationProps,
-  sidebarActiveIconStore,
-} from 'app/utils/navigation';
+import { NavigationProps, sidebarActiveIconStore } from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
   maybeUnwrapSecuritySuspendedError,
@@ -181,15 +166,8 @@ export const LEONARDO_APP_PAGE_KEY = 'leonardo_app';
 
 const pageKeyToAnalyticsLabels = {
   about: 'About Page',
-  cohortBuilder: 'Cohort Builder',
-  conceptSets: 'Concept Set',
-  searchConceptSets: 'Concept Set',
-  conceptSetActions: 'Concept Set',
   data: 'Data Landing Page',
-  datasetBuilder: 'Dataset Builder',
   notebooks: 'Analysis Tab Landing Page',
-  reviewParticipants: 'Review Participant List',
-  reviewParticipantDetail: 'Review Individual',
 };
 
 interface Props extends NavigationProps, UserSuspendedProps {
@@ -197,11 +175,8 @@ interface Props extends NavigationProps, UserSuspendedProps {
   profileState: any;
   shareFunction: Function;
   workspace: WorkspaceData;
-  criteria: Array<Selection>;
-  concept?: Array<Criteria>;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   genomicExtractionJobs: GenomicExtractionJob[];
-  cohortContext: any;
 }
 
 enum CurrentModal {
@@ -271,9 +246,6 @@ const BetaBadge = ({ tooltipContent, style }) => (
 
 export const HelpSidebar = fp.flow(
   withUserSuspended(),
-  withCurrentCohortCriteria(),
-  withCurrentCohortSearchContext(),
-  withCurrentConcept(),
   withGenomicExtractionJobs,
   withCurrentWorkspace(),
   withUserProfile(),
@@ -354,11 +326,6 @@ export const HelpSidebar = fp.flow(
       // indicate to the user that it's something they can close.
       this.setActiveIcon(initialActiveIcon);
       this.subscriptions.push(
-        participantStore.subscribe((participant) =>
-          this.setState({ participant })
-        )
-      );
-      this.subscriptions.push(
         sidebarActiveIconStore.subscribe((activeIcon) => {
           this.setState({ activeIcon });
           if (activeIcon) {
@@ -394,15 +361,6 @@ export const HelpSidebar = fp.flow(
           }
         })
       );
-    }
-
-    componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (
-        (!this.props.criteria && !!prevProps.criteria) ||
-        (!this.props.concept && !!prevProps.concept)
-      ) {
-        this.setActiveIcon(null);
-      }
     }
 
     componentWillUnmount(): void {
@@ -481,7 +439,7 @@ export const HelpSidebar = fp.flow(
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
-      const { pageKey, workspace, cohortContext } = this.props;
+      const { pageKey, workspace } = this.props;
 
       const sharedGKEAppConfigSidebarContent = {
         headerPadding: '1.125rem',
@@ -663,48 +621,6 @@ export const HelpSidebar = fp.flow(
             ),
             showFooter: true,
           };
-        case 'annotations':
-          return {
-            headerPadding: '0.75rem 0.75rem 0 0.75rem',
-            renderHeader: () =>
-              this.state.participant && (
-                <div style={{ fontSize: 18, color: colors.primary }}>
-                  {'Participant ' + this.state.participant.participantId}
-                </div>
-              ),
-            renderBody: () =>
-              this.state.participant ? (
-                <SidebarContent participant={this.state.participant} />
-              ) : (
-                <Spinner style={{ display: 'block', margin: '4.5rem auto' }} />
-              ),
-            showFooter: true,
-          };
-        case 'concept':
-          return {
-            headerPadding: '1.125rem',
-            renderHeader: () => (
-              <h3 style={styles.sectionTitle}>Selected Concepts</h3>
-            ),
-            bodyWidthRem: '30',
-            bodyPadding: '1.125rem 1.125rem 0',
-            renderBody: () =>
-              !!currentConceptStore.getValue() && <ConceptListPage />,
-            showFooter: false,
-          };
-        case 'criteria':
-          return {
-            bodyWidthRem: '30',
-            bodyPadding: '1.125rem 1.125rem 0',
-            renderBody: () =>
-              !!cohortContext && (
-                <SelectionList
-                  back={() => this.setActiveIcon(null)}
-                  selections={[]}
-                />
-              ),
-            showFooter: false,
-          };
         case 'genomicExtractions':
           return {
             overflow: 'visible',
@@ -730,15 +646,12 @@ export const HelpSidebar = fp.flow(
         workspace,
         workspace: { namespace, terraName },
         pageKey,
-        criteria,
       } = this.props;
       const sidebarContent = this.sidebarContent(
         activeIcon,
         gkeAppConfPanelInitialState,
         runtimeConfPanelInitialState
       );
-      const shouldRenderWorkspaceMenu =
-        !showConceptIcon(pageKey) && !showCriteriaIcon(pageKey, criteria);
 
       const closeButton = (
         <CloseButton
@@ -757,68 +670,64 @@ export const HelpSidebar = fp.flow(
                 : {}),
             }}
           >
-            {shouldRenderWorkspaceMenu && (
-              <PopupTrigger
-                side='bottom'
-                closeOnClick
-                content={
-                  <React.Fragment>
-                    <div style={styles.dropdownHeader}>Workspace Actions</div>
-                    <WorkspaceActionsMenu
-                      workspaceData={workspace}
-                      onDuplicate={() => {
-                        AnalyticsTracker.Workspaces.OpenDuplicatePage();
-                        this.props.navigate([
-                          'workspaces',
-                          namespace,
-                          terraName,
-                          'duplicate',
-                        ]);
-                      }}
-                      onEdit={() => {
-                        AnalyticsTracker.Workspaces.OpenEditPage();
-                        this.props.navigate([
-                          'workspaces',
-                          namespace,
-                          terraName,
-                          'edit',
-                        ]);
-                      }}
-                      onShare={() => {
-                        AnalyticsTracker.Workspaces.OpenShareModal();
-                        this.setState({ currentModal: CurrentModal.Share });
-                      }}
-                      onDelete={() => {
-                        AnalyticsTracker.Workspaces.OpenDeleteModal();
-                        this.setState({ currentModal: CurrentModal.Delete });
-                      }}
-                    />
-                  </React.Fragment>
-                }
+            <PopupTrigger
+              side='bottom'
+              closeOnClick
+              content={
+                <React.Fragment>
+                  <div style={styles.dropdownHeader}>Workspace Actions</div>
+                  <WorkspaceActionsMenu
+                    workspaceData={workspace}
+                    onDuplicate={() => {
+                      AnalyticsTracker.Workspaces.OpenDuplicatePage();
+                      this.props.navigate([
+                        'workspaces',
+                        namespace,
+                        terraName,
+                        'duplicate',
+                      ]);
+                    }}
+                    onEdit={() => {
+                      AnalyticsTracker.Workspaces.OpenEditPage();
+                      this.props.navigate([
+                        'workspaces',
+                        namespace,
+                        terraName,
+                        'edit',
+                      ]);
+                    }}
+                    onShare={() => {
+                      AnalyticsTracker.Workspaces.OpenShareModal();
+                      this.setState({ currentModal: CurrentModal.Share });
+                    }}
+                    onDelete={() => {
+                      AnalyticsTracker.Workspaces.OpenDeleteModal();
+                      this.setState({ currentModal: CurrentModal.Delete });
+                    }}
+                  />
+                </React.Fragment>
+              }
+            >
+              <div
+                aria-label='Open Actions Menu'
+                data-test-id='workspace-menu-button'
               >
-                <div
-                  aria-label='Open Actions Menu'
-                  data-test-id='workspace-menu-button'
-                >
-                  <TooltipTrigger content={<div>Menu</div>} side='left'>
-                    <div
-                      style={styles.icon}
-                      onClick={() =>
-                        this.analyticsEvent(
-                          'OpenSidebar',
-                          'Sidebar - Menu Icon'
-                        )
-                      }
-                    >
-                      <FontAwesomeIcon
-                        icon={faEllipsisV}
-                        style={{ fontSize: '21px' }}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                </div>
-              </PopupTrigger>
-            )}
+                <TooltipTrigger content={<div>Menu</div>} side='left'>
+                  <div
+                    style={styles.icon}
+                    onClick={() =>
+                      this.analyticsEvent('OpenSidebar', 'Sidebar - Menu Icon')
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faEllipsisV}
+                      style={{ fontSize: '21px' }}
+                    />
+                  </div>
+                </TooltipTrigger>
+              </div>
+            </PopupTrigger>
+
             <HelpSidebarIcons
               {...{ ...this.props, activeIcon }}
               onIconClick={(icon) => this.onIconClick(icon)}
