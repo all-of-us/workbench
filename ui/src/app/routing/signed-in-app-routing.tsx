@@ -123,10 +123,7 @@ const UserAdminTablePage = fp.flow(
   withRoutingSpinner
 )(AdminUserTable);
 const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
-const WorkspaceWrapperPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(WorkspaceWrapper);
+const WorkspaceWrapperPage = fp.flow(withRouteData)(WorkspaceWrapper);
 const WorkspaceAdminPage = fp.flow(
   withRouteData,
   withRoutingSpinner

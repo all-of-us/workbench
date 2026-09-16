@@ -1,10 +1,7 @@
-import { matchPath } from 'react-router-dom';
-
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { Guard } from 'app/components/app-router';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
@@ -24,10 +21,10 @@ import {
 } from 'app/utils/authorities';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
-import { authStore, MatchParams, profileStore } from 'app/utils/stores';
+import { authStore, profileStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
-import { analysisTabName, analysisTabPath, workspacePath } from './utils';
+import { workspacePath } from './utils';
 
 export const signInGuard: Guard = {
   allowed: (): boolean => {
@@ -95,21 +92,6 @@ export const adminLockedGuard = (ns: string, terraName: string): Guard => {
   return {
     allowed: (): boolean => !currentWorkspaceStore.getValue().adminLocked,
     redirectPath: `${workspacePath(ns, terraName)}/about`,
-  };
-};
-
-export const confirmAppIsValid = () => {
-  const urlMatchParam = matchPath<MatchParams>(location.pathname, {
-    path: `/workspaces/:ns/:terraName/${analysisTabName}/userApp/:appType`,
-  });
-  const appFromUrl = urlMatchParam.params.appType as UIAppType;
-  return Object.values(UIAppType).includes(appFromUrl);
-};
-
-export const appIsValidGuard = (ns: string, terraName: string): Guard => {
-  return {
-    allowed: (): boolean => confirmAppIsValid(),
-    redirectPath: `${analysisTabPath(ns, terraName)}`,
   };
 };
 

@@ -35,7 +35,6 @@ import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
-import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import {
   userRolesStub,
   workspaceStubs,
@@ -67,7 +66,6 @@ describe('WorkspaceAbout', () => {
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(RuntimeApi, new RuntimeApiStub());
 
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {

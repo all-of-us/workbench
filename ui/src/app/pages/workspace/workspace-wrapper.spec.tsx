@@ -21,9 +21,7 @@ import {
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
-import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
@@ -47,8 +45,6 @@ describe(WorkspaceWrapper.name, () => {
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
     cdrVersionStore.set(cdrVersionTiersResponse);
-    registerApiClient(RuntimeApi, new RuntimeApiStub());
-    registerApiClient(AppsApi, new AppsApiStub());
 
     const workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
@@ -70,7 +66,7 @@ describe(WorkspaceWrapper.name, () => {
         ]}
       >
         <Route path='/workspaces/:ns/:terraName'>
-          <WorkspaceWrapper hideSpinner={() => {}} />
+          <WorkspaceWrapper />
         </Route>
       </MemoryRouter>
     );

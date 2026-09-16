@@ -1,30 +1,9 @@
-import {
-  Cohort,
-  CohortReview,
-  ConceptSet,
-  DataSet,
-  FileDetail,
-  ResourceType,
-  WorkspaceResource,
-} from 'generated/fetch';
+import { WorkspaceResource } from 'generated/fetch';
 
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { convertToResource } from 'app/utils/resources';
-import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
-
-type InputResource = FileDetail | Cohort | CohortReview | ConceptSet | DataSet;
-export function convertToResources(
-  inputResources: InputResource[],
-  resourceType: ResourceType,
-  workspace: WorkspaceData
-): WorkspaceResource[] {
-  return inputResources.map((ir) =>
-    convertToResource(ir, resourceType, workspace)
-  );
-}
 
 export const stubResource: WorkspaceResource = {
   workspaceNamespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,

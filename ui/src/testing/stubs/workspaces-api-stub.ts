@@ -22,14 +22,6 @@ import {
   WorkspaceUserRolesResponse,
 } from 'generated/fetch';
 
-import { WorkspaceData } from 'app/utils/workspace-data';
-
-import { CdrVersionsStubVariables } from './cdr-versions-api-stub';
-import { cohortReviewStubs } from './cohort-review-service-stub';
-import { exampleCohortStubs } from './cohorts-api-stub';
-import { ConceptSetsApiStub } from './concept-sets-api-stub';
-import { DataSetApiStub } from './data-set-api-stub';
-import { convertToResources } from './resources-stub';
 import {
   recentWorkspaceStubs,
   userRolesStub,
@@ -281,44 +273,6 @@ export class WorkspacesApiStub extends WorkspacesApi {
   getBillingUsage(): Promise<WorkspaceBillingUsageResponse> {
     return new Promise<WorkspaceBillingUsageResponse>((resolve) => {
       resolve({ cost: 5.5 });
-    });
-  }
-
-  getWorkspaceResourcesV2(
-    workspaceNamespace: string,
-    terraName: string
-  ): Promise<WorkspaceResourceResponse> {
-    return new Promise<WorkspaceResourceResponse>((resolve) => {
-      const workspace: WorkspaceData = {
-        namespace: workspaceNamespace,
-        terraName,
-        name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
-        accessLevel: WorkspaceAccessLevel.OWNER,
-        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-      };
-      const workspaceResources = convertToResources(
-        cohortReviewStubs,
-        ResourceType.COHORT_REVIEW,
-        workspace
-      )
-        .concat(
-          convertToResources(exampleCohortStubs, ResourceType.COHORT, workspace)
-        )
-        .concat(
-          convertToResources(
-            DataSetApiStub.stubDataSets(),
-            ResourceType.DATASET,
-            workspace
-          )
-        )
-        .concat(
-          convertToResources(
-            ConceptSetsApiStub.stubConceptSets(),
-            ResourceType.CONCEPT_SET,
-            workspace
-          )
-        );
-      resolve(workspaceResources);
     });
   }
 

@@ -3,9 +3,6 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 
 import {
-  AdminRuntimeFields,
-  CloudStorageTraffic,
-  UserAppEnvironment,
   WorkspaceActiveStatus,
   WorkspaceAdminView,
   WorkspaceUserAdminView,
@@ -16,7 +13,6 @@ import { ResearchPurposeSection } from 'app/components/research-purpose-section'
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
-import { DisksTable } from 'app/pages/admin/workspace/disks-table';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import {
   AuthorityGuardedAction,
@@ -29,10 +25,6 @@ import { showAIANResearchPurpose } from 'app/utils/workspace-utils';
 import { AdminLockWorkspace } from './admin-lock-workspace';
 import { AdminWorkspaceRecoveryModal } from './admin-workspace-recovery-modal';
 import { BasicInformation } from './basic-information';
-import { CloudEnvironmentsTable } from './cloud-environments-table';
-import { CloudStorageObjects } from './cloud-storage-objects';
-import { CloudStorageTrafficChart } from './cloud-storage-traffic-chart';
-import { CohortBuilder } from './cohort-builder';
 import { Collaborators } from './collaborators';
 import { WorkspaceArchiveInfo } from './workspace-archival-info';
 import { WorkspaceMigrationInfo } from './workspace-migration-info';
@@ -44,12 +36,8 @@ interface Props
 const AdminWorkspaceImpl = (props: Props) => {
   const [workspaceDetails, setWorkspaceDetails] =
     useState<WorkspaceAdminView>();
-  const [cloudStorageTraffic, setCloudStorageTraffic] =
-    useState<CloudStorageTraffic>();
   const [loadingWorkspace, setLoadingWorkspace] = useState<boolean>(false);
   const [dataLoadError, setDataLoadError] = useState<Response>();
-  const [runtimes, setRuntimes] = useState<AdminRuntimeFields[]>();
-  const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
   const [workspaceCollaborators, setWorkspaceCollaborators] =
     useState<WorkspaceUserAdminView[]>();
@@ -66,26 +54,9 @@ const AdminWorkspaceImpl = (props: Props) => {
     setLoadingWorkspace(true);
 
     workspaceAdminApi()
-      .getCloudStorageTraffic(ns)
-      .then(setCloudStorageTraffic)
-      .catch((error) =>
-        console.log('Error loading cloud storage traffic: ', error)
-      );
-
-    workspaceAdminApi()
-      .adminListRuntimes(ns)
-      .then(setRuntimes)
-      .catch(handleDataLoadError);
-
-    workspaceAdminApi()
-      .adminListUserAppsInWorkspace(ns)
-      .then(setUserApps)
-      .catch(handleDataLoadError);
-
-    workspaceAdminApi()
-      .getWorkspaceCollaborators(ns)
-      .then(setWorkspaceCollaborators)
-      .catch((e) => console.error(e));
+    .getWorkspaceCollaborators(ns)
+    .then(setWorkspaceCollaborators)
+    .catch((e) => console.error(e));
 
     workspaceAdminApi()
       .getWorkspaceAdminView(ns)
@@ -115,9 +86,7 @@ const AdminWorkspaceImpl = (props: Props) => {
   };
 
   const { profile } = profileStore.get();
-  const { collaborators, resources, workspace, activeStatus } =
-    workspaceDetails || {};
-  const { workspaceObjects, cloudStorage } = resources || {};
+  const { collaborators, workspace, activeStatus } = workspaceDetails || {};
   const { researchPurpose } = workspace || {};
   const cdrVersion = findCdrVersion(
     workspace?.cdrVersionId,
@@ -167,20 +136,6 @@ const AdminWorkspaceImpl = (props: Props) => {
                 {...{ collaborators }}
                 creator={workspace.creatorUser.userName}
               />
-              <CohortBuilder {...{ workspaceObjects }} />
-              <CloudStorageObjects
-                {...{ cloudStorage }}
-                workspaceNamespace={workspace.namespace}
-              />
-              {cloudStorageTraffic?.receivedBytes && (
-                <CloudStorageTrafficChart {...{ cloudStorageTraffic }} />
-              )}
-              <h2>Cloud Environments</h2>
-              <CloudEnvironmentsTable
-                {...{ runtimes, userApps }}
-                workspaceNamespace={workspace.namespace}
-                onDelete={populateFederatedWorkspaceInformation}
-              />
               <h2>Egress event history</h2>
               {renderIfAuthorized(
                 profile,
@@ -192,8 +147,6 @@ const AdminWorkspaceImpl = (props: Props) => {
                   />
                 )
               )}
-              <h2>Disks</h2>
-              <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
             </>
           )}
 

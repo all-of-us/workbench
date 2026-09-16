@@ -9,14 +9,7 @@ import { cond } from '@terra-ui-packages/core-utils';
 import { BannerScenario } from 'app/lab/pages/workspace/initial-credits/banner-config';
 import { CreditBanner } from 'app/lab/pages/workspace/initial-credits/credit-banner';
 import { InvalidBillingBanner } from 'app/lab/pages/workspace/invalid-billing-banner';
-import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
-import {
-  analysisTabName,
-  analysisTabPath,
-  appDisplayPath,
-  dataTabPath,
-  workspacePath,
-} from 'app/routing/utils';
+import { analysisTabName, dataTabPath, workspacePath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import {
@@ -61,17 +54,8 @@ export const getTrail = (
   workspace: WorkspaceData,
   params: MatchParams
 ): Array<BreadcrumbData> => {
-  const { ns, terraName, nbName, appType } = params;
+  const { ns, terraName } = params;
   switch (type) {
-    case BreadcrumbType.UserApp:
-      return [
-        ...getTrail(BreadcrumbType.Workspace, workspace, params),
-        new BreadcrumbData(
-          fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, terraName)
-        ),
-        new BreadcrumbData(appType, appDisplayPath(ns, terraName, appType)),
-      ];
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
     case BreadcrumbType.Workspace:
@@ -96,30 +80,6 @@ export const getTrail = (
         new BreadcrumbData(
           'Duplicate Workspace',
           `${workspacePath(ns, terraName)}/duplicate`
-        ),
-      ];
-    case BreadcrumbType.Analysis:
-      return [
-        ...getTrail(BreadcrumbType.Workspace, workspace, params),
-        new BreadcrumbData(
-          fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, terraName)
-        ),
-        new BreadcrumbData(
-          nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${analysisTabPath(ns, terraName)}/${nbName}`
-        ),
-      ];
-    case BreadcrumbType.AnalysisPreview:
-      return [
-        ...getTrail(BreadcrumbType.Workspace, workspace, params),
-        new BreadcrumbData(
-          fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, terraName)
-        ),
-        new BreadcrumbData(
-          nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${analysisTabPath(ns, terraName)}/preview/${nbName}`
         ),
       ];
     case BreadcrumbType.Data:

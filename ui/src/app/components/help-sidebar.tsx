@@ -1,42 +1,26 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import * as fp from 'lodash/fp';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import {
-  CdrVersionTiersResponse,
-  GenomicExtractionJob,
-  ParticipantCohortStatus,
-  RuntimeError,
-  RuntimeStatus,
-} from 'generated/fetch';
+import { CdrVersionTiersResponse } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { AppsPanel } from 'app/components/apps-panel';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
-import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
-import { GKEAppPanelContent } from 'app/components/gke-app-configuration-panel';
 import {
-  cromwellConfigIconId,
   HelpSidebarIcons,
   IconConfig,
-  rstudioConfigIconId,
-  sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { HelpTips } from 'app/components/help-tips';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
-import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
-import { runtimeApi, workspacesApi } from 'app/services/swagger-fetch-clients';
+import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
@@ -46,21 +30,10 @@ import {
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { NavigationProps, sidebarActiveIconStore } from 'app/utils/navigation';
-import {
-  ComputeSecuritySuspendedError,
-  maybeUnwrapSecuritySuspendedError,
-} from 'app/utils/runtime-utils';
-import {
-  routeDataStore,
-  runtimeStore,
-  withGenomicExtractionJobs,
-} from 'app/utils/stores';
+import { routeDataStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-
-import { PanelContent } from './runtime-configuration-panel/utils';
-import { SUPPORT_EMAIL } from './support';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -153,15 +126,6 @@ const styles = reactStyles({
   },
 });
 
-const SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED = [
-  'apps',
-  'runtimeConfig',
-  cromwellConfigIconId,
-  rstudioConfigIconId,
-  sasConfigIconId,
-  'terminal',
-] as SidebarIconId[];
-
 export const LEONARDO_APP_PAGE_KEY = 'leonardo_app';
 
 const pageKeyToAnalyticsLabels = {
@@ -170,13 +134,12 @@ const pageKeyToAnalyticsLabels = {
   notebooks: 'Analysis Tab Landing Page',
 };
 
-interface Props extends NavigationProps, UserSuspendedProps {
+interface Props extends NavigationProps {
   pageKey: string;
   profileState: any;
   shareFunction: Function;
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
-  genomicExtractionJobs: GenomicExtractionJob[];
 }
 
 enum CurrentModal {
@@ -186,67 +149,15 @@ enum CurrentModal {
   HasRuntimeError,
 }
 
-interface UserSuspendedProps {
-  userSuspended: boolean;
-}
-
-// We use runtime API errors as a proxy for whether the user is suspended
-const withUserSuspended = () => (WrappedComponent) => (props) => {
-  const [userSuspended, setUserSuspended] = useState(undefined);
-
-  useEffect(() => {
-    runtimeApi()
-      .getRuntime(props.workspace.namespace)
-      .then(() => {
-        setUserSuspended(false);
-      })
-      .catch((e) => {
-        maybeUnwrapSecuritySuspendedError(e)
-          .then((error) => {
-            setUserSuspended(error instanceof ComputeSecuritySuspendedError);
-          })
-          .catch(() => {
-            setUserSuspended(false);
-          });
-      });
-  }, []);
-
-  if (userSuspended === undefined) {
-    return null;
-  } else {
-    return <WrappedComponent {...props} userSuspended={userSuspended} />;
-  }
-};
-
 interface State {
   activeIcon: SidebarIconId;
   filteredContent: Array<any>;
-  participant: ParticipantCohortStatus;
   searchTerm: string;
-  showCriteria: boolean;
   tooltipId: number;
   currentModal: CurrentModal;
-  runtimeErrors: Array<RuntimeError>;
-  runtimeConfPanelInitialState: PanelContent | null;
-  gkeAppConfPanelInitialState: GKEAppPanelContent | null;
 }
 
-const BetaBadge = ({ tooltipContent, style }) => (
-  <TooltipTrigger content={tooltipContent}>
-    <div
-      style={{
-        ...styles.betaBadge,
-        ...style,
-      }}
-    >
-      <b>Beta</b>
-    </div>
-  </TooltipTrigger>
-);
-
 export const HelpSidebar = fp.flow(
-  withUserSuspended(),
-  withGenomicExtractionJobs,
   withCurrentWorkspace(),
   withUserProfile(),
   withCdrVersions(),
@@ -258,14 +169,9 @@ export const HelpSidebar = fp.flow(
       this.state = {
         activeIcon: null,
         filteredContent: undefined,
-        participant: undefined,
         searchTerm: '',
-        showCriteria: false,
         tooltipId: undefined,
         currentModal: CurrentModal.None,
-        runtimeErrors: null,
-        runtimeConfPanelInitialState: null,
-        gkeAppConfPanelInitialState: null,
       };
     }
 
@@ -292,36 +198,12 @@ export const HelpSidebar = fp.flow(
 
     setActiveIcon(activeIcon: SidebarIconId) {
       sidebarActiveIconStore.next(activeIcon);
-      // let the Config Panels use their own logic
-      this.setState({
-        runtimeConfPanelInitialState: null,
-        gkeAppConfPanelInitialState: null,
-      });
-    }
-
-    openRuntimeConfigWithState(runtimeConfPanelInitialState: PanelContent) {
-      sidebarActiveIconStore.next('runtimeConfig');
-      this.setState({ runtimeConfPanelInitialState });
-    }
-
-    openGkeAppConfigWithState(
-      icon: SidebarIconId,
-      gkeAppConfPanelInitialState: GKEAppPanelContent
-    ) {
-      sidebarActiveIconStore.next(icon);
-      this.setState({ gkeAppConfPanelInitialState });
     }
 
     async componentDidMount() {
-      let initialActiveIcon = localStorage.getItem(
+      const initialActiveIcon = localStorage.getItem(
         LOCAL_STORAGE_KEY_SIDEBAR_STATE
       ) as SidebarIconId;
-      if (
-        this.props.userSuspended &&
-        SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED.includes(initialActiveIcon)
-      ) {
-        initialActiveIcon = null;
-      }
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
       this.setActiveIcon(initialActiveIcon);
@@ -339,25 +221,6 @@ export const HelpSidebar = fp.flow(
         routeDataStore.subscribe((newRoute, oldRoute) => {
           if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
             this.setActiveIcon(null);
-          }
-        })
-      );
-      this.subscriptions.push(
-        runtimeStore.subscribe((newRuntime, oldRuntime) => {
-          // If the runtime status has changed from something that is not Error to Error,
-          // and we have error messages, show the error modal.
-          if (
-            newRuntime.runtimeLoaded &&
-            newRuntime.workspaceNamespace === this.props.workspace.namespace &&
-            newRuntime.runtime.status === RuntimeStatus.ERROR &&
-            (!oldRuntime.runtime ||
-              oldRuntime.runtime.status !== RuntimeStatus.ERROR) &&
-            newRuntime.runtime.errors
-          ) {
-            this.setState({
-              currentModal: CurrentModal.HasRuntimeError,
-              runtimeErrors: newRuntime.runtime.errors,
-            });
           }
         })
       );
@@ -419,18 +282,10 @@ export const HelpSidebar = fp.flow(
 
     get sidebarWidth() {
       const { activeIcon } = this.state;
-      return fp.getOr(
-        '21',
-        'bodyWidthRem',
-        this.sidebarContent(activeIcon, null)
-      );
+      return fp.getOr('21', 'bodyWidthRem', this.sidebarContent(activeIcon));
     }
 
-    sidebarContent(
-      activeIcon: SidebarIconId,
-      gkeAppConfPanelInitialState: GKEAppPanelContent | null,
-      runtimeConfPanelInitialState?: PanelContent
-    ): {
+    sidebarContent(activeIcon: SidebarIconId): {
       overflow?: string;
       headerPadding?: string;
       renderHeader?: () => JSX.Element;
@@ -439,14 +294,7 @@ export const HelpSidebar = fp.flow(
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
-      const { pageKey, workspace } = this.props;
-
-      const sharedGKEAppConfigSidebarContent = {
-        headerPadding: '1.125rem',
-        bodyWidthRem: '55',
-        bodyPadding: '0 1.875rem',
-        showFooter: false,
-      };
+      const { pageKey } = this.props;
 
       switch (activeIcon) {
         case 'help':
@@ -471,187 +319,17 @@ export const HelpSidebar = fp.flow(
             ),
             showFooter: true,
           };
-        case 'runtimeConfig':
-          return {
-            headerPadding: '1.125rem',
-            renderHeader: () => (
-              <div>
-                <h3
-                  style={{
-                    ...styles.sectionTitle,
-                    lineHeight: 1.75,
-                  }}
-                >
-                  Cloud analysis environment
-                </h3>
-              </div>
-            ),
-            bodyWidthRem: '45',
-            bodyPadding: '0 1.875rem',
-            renderBody: () => (
-              <ConfigurationPanel
-                {...{ runtimeConfPanelInitialState }}
-                appType={UIAppType.JUPYTER}
-                onClose={() => this.setActiveIcon(null)}
-              />
-            ),
-            showFooter: false,
-          };
-        case 'apps':
-          return {
-            bodyWidthRem: '28.5',
-            renderBody: () => (
-              <AppsPanel
-                {...{ workspace }}
-                onClose={() => this.setActiveIcon(null)}
-                onClickRuntimeConf={() =>
-                  this.openRuntimeConfigWithState(PanelContent.Customize)
-                }
-                onClickDeleteRuntime={() =>
-                  this.openRuntimeConfigWithState(PanelContent.DeleteRuntime)
-                }
-                onClickDeleteGkeApp={(sidebarIcon: SidebarIconId) =>
-                  this.openGkeAppConfigWithState(
-                    sidebarIcon,
-                    GKEAppPanelContent.DELETE_GKE_APP
-                  )
-                }
-              />
-            ),
-            showFooter: false,
-          };
-        case cromwellConfigIconId:
-          return {
-            ...sharedGKEAppConfigSidebarContent,
-            renderHeader: () => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <h3
-                  style={{
-                    ...styles.sectionTitle,
-                    lineHeight: 1.75,
-                  }}
-                >
-                  Cromwell Cloud Environment
-                </h3>
-                <BetaBadge
-                  tooltipContent={`We are regularly improving the Cromwell experience. If you have feedback, reach out to ${SUPPORT_EMAIL}`}
-                  style={{
-                    marginLeft: '0.5rem',
-                    ...styles.cromwellBetaBadge,
-                  }}
-                />
-              </div>
-            ),
-            renderBody: () => (
-              <ConfigurationPanel
-                {...{ gkeAppConfPanelInitialState }}
-                appType={UIAppType.CROMWELL}
-                onClose={() => this.setActiveIcon(null)}
-              />
-            ),
-          };
-        case rstudioConfigIconId:
-          return {
-            ...sharedGKEAppConfigSidebarContent,
-            renderHeader: () => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <h3
-                  style={{
-                    ...styles.sectionTitle,
-                    lineHeight: 1.75,
-                  }}
-                >
-                  RStudio Cloud Environment
-                </h3>
-                <BetaBadge
-                  tooltipContent={`We are regularly improving the RStudio experience. If you have feedback, reach out to ${SUPPORT_EMAIL}`}
-                  style={{
-                    marginLeft: '0.5rem',
-                    ...styles.rstudioBetaBadge,
-                  }}
-                />
-              </div>
-            ),
-            renderBody: () => (
-              <ConfigurationPanel
-                {...{ gkeAppConfPanelInitialState }}
-                appType={UIAppType.RSTUDIO}
-                onClose={() => this.setActiveIcon(null)}
-              />
-            ),
-          };
-        case sasConfigIconId:
-          return {
-            ...sharedGKEAppConfigSidebarContent,
-            renderHeader: () => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <h3
-                  style={{
-                    ...styles.sectionTitle,
-                    lineHeight: 1.75,
-                  }}
-                >
-                  SAS Cloud Environment
-                </h3>
-                <BetaBadge
-                  tooltipContent={`We are regularly improving the SAS experience. If you have feedback, reach out to ${SUPPORT_EMAIL}`}
-                  style={{
-                    marginLeft: '0.5rem',
-                    ...styles.sasBetaBadge,
-                  }}
-                />
-              </div>
-            ),
-            renderBody: () => (
-              <ConfigurationPanel
-                {...{ gkeAppConfPanelInitialState }}
-                appType={UIAppType.SAS}
-                onClose={() => this.setActiveIcon(null)}
-              />
-            ),
-          };
-        case 'notebooksHelp':
-          return {
-            headerPadding: '0.75rem',
-            renderHeader: () => (
-              <h3 style={styles.sectionTitle}>Workspace storage</h3>
-            ),
-            renderBody: () => (
-              <HelpTips allowSearch={false} pageKey='notebook' />
-            ),
-            showFooter: true,
-          };
-        case 'genomicExtractions':
-          return {
-            overflow: 'visible',
-            headerPadding: '1.125rem',
-            renderHeader: () => (
-              <h3 style={styles.sectionTitle}>Genomic Extractions</h3>
-            ),
-            bodyWidthRem: '45',
-            renderBody: () => <GenomicsExtractionTable />,
-            showFooter: false,
-          };
       }
     }
 
     render() {
-      const {
-        activeIcon,
-        runtimeErrors,
-        runtimeConfPanelInitialState,
-        gkeAppConfPanelInitialState,
-      } = this.state;
+      const { activeIcon } = this.state;
       const {
         workspace,
         workspace: { namespace, terraName },
         pageKey,
       } = this.props;
-      const sidebarContent = this.sidebarContent(
-        activeIcon,
-        gkeAppConfPanelInitialState,
-        runtimeConfPanelInitialState
-      );
+      const sidebarContent = this.sidebarContent(activeIcon);
 
       const closeButton = (
         <CloseButton
@@ -832,18 +510,6 @@ export const HelpSidebar = fp.flow(
                   }
                   receiveDelete={() => this.deleteWorkspace()}
                   workspaceName={this.props.workspace.name}
-                />
-              ),
-            ],
-            [
-              CurrentModal.HasRuntimeError,
-              () => (
-                <RuntimeErrorModal
-                  closeFunction={() =>
-                    this.setState({ currentModal: CurrentModal.None })
-                  }
-                  openRuntimePanel={() => this.setActiveIcon('runtimeConfig')}
-                  errors={runtimeErrors}
                 />
               ),
             ]

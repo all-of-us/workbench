@@ -1,43 +1,18 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
-import * as fp from 'lodash/fp';
 import {
   faBook,
-  faCircle,
-  faDna,
-  faFolderOpen,
   faInfoCircle,
-  faSyncAlt,
-  faTerminal,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import {
-  CdrVersionTiersResponse,
-  GenomicExtractionJob,
-  TerraJobStatus,
-} from 'generated/fetch';
-
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
-import { workspacePath } from 'app/routing/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { getCdrVersion } from 'app/utils/cdr-versions';
-import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import { runtimeStore, userAppsStore, useStore } from 'app/utils/stores';
-import { WorkspaceData } from 'app/utils/workspace-data';
-import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
-import thunderstorm from 'assets/icons/thunderstorm-solid.svg';
-import moment from 'moment/moment';
 
-import { RouteLink } from './app-router';
-import { AppStatusIndicator } from './app-status-indicator';
-import { appAssets, findApp, UIAppType } from './apps-panel/utils';
-import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
-import { RuntimeStatusIndicator } from './runtime-status-indicator';
 
 const styles = reactStyles({
   asyncOperationStatusIcon: {
@@ -82,21 +57,7 @@ const iconStyles = reactStyles({
   },
 });
 
-export const rstudioConfigIconId = 'rstudioConfig';
-export const cromwellConfigIconId = 'cromwellConfig';
-export const sasConfigIconId = 'sasConfig';
-
-export type SidebarIconId =
-  | 'help'
-  | 'notebooksHelp'
-  | 'dataDictionary'
-  | 'apps'
-  | 'runtimeConfig'
-  | typeof cromwellConfigIconId
-  | typeof rstudioConfigIconId
-  | typeof sasConfigIconId
-  | 'terminal'
-  | 'genomicExtractions';
+export type SidebarIconId = 'help' | 'dataDictionary';
 
 export interface IconConfig {
   id: SidebarIconId;
@@ -109,79 +70,6 @@ export interface IconConfig {
   hasContent: boolean;
 }
 
-interface CompoundIconProps {
-  iconPath: string;
-  iconConfig: IconConfig;
-  children: React.ReactNode;
-}
-
-const CompoundIcon = ({
-  iconPath,
-  iconConfig,
-  children,
-}: CompoundIconProps) => {
-  // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
-  // overlay icon in the bottom right of the tab showing the runtime status.
-  return (
-    <FlexRow style={styles.compoundContainerStyle}>
-      <img
-        src={iconPath}
-        alt={iconConfig.label}
-        aria-label={iconConfig.label}
-        style={styles.compoundStyle}
-        data-test-id={'help-sidebar-icon-' + iconConfig.id}
-      />
-      {children}
-    </FlexRow>
-  );
-};
-
-export const UserAppIcon = (props: {
-  iconConfig: IconConfig;
-  userSuspended: boolean;
-  appType: UIAppType;
-}) => {
-  const { iconConfig, userSuspended, appType } = props;
-  const { userApps } = useStore(userAppsStore);
-  const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
-  return (
-    <CompoundIcon {...{ iconConfig }} iconPath={appTypeAssets?.icon}>
-      <AppStatusIndicator
-        {...{ userSuspended }}
-        appStatus={findApp(userApps, appType)?.status}
-        style={styles.statusIconContainer}
-      />
-    </CompoundIcon>
-  );
-};
-
-export const RuntimeIcon = (props: {
-  iconConfig: IconConfig;
-  workspaceNamespace: string;
-  userSuspended: boolean;
-}) => {
-  const { iconConfig, workspaceNamespace, userSuspended } = props;
-  const jupyterAssets = appAssets.find(
-    (aa) => aa.appType === UIAppType.JUPYTER
-  );
-
-  // We always want to show the Jupyter icon.
-  return (
-    <CompoundIcon {...{ iconConfig }} iconPath={jupyterAssets.icon}>
-      <RuntimeStatusIndicator
-        {...{ workspaceNamespace, userSuspended }}
-        style={styles.statusIconContainer}
-      />
-    </CompoundIcon>
-  );
-};
-
-const withinPastTwentyFourHours = (epoch: number) => {
-  const completionTimeMoment = moment(epoch);
-  const twentyFourHoursAgo = moment().subtract(1, 'days');
-  return completionTimeMoment.isAfter(twentyFourHoursAgo);
-};
-
 const displayFontAwesomeIcon = (icon: IconConfig) => (
   <FontAwesomeIcon
     data-test-id={'help-sidebar-icon-' + icon.id}
@@ -190,138 +78,11 @@ const displayFontAwesomeIcon = (icon: IconConfig) => (
   />
 );
 
-const displayExtractionIcon = (icon: IconConfig, genomicExtractionJobs) => {
-  const jobsByStatus = fp.groupBy('status', genomicExtractionJobs);
-  let status;
-  // If any jobs are currently active, show the 'sync' icon corresponding to their status.
-  if (jobsByStatus[TerraJobStatus.RUNNING]) {
-    status = TerraJobStatus.RUNNING;
-  } else if (jobsByStatus[TerraJobStatus.ABORTING]) {
-    status = TerraJobStatus.ABORTING;
-  } else if (
-    jobsByStatus[TerraJobStatus.SUCCEEDED] ||
-    jobsByStatus[TerraJobStatus.FAILED] ||
-    jobsByStatus[TerraJobStatus.ABORTED]
-  ) {
-    // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
-    const completedJobs = fp.flatten([
-      jobsByStatus[TerraJobStatus.SUCCEEDED] || [],
-      jobsByStatus[TerraJobStatus.FAILED] || [],
-      jobsByStatus[TerraJobStatus.ABORTED] || [],
-    ]);
-    const mostRecentCompletedJob = fp.flow(
-      fp.filter((job: GenomicExtractionJob) =>
-        withinPastTwentyFourHours(job.completionTime)
-      ),
-      // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
-      fp.sortBy((job) => job.completionTime),
-      fp.reverse,
-      fp.head
-    )(completedJobs);
-    if (mostRecentCompletedJob) {
-      status = mostRecentCompletedJob.status;
-    }
-  }
-
-  // We always want to show the DNA icon.
-  // When there are running or recently completed  jobs, we will show a small overlay icon in
-  // the bottom right of the tab showing the job status.
-  return (
-    <FlexRow
-      style={{
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-      }}
-    >
-      {displayFontAwesomeIcon(icon)}
-      <FlexRow
-        data-test-id='extraction-status-icon-container'
-        style={styles.statusIconContainer}
-      >
-        {switchCase(
-          status,
-          [
-            TerraJobStatus.RUNNING,
-            () => (
-              <FontAwesomeIcon
-                icon={faSyncAlt}
-                style={{
-                  ...styles.asyncOperationStatusIcon,
-                  ...styles.rotate,
-                  color: colors.asyncOperationStatus.starting,
-                }}
-                title='Icon indicating extraction is running'
-              />
-            ),
-          ],
-          [
-            TerraJobStatus.ABORTING,
-            () => (
-              <FontAwesomeIcon
-                icon={faSyncAlt}
-                style={{
-                  ...styles.asyncOperationStatusIcon,
-                  ...styles.rotate,
-                  color: colors.asyncOperationStatus.stopping,
-                }}
-                title='Icon indicating extraction is stopping'
-              />
-            ),
-          ],
-          [
-            TerraJobStatus.FAILED,
-            () => (
-              <FontAwesomeIcon
-                icon={faCircle}
-                style={{
-                  ...styles.asyncOperationStatusIcon,
-                  color: colors.asyncOperationStatus.error,
-                }}
-                title='Icon indicating extraction has failed'
-              />
-            ),
-          ],
-          [
-            TerraJobStatus.SUCCEEDED,
-            () => (
-              <FontAwesomeIcon
-                icon={faCircle}
-                style={{
-                  ...styles.asyncOperationStatusIcon,
-                  color: colors.asyncOperationStatus.succeeded,
-                }}
-                title='Icon indicating extraction has succeeded'
-              />
-            ),
-          ],
-          [
-            TerraJobStatus.ABORTED,
-            () => (
-              <FontAwesomeIcon
-                icon={faCircle}
-                style={{
-                  ...styles.asyncOperationStatusIcon,
-                  color: colors.asyncOperationStatus.stopped,
-                }}
-                title='Icon indicating extraction has aborted'
-              />
-            ),
-          ]
-        )}
-      </FlexRow>
-    </FlexRow>
-  );
-};
-
 interface DisplayIconProps {
-  workspace: WorkspaceData;
-  genomicExtractionJobs: GenomicExtractionJob[];
-  userSuspended: boolean;
   icon: IconConfig;
 }
 const DisplayIcon = (props: DisplayIconProps) => {
-  const { workspace, genomicExtractionJobs, userSuspended, icon } = props;
+  const { icon } = props;
 
   return switchCase<SidebarIconId, React.ReactElement>(
     icon.id,
@@ -336,86 +97,6 @@ const DisplayIcon = (props: DisplayIconProps) => {
           />
         </a>
       ),
-    ],
-    [
-      'apps',
-      () => (
-        <FlexRow
-          style={{
-            height: '100%',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-          }}
-        >
-          <img
-            alt={icon.id}
-            data-test-id={'help-sidebar-icon-' + icon.id}
-            src={thunderstorm}
-            style={{ ...icon.style, position: 'absolute' }}
-          />
-        </FlexRow>
-      ),
-    ],
-    [
-      'runtimeConfig',
-      () => (
-        <RuntimeIcon
-          {...{ userSuspended }}
-          iconConfig={icon}
-          workspaceNamespace={workspace.namespace}
-        />
-      ),
-    ],
-    [
-      cromwellConfigIconId,
-      () => (
-        <UserAppIcon
-          {...{ userSuspended }}
-          iconConfig={icon}
-          appType={UIAppType.CROMWELL}
-        />
-      ),
-    ],
-    [
-      rstudioConfigIconId,
-      () => (
-        <UserAppIcon
-          {...{ userSuspended }}
-          iconConfig={icon}
-          appType={UIAppType.RSTUDIO}
-        />
-      ),
-    ],
-    [
-      sasConfigIconId,
-      () => (
-        <UserAppIcon
-          {...{ userSuspended }}
-          iconConfig={icon}
-          appType={UIAppType.SAS}
-        />
-      ),
-    ],
-    [
-      'terminal',
-      () => (
-        <RouteLink
-          path={`${workspacePath(
-            workspace.namespace,
-            workspace.terraName
-          )}/terminals`}
-        >
-          <FontAwesomeIcon
-            data-test-id={'help-sidebar-icon-' + icon.id}
-            icon={icon.faIcon}
-            style={icon.style}
-          />
-        </RouteLink>
-      ),
-    ],
-    [
-      'genomicExtractions',
-      () => displayExtractionIcon(icon, genomicExtractionJobs),
     ],
     [
       DEFAULT,
@@ -433,51 +114,11 @@ const DisplayIcon = (props: DisplayIconProps) => {
   );
 };
 
-const runtimeTooltip = (
-  baseTooltip: string,
-  loadingError: Error,
-  userSuspended: boolean
-): string => {
-  const suspendedMessage = `Security suspended: ${baseTooltip}`;
-
-  if (userSuspended) {
-    return suspendedMessage;
-  }
-
-  if (loadingError) {
-    if (loadingError instanceof ComputeSecuritySuspendedError) {
-      return suspendedMessage;
-    }
-    return `${baseTooltip} (unknown error)`;
-  }
-
-  return baseTooltip;
-};
-
 interface IconConfigProps {
   iconId: SidebarIconId;
-  loadingError: Error;
-  userSuspended: boolean;
 }
 const iconConfig = (props: IconConfigProps): IconConfig => {
-  const { iconId, loadingError, userSuspended } = props;
-
-  const disableEnvironmentSidebarIcons = !!loadingError || userSuspended;
-
-  const gkeAppIconConfig = (
-    id: SidebarIconId,
-    label: string,
-    tooltip: string
-  ): IconConfig => ({
-    id,
-    disabled: disableEnvironmentSidebarIcons,
-    faIcon: null,
-    label,
-    showIcon: () => true,
-    style: { width: '36px' },
-    tooltip: runtimeTooltip(tooltip, loadingError, userSuspended),
-    hasContent: true,
-  });
+  const { iconId } = props;
 
   const config: Record<SidebarIconId, IconConfig> = {
     help: {
@@ -490,16 +131,6 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: 'Help Tips',
       hasContent: true,
     },
-    notebooksHelp: {
-      id: 'notebooksHelp',
-      disabled: false,
-      faIcon: faFolderOpen,
-      label: 'Storage Icon',
-      showIcon: () => true,
-      style: { fontSize: '21px' },
-      tooltip: 'Workspace Storage',
-      hasContent: true,
-    },
     dataDictionary: {
       id: 'dataDictionary',
       disabled: false,
@@ -510,128 +141,25 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: 'Data Dictionary',
       hasContent: false,
     },
-    apps: {
-      id: 'apps',
-      disabled: disableEnvironmentSidebarIcons,
-      faIcon: null,
-      label: 'Cloud Icon',
-      showIcon: () => true,
-      style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip('Applications', loadingError, userSuspended),
-      hasContent: true,
-    },
-    runtimeConfig: {
-      id: 'runtimeConfig',
-      disabled: disableEnvironmentSidebarIcons,
-      faIcon: null,
-      label: 'Jupyter Icon',
-      showIcon: () => true,
-      style: { width: '36px' },
-      tooltip: runtimeTooltip(
-        'Jupyter Cloud Environment',
-        loadingError,
-        userSuspended
-      ),
-      hasContent: true,
-    },
-    [cromwellConfigIconId]: gkeAppIconConfig(
-      cromwellConfigIconId,
-      'Cromwell Icon',
-      'Cromwell Cloud Environment'
-    ),
-    [rstudioConfigIconId]: gkeAppIconConfig(
-      rstudioConfigIconId,
-      'RStudio Icon',
-      'RStudio Cloud Environment'
-    ),
-    [sasConfigIconId]: gkeAppIconConfig(
-      sasConfigIconId,
-      'SAS Icon',
-      'SAS Cloud Environment'
-    ),
-    terminal: {
-      id: 'terminal',
-      disabled: disableEnvironmentSidebarIcons,
-      faIcon: faTerminal,
-      label: 'Terminal Icon',
-      showIcon: () => true,
-      style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip(
-        'Cloud Analysis Terminal',
-        loadingError,
-        userSuspended
-      ),
-      hasContent: false,
-    },
-    genomicExtractions: {
-      id: 'genomicExtractions',
-      disabled: false,
-      faIcon: faDna,
-      label: 'Genomic Extraction',
-      showIcon: () => true,
-      // position: absolute is so the status icon won't push the DNA icon to the left.
-      style: {
-        height: '22px',
-        width: '22px',
-        marginTop: '0.375rem',
-        position: 'absolute',
-      } as CSSProperties,
-      tooltip: 'Genomic Extraction History',
-      hasContent: true,
-    },
   };
 
   return config[iconId];
 };
 
 interface HelpSidebarIconsProps {
-  workspace: WorkspaceData;
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
-  genomicExtractionJobs: GenomicExtractionJob[];
   activeIcon: string;
   onIconClick: (icon: IconConfig) => void;
-  userSuspended: boolean;
 }
 export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
-  const {
-    workspace,
-    cdrVersionTiersResponse,
-    activeIcon,
-    onIconClick,
-    userSuspended,
-  } = props;
-  const { loadingError } = useStore(runtimeStore);
-  const defaultIcons: SidebarIconId[] = [
-    'help',
-    'notebooksHelp',
-    'dataDictionary',
-  ];
+  const { activeIcon, onIconClick } = props;
+  const defaultIcons: SidebarIconId[] = ['help', 'dataDictionary'];
   const keys: SidebarIconId[] = defaultIcons.filter((iconId) =>
     iconConfig({
       iconId,
-      loadingError,
-      userSuspended,
     }).showIcon()
   );
 
-  if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push(
-      'apps',
-      cromwellConfigIconId,
-      rstudioConfigIconId,
-      sasConfigIconId,
-      'runtimeConfig',
-      'terminal'
-    );
-  }
-
-  if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {
-    keys.push('genomicExtractions');
-  }
-
-  const icons = keys.map((iconId) =>
-    iconConfig({ iconId, loadingError, userSuspended })
-  );
+  const icons = keys.map((iconId) => iconConfig({ iconId }));
 
   return (
     <>

@@ -6,18 +6,13 @@ import {
   CdrVersionTier,
   ConfigResponse,
   CreateNewUserSatisfactionSurvey,
-  Disk,
-  ListAppsResponse,
   Profile,
-  Runtime,
-  TerraJobStatus,
 } from 'generated/fetch';
 
 import { BreadcrumbType } from 'app/lab/components/breadcrumb-type';
-import { dataSetApi, profileApi } from 'app/services/swagger-fetch-clients';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 import { Atom, atom } from 'app/utils/subscribable';
 import StackdriverErrorReporter from 'stackdriver-errors-js';
-import useSWR from 'swr';
 
 const { useEffect, useState } = React;
 
@@ -49,49 +44,6 @@ export interface CdrVersionStore {
 }
 
 export const cdrVersionStore = atom<CdrVersionStore>({});
-
-export const useGenomicExtractionJobs = (
-  workspaceNamespace: string,
-  terraName: string,
-  pollWhileNonTerminal = true
-) =>
-  useSWR(
-    `/api/workspaces/${workspaceNamespace}/${terraName}/genomicExtractionJobs`,
-    () =>
-      dataSetApi()
-        .getGenomicExtractionJobs(workspaceNamespace, terraName)
-        .then(({ jobs }) => jobs),
-    {
-      // Genomic jobs will rarely change without user interaction. Avoid some extraneous revalidation.
-      revalidateOnFocus: false,
-      refreshInterval: (data) => {
-        if (
-          pollWhileNonTerminal &&
-          data?.some(({ status }) =>
-            (
-              [
-                TerraJobStatus.RUNNING,
-                TerraJobStatus.ABORTING,
-              ] as Array<TerraJobStatus>
-            ).includes(status)
-          )
-        ) {
-          return 10 * 1000;
-        }
-        return 0;
-      },
-    }
-  );
-
-// HOC for genomic extraction jobs compatibility with class-based components.
-// New components should use the useGenomicExtractionJobs() hook.
-export const withGenomicExtractionJobs = (WrappedComponent) => (props) => {
-  const { data } = useGenomicExtractionJobs(
-    props.workspace.namespace,
-    props.workspace.terraName
-  );
-  return <WrappedComponent genomicExtractionJobs={data} {...props} />;
-};
 
 export interface ProfileStore {
   profile?: Profile;
@@ -140,77 +92,6 @@ export interface NotificationStore {
 }
 
 export const notificationStore = atom<NotificationStore | null>(null);
-
-export interface CompoundRuntimeOperation {
-  pendingRuntime?: Runtime;
-  aborter: AbortController;
-}
-
-export interface CompoundRuntimeOpStore {
-  [workspaceNamespace: string]: CompoundRuntimeOperation;
-}
-
-// Store tracking any compound Runtime operations per workspace. Currently, this
-// only pertains to applying a runtime configuration update via full recreate
-// (compound operation of delete -> create).
-export const compoundRuntimeOpStore = atom<CompoundRuntimeOpStore>({});
-
-export const registerCompoundRuntimeOperation = (
-  workspaceNamespace: string,
-  runtimeOperation: CompoundRuntimeOperation
-) => {
-  compoundRuntimeOpStore.set({
-    ...compoundRuntimeOpStore.get(),
-    [workspaceNamespace]: runtimeOperation,
-  });
-};
-
-export const markCompoundRuntimeOperationCompleted = (
-  workspaceNamespace: string
-) => {
-  const { [workspaceNamespace]: op, ...otherOps } =
-    compoundRuntimeOpStore.get();
-  if (op) {
-    op.aborter.abort();
-    compoundRuntimeOpStore.set(otherOps);
-  }
-};
-
-export const clearCompoundRuntimeOperations = () => {
-  const ops = compoundRuntimeOpStore.get();
-  Object.keys(ops).forEach((k) => ops[k].aborter.abort());
-  compoundRuntimeOpStore.set({});
-};
-
-// runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
-// error should be set if there is a failure in initializing the store value. If
-// error is set, runtimeLoaded should be false.
-export interface RuntimeStore {
-  workspaceNamespace: string | null | undefined;
-  runtime: Runtime | null | undefined;
-  runtimeLoaded: boolean;
-  loadingError?: Error;
-}
-
-export const runtimeStore = atom<RuntimeStore>({
-  workspaceNamespace: undefined,
-  runtime: undefined,
-  runtimeLoaded: false,
-  loadingError: undefined,
-});
-
-// runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
-export interface RuntimeDiskStore {
-  workspaceNamespace: string | null | undefined;
-  gcePersistentDisk: Disk | null | undefined;
-  gcePersistentDiskLoaded: boolean;
-}
-
-export const runtimeDiskStore = atom<RuntimeDiskStore>({
-  workspaceNamespace: undefined,
-  gcePersistentDisk: undefined,
-  gcePersistentDiskLoaded: false,
-});
 
 export interface StackdriverErrorReporterStore {
   reporter?: StackdriverErrorReporter;
@@ -265,14 +146,6 @@ export function withParamsKey(...paramNames: (keyof MatchParams)[]) {
       );
     };
 }
-
-export interface UserAppsStore {
-  updating?: boolean;
-  userApps?: ListAppsResponse;
-  timeoutID?: ReturnType<typeof setTimeout>;
-}
-
-export const userAppsStore = atom<UserAppsStore>({});
 
 /**
  * @name useStore
