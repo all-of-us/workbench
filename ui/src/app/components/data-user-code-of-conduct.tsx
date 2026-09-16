@@ -493,7 +493,7 @@ export const DataUserCodeOfConduct = fp.flow(
     {
       initialMonitoring: {
         presence: { allowEmpty: false },
-        length: { maxiumum: 6 },
+        length: { maximum: 6 },
       },
       initialPublic: {
         presence: { allowEmpty: false },
