@@ -516,14 +516,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void deleteWorkspaceAsService(String workspaceNamespace, String firecloudName) {
-    retryHandler.run(
-        (context) -> {
-          fcServiceAccountWorkspacesApiProvider
-              .get()
-              .deleteWorkspace(workspaceNamespace, firecloudName);
-          return null;
-        });
+  public void deleteWorkspaceAsService(String workspaceNamespace, String firecloudName)
+      throws ApiException {
+    fcServiceAccountWorkspacesApiProvider.get().deleteWorkspace(workspaceNamespace, firecloudName);
   }
 
   @Override

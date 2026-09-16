@@ -43,6 +43,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
@@ -298,9 +299,30 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // This is for auditing purposes and potentially workspace restore.
     // TODO: do we want to delete workspace resource references and save only metadata?
 
-    // This automatically handles access control to the workspace.
-    fireCloudService.deleteWorkspaceAsService(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    try {
+      // This automatically handles access control to the workspace.
+      fireCloudService.deleteWorkspaceAsService(
+          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    } catch (ApiException e) {
+      if (e.getCode() == 404) {
+        // Doesn't exist in Terra. So we don't throw an exception, just continue to delete the
+        // workspace in RWB
+        log.warning(
+            String.format(
+                "Workspace does not exist in Terra. Continue deleting from RW: %s/%s: %s",
+                dbWorkspace.getWorkspaceNamespace(),
+                dbWorkspace.getFirecloudName(),
+                e.getMessage()));
+      } else {
+        throw new ServerErrorException(
+            String.format(
+                "Error deleting workspace in Terra %s/%s: %s",
+                dbWorkspace.getWorkspaceNamespace(),
+                dbWorkspace.getFirecloudName(),
+                e.getMessage()),
+            e);
+      }
+    }
     dbWorkspace
         .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED)
         .setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()))
