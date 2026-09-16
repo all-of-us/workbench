@@ -684,6 +684,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
     try {
       DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+      // Update last modified before deleting so failed deletion attempts are logged with the
+      // correct time. This is important for the legacy deletion queue so it doesn't retry failed
+      // attempts
+      dbWorkspace.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+      workspaceDao.save(dbWorkspace);
       workspaceService.deleteWorkspaceAsService(dbWorkspace);
       logger.log(Level.INFO, "Legacy workspace " + namespace + "/" + terraName + " deleted");
     } catch (Exception e) {

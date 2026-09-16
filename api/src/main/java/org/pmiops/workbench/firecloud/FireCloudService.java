@@ -118,7 +118,8 @@ public interface FireCloudService {
 
   void deleteWorkspace(String workspaceNamespace, String firecloudName);
 
-  void deleteWorkspaceAsService(String workspaceNamespace, String firecloudName);
+  void deleteWorkspaceAsService(String workspaceNamespace, String firecloudName)
+      throws ApiException;
 
   FirecloudManagedGroupWithMembers getGroup(String groupName);
 
