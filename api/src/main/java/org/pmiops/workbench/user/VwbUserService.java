@@ -102,8 +102,10 @@ public class VwbUserService {
     // Get the latest pod state from database (not from the passed-in user object)
     DbVwbUserPod existingPod = vwbUserPodDao.findByUserUserId(dbUser.getUserId());
 
-    // Check if pod already exists and has a pod_id (not just a lock)
-    if (existingPod != null && existingPod.getVwbPodId() != null) {
+    // Check if pod already exists and has a pod_id (not just a lock) and is using initial credits
+    if (existingPod != null
+        && existingPod.getVwbPodId() != null
+        && existingPod.isInitialCreditsActive()) {
       logger.info("User already has a pod with email {}", email);
       return existingPod;
     }
