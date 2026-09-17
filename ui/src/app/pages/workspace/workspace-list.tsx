@@ -108,12 +108,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
     }
 
     reloadWorkspaces() {
-      // Only call for both workspace lists if the user is registered in Terra. Otherwise, only get RW 2.0 workspaces
-      if (this.props.profileState?.profile?.terraUser) {
-        void this.loadRwAndLegacyWorkspaces();
-      } else {
-        void this.loadRwWorkspaces();
-      }
+      void this.loadRwAndLegacyWorkspaces();
     }
 
     async loadRwWorkspaces() {
@@ -141,7 +136,9 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       this.setState({ workspacesLoading: true });
       try {
         const [legacyResponse, vwbResponse] = await Promise.all([
-          workspacesApi().getWorkspaces(),
+          workspacesApi()
+            .getWorkspaces()
+            .catch(() => ({ items: [] })),
           workspacesApi()
             .getVwbWorkspaces()
             .catch(() => ({ items: [] })),
