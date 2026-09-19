@@ -35,6 +35,7 @@ import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceBucketArchive;
+import org.pmiops.workbench.model.ReportingWorkspaceCollaborator;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.ReportingWorkspaceUser;
 import org.pmiops.workbench.utils.FieldValues;
@@ -843,6 +844,35 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .status(rs.getString("status")));
   }
 
+  @Override
+  public List<ReportingWorkspaceCollaborator> getWorkspaceUsersByNamespace(String namespace) {
+    var queryString =
+        String.format(
+            "SELECT DISTINCT wu.workspace_id, wu.user_id, wu.role, u.username "
+                + "FROM "
+                + getReportingTableName("workspace_user")
+                + " wu "
+                + "JOIN "
+                + getReportingTableName("workspace")
+                + " w on wu.workspace_id = w.workspace_id "
+                + "JOIN "
+                + getReportingTableName("user")
+                + " u on wu.user_id = u.user_id "
+                + "WHERE w.workspace_namespace = '%s'\n",
+            namespace);
+    final QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(queryString).build();
+    List<ReportingWorkspaceCollaborator> queryResults = new ArrayList<>();
+    for (FieldValueList row : bigQueryService.executeQuery(queryConfig).getValues()) {
+      ReportingWorkspaceCollaborator c = new ReportingWorkspaceCollaborator();
+      FieldValues.getLong(row, "workspace_id").ifPresent(c::setWorkspaceId);
+      FieldValues.getLong(row, "user_id").ifPresent(c::setUserId);
+      FieldValues.getString(row, "username").ifPresent(c::setUsername);
+      FieldValues.getString(row, "role").ifPresent(c::setRole);
+      queryResults.add(c);
+    }
+    return queryResults;
+  }
+
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
       String stringEnums, Function<Short, String> convertDbEnum) {
@@ -975,5 +1005,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     }
 
     return workspaceDemographic;
+  }
+
+  private String getReportingTableName(String tableName) {
+    final String projectId = workbenchConfigProvider.get().server.projectId;
+    final String dataset = workbenchConfigProvider.get().reporting.dataset;
+
+    return String.format("`%s.%s.%s`", projectId, dataset, tableName);
   }
 }
