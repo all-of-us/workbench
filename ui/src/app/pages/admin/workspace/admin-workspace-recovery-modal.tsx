@@ -241,16 +241,12 @@ export const AdminWorkspaceRecoveryModal = ({
 
     try {
       setStartingRecovery(true);
-      await workspacesApi().startWorkspaceRecovery(
-        workspace.namespace,
-        workspace.terraName,
-        {
-          podId: updatedPodId,
-          researchPurpose: JSON.stringify(
-            rwToVwbResearchPurpose(workspace.researchPurpose)
-          ),
-        }
-      );
+      await workspacesApi().startWorkspaceRecovery(workspace.namespace, {
+        podId: updatedPodId,
+        researchPurpose: JSON.stringify(
+          rwToVwbResearchPurpose(workspace.researchPurpose)
+        ),
+      });
 
       await reload();
       onClose();

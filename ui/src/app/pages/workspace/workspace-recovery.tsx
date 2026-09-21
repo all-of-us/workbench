@@ -199,7 +199,6 @@ export const WorkspaceRecovery = fp.flow(
 
       await workspacesApi().requestWorkspaceRecovery(
         workspace.namespace,
-        workspace.terraName,
         selectedPod
       );
       setShowSuccessModal(true);

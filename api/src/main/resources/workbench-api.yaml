@@ -4851,7 +4851,7 @@ paths:
         200:
           description: Recovery status checked successfully
           content: { }
-  /v1/workspaces/{namespace}/{terraName}/recovery:
+  /v1/workspaces/{namespace}/recovery:
     post:
       tags:
         - workspaces
@@ -4859,11 +4859,6 @@ paths:
       operationId: startWorkspaceRecovery
       parameters:
         - name: namespace
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: terraName
           in: path
           required: true
           schema:
@@ -4878,7 +4873,7 @@ paths:
       responses:
         200:
           description: Recovery started successfully
-  /v1/workspaces/{namespace}/{terraName}/requestRecovery:
+  /v1/workspaces/{namespace}/requestRecovery:
     post:
       tags:
         - workspaces
@@ -4886,11 +4881,6 @@ paths:
       operationId: requestWorkspaceRecovery
       parameters:
         - name: namespace
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: terraName
           in: path
           required: true
           schema:
@@ -8584,8 +8574,6 @@ components:
       type: object
       properties:
         workspaceNamespace:
-          type: string
-        workspaceName:
           type: string
     StartWorkspaceMigrationRequest:
       type: object

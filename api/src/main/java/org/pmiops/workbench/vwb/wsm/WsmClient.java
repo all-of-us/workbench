@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.PreprodWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.utils.WorkbenchStringUtils;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.wsmanager.ApiException;
 import org.pmiops.workbench.wsmanager.api.ControlledGcpResourceApi;
 import org.pmiops.workbench.wsmanager.api.WorkspaceApi;
@@ -31,6 +33,7 @@ public class WsmClient {
   private final Provider<WorkspaceApi> workspaceServiceApi;
 
   private final WsmRetryHandler wsmRetryHandler;
+  private final WorkspaceMapper workspaceMapper;
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -40,10 +43,12 @@ public class WsmClient {
       @Qualifier(WsmConfig.WSM_SERVICE_ACCOUNT_CONTROLLED_GCP_RESOURCE_API)
           Provider<ControlledGcpResourceApi> controlledGcpResourceApiProvider,
       WsmRetryHandler wsmRetryHandler,
+      WorkspaceMapper workspaceMapper,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.controlledGcpResourceApiProvider = controlledGcpResourceApiProvider;
     this.workspaceServiceApi = workspaceServiceApi;
     this.wsmRetryHandler = wsmRetryHandler;
+    this.workspaceMapper = workspaceMapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -69,7 +74,7 @@ public class WsmClient {
                           Map.of(
                               "terra-workspace-short-description",
                               targetWorkspace.getResearchPurpose().getOtherPurposeDetails())))
-                  .description(formatWorkspaceDescription(targetWorkspace))
+                  .description(formatWorkspaceDescription(targetWorkspace.getResearchPurpose()))
                   .cloudResourceGroupId(podId)
                   .organizationId(workbenchConfigProvider.get().vwb.organizationId)
                   .jobControl(new JobControl().id(UUID.randomUUID().toString()));
@@ -112,11 +117,14 @@ public class WsmClient {
    * @param podId the cloud resource group (pod) id
    * @return WorkspaceDescription of the created workspace
    */
-  public WorkspaceDescription createWorkspaceAsService(Workspace targetWorkspace, String podId) {
+  public WorkspaceDescription createWorkspaceAsService(DbWorkspace targetWorkspace, String podId) {
     return wsmRetryHandler.run(
         context -> {
+          ResearchPurpose researchPurpose =
+              workspaceMapper.workspaceToResearchPurpose(targetWorkspace);
+          String namespace = targetWorkspace.getWorkspaceNamespace();
           String shortDescription =
-              Optional.ofNullable(targetWorkspace.getResearchPurpose())
+              Optional.ofNullable(researchPurpose)
                   .map(ResearchPurpose::getOtherPurposeDetails)
                   .orElse("");
 
@@ -126,8 +134,8 @@ public class WsmClient {
               new CreateWorkspaceV2Request()
                   .id(workspaceId)
                   .stage(WorkspaceStageModel.CRG_WORKSPACE)
-                  .userFacingId(targetWorkspace.getNamespace())
-                  .displayName(targetWorkspace.getDisplayName())
+                  .userFacingId(namespace)
+                  .displayName(targetWorkspace.getName())
                   .properties(
                       stringMapToProperties(
                           Map.of(
@@ -135,7 +143,9 @@ public class WsmClient {
                               WorkbenchStringUtils.encodeUserInput(shortDescription))))
                   .description(
                       WorkbenchStringUtils.encodeUserInput(
-                          formatWorkspaceDescription(targetWorkspace)))
+                          researchPurpose != null
+                              ? formatWorkspaceDescription(researchPurpose)
+                              : ""))
                   .cloudResourceGroupId(podId)
                   .organizationId(workbenchConfigProvider.get().vwb.organizationId)
                   .jobControl(new JobControl().id(UUID.randomUUID().toString()));
@@ -145,43 +155,39 @@ public class WsmClient {
                 workspaceServiceApi.get().createWorkspaceV2(createWorkspaceRequest);
             if (createWorkspaceV2Result.getErrorReport() != null) {
               logger.error(
-                  targetWorkspace.getNamespace()
+                  namespace
                       + ": Create workspace response with error report: "
                       + createWorkspaceV2Result.getErrorReport());
               throw new WorkbenchException(
-                  targetWorkspace.getNamespace()
-                      + ": Failed WSM workspace creation result: "
-                      + createWorkspaceV2Result);
+                  namespace + ": Failed WSM workspace creation result: " + createWorkspaceV2Result);
             }
           } catch (ApiException e) {
             logger.error(
-                targetWorkspace.getNamespace()
+                namespace
                     + ": Create workspace failed, exception from WSM: "
                     + e.getResponseBody());
             throw new WorkbenchException(
-                targetWorkspace.getNamespace()
-                    + ": Failed WSM workspace creation exception: "
-                    + e.getResponseBody());
+                namespace + ": Failed WSM workspace creation exception: " + e.getResponseBody());
           }
 
           try {
             waitForWorkspaceCreation(workspaceId.toString()); // ← reuse existing poller!
           } catch (InterruptedException e) {
             logger.error(
-                targetWorkspace.getNamespace()
+                namespace
                     + ": Interrupted waiting for workspace creation, exception from WSM: "
                     + e.getMessage());
             throw new WorkbenchException(
-                targetWorkspace.getNamespace()
+                namespace
                     + ": Interrupted waiting for workspace creation, exception from WSM: "
                     + e.getMessage());
           } catch (ApiException e) {
             logger.error(
-                targetWorkspace.getNamespace()
+                namespace
                     + ": Error waiting for workspace creation, exception from WSM: "
                     + e.getResponseBody());
             throw new WorkbenchException(
-                targetWorkspace.getNamespace()
+                namespace
                     + ": Error waiting for workspace creation, exception from WSM: "
                     + e.getResponseBody());
           }
@@ -455,17 +461,18 @@ public class WsmClient {
     return properties;
   }
 
-  private String formatWorkspaceDescription(Workspace targetWorkspace) {
-    String intendedStudy = targetWorkspace.getResearchPurpose().getIntendedStudy();
-    String scientificApproach = targetWorkspace.getResearchPurpose().getScientificApproach();
-    String anticipatedFindings = targetWorkspace.getResearchPurpose().getAnticipatedFindings();
-    StringBuilder description = new StringBuilder();
-    description
-        .append("# Scientific Questions being studied\n")
-        .append(intendedStudy)
-        .append("\n\n");
-    description.append("# Scientific Approaches\n").append(scientificApproach).append("\n\n");
-    description.append("# Anticipated Findings\n").append(anticipatedFindings).append("\n\n");
-    return description.toString();
+  private String formatWorkspaceDescription(ResearchPurpose researchPurpose) {
+    String intendedStudy = researchPurpose.getIntendedStudy();
+    String scientificApproach = researchPurpose.getScientificApproach();
+    String anticipatedFindings = researchPurpose.getAnticipatedFindings();
+    return "# Scientific Questions being studied\n"
+        + intendedStudy
+        + "\n\n"
+        + "# Scientific Approaches\n"
+        + scientificApproach
+        + "\n\n"
+        + "# Anticipated Findings\n"
+        + anticipatedFindings
+        + "\n\n";
   }
 }

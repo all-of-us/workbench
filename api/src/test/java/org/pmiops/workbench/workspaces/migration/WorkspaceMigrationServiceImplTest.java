@@ -194,7 +194,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(
         NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, customPodId, RESEARCH_PURPOSE);
 
-    verify(wsmClient).createWorkspaceAsService(workspace, customPodId);
+    verify(wsmClient).createWorkspaceAsService(dbWorkspace, customPodId);
   }
 
   @Test
@@ -204,7 +204,7 @@ public class WorkspaceMigrationServiceImplTest {
     service.startWorkspaceMigration(
         NAMESPACE, TERRA_NAME, SELECTED_FOLDERS, null, RESEARCH_PURPOSE);
 
-    verify(wsmClient).createWorkspaceAsService(workspace, POD_ID);
+    verify(wsmClient).createWorkspaceAsService(dbWorkspace, POD_ID);
   }
 
   @Test
@@ -493,7 +493,7 @@ public class WorkspaceMigrationServiceImplTest {
     RuntimeException ex =
         assertThrows(
             RuntimeException.class,
-            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, RESEARCH_PURPOSE, POD_ID));
+            () -> service.startWorkspaceRecovery(NAMESPACE, RESEARCH_PURPOSE, POD_ID));
 
     assertThat(ex.getMessage()).contains("Recovery failed to start");
     assertThat(ex.getCause()).isNotNull();
@@ -507,7 +507,7 @@ public class WorkspaceMigrationServiceImplTest {
     RuntimeException ex =
         assertThrows(
             RuntimeException.class,
-            () -> service.startWorkspaceRecovery(NAMESPACE, TERRA_NAME, RESEARCH_PURPOSE, POD_ID));
+            () -> service.startWorkspaceRecovery(NAMESPACE, RESEARCH_PURPOSE, POD_ID));
 
     assertThat(ex.getMessage())
         .contains("Workspace recovery can only start when state is REQUESTED");
@@ -524,9 +524,9 @@ public class WorkspaceMigrationServiceImplTest {
     when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, RECOVERY_JOB_NAME))
         .thenReturn(transferOperation);
 
-    service.checkRecoveryStatus(NAMESPACE, TERRA_NAME);
+    service.checkRecoveryStatus(NAMESPACE);
 
-    verify(taskQueueService).pushWorkspaceRecoveryStatusTask(NAMESPACE, TERRA_NAME);
+    verify(taskQueueService).pushWorkspaceRecoveryStatusTask(NAMESPACE);
   }
 
   @Test
@@ -547,7 +547,7 @@ public class WorkspaceMigrationServiceImplTest {
     when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, RECOVERY_JOB_NAME))
         .thenReturn(transferOperation);
 
-    service.checkRecoveryStatus(NAMESPACE, TERRA_NAME);
+    service.checkRecoveryStatus(NAMESPACE);
 
     verify(workspaceDao)
         .save(
@@ -567,7 +567,7 @@ public class WorkspaceMigrationServiceImplTest {
     when(storageTransferClient.getTransferJobStatus(SERVER_PROJECT, RECOVERY_JOB_NAME))
         .thenReturn(transferOperation);
 
-    service.checkRecoveryStatus(NAMESPACE, TERRA_NAME);
+    service.checkRecoveryStatus(NAMESPACE);
 
     verify(workspaceDao)
         .save(argThat(ws -> WorkspaceRecoveryStatus.FAILED.name().equals(ws.getRecoveryState())));

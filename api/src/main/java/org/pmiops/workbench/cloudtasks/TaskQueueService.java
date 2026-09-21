@@ -327,13 +327,8 @@ public class TaskQueueService {
             "jobName", jobName));
   }
 
-  public void pushWorkspaceRecoveryStatusTask(String namespace, String terraName) {
-
-    createAndPushTask(
-        WORKSPACE_RECOVERY_STATUS,
-        Map.of(
-            "workspaceNamespace", namespace,
-            "workspaceName", terraName));
+  public void pushWorkspaceRecoveryStatusTask(String namespace) {
+    createAndPushTask(WORKSPACE_RECOVERY_STATUS, Map.of("workspaceNamespace", namespace));
   }
 
   private TaskQueuePair withRdrBackfill(TaskQueuePair pair) {

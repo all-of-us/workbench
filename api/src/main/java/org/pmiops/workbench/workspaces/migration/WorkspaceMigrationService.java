@@ -46,10 +46,9 @@ public interface WorkspaceMigrationService {
 
   void checkArchiveStatus(String workspaceNamespace, String workspaceName);
 
-  void startWorkspaceRecovery(
-      String namespace, String terraName, String researchPurpose, String podId);
+  void startWorkspaceRecovery(String namespace, String researchPurpose, String podId);
 
-  void requestWorkspaceRecovery(String namespace, String terraName, String podId);
+  void requestWorkspaceRecovery(String namespace, String podId);
 
-  void checkRecoveryStatus(String namespace, String terraName);
+  void checkRecoveryStatus(String namespace);
 }
