@@ -79,7 +79,6 @@ describe('getTrail', () => {
       const ns = 'testNs';
       const terraName = 'testTerraName';
       const cid = '88';
-      const pid = '77';
 
       const trail = getTrail(BreadcrumbType[bType], workspaceDataStub, {
         ns,

@@ -2,7 +2,6 @@ package org.pmiops.workbench.mail;
 
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -36,9 +35,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.leonardo.LeonardoAppUtils;
-import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.workspaces.migration.WorkspaceMigrationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -198,10 +194,6 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
-  private boolean checkEnableUnlinkBillingForInitialCreditsFlag() {
-    return workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits;
-  }
-
   @Override
   public void alertUserInitialCreditsDollarThreshold(
       final DbUser user, double threshold, double currentUsage, double remainingBalance)
@@ -349,56 +341,6 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void alertUsersUnusedDiskWarningThreshold(
-      List<DbUser> users,
-      DbWorkspace diskWorkspace,
-      Disk disk,
-      boolean isDiskAttached,
-      int daysUnused,
-      @Nullable Double workspaceInitialCreditsRemaining)
-      throws MessagingException {
-    final String htmlMessage =
-        buildHtml(
-            UNUSED_DISK_RESOURCE,
-            ImmutableMap.<EmailSubstitutionField, String>builder()
-                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-                .put(
-                    EmailSubstitutionField.DISK_SIZE,
-                    NumberFormat.getNumberInstance(Locale.US).format(disk.getSize()) + " GB")
-                .put(EmailSubstitutionField.WORKSPACE_NAME, diskWorkspace.getName())
-                .put(EmailSubstitutionField.DISK_UNUSED_DAYS, Integer.toString(daysUnused))
-                .put(
-                    EmailSubstitutionField.DISK_COST_PER_MONTH,
-                    String.format("$%.2f", PersistentDiskUtils.costPerMonth(disk)))
-                .put(
-                    EmailSubstitutionField.DISK_CREATION_DATE,
-                    formatDateCentralTime(Instant.parse(disk.getCreatedDate())))
-                .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getCreator())
-                .put(
-                    EmailSubstitutionField.DISK_STATUS,
-                    isDiskAttached ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS)
-                .put(
-                    EmailSubstitutionField.ENVIRONMENT_TYPE,
-                    disk.isGceRuntime()
-                        ? "Jupyter"
-                        : LeonardoAppUtils.appDisplayName(disk.getAppType()))
-                .put(
-                    EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
-                    buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))
-                .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(diskWorkspace))
-                .put(EmailSubstitutionField.DISK_DELETE_INSTRUCTION, UNUSED_DISK_DELETE_HELP)
-                .build());
-    sendWithRetries(
-        workbenchConfigProvider.get().mail.fromEmail,
-        Collections.emptyList(),
-        Collections.emptyList(),
-        users.stream().map(DbUser::getContactEmail).toList(),
-        "Reminder - Unused Disk in your Workspace",
-        "Unused disk notification",
-        htmlMessage);
-  }
-
-  @Override
   public void sendBillingSetupEmail(DbUser dbUser, SendBillingSetupEmailRequest emailRequest)
       throws MessagingException {
     final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
@@ -422,35 +364,24 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendEgressRemediationEmail(
-      DbUser dbUser, EgressRemediationAction action, @Nullable String gkeServiceName)
-      throws MessagingException {
-    sendEgressRemediationEmailCommon(dbUser, action, gkeServiceName, false);
+      DbUser dbUser, EgressRemediationAction action, @Nullable String gkeServiceName) {
+    log.info("RW 1.0 Egress remediation email is no longer implemented");
   }
 
   @Override
   public void sendEgressRemediationEmailForVwb(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
-    sendEgressRemediationEmailCommon(dbUser, action, null, true);
+    sendEgressRemediationEmailCommon(dbUser, action);
   }
 
   private void sendEgressRemediationEmailCommon(
       DbUser dbUser,
-      EgressRemediationAction action,
-      @Nullable String gkeServiceName,
-      boolean isVwbEgress)
+      EgressRemediationAction action)
       throws MessagingException {
     String remediation = EGRESS_REMEDIATION_ACTION_MAP.get(action);
     String givenName = Optional.ofNullable(dbUser.getGivenName()).orElse("Researcher");
 
     String egressSource = "";
-
-    if (!isVwbEgress) {
-      String environmentType =
-          appServiceNameToAppType(Strings.nullToEmpty(gkeServiceName))
-              .map(LeonardoAppUtils::appDisplayName)
-              .orElse("Jupyter");
-      egressSource = String.format(EGRESS_SOURCE, environmentType);
-    }
 
     var substitutionMap =
         Map.of(
@@ -673,21 +604,6 @@ public class MailServiceImpl implements MailService {
         "can provide a new billing account in the Workbench to continue with your analyses. "
             + "Instructions for providing a new billing account are provided in the %s.",
         getSupportHubUrlAsHref());
-  }
-
-  private ImmutableMap<EmailSubstitutionField, String>
-      initialCreditsDollarThresholdSubstitutionMapV1(
-          final DbUser user, double currentUsage, double remainingBalance) {
-
-    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
-        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
-        .put(EmailSubstitutionField.USERNAME, user.getUsername())
-        .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
-        .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
-        .put(EmailSubstitutionField.INITIAL_CREDITS_RESOLUTION, getInitialCreditsResolutionText())
-        .build();
   }
 
   private ImmutableMap<EmailSubstitutionField, String>

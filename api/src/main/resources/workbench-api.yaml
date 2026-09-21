@@ -3421,62 +3421,6 @@ paths:
           description: The survey responses were successfully stored.
           content: {}
       x-codegen-request-body-name: NewUserSatisfactionSurveyWithOneTimeCode
-  /v1/admin/workspaces/{workspaceNamespace}/disks:
-    get:
-      tags:
-      - diskAdmin
-      description: Lists persistent disks in a workspace. Requires the RESEARCHER_DATA_VIEW
-        authority.
-      operationId: listDisksInWorkspace
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListDisksResponse'
-        404:
-          description: Workspace not found
-          content: {}
-  /v1/admin/workspaces/{workspaceNamespace}/disks/{diskName}:
-    delete:
-      tags:
-      - diskAdmin
-      description: Deletes a disk as an admin. Requires the RESEARCHER_DATA_VIEW authority.
-      operationId: adminDeleteDisk
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      - name: diskName
-        in: path
-        description: name of the disk admin wants to delete
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
-        409:
-          description: This disk is attached to a running app or runtime.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
   /v2/admin/vwb/egressEvent:
     post:
       tags:
@@ -4300,13 +4244,9 @@ components:
     StatusResponse:
       required:
       - firecloudStatus
-      - notebooksStatus
       type: object
       properties:
         firecloudStatus:
-          type: boolean
-          default: false
-        notebooksStatus:
           type: boolean
           default: false
     ConfigResponse:

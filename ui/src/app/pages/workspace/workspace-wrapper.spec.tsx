@@ -4,7 +4,7 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import { Route } from 'react-router-dom';
 
-import { AppsApi, RuntimeApi, WorkspacesApi } from 'generated/fetch';
+import { WorkspacesApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';

@@ -21,31 +21,19 @@
  */
 
 import {
-  AppsApi,
   BaseAPI,
   CdrVersionsApi,
-  CohortAnnotationDefinitionApi,
-  CohortBuilderApi,
-  CohortReviewApi,
-  CohortsApi,
-  ConceptSetsApi,
   ConfigApi,
   Configuration as FetchConfiguration,
-  DataSetApi,
-  DiskAdminApi,
-  DisksApi,
   EgressEventsAdminApi,
   FeaturedWorkspaceApi,
   InstitutionApi,
-  NotebooksApi,
   ProfileApi,
-  RuntimeApi,
   StatusAlertApi,
   StatusApi,
   SurveysApi,
   UserAdminApi,
   UserApi,
-  UserMetricsApi,
   VwbDataCollectionAdminApi,
   VwbGroupAdminApi,
   VwbSystemNotificationAdminApi,
@@ -102,31 +90,17 @@ function bindCtor<T extends BaseAPI>(ctor: new () => T): () => T {
 
 // To add a new service, add a new entry below. Note that these properties are
 // getters for the API clients, e.g.: runtimeApi().listRuntimes();
-export const appsApi = bindCtor(AppsApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
-export const cohortAnnotationDefinitionApi = bindCtor(
-  CohortAnnotationDefinitionApi
-);
-export const cohortBuilderApi = bindCtor(CohortBuilderApi);
-export const cohortReviewApi = bindCtor(CohortReviewApi);
-export const cohortsApi = bindCtor(CohortsApi);
-export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
-export const dataSetApi = bindCtor(DataSetApi);
-export const disksApi = bindCtor(DisksApi);
-export const disksAdminApi = bindCtor(DiskAdminApi);
 export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
 export const featuredWorkspaceApi = bindCtor(FeaturedWorkspaceApi);
 export const institutionApi = bindCtor(InstitutionApi);
-export const notebooksApi = bindCtor(NotebooksApi);
 export const profileApi = bindCtor(ProfileApi);
-export const runtimeApi = bindCtor(RuntimeApi);
 export const statusAlertApi = bindCtor(StatusAlertApi);
 export const statusApi = bindCtor(StatusApi);
 export const surveysApi = bindCtor(SurveysApi);
 export const userAdminApi = bindCtor(UserAdminApi);
 export const userApi = bindCtor(UserApi);
-export const userMetricsApi = bindCtor(UserMetricsApi);
 export const vwbDataCollectionAdminApi = bindCtor(VwbDataCollectionAdminApi);
 export const vwbGroupAdminApi = bindCtor(VwbGroupAdminApi);
 export const vwbSystemNotificationAdminApi = bindCtor(

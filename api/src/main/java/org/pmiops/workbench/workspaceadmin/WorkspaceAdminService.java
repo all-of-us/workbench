@@ -30,10 +30,6 @@ public interface WorkspaceAdminService {
 
   WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace);
 
-  List<AdminRuntimeFields> listRuntimes(String workspaceNamespace);
-
-  List<UserAppEnvironment> listUserApps(String workspaceNamespace);
-
   WorkspaceAuditLogQueryResponse getWorkspaceAuditLogEntries(
       String workspaceNamespace,
       Integer limit,
@@ -44,10 +40,6 @@ public interface WorkspaceAdminService {
 
   String getReadOnlyNotebook(
       String workspaceNamespace, String notebookName, AccessReason accessReason);
-
-  List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles);
-
-  AdminRuntimeFields deleteRuntime(String workspaceNamespace, String runtimeNameToDelete);
 
   void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
 

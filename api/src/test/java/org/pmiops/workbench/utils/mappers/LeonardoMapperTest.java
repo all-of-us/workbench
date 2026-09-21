@@ -157,28 +157,6 @@ public class LeonardoMapperTest {
     assertThat(mapper.toLeonardoAllowedChartName(AppType.CROMWELL)).isNull();
   }
 
-  @ParameterizedTest(name = "appType {0} can be mapped for listApp call")
-  @MethodSource("allAppTypesMap")
-  public void testToAppFromListResponse(
-      AppType apiAppType,
-      org.broadinstitute.dsde.workbench.client.leonardo.model.AppType leoAppType) {
-    labels.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(apiAppType));
-    ListAppResponse listAppResponse =
-        new ListAppResponse()
-            .appType(leoAppType)
-            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus.RUNNING)
-            .auditInfo(leonardoAuditInfo)
-            .diskName(DISK_NAME)
-            .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
-            .errors(leonardoKubernetesErrors)
-            .proxyUrls(proxyUrls)
-            .labels(labels)
-            .appName(APP_NAME)
-            .cloudContext(
-                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT));
-    assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app.appType(apiAppType));
-  }
-
   @Test
   public void testToApiDiskFromListDiskResponse() {
     ListPersistentDiskResponse listPersistentDiskResponse =

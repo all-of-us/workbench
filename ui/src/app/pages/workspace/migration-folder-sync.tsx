@@ -8,11 +8,7 @@ import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { CheckBox } from 'app/components/inputs';
 import { Spinner } from 'app/components/spinners';
-import {
-  disksApi,
-  userApi,
-  workspacesApi,
-} from 'app/services/swagger-fetch-clients';
+import { userApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -21,7 +17,6 @@ import { useNavigation } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { PdWarningModal } from './pd-warning-modal';
 import { VwbImportantBanner } from './vwb-important-banner';
 import { VwbMigrationSyncInfoBox } from './vwb-migration-sync-infobox';
 
@@ -43,10 +38,6 @@ export const MigrationFolderSync = withCurrentWorkspace()(
     const [navigate] = useNavigation();
     const [loadingTos, setLoadingTos] = useState(true);
     const [hasAcceptedTos, setHasAcceptedTos] = useState<boolean | null>(null);
-    const [hasPersistentDisk, setHasPersistentDisk] = useState<boolean | null>(
-      null
-    );
-    const [showPdModal, setShowPdModal] = useState(false);
     const [folders, setFolders] = useState<string[]>([]);
     const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
     const [selectAll, setSelectAll] = useState(false);
@@ -178,29 +169,8 @@ export const MigrationFolderSync = withCurrentWorkspace()(
       void fetchTos();
     }, []);
 
-    useEffect(() => {
-      const checkDisks = async () => {
-        try {
-          const disks = await disksApi().listOwnedDisksInWorkspace(
-            workspace.namespace
-          );
-
-          setHasPersistentDisk(disks && disks.length > 0);
-        } catch (e) {
-          console.error('Failed to check disks', e);
-          setHasPersistentDisk(false);
-        }
-      };
-
-      checkDisks();
-    }, [workspace.namespace]);
-
     const handleStartClick = () => {
-      if (hasPersistentDisk) {
-        setShowPdModal(true);
-      } else {
-        void handleFolderSync();
-      }
+      void handleFolderSync();
     };
 
     return (
@@ -375,17 +345,6 @@ to agree to the terms of service. You only need to do this once.`}
             </>
           )}
         </div>
-
-        {/* PD MODAL */}
-        {showPdModal && (
-          <PdWarningModal
-            onCancel={() => setShowPdModal(false)}
-            onConfirm={() => {
-              setShowPdModal(false);
-              void handleFolderSync();
-            }}
-          />
-        )}
       </div>
     );
   }

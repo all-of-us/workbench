@@ -68,25 +68,4 @@ public class CloudStorageClientTest {
     assertThat(actualFileDetail.getLastModifiedTime()).isEqualTo(updateTime);
     assertThat(actualFileDetail.getSizeInBytes()).isEqualTo(notebookSize);
   }
-
-  @Test
-  public void testGetNotebookLastModifiedBy() {
-    String notebookPath = NotebookUtils.withNotebookPath(NOTEBOOK_NAME);
-
-    Set<String> workspaceUsers = new HashSet<String>();
-    workspaceUsers.add(USER_EMAIL);
-    Blob notebookBlob = mock(Blob.class);
-
-    Map<String, String> metaData = new HashMap<String, String>();
-    metaData.put(
-        "lastLockedBy", NotebookLockingUtils.notebookLockingEmailHash("notebooks", USER_EMAIL));
-
-    when(notebookBlob.getName()).thenReturn(NOTEBOOK_NAME);
-    when(notebookBlob.getMetadata()).thenReturn(metaData);
-    when(storageProvider.get().get("notebooks", NOTEBOOK_NAME)).thenReturn(notebookBlob);
-
-    String lastModifiedBy =
-        cloudStorageClient.getNotebookLastModifiedBy(notebookPath, workspaceUsers);
-    assertThat(lastModifiedBy).isEqualTo(USER_EMAIL);
-  }
 }

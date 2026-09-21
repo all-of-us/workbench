@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 import {
   FeaturedWorkspaceCategory,
   ProfileApi,
-  RuntimeApi,
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';

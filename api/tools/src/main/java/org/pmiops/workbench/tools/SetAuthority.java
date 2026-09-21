@@ -25,7 +25,7 @@ public class SetAuthority extends Tool {
   }
 
   private Set<Authority> commaDelimitedStringToAuthoritySet(String str) {
-    Set<Authority> auths = new HashSet();
+    Set<Authority> auths = new HashSet<>();
     for (String value : commaDelimitedStringToSet(str)) {
       String cleanedValue = value.trim().toUpperCase();
       if (cleanedValue.isEmpty()) {
@@ -48,9 +48,9 @@ public class SetAuthority extends Tool {
       }
       Set<String> emails = commaDelimitedStringToSet(args[0]);
       String authoritiesArgument = args[1];
-      boolean remove = Boolean.valueOf(args[2]);
-      boolean dryRun = Boolean.valueOf(args[3]);
-      boolean removeAll = Boolean.valueOf(args[4]);
+      boolean remove = Boolean.parseBoolean(args[2]);
+      boolean dryRun = Boolean.parseBoolean(args[3]);
+      boolean removeAll = Boolean.parseBoolean(args[4]);
 
       Set<Authority> authorities =
           removeAll
@@ -73,7 +73,7 @@ public class SetAuthority extends Tool {
         user = userDao.findUserWithAuthorities(user.getUserId());
 
         Set<Authority> granted = user.getAuthoritiesEnum();
-        Set<Authority> updated = new HashSet(granted);
+        Set<Authority> updated = new HashSet<>(granted);
         if (remove || removeAll) {
           updated.removeAll(authorities);
         } else {

@@ -17,7 +17,6 @@ import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.user.UserAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,6 @@ public class EgressVwbRemediationService extends EgressRemediationService {
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
-      LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
       @Qualifier(EGRESS_VWB_JIRA_HANDLER_QUALIFIER) EgressJiraHandler egressJiraHandler,
@@ -53,7 +51,6 @@ public class EgressVwbRemediationService extends EgressRemediationService {
         clock,
         workbenchConfigProvider,
         userService,
-        leonardoNotebooksClient,
         egressEventAuditor,
         egressEventDao);
     this.egressJiraHandler = egressJiraHandler;

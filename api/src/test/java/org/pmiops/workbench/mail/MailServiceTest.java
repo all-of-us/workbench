@@ -5,13 +5,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.mail.MailServiceImpl.ATTACHED_DISK_STATUS;
-import static org.pmiops.workbench.mail.MailServiceImpl.DETACHED_DISK_STATUS;
 
 import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,11 +17,8 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -59,7 +52,6 @@ public class MailServiceTest {
     }
   }
 
-  @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private SendGridMailSender sendGridMailSender;
 
   @Autowired private MailService mailService;
@@ -67,8 +59,6 @@ public class MailServiceTest {
   @BeforeEach
   public void setUp() {
     workbenchConfig = createWorkbenchConfig();
-
-    when(mockCloudStorageClient.getImageUrl(any())).thenReturn("test_img");
   }
 
   @Test
@@ -239,83 +229,6 @@ public class MailServiceTest {
     String gotHtml = htmlCaptor.getValue();
     assertThat(gotHtml).contains("temporarily suspended");
     assertThat(gotHtml).doesNotContain("when using the <b>Jupyter</b> application");
-    assertThat(gotHtml).doesNotContain("${");
-  }
-
-  @Test
-  public void testAlertUsersUnusedDiskWarning_attached() throws Exception {
-    DbUser user = createDbUser();
-    mailService.alertUsersUnusedDiskWarningThreshold(
-        Collections.singletonList(user),
-        new DbWorkspace().setName("my workspace").setCreator(user),
-        new Disk()
-            .diskType(DiskType.SSD)
-            .gceRuntime(true)
-            .size(123)
-            .createdDate(
-                FakeClockConfiguration.NOW.toInstant().minus(Duration.ofDays(20)).toString())
-            .creator(user.getUsername()),
-        true,
-        14,
-        20.0);
-
-    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-
-    verify(sendGridMailSender, times(1))
-        .sendWithRetries(
-            eq(workbenchConfig.mail.fromEmail),
-            eq(Collections.emptyList()),
-            eq(Collections.emptyList()),
-            eq(Collections.singletonList(user.getContactEmail())),
-            eq("Reminder - Unused Disk in your Workspace"),
-            any(),
-            htmlCaptor.capture());
-
-    String gotHtml = htmlCaptor.getValue();
-    assertThat(gotHtml).contains("123 GB");
-    assertThat(gotHtml).contains("$20.91 per month");
-    assertThat(gotHtml)
-        .contains(String.format("%s's initial credits ($20.00 remaining)", FULL_USER_NAME));
-    assertThat(gotHtml).contains("Jupyter");
-    assertThat(gotHtml).contains(ATTACHED_DISK_STATUS);
-    assertThat(gotHtml).doesNotContain("${");
-  }
-
-  @Test
-  public void testAlertUsersUnusedDiskWarning_detached() throws Exception {
-    DbUser user = createDbUser();
-    mailService.alertUsersUnusedDiskWarningThreshold(
-        Collections.singletonList(user),
-        new DbWorkspace().setName("my workspace").setCreator(user),
-        new Disk()
-            .diskType(DiskType.SSD)
-            .gceRuntime(true)
-            .size(123)
-            .createdDate(
-                FakeClockConfiguration.NOW.toInstant().minus(Duration.ofDays(20)).toString())
-            .creator(user.getUsername()),
-        false,
-        14,
-        20.0);
-
-    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1))
-        .sendWithRetries(
-            eq(workbenchConfig.mail.fromEmail),
-            eq(Collections.emptyList()),
-            eq(Collections.emptyList()),
-            eq(Collections.singletonList(user.getContactEmail())),
-            eq("Reminder - Unused Disk in your Workspace"),
-            any(),
-            htmlCaptor.capture());
-
-    String gotHtml = htmlCaptor.getValue();
-    assertThat(gotHtml).contains("123 GB");
-    assertThat(gotHtml).contains("$20.91 per month");
-    assertThat(gotHtml)
-        .contains(String.format("%s's initial credits ($20.00 remaining)", FULL_USER_NAME));
-    assertThat(gotHtml).contains("Jupyter");
-    assertThat(gotHtml).contains(DETACHED_DISK_STATUS);
     assertThat(gotHtml).doesNotContain("${");
   }
 

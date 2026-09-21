@@ -1,20 +1,16 @@
 package org.pmiops.workbench.api;
 
 import jakarta.annotation.Nullable;
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;
-import org.pmiops.workbench.model.AdminRuntimeFields;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
-import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -44,19 +40,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<WorkspaceAdminView> getWorkspaceAdminView(String workspaceNamespace) {
     return ResponseEntity.ok(workspaceAdminService.getWorkspaceAdminView(workspaceNamespace));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<AdminRuntimeFields>> adminListRuntimes(String workspaceNamespace) {
-    return ResponseEntity.ok(workspaceAdminService.listRuntimes(workspaceNamespace));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<UserAppEnvironment>> adminListUserAppsInWorkspace(
-      String workspaceNamespace) {
-    return ResponseEntity.ok(workspaceAdminService.listUserApps(workspaceNamespace));
   }
 
   @Override
@@ -104,21 +87,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
         workspaceAdminService.getReadOnlyNotebook(
             workspaceNamespace, notebookNameWithFileExtension, accessReason);
     return ResponseEntity.ok(new ReadOnlyNotebookResponse().html(notebookHtml));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<FileDetail>> listFiles(
-      String workspaceNamespace, Boolean onlyAppFiles) {
-    return ResponseEntity.ok(
-        workspaceAdminService.listFiles(workspaceNamespace, Boolean.TRUE.equals(onlyAppFiles)));
-  }
-
-  @Override
-  @AuthorityRequired(Authority.SECURITY_ADMIN)
-  public ResponseEntity<AdminRuntimeFields> adminDeleteRuntime(
-      String workspaceNamespace, String runtimeName) {
-    return ResponseEntity.ok(workspaceAdminService.deleteRuntime(workspaceNamespace, runtimeName));
   }
 
   @Override

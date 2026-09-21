@@ -1,7 +1,6 @@
 package org.pmiops.workbench.exfiltration.impl;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
-import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
@@ -19,7 +18,6 @@ import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.user.UserAdminService;
@@ -48,7 +46,6 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
-      LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
       SumologicEgressEventMapper sumologicEgressEventMapper,
@@ -59,7 +56,6 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
         clock,
         workbenchConfigProvider,
         userService,
-        leonardoNotebooksClient,
         egressEventAuditor,
         egressEventDao);
     this.egressJiraHandler = egressJiraHandler;
@@ -85,13 +81,6 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
 
   @Override
   protected boolean shouldSkipEgressEvent(DbEgressEvent event) {
-    if (isCromwellApp(event)) {
-      logger.info(
-          String.format(
-              "Skip egress event %d because this is triggered by Cromwell app and caused by GKE internal traffic",
-              event.getEgressEventId()));
-      return true;
-    }
     if (isUserBypassedForLargeFileDownload(event)) {
       logger.info(
           String.format(
@@ -106,11 +95,5 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
     return userAdminService.getCurrentEgressBypassWindow(event.getUser().getUserId()) != null
         && event.getEgressMegabytes() != null
         && event.getEgressMegabytes() < EGRESS_HARD_LIMIT_MB;
-  }
-
-  private boolean isCromwellApp(DbEgressEvent event) {
-    String serviceName = sumologicEgressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
-    return serviceName != null
-        && appServiceNameToAppType(serviceName).equals(Optional.of(AppType.CROMWELL));
   }
 }

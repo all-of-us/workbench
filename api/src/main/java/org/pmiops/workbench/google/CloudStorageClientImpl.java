@@ -7,10 +7,8 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import jakarta.inject.Provider;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,7 +18,6 @@ import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 
 public class CloudStorageClientImpl implements CloudStorageClient {
 
@@ -175,7 +172,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
     if (null != fileMetadata) {
       String hash = fileMetadata.getOrDefault("lastLockedBy", null);
       if (hash != null) {
-        String userName = NotebookLockingUtils.findHashedUser(bucketName, workspaceUsers, hash);
+        String userName = "";
         fileDetail.setLastModifiedBy(userName);
       }
     }
@@ -186,17 +183,5 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   @Override
   public String getGoogleOAuthClientSecret() {
     return getCredentialsBucketString("google-oauth-client-secret.txt");
-  }
-
-  @Override
-  public String getNotebookLastModifiedBy(String notebookUri, Set<String> workspaceUsers) {
-    String notebookDetails = notebookUri.replaceFirst("gs://", "");
-    String[] notebookPath = notebookDetails.split("/");
-    final String name =
-        Joiner.on('/').join(Arrays.copyOfRange(notebookPath, 1, notebookPath.length));
-    String bucketName = notebookPath[0];
-    Blob blob = getBlob(bucketName, name);
-    FileDetail fileDetail = blobToFileDetail(blob, bucketName, workspaceUsers);
-    return fileDetail.getLastModifiedBy();
   }
 }

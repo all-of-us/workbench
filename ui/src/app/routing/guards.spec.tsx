@@ -13,7 +13,6 @@ import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import { shouldRedirectToMaybe } from './guards';
 
-const hostPath = 'https://exampleWorkbenchHost';
 // a newly-created user will have Profile and Publications newly completed, and no others
 const newUserModuleState: AccessModuleStatus[] = [
   {

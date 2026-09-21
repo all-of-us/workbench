@@ -12,10 +12,6 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.tanagra.model.Cohort;
-import org.pmiops.workbench.tanagra.model.CohortList;
-import org.pmiops.workbench.tanagra.model.FeatureSet;
-import org.pmiops.workbench.tanagra.model.FeatureSetList;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.vwb.wsm.WsmClient;
@@ -140,12 +136,6 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
-    logger.warn("saveAndCloneCohortsConceptSetsAndDataSets not implemented in VWB");
-    return null;
-  }
-
-  @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     logger.warn("getFirecloudUserRoles not implemented in VWB");
     return null;
@@ -179,36 +169,6 @@ public class VwbWorkspaceServiceImpl implements WorkspaceService {
   public List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces) {
     logger.warn("lookupWorkspacesByNamespace not implemented in VWB");
     return null;
-  }
-
-  @Override
-  public void createTanagraStudy(String workspaceNamespace, String workspaceName) {
-    logger.warn("createTanagraStudy not implemented in VWB");
-  }
-
-  @Override
-  public CohortList listTanagraCohorts(String workspaceNamespace, Integer offset, Integer limit) {
-    logger.warn("listTanagraCohorts not implemented in VWB");
-    return null;
-  }
-
-  @Override
-  public FeatureSetList listTanagraFeatureSets(
-      String workspaceNamespace, Integer offset, Integer limit) {
-    logger.warn("listTanagraFeatureSets not implemented in VWB");
-    return null;
-  }
-
-  @Override
-  public void cloneTanagraCohort(
-      Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace) {
-    logger.warn("cloneTanagraCohort not implemented in VWB");
-  }
-
-  @Override
-  public void cloneTanagraFeatureSet(
-      FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace) {
-    logger.warn("cloneTanagraFeatureSet not implemented in VWB");
   }
 
   @Override

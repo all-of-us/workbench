@@ -9,10 +9,6 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.tanagra.model.Cohort;
-import org.pmiops.workbench.tanagra.model.CohortList;
-import org.pmiops.workbench.tanagra.model.FeatureSet;
-import org.pmiops.workbench.tanagra.model.FeatureSetList;
 
 /*
  * WorkspaceService is primarily an interface for coordinating the three Workspace models.
@@ -67,8 +63,6 @@ public interface WorkspaceService {
 
   void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
 
-  DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
-
   List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
 
   List<DbUserRecentWorkspace> getRecentWorkspaces();
@@ -80,22 +74,6 @@ public interface WorkspaceService {
   DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace);
 
   List<DbWorkspace> lookupWorkspacesByNamespace(Collection<String> workspaceNamespaces);
-
-  /**
-   * This call will create a Study in the Tanagra application. A Tanagra Study is equivalent to a
-   * AoU workspace.
-   */
-  void createTanagraStudy(String workspaceNamespace, String workspaceName);
-
-  CohortList listTanagraCohorts(String workspaceNamespace, Integer offset, Integer limit);
-
-  FeatureSetList listTanagraFeatureSets(String workspaceNamespace, Integer offset, Integer limit);
-
-  void cloneTanagraCohort(
-      Cohort cohort, String fromWorkspaceNamespace, String toWorkspaceNamespace);
-
-  void cloneTanagraFeatureSet(
-      FeatureSet featureSet, String fromWorkspaceNamespace, String toWorkspaceNamespace);
 
   void publishCommunityWorkspace(DbWorkspace workspace);
 

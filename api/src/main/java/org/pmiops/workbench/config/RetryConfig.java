@@ -3,9 +3,6 @@ package org.pmiops.workbench.config;
 import org.pmiops.workbench.calhoun.CalhounRetryHandler;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
 import org.pmiops.workbench.google.GoogleRetryHandler;
-import org.pmiops.workbench.leonardo.LegacyLeonardoRetryHandler;
-import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
-import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.rawls.RawlsRetryHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +17,6 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
   CalhounRetryHandler.class,
   FirecloudRetryHandler.class,
   GoogleRetryHandler.class,
-  LegacyLeonardoRetryHandler.class,
-  LeonardoRetryHandler.class,
-  NotebooksRetryHandler.class,
   RawlsRetryHandler.class,
 })
 public class RetryConfig {

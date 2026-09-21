@@ -40,11 +40,9 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.user.VwbUserService;
-import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +55,6 @@ public class InitialCreditsService {
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final InstitutionService institutionService;
-  private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final TaskQueueService taskQueueService;
@@ -77,7 +74,6 @@ public class InitialCreditsService {
       Clock clock,
       FireCloudService fireCloudService,
       InstitutionService institutionService,
-      LeonardoApiClient leonardoApiClient,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       TaskQueueService taskQueueService,
@@ -92,7 +88,6 @@ public class InitialCreditsService {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
-    this.leonardoApiClient = leonardoApiClient;
     this.mailService = mailService;
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
@@ -560,13 +555,6 @@ public class InitialCreditsService {
         user.getUsername(),
         userInitialCreditsExpiration.getExpirationTime());
 
-    getWorkspacesForUser(user).stream()
-        .filter(
-            ws ->
-                BillingUtils.isInitialCredits(
-                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .forEach(this::stopInitialCreditSpendInWorkspace);
-
     if (workbenchConfigProvider.get().featureFlags.enableVWBInitialCreditsExhaustion) {
       vwbUserService.unlinkBillingAccountForUserPod(user);
     }
@@ -599,40 +587,6 @@ public class InitialCreditsService {
     }
   }
 
-  private void stopInitialCreditSpendInWorkspace(DbWorkspace workspace) {
-    String namespace = workspace.getWorkspaceNamespace();
-    String googleProject = workspace.getGoogleProject();
-
-    if (workbenchConfigProvider.get().featureFlags.enableUnlinkBillingForInitialCredits) {
-      try {
-        fireCloudService.removeBillingAccountFromBillingProjectAsService(namespace);
-        logger.info("Removed initial credits billing account from workspace {}", namespace);
-      } catch (WorkbenchException e) {
-        logger.error(
-            "Failed to remove initial credits billing account from workspace {}", namespace, e);
-
-        try {
-          leonardoApiClient.deleteAllResources(googleProject, false);
-          logger.info(
-              "Deleted apps and runtimes for workspace {} because we failed to unlink billing",
-              namespace);
-        } catch (WorkbenchException we) {
-          logger.error(
-              "Failed to delete apps and runtimes for workspace {} and we failed to unlink billing",
-              namespace,
-              we);
-        }
-      }
-    } else {
-      try {
-        leonardoApiClient.deleteAllResources(googleProject, false);
-        logger.info("Deleted apps and runtimes for workspace {}", namespace);
-      } catch (WorkbenchException e) {
-        logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
-      }
-    }
-  }
-
   private Timestamp clockNow() {
     return new Timestamp(clock.instant().toEpochMilli());
   }
@@ -658,7 +612,6 @@ public class InitialCreditsService {
     workspaceDao.saveAll(workspaces);
 
     if (exhausted) {
-      workspaces.forEach(this::stopInitialCreditSpendInWorkspace);
       // Unlink billing account in VWB
       // This is done to stop extra charges from being incurred
       vwbUserService.unlinkBillingAccountForUserPod(user);

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import jakarta.inject.Provider;
-import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class VwbEgressAdminController implements VwbEgressAdminApiDelegate {
-  private static final Logger log = Logger.getLogger(NotebooksController.class.getName());
   private final EgressEventService egressEventService;
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;

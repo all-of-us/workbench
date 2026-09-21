@@ -1,12 +1,7 @@
 import '@testing-library/jest-dom';
 
 import { ProfileApi } from 'generated/fetch';
-import {
-  CohortsApi,
-  ConceptSetsApi,
-  UserMetricsApi,
-  WorkspacesApi,
-} from 'generated/fetch';
+import { WorkspacesApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -23,7 +18,6 @@ import {
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
-import { UserMetricsApiStub } from 'testing/stubs/user-metrics-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { Homepage } from './homepage';
@@ -45,7 +39,6 @@ describe('HomepageComponent', () => {
 
     registerApiClient(ProfileApi, profileApi);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(UserMetricsApi, new UserMetricsApiStub());
 
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
