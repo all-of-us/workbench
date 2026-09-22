@@ -10,8 +10,7 @@ public class EnvironmentsAdminServiceImpl implements EnvironmentsAdminService {
   private final WorkspaceService workspaceService;
 
   @Autowired
-  public EnvironmentsAdminServiceImpl(
-      WorkspaceService workspaceService) {
+  public EnvironmentsAdminServiceImpl(WorkspaceService workspaceService) {
     this.workspaceService = workspaceService;
   }
 

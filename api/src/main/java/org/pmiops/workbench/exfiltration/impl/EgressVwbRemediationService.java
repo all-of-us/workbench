@@ -47,12 +47,7 @@ public class EgressVwbRemediationService extends EgressRemediationService {
       @Qualifier(EGRESS_VWB_JIRA_HANDLER_QUALIFIER) EgressJiraHandler egressJiraHandler,
       MailService mailService,
       UserAdminService userAdminService) {
-    super(
-        clock,
-        workbenchConfigProvider,
-        userService,
-        egressEventAuditor,
-        egressEventDao);
+    super(clock, workbenchConfigProvider, userService, egressEventAuditor, egressEventDao);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
     this.userAdminService = userAdminService;

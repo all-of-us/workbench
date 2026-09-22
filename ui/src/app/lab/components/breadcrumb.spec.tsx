@@ -61,7 +61,7 @@ describe('getTrail', () => {
     const ns = 'testNs';
     const terraName = 'testTerraName';
 
-    const trail = getTrail(BreadcrumbType.Participant, workspaceDataStub, {
+    const trail = getTrail(BreadcrumbType.Data, workspaceDataStub, {
       ns,
       terraName,
     });
@@ -69,7 +69,7 @@ describe('getTrail', () => {
       'Workspaces',
       workspaceDataStub.name,
     ]);
-    expect(trail[3].url).toEqual(dataTabPath(ns, terraName));
+    expect(trail[1].url).toEqual(dataTabPath(ns, terraName));
   });
 
   // regression test for RW-7572
@@ -78,7 +78,6 @@ describe('getTrail', () => {
     (bType: string) => {
       const ns = 'testNs';
       const terraName = 'testTerraName';
-      const cid = '88';
 
       const trail = getTrail(BreadcrumbType[bType], workspaceDataStub, {
         ns,

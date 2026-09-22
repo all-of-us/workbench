@@ -374,9 +374,7 @@ public class MailServiceImpl implements MailService {
     sendEgressRemediationEmailCommon(dbUser, action);
   }
 
-  private void sendEgressRemediationEmailCommon(
-      DbUser dbUser,
-      EgressRemediationAction action)
+  private void sendEgressRemediationEmailCommon(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
     String remediation = EGRESS_REMEDIATION_ACTION_MAP.get(action);
     String givenName = Optional.ofNullable(dbUser.getGivenName()).orElse("Researcher");

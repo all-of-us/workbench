@@ -40,12 +40,7 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
       @Qualifier(ExfiltrationUtils.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER)
           EgressJiraHandler egressJiraHandler,
       MailService mailService) {
-    super(
-        clock,
-        workbenchConfigProvider,
-        userService,
-        egressEventAuditor,
-        egressEventDao);
+    super(clock, workbenchConfigProvider, userService, egressEventAuditor, egressEventDao);
     this.sumologicEgressEventMapper = sumologicEgressEventMapper;
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;

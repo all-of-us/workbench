@@ -5,11 +5,10 @@ import * as fp from 'lodash/fp';
 
 import { Profile } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
 import { BannerScenario } from 'app/lab/pages/workspace/initial-credits/banner-config';
 import { CreditBanner } from 'app/lab/pages/workspace/initial-credits/credit-banner';
 import { InvalidBillingBanner } from 'app/lab/pages/workspace/invalid-billing-banner';
-import { analysisTabName, dataTabPath, workspacePath } from 'app/routing/utils';
+import { dataTabPath, workspacePath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import {
@@ -223,55 +222,9 @@ export const Breadcrumb = fp.flow(
       ? workspaceMatch.params
       : {};
 
-    // WARNING
-    // because this pattern *also* matches previews and user apps, it must be checked AFTER those in the cond()
-    const analysisMatch = matchPath<MatchParams>(location.pathname, {
-      path: `/workspaces/:ns/:terraName/${analysisTabName}/:nbName`,
-    });
-
-    const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
-      path: `/workspaces/:ns/:terraName/${analysisTabName}/preview/:nbName`,
-    });
-
-    const userAppMatch = matchPath<MatchParams>(location.pathname, {
-      path: `/workspaces/:ns/:terraName/${analysisTabName}/userApp/:appType`,
-    });
-
-    const {
-      nbName = '',
-      appType = '',
-      breadcrumbType,
-    } = cond<MatchParams & { breadcrumbType: BreadcrumbType }>(
-      [
-        !!analysisPreviewMatch,
-        () => ({
-          ...analysisPreviewMatch.params,
-          breadcrumbType: BreadcrumbType.AnalysisPreview,
-        }),
-      ],
-      [
-        !!userAppMatch,
-        () => ({
-          ...userAppMatch.params,
-          breadcrumbType: BreadcrumbType.UserApp,
-        }),
-      ],
-      [
-        // this check must go after analysisPreviewMatch and userAppMatch
-        !!analysisMatch,
-        () => ({
-          ...analysisMatch.params,
-          breadcrumbType: BreadcrumbType.Analysis,
-        }),
-      ],
-      () => ({ breadcrumbType: props.routeData.breadcrumb })
-    );
-
-    return getTrail(breadcrumbType, props.workspace, {
+    return getTrail(props.routeData.breadcrumb, props.workspace, {
       ns,
       terraName,
-      nbName,
-      appType,
     });
   };
 

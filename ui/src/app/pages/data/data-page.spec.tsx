@@ -48,6 +48,5 @@ describe('DataPage', () => {
     expect(
       screen.getByRole('heading', { name: 'Datasets' })
     ).toBeInTheDocument();
-    expect(screen.getByText('Show All')).toBeInTheDocument();
   });
 });

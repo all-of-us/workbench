@@ -55,7 +55,6 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -90,7 +89,6 @@ public class InitialCreditsServiceTest {
 
   @MockitoBean private UserServiceAuditor mockUserServiceAuditor;
   @MockitoBean private MailService mailService;
-  @MockitoBean private LeonardoApiClient leonardoApiClient;
   @MockitoBean private InstitutionService institutionService;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private VwbUserService vwbUserService;

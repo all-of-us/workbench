@@ -12,6 +12,8 @@ public class DiskAdminService {
   public DiskAdminService() {}
 
   public void checkPersistentDisks(List<Disk> disks) {
-    log.info(String.format("Removed disk check with Terra calls, skipping check on %d disks", disks.size()));
+    log.info(
+        String.format(
+            "Removed disk check with Terra calls, skipping check on %d disks", disks.size()));
   }
 }

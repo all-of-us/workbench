@@ -5,29 +5,19 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
-import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
-import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -41,16 +31,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.CloudBillingClient;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
-import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
-import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
 import org.pmiops.workbench.model.EthnicCategory;
@@ -66,7 +47,6 @@ import org.pmiops.workbench.model.YesNoPreferNot;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 
 public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
@@ -179,16 +159,6 @@ public class TestMockFactory {
         .googleProject(DEFAULT_GOOGLE_PROJECT);
   }
 
-  public static LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
-    return new LeonardoListRuntimeResponse()
-        .runtimeName("runtime")
-        .cloudContext(
-            new LeonardoCloudContext()
-                .cloudProvider(LeonardoCloudProvider.GCP)
-                .cloudResource("google-project"))
-        .status(LeonardoRuntimeStatus.STOPPED);
-  }
-
   public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {
     doAnswer(
             invocation -> {
@@ -211,28 +181,6 @@ public class TestMockFactory {
         .createWorkspace(anyString(), anyString(), anyString());
   }
 
-  public static void stubCreateFcWorkspace(
-      WorkspaceService workspaceService, FireCloudService fireCloudService) {
-    doAnswer(
-            invocation -> {
-              Workspace capturedWorkspace = (Workspace) invocation.getArguments()[0];
-              RawlsWorkspaceDetails fcWorkspace =
-                  createTerraWorkspace(
-                      capturedWorkspace.getNamespace(), capturedWorkspace.getName(), null);
-
-              RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
-              fcResponse.setWorkspace(fcWorkspace);
-              fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
-
-              doReturn(fcResponse)
-                  .when(fireCloudService)
-                  .getWorkspace(capturedWorkspace.getNamespace(), capturedWorkspace.getName());
-              return fcWorkspace;
-            })
-        .when(workspaceService)
-        .createWorkspace(any(Workspace.class), any(DbCdrVersion.class));
-  }
-
   public static void stubCreateBillingProject(FireCloudService fireCloudService) {
     stubCreateBillingProject(fireCloudService, UUID.randomUUID().toString());
   }
@@ -240,24 +188,6 @@ public class TestMockFactory {
   public static void stubCreateBillingProject(
       FireCloudService fireCloudService, String billingProjectId) {
     doReturn(billingProjectId).when(fireCloudService).createBillingProjectName();
-  }
-
-  public static void stubPollCloudBillingLinked(
-      CloudBillingClient cloudBillingClient, String billingAccountName) {
-    try {
-      ProjectBillingInfo billingInfo =
-          new ProjectBillingInfo().setBillingEnabled(true).setName(billingAccountName);
-      // Mock the 2-argument version: pollUntilBillingAccountLinked(String, String)
-      doReturn(billingInfo)
-          .when(cloudBillingClient)
-          .pollUntilBillingAccountLinked(anyString(), anyString());
-      // Mock the 3-argument version: pollUntilBillingAccountLinked(String, String, boolean)
-      doReturn(billingInfo)
-          .when(cloudBillingClient)
-          .pollUntilBillingAccountLinked(anyString(), anyString(), anyBoolean());
-    } catch (IOException | InterruptedException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public static Cloudbilling createMockedCloudbilling() {
@@ -416,67 +346,6 @@ public class TestMockFactory {
   public static void assertEqualDemographicSurveys(
       DemographicSurveyV2 survey1, DemographicSurveyV2 survey2) {
     assertThat(normalizeLists(survey1)).isEqualTo(normalizeLists(survey2));
-  }
-
-  public static ListPersistentDiskResponse createListPersistentDiskResponse(
-      String pdName,
-      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status,
-      String date,
-      String googleProjectId,
-      DbUser user,
-      @Nullable AppType appType) {
-    ListPersistentDiskResponse response =
-        new ListPersistentDiskResponse()
-            .name(pdName)
-            .size(300)
-            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
-            .status(status)
-            .auditInfo(new AuditInfo().createdDate(date).creator(user.getUsername()))
-            .cloudContext(
-                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(googleProjectId));
-    if (appType != null) {
-      Map<String, String> label = new HashMap<>();
-      label.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
-      response.labels(label);
-    }
-    return response;
-  }
-
-  public static ListPersistentDiskResponse createLeonardoRuntimePDResponse(
-      String pdName,
-      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status,
-      String date,
-      String googleProjectId,
-      DbUser user) {
-    return createListPersistentDiskResponse(
-        pdName, status, date, googleProjectId, user, /*appType*/ null);
-  }
-
-  private static Disk createDisk(
-      String pdName, DiskStatus status, String date, String googleProject, DbUser user) {
-    return new Disk()
-        .name(pdName)
-        .size(300)
-        .diskType(DiskType.STANDARD)
-        .status(status)
-        .createdDate(date)
-        .googleProject(googleProject)
-        .creator(user.getUsername());
-  }
-
-  public static Disk createAppDisk(
-      String pdName,
-      DiskStatus status,
-      String date,
-      String googleProject,
-      DbUser user,
-      AppType appType) {
-    return createDisk(pdName, status, date, googleProject, user).appType(appType);
-  }
-
-  public static Disk createRuntimeDisk(
-      String pdName, DiskStatus status, String date, String googleProject, DbUser user) {
-    return createDisk(pdName, status, date, googleProject, user).gceRuntime(true);
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2

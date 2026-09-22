@@ -30,19 +30,19 @@ public class ValidationPredicates {
   public static Predicate<Object> notBetweenAndNotInOperator() {
     return t ->
         !Operator.BETWEEN.equals(
-            (t instanceof Attribute)
-                ? ((Attribute) t).getOperator()
-                : ((Modifier) t).getOperator())
+                (t instanceof Attribute)
+                    ? ((Attribute) t).getOperator()
+                    : ((Modifier) t).getOperator())
             && !Operator.IN.equals(
-            (t instanceof Attribute)
-                ? ((Attribute) t).getOperator()
-                : ((Modifier) t).getOperator());
+                (t instanceof Attribute)
+                    ? ((Attribute) t).getOperator()
+                    : ((Modifier) t).getOperator());
   }
 
   public static Predicate<Object> operandsNotTwo() {
     return t ->
         ((t instanceof Attribute) ? ((Attribute) t).getOperands() : ((Modifier) t).getOperands())
-            .size()
+                .size()
             != 2;
   }
 
@@ -56,15 +56,15 @@ public class ValidationPredicates {
     return t ->
         !((t instanceof Attribute) ? ((Attribute) t).getOperands() : ((Modifier) t).getOperands())
             .stream()
-            .filter(o -> !NumberUtils.isCreatable(o))
-            .collect(Collectors.toList())
-            .isEmpty();
+                .filter(o -> !NumberUtils.isCreatable(o))
+                .collect(Collectors.toList())
+                .isEmpty();
   }
 
   public static Predicate<Object> operandsNotOne() {
     return t ->
         ((t instanceof Attribute) ? ((Attribute) t).getOperands() : ((Modifier) t).getOperands())
-            .size()
+                .size()
             != 1;
   }
 
@@ -78,17 +78,17 @@ public class ValidationPredicates {
     return t ->
         !((t instanceof Attribute) ? ((Attribute) t).getOperands() : ((Modifier) t).getOperands())
             .stream()
-            .filter(
-                date -> {
-                  try {
-                    new SimpleDateFormat("yyyy-MM-dd").parse(date);
-                    return false;
-                  } catch (ParseException pe) {
-                    return true;
-                  }
-                })
-            .collect(Collectors.toList())
-            .isEmpty();
+                .filter(
+                    date -> {
+                      try {
+                        new SimpleDateFormat("yyyy-MM-dd").parse(date);
+                        return false;
+                      } catch (ParseException pe) {
+                        return true;
+                      }
+                    })
+                .collect(Collectors.toList())
+                .isEmpty();
   }
 
   public static Predicate<SearchGroupItem> temporalGroupNull() {

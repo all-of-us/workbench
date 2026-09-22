@@ -7,7 +7,6 @@ import java.util.List;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
-import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {

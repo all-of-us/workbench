@@ -5,7 +5,6 @@ import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
-import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -19,7 +18,6 @@ import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.user.UserAdminService;
 import org.pmiops.workbench.utils.mappers.SumologicEgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,12 +50,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
       @Qualifier(SUMOLOGIC_JIRA_HANDLER_QUALIFIER) EgressJiraHandler egressJiraHandler,
       MailService mailService,
       UserAdminService userAdminService) {
-    super(
-        clock,
-        workbenchConfigProvider,
-        userService,
-        egressEventAuditor,
-        egressEventDao);
+    super(clock, workbenchConfigProvider, userService, egressEventAuditor, egressEventDao);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
     this.sumologicEgressEventMapper = sumologicEgressEventMapper;

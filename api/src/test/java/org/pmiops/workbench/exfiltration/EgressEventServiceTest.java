@@ -32,7 +32,6 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,6 @@ public class EgressEventServiceTest {
   @MockitoBean private EgressEventAuditor egressEventAuditor;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserService userService;
-  @MockitoBean private LeonardoApiClient leonardoApiClient;
 
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
   private static final String WORKSPACE_NAMEPACE = "aou-namespace";

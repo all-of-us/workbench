@@ -39,15 +39,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
-import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.cohorts.CohortCloningService;
-import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
@@ -103,10 +95,6 @@ public class WorkspaceServiceTest {
 
   @MockitoBean private ActionAuditQueryService actionAuditQueryService;
   @MockitoBean private BucketAuditQueryService bucketAuditQueryService;
-  @MockitoBean private CohortCloningService cohortCloningService;
-  @MockitoBean private CohortService cohortService;
-  @MockitoBean private ConceptSetService conceptSetService;
-  @MockitoBean private DataSetService dataSetService;
   @MockitoBean private EgressRemediationService egressRemediationService;
   @MockitoBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
   @MockitoBean private IamService iamService;
@@ -120,11 +108,7 @@ public class WorkspaceServiceTest {
   @TestConfiguration
   @Import({
     CloudStorageClientImpl.class,
-    CohortMapperImpl.class,
-    CohortReviewMapperImpl.class,
     CommonMappers.class,
-    ConceptSetMapperImpl.class,
-    DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
     ObjectNameLengthServiceImpl.class,
     WorkspaceMapperImpl.class,

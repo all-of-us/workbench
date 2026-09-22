@@ -13,23 +13,13 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
-import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
-import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.dataset.BigQueryTableInfo;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.lab.notebooks.NotebooksService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
@@ -54,15 +44,8 @@ public class DataDictionaryTest {
   @MockitoBean private BigQueryService bigQueryService;
   @MockitoBean private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @MockitoBean private CdrVersionMapper cdrVersionMapper;
-  @MockitoBean private CohortBuilderMapperImpl cohortBuilderMapperImpl;
-  @MockitoBean private CohortBuilderServiceImpl cohortBuilderServiceImpl;
-  @MockitoBean private CohortQueryBuilder cohortQueryBuilder;
-  @MockitoBean private CohortService cohortService;
   @MockitoBean private ConceptBigQueryService conceptBigQueryService;
-  @MockitoBean private ConceptSetMapper conceptSetMapper;
-  @MockitoBean private ConceptSetService conceptSetService;
   @MockitoBean private FireCloudService fireCloudService;
-  @MockitoBean private GenomicExtractionService genomicExtractionService;
   @MockitoBean private NotebooksService notebooksService;
   @MockitoBean private UserRecentResourceService userRecentResourceService;
   @MockitoBean private WorkspaceAuthService workspaceAuthService;
@@ -70,7 +53,6 @@ public class DataDictionaryTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
-  @Autowired private DataSetController dataSetController;
 
   private static DbCdrVersion cdrVersion;
 
@@ -78,9 +60,6 @@ public class DataDictionaryTest {
   @Import({
     CdrVersionService.class,
     CommonMappers.class,
-    DataSetController.class,
-    DataSetMapperImpl.class,
-    DataSetServiceImpl.class,
     FakeClockConfiguration.class,
   })
   static class Configuration {}
@@ -92,7 +71,6 @@ public class DataDictionaryTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     DbDSDataDictionary dbDSDataDictionary = new DbDSDataDictionary();
-    dbDSDataDictionary.setRelevantOmopTable(BigQueryTableInfo.getTableName(Domain.DRUG));
     dbDSDataDictionary.setFieldName("TEST FIELD");
     dbDSDataDictionary.setOmopCdmStandardOrCustomField("A");
     dbDSDataDictionary.setDescription("B");
@@ -110,7 +88,6 @@ public class DataDictionaryTest {
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
     DbDSDataDictionary dbDSDataDictionary = new DbDSDataDictionary();
-    dbDSDataDictionary.setRelevantOmopTable(BigQueryTableInfo.getTableName(domain));
     dbDSDataDictionary.setFieldName(domainValue);
     dbDSDataDictionary.setOmopCdmStandardOrCustomField("A");
     dbDSDataDictionary.setDescription("B");

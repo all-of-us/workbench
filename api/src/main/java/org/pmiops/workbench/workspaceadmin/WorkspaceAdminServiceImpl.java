@@ -40,12 +40,9 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.initialcredits.InitialCreditsService;
 import org.pmiops.workbench.lab.notebooks.NotebooksService;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;
-import org.pmiops.workbench.model.AdminRuntimeFields;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
@@ -53,7 +50,6 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
-import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -268,7 +264,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }
-
 
   private DbWorkspace getWorkspaceByNamespaceOrThrow(String workspaceNamespace) {
     return getFirstWorkspaceByNamespace(workspaceNamespace)

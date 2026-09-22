@@ -64,7 +64,6 @@ import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.IssueUpdateDetails;
 import org.pmiops.workbench.jira.model.SearchResults;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.EgressBypassWindow;
@@ -94,7 +93,6 @@ public class EgressRemediationServiceTest {
   private static WorkbenchConfig workbenchConfig;
 
   @MockitoBean private UserService mockUserService;
-  @MockitoBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockitoBean private EgressEventAuditor mockEgressEventAuditor;
   @MockitoBean private MailService mockMailService;
   @MockitoBean private JiraApi mockJiraApi;
@@ -214,7 +212,6 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
-    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test
@@ -225,7 +222,6 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
-    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test
@@ -237,7 +233,6 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
-    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test
@@ -250,7 +245,6 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
-    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test

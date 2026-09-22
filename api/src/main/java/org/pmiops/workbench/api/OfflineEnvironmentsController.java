@@ -21,8 +21,7 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
 
   @Autowired
   OfflineEnvironmentsController(
-      TaskQueueService taskQueueService,
-      WorkspaceService workspaceService) {
+      TaskQueueService taskQueueService, WorkspaceService workspaceService) {
     this.taskQueueService = taskQueueService;
     this.workspaceService = workspaceService;
   }
@@ -48,7 +47,6 @@ public class OfflineEnvironmentsController implements OfflineEnvironmentsApiDele
     log.info("deleteOldRuntimes endpoint is decommissioned");
     return ResponseEntity.noContent().build();
   }
-
 
   @Override
   public ResponseEntity<Void> checkPersistentDisks() {

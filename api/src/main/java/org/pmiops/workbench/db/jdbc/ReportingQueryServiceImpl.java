@@ -18,7 +18,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.model.*;
-import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
