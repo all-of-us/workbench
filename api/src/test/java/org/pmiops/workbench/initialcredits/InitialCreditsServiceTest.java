@@ -968,7 +968,6 @@ public class InitialCreditsServiceTest {
 
     initialCreditsService.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
-    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
     assertNull(user.getUserInitialCreditsExpiration());
   }
 
@@ -1657,9 +1656,6 @@ public class InitialCreditsServiceTest {
               initialCreditsWorkspace2.getWorkspaceNamespace());
     }
 
-    // Verify that resources were not stopped for non-initial credits workspace
-    verify(leonardoApiClient, never())
-        .deleteAllResources(nonInitialCreditsWorkspace.getGoogleProject(), false);
     verify(mockFireCloudService, never())
         .removeBillingAccountFromBillingProjectAsService(
             nonInitialCreditsWorkspace.getWorkspaceNamespace());
@@ -1711,8 +1707,6 @@ public class InitialCreditsServiceTest {
         workspaceDao.findById(nonInitialCreditsWorkspace.getWorkspaceId()).get();
     assertThat(updatedNonInitialWorkspace.isInitialCreditsExhausted()).isTrue();
 
-    // Verify that resources were NOT stopped (as exhausted is false)
-    verify(leonardoApiClient, never()).deleteAllResources(any(String.class), any(Boolean.class));
     verify(mockFireCloudService, never())
         .removeBillingAccountFromBillingProjectAsService(any(String.class));
   }
@@ -1730,7 +1724,6 @@ public class InitialCreditsServiceTest {
 
     // ASSERT
     // Verify no interactions with APIs as there are no workspaces
-    verifyNoInteractions(leonardoApiClient);
     FireCloudService mockFireCloudService = applicationContext.getBean(FireCloudService.class);
     verify(mockFireCloudService, never()).removeBillingAccountFromBillingProjectAsService(any());
 

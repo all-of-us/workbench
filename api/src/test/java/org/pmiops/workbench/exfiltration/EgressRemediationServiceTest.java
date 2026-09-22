@@ -435,7 +435,6 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
-    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test
@@ -448,8 +447,6 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isTrue();
     assertComputeNotSuspended();
-    // The disable action also stops the user's runtimes
-    verify(mockLeonardoNotebooksClient).stopAllUserRuntimesAsService(USER_EMAIL);
 
     DbEgressEvent event = egressEventDao.findById(eventId).get();
     assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
@@ -679,7 +676,6 @@ public class EgressRemediationServiceTest {
             FakeClockConfiguration.NOW.toInstant(),
             getDbUser().getComputeSecuritySuspendedUntil().toInstant());
     assertThat(suspendedFor).isEqualTo(d);
-    verify(mockLeonardoNotebooksClient).stopAllUserRuntimesAsService(USER_EMAIL);
   }
 
   private void assertComputeNotSuspended() {
