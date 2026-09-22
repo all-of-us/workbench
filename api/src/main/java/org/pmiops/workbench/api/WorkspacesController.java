@@ -490,6 +490,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Workspace> getWorkspaceByNamespace(String workspaceNamespace) {
+    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
+    return ResponseEntity.ok(
+        workspaceMapper.toApiWorkspace(dbWorkspace, null, initialCreditsService));
+  }
+
+  @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     return ResponseEntity.ok(
         new WorkspaceResponseListResponse().items(workspaceService.listWorkspaces()));

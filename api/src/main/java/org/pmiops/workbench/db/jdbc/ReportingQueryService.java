@@ -57,6 +57,8 @@ public interface ReportingQueryService {
 
   List<ReportingWorkspaceCollaborator> getWorkspaceUsersByNamespace(String namespace);
 
+  List<WorkspaceIdWithRoleImpl> getWorkspaceIdsAndRolesByCollaboratorId(long userId);
+
   default <T> List<T> getBatchByIndex(
       BiFunction<Long, Long, List<T>> getter, long batchSize, long batchIndex) {
     final long offset = batchSize * batchIndex;
@@ -124,4 +126,12 @@ public interface ReportingQueryService {
   int getTableRowCount(String rwbTableName);
 
   int getAppUsageRowCount();
+
+  interface WorkspaceIdWithRole {
+    Long workspaceId();
+
+    String role();
+  }
+
+  record WorkspaceIdWithRoleImpl(Long workspaceId, String role) implements WorkspaceIdWithRole {}
 }

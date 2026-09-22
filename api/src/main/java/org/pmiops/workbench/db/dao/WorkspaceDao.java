@@ -30,6 +30,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   DbWorkspace findByWorkspaceNamespace(String workspaceNamespace);
 
+  DbWorkspace findByWorkspaceIdAndActiveStatus(long workspaceId, short activeStatus);
+
   default DbWorkspace getRequired(String ns, String firecloudName) {
     DbWorkspace workspace =
         findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(

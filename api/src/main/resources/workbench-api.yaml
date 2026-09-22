@@ -1501,6 +1501,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/Workspace'
       x-codegen-request-body-name: workspace
+  /v1/workspaces/{workspaceNamespace}:
+    get:
+      tags:
+        - workspaces
+      description: Returns the workspace definition with the specified namespace
+      operationId: getWorkspaceByNamespace
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A workspace response containing workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        403:
+          description: User doesnt have access to the workspace's access tier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v2/workspaces/{workspaceNamespace}/{terraName}/resources:
     get:
       tags:

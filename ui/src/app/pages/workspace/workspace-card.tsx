@@ -220,10 +220,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         workspace.migrationState === MigrationState.FINISHED;
       const canUseDeleteAction =
         canDeleteAction ?? accessLevel === WorkspaceAccessLevel.OWNER;
+      const isDeleted = terraName == null;
 
       const getWorkspacePath = () => {
         if (workspace.recoveryState === 'NOT_STARTED') {
-          return `/workspaces/${namespace}/${terraName}/recovery`;
+          return `/workspaces/${namespace}/recovery`;
         }
 
         return dataTabPath(namespace, terraName);
@@ -433,25 +434,33 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                               'Delete this Legacy Workbench workspace. Your RW 2.0 workspace will not ' +
                               'be affected. Deleting will stop incurring charges for unused legacy resources.'
                             }
+                            disabled={isDeleted}
                           >
                             <div
                               role='button'
                               aria-label='Delete workspace'
                               data-test-id='delete-migrated-workspace'
-                              style={styles.deleteBadge}
+                              style={{
+                                ...styles.deleteBadge,
+                                ...(isDeleted
+                                  ? { opacity: 0.4, cursor: 'not-allowed' }
+                                  : {}),
+                              }}
                               onClick={() => {
-                                AnalyticsTracker.Workspaces.OpenDeleteModal(
-                                  'Card'
-                                );
-                                triggerEvent(
-                                  EVENT_CATEGORY,
-                                  'delete',
-                                  'Migrated workspace - click delete badge'
-                                );
-                                this.setState({ confirmDeleting: true });
+                                if (!isDeleted) {
+                                  AnalyticsTracker.Workspaces.OpenDeleteModal(
+                                    'Card'
+                                  );
+                                  triggerEvent(
+                                    EVENT_CATEGORY,
+                                    'delete',
+                                    'Migrated workspace - click delete badge'
+                                  );
+                                  this.setState({ confirmDeleting: true });
+                                }
                               }}
                             >
-                              DELETE
+                              DELETE{isDeleted && 'D'}
                             </div>
                           </TooltipTrigger>
                         )}

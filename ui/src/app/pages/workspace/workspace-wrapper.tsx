@@ -308,9 +308,11 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
 
   useEffect(() => {
     // abort if the routing is invalid (though this should never happen)
-    if (!ns || !terraName) {
+    if (!ns) {
       return;
     }
+
+    console.log(terraName);
 
     maybeStartPollingForUserApps(ns);
     workspacesApi().updateRecentWorkspaces(ns, terraName);

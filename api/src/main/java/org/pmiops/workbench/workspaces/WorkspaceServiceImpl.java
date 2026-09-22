@@ -29,12 +29,14 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -100,6 +102,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final Provider<Stopwatch> stopwatchProvider;
   private final Provider<TanagraApi> tanagraApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final ReportingQueryService reportingQueryService;
   private final UserDao userDao;
   private final UserMapper userMapper;
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
@@ -126,6 +129,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Provider<Stopwatch> stopwatchProvider,
       Provider<TanagraApi> tanagraApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      ReportingQueryService reportingQueryService,
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
@@ -145,6 +149,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.firecloudMapper = firecloudMapper;
     this.initialCreditsService = initialCreditsService;
     this.mailService = mailService;
+    this.reportingQueryService = reportingQueryService;
     this.stopwatchProvider = stopwatchProvider;
     this.tanagraApiProvider = tanagraApiProvider;
     this.userDao = userDao;
@@ -159,12 +164,38 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> listWorkspaces() {
-    return workspaceMapper
-        .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.listWorkspaces(), initialCreditsService)
-        .stream()
-        .filter(WorkspaceServiceImpl::filterToNonPublished)
-        .toList();
+    // Get all deleted workspaces that have been archived and add them to the list of workspaces
+    // returned to the user
+    List<ReportingQueryService.WorkspaceIdWithRoleImpl> workspaceIdsWithRole =
+        reportingQueryService.getWorkspaceIdsAndRolesByCollaboratorId(
+            userProvider.get().getUserId());
+    List<WorkspaceResponse> allWorkspaces = new ArrayList<>();
+    workspaceIdsWithRole.forEach(
+        workspaceIdWithRole -> {
+          if (workspaceIdWithRole.workspaceId() != null) {
+            DbWorkspace workspace =
+                workspaceDao.findByWorkspaceIdAndActiveStatus(
+                    workspaceIdWithRole.workspaceId(),
+                    DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.DELETED));
+            if (workspace != null && workspace.getRecoveryState() != null) {
+              WorkspaceResponse response = new WorkspaceResponse();
+              response.setAccessLevel(WorkspaceAccessLevel.fromValue(workspaceIdWithRole.role()));
+              response.setWorkspace(
+                  workspaceMapper.toApiWorkspace(workspace, null, initialCreditsService));
+              allWorkspaces.add(response);
+            }
+          }
+        });
+
+    List<WorkspaceResponse> activeWorkspaces =
+        workspaceMapper
+            .toApiWorkspaceResponseList(
+                workspaceDao, fireCloudService.listWorkspaces(), initialCreditsService)
+            .stream()
+            .filter(WorkspaceServiceImpl::filterToNonPublished)
+            .toList();
+    allWorkspaces.addAll(activeWorkspaces);
+    return allWorkspaces;
   }
 
   private static boolean filterToNonPublished(WorkspaceResponse response) {

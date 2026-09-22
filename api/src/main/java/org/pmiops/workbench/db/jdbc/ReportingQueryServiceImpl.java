@@ -873,6 +873,28 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return queryResults;
   }
 
+  @Override
+  public List<ReportingQueryService.WorkspaceIdWithRoleImpl>
+      getWorkspaceIdsAndRolesByCollaboratorId(long userId) {
+    var queryString =
+        String.format(
+            "SELECT DISTINCT workspace_id, role "
+                + "FROM "
+                + getReportingTableName("workspace_user")
+                + " WHERE user_id = %d\n",
+            userId);
+    final QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(queryString).build();
+    List<ReportingQueryService.WorkspaceIdWithRoleImpl> queryResults = new ArrayList<>();
+    for (FieldValueList row : bigQueryService.executeQuery(queryConfig).getValues()) {
+      ReportingQueryService.WorkspaceIdWithRoleImpl workspaceIdWithRole =
+          new WorkspaceIdWithRoleImpl(
+              FieldValues.getLong(row, "workspace_id").orElse(null),
+              FieldValues.getString(row, "role").orElse(null));
+      queryResults.add(workspaceIdWithRole);
+    }
+    return queryResults;
+  }
+
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
       String stringEnums, Function<Short, String> convertDbEnum) {

@@ -99,10 +99,6 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
-const WorkspaceRecoveryPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(WorkspaceRecovery);
 const GKEAppRedirectPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -452,20 +448,6 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.ConceptSet,
             workspaceNavBarTab: 'data',
             pageKey: 'conceptSets',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/recovery`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <WorkspaceRecoveryPage
-          routeData={{
-            title: 'Workspace Recovery',
-            breadcrumb: BreadcrumbType.Workspace,
-            workspaceNavBarTab: 'data',
-            pageKey: 'data',
           }}
         />
       </AppRoute>
