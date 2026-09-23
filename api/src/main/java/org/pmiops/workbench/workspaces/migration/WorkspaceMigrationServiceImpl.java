@@ -17,6 +17,7 @@ import org.pmiops.workbench.db.dao.FolderSyncTransferDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceBucketArchiveDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbFolderSyncTransfer.TransferState;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -73,6 +74,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   private final Provider<DbUser> userProvider;
   private final Clock clock;
   private final WorkspaceBucketArchiveDao workspaceBucketArchiveDao;
+  private final ReportingQueryService reportingQueryService;
   private static final String CONTROLLED_TIER_ARCHIVE_BUCKET =
       "all-of-us-archive-ct-bucket-wb-blazing-lime-5817";
 
@@ -98,7 +100,8 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       Provider<PodApi> podApiProvider,
       Provider<DbUser> userProvider,
       Clock clock,
-      WorkspaceBucketArchiveDao workspaceBucketArchiveDao) {
+      WorkspaceBucketArchiveDao workspaceBucketArchiveDao,
+      ReportingQueryService reportingQueryService) {
 
     this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
@@ -118,6 +121,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
     this.userProvider = userProvider;
     this.clock = clock;
     this.workspaceBucketArchiveDao = workspaceBucketArchiveDao;
+    this.reportingQueryService = reportingQueryService;
   }
 
   @Override
@@ -163,7 +167,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
           try {
             logger.log(Level.INFO, namespace + ": Starting workspace creation");
 
-            vwbWorkspace = wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
+            vwbWorkspace = wsmClient.createWorkspaceAsService(dbWorkspace, resolvedPodId);
           } catch (Exception e) {
             logger.log(
                 Level.INFO, namespace + ": Workspace creation failed message: " + e.getMessage());
@@ -1170,10 +1174,10 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void requestWorkspaceRecovery(String namespace, String terraName, String podId) {
+  public void requestWorkspaceRecovery(String namespace, String podId) {
     logger.log(Level.INFO, namespace + ": Requesting workspace recovery");
 
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespace(namespace);
 
     // Validate workspace is eligible for recovery
     if (!WorkspaceRecoveryStatus.NOT_STARTED.toString().equals(dbWorkspace.getRecoveryState())) {
@@ -1223,12 +1227,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void startWorkspaceRecovery(
-      String namespace, String terraName, String researchPurpose, String podId) {
+  public void startWorkspaceRecovery(String namespace, String researchPurpose, String podId) {
 
     Duration bucketDelay = Duration.ofSeconds(10);
 
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespace(namespace);
 
     logger.log(Level.INFO, namespace + ": Starting workspace recovery");
 
@@ -1277,16 +1280,12 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       logger.log(
           Level.INFO, namespace + ": Archive bucket=" + archiveBucket + " prefix=" + archivePrefix);
 
-      RawlsWorkspaceDetails fcWorkspace =
-          fireCloudService.getWorkspaceAsService(namespace, terraName).getWorkspace();
-
-      Workspace workspace =
-          workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsService);
+      DbUser creator = userDao.findUserByUserId(dbWorkspace.getCreator().getUserId());
 
       String resolvedPodId =
           podId != null
               ? podId
-              : Optional.ofNullable(userDao.findUserByUsername(workspace.getCreator()))
+              : Optional.ofNullable(creator)
                   .map(DbUser::getVwbUserPod)
                   .map(DbVwbUserPod::getVwbPodId)
                   .orElse(workbenchConfigProvider.get().vwb.defaultPodId);
@@ -1294,7 +1293,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       logger.log(Level.INFO, namespace + ": Creating new recovery workspace");
 
       WorkspaceDescription vwbWorkspace =
-          wsmClient.createWorkspaceAsService(workspace, resolvedPodId);
+          wsmClient.createWorkspaceAsService(dbWorkspace, resolvedPodId);
 
       UUID workspaceId = vwbWorkspace.getId();
 
@@ -1303,73 +1302,70 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       workspaceDao.save(dbWorkspace);
 
       wsmClient.shareWorkspaceAsService(
-          workspaceId.toString(), workspace.getCreator(), IamRole.OWNER);
+          workspaceId.toString(), creator.getUsername(), IamRole.OWNER);
 
       logger.log(Level.INFO, namespace + ": Fetching existing collaborators from Terra");
-      RawlsWorkspaceACL acl = fireCloudService.getWorkspaceAclAsService(namespace, terraName);
 
-      if (acl != null && acl.getAcl() != null) {
-        com.google.gson.Gson gson = new com.google.gson.Gson();
-        String aclJson = gson.toJson(acl.getAcl());
-        Map<String, RawlsWorkspaceAccessEntry> aclMap =
-            gson.fromJson(
-                aclJson,
-                new com.google.gson.reflect.TypeToken<
-                    Map<String, RawlsWorkspaceAccessEntry>>() {}.getType());
+      List<ReportingWorkspaceCollaborator> collaborators =
+          reportingQueryService.getWorkspaceUsersByNamespace(namespace);
+      if (collaborators != null) {
+        collaborators.forEach(
+            c -> {
+              String collaboratorEmail = c.getUsername();
 
-        for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : aclMap.entrySet()) {
-          String collaboratorEmail = entry.getKey();
+              // Skip creator, already shared above
+              if (collaboratorEmail.equals(creator.getUsername())) {
+                return;
+              }
 
-          // Skip creator, already shared above
-          if (collaboratorEmail.equals(workspace.getCreator())) {
-            continue;
-          }
+              try {
+                OrganizationMember member = vwbUserService.getOrganizationMember(collaboratorEmail);
 
-          try {
-            OrganizationMember member = vwbUserService.getOrganizationMember(collaboratorEmail);
+                // Skip if not found in VWB
+                if (member == null || member.getUserDescription() == null) {
+                  logger.log(
+                      Level.INFO,
+                      namespace + ": Skipping collaborator not found in VWB: " + collaboratorEmail);
+                  return;
+                }
 
-            // Skip if not found in VWB
-            if (member == null || member.getUserDescription() == null) {
-              logger.log(
-                  Level.INFO,
-                  namespace + ": Skipping collaborator not found in VWB: " + collaboratorEmail);
-              continue;
-            }
+                // Skip if not ENABLED (could be INVITED, DECLINED, DISABLED, ARCHIVED)
+                if (!UserActiveState.ENABLED.equals(member.getUserDescription().getActiveState())) {
+                  logger.log(
+                      Level.INFO,
+                      namespace
+                          + ": Skipping inactive collaborator: "
+                          + collaboratorEmail
+                          + " state: "
+                          + member.getUserDescription().getActiveState());
+                  return;
+                }
 
-            // Skip if not ENABLED (could be INVITED, DECLINED, DISABLED, ARCHIVED)
-            if (!UserActiveState.ENABLED.equals(member.getUserDescription().getActiveState())) {
-              logger.log(
-                  Level.INFO,
-                  namespace
-                      + ": Skipping inactive collaborator: "
-                      + collaboratorEmail
-                      + " state: "
-                      + member.getUserDescription().getActiveState());
-              continue;
-            }
+                // Map Terra role to VWB IamRole
+                IamRole vwbRole = mapTerraRoleToVwbRole(c.getRole());
+                if (vwbRole == null) {
+                  logger.log(
+                      Level.INFO,
+                      namespace
+                          + ": Skipping collaborator with unmappable role: "
+                          + collaboratorEmail);
+                  return;
+                }
 
-            // Map Terra role to VWB IamRole
-            IamRole vwbRole = mapTerraRoleToVwbRole(entry.getValue().getAccessLevel());
-            if (vwbRole == null) {
-              logger.log(
-                  Level.INFO,
-                  namespace + ": Skipping collaborator with unmappable role: " + collaboratorEmail);
-              continue;
-            }
+                logger.log(
+                    Level.INFO,
+                    namespace + ": Sharing workspace with collaborator: " + collaboratorEmail);
+                wsmClient.shareWorkspaceAsService(
+                    workspaceId.toString(), collaboratorEmail, vwbRole);
 
-            logger.log(
-                Level.INFO,
-                namespace + ": Sharing workspace with collaborator: " + collaboratorEmail);
-            wsmClient.shareWorkspaceAsService(workspaceId.toString(), collaboratorEmail, vwbRole);
-
-          } catch (Exception e) {
-            // Don't fail entire migration for one collaborator
-            logger.log(
-                Level.WARNING,
-                namespace + ": Failed to share with collaborator: " + collaboratorEmail,
-                e);
-          }
-        }
+              } catch (Exception e) {
+                // Don't fail entire migration for one collaborator
+                logger.log(
+                    Level.WARNING,
+                    namespace + ": Failed to share with collaborator: " + collaboratorEmail,
+                    e);
+              }
+            });
       }
 
       List<Property> properties =
@@ -1452,7 +1448,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
 
       logger.log(Level.INFO, namespace + ": Recovery transfer started");
 
-      taskQueueService.pushWorkspaceRecoveryStatusTask(namespace, terraName);
+      taskQueueService.pushWorkspaceRecoveryStatusTask(namespace);
 
     } catch (Exception e) {
 
@@ -1469,11 +1465,11 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
   }
 
   @Override
-  public void checkRecoveryStatus(String namespace, String terraName) {
+  public void checkRecoveryStatus(String namespace) {
 
     logger.log(Level.INFO, namespace + ": Checking recovery queue status");
 
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(namespace, terraName);
+    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespace(namespace);
 
     String projectId = workbenchConfigProvider.get().server.projectId;
 
@@ -1490,7 +1486,7 @@ public class WorkspaceMigrationServiceImpl implements WorkspaceMigrationService 
       case IN_PROGRESS:
       case QUEUED:
         logger.log(Level.INFO, namespace + ": Recovery transfer in progress, requeue");
-        taskQueueService.pushWorkspaceRecoveryStatusTask(namespace, terraName);
+        taskQueueService.pushWorkspaceRecoveryStatusTask(namespace);
 
         return;
 

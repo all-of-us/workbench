@@ -49,6 +49,7 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
@@ -113,6 +114,7 @@ public class WorkspaceAdminServiceTest {
   @MockitoBean private DataSetMapper dataSetMapper;
   @MockitoBean private FirecloudMapper firecloudMapper;
   @MockitoBean private InitialCreditsService initialCreditsService;
+  @MockitoBean private ReportingQueryService reportingQueryService;
   @MockitoBean private UserMapper userMapper;
   @MockitoBean private UserService userService;
   @MockitoBean private WorkspaceAuthService workspaceAuthService;

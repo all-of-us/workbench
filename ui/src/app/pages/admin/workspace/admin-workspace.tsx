@@ -8,6 +8,7 @@ import {
   UserAppEnvironment,
   WorkspaceActiveStatus,
   WorkspaceAdminView,
+  WorkspaceUserAdminView,
 } from 'generated/fetch';
 
 import { Error as ErrorDiv } from 'app/components/inputs';
@@ -50,6 +51,8 @@ const AdminWorkspaceImpl = (props: Props) => {
   const [runtimes, setRuntimes] = useState<AdminRuntimeFields[]>();
   const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [workspaceCollaborators, setWorkspaceCollaborators] =
+    useState<WorkspaceUserAdminView[]>();
 
   const handleDataLoadError = async (error) => {
     if (error instanceof Response) {
@@ -78,6 +81,11 @@ const AdminWorkspaceImpl = (props: Props) => {
       .adminListUserAppsInWorkspace(ns)
       .then(setUserApps)
       .catch(handleDataLoadError);
+
+    workspaceAdminApi()
+      .getWorkspaceCollaborators(ns)
+      .then(setWorkspaceCollaborators)
+      .catch((e) => console.error(e));
 
     workspaceAdminApi()
       .getWorkspaceAdminView(ns)
@@ -192,7 +200,7 @@ const AdminWorkspaceImpl = (props: Props) => {
           {showRecoveryModal && (
             <AdminWorkspaceRecoveryModal
               workspace={workspace}
-              collaborators={collaborators}
+              collaborators={collaborators || workspaceCollaborators}
               onClose={() => setShowRecoveryModal(false)}
               reload={populateWorkspaceDetails}
             />

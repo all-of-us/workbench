@@ -15,6 +15,7 @@ import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.model.WorkspaceWaitingForRetrieval;
 
 public interface WorkspaceAdminService {
@@ -58,4 +59,6 @@ public interface WorkspaceAdminService {
   void unpublishWorkspaceViaDB(String workspaceNamespace);
 
   void updateBillingToCredits(String workspaceNamespace, String terraName);
+
+  List<WorkspaceUserAdminView> getWorkspaceCollaborators(String namespace);
 }

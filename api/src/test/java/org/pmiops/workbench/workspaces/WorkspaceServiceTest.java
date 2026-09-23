@@ -53,6 +53,7 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
@@ -109,6 +110,7 @@ public class WorkspaceServiceTest {
   @MockitoBean private IamService iamService;
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private ProfileMapper profileMapper;
+  @MockitoBean private ReportingQueryService reportingQueryService;
   @MockitoBean private UserDao userDao;
   @MockitoBean private UserMapper userMapper;
   @MockitoBean private UserService userService;

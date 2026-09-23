@@ -18,6 +18,7 @@ import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
 import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceBucketArchive;
+import org.pmiops.workbench.model.ReportingWorkspaceCollaborator;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.ReportingWorkspaceUser;
 
@@ -53,6 +54,10 @@ public interface ReportingQueryService {
   List<ReportingFolderSync> getFolderSyncBatch(long limit, long offset);
 
   List<ReportingWorkspaceBucketArchive> getWorkspaceBucketArchiveBatch(long limit, long offset);
+
+  List<ReportingWorkspaceCollaborator> getWorkspaceUsersByNamespace(String namespace);
+
+  List<WorkspaceIdWithRoleImpl> getWorkspaceIdsAndRolesByCollaboratorId(long userId);
 
   default <T> List<T> getBatchByIndex(
       BiFunction<Long, Long, List<T>> getter, long batchSize, long batchIndex) {
@@ -121,4 +126,12 @@ public interface ReportingQueryService {
   int getTableRowCount(String rwbTableName);
 
   int getAppUsageRowCount();
+
+  interface WorkspaceIdWithRole {
+    Long workspaceId();
+
+    String role();
+  }
+
+  record WorkspaceIdWithRoleImpl(Long workspaceId, String role) implements WorkspaceIdWithRole {}
 }

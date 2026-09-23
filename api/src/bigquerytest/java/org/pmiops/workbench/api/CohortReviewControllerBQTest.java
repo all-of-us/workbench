@@ -50,6 +50,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -114,6 +115,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @MockitoBean private InitialCreditsService initialCreditsService;
   @MockitoBean private MailService mailService;
+  @MockitoBean private ReportingQueryService reportingQueryService;
   @MockitoBean private UserRecentResourceService userRecentResourceService;
   @MockitoBean private UserService userService;
 

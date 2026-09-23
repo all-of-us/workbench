@@ -33,7 +33,6 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { WorkspaceRecovery } from 'app/pages/workspace/workspace-recovery';
 import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 
@@ -99,10 +98,6 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
-const WorkspaceRecoveryPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(WorkspaceRecovery);
 const GKEAppRedirectPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -452,20 +447,6 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.ConceptSet,
             workspaceNavBarTab: 'data',
             pageKey: 'conceptSets',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/recovery`}
-        guards={[adminLockedGuard(ns, terraName)]}
-      >
-        <WorkspaceRecoveryPage
-          routeData={{
-            title: 'Workspace Recovery',
-            breadcrumb: BreadcrumbType.Workspace,
-            workspaceNavBarTab: 'data',
-            pageKey: 'data',
           }}
         />
       </AppRoute>

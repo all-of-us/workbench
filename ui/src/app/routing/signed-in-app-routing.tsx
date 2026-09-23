@@ -43,6 +43,7 @@ import {
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
 import { WorkspaceList } from 'app/pages/workspace/workspace-list';
+import { WorkspaceRecovery } from 'app/pages/workspace/workspace-recovery';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
   DARPageMode,
@@ -170,6 +171,10 @@ const AdminWorkspacesWaitingForRetrievalPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminWorkspacesWaitingForRetrieval);
+const WorkspaceRecoveryPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(WorkspaceRecovery);
 
 export const SignedInRoutes = () => {
   const location = useLocation();
@@ -459,6 +464,18 @@ export const SignedInRoutes = () => {
         <WorkspaceEditPage
           routeData={{ title: 'Create Workspace' }}
           workspaceEditMode={WorkspaceEditMode.Create}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/workspaces/:ns/recovery'
+        guards={[getAccessModuleGuard()]}
+      >
+        <WorkspaceRecoveryPage
+          routeData={{
+            title: 'Workspace Recovery',
+            breadcrumb: BreadcrumbType.Workspace,
+          }}
         />
       </AppRoute>
       <AppRoute

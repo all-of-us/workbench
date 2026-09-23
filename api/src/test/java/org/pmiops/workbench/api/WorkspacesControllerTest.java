@@ -99,6 +99,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -201,6 +202,7 @@ public class WorkspacesControllerTest {
   @MockitoBean private LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   @MockitoBean private MailService mailService;
   @MockitoBean private NotebooksService notebooksService;
+  @MockitoBean private ReportingQueryService reportingQueryService;
   @MockitoBean private TanagraApi tanagraApi;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserService userService;

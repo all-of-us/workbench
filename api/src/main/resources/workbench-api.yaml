@@ -1501,6 +1501,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/Workspace'
       x-codegen-request-body-name: workspace
+  /v1/workspaces/{workspaceNamespace}:
+    get:
+      tags:
+        - workspaces
+      description: Returns the workspace definition with the specified namespace
+      operationId: getWorkspaceByNamespace
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A workspace response containing workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        403:
+          description: User doesnt have access to the workspace's access tier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v2/workspaces/{workspaceNamespace}/{terraName}/resources:
     get:
       tags:
@@ -2356,6 +2382,27 @@ paths:
         200:
           description: Billing updated successfully
           content: {}
+  /v1/admin/workspaces/{namespace}/collaborators:
+    get:
+      tags:
+        - workspaceAdmin
+      description: List of collaborators for a workspace. RESEARCHER_DATA_VIEW authority required.
+      operationId: getWorkspaceCollaborators
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of collaborators on the workspace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceUserAdminView'
   /v1/admin/egressEvents:
     post:
       tags:
@@ -4830,7 +4877,7 @@ paths:
         200:
           description: Recovery status checked successfully
           content: { }
-  /v1/workspaces/{namespace}/{terraName}/recovery:
+  /v1/workspaces/{namespace}/recovery:
     post:
       tags:
         - workspaces
@@ -4838,11 +4885,6 @@ paths:
       operationId: startWorkspaceRecovery
       parameters:
         - name: namespace
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: terraName
           in: path
           required: true
           schema:
@@ -4857,7 +4899,7 @@ paths:
       responses:
         200:
           description: Recovery started successfully
-  /v1/workspaces/{namespace}/{terraName}/requestRecovery:
+  /v1/workspaces/{namespace}/requestRecovery:
     post:
       tags:
         - workspaces
@@ -4865,11 +4907,6 @@ paths:
       operationId: requestWorkspaceRecovery
       parameters:
         - name: namespace
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: terraName
           in: path
           required: true
           schema:
@@ -8563,8 +8600,6 @@ components:
       type: object
       properties:
         workspaceNamespace:
-          type: string
-        workspaceName:
           type: string
     StartWorkspaceMigrationRequest:
       type: object
@@ -14596,6 +14631,23 @@ components:
         status:
           type: string
           description: Status of the archive job
+    ReportingWorkspaceCollaborator:
+      type: object
+      properties:
+        workspaceId:
+          type: integer
+          description: Id of the RW 1.0 workspace
+          format: int64
+        userId:
+          type: integer
+          description: Id of the workspace collaborator
+          format: int64
+        username:
+          type: string
+          description: Username of the workspace collaborator
+        role:
+          type: string
+          description: Role of the workspace collaborator
     GenomicExtractionJobListResponse:
       type: object
       properties:
