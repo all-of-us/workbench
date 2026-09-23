@@ -33,7 +33,6 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { WorkspaceRecovery } from 'app/pages/workspace/workspace-recovery';
 import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 

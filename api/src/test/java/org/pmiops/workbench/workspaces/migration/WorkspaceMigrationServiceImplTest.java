@@ -133,6 +133,7 @@ public class WorkspaceMigrationServiceImplTest {
 
     lenient().when(workbenchConfigProvider.get()).thenReturn(config);
     lenient().when(workspaceDao.getRequired(NAMESPACE, TERRA_NAME)).thenReturn(dbWorkspace);
+    lenient().when(workspaceDao.findByWorkspaceNamespace(NAMESPACE)).thenReturn(dbWorkspace);
   }
 
   private void setupStartMigrationStubs() {
@@ -486,7 +487,7 @@ public class WorkspaceMigrationServiceImplTest {
     dbWorkspace.setWorkspaceId(123L);
     dbWorkspace.setRecoveryState(WorkspaceRecoveryStatus.REQUESTED.name());
 
-    when(workspaceDao.getRequired(eq(NAMESPACE), eq(TERRA_NAME))).thenReturn(dbWorkspace);
+    when(workspaceDao.findByWorkspaceNamespace(eq(NAMESPACE))).thenReturn(dbWorkspace);
 
     when(workspaceBucketArchiveDao.findByLegacyWorkspaceId(anyLong())).thenReturn(List.of());
 
