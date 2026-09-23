@@ -56,6 +56,7 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -141,6 +142,7 @@ public class CohortsControllerTest {
   @MockitoBean private MailService mailService;
   @MockitoBean private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
   @MockitoBean private ParticipantCohortStatusMapper participantCohortStatusMapper;
+  @MockitoBean private ReportingQueryService reportingQueryService;
   @MockitoBean private ReviewQueryBuilder reviewQueryBuilder;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserServiceAuditor userServiceAuditor;

@@ -86,6 +86,7 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -191,6 +192,7 @@ public class DataSetControllerTest {
   @MockitoBean private MailService mailService;
   @MockitoBean private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
   @MockitoBean private ParticipantCohortStatusMapper participantCohortStatusMapper;
+  @MockitoBean private ReportingQueryService reportingQueryService;
   @MockitoBean private ReviewQueryBuilder reviewQueryBuilder;
   @MockitoBean private TanagraApi tanagraApi;
   @MockitoBean private TaskQueueService taskQueueService;
