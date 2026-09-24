@@ -15,7 +15,37 @@ class CloudSqlProxyContext < ServiceAccountContext
       ps = nil
       docker_container_id = nil
       instance = "#{@project}:us-central1:workbenchmaindb"
-      if Workbench.in_docker?
+      if @iam_mode
+        if Workbench.in_docker?
+          ps = fork do
+            exec(*%W{
+            cloud_sql_proxy
+              --port 3307
+              --auto-iam-authn
+              --impersonate-service-account=#{@service_account}
+              #{instance}
+            })
+          end
+        else
+          if common.run(%W{docker kill #{DOCKER_PROXY_NAME}}).success?
+            common.warning "found and killed existing cloud sql proxy docker service"
+          end
+
+          docker_container_id = common.capture_stdout(%W{docker run -d
+               -u #{ENV["UID"]}
+               -v #{ENV["HOME"]}/.config/gcloud:/root/.config/gcloud:ro
+               --publish 3307:3307
+               --rm
+               --name #{DOCKER_PROXY_NAME}
+               gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.2
+               --address 0.0.0.0
+               --port 3307
+               --auto-iam-authn
+               --impersonate-service-account=#{@service_account}
+               #{instance}
+            }).chomp
+        end
+      elsif Workbench.in_docker?
         ps = fork do
           exec(*%W{
           cloud_sql_proxy
@@ -28,11 +58,11 @@ class CloudSqlProxyContext < ServiceAccountContext
         if common.run(%W{docker kill #{DOCKER_PROXY_NAME}}).success?
           common.warning "found and killed existing cloud sql proxy docker service"
         end
- 
+
         docker_container_id = common.capture_stdout(%W{docker run -d
              -u #{ENV["UID"]}
              -v #{@keyfile_path}:/config
-             --publish 3307:3307 
+             --publish 3307:3307
              --rm
              --name #{DOCKER_PROXY_NAME}
              gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.2

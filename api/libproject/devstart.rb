@@ -64,11 +64,21 @@ def read_db_vars(gcc)
     exit 1
   end
   vars["GOOGLE_APPLICATION_CREDENTIALS"] = "sa-key.json"
-  return vars.merge({
+  merged = vars.merge({
     'CDR_DB_CONNECTION_STRING' => cdr_vars['DB_CONNECTION_STRING'],
     'CDR_DB_USER' => cdr_vars['WORKBENCH_DB_USER'],
     'CDR_DB_PASSWORD' => cdr_vars['WORKBENCH_DB_PASSWORD']
   })
+  iam_user = ENVIRONMENTS.fetch(gcc.project, {})[:cloud_sql_iam_user]
+  if iam_user
+    merged['CLOUD_SQL_IAM_USER'] = iam_user
+    merged['CDR_CLOUD_SQL_IAM_USER'] = iam_user
+  end
+  return merged
+end
+
+def use_iam_mode?(project)
+  ENVIRONMENTS.fetch(project, {}).has_key?(:cloud_sql_iam_user)
 end
 
 def format_benchmark(bm)
@@ -300,7 +310,7 @@ Common.register_command({
 
 def run_integration_tests(cmd_name, *args)
   common = Common.new
-  ServiceAccountContext.new(TEST_PROJECT).run do
+  ServiceAccountContext.new(TEST_PROJECT, nil, nil, iam_mode: use_iam_mode?(TEST_PROJECT)).run do
     common.run_inline %W{./gradlew integrationTest} + args
   end
 end
@@ -313,7 +323,7 @@ Common.register_command({
 
 def run_bigquery_tests(cmd_name, *args)
   common = Common.new
-  ServiceAccountContext.new(TEST_PROJECT).run do
+  ServiceAccountContext.new(TEST_PROJECT, nil, nil, iam_mode: use_iam_mode?(TEST_PROJECT)).run do
     common.run_inline %W{./gradlew bigQueryTest} + args
   end
 end
@@ -390,7 +400,7 @@ def drop_cloud_db(cmd_name, *args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     puts "Dropping database..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
@@ -414,7 +424,7 @@ def drop_cloud_cdr(cmd_name, *args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     puts "Dropping cdr database..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
@@ -1123,7 +1133,7 @@ def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
   ENV["DB_PORT"] = "3307" # Temporary fix until we decide on how to handle this correctly.
 
   common = Common.new
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     Dir.chdir('db-cdr') do
       common.run_inline %W{./generate-cdr/import-cdr-indices-build-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
     end
@@ -1160,7 +1170,7 @@ def set_grants(cmd_name, *args)
   ENV["DB_PORT"] = "3307" # Temporary fix until we decide on how to handle this correctly.
 
   common = Common.new
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     Dir.chdir('db-cdr') do
       common.run_inline %W{./generate-cdr/set-grants.sh #{op.opts.cdr_version}}
     end
@@ -1194,7 +1204,7 @@ def copy_bq_tables(cmd_name, *args)
   op.parse.validate
 
   source_project = "#{op.opts.source_dataset}".split(':').first
-  ServiceAccountContext.new(op.opts.sa_project).run do
+  ServiceAccountContext.new(op.opts.sa_project, nil, nil, iam_mode: use_iam_mode?(op.opts.sa_project)).run do
     common = Common.new
     common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
     Dir.chdir('db-cdr') do
@@ -1238,7 +1248,7 @@ def cloudsql_import(cmd_name, *args)
     )
   op.parse.validate
 
-  ServiceAccountContext.new(op.opts.project).run do
+  ServiceAccountContext.new(op.opts.project, nil, nil, iam_mode: use_iam_mode?(op.opts.project)).run do
     Dir.chdir('db-cdr') do
       common = Common.new
       common.run_inline %W{./generate-cdr/cloudsql-import.sh
@@ -1430,7 +1440,7 @@ def fix_desynchronized_billing_project_owners(cmd_name, *args)
   end
   # Gradle args need to be single-quote wrapped.
   flags.map! { |f| "'#{f}'" }
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{
         ./gradlew fixDesynchronizedBillingProjectOwners
        -PappArgs=[#{flags.join(',')}]}
@@ -1516,7 +1526,7 @@ def fetch_firecloud_user_profile(cmd_name, *args)
   gcc.validate()
 
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{
         ./gradlew fetchFireCloudUserProfile
        -PappArgs=["#{op.opts.user}"]}
@@ -1556,7 +1566,7 @@ def fetch_workspace_details(cmd_name, *args)
   flags.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{
         ./gradlew fetchWorkspaceDetails
        -PappArgs=[#{flags.join(',')}]}
@@ -1667,7 +1677,7 @@ def generate_impersonated_user_tokens(cmd_name, *args)
   ).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
-  ServiceAccountContext.new(project_id).run do
+  ServiceAccountContext.new(project_id, nil, nil, iam_mode: use_iam_mode?(project_id)).run do
     common.run_inline %W{
         ./gradlew generateImpersonatedUserTokens
        -PappArgs=[#{flags.join(',')}]}
@@ -1719,7 +1729,7 @@ def load_institutions(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{
         ./gradlew loadInstitutions
        -PappArgs=[#{gradle_args.join(',')}]}
@@ -1789,7 +1799,7 @@ def invalidate_rdr_export(cmd_name, *args)
   flags.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{
         ./gradlew invalidateRdrExport
        -PappArgs=[#{flags.join(',')}]}
@@ -1902,7 +1912,7 @@ def set_authority(cmd_name, *args)
   gcc.validate
 
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     Common.new.run_inline %W{
       ./gradlew setAuthority
      -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run},#{op.opts.remove_all}]}
@@ -1969,7 +1979,7 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
   flags.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{
        ./gradlew createWgsCohortExtractionBillingProjectWorkspace
        -PappArgs=[#{flags.join(',')}]}
@@ -2077,7 +2087,7 @@ def create_terra_method_snapshot(cmd_name, *args)
     flags.map! { |f| "'#{f}'" }
 
     ENV.update(read_db_vars(gcc))
-    ServiceAccountContext.new(gcc.project).run do
+    ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
       common.run_inline %W{
        ./gradlew createTerraMethodSnapshot
        -PappArgs=[#{flags.join(',')}]}
@@ -2123,7 +2133,7 @@ def delete_runtimes(cmd_name, *args)
   end
 
   api_url = get_leo_api_url(gcc.project)
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{
        ./gradlew manageLeonardoRuntimes
       -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.runtime_ids}',#{op.opts.dry_run}]}
@@ -2151,7 +2161,7 @@ def describe_runtime(cmd_name, *args)
   gcc.validate
 
   api_url = get_leo_api_url(gcc.project)
-  ServiceAccountContext.new(gcc.project).run do |ctx|
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do |ctx|
     common = Common.new
     common.run_inline %W{
        ./gradlew manageLeonardoRuntimes
@@ -2190,7 +2200,7 @@ def list_runtimes(cmd_name, *args)
   gcc.validate
 
   api_url = get_leo_api_url(gcc.project)
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common = Common.new
     common.run_inline %W{
       ./gradlew manageLeonardoRuntimes -PappArgs=['list','#{api_url}','#{op.opts.google_project}','#{op.opts.format}']
@@ -2229,7 +2239,7 @@ def update_cdr_config(cmd_name, *args)
 
   ENV.update(read_db_vars(gcc))
   cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
   end
 end
@@ -2258,7 +2268,7 @@ Common.register_command({
 })
 
 def get_test_service_account()
-  ServiceAccountContext.new(TEST_PROJECT).run do
+  ServiceAccountContext.new(TEST_PROJECT, nil, nil, iam_mode: use_iam_mode?(TEST_PROJECT)).run do
     print "Service account key is now in sa-key.json"
   end
 end
@@ -2300,20 +2310,31 @@ def connect_to_cloud_db(cmd_name, *args)
   end
   db_password = user_to_password[op.opts.db_user]
 
-  CloudSqlProxyContext.new(gcc.project).run do
-    if op.opts.db_user == "dev-readonly"
-      common.status ""
-      common.status "Database session will be read-only; use --db-user to change this"
-      common.status ""
-    end
-    common.status "Fetch credentials from #{gcs_vars_path(gcc.project)} to connect through a different SQL tool"
-    common.run_inline(
-      maybe_dockerize_mysql_cmd(
-        "mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user} " +
-        "--database=#{env["DB_NAME"]} --password=#{db_password}",
-        true, true # interactive, tty
-      ),
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
+    if use_iam_mode?(gcc.project)
+      iam_user = ENVIRONMENTS[gcc.project][:cloud_sql_iam_user]
+      common.status "Connecting with IAM auth as #{iam_user}"
+      common.run_inline(
+        maybe_dockerize_mysql_cmd(
+          "mysql --host=127.0.0.1 --port=3307 --user=#{iam_user} " +
+          "--database=#{env["DB_NAME"]}",
+          true, true # interactive, tty
+        ))
+    else
+      if op.opts.db_user == "dev-readonly"
+        common.status ""
+        common.status "Database session will be read-only; use --db-user to change this"
+        common.status ""
+      end
+      common.status "Fetch credentials from #{gcs_vars_path(gcc.project)} to connect through a different SQL tool"
+      common.run_inline(
+        maybe_dockerize_mysql_cmd(
+          "mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user} " +
+          "--database=#{env["DB_NAME"]} --password=#{db_password}",
+          true, true # interactive, tty
+        ),
       db_password)
+    end
   end
 
 end
@@ -2331,7 +2352,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
   op.parse.validate
   gcc.validate
   env = read_db_vars(gcc)
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.status "\n" + "*" * 80
     common.status "Listing available journal files: "
 
@@ -2459,7 +2480,7 @@ def create_or_update_workbench_db_cmd(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     create_or_update_workbench_db
   end
 end
@@ -2479,7 +2500,7 @@ Common.register_command({
 def migrate_database(gcc, serviceAccount = nil, dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
-  CloudSqlProxyContext.new(gcc.project, serviceAccount, gcc.creds_file).run do
+  CloudSqlProxyContext.new(gcc.project, serviceAccount, gcc.creds_file, iam_mode: use_iam_mode?(gcc.project)).run do
     Dir.chdir("db") do
       run_inline_or_log(dry_run, %W{../gradlew update -PrunList=main})
     end
@@ -2547,7 +2568,7 @@ def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
     yield gcc
   else
     ENV.update(read_db_vars(gcc))
-    ServiceAccountContext.new(gcc.project, service_account, key_file).run do
+    ServiceAccountContext.new(gcc.project, service_account, key_file, iam_mode: use_iam_mode?(gcc.project)).run do
       yield gcc
     end
   end
@@ -2736,7 +2757,7 @@ def run_cloud_migrations(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     migrate_database(gcc)
   end
 end
@@ -2753,7 +2774,7 @@ def update_cloud_config(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     load_config(gcc.project)
   end
 end
@@ -2832,7 +2853,7 @@ def set_access_module_timestamps(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{./gradlew setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
@@ -2862,7 +2883,7 @@ def export_workspace_operations(cmd_name, *args)
 
   common = Common.new
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{./gradlew exportWorkspaceOperations}
   end
 end
@@ -2937,7 +2958,7 @@ def verify_preprod_prod_counts(op)
   }
   db_password = user_to_password[op.opts.db_user]
 
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.status "Fetch credentials from #{gcs_vars_path(gcc.project)} to connect through a different SQL tool"
     common.status common.bold_term_text(common.red_term_text("======="+op.opts.project+"======="))
     common.run_inline(
@@ -3010,7 +3031,7 @@ def delete_workspaces(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{./gradlew deleteWorkspaces -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
@@ -3063,7 +3084,7 @@ def backfill_gsuite_user_data(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{./gradlew backfillGSuiteUserData -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
@@ -3109,7 +3130,7 @@ def list_disks(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{./gradlew listDisks -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
@@ -3206,7 +3227,7 @@ def send_email(cmd_name, *args)
   gcc = GcloudContextV2.new(op)
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{./gradlew sendEmail -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
@@ -3303,7 +3324,7 @@ def run_genomic_extraction(cmd_name, *args)
   gcc = GcloudContextV2.new(op)
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, nil, nil, iam_mode: use_iam_mode?(gcc.project)).run do
     common.run_inline %W{./gradlew runGenomicExtraction -PappArgs=[#{gradle_args.join(',')}]}
   end
 
