@@ -25,6 +25,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.VwbAccessService;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -56,7 +57,6 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -127,6 +127,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CohortsControllerTest {
 
   @MockitoBean private AccessModuleService accessModuleService;
+  @MockitoBean private ActionAuditQueryService actionAuditQueryService;
   @MockitoBean private BigQueryService bigQueryService;
   @MockitoBean private BillingProjectAuditor billingProjectAuditor;
   @MockitoBean private CohortBuilderMapper cohortBuilderMapper;
@@ -142,7 +143,6 @@ public class CohortsControllerTest {
   @MockitoBean private MailService mailService;
   @MockitoBean private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
   @MockitoBean private ParticipantCohortStatusMapper participantCohortStatusMapper;
-  @MockitoBean private ReportingQueryService reportingQueryService;
   @MockitoBean private ReviewQueryBuilder reviewQueryBuilder;
   @MockitoBean private TaskQueueService taskQueueService;
   @MockitoBean private UserServiceAuditor userServiceAuditor;

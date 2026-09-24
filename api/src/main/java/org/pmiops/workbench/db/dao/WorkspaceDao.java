@@ -106,6 +106,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
   @Query(
+      "SELECT workspaceId from DbWorkspace "
+          + "WHERE creator = :creator AND activeStatus = :activeStatus")
+  Set<Long> findAllWorkspaceIdsByCreatorAndActiveStatus(
+      @Param("creator") DbUser creator, @Param("activeStatus") short activeStatus);
+
+  @Query(
       "SELECT w.creator FROM DbWorkspace w "
           + "LEFT JOIN DbUserInitialCreditsExpiration uice ON w.creator = uice.user "
           + "JOIN DbVerifiedInstitutionalAffiliation via ON w.creator = via.user "
