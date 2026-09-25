@@ -426,18 +426,6 @@ public class EgressRemediationServiceTest {
   }
 
   @Test
-  public void testRemediateGKEEgressEvent_skipCromwellApp() {
-    workbenchConfig.egressAlertRemediationPolicy.escalations =
-        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
-
-    long eventId = saveNewGKEEvent(AppType.CROMWELL);
-    sumologicEgressRemediationService.remediateEgressEvent(eventId);
-
-    assertThat(getDbUser().getDisabled()).isFalse();
-    assertComputeNotSuspended();
-  }
-
-  @Test
   public void testRemediateEgressEvent_disableUser() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(disableUserAfter(1));

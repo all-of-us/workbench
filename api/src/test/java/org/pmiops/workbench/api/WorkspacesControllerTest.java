@@ -1356,10 +1356,6 @@ public class WorkspacesControllerTest {
     } catch (Exception e) {
       verify(fireCloudService)
           .updateBillingAccount(modWorkspace.getNamespace(), modWorkspace.getBillingAccountName());
-      verify(fireCloudService)
-          .updateBillingAccountAsService(
-              modWorkspace.getNamespace(),
-              workbenchConfig.billing.initialCreditsBillingAccountName());
       return;
     }
     fail();

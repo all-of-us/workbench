@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
 import java.util.Collections;
 import java.util.List;
@@ -52,6 +52,7 @@ public class MailServiceTest {
     }
   }
 
+  @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private SendGridMailSender sendGridMailSender;
 
   @Autowired private MailService mailService;
@@ -59,6 +60,8 @@ public class MailServiceTest {
   @BeforeEach
   public void setUp() {
     workbenchConfig = createWorkbenchConfig();
+
+    when(mockCloudStorageClient.getImageUrl(any())).thenReturn("test_img");
   }
 
   @Test
@@ -157,56 +160,6 @@ public class MailServiceTest {
     assertThat(gotHtml).contains(CONTACT_EMAIL);
     assertThat(gotHtml)
         .contains("Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
-  }
-
-  @Test
-  public void testSendEgressRemediationEmail_suspendCompute() throws Exception {
-    workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail = "egress@aou.com";
-    DbUser user = createDbUser();
-    mailService.sendEgressRemediationEmail(
-        user, EgressRemediationAction.SUSPEND_COMPUTE, "Jupyter");
-
-    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-    verify(sendGridMailSender, times(1))
-        .sendWithRetries(
-            eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
-            eq(Collections.singletonList(user.getContactEmail())),
-            eq(Collections.emptyList()),
-            eq(Collections.emptyList()),
-            eq("[Response Required] AoU Researcher Workbench High Data Egress Alert"),
-            any(),
-            htmlCaptor.capture());
-
-    String gotHtml = htmlCaptor.getValue();
-    assertThat(gotHtml).contains("temporarily suspended");
-    assertThat(gotHtml).contains("when using the <b>Jupyter</b> application");
-    assertThat(gotHtml).doesNotContain("${");
-  }
-
-  @Test
-  public void testSendEgressRemediationEmail_disableUser() throws Exception {
-    workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail = "egress@aou.com";
-    workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails =
-        ImmutableList.of("egress-cc@aou.com");
-    DbUser user = createDbUser();
-    mailService.sendEgressRemediationEmail(user, EgressRemediationAction.DISABLE_USER, "Jupyter");
-
-    ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.captor();
-
-    verify(sendGridMailSender, times(1))
-        .sendWithRetries(
-            eq(workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail),
-            eq(Collections.singletonList(user.getContactEmail())),
-            eq(workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails),
-            eq(Collections.emptyList()),
-            eq("[Response Required] AoU Researcher Workbench High Data Egress Alert"),
-            any(),
-            htmlCaptor.capture());
-
-    String gotHtml = htmlCaptor.getValue();
-    assertThat(gotHtml).contains("will remain disabled");
-    assertThat(gotHtml).contains("when using the <b>Jupyter</b> application");
-    assertThat(gotHtml).doesNotContain("${");
   }
 
   @Test

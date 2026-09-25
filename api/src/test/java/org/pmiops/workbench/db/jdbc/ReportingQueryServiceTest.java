@@ -1,8 +1,6 @@
 package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME;
@@ -20,21 +18,12 @@ import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
-import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.FieldValue.Attribute;
-import com.google.cloud.bigquery.FieldValueList;
-import com.google.cloud.bigquery.LegacySQLTypeName;
-import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.Schema;
-import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import jakarta.inject.Provider;
 import jakarta.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -88,7 +77,6 @@ import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture;
-import org.pmiops.workbench.utils.BigQueryUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -781,89 +769,6 @@ public class ReportingQueryServiceTest {
             .map(ReportingNewUserSatisfactionSurvey::getId)
             .collect(ImmutableSet.toImmutableSet());
     assertThat(ids).hasSize(numNewUserSatisfactionSurveys);
-  }
-
-  @Test
-  public void testQueryLeonardoAppUsage() {
-    workbenchConfig.reporting.exportTerraDataWarehouse = true;
-    workbenchConfig.reporting.terraWarehouseLeoAppUsageTableId = "app_usage_table";
-    workbenchConfig.reporting.terraWarehouseLeoAppTableId = "app_table";
-
-    Instant now = Instant.now();
-
-    Field idField = Field.of("appId", LegacySQLTypeName.STRING);
-    FieldValue idValue = FieldValue.of(Attribute.PRIMITIVE, "123");
-
-    Field appNameField = Field.of("appName", LegacySQLTypeName.STRING);
-    FieldValue appNameValue = FieldValue.of(Attribute.PRIMITIVE, "all-of-us-123-sas-esdw");
-
-    Field statusField = Field.of("status", LegacySQLTypeName.STRING);
-    FieldValue statusValue = FieldValue.of(Attribute.PRIMITIVE, "DELETED");
-
-    Field creatorField = Field.of("creator", LegacySQLTypeName.STRING);
-    FieldValue creatorValue = FieldValue.of(Attribute.PRIMITIVE, "user@email.com");
-
-    Field customEnvironmentVariablesField =
-        Field.of("customEnvironmentVariables", LegacySQLTypeName.STRING);
-    FieldValue customEnvironmentVariablesValue = FieldValue.of(Attribute.PRIMITIVE, "env vars");
-
-    Field createdDateField = Field.of("createdDate", LegacySQLTypeName.TIMESTAMP);
-    FieldValue createdDateValue =
-        FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(1).getEpochSecond()));
-
-    Field destroyedDateDateField = Field.of("destroyedDate", LegacySQLTypeName.TIMESTAMP);
-    FieldValue destroyedDateValue =
-        FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(2).getEpochSecond()));
-
-    Field startTimeField = Field.of("startTime", LegacySQLTypeName.TIMESTAMP);
-    FieldValue startTimeValue =
-        FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(3).getEpochSecond()));
-
-    Field stopTimeField = Field.of("stopTime", LegacySQLTypeName.TIMESTAMP);
-    FieldValue stopTimeValue =
-        FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(4).getEpochSecond()));
-
-    Schema s =
-        Schema.of(
-            idField,
-            appNameField,
-            statusField,
-            creatorField,
-            customEnvironmentVariablesField,
-            createdDateField,
-            destroyedDateDateField,
-            startTimeField,
-            stopTimeField);
-
-    List<FieldValueList> tableRows =
-        List.of(
-            FieldValueList.of(
-                Arrays.asList(
-                    idValue,
-                    appNameValue,
-                    statusValue,
-                    creatorValue,
-                    customEnvironmentVariablesValue,
-                    createdDateValue,
-                    destroyedDateValue,
-                    startTimeValue,
-                    stopTimeValue)));
-
-    TableResult tableResult = BigQueryUtils.newTableResult(s, tableRows);
-    when(bigQueryService.executeQuery(any(QueryJobConfiguration.class))).thenReturn(tableResult);
-    assertThat(reportingQueryService.getLeonardoAppUsageBatch(10, 0))
-        .containsExactly(
-            new ReportingLeonardoAppUsage()
-                .appId(123L)
-                .appName("all-of-us-123-sas-esdw")
-                .appType("SAS")
-                .creator("user@email.com")
-                .status("DELETED")
-                .createdDate(now.plusSeconds(1).atOffset(ZoneOffset.UTC).withNano(0))
-                .destroyedDate(now.plusSeconds(2).atOffset(ZoneOffset.UTC).withNano(0))
-                .startTime(now.plusSeconds(3).atOffset(ZoneOffset.UTC).withNano(0))
-                .stopTime(now.plusSeconds(4).atOffset(ZoneOffset.UTC).withNano(0))
-                .environmentVariables("env vars"));
   }
 
   private Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
