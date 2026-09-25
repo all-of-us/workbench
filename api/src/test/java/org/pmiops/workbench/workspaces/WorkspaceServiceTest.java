@@ -36,6 +36,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -100,6 +101,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceServiceTest {
 
+  @MockitoBean private ActionAuditQueryService actionAuditQueryService;
   @MockitoBean private BucketAuditQueryService bucketAuditQueryService;
   @MockitoBean private CohortCloningService cohortCloningService;
   @MockitoBean private CohortService cohortService;
