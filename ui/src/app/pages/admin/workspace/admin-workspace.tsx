@@ -54,9 +54,9 @@ const AdminWorkspaceImpl = (props: Props) => {
     setLoadingWorkspace(true);
 
     workspaceAdminApi()
-    .getWorkspaceCollaborators(ns)
-    .then(setWorkspaceCollaborators)
-    .catch((e) => console.error(e));
+      .getWorkspaceCollaborators(ns)
+      .then(setWorkspaceCollaborators)
+      .catch((e) => console.error(e));
 
     workspaceAdminApi()
       .getWorkspaceAdminView(ns)
@@ -67,7 +67,6 @@ const AdminWorkspaceImpl = (props: Props) => {
 
   useEffect(() => {
     props.hideSpinner();
-    populateFederatedWorkspaceInformation();
   }, []);
 
   useEffect(() => {
